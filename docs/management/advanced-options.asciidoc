@@ -1,5 +1,5 @@
 [[advanced-options]]
-== Setting Advanced Options
+== Setting advanced options
 
 The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application.
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision
@@ -12,14 +12,13 @@ To set advanced options:
 . Enter a new value for the option.
 . Click the *Save* button.
 
-[float]
 [[kibana-settings-reference]]
 
 WARNING: Modifying the following settings can significantly affect Kibana's performance and cause problems that are
 difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be
 compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
 
-.Kibana Settings Reference
+.Kibana settings reference
 [horizontal]
 `query:queryString:options`:: Options for the Lucene query string parser.
 `query:allowLeadingWildcards`:: When set, * is allowed as the first character in a query clause. Currently only applies when experimental query features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options.
@@ -77,7 +76,6 @@ mentioned use "_default_".
 `timepicker:timeDefaults`:: The default time filter selection.
 `timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
 `timepicker:quickRanges`:: The list of ranges to show in the Quick section of the time picker. This should be an array of objects, with each object containing `from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), `display` (the title to be displayed), and `section` (which column to put the option in).
-`dashboard:defaultDarkTheme`:: Set this property to `true` to make new dashboards use the dark theme by default.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports

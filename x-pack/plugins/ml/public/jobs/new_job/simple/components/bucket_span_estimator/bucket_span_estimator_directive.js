@@ -11,7 +11,7 @@ import { BucketSpanEstimator } from './bucket_span_estimator_view';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -39,7 +39,9 @@ module.directive('mlBucketSpanEstimator', function (i18n) {
       const errorHandler = (error) => {
         console.log('Bucket span could not be estimated', error);
         $scope.ui.bucketSpanEstimator.status = STATUS.FAILED;
-        $scope.ui.bucketSpanEstimator.message = 'Bucket span could not be estimated';
+        $scope.ui.bucketSpanEstimator.message = i18n('xpack.ml.newJob.simple.bucketSpanEstimator.bucketSpanCouldNotBeEstimatedMessage', {
+          defaultMessage: 'Bucket span could not be estimated'
+        });
         $scope.$applyAsync();
       };
 
@@ -136,9 +138,9 @@ module.directive('mlBucketSpanEstimator', function (i18n) {
         };
 
         ReactDOM.render(
-          <I18nProvider>
+          <I18nContext>
             {React.createElement(BucketSpanEstimator, props)}
-          </I18nProvider>,
+          </I18nContext>,
           $element[0]
         );
       }

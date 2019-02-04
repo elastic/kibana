@@ -8,8 +8,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiText } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
-import { colors, px, unit, units } from '../../../../../../style/variables';
+import { px, unit, units } from '../../../../../../style/variables';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span';
@@ -35,11 +36,12 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   padding-bottom: ${px(units.plus)};
   margin-right: ${props => px(props.timelineMargins.right)};
   margin-left: ${props => px(props.timelineMargins.left)};
-  border-top: 1px solid ${colors.gray4};
-  background-color: ${props => (props.isSelected ? colors.gray5 : 'initial')};
+  border-top: 1px solid ${theme.euiColorLightShade};
+  background-color: ${props =>
+    props.isSelected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
   &:hover {
-    background-color: ${colors.gray5};
+    background-color: ${theme.euiColorLightestShade};
   }
 `;
 
@@ -65,7 +67,7 @@ const ItemText = styled.span`
 `;
 
 const SpanNameLabel = styled.span`
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   font-weight: normal;
   white-space: nowrap;
 `;
@@ -104,7 +106,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   }
 
   // icon for RUM agent transactions
-  const isRumAgent = item.transaction.context.service.agent.name === 'js-base';
+  const isRumAgent = item.transaction.agent.name === 'js-base';
   if (isRumAgent) {
     return <EuiIcon type="globe" />;
   }

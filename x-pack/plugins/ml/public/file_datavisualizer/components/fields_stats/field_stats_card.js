@@ -16,8 +16,6 @@ import { FieldTypeIcon } from '../../../components/field_type_icon';
 
 export function FieldStatsCard({ field }) {
 
-  const percent = Math.round(field.percent * 100) / 100;
-
   let type = field.type;
   if (type === 'double' || type === 'long') {
     type = 'number';
@@ -39,18 +37,18 @@ export function FieldStatsCard({ field }) {
               <React.Fragment>
                 <div className="stats">
                   <div className="stat">
-                    <i className="fa fa-files-o" aria-hidden="true" />
+                    <i className="fa fa-files-o" aria-hidden="true" />&nbsp;
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
                       defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
                       values={{
                         fieldCount: field.count,
-                        fieldPercent: percent,
+                        fieldPercent: field.percent,
                       }}
                     />
                   </div>
                   <div className="stat">
-                    <i className="fa fa-cubes" aria-hidden="true" />
+                    <i className="fa fa-cubes" aria-hidden="true" />&nbsp;
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
                       defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"
@@ -61,7 +59,7 @@ export function FieldStatsCard({ field }) {
                   </div>
 
                   {
-                    (field.mean_value) &&
+                    (field.median_value) &&
                     <React.Fragment>
                       <div>
                         <div className="stat min heading">

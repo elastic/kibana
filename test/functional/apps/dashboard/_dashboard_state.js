@@ -164,14 +164,6 @@ export default function ({ getService, getPageObjects }) {
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 
-    it('retains dark theme', async function () {
-      await PageObjects.dashboard.useDarkTheme(true);
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-      const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
-      expect(isDarkThemeOn).to.equal(true);
-    });
-
     describe('Directly modifying url updates dashboard state', () => {
       it('for query parameter', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();

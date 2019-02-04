@@ -7,10 +7,11 @@
 // @ts-ignore No typings for EuiSearchBar
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { FilterBar as FilterBarType, MonitorKey } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
+import { FilterBarLoading } from '../../functional';
 import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
 
@@ -20,16 +21,23 @@ interface FilterBarProps {
 
 type Props = FilterBarProps & UptimeCommonProps;
 
-const MAX_SELECTION_LENGTH = 20;
-const SEARCH_THRESHOLD = 2;
+const SEARCH_THRESHOLD = 8;
 
-export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) => (
-  <Query query={getFilterBarQuery} variables={{ dateRangeStart, dateRangeEnd }}>
+export const FilterBar = ({
+  autorefreshInterval,
+  autorefreshIsPaused,
+  dateRangeStart,
+  dateRangeEnd,
+  updateQuery,
+}: Props) => (
+  <Query
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+    query={getFilterBarQuery}
+    variables={{ dateRangeStart, dateRangeEnd }}
+  >
     {({ loading, error, data }) => {
       if (loading) {
-        return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
+        return <FilterBarLoading />;
       }
       if (error) {
         return i18n.translate('xpack.uptime.filterBar.errorMessage', {
@@ -38,11 +46,8 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
         });
       }
       const {
-        filterBar: { port, id, scheme },
-      } = data;
-      const showFilterDisclaimer =
-        (id.length && id.length > MAX_SELECTION_LENGTH) ||
-        (port.length && port.length > MAX_SELECTION_LENGTH);
+        filterBar: { names, ports, ids, schemes },
+      }: { filterBar: FilterBarType } = data;
 
       // TODO: add a factory function + type for these filter options
       const filters = [
@@ -57,10 +62,10 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
               }),
             },
             {
-              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
+              value: 'down',
+              name: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
                 defaultMessage: 'Down',
               }),
-              name: 'Down',
             },
           ],
         },
@@ -72,10 +77,34 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
             defaultMessage: 'ID',
           }),
           multiSelect: false,
-          options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
-            value: idValue,
-            view: idValue,
-          })),
+          options: ids
+            ? ids.map(({ key }: MonitorKey) => ({
+                value: key,
+                view: key,
+              }))
+            : [],
+          searchThreshold: SEARCH_THRESHOLD,
+        },
+        {
+          type: 'field_value_selection',
+          field: 'monitor.name',
+          name: i18n.translate('xpack.uptime.filterBar.options.nameLabel', {
+            defaultMessage: 'Name',
+          }),
+          multiSelect: false,
+          options: names
+            ? names.map((nameValue: string) => ({ value: nameValue, view: nameValue }))
+            : [],
+          searchThreshold: SEARCH_THRESHOLD,
+        },
+        {
+          type: 'field_value_selection',
+          field: 'url.full',
+          name: i18n.translate('xpack.uptime.filterBar.options.urlLabel', {
+            defaultMessage: 'URL',
+          }),
+          multiSelect: false,
+          options: ids ? ids.map(({ url }: MonitorKey) => ({ value: url, view: url })) : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
@@ -85,20 +114,27 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
             defaultMessage: 'Port',
           }),
           multiSelect: false,
-          options: take(port, MAX_SELECTION_LENGTH).map((portValue: any) => ({
-            value: portValue,
-            view: portValue,
-          })),
+          options: ports
+            ? ports.map((portValue: any) => ({
+                value: portValue,
+                view: portValue,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
           type: 'field_value_selection',
-          field: 'monitor.scheme',
+          field: 'monitor.type',
           name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
             defaultMessage: 'Type',
           }),
           multiSelect: false,
-          options: scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
+          options: schemes
+            ? schemes.map((schemeValue: string) => ({
+                value: schemeValue,
+                view: schemeValue,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
       ];
@@ -123,23 +159,6 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
               schema={filterBarSearchSchema}
             />
           </EuiFlexItem>
-          {showFilterDisclaimer && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="left"
-                title={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipTitle', {
-                  defaultMessage: 'Filter limitations',
-                })}
-                content={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipText', {
-                  values: { selectionLength: MAX_SELECTION_LENGTH },
-                  defaultMessage:
-                    'The top {selectionLength} filter options for each field are displayed, but you can modify the filters manually or search for additional values.',
-                })}
-              >
-                <EuiIcon type="iInCircle" size="l" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       );
     }}

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import {
   borderRadius,
-  colors,
   fontFamily,
   px,
   unit,
@@ -21,8 +21,8 @@ import { Ellipsis } from '../Icons';
 import { PropertiesTable } from '../PropertiesTable';
 
 const VariablesContainer = styled.div`
-  background: ${colors.white};
-  border-top: 1px solid ${colors.gray4};
+  background: ${theme.euiColorEmptyShade};
+  border-top: 1px solid ${theme.euiColorLightShade};
   border-radius: 0 0 ${borderRadius} ${borderRadius};
   padding: ${px(units.half)} ${px(unit)};
   font-family: ${fontFamily};

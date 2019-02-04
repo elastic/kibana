@@ -69,7 +69,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async selectDefaultIndex(indexName) {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickLinkText(indexName);
       await PageObjects.settings.clickDefaultIndexButton();
     }
@@ -275,22 +275,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.visualize.gotoLandingPage();
       await PageObjects.header.clickDashboard();
       await this.gotoDashboardLandingPage();
-    }
-
-    async isDarkThemeOn() {
-      log.debug('isDarkThemeOn');
-      await this.openOptions();
-      const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
-    }
-
-    async useDarkTheme(on) {
-      log.debug(`useDarkTheme: on ${on}`);
-      await this.openOptions();
-      const isDarkThemeOn = await this.isDarkThemeOn();
-      if (isDarkThemeOn !== on) {
-        return await testSubjects.click('dashboardDarkThemeCheckbox');
-      }
     }
 
     async isMarginsOn() {
@@ -544,10 +528,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());
       }
-    }
-
-    async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar .filter', timeout);
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {

@@ -21,12 +21,16 @@ Note: You cannot access this endpoint via the Console in Kibana.
   (number) The page of objects to return
 `search` (optional)::
   (string) A {ref}/query-dsl-simple-query-string-query.html[simple_query_string] Elasticsearch query to filter the objects in the response
+`default_search_operator` (optional)::
+  (string) The default operator to use for the `simple_query_string`
 `search_fields` (optional)::
   (array|string) The fields to perform the `simple_query_string` parsed query against
 `fields` (optional)::
   (array|string) The fields to return in the response
 `sort_field` (optional)::
   (string) The field on which the response will be sorted
+`has_reference` (optional)::
+  (object) Filters to objects having a relationship with the type and id combination
 
 [NOTE]
 ==============================================

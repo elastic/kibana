@@ -15,7 +15,7 @@ function getIndexArrayFromPayload(payload) {
 
 async function unfreezeIndices(callWithRequest, indices) {
   const params = {
-    path: `/${indices.join(',')}/_unfreeze`,
+    path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
     method: 'POST',
   };
 

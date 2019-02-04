@@ -27,12 +27,12 @@ const module = uiModules.get('apps/ml');
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
-module.directive('mlTimeseriesChart', function () {
+module.directive('mlTimeseriesChart', function ($timeout) {
 
   function link(scope, element) {
     // Key dimensions for the viz and constituent charts.
@@ -75,9 +75,9 @@ module.directive('mlTimeseriesChart', function () {
       };
 
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(TimeseriesChart, props)}
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }
@@ -85,7 +85,9 @@ module.directive('mlTimeseriesChart', function () {
     renderReactComponent();
 
     scope.$on('render', () => {
-      renderReactComponent();
+      $timeout(() => {
+        renderReactComponent();
+      });
     });
 
     function renderFocusChart() {
