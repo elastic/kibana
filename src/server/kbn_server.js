@@ -42,6 +42,7 @@ import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
 import { i18nMixin } from './i18n';
+import { keystoreMixin } from './keystore';
 
 const rootDir = fromRoot('.');
 
@@ -71,6 +72,7 @@ export default class KbnServer {
       warningsMixin,
       usageMixin,
       statusMixin,
+      keystoreMixin,
 
       // writes pid file
       pidMixin,

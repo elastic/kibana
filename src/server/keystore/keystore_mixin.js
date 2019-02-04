@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { Keystore } from './keystore';
-export { keystoreMixin } from './keystore_mixin';
+import { Keystore } from './keystore';
+
+export function keystoreMixin(_, server) {
+  server.decorate('server', 'Keystore', Keystore);
+}
