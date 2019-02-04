@@ -86,7 +86,7 @@ export type IWaterfallItem = IWaterfallItemSpan | IWaterfallItemTransaction;
 
 function getTransactionItem(
   transaction: Transaction,
-  transactionErrorCounts: TraceAPIResponse['transactionErrorCounts']
+  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction']
 ): IWaterfallItemTransaction {
   return {
     id: transaction.transaction.id,
@@ -99,7 +99,7 @@ function getTransactionItem(
     skew: 0,
     docType: 'transaction',
     transaction,
-    errorCount: transactionErrorCounts[transaction.transaction.id] || 0
+    errorCount: errorsPerTransaction[transaction.transaction.id] || 0
   };
 }
 
@@ -236,7 +236,7 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
 export function getWaterfall(
   hits: TraceAPIResponse['trace'],
   entryTransaction: Transaction,
-  transactionErrorCounts: TraceAPIResponse['transactionErrorCounts']
+  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction']
 ): IWaterfall {
   if (isEmpty(hits)) {
     return {
@@ -260,7 +260,7 @@ export function getWaterfall(
         case 'span':
           return getSpanItem(hit as Span);
         case 'transaction':
-          return getTransactionItem(hit as Transaction, transactionErrorCounts);
+          return getTransactionItem(hit as Transaction, errorsPerTransaction);
         default:
           throw new Error(`Unknown type ${docType}`);
       }
@@ -271,7 +271,7 @@ export function getWaterfall(
   );
   const entryTransactionItem = getTransactionItem(
     entryTransaction,
-    transactionErrorCounts
+    errorsPerTransaction
   );
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
   const items = getWaterfallItems(childrenByParentId, entryTransactionItem);

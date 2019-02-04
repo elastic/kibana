@@ -112,7 +112,8 @@ export class Waterfall extends Component<Props> {
             onClose={this.onCloseFlyout}
             location={location}
             urlParams={urlParams}
-            waterfall={waterfall}
+            traceRootDuration={waterfall.traceRootDuration}
+            errorCount={currentItem.errorCount}
           />
         );
       default:

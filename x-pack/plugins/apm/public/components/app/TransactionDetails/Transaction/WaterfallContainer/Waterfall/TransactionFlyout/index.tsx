@@ -28,14 +28,14 @@ import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
   location: Location;
   urlParams: IUrlParams;
-  waterfall: IWaterfall;
+  errorCount: number;
+  traceRootDuration?: number;
 }
 
 const ResponsiveFlyout = styled(EuiFlyout)`
@@ -98,13 +98,12 @@ export function TransactionFlyout({
   onClose,
   location,
   urlParams,
-  waterfall
+  errorCount,
+  traceRootDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
   }
-
-  const waterfallItem = waterfall.itemsById[transactionDoc.transaction.id];
 
   return (
     <EuiPortal>
@@ -136,13 +135,9 @@ export function TransactionFlyout({
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
           <StickyTransactionProperties
-            errorCount={
-              waterfallItem.docType === 'transaction'
-                ? waterfallItem.errorCount
-                : undefined
-            }
+            errorCount={errorCount}
             transaction={transactionDoc}
-            totalDuration={waterfall.traceRootDuration}
+            totalDuration={traceRootDuration}
           />
           <EuiHorizontalRule />
           <DroppedSpansWarning transactionDoc={transactionDoc} />

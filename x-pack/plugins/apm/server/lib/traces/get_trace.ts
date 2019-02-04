@@ -10,25 +10,23 @@ import { Span } from '../../../typings/es_schemas/Span';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
-export interface TransactionErrorCounts {
-  [transactionId: string]: number;
-}
-export type TraceItems = Array<Transaction | Span>;
 export interface TraceAPIResponse {
-  trace: TraceItems;
-  transactionErrorCounts: TransactionErrorCounts;
+  trace: Array<Transaction | Span>;
+  errorsPerTransaction: {
+    [transactionId: string]: number;
+  };
 }
 
-interface TraceErrorsAggregationBucket {
+interface TraceErrorsAggBucket {
   key: string;
   errors: {
     doc_count: number;
   };
 }
 
-interface TraceAggregationResponse {
+interface TraceErrorsAggResponse {
   transactions: {
-    buckets: TraceErrorsAggregationBucket[];
+    buckets: TraceErrorsAggBucket[];
   };
 }
 
@@ -38,26 +36,39 @@ export async function getTrace(
 ): Promise<TraceAPIResponse> {
   const { start, end, client, config } = setup;
 
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
+  const query = {
+    bool: {
+      filter: [
+        { term: { [TRACE_ID]: traceId } },
+        {
+          range: {
+            '@timestamp': {
+              gte: start,
+              lte: end,
+              format: 'epoch_millis'
+            }
+          }
+        }
+      ]
+    }
+  };
+
+  const traceParams: SearchParams = {
+    index: [
+      config.get('apm_oss.spanIndices'),
+      config.get('apm_oss.transactionIndices')
+    ],
     body: {
       size: 1000,
-      query: {
-        bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
-      },
+      query
+    }
+  };
+
+  const errorsAggParams: SearchParams = {
+    index: [config.get('apm_oss.errorIndices')],
+    body: {
+      size: 0,
+      query,
       aggs: {
         transactions: {
           terms: {
@@ -77,26 +88,31 @@ export async function getTrace(
     }
   };
 
-  const resp = await client<Span | Transaction, TraceAggregationResponse>(
-    'search',
-    params
-  );
-  const trace = resp.hits.hits.map(hit => hit._source);
-  const transactionErrorCounts = resp.aggregations.transactions.buckets.reduce(
-    (
-      acc: object,
-      { key, errors: { doc_count } }: TraceErrorsAggregationBucket
-    ) => {
-      return {
-        ...acc,
-        [key]: doc_count
-      };
-    },
-    {}
-  );
+  return Promise.all([
+    client<Span | Transaction>('search', traceParams), // query for trace items (spans & transaction)
+    client<Span | Transaction, TraceErrorsAggResponse>( // agg for transaction error count
+      'search',
+      errorsAggParams
+    )
+  ]).then(([traceResponse, errorsAggResponse]) => {
+    const trace = traceResponse.hits.hits.map(hit => hit._source);
+    const errorsPerTransaction = errorsAggResponse.aggregations.transactions.buckets.reduce(
+      (accumulatedErrorsPerTransaction, bucket: TraceErrorsAggBucket) => {
+        const {
+          key,
+          errors: { doc_count }
+        } = bucket;
+        return {
+          ...accumulatedErrorsPerTransaction,
+          [key]: doc_count
+        };
+      },
+      {}
+    );
 
-  return {
-    trace,
-    transactionErrorCounts
-  };
+    return {
+      trace,
+      errorsPerTransaction
+    };
+  });
 }
