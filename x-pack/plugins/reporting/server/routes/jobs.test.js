@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { difference, memoize } from 'lodash';
-import { jobs } from './jobs';
+import { registerJobs } from './jobs';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
 jest.mock('../lib/authorized_user_pre_routing', () => {
   return {
@@ -63,7 +63,7 @@ test(`returns 404 if job not found`, async () => {
   mockServer.plugins.elasticsearch.getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits()));
 
-  jobs(mockServer);
+  registerJobs(mockServer);
 
   const request = {
     method: 'GET',
@@ -79,7 +79,7 @@ test(`returns 401 if not valid job type`, async () => {
   mockServer.plugins.elasticsearch.getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' })));
 
-  jobs(mockServer);
+  registerJobs(mockServer);
 
   const request = {
     method: 'GET',
@@ -96,7 +96,7 @@ describe(`when job is incomplete`, () => {
     mockServer.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' })));
 
-    jobs(mockServer);
+    registerJobs(mockServer);
 
     const request = {
       method: 'GET',
@@ -133,7 +133,7 @@ describe(`when job is failed`, () => {
     mockServer.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
-    jobs(mockServer);
+    registerJobs(mockServer);
 
     const request = {
       method: 'GET',
@@ -178,7 +178,7 @@ describe(`when job is completed`, () => {
     });
     mockServer.plugins.elasticsearch.getCluster('admin').callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
-    jobs(mockServer);
+    registerJobs(mockServer);
 
     const request = {
       method: 'GET',
