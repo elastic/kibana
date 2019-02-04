@@ -39,7 +39,7 @@ export function mssqlMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    euiIconType: 'logoMicrosoftSQL',
+    euiIconType: 'logoMSSQL',
     isBeta: true,
     artifacts: {
       dashboards: [
