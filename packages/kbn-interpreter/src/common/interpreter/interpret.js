@@ -55,7 +55,7 @@ export function interpreterProvider(config) {
     const fnDef = getByAlias(functions, fnName);
 
     if (!fnDef) {
-      createError({ message: `Function ${fnName} could not be found.` });
+      return createError({ message: `Function ${fnName} could not be found.` });
     }
 
     try {

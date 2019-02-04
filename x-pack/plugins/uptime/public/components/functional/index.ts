@@ -5,6 +5,8 @@
  */
 
 export { EmptyStatusBar } from './empty_status_bar';
+export { FilterBarLoading } from './filter_bar_loading';
 export { MonitorPageTitle } from './monitor_page_title';
 export { SnapshotHistogram } from './snapshot_histogram';
+export { SnapshotLoading } from './snapshot_loading';
 export { StatusBar } from './status_bar';

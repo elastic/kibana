@@ -2,9 +2,9 @@
 
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
-exports[`Error ERROR_EXC_HANDLED 1`] = `false`;
+exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
 
-exports[`Error ERROR_EXC_MESSAGE 1`] = `"sonic boom"`;
+exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_EXC_STACKTRACE 1`] = `undefined`;
 
