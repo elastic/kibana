@@ -80,7 +80,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/gis'),
+      resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/uptime')
@@ -134,7 +134,7 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
-      gis: GisPageProvider,
+      maps: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
       uptime: UptimePageProvider,
@@ -179,8 +179,8 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/logstash/pipelines',
       },
-      gis: {
-        pathname: '/app/gis',
+      maps: {
+        pathname: '/app/maps',
       },
       graph: {
         pathname: '/app/graph',

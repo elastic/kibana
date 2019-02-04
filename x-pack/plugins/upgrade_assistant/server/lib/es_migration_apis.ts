@@ -23,8 +23,7 @@ export interface UpgradeAssistantStatus {
 
 export async function getUpgradeAssistantStatus(
   callWithRequest: any,
-  req: Request,
-  basePath: string
+  req: Request
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = (await callWithRequest(req, 'transport.request', {
     path: '/_xpack/migration/deprecations',
@@ -33,14 +32,14 @@ export async function getUpgradeAssistantStatus(
 
   return {
     cluster: deprecations.cluster_settings.concat(deprecations.node_settings),
-    indices: getCombinedIndexInfos(deprecations, basePath),
+    indices: getCombinedIndexInfos(deprecations),
   };
 }
 
 // Combines the information from the migration assistance api and the deprecation api into a single array.
 // Enhances with information about which index the deprecation applies to and adds buttons for accessing the
 // reindex UI.
-const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse, basePath: string) =>
+const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce(
     (indexDeprecations, indexName) => {
       return indexDeprecations.concat(

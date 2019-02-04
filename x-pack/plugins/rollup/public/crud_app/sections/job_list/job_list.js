@@ -266,7 +266,6 @@ export class JobListUi extends Component {
     return (
       <EuiPageContent
         horizontalPosition="center"
-        verticalPosition="center"
       >
         {content}
       </EuiPageContent>

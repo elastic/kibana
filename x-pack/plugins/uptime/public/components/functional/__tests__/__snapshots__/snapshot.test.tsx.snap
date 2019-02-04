@@ -1,0 +1,431 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot component renders without errors 1`] = `
+<EuiFlexGroup
+  alignItems="baseline"
+  component="div"
+  direction="row"
+  gutterSize="xl"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Endpoint status"
+          id="xpack.uptime.snapshot.endpointStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="m"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="xl"
+        justifyContent="spaceEvenly"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
+          >
+            <EuiStat
+              description="Up"
+              reverse={false}
+              textAlign="center"
+              title={3}
+              titleColor="primary"
+              titleSize="l"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
+          >
+            <EuiStat
+              description="Down"
+              reverse={false}
+              textAlign="center"
+              title={1}
+              titleColor="danger"
+              titleSize="l"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
+          >
+            <EuiStat
+              description="Total"
+              reverse={false}
+              textAlign="center"
+              title={4}
+              titleColor="subdued"
+              titleSize="l"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    style={
+      Object {
+        "paddingTop": "12px",
+      }
+    }
+  >
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Status over time"
+          id="xpack.uptime.snapshot.statusOverTimeTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="s"
+    >
+      <Component
+        histogram={
+          Array [
+            Object {
+              "data": Array [
+                Object {
+                  "downCount": null,
+                  "upCount": 54,
+                  "x": 1547849220000,
+                  "x0": 1547848920000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 6,
+                  "upCount": 54,
+                  "x": 1547849520000,
+                  "x0": 1547849220000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547849820000,
+                  "x0": 1547849520000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547850120000,
+                  "x0": 1547849820000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547850420000,
+                  "x0": 1547850120000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547850720000,
+                  "x0": 1547850420000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547851020000,
+                  "x0": 1547850720000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547851320000,
+                  "x0": 1547851020000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547851620000,
+                  "x0": 1547851320000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 26,
+                  "x": 1547852820000,
+                  "x0": 1547852520000,
+                  "y": 1,
+                },
+              ],
+              "monitorId": "http@http://localhost:12349/",
+            },
+            Object {
+              "data": Array [
+                Object {
+                  "downCount": 54,
+                  "upCount": null,
+                  "x": 1547849220000,
+                  "x0": 1547848920000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547849520000,
+                  "x0": 1547849220000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547849820000,
+                  "x0": 1547849520000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547850120000,
+                  "x0": 1547849820000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547850420000,
+                  "x0": 1547850120000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547850720000,
+                  "x0": 1547850420000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547851020000,
+                  "x0": 1547850720000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 60,
+                  "upCount": null,
+                  "x": 1547851320000,
+                  "x0": 1547851020000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 5,
+                  "upCount": null,
+                  "x": 1547851620000,
+                  "x0": 1547851320000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 4,
+                  "upCount": null,
+                  "x": 1547852820000,
+                  "x0": 1547852520000,
+                  "y": 1,
+                },
+              ],
+              "monitorId": "http@http://www.example.com",
+            },
+            Object {
+              "data": Array [
+                Object {
+                  "downCount": null,
+                  "upCount": 54,
+                  "x": 1547849220000,
+                  "x0": 1547848920000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547849520000,
+                  "x0": 1547849220000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547849820000,
+                  "x0": 1547849520000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547850120000,
+                  "x0": 1547849820000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547850420000,
+                  "x0": 1547850120000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547850720000,
+                  "x0": 1547850420000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547851020000,
+                  "x0": 1547850720000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 60,
+                  "x": 1547851320000,
+                  "x0": 1547851020000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547851620000,
+                  "x0": 1547851320000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": 1,
+                  "upCount": 7,
+                  "x": 1547852820000,
+                  "x0": 1547852520000,
+                  "y": 1,
+                },
+              ],
+              "monitorId": "http@https://www.google.com/",
+            },
+            Object {
+              "data": Array [
+                Object {
+                  "downCount": null,
+                  "upCount": 4,
+                  "x": 1547849220000,
+                  "x0": 1547848920000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547849520000,
+                  "x0": 1547849220000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547849820000,
+                  "x0": 1547849520000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547850120000,
+                  "x0": 1547849820000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547850420000,
+                  "x0": 1547850120000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547850720000,
+                  "x0": 1547850420000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547851020000,
+                  "x0": 1547850720000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 5,
+                  "x": 1547851320000,
+                  "x0": 1547851020000,
+                  "y": 1,
+                },
+                Object {
+                  "downCount": null,
+                  "upCount": 1,
+                  "x": 1547852820000,
+                  "x0": 1547852520000,
+                  "y": 1,
+                },
+              ],
+              "monitorId": "http@https://www.wikipedia.org/",
+            },
+          ]
+        }
+      />
+    </EuiPanel>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

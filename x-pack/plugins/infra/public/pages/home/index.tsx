@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import React from 'react';
 
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
-import { EmptyPage } from '../../components/empty_page';
+import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
+import { InfraHeaderFeedbackLink } from '../../components/header_feedback_link';
+import { SourceConfigurationFlyout } from '../../components/source_configuration';
+import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
@@ -35,7 +37,12 @@ export const HomePage = injectI18n(
 
       return (
         <ColumnarPage>
-          <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
+          <Header
+            appendSections={
+              <InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/infrastructure" />
+            }
+          />
+          <SourceConfigurationFlyout />
           <WithSource>
             {({
               derivedIndexPattern,
@@ -45,7 +52,9 @@ export const HomePage = injectI18n(
               load,
               metricIndicesExist,
             }) =>
-              metricIndicesExist ? (
+              isLoading ? (
+                <SourceLoadingPage />
+              ) : metricIndicesExist ? (
                 <>
                   <WithWaffleTimeUrlState />
                   <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
@@ -53,14 +62,12 @@ export const HomePage = injectI18n(
                   <HomeToolbar />
                   <HomePageContent />
                 </>
-              ) : isLoading ? (
-                <SourceLoadingPage />
               ) : hasFailed ? (
                 <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
               ) : (
                 <WithKibanaChrome>
                   {({ basePath }) => (
-                    <EmptyPage
+                    <NoIndices
                       title={intl.formatMessage({
                         id: 'xpack.infra.homePage.noMetricsIndicesTitle',
                         defaultMessage: "Looks like you don't have any metrics indices.",
@@ -69,11 +76,34 @@ export const HomePage = injectI18n(
                         id: 'xpack.infra.homePage.noMetricsIndicesDescription',
                         defaultMessage: "Let's add some!",
                       })}
-                      actionLabel={intl.formatMessage({
-                        id: 'xpack.infra.homePage.noMetricsIndicesActionLabel',
-                        defaultMessage: 'Setup Instructions',
-                      })}
-                      actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                      actions={
+                        <EuiFlexGroup>
+                          <EuiFlexItem>
+                            <EuiButton
+                              href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                              color="primary"
+                              fill
+                            >
+                              {intl.formatMessage({
+                                id: 'xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel',
+                                defaultMessage: 'View setup instructions',
+                              })}
+                            </EuiButton>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <WithSourceConfigurationFlyoutState>
+                              {({ enable }) => (
+                                <EuiButton color="primary" onClick={enable}>
+                                  {intl.formatMessage({
+                                    id: 'xpack.infra.configureSourceActionLabel',
+                                    defaultMessage: 'Change source configuration',
+                                  })}
+                                </EuiButton>
+                              )}
+                            </WithSourceConfigurationFlyoutState>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
                       data-test-subj="noMetricsIndicesPrompt"
                     />
                   )}

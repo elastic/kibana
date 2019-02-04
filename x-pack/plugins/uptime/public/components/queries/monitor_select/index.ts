@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorSelect } from './monitor_select';
+export { MonitorSelectQuery } from './monitor_select_query';

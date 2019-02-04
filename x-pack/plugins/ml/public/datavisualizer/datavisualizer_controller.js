@@ -270,7 +270,8 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery, config);
+      const queryStringOptions = config.get('query:queryString:options');
+      decorateQuery(searchQuery, queryStringOptions);
       return searchQuery;
     }
 

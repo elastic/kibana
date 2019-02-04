@@ -7,11 +7,13 @@
 import { Legacy } from 'kibana';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
+import { registerDeleteTasksRoutes } from './routes/delete_tasks';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
 
 export function initServer(server: Legacy.Server) {
   registerClusterCheckupRoutes(server);
+  registerDeleteTasksRoutes(server);
   registerDeprecationLoggingRoutes(server);
 
   // The ReindexWorker uses a map of request headers that contain the authentication credentials

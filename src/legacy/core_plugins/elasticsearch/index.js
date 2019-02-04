@@ -106,27 +106,10 @@ export default function (kibana) {
         };
       };
 
-      const url = () => {
-        return (settings, log) => {
-          const deprecatedUrl = get(settings, 'url');
-          const hosts = get(settings, 'hosts.length');
-          if (!deprecatedUrl) {
-            return;
-          }
-          if (hosts) {
-            log('Deprecated config key "elasticsearch.url" conflicts with "elasticsearch.hosts".  Ignoring "elasticsearch.url"');
-          } else {
-            set(settings, 'hosts', [deprecatedUrl]);
-            log('Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"');
-          }
-          unset(settings, 'url');
-        };
-      };
-
       return [
         rename('ssl.ca', 'ssl.certificateAuthorities'),
         rename('ssl.cert', 'ssl.certificate'),
-        url(),
+        rename('url', 'hosts'),
         sslVerify(),
         rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
         rename('tribe.ssl.cert', 'tribe.ssl.certificate'),

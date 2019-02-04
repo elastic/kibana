@@ -32,7 +32,6 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import chrome from 'ui/chrome';
 import { recentlyAccessedShape } from './recently_accessed';
-import { I18nProvider } from '@kbn/i18n/react';
 
 export function HomeApp({
   directories,
@@ -71,42 +70,40 @@ export function HomeApp({
   };
 
   return (
-    <I18nProvider>
-      <Router>
-        <Switch>
-          <Route
-            path="/home/tutorial/:id"
-            render={renderTutorial}
+    <Router>
+      <Switch>
+        <Route
+          path="/home/tutorial/:id"
+          render={renderTutorial}
+        />
+        <Route
+          path="/home/tutorial_directory/:tab?"
+          render={renderTutorialDirectory}
+        />
+        <Route
+          path="/home/feature_directory"
+        >
+          <FeatureDirectory
+            addBasePath={chrome.addBasePath}
+            directories={directories}
           />
-          <Route
-            path="/home/tutorial_directory/:tab?"
-            render={renderTutorialDirectory}
+        </Route>
+        <Route
+          path="/home"
+        >
+          <Home
+            addBasePath={chrome.addBasePath}
+            directories={directories}
+            apmUiEnabled={apmUiEnabled}
+            mlEnabled={mlEnabled}
+            recentlyAccessed={recentlyAccessed}
+            find={savedObjectsClient.find}
+            localStorage={localStorage}
+            urlBasePath={chrome.getBasePath()}
           />
-          <Route
-            path="/home/feature_directory"
-          >
-            <FeatureDirectory
-              addBasePath={chrome.addBasePath}
-              directories={directories}
-            />
-          </Route>
-          <Route
-            path="/home"
-          >
-            <Home
-              addBasePath={chrome.addBasePath}
-              directories={directories}
-              apmUiEnabled={apmUiEnabled}
-              mlEnabled={mlEnabled}
-              recentlyAccessed={recentlyAccessed}
-              find={savedObjectsClient.find}
-              localStorage={localStorage}
-              urlBasePath={chrome.getBasePath()}
-            />
-          </Route>
-        </Switch>
-      </Router>
-    </I18nProvider>
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 
