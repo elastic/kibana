@@ -123,7 +123,12 @@ jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
-  injectedMetadata: {} as any,
+  browserSupportsCsp: true,
+  injectedMetadata: {
+    csp: {
+      warnLegacyBrowsers: true,
+    },
+  } as any,
   requireLegacyFiles: jest.fn(),
 };
 
