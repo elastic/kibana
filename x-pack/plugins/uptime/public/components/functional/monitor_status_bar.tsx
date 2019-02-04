@@ -17,7 +17,7 @@ interface Props {
   timestamp?: string;
 }
 
-export const StatusBar = ({ timestamp, url, duration, status }: Props) => (
+export const MonitorStatusBar = ({ timestamp, url, duration, status }: Props) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={false}>
