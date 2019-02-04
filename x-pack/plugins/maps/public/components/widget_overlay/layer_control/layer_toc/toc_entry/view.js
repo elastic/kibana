@@ -15,10 +15,8 @@ import { LayerTocActions } from '../../../../../shared/components/layer_toc_acti
 
 export class TOCEntry extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      displayName: null };
+  state = {
+    displayName: null
   }
 
   componentDidMount() {
@@ -29,7 +27,6 @@ export class TOCEntry extends React.Component {
   componentWillUnmount() {
     this._isMounted = false;
   }
-
 
   async _updateDisplayName() {
     const label = await this.props.layer.getDisplayName();
@@ -73,7 +70,7 @@ export class TOCEntry extends React.Component {
 
     return (
       <div
-        className="gisTocEntry"
+        className="mapTocEntry"
         id={layer.getId()}
         data-layerid={layer.getId()}
       >
@@ -83,7 +80,7 @@ export class TOCEntry extends React.Component {
           responsive={false}
           className={
             layer.isVisible() && layer.showAtZoomLevel(zoom)
-              && !layer.hasErrors() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
+              && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
           }
         >
           <EuiFlexItem grow={false}>
@@ -100,7 +97,7 @@ export class TOCEntry extends React.Component {
             </button>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <span className="gisTocEntry__grab"><EuiIcon type="grab"/></span>
+            <span className="mapTocEntry__grab"><EuiIcon type="grab"/></span>
           </EuiFlexItem>
         </EuiFlexGroup>
         {tocDetails}

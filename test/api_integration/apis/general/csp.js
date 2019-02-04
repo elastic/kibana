@@ -17,14 +17,23 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import {
-  I18nProvider,
-  i18nFilter,
-  i18nDirective,
-} from '@kbn/i18n/angular';
+import expect from 'expect.js';
 
-uiModules.get('i18n')
-  .provider('i18n', I18nProvider)
-  .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective);
+export default function ({ getService }) {
+  const supertest = getService('supertest');
+
+  describe('csp smoke test', () => {
+    it('app response sends content security policy headers', async () => {
+      const response = await supertest.get('/app/kibana');
+
+      expect(response.headers).to.have.property('content-security-policy');
+    });
+
+    it('csp header does not allow all inline scripts', async () => {
+      const response = await supertest.get('/app/kibana');
+
+      expect(response.headers['content-security-policy']).to.contain('script-src');
+      expect(response.headers['content-security-policy']).not.to.contain('unsafe-inline');
+    });
+  });
+}
