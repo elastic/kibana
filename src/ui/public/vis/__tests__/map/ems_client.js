@@ -23,7 +23,7 @@ import EMS_FILES from './ems_mocks/sample_files_6.6.json';
 import EMS_TILES from './ems_mocks/sample_tiles_6.6.json';
 
 
-import { EMSClientV66 } from '../../../../../legacy/core_plugins/tile_map/common/ems_client';
+import { EMSClient } from '../../../../../legacy/core_plugins/tile_map/common/ems_client';
 
 describe('ems_client', () => {
 
@@ -181,9 +181,9 @@ describe('ems_client', () => {
 
 function getEMSClient(options = {}) {
 
-  const emsClient = new EMSClientV66({
+  const emsClient = new EMSClient({
     language: 'en',
-    kbnVersion: '6.x.x',
+    kbnVersion: '7.x.x',
     manifestServiceUrl: 'https://foobar',
     htmlSanitizer: x => x,
     landingPageUrl: 'https://landing.foobar',
