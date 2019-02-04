@@ -150,20 +150,13 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         query,
         size: 0,
         aggs: {
-          urls: {
+          ids: {
             composite: {
               sources: [
                 {
                   id: {
                     terms: {
                       field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  port: {
-                    terms: {
-                      field: 'url.full',
                     },
                   },
                 },
@@ -187,35 +180,44 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const queryResult = await this.database.search(request, params);
-    const hostBuckets = get(queryResult, 'aggregations.urls.buckets', []);
-    const monitorStatuses = hostBuckets.map(bucket => {
-      const latest = get(bucket, 'latest.hits.hits', []);
-      return latest.reduce(
-        (acc, doc) => {
-          const status = get(doc, '_source.monitor.status', null);
-          if (statusFilter && statusFilter !== status) {
+    let up: number = 0;
+    let down: number = 0;
+    let searchAfter: any = null;
+
+    while (true) {
+      if (searchAfter) {
+        set(params, 'body.aggs.ids.composite.after', searchAfter);
+      }
+
+      const queryResult = await this.database.search(request, params);
+      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
+
+      if (idBuckets.length === 0) {
+        break;
+      }
+
+      idBuckets.forEach(bucket => {
+        const latest = get(bucket, 'latest.hits.hits', []);
+        return latest.reduce(
+          (acc, doc) => {
+            const status = get(doc, '_source.monitor.status', null);
+            if (statusFilter && statusFilter !== status) {
+              return acc;
+            }
+            if (status === 'up') {
+              up++;
+            } else {
+              down++;
+            }
             return acc;
-          }
-          if (status === 'up') {
-            acc.up += 1;
-          } else {
-            acc.down += 1;
-          }
-          return acc;
-        },
-        { up: 0, down: 0 }
-      );
-    });
-    const { up, down } = monitorStatuses.reduce(
-      (acc, status) => {
-        acc.up += status.up;
-        acc.down += status.down;
-        return acc;
-      },
-      // @ts-ignore TODO update typings and remove this comment
-      { up: 0, down: 0 }
-    );
+          },
+          { up: 0, down: 0 }
+        );
+      });
+
+      searchAfter = get(queryResult, 'aggregations.ids.after_key');
+    }
+
     return { up, down, total: up + down };
   }
 
@@ -261,6 +263,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   },
                 },
               ],
+              size: 50,
             },
             aggs: {
               latest: {
