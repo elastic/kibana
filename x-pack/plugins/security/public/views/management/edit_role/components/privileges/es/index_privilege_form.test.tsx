@@ -32,7 +32,7 @@ test('it renders without crashing', () => {
     intl: {} as any,
   };
 
-  const wrapper = shallowWithIntl(<IndexPrivilegeForm.WrappedComponent {...props} />);
+  const wrapper = shallowWithIntl(<IndexPrivilegeForm {...props} />);
   expect(wrapper).toMatchSnapshot();
 });
 
@@ -64,7 +64,7 @@ describe('delete button', () => {
       ...props,
       allowDelete: false,
     };
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
 
@@ -73,7 +73,7 @@ describe('delete button', () => {
       ...props,
       allowDelete: true,
     };
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
   });
 
@@ -82,7 +82,7 @@ describe('delete button', () => {
       ...props,
       allowDelete: true,
     };
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     wrapper.find(EuiButtonIcon).simulate('click');
     expect(testProps.onDelete).toHaveBeenCalledTimes(1);
   });
@@ -117,7 +117,7 @@ describe(`document level security`, () => {
       allowDocumentLevelSecurity: false,
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiSwitch)).toHaveLength(0);
     expect(wrapper.find(EuiTextArea)).toHaveLength(0);
   });
@@ -131,7 +131,7 @@ describe(`document level security`, () => {
       },
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiSwitch)).toHaveLength(1);
     expect(wrapper.find(EuiTextArea)).toHaveLength(0);
   });
@@ -141,7 +141,7 @@ describe(`document level security`, () => {
       ...props,
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiSwitch)).toHaveLength(1);
     expect(wrapper.find(EuiTextArea)).toHaveLength(1);
   });
@@ -176,7 +176,7 @@ describe('field level security', () => {
       allowFieldLevelSecurity: false,
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(0);
   });
 
@@ -185,7 +185,7 @@ describe('field level security', () => {
       ...props,
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
   });
 
@@ -200,7 +200,7 @@ describe('field level security', () => {
       },
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(1);
   });
@@ -210,7 +210,7 @@ describe('field level security', () => {
       ...props,
     };
 
-    const wrapper = mountWithIntl(<IndexPrivilegeForm.WrappedComponent {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(0);
   });
