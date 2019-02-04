@@ -79,7 +79,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
             <p>
               <FormattedMessage
                 id="common.ui.queryBar.syntaxOptionsDescription"
-                defaultMessage="Our experimental autocomplete and simple syntax features can help you create your
+                defaultMessage="Our new autocomplete and simple syntax features can help you create your
                 queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
                 values={{
                   docsLink: (
