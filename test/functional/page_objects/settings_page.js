@@ -128,7 +128,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getCreateIndexPatternButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
+      return await testSubjects.find('createIndexPatternButton');
     }
 
     async getCreateButton() {
@@ -289,7 +289,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await (await this.getCreateIndexPatternCreateButton()).click();
+        await (await this.getCreateIndexPatternButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -308,8 +308,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
     async clickOptionalAddNewButton() {
-      if (await testSubjects.isDisplayed('createIndexPatternCreateButton')) {
-        await testSubjects.click('createIndexPatternCreateButton');
+      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
+        await testSubjects.click('createIndexPatternButton');
       }
     }
 
@@ -334,10 +334,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternGoToStep2Button() {
       return await testSubjects.find('createIndexPatternGoToStep2Button');
-    }
-
-    async getCreateIndexPatternCreateButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
     }
 
     async clickOnOnlyIndexPattern() {
