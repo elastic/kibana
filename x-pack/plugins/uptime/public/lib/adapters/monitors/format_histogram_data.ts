@@ -23,8 +23,8 @@ export const formatHistogramData = (histograms: HistogramSeries[]): FormattedHis
     .filter(series => series !== null && series !== undefined)
     .reduce(
       (accumulatedData: FormattedHistogramData, data) => {
-        // @ts-ignore data will not be null/undefined because those elements are filtered
-        data.forEach(dataPoint => {
+        // `data` will not be null/undefined because those elements are filtered
+        data!.forEach(dataPoint => {
           const { x, x0, downCount, upCount } = dataPoint;
           const findPointInSeries = (hdp: HistogramDataPoint) => hdp.x === x && hdp.x0 === x0;
           const upEntry = accumulatedData.upSeriesData.find(findPointInSeries);
