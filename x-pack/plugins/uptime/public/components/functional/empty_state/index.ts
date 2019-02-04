@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorStatusBarQuery } from './monitor_status_bar_query';
+export { EmptyState } from './empty_state';
