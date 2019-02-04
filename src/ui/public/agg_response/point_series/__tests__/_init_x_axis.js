@@ -90,6 +90,6 @@ describe('initXAxis', function () {
 
     expect(chart.ordered)
       .to.be.an('object')
-      .and.have.property('interval', 50);
+      .and.have.property('interval', 10);
   });
 });
