@@ -272,6 +272,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async getAppNavLinksText() {
       const appsMenu = await testSubjects.find('appsMenu');
       await browser.moveMouseTo(appsMenu);
+      await this.sleep(250); // give menu extra time to expand and render link text
       const appLinks = await testSubjects.findAllDescendant('appLink', appsMenu);
       const linksText = await Promise.all(appLinks.map((appLink) => appLink.getVisibleText()));
       return linksText;
