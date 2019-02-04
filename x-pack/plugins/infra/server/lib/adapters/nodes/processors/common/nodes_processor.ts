@@ -26,7 +26,6 @@ const nodeTypeToField = (options: InfraProcesorRequestOptions): string => {
 };
 
 export const nodesProcessor = (options: InfraProcesorRequestOptions) => {
-  const { fields } = options.nodeOptions.sourceConfiguration;
   return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     const field = nodeTypeToField(options);
@@ -43,10 +42,9 @@ export const nodesProcessor = (options: InfraProcesorRequestOptions) => {
 
     set(result, 'aggs.waffle.aggs.nodes.aggs', {
       nodeDetails: {
-        top_hits: {
+        terms: {
+          field: NAME_FIELDS[options.nodeType],
           size: 1,
-          _source: { includes: [NAME_FIELDS[options.nodeType]] },
-          sort: [{ [fields.timestamp]: { order: 'desc' } }],
         },
       },
     });

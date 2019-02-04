@@ -11,6 +11,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
+import { FilterBarLoading } from '../../functional';
 import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
 
@@ -36,9 +37,7 @@ export const FilterBar = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
+        return <FilterBarLoading />;
       }
       if (error) {
         return i18n.translate('xpack.uptime.filterBar.errorMessage', {

@@ -15,7 +15,7 @@ import {
   TRANSACTION_RESULT,
   URL_FULL,
   USER_ID
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
