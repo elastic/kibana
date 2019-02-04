@@ -26,16 +26,25 @@ describe('initXAxis', function () {
   const baseChart = {
     aspects: {
       x: [{
+        accessor: 'col-0-2',
         format: {},
         title: 'label',
         params: {}
       }]
     }
   };
+  const table = {
+    rows: [
+      { 'col-0-2': 0 },
+      { 'col-0-2': 100 },
+      { 'col-0-2': 200 },
+      { 'col-0-2': 300 },
+    ]
+  };
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
     const chart = _.cloneDeep(baseChart);
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormat', chart.aspects.x[0].format);
@@ -45,17 +54,17 @@ describe('initXAxis', function () {
     const chart = _.cloneDeep(baseChart);
     chart.aspects.x[0].params.interval = 10;
 
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
   });
 
-  it('reads the interval param from the x agg', function () {
+  it('reads the interval param from table output, overwriting current interval', function () {
     const chart = _.cloneDeep(baseChart);
     chart.aspects.x[0].params.interval = 10;
-    initXAxis(chart);
+    initXAxis(chart, table);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
       .and.have.property('xAxisFormat', chart.aspects.x[0].format)
@@ -63,6 +72,24 @@ describe('initXAxis', function () {
 
     expect(chart.ordered)
       .to.be.an('object')
-      .and.have.property('interval', 10);
+      .and.have.property('interval', 100);
+  });
+  it('use existing interval if table has one or zero rows', function () {
+    const chart = _.cloneDeep(baseChart);
+    chart.aspects.x[0].params.interval = 10;
+    const table = {
+      rows: [
+        { 'col-0-2': 50 },
+      ]
+    };
+    initXAxis(chart, table);
+    expect(chart)
+      .to.have.property('xAxisLabel', 'label')
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
+      .and.have.property('ordered');
+
+    expect(chart.ordered)
+      .to.be.an('object')
+      .and.have.property('interval', 50);
   });
 });

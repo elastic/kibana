@@ -28,7 +28,7 @@ export const buildPointSeriesData = (table, dimensions) => {
     aspects: getAspects(table, dimensions),
   };
 
-  initXAxis(chart);
+  initXAxis(chart, table);
   initYAxis(chart);
 
 

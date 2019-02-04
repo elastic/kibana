@@ -17,14 +17,19 @@
  * under the License.
  */
 
-
-export function initXAxis(chart) {
-  const x = chart.aspects.x[0];
-  chart.xAxisFormat = x.format;
-  chart.xAxisLabel = x.title;
-  if (x.params.interval) {
+export function initXAxis(chart, table) {
+  const { format, title, params, accessor } = chart.aspects.x[0];
+  chart.xAxisFormat = format;
+  chart.xAxisLabel = title;
+  if (params.interval) {
+    let interval = params.interval;
+    // compute the interval from data only for histogram
+    if (table.rows.length > 1 && !params.date) {
+      // the max interval is enforced on courier pre-flight request
+      interval = Math.abs(table.rows[1][accessor] - table.rows[0][accessor]);
+    }
     chart.ordered = {
-      interval: x.params.interval
+      interval,
     };
   }
 }
