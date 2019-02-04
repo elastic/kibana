@@ -19,6 +19,7 @@ import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
+import { OpenIdConnectAuthenticationProvider } from './providers/oidc';
 
 interface ProviderSession {
   provider: string;
@@ -34,6 +35,7 @@ const providerMap = new Map<
   ['basic', BasicAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
+  ['oidc', OpenIdConnectAuthenticationProvider],
 ]);
 
 function assertRequest(request: Legacy.Request) {
@@ -60,6 +62,21 @@ function getProviderOptions(server: Legacy.Server) {
 
     ...config.get('xpack.security.public'),
   };
+}
+
+/**
+ * Prepares options object that is specific only to an authentication provider. This will be merged
+ * with the general options
+ * @param {Hapi.Server} server HapiJS Server instance.
+ * @returns {Object}
+ */
+function getProviderSpecificOptions(server, providerName) {
+  const config = server.config();
+  if (config.has(`xpack.security.${providerName}`)) {
+    return config.get(`xpack.security.${providerName}`);
+  } else {
+    return {};
+  }
 }
 
 /**
@@ -114,15 +131,17 @@ class Authenticator {
       );
     }
 
-    const providerOptions = Object.freeze(getProviderOptions(server));
+    const generalOptions = getProviderOptions(server);
 
     this.providers = new Map(
       authProviders.map(
-        providerType =>
-          [providerType, instantiateProvider(providerType, providerOptions)] as [
+        (providerType) => {
+          const providerOptions = Object.freeze({ ...generalOptions, ...getProviderSpecificOptions(server, providerType) });
+          return [providerType, instantiateProvider(providerType, providerOptions)] as [
             string,
             BaseAuthenticationProvider
-          ]
+            ];
+        }
       )
     );
   }
