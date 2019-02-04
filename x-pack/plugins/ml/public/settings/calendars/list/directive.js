@@ -18,7 +18,7 @@ import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 
 import uiRoutes from 'ui/routes';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const template = `
   <ml-nav-menu name="settings" />
@@ -52,9 +52,9 @@ module.directive('mlCalendarsList', function () {
       };
 
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(CalendarsList, props)}
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }

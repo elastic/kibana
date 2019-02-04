@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { applyTheme } from 'ui/theme';
@@ -158,9 +158,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <I18nProvider>
+        <I18nContext>
           <GisMap/>
-        </I18nProvider>
+        </I18nContext>
       </Provider>,
       root);
   });
