@@ -61,11 +61,10 @@ export function maps(kibana) {
         return;
       }
 
-      const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
       let routesInitialized = false;
 
-      watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
+      watchStatusAndLicenseToInitialize(xpackMainPlugin, this,
         async license => {
           if (license && license.maps && !routesInitialized) {
             routesInitialized = true;
@@ -75,7 +74,7 @@ export function maps(kibana) {
         });
 
       xpackMainPlugin.info
-        .feature(thisPlugin.id)
+        .feature(this.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
 
       server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);

@@ -88,7 +88,7 @@ export function buildMapsTelemetry(savedObjects) {
 
 async function getSavedObjects(savedObjectsClient) {
   const gisMapsSavedObject = await savedObjectsClient.find({
-    type: 'gis-map'
+    type: 'map'
   });
   return _.get(gisMapsSavedObject, 'saved_objects');
 }
