@@ -21,6 +21,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await testSubjects.exists('exitFullScreenModeLogo');
       });
+      await this.waitForLayersToLoad();
     }
 
     // TODO combine with dashboard full screen into a service
