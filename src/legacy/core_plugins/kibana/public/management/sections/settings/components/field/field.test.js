@@ -122,6 +122,11 @@ const settings = {
     isCustom: false,
     isOverridden: false,
     options: ['apple', 'orange', 'banana'],
+    optionLabels: {
+      apple: 'Apple',
+      orange: 'Orange',
+      // Deliberately left out `banana` to test if it also works with missing labels
+    }
   },
   string: {
     name: 'string:test:setting',
@@ -212,6 +217,40 @@ describe('Field', () => {
         expect(component).toMatchSnapshot();
       });
     });
+
+    if(type === 'select') {
+      it('should use options for rendering values', () => {
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={{
+              ...setting,
+              isCustom: true,
+            }}
+            save={save}
+            clear={clear}
+          />
+        );
+        const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
+        const labels = select.find('option').map(option => option.prop('value'));
+        expect(labels).toEqual(['apple', 'orange', 'banana']);
+      });
+
+      it('should use optionLabels for rendering labels', () => {
+        const component = mountWithIntl(
+          <Field.WrappedComponent
+            setting={{
+              ...setting,
+              isCustom: true,
+            }}
+            save={save}
+            clear={clear}
+          />
+        );
+        const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
+        const labels = select.find('option').map(option => option.text());
+        expect(labels).toEqual(['Apple', 'Orange', 'banana']);
+      });
+    }
 
     if(type === 'image') {
       describe(`for changing ${type} setting`, () => {

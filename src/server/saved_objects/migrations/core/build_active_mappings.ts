@@ -74,6 +74,20 @@ function defaultMapping(): IndexMapping {
       updated_at: {
         type: 'date',
       },
+      references: {
+        type: 'nested',
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   };
 }

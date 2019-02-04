@@ -34,6 +34,24 @@ describe('saved object conversion', () => {
       expect(actual).toHaveProperty('type', 'foo');
     });
 
+    test('it copies the _source.references property to references', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      const actual = serializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
+        },
+      });
+      expect(actual).toHaveProperty('references', [
+        {
+          name: 'ref_0',
+          type: 'index-pattern',
+          id: 'pattern*',
+        },
+      ]);
+    });
+
     test('if specified it copies the _source.migrationVersion property to migrationVersion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
@@ -95,6 +113,7 @@ describe('saved object conversion', () => {
           acl: '33.3.5',
         },
         updated_at: now,
+        references: [],
       };
       expect(expected).toEqual(actual);
     });
@@ -166,6 +185,7 @@ describe('saved object conversion', () => {
         attributes: {
           world: 'earth',
         },
+        references: [],
       });
     });
 
@@ -180,6 +200,7 @@ describe('saved object conversion', () => {
       expect(actual).toEqual({
         id: 'universe',
         type: 'hello',
+        references: [],
       });
     });
 
@@ -214,6 +235,7 @@ describe('saved object conversion', () => {
           },
           namespace: 'foo-namespace',
           updated_at: new Date(),
+          references: [],
         },
       };
 
@@ -383,6 +405,23 @@ describe('saved object conversion', () => {
       } as any);
 
       expect(actual._source).toHaveProperty('type', 'foo');
+    });
+
+    test('it copies the references property to _source.references', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      const actual = serializer.savedObjectToRaw({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
+      });
+      expect(actual._source).toHaveProperty('references', [
+        {
+          name: 'ref_0',
+          type: 'index-pattern',
+          id: 'pattern*',
+        },
+      ]);
     });
 
     test('if specified it copies the updated_at property to _source.updated_at', () => {

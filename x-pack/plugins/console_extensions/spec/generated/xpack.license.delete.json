@@ -4,7 +4,7 @@
       "DELETE"
     ],
     "patterns": [
-      "_xpack/license"
+      "_license"
     ],
     "documentation": "https://www.elastic.co/guide/en/x-pack/current/license-management.html"
   }

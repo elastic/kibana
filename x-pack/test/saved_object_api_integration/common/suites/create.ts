@@ -67,6 +67,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       attributes: {
         title: 'My favorite vis',
       },
+      references: [],
     });
 
     const expectedSpacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}:`;
@@ -107,6 +108,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       attributes: {
         name: `Can't be contained to a space`,
       },
+      references: [],
     });
 
     // query ES directory to ensure namespace wasn't specified
