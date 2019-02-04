@@ -341,8 +341,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
               });
               return {
                 ...filterRow,
-                indexRefName: refName,
-                index: undefined,
+                meta: {
+                  ...filterRow.meta,
+                  indexRefName: refName,
+                  index: undefined,
+                }
               };
             }),
           };
