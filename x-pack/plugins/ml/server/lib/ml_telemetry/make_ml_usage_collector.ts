@@ -11,6 +11,7 @@ import {
   getSavedObjectsClient,
   ML_TELEMETRY_DOC_ID,
   MlTelemetry,
+  MlTelemetrySavedObject,
 } from './ml_telemetry';
 
 // TODO this type should be defined by the platform
@@ -29,10 +30,10 @@ export function makeMlUsageCollector(server: KibanaHapiServer): void {
     fetch: async (): Promise<MlTelemetry> => {
       try {
         const savedObjectsClient = getSavedObjectsClient(server);
-        const mlTelemetrySavedObject = await savedObjectsClient.get(
+        const mlTelemetrySavedObject = (await savedObjectsClient.get(
           'ml-telemetry',
           ML_TELEMETRY_DOC_ID
-        );
+        )) as MlTelemetrySavedObject;
         return mlTelemetrySavedObject.attributes;
       } catch (err) {
         return createMlTelemetry();

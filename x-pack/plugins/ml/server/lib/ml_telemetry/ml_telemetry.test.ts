@@ -16,11 +16,11 @@ describe('ml_telemetry', () => {
   describe('createMlTelemetry', () => {
     it('should create a MlTelemetry object', () => {
       const mlTelemetry = createMlTelemetry(1);
-      expect(mlTelemetry.file_data_visualizer_index_creation_count).toBe(1);
+      expect(mlTelemetry.file_data_visualizer.index_creation_count).toBe(1);
     });
     it('should ignore undefined or unknown values', () => {
       const mlTelemetry = createMlTelemetry(undefined);
-      expect(mlTelemetry.file_data_visualizer_index_creation_count).toBe(0);
+      expect(mlTelemetry.file_data_visualizer.index_creation_count).toBe(0);
     });
   });
 
@@ -45,7 +45,9 @@ describe('ml_telemetry', () => {
         },
       };
       mlTelemetry = {
-        file_data_visualizer_index_creation_count: 1,
+        file_data_visualizer: {
+          index_creation_count: 1,
+        },
       };
     });
 
