@@ -12,16 +12,20 @@ import 'plugins/security/services/shield_user';
 import { SECURITY_PATH, USERS_PATH } from './management_urls';
 import { Users } from '../../components/management/users';
 import { createApiClient } from '../../lib/api';
+import { I18nContext } from 'ui/i18n';
+import { getUsersBreadcrumbs } from './breadcrumbs';
+
 routes.when(SECURITY_PATH, {
   redirectTo: USERS_PATH,
 });
 
 const renderReact = (elem, httpClient, changeUrl) => {
-  render(<Users changeUrl={changeUrl} apiClient={createApiClient(httpClient)} />, elem);
+  render(<I18nContext><Users changeUrl={changeUrl} apiClient={createApiClient(httpClient)} /></I18nContext>, elem);
 };
 
 routes.when(USERS_PATH, {
   template,
+  k7Breadcrumbs: getUsersBreadcrumbs,
   controller($scope, $route, $q, confirmModal, $http, kbnUrl) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('usersReactRoot');

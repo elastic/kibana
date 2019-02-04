@@ -13,9 +13,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
 
   class ReportingPage {
     async initTests() {
@@ -28,34 +28,22 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
-      await remote.setWindowSize(1600, 850);
-    }
-
-    async clickTopNavReportingLink() {
-      await retry.try(() => testSubjects.click('topNavReportingLink'));
-    }
-
-    async isReportingPanelOpen() {
-      const generateReportButtonExists = await this.getGenerateReportButtonExists();
-      const unsavedChangesWarningExists = await this.getUnsavedChangesWarningExists();
-      const isOpen = generateReportButtonExists || unsavedChangesWarningExists;
-      log.debug('isReportingPanelOpen: ' + isOpen);
-      return isOpen;
+      await browser.setWindowSize(1600, 850);
     }
 
     async getUrlOfTab(tabIndex) {
       return await retry.try(async () => {
         log.debug(`reportingPage.getUrlOfTab(${tabIndex}`);
-        const handles = await remote.getAllWindowHandles();
+        const handles = await browser.getAllWindowHandles();
         log.debug(`Switching to window ${handles[tabIndex]}`);
-        await remote.switchToWindow(handles[tabIndex]);
+        await browser.switchToWindow(handles[tabIndex]);
 
-        const url = await remote.getCurrentUrl();
+        const url = await browser.getCurrentUrl();
         if (!url || url === 'about:blank') {
           throw new Error('url is blank');
         }
 
-        await remote.switchToWindow(handles[0]);
+        await browser.switchToWindow(handles[0]);
         return url;
       });
     }
@@ -63,16 +51,16 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     async closeTab(tabIndex) {
       return await retry.try(async () => {
         log.debug(`reportingPage.closeTab(${tabIndex}`);
-        const handles = await remote.getAllWindowHandles();
+        const handles = await browser.getAllWindowHandles();
         log.debug(`Switching to window ${handles[tabIndex]}`);
-        await remote.switchToWindow(handles[tabIndex]);
-        await remote.closeCurrentWindow();
-        await remote.switchToWindow(handles[0]);
+        await browser.switchToWindow(handles[tabIndex]);
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(handles[0]);
       });
     }
 
     async forceSharedItemsContainerSize({ width }) {
-      await remote.execute(`
+      await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex="none";
         el.style.width="${width}px";
@@ -80,7 +68,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async removeForceSharedItemsContainerSize() {
-      await remote.execute(`
+      await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex = null;
         el.style.width = null;
@@ -118,32 +106,28 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async openReportingPanel() {
-      log.debug('openReportingPanel');
-      await retry.try(async () => {
-        const isOpen = await this.isReportingPanelOpen();
+    async openCsvReportingPanel() {
+      log.debug('openCsvReportingPanel');
+      await PageObjects.share.openShareMenuItem('CSV Reports');
+    }
 
-        if (!isOpen) {
-          await this.clickTopNavReportingLink();
-        }
+    async openPdfReportingPanel() {
+      log.debug('openPdfReportingPanel');
+      await PageObjects.share.openShareMenuItem('PDF Reports');
+    }
 
-        const wasOpened = await this.isReportingPanelOpen();
-        if (!wasOpened) {
-          throw new Error('Reporting panel was not opened successfully');
-        }
-      });
+    async openPngReportingPanel() {
+      log.debug('openPngReportingPanel');
+      await PageObjects.share.openShareMenuItem('PNG Reports');
     }
 
     async clickDownloadReportButton(timeout) {
       await testSubjects.click('downloadCompletedReportButton', timeout);
     }
 
-    async getUnsavedChangesWarningExists() {
-      return await testSubjects.exists('unsavedChangesReportingWarning');
-    }
-
-    async getGenerateReportButtonExists() {
-      return await testSubjects.exists('generateReportButton');
+    async clearToastNotifications() {
+      const toasts = await testSubjects.findAll('toastCloseButton');
+      await Promise.all(toasts.map(t => t.click()));
     }
 
     async getQueueReportError() {
@@ -154,8 +138,12 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       return await retry.try(() => testSubjects.find('generateReportButton'));
     }
 
-    async clickPreserveLayoutOption() {
-      await retry.try(() => testSubjects.click('preserveLayoutOption'));
+    async checkUsePrintLayout() {
+      // The print layout checkbox slides in as part of an animation, and tests can
+      // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
+      // the animation to complete before we attempt a click.
+      const menuAnimationDelay = 500;
+      await retry.tryForTime(menuAnimationDelay, () => testSubjects.click('usePrintLayout'));
     }
 
     async clickGenerateReportButton() {
@@ -164,7 +152,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
-      const isToastPresent = await testSubjects.exists('completeReportSuccess', 60000);
+      const isToastPresent = await testSubjects.exists('completeReportSuccess', {
+        timeout: 60000
+      });
       // Close toast so it doesn't obscure the UI.
       await testSubjects.click('completeReportSuccess toastCloseButton');
       return isToastPresent;

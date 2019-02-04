@@ -1,0 +1,23 @@
+.tvbAggRow {
+  @include tvbEditor__repeatingRow;
+}
+
+.tvbAggRow--split {
+  padding-left: $euiSizeXL;
+}
+
+.tvbAggRow__visibilityIcon {
+  margin-top: $euiSizeXS;
+}
+
+.tvbAggRow__children {
+  padding-top: $euiSizeS - 2px;
+}
+
+.tvbAggRow__unavailable {
+  margin-top: -$euiSizeXS;
+}
+
+.tvbAgg__input {
+  @include euiFormControlStyle($borderOnly: false, $includeStates: true, $includeSizes: false);
+}

@@ -20,39 +20,19 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { createEsTestCluster } from '@kbn/test';
-import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
-import { createToolingLog } from '@kbn/dev-utils';
+import { startTestServers } from '../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient;
   let kbnServer;
-  const cleanup = [];
+  let servers;
 
   before(async function () {
-    const log = createToolingLog('debug');
-    log.pipe(process.stdout);
-    log.indent(6);
-
-    log.info('starting elasticsearch');
-    log.indent(4);
-
-    const es = createEsTestCluster({ log });
-    this.timeout(es.getStartTimeout());
-
-    log.indent(-4);
-    cleanup.push(async () => await es.cleanup());
-
-    await es.start();
-
-    kbnServer = createServerWithCorePlugins();
-    await kbnServer.ready();
-    cleanup.push(async () => {
-      await kbnServer.close();
-      kbnServer = null;
-      savedObjectsClient = null;
+    servers = await startTestServers({
+      adjustTimeout: (t) => this.timeout(t),
     });
+    kbnServer = servers.kbnServer;
 
     await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 
@@ -87,10 +67,7 @@ describe('createOrUpgradeSavedConfig()', () => {
     ]);
   });
 
-  after(async () => {
-    await Promise.all(cleanup.map(fn => fn()));
-    cleanup.length = 0;
-  });
+  after(() => servers.stop());
 
   it('upgrades the previous version on each increment', async function () {
     this.timeout(30000);
@@ -101,7 +78,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.0',
       buildNum: 54099,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
@@ -127,7 +104,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.1',
       buildNum: 54199,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
@@ -153,7 +130,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0-rc1',
       buildNum: 70010,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
@@ -180,7 +157,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0',
       buildNum: 70099,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
@@ -208,7 +185,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '6.2.3-rc1',
       buildNum: 62310,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');

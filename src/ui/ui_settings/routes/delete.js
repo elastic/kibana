@@ -30,7 +30,7 @@ async function handleRequest(request) {
 export const deleteRoute = {
   path: '/api/kibana/settings/{key}',
   method: 'DELETE',
-  handler(request, reply) {
-    reply(handleRequest(request));
+  handler: async (request, h) => {
+    return h.response(await handleRequest(request));
   }
 };

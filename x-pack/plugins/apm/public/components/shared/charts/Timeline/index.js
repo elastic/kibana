@@ -8,36 +8,37 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import { makeWidthFlexible } from 'react-vis';
-import { createSelector } from 'reselect';
 import { getPlotValues } from './plotUtils';
 import TimelineAxis from './TimelineAxis';
 import VerticalLines from './VerticalLines';
 
 class Timeline extends PureComponent {
-  getPlotValues = createSelector(
-    state => state.duration,
-    state => state.height,
-    state => state.margins,
-    state => state.width,
-    getPlotValues
-  );
-
   render() {
-    const { width, duration, header, agentMarks } = this.props;
+    const {
+      width,
+      duration,
+      agentMarks,
+      traceRootDuration,
+      height,
+      margins
+    } = this.props;
     if (duration == null || !width) {
       return null;
     }
-
-    const plotValues = this.getPlotValues(this.props);
+    const plotValues = getPlotValues({ width, duration, height, margins });
 
     return (
       <div>
         <TimelineAxis
           plotValues={plotValues}
           agentMarks={agentMarks}
-          header={header}
+          traceRootDuration={traceRootDuration}
         />
-        <VerticalLines plotValues={plotValues} agentMarks={agentMarks} />
+        <VerticalLines
+          plotValues={plotValues}
+          agentMarks={agentMarks}
+          traceRootDuration={traceRootDuration}
+        />
       </div>
     );
   }
@@ -45,7 +46,7 @@ class Timeline extends PureComponent {
 
 Timeline.propTypes = {
   agentMarks: PropTypes.array,
-  duration: PropTypes.number.isRequired,
+  duration: PropTypes.number,
   height: PropTypes.number.isRequired,
   header: PropTypes.node,
   margins: PropTypes.object.isRequired,

@@ -18,34 +18,53 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce } from 'lodash';
+import { debounce, forEach, get } from 'lodash';
+// @ts-ignore
+import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
-
+import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { VisualizeDataLoader } from './visualize_data_loader';
 
+import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
+
+import { getTableAggs } from './pipeline_helpers/utilities';
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
+  autoFetch?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 const LOADING_ATTRIBUTE = 'data-loading';
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
 /**
  * A handler to the embedded visualization. It offers several methods to interact
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
+  /**
+   * This observable will emit every time new data is loaded for the
+   * visualization. The emitted value is the loaded data after it has
+   * been transformed by the visualization's response handler.
+   * This should not be used by any plugin.
+   * @ignore
+   */
+  public readonly data$: Rx.Observable<any>;
+  public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
+  private handlers: any;
   private loaded: boolean = false;
   private destroyed: boolean = false;
 
@@ -64,9 +83,13 @@ export class EmbeddedVisualizeHandler {
   }, 100);
 
   private dataLoaderParams: RequestHandlerParams;
-  private appState: AppState;
+  private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: VisualizeDataLoader;
+  private dataLoader: PipelineDataLoader;
+  private dataSubject: Rx.Subject<any>;
+  private actions: any = {};
+  private events$: Rx.Observable<any>;
+  private autoFetch: boolean;
 
   constructor(
     private readonly element: HTMLElement,
@@ -75,7 +98,7 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, Private } = params;
+    const { appState, uiState, queryFilter, timeRange, filters, query, autoFetch } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -88,12 +111,15 @@ export class EmbeddedVisualizeHandler {
       forceFetch: false,
     };
 
+    this.autoFetch = !(autoFetch === false);
+
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
       this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.appState = appState;
@@ -103,13 +129,44 @@ export class EmbeddedVisualizeHandler {
     }
     this.uiState = this.vis.getUiState();
 
+    this.handlers = {
+      vis: this.vis,
+      uiState: this.uiState,
+      onDestroy: (fn: () => never) => (this.handlers.destroyFn = fn),
+    };
+
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
-    this.uiState.on('change', this.fetchAndRender);
+    this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
-    this.dataLoader = new VisualizeDataLoader(vis, Private);
+    this.dataLoader = new PipelineDataLoader(vis);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
+    this.inspectorAdapters = this.getActiveInspectorAdapters();
+    this.vis.openInspector = this.openInspector;
+    this.vis.hasInspector = this.hasInspector;
+
+    // init default actions
+    forEach(this.vis.type.events, (event, eventName) => {
+      if (event.disabled || !eventName) {
+        return;
+      } else {
+        this.actions[eventName] = event.defaultAction;
+      }
+    });
+
+    this.handlers.eventsSubject = new Rx.Subject();
+    this.vis.eventsSubject = this.handlers.eventsSubject;
+    this.events$ = this.handlers.eventsSubject.asObservable().pipe(share());
+    this.events$.subscribe(event => {
+      if (this.actions[event.name]) {
+        event.data.aggConfigs = getTableAggs(this.vis);
+        this.actions[event.name](event.data);
+      }
+    });
+
+    this.dataSubject = new Rx.Subject();
+    this.data$ = this.dataSubject.asObservable().pipe(share());
 
     this.render();
   }
@@ -165,9 +222,12 @@ export class EmbeddedVisualizeHandler {
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
-    this.uiState.off('change', this.fetchAndRender);
+    this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
     this.renderCompleteHelper.destroy();
+    if (this.handlers.destroyFn) {
+      this.handlers.destroyFn();
+    }
   }
 
   /**
@@ -180,13 +240,47 @@ export class EmbeddedVisualizeHandler {
   }
 
   /**
+   * renders visualization with provided data
+   * @param visData: visualization data
+   */
+  public render = (pipelineResponse: any = {}) => {
+    // TODO: we have this weird situation when we need to render first, and then we call fetch and render ....
+    // we need to get rid of that ....
+
+    const renderer = renderFunctionsRegistry.get(get(pipelineResponse, 'as', 'visualization'));
+    if (!renderer) {
+      return;
+    }
+    renderer
+      .render(
+        this.element,
+        pipelineResponse.value || { visType: this.vis.type.name },
+        this.handlers
+      )
+      .then(() => {
+        if (!this.loaded) {
+          this.loaded = true;
+          if (this.autoFetch) {
+            this.fetchAndRender();
+          }
+        }
+      });
+  };
+
+  /**
    * Opens the inspector for the embedded visualization. This will return an
    * handler to the inspector to close and interact with it.
    * @return An inspector session to interact with the opened inspector.
    */
-  public openInspector(): ReturnType<typeof Inspector.open> {
-    return this.vis.openInspector();
-  }
+  public openInspector = () => {
+    return Inspector.open(this.inspectorAdapters, {
+      title: this.vis.title,
+    });
+  };
+
+  public hasInspector = () => {
+    return Inspector.isAvailable(this.inspectorAdapters);
+  };
 
   /**
    * Returns a promise, that will resolve (without a value) once the first rendering of
@@ -221,9 +315,60 @@ export class EmbeddedVisualizeHandler {
     this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
 
+  /**
+   * Force the fetch of new data and renders the chart again.
+   */
+  public reload = () => {
+    this.fetchAndRender(true);
+  };
+
+  private incrementRenderingCount = () => {
+    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
+  };
+
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
+    this.incrementRenderingCount();
+  };
+
+  private onUiStateChange = () => {
+    this.fetchAndRender();
+  };
+
+  /**
+   * Returns an object of all inspectors for this vis object.
+   * This must only be called after this.type has properly be initialized,
+   * since we need to read out data from the the vis type to check which
+   * inspectors are available.
+   */
+  private getActiveInspectorAdapters = (): Adapters => {
+    const adapters: Adapters = {};
+    const { inspectorAdapters: typeAdapters } = this.vis.type;
+
+    // Add the requests inspector adapters if the vis type explicitly requested it via
+    // inspectorAdapters.requests: true in its definition or if it's using the courier
+    // request handler, since that will automatically log its requests.
+    if ((typeAdapters && typeAdapters.requests) || this.vis.type.requestHandler === 'courier') {
+      adapters.requests = new RequestAdapter();
+    }
+
+    // Add the data inspector adapter if the vis type requested it or if the
+    // vis is using courier, since we know that courier supports logging
+    // its data.
+    if ((typeAdapters && typeAdapters.data) || this.vis.type.requestHandler === 'courier') {
+      adapters.data = new DataAdapter();
+    }
+
+    // Add all inspectors, that are explicitly registered with this vis type
+    if (typeAdapters && typeAdapters.custom) {
+      Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
+        adapters[key] = new (Adapter as any)();
+      });
+    }
+
+    return adapters;
   };
 
   /**
@@ -251,30 +396,18 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender();
   };
 
-  /**
-   * Force the fetch of new data and renders the chart again.
-   */
-  private reload = () => {
-    this.fetchAndRender(true);
-  };
-
   private fetch = (forceFetch: boolean = false) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
+    this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
-    return this.dataLoader.fetch(this.dataLoaderParams);
-  };
+    this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
-  private render = (visData: any = null) => {
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
-        listenOnChange: false,
-      })
-      .then(() => {
-        if (!this.loaded) {
-          this.loaded = true;
-          this.fetchAndRender();
-        }
-      });
+    return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
+      if (data.value) {
+        this.dataSubject.next(data.value);
+      }
+      return data;
+    });
   };
 }

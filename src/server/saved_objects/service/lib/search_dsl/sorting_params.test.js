@@ -20,43 +20,41 @@
 import { getSortingParams } from './sorting_params';
 
 const MAPPINGS = {
-  rootType: {
-    properties: {
-      type: {
-        type: 'text',
-        fields: {
-          raw: {
-            type: 'keyword'
-          }
+  properties: {
+    type: {
+      type: 'text',
+      fields: {
+        raw: {
+          type: 'keyword'
         }
-      },
-      pending: {
-        properties: {
-          title: {
-            type: 'text',
-            fields: {
-              raw: {
-                type: 'keyword'
-              }
+      }
+    },
+    pending: {
+      properties: {
+        title: {
+          type: 'text',
+          fields: {
+            raw: {
+              type: 'keyword'
             }
           }
         }
-      },
-      saved: {
-        properties: {
-          title: {
-            type: 'text',
-            fields: {
-              raw: {
-                type: 'keyword'
-              }
+      }
+    },
+    saved: {
+      properties: {
+        title: {
+          type: 'text',
+          fields: {
+            raw: {
+              type: 'keyword'
             }
-          },
-          obj: {
-            properties: {
-              key1: {
-                type: 'text'
-              }
+          }
+        },
+        obj: {
+          properties: {
+            key1: {
+              type: 'text'
             }
           }
         }
@@ -126,6 +124,21 @@ describe('searchDsl/getSortParams', () => {
     describe('sortField is multi-field with single type', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw'))
+          .toEqual({
+            sort: [
+              {
+                'saved.title.raw': {
+                  order: undefined,
+                  unmapped_type: 'keyword'
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is multi-field with single type as array', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved'], 'title.raw'))
           .toEqual({
             sort: [
               {

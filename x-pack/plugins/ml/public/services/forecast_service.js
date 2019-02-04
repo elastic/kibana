@@ -59,6 +59,7 @@ function getForecastsSummary(
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: maxResults,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
@@ -352,6 +353,7 @@ function getForecastRequestStats(job, forecastId) {
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 1,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {

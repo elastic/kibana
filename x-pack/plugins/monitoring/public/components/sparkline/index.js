@@ -90,18 +90,18 @@ export class Sparkline extends React.Component {
 
     return (
       <div
-        className="sparklineTooltipContainer"
+        className="monSparklineTooltip__container"
         style={styles.tooltipContainer}
       >
-        <i className="fa fa-caret-left sparklineTooltipCaret" style={styles.leftCaret} />
+        <i className="fa fa-caret-left monSparklineTooltip__caret" style={styles.leftCaret} />
         <div
-          className="sparklineTooltip"
+          className="monSparklineTooltip"
           style={styles.tooltip}
         >
-          <div className="sparklineTooltip__yValue">{this.props.tooltip.yValueFormatter(this.state.tooltip.yValue)}</div>
-          <div className="sparklineTooltip__xValue">{this.props.tooltip.xValueFormatter(this.state.tooltip.xValue)}</div>
+          <div className="monSparklineTooltip__yValue">{this.props.tooltip.yValueFormatter(this.state.tooltip.yValue)}</div>
+          <div className="monSparklineTooltip__xValue">{this.props.tooltip.xValueFormatter(this.state.tooltip.xValue)}</div>
         </div>
-        <i className="fa fa-caret-right sparklineTooltipCaret" style={styles.rightCaret} />
+        <i className="fa fa-caret-right monSparklineTooltip__caret" style={styles.rightCaret} />
       </div>
     );
   }
@@ -119,7 +119,7 @@ export class Sparkline extends React.Component {
     return (
       <div>
         <div
-          className="sparkline"
+          className="monSparkline"
           ref={this.handleSparklineRef}
         />
         {this.renderTooltip()}

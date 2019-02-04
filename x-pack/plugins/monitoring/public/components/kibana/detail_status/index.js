@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function DetailStatus({ stats }) {
+function DetailStatusUI({ stats, intl }) {
   const {
     transport_address: transportAddress,
     os_memory_free: osFreeMemory,
@@ -20,30 +21,41 @@ export function DetailStatus({ stats }) {
 
   const metrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.detailStatus.transportAddressLabel',
+        defaultMessage: 'Transport Address'
+      }),
       value: transportAddress,
-      dataTestSubj: 'transportAddress'
+      'data-test-subj': 'transportAddress'
     },
     {
-      label: 'OS Free Memory',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.detailStatus.osFreeMemoryLabel',
+        defaultMessage: 'OS Free Memory'
+      }),
       value: formatMetric(osFreeMemory, 'byte'),
-      dataTestSubj: 'osFreeMemory'
+      'data-test-subj': 'osFreeMemory'
     },
     {
-      label: 'Version',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.detailStatus.versionLabel',
+        defaultMessage: 'Version'
+      }),
       value: version,
-      dataTestSubj: 'version'
+      'data-test-subj': 'version'
     },
     {
-      label: 'Uptime',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.kibana.detailStatus.uptimeLabel',
+        defaultMessage: 'Uptime'
+      }),
       value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
+      'data-test-subj': 'uptime'
     }
   ];
 
   const IconComponent = ({ status }) => (
-    <Fragment>
-      Status: <KibanaStatusIcon status={status} />
-    </Fragment>
+    <KibanaStatusIcon status={status} />
   );
 
   return (
@@ -55,3 +67,5 @@ export function DetailStatus({ stats }) {
     />
   );
 }
+
+export const DetailStatus = injectI18n(DetailStatusUI);

@@ -26,11 +26,15 @@ import {
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
-import { validateModelMemoryLimit, validateGroupNames } from './validate_job';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import {
+  validateModelMemoryLimit,
+  validateGroupNames,
+  isValidCustomUrls } from '../validate_job';
+import { mlMessageBarService } from '../../../../components/messagebar/messagebar_service';
 import { toastNotifications } from 'ui/notify';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class EditJobFlyout extends Component {
+class EditJobFlyoutUI extends Component {
   constructor(props) {
     super(props);
 
@@ -50,7 +54,8 @@ export class EditJobFlyout extends Component {
       datafeedScrollSize: '',
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
-      valid: true,
+      isValidJobDetails: true,
+      isValidJobCustomUrls: true,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -129,16 +134,23 @@ export class EditJobFlyout extends Component {
     }
 
     if (jobDetails.jobGroups !== undefined) {
-      jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
+        jobGroupsValidationError = this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
+          defaultMessage: 'A job with this ID already exists. Groups and jobs cannot use the same ID.'
+        });
+      } else {
+        jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      }
     }
 
-    const valid = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+    const isValidJobDetails = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
 
     this.setState({
       ...jobDetails,
       jobModelMemoryLimitValidationError,
       jobGroupsValidationError,
-      valid,
+      isValidJobDetails,
     });
   }
 
@@ -155,7 +167,11 @@ export class EditJobFlyout extends Component {
   }
 
   setCustomUrls = (jobCustomUrls) => {
-    this.setState({ jobCustomUrls });
+    const isValidJobCustomUrls = isValidCustomUrls(jobCustomUrls);
+    this.setState({
+      jobCustomUrls,
+      isValidJobCustomUrls,
+    });
   }
 
   save = () => {
@@ -173,13 +189,21 @@ export class EditJobFlyout extends Component {
 
     saveJob(this.state.job, newJobData)
       .then(() => {
-        toastNotifications.addSuccess(`Changes to ${this.state.job.job_id} saved`);
+        toastNotifications.addSuccess(this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage',
+          defaultMessage: 'Changes to {jobId} saved' }, {
+          jobId: this.state.job.job_id }
+        ));
         this.refreshJobs();
         this.closeFlyout();
       })
       .catch((error) => {
         console.error(error);
-        toastNotifications.addDanger(`Could not save changes to ${this.state.job.job_id}`);
+        toastNotifications.addDanger(this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage',
+          defaultMessage: 'Could not save changes to {jobId}' }, {
+          jobId: this.state.job.job_id }
+        ));
         mlMessageBarService.notify.error(error);
       });
   }
@@ -203,12 +227,18 @@ export class EditJobFlyout extends Component {
         datafeedScrollSize,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
-        valid,
+        isValidJobDetails,
+        isValidJobCustomUrls,
       } = this.state;
+
+      const { intl } = this.props;
 
       const tabs = [{
         id: 'job-details',
-        name: 'Job details',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.jobDetailsTitle',
+          defaultMessage: 'Job details'
+        }),
         content: <JobDetails
           jobDescription={jobDescription}
           jobGroups={jobGroups}
@@ -219,7 +249,10 @@ export class EditJobFlyout extends Component {
         />,
       }, {
         id: 'detectors',
-        name: 'Detectors',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.detectorsTitle',
+          defaultMessage: 'Detectors'
+        }),
         content: <Detectors
           jobDetectors={jobDetectors}
           jobDetectorDescriptions={jobDetectorDescriptions}
@@ -227,7 +260,10 @@ export class EditJobFlyout extends Component {
         />,
       }, {
         id: 'datafeed',
-        name: 'Datafeed',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.datafeedTitle',
+          defaultMessage: 'Datafeed'
+        }),
         content: <Datafeed
           datafeedQuery={datafeedQuery}
           datafeedQueryDelay={datafeedQueryDelay}
@@ -238,7 +274,10 @@ export class EditJobFlyout extends Component {
         />,
       }, {
         id: 'custom-urls',
-        name: 'Custom URLs',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrlsTitle',
+          defaultMessage: 'Custom URLs'
+        }),
         content: <CustomUrls
           job={job}
           jobCustomUrls={jobCustomUrls}
@@ -256,7 +295,11 @@ export class EditJobFlyout extends Component {
           <EuiFlyoutHeader>
             <EuiTitle>
               <h2>
-                Edit {job.id}
+                <FormattedMessage
+                  id="xpack.ml.jobsList.editJobFlyout.pageTitle"
+                  defaultMessage="Edit {jobId}"
+                  values={{ jobId: job.id }}
+                />
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -277,16 +320,22 @@ export class EditJobFlyout extends Component {
                   onClick={this.closeFlyout}
                   flush="left"
                 >
-                  Close
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.editJobFlyout.closeButtonLabel"
+                    defaultMessage="Close"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={this.save}
                   fill
-                  isDisabled={(valid === false)}
+                  isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.editJobFlyout.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -304,8 +353,11 @@ export class EditJobFlyout extends Component {
   }
 }
 
-EditJobFlyout.propTypes = {
+EditJobFlyoutUI.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  allJobIds: PropTypes.array.isRequired,
 };
+
+export const EditJobFlyout = injectI18n(EditJobFlyoutUI);

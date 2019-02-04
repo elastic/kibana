@@ -1,0 +1,63 @@
+.kbnToaster__container {
+  visibility: visible;
+  width: 100%;
+
+  .kbnToaster {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /**
+   * 1. Shouldn't look like a button.
+   */
+  .kbnToaster__countdown {
+    appearance: none;
+    background: none;
+    border: none;
+  }
+
+  .alert {
+    padding: $euiSizeXS $euiSize;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+
+  .kbnToast {
+    display: flex;
+    align-items: center;
+
+    > * {
+      flex: 0 0 auto;
+
+      &:not(:last-child) {
+        margin-right: $euiSizeXS;
+      }
+    }
+  }
+
+  .kbnToast__message {
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    line-height: normal;
+    white-space: normal;
+  }
+
+  .kbnToast__stack {
+    padding-bottom: $euiSizeS;
+
+    pre {
+      display: inline-block;
+      width: 100%;
+      margin: $euiSizeS 0;
+      word-break: normal;
+      word-wrap: normal;
+      white-space: pre-wrap;
+    }
+  }
+
+  .kbnToast__controls {
+    display: flex;
+  }
+}

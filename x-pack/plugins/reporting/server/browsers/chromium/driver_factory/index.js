@@ -6,15 +6,14 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { spawn } from 'child_process';
+import puppeteer from 'puppeteer-core';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
-import { map, share, first, tap, mergeMap, filter, partition } from 'rxjs/operators';
-import cdp from 'chrome-remote-interface';
+import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
-import { ensureChromiumIsListening } from './ensure_chromium_is_listening';
+import { safeChildProcess } from '../../safe_child_process';
+import { getChromeLogLocation } from '../paths';
 
 const compactWhitespace = (str) => {
   return str.replace(/\s+/, ' ');
@@ -29,57 +28,102 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  create({ bridgePort, viewport }) {
+  test({ viewport, browserTimezone }, log) {
+    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
+    const chromiumArgs = args({
+      userDataDir,
+      viewport,
+      verboseLogging: true,
+      disableSandbox: this.browserConfig.disableSandbox,
+      proxyConfig: this.browserConfig.proxy,
+    });
+
+    return puppeteer
+      .launch({
+        userDataDir,
+        executablePath: this.binaryPath,
+        ignoreHTTPSErrors: true,
+        args: chromiumArgs,
+        env: {
+          TZ: browserTimezone,
+        },
+      })
+      .catch((error) => {
+        log(`The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: ${error}`);
+        log(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+        return null;
+      });
+  }
+
+  create({ viewport, browserTimezone }) {
     return Rx.Observable.create(async observer => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
-        bridgePort,
         viewport,
         verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
 
-      this.logger.debug(`spawning chromium process at ${this.binaryPath} with arguments ${chromiumArgs}`);
-      let chromium;
+      let browser;
+      let page;
       try {
-        chromium = spawn(this.binaryPath, chromiumArgs);
+        browser = await puppeteer.launch({
+          userDataDir,
+          executablePath: this.binaryPath,
+          ignoreHTTPSErrors: true,
+          args: chromiumArgs,
+          env: {
+            TZ: browserTimezone
+          },
+        });
+
+        page = await browser.newPage();
       } catch (err) {
-        observer.error(new Error(`Caught error spawning Chromium`));
-        return;
+        observer.error(new Error(`Error spawning Chromium browser: ${err}`));
+        throw err;
       }
 
-      safeChildProcess(chromium, observer);
+      safeChildProcess({
+        async kill() {
+          await browser.close();
+        }
+      }, observer);
 
-      const stderr$ = Rx.fromEvent(chromium.stderr, 'data').pipe(
-        map(line => line.toString()),
+      // Register with a few useful puppeteer event handlers:
+      // https://pptr.dev/#?product=Puppeteer&version=v1.10.0&show=api-event-error
+      // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-page
+
+      const stderr$ = Rx.fromEvent(page, 'console').pipe(
+        filter(line => line._type === 'error'),
+        map(line => line._text),
         share()
       );
 
-      const [ consoleMessage$, message$ ] = stderr$.pipe(
+      const [consoleMessage$, message$] = stderr$.pipe(
         partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
       );
 
-      const driver$ = message$.pipe(
-        first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0),
-        tap(() => this.logger.debug('Ensure chromium is running and listening')),
-        mergeMap(() => ensureChromiumIsListening(bridgePort, this.logger)),
-        tap(() => this.logger.debug('Connecting chrome remote interface')),
-        mergeMap(() => cdp({ port: bridgePort, local: true })),
-        tap(() => this.logger.debug('Initializing chromium driver')),
-        map(client => new HeadlessChromiumDriver(client, {
-          maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
-          logger: this.logger
-        }))
+      const driver$ = Rx.of(new HeadlessChromiumDriver(page, {
+        maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
+        logger: this.logger
+      }));
+
+      const processError$ = Rx.fromEvent(page, 'error').pipe(
+        mergeMap((err) => Rx.throwError(new Error(`Unable to spawn Chromium: ${err}`))),
       );
 
-      const processError$ = Rx.fromEvent(chromium, 'error').pipe(
-        mergeMap(() => Rx.throwError(new Error(`Unable to spawn Chromium`))),
+      const processPageError$ = Rx.fromEvent(page, 'pageerror').pipe(
+        mergeMap((err) => Rx.throwError(new Error(`Uncaught exception within the page: ${err}`))),
       );
 
-      const processExit$ = Rx.fromEvent(chromium, 'exit').pipe(
-        mergeMap(([code]) => Rx.throwError(new Error(`Chromium exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
+      const processRequestFailed$ = Rx.fromEvent(page, 'requestfailed').pipe(
+        mergeMap((err) => Rx.throwError(new Error(`Request failed: ${err}`))),
+      );
+
+      const processExit$ = Rx.fromEvent(browser, 'disconnected').pipe(
+        mergeMap((code) => Rx.throwError(new Error(`Chromium exited with: [${JSON.stringify({ code })}]`)))
       );
 
       const nssError$ = message$.pipe(
@@ -100,7 +144,15 @@ export class HeadlessChromiumDriverFactory {
         `))))
       );
 
-      const exit$ = Rx.merge(processError$, processExit$, nssError$, fontError$, noUsableSandbox$);
+      const exit$ = Rx.merge(
+        processError$,
+        processPageError$,
+        processRequestFailed$,
+        processExit$,
+        nssError$,
+        fontError$,
+        noUsableSandbox$
+      );
 
       observer.next({
         driver$,

@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiBadge, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
 
 export function Metric({ className, warning, value }) {
-  const classes = classNames('pipelineViewer__metric', className);
+  const classes = classNames('monPipelineViewer__metric', className);
 
   let stylizedValue;
   if (warning) {
@@ -27,7 +27,7 @@ export function Metric({ className, warning, value }) {
     );
   }
   return (
-    <EuiFlexItem className="pipelineViewer__metricFlexItem" grow={false}>
+    <EuiFlexItem className="monPipelineViewer__metricFlexItem" grow={false}>
       {stylizedValue}
     </EuiFlexItem>
   );

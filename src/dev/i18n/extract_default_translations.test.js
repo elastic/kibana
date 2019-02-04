@@ -18,14 +18,12 @@
  */
 
 import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
 
-import { extractDefaultTranslations } from './extract_default_translations';
-
-const readFileAsync = promisify(fs.readFile);
-const removeDirAsync = promisify(fs.rmdir);
-const unlinkAsync = promisify(fs.unlink);
+import {
+  extractMessagesFromPathToMap,
+  validateMessageNamespace,
+} from './extract_default_translations';
+import { ErrorReporter } from './utils';
 
 const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
 const pluginsPaths = [
@@ -34,40 +32,52 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_3'),
 ];
 
+const config = {
+  paths: {
+    plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
+    plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
+    plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
+  },
+  exclude: [],
+};
+
 describe('dev/i18n/extract_default_translations', () => {
-  test('extracts messages to en.json', async () => {
+  test('extracts messages from path to map', async () => {
     const [pluginPath] = pluginsPaths;
-    await extractDefaultTranslations(pluginPath);
+    const resultMap = new Map();
 
-    const extractedJSONBuffer = await readFileAsync(
-      path.join(pluginPath, 'translations', 'en.json')
-    );
-
-    await unlinkAsync(path.join(pluginPath, 'translations', 'en.json'));
-    await removeDirAsync(path.join(pluginPath, 'translations'));
-
-    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
-  });
-
-  test('injects default formats into en.json', async () => {
-    const [, pluginPath] = pluginsPaths;
-    await extractDefaultTranslations(pluginPath);
-
-    const extractedJSONBuffer = await readFileAsync(
-      path.join(pluginPath, 'translations', 'en.json')
-    );
-
-    await unlinkAsync(path.join(pluginPath, 'translations', 'en.json'));
-    await removeDirAsync(path.join(pluginPath, 'translations'));
-
-    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+    await extractMessagesFromPathToMap(pluginPath, resultMap, config, new ErrorReporter());
+    expect([...resultMap].sort()).toMatchSnapshot();
   });
 
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
-    await expect(extractDefaultTranslations(pluginPath)).rejects.toMatchObject({
-      message: `Error in ${path.join(pluginPath, 'test_file.jsx')}
-There is more than one default message for the same id "plugin_3.duplicate_id": "Message 1" and "Message 2"`,
-    });
+    const reporter = new ErrorReporter();
+
+    await expect(
+      extractMessagesFromPathToMap(pluginPath, new Map(), config, reporter)
+    ).resolves.not.toThrow();
+    expect(reporter.errors).toMatchSnapshot();
+  });
+
+  test('validates message namespace', () => {
+    const id = 'plugin_2.message-id';
+    const filePath = path.resolve(
+      __dirname,
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
+    );
+    expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
+  });
+
+  test('throws on wrong message namespace', () => {
+    const report = jest.fn();
+    const id = 'wrong_plugin_namespace.message-id';
+    const filePath = path.resolve(
+      __dirname,
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
+    );
+
+    expect(() => validateMessageNamespace(id, filePath, config.paths, { report })).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

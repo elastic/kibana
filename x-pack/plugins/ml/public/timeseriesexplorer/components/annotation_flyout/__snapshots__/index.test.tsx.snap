@@ -1,0 +1,141 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnnotationFlyout Initialization. 1`] = `
+<EuiFlyout
+  aria-labelledby="Add annotation"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="s"
+      textTransform="none"
+    >
+      <h2
+        id="mlAnnotationFlyoutTitle"
+      >
+        <FormattedMessage
+          defaultMessage="Edit annotation"
+          id="xpack.ml.timeSeriesExplorer.annotationFlyout.editAnnotationTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <InjectIntl(Component)
+      annotation={
+        Object {
+          "_id": "KCCkDWgB_ZdQ1MFDSYPi",
+          "annotation": "Major spike.",
+          "create_time": 1546417097181,
+          "create_username": "<user unknown>",
+          "end_timestamp": 1455041968976,
+          "job_id": "farequote",
+          "modified_time": 1546417097181,
+          "modified_username": "<user unknown>",
+          "timestamp": 1455026177994,
+          "type": "annotation",
+        }
+      }
+    />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Annotation text"
+          id="xpack.ml.timeSeriesExplorer.annotationFlyout.annotationTextLabel"
+          values={Object {}}
+        />
+      }
+    >
+      <EuiTextArea
+        fullWidth={true}
+        isInvalid={false}
+        onChange={[MockFunction]}
+        placeholder="..."
+        resize="vertical"
+        value="Major spike."
+      />
+    </EuiFormRow>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="spaceBetween"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="primary"
+          flush="left"
+          iconSide="left"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="danger"
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Delete"
+            id="xpack.ml.timeSeriesExplorer.annotationFlyout.deleteButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          fill={true}
+          iconSide="left"
+          isDisabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Update"
+            id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;

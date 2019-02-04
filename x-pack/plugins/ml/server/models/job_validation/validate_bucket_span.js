@@ -48,7 +48,7 @@ const pickBucketSpan = (bucketSpans) => {
   return bucketSpans[i];
 };
 
-export async function validateBucketSpan(callWithRequest, job, duration) {
+export async function validateBucketSpan(callWithRequest, job, duration, server) {
   validateJobObject(job);
 
   // if there is no duration, do not run the estimate test
@@ -115,7 +115,7 @@ export async function validateBucketSpan(callWithRequest, job, duration) {
   try {
     const estimations = estimatorConfigs.map((data) => {
       return new Promise((resolve) => {
-        estimateBucketSpanFactory(callWithRequest)(data)
+        estimateBucketSpanFactory(callWithRequest, server)(data)
           .then(resolve)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.

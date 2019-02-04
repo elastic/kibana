@@ -4,7 +4,7 @@
 [float]
 === Hosted Kibana
 
-If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
+If you are running our https://cloud.elastic.co[hosted Elasticsearch Service]
 on Elastic Cloud, you can access Kibana with a single click.
 
 [float]
@@ -48,7 +48,7 @@ downloaded from the Elastic Docker Registry.
 <<docker,Running Kibana on Docker>>
 
 IMPORTANT: If your Elasticsearch installation is protected by
-{xpack-ref}/xpack-security.html[{security}] see
+{xpack-ref}/elasticsearch-security.html[{security}] see
 {kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for
 additional setup instructions.
 

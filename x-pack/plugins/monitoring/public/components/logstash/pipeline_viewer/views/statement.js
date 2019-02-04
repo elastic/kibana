@@ -16,12 +16,13 @@ function renderStatementName(name, onVertexSelected) {
   return (
     <EuiFlexItem grow={false} key="statementName">
       <EuiButtonEmpty
+        aria-label={name}
         color="text"
         size="xs"
         onClick={onVertexSelected}
         flush="left"
       >
-        <span className="pipelineViewer__conditional">{name}</span>
+        <span className="monPipelineViewer__conditional">{name}</span>
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -56,7 +57,7 @@ function renderNestingSpacers(depth) {
   const spacers = [];
   for (let i = 0; i < depth; i += 1) {
     spacers.push(
-      <div key={`spacer_${i}`} className="pipelineViewer__spacer" />
+      <div key={`spacer_${i}`} className="monPipelineViewer__spacer" />
     );
   }
   return spacers;
@@ -106,8 +107,8 @@ export function Statement(props) {
   const { depth } = props.element;
 
   return (
-    <li className={`pipelineViewer__listItem`}>
-      <div className="pipelineViewer__spaceContainer">
+    <li className={`monPipelineViewer__listItem`}>
+      <div className="monPipelineViewer__spaceContainer">
         {renderNestingSpacers(depth)}
       </div>
       {renderStatement(props)}

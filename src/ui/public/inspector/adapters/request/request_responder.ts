@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Request, RequestStatistics, RequestStatus, Response } from './types';
 
 /**
@@ -43,6 +44,19 @@ export class RequestResponder {
       ...(this.request.stats || {}),
       ...stats,
     };
+
+    const startDate = new Date(this.request.startTime);
+
+    this.request.stats.requestTimestamp = {
+      label: i18n.translate('common.ui.inspector.reqTimestampKey', {
+        defaultMessage: 'Request timestamp',
+      }),
+      value: startDate.toISOString(),
+      description: i18n.translate('common.ui.inspector.reqTimestampDescription', {
+        defaultMessage: 'Time when the start of the request has been logged',
+      }),
+    };
+
     this.onChange();
     return this;
   }

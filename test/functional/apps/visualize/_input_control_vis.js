@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const testSubjects = getService('testSubjects');
+  const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
 
@@ -37,16 +38,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange('2017-01-01', '2017-01-02');
       await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
-      await comboBox.set('indexPatternSelect-0', 'logstash');
+      await comboBox.set('indexPatternSelect-0', 'logstash- ');
       await comboBox.set('fieldSelect-0', FIELD_NAME);
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
 
     it('should not have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(false);
+      await inspector.expectIsNotEnabled();
     });
 
     describe('updateFiltersOnChange is false', () => {
@@ -128,16 +127,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.checkCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       after(async () => {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.uncheckCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should not display staging control buttons', async () => {
@@ -165,7 +160,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.checkCheckbox('inputControlEditorUseTimeFilterCheckbox');
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         // Expect control to be disabled because no terms could be gathered with time filter applied
         const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');
@@ -190,11 +184,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('controls');
 
         await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-0', 'logstash');
+        await comboBox.set('indexPatternSelect-0', 'logstash- ');
         await comboBox.set('fieldSelect-0', 'geo.src');
 
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should fetch new options when string field is filtered', async () => {
@@ -211,7 +204,6 @@ export default function ({ getService, getPageObjects }) {
       it('should not fetch new options when non-string is filtered', async () => {
         await comboBox.set('fieldSelect-0', 'clientip');
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
         expect(initialOptions.trim().split('\n').join()).to.equal(
@@ -233,16 +225,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('controls');
 
         await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-0', 'logstash');
+        await comboBox.set('indexPatternSelect-0', 'logstash- ');
         await comboBox.set('fieldSelect-0', 'geo.src');
 
         await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-1', 'logstash');
+        await comboBox.set('indexPatternSelect-1', 'logstash- ');
         await comboBox.set('fieldSelect-1', 'clientip');
         await PageObjects.visualize.setSelectByOptionText('parentSelect-1', 'geo.src');
 
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should disable child control when parent control is not set', async () => {

@@ -7,22 +7,37 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 import { initPutRolesApi } from './put';
-import { ALL_RESOURCE } from '../../../../../common/constants';
+import { defaultValidationErrorHandler } from '../../../../../../../../src/core/server/http/http_tools';
+import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 
 const application = 'kibana-.kibana';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({
+    debug: false,
+    port: 8080,
+    routes: {
+      validate: {
+        failAction: defaultValidationErrorHandler
+      }
+    }
+  });
   return mockServer;
 };
 
-const defaultPreCheckLicenseImpl = (request, reply) => reply();
+const defaultPreCheckLicenseImpl = () => null;
 
 const privilegeMap = {
-  'test-kibana-privilege-1': {},
-  'test-kibana-privilege-2': {},
-  'test-kibana-privilege-3': {},
+  global: {
+    'test-global-privilege-1': [],
+    'test-global-privilege-2': [],
+    'test-global-privilege-3': [],
+  },
+  space: {
+    'test-space-privilege-1': [],
+    'test-space-privilege-2': [],
+    'test-space-privilege-3': [],
+  }
 };
 
 const putRoleTest = (
@@ -55,7 +70,8 @@ const putRoleTest = (
       headers,
       payload,
     };
-    const { result, statusCode } = await mockServer.inject(request);
+    const response = await mockServer.inject(request);
+    const { result, statusCode } = response;
 
     expect(result).toEqual(asserts.result);
     expect(statusCode).toBe(asserts.statusCode);
@@ -90,6 +106,7 @@ describe('PUT role', () => {
         statusCode: 404,
         result: {
           error: 'Not Found',
+          message: 'Not Found',
           statusCode: 404,
         },
       },
@@ -112,24 +129,92 @@ describe('PUT role', () => {
       },
     });
 
-    putRoleTest(`only allows known Kibana privileges`, {
+    putRoleTest(`only allows known Kibana global privileges`, {
       name: 'foo-role',
       payload: {
-        kibana: [
-          {
-            privileges: ['foo']
-          }
-        ]
+        kibana: {
+          global: ['foo']
+        }
       },
       asserts: {
         statusCode: 400,
         result: {
           error: 'Bad Request',
           //eslint-disable-next-line max-len
-          message: `child "kibana" fails because ["kibana" at position 0 fails because [child "privileges" fails because ["privileges" at position 0 fails because ["0" must be one of [test-kibana-privilege-1, test-kibana-privilege-2, test-kibana-privilege-3]]]]]`,
+          message: `child \"kibana\" fails because [child \"global\" fails because [\"global\" at position 0 fails because [\"0\" must be one of [test-global-privilege-1, test-global-privilege-2, test-global-privilege-3]]]]`,
           statusCode: 400,
           validation: {
-            keys: ['kibana.0.privileges.0'],
+            keys: ['kibana.global.0'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
+    putRoleTest(`only allows known Kibana space privileges`, {
+      name: 'foo-role',
+      payload: {
+        kibana: {
+          space: {
+            quz: ['foo']
+          }
+        }
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          //eslint-disable-next-line max-len
+          message: `child \"kibana\" fails because [child \"space\" fails because [child \"quz\" fails because [\"quz\" at position 0 fails because [\"0\" must be one of [test-space-privilege-1, test-space-privilege-2, test-space-privilege-3]]]]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.space.quz.0'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
+    putRoleTest(`doesn't allow * space ID`, {
+      name: 'foo-role',
+      payload: {
+        kibana: {
+          space: {
+            '*': ['test-space-privilege-1']
+          }
+        }
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"*\" is not allowed]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.space.&#x2a;'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
+    putRoleTest(`doesn't allow * in a space ID`, {
+      name: 'foo-role',
+      payload: {
+        kibana: {
+          space: {
+            'foo-*': ['test-space-privilege-1']
+          }
+        }
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-*\" is not allowed]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.space.foo-&#x2a;'],
             source: 'payload',
           },
         },
@@ -139,8 +224,7 @@ describe('PUT role', () => {
     putRoleTest(`returns result of routePreCheckLicense`, {
       name: 'foo-role',
       payload: {},
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {
@@ -157,7 +241,7 @@ describe('PUT role', () => {
       name: 'foo-role',
       payload: {},
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => {}],
+      callWithRequestImpls: [async () => ({}), async () => { }],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -191,7 +275,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                except: ['test-field-security-except-1', 'test-field-security-except-2']
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -200,17 +284,16 @@ describe('PUT role', () => {
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
-        kibana: [
-          {
-            privileges: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-          },
-          {
-            privileges: ['test-kibana-privilege-3'],
-          },
-        ],
+        kibana: {
+          global: ['test-global-privilege-1', 'test-global-privilege-2', 'test-global-privilege-3'],
+          space: {
+            'test-space-1': ['test-space-privilege-1', 'test-space-privilege-2'],
+            'test-space-2': ['test-space-privilege-3'],
+          }
+        },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => {}],
+      callWithRequestImpls: [async () => ({}), async () => { }],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -223,15 +306,26 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: [
-                      'test-kibana-privilege-1',
-                      'test-kibana-privilege-2',
+                      'test-global-privilege-1',
+                      'test-global-privilege-2',
+                      'test-global-privilege-3'
                     ],
-                    resources: [ALL_RESOURCE],
+                    resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: ['test-kibana-privilege-3'],
-                    resources: [ALL_RESOURCE],
+                    privileges: [
+                      'space_test-space-privilege-1',
+                      'space_test-space-privilege-2'
+                    ],
+                    resources: ['space:test-space-1']
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'space_test-space-privilege-3',
+                    ],
+                    resources: ['space:test-space-2']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -239,7 +333,7 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                      except: ['test-field-security-except-1', 'test-field-security-except-2']
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
@@ -272,7 +366,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                except: ['test-field-security-except-1', 'test-field-security-except-2']
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -281,14 +375,13 @@ describe('PUT role', () => {
           ],
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
-        kibana: [
-          {
-            privileges: ['test-kibana-privilege-1', 'test-kibana-privilege-2'],
-          },
-          {
-            privileges: ['test-kibana-privilege-3'],
-          },
-        ],
+        kibana: {
+          global: ['test-global-privilege-1', 'test-global-privilege-2', 'test-global-privilege-3'],
+          space: {
+            'test-space-1': ['test-space-privilege-1', 'test-space-privilege-2'],
+            'test-space-2': ['test-space-privilege-3'],
+          }
+        },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
       callWithRequestImpls: [
@@ -305,7 +398,7 @@ describe('PUT role', () => {
               {
                 field_security: {
                   grant: ['old-field-security-grant-1', 'old-field-security-grant-2'],
-                  except: [ 'old-field-security-except-1', 'old-field-security-except-2' ]
+                  except: ['old-field-security-except-1', 'old-field-security-except-2']
                 },
                 names: ['old-index-name'],
                 privileges: ['old-privilege'],
@@ -322,7 +415,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
+        async () => { },
       ],
       asserts: {
         callWithRequests: [
@@ -336,15 +429,26 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: [
-                      'test-kibana-privilege-1',
-                      'test-kibana-privilege-2',
+                      'test-global-privilege-1',
+                      'test-global-privilege-2',
+                      'test-global-privilege-3'
                     ],
-                    resources: [ALL_RESOURCE],
+                    resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: ['test-kibana-privilege-3'],
-                    resources: [ALL_RESOURCE],
+                    privileges: [
+                      'space_test-space-privilege-1',
+                      'space_test-space-privilege-2'
+                    ],
+                    resources: ['space:test-space-1']
+                  },
+                  {
+                    application,
+                    privileges: [
+                      'space_test-space-privilege-3',
+                    ],
+                    resources: ['space:test-space-2']
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -352,7 +456,7 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                      except: ['test-field-security-except-1', 'test-field-security-except-2']
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
@@ -394,17 +498,13 @@ describe('PUT role', () => {
             ],
             run_as: ['test-run-as-1', 'test-run-as-2'],
           },
-          kibana: [
-            {
-              privileges: [
-                'test-kibana-privilege-1',
-                'test-kibana-privilege-2',
-              ],
-            },
-            {
-              privileges: ['test-kibana-privilege-3'],
-            },
-          ],
+          kibana: {
+            global: [
+              'test-global-privilege-1',
+              'test-global-privilege-2',
+              'test-global-privilege-3'
+            ],
+          },
         },
         preCheckLicenseImpl: defaultPreCheckLicenseImpl,
         callWithRequestImpls: [
@@ -443,7 +543,7 @@ describe('PUT role', () => {
               ],
             },
           }),
-          async () => {},
+          async () => { },
         ],
         asserts: {
           callWithRequests: [
@@ -457,15 +557,11 @@ describe('PUT role', () => {
                     {
                       application,
                       privileges: [
-                        'test-kibana-privilege-1',
-                        'test-kibana-privilege-2',
+                        'test-global-privilege-1',
+                        'test-global-privilege-2',
+                        'test-global-privilege-3'
                       ],
-                      resources: [ALL_RESOURCE],
-                    },
-                    {
-                      application,
-                      privileges: ['test-kibana-privilege-3'],
-                      resources: [ALL_RESOURCE],
+                      resources: [GLOBAL_RESOURCE],
                     },
                     {
                       application: 'logstash-foo',

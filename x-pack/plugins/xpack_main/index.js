@@ -16,11 +16,14 @@ import { setupXPackMain } from './server/lib/setup_xpack_main';
 import {
   xpackInfoRoute,
   telemetryRoute,
+  settingsRoute,
 } from './server/routes/api/v1';
 import {
   CONFIG_TELEMETRY,
-  CONFIG_TELEMETRY_DESC,
+  getConfigTelemetryDesc,
 } from './common/constants';
+import mappings from './mappings.json';
+import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
@@ -64,25 +67,43 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
+      managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
-          name: 'Telemetry opt-in',
-          description: CONFIG_TELEMETRY_DESC,
-          value: false
+          name: i18n.translate('xpack.main.telemetry.telemetryConfigTitle', {
+            defaultMessage: 'Telemetry opt-in'
+          }),
+          description: getConfigTelemetryDesc(),
+          value: false,
+          readonly: true,
         },
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: 'Admin email',
+          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
+            defaultMessage: 'Admin email'
+          }),
           // TODO: change the description when email address is used for more things?
-          description: `Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.`,
+          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
+            defaultMessage:
+              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
+          }),
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
           value: null
         }
+      },
+      savedObjectSchemas: {
+        telemetry: {
+          isNamespaceAgnostic: true,
+        },
       },
       injectDefaultVars(server) {
         const config = server.config();
         return {
           telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
           telemetryEnabled: isTelemetryEnabled(config),
+          telemetryOptedIn: null,
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+          userProfile: {},
         };
       },
       hacks: [
@@ -100,6 +121,7 @@ export const xpackMain = (kibana) => {
           raw: true,
         });
       },
+      mappings,
     },
 
     init(server) {
@@ -110,6 +132,7 @@ export const xpackMain = (kibana) => {
       // register routes
       xpackInfoRoute(server);
       telemetryRoute(server);
+      settingsRoute(server, this.kbnServer);
     }
   });
 };

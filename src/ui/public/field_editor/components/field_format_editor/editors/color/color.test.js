@@ -20,8 +20,8 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ColorFormatEditorComponent } from './color';
-import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
+import { ColorFormatEditor, ColorFormatEditorComponent } from './color';
+import { DEFAULT_COLOR } from '../../../../../../../legacy/core_plugins/kibana/common/field_formats/types/color_default';
 
 const fieldType = 'string';
 const format = {
@@ -34,6 +34,12 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('ColorFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(ColorFormatEditor.formatId).toEqual('color');
+  });
+});
+
+describe('ColorFormatEditorComponent', () => {
   it('should render string type normally (regex field)', async () => {
     const component = shallowWithIntl(
       <ColorFormatEditorComponent

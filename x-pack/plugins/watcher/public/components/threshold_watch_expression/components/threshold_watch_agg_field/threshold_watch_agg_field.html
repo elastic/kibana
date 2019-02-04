@@ -16,9 +16,9 @@
       xpack-aria-describes="{{thresholdWatchAggField.makeId('aggField')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchAggField.isValidationMessageVisible('aggField', 'required')"
-    >
-      Please select a field.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage"
+      i18n-default-message="Please select a field."
+    ></div>
     <select
       id="{{thresholdWatchAggField.makeId('aggField')}}"
       class="kuiSelect"
@@ -27,7 +27,11 @@
       ng-model="thresholdWatchAggField.aggField"
       ng-options="aggField as aggField.name group by aggField.normalizedType for aggField in thresholdWatchAggField.aggFields"
     >
-      <option value="">Select a field...</option>
+      <option
+        value=""
+        i18n-id="xpack.watcher.thresholdWatchExpression.aggType.selectFieldDropdownPlaceholder"
+        i18n-default-message="Select a field…"
+      ></option>
     </select>
   </form>
 </expression-item>

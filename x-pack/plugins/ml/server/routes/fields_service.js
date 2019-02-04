@@ -15,7 +15,6 @@ function getCardinalityOfFields(callWithRequest, payload) {
   const fs = fieldsServiceProvider(callWithRequest);
   const {
     index,
-    types,
     fieldNames,
     query,
     timeFieldName,
@@ -23,7 +22,6 @@ function getCardinalityOfFields(callWithRequest, payload) {
     latestMs } = payload;
   return fs.getCardinalityOfFields(
     index,
-    types,
     fieldNames,
     query,
     timeFieldName,
@@ -48,11 +46,10 @@ export function fieldsService(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/fields_service/field_cardinality',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getCardinalityOfFields(callWithRequest, request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -62,11 +59,10 @@ export function fieldsService(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/fields_service/time_field_range',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getTimeFieldRange(callWithRequest, request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

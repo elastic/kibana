@@ -47,11 +47,18 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               id: resp.body.id,
               type: 'visualization',
+              migrationVersion: {
+                visualization: '7.0.0'
+              },
               updated_at: resp.body.updated_at,
               version: 1,
               attributes: {
                 title: 'My favorite vis'
-              }
+              },
+              migrationVersion: {
+                visualization: '7.0.0',
+              },
+              references: [],
             });
           });
       });
@@ -85,11 +92,18 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               id: resp.body.id,
               type: 'visualization',
+              migrationVersion: {
+                visualization: '7.0.0'
+              },
               updated_at: resp.body.updated_at,
               version: 1,
               attributes: {
                 title: 'My favorite vis'
-              }
+              },
+              migrationVersion: {
+                visualization: '7.0.0',
+              },
+              references: [],
             });
           });
 

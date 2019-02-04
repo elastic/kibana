@@ -1,0 +1,63 @@
+// SASSTODO: Looks like this could use a rewrite. Needs selectors
+.time-range-selector {
+  .time-range-section-container {
+    display: flex;
+  }
+  .time-range-section-title {
+    font-weight: bold;
+    margin-bottom: $euiSizeS;
+  }
+  .time-range-section {
+    flex: 50%;
+    padding: 0px $euiSizeS;
+    border-right: $euiBorderThin;
+  }
+
+  .tab-stack {
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+
+    & > li {
+      float: none;
+      position: relative;
+      display: block;
+      margin-bottom: $euiSizeXS;
+
+      & > a {
+        position: relative;
+        display: block;
+        padding: $euiSizeS $euiSize;
+        border-radius: $euiSizeXS;
+      }
+      & > a:hover {
+        background-color: $euiColorLightestShade;
+      }
+      .body {
+        display: none;
+      }
+    }
+    & > li.active {
+      & > a {
+        color: $euiColorEmptyShade;
+        background-color: $euiColorPrimary;
+
+      }
+      .body {
+        display: block;
+      }
+    }
+    & > li.has-body.active  {
+      & > a {
+        border-radius: $euiBorderRadius $euiBorderRadius 0px 0px;
+      }
+      .react-datepicker {
+        border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
+        border-top: none;
+      }
+    }
+  }
+  .time-range-section:last-child {
+    border-right: none;
+  }
+}

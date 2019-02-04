@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import { Server } from 'hapi-latest';
+import { Server, ServerOptions } from 'hapi';
 
 import { modifyUrl } from '../../utils';
-import { Env } from '../config';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
 import { Router } from './router';
 
+export interface HttpServerInfo {
+  server: Server;
+  options: ServerOptions;
+}
+
 export class HttpServer {
   private server?: Server;
   private registeredRouters: Set<Router> = new Set();
 
-  constructor(private readonly log: Logger, private readonly env: Env) {}
+  constructor(private readonly log: Logger) {}
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
@@ -45,7 +49,10 @@ export class HttpServer {
   }
 
   public async start(config: HttpConfig) {
-    this.server = createServer(getServerOptions(config));
+    this.log.debug('starting http server');
+
+    const serverOptions = getServerOptions(config);
+    this.server = createServer(serverOptions);
 
     this.setupBasePathRewrite(this.server, config);
 
@@ -59,46 +66,28 @@ export class HttpServer {
       }
     }
 
-    const legacyKbnServer = this.env.getLegacyKbnServer();
-    if (legacyKbnServer !== undefined) {
-      legacyKbnServer.newPlatformProxyListener.bind(this.server.listener);
-
-      // We register Kibana proxy middleware right before we start server to allow
-      // all new platform plugins register their routes, so that `legacyKbnServer`
-      // handles only requests that aren't handled by the new platform.
-      this.server.route({
-        handler: ({ raw: { req, res } }, responseToolkit) => {
-          legacyKbnServer.newPlatformProxyListener.proxy(req, res);
-          return responseToolkit.abandon;
-        },
-        method: '*',
-        options: {
-          payload: {
-            output: 'stream',
-            parse: false,
-            timeout: false,
-          },
-        },
-        path: '/{p*}',
-      });
-    }
-
     await this.server.start();
 
-    this.log.info(
-      `Server running at ${this.server.info.uri}${config.rewriteBasePath ? config.basePath : ''}`,
-      // The "legacy" Kibana will output log records with `listening` tag even if `quiet` logging mode is enabled.
-      { tags: ['listening'] }
+    this.log.debug(
+      `http server running at ${this.server.info.uri}${
+        config.rewriteBasePath ? config.basePath : ''
+      }`
     );
+
+    // Return server instance with the connection options so that we can properly
+    // bridge core and the "legacy" Kibana internally. Once this bridge isn't
+    // needed anymore we shouldn't return anything from this method.
+    return { server: this.server, options: serverOptions };
   }
 
   public async stop() {
-    this.log.info('stopping http server');
-
-    if (this.server !== undefined) {
-      await this.server.stop();
-      this.server = undefined;
+    if (this.server === undefined) {
+      return;
     }
+
+    this.log.debug('stopping http server');
+    await this.server.stop();
+    this.server = undefined;
   }
 
   private setupBasePathRewrite(server: Server, config: HttpConfig) {

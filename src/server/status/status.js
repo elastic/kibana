@@ -42,13 +42,15 @@ export default class Status extends EventEmitter {
         this.state === 'red' ? 'error' : 'info'
       ];
 
-      server.log(tags, {
-        tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
-        state: this.state,
-        message: this.message,
-        prevState: previous,
-        prevMsg: previousMsg
-      });
+      server.logWithMetadata(tags,
+        `Status changed from ${ previous } to ${this.state}${ this.message ? ' - ' + this.message : '' }`,
+        {
+          state: this.state,
+          message: this.message,
+          prevState: previous,
+          prevMsg: previousMsg
+        }
+      );
     });
   }
 
@@ -58,6 +60,7 @@ export default class Status extends EventEmitter {
       state: this.state,
       icon: states.get(this.state).icon,
       message: this.message,
+      uiColor: states.get(this.state).uiColor,
       since: this.since
     };
   }
@@ -79,7 +82,7 @@ export default class Status extends EventEmitter {
   }
 }
 
-states.all.forEach(function (state) {
+states.getAll().forEach(function (state) {
   Status.prototype[state.id] = function (message) {
     if (this.state === 'disabled') return;
 

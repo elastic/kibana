@@ -66,4 +66,14 @@ describe('#getSavedObjectAction()', () => {
       expect(() => actions.getSavedObjectAction('saved-object-type', action)).toThrowErrorMatchingSnapshot();
     });
   });
+
+  describe('#manageSpaces', () => {
+    test('returns action:manage_spaces/*', () => {
+      const mockConfig = createMockConfig();
+
+      const actions = actionsFactory(mockConfig);
+
+      expect(actions.manageSpaces).toEqual('action:manage_spaces/*');
+    });
+  });
 });

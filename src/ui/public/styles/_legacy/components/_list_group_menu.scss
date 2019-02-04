@@ -1,0 +1,23 @@
+.list-group-menu {
+  &.select-mode a {
+     outline: none;
+     color: tintOrShade($euiColorPrimary, 10%, 10%);
+  }
+
+  .list-group-menu-item {
+    list-style: none;
+    color: tintOrShade($euiColorPrimary, 10%, 10%);
+
+    &.active {
+      font-weight: bold;
+      background-color: $euiColorLightShade;
+    }
+    &:hover {
+      background-color: tintOrShade($euiColorPrimary, 90%, 90%);
+    }
+    li {
+      list-style: none;
+      color: tintOrShade($euiColorPrimary, 10%, 10%);
+    }
+  }
+}

@@ -22,17 +22,20 @@ import Boom from 'boom';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
-export function getSearchDsl(mappings, options = {}) {
+export function getSearchDsl(mappings, schema, options = {}) {
   const {
     type,
     search,
+    defaultSearchOperator,
     searchFields,
     sortField,
-    sortOrder
+    sortOrder,
+    namespace,
+    hasReference,
   } = options;
 
-  if (!type && sortField) {
-    throw Boom.notAcceptable('Cannot sort without filtering by type');
+  if (!type) {
+    throw Boom.notAcceptable('type must be specified');
   }
 
   if (sortOrder && !sortField) {
@@ -40,7 +43,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields),
+    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, defaultSearchOperator, hasReference),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title should update a viz when using a custom panel title', async () => {
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       const CUSTOM_VIS_TITLE = 'ima custom title for a vis!';
       await dashboardPanelActions.setCustomPanelTitle(CUSTOM_VIS_TITLE);
       await retry.try(async () => {

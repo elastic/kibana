@@ -45,7 +45,8 @@ export default function ({ getService }) {
                   version: 1,
                   attributes: {
                     'title': 'Count of requests'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });
@@ -135,6 +136,25 @@ export default function ({ getService }) {
                 per_page: 20,
                 total: 0,
                 saved_objects: []
+              });
+            })
+        ));
+      });
+
+      describe('missing type', () => {
+        it('should return 400', async () => (
+          await supertest
+            .get('/api/saved_objects/_find')
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'child "type" fails because ["type" is required]',
+                statusCode: 400,
+                validation: {
+                  keys: ['type'],
+                  source: 'query'
+                }
               });
             })
         ));

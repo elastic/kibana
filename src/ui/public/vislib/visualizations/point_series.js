@@ -235,6 +235,7 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
           div = d3.select(el);
 
           svg = div.append('svg')
+            .attr('focusable', 'false')
             .attr('width', width)
             .attr('height', height);
 

@@ -39,16 +39,12 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/logstash/pipelines',
     method: 'DELETE',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return deletePipelines(callWithRequest, request.payload.pipelineIds)
-        .then(results => {
-          reply({ results });
-        })
-        .catch(err => {
-          reply(wrapUnknownError(err));
-        });
+        .then(results => ({ results }))
+        .catch(err => wrapUnknownError(err));
     },
     config: {
       pre: [ licensePreRouting ]

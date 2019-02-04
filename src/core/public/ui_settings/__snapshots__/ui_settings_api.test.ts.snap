@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"bar\\":\\"box\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"foo\\":\\"a\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"foo\\":\\"d\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"box\\":\\"bar\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: initial, only one request 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet rejects all promises for batched requests that fail: promise rejections 1`] = `
+Array [
+  Object {
+    "error": [Error: Request failed with status code: 400],
+    "isRejected": true,
+  },
+  Object {
+    "error": [Error: Request failed with status code: 400],
+    "isRejected": true,
+  },
+  Object {
+    "error": [Error: Request failed with status code: 400],
+    "isRejected": true,
+  },
+]
+`;
+
+exports[`#batchSet rejects on 301 1`] = `"Request failed with status code: 301"`;
+
+exports[`#batchSet rejects on 404 response 1`] = `"Request failed with status code: 404"`;
+
+exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`;
+
+exports[`#batchSet sends a single change immediately: synchronous fetch 1`] = `
+Array [
+  Array [
+    "/foo/bar/api/kibana/settings",
+    Object {
+      "body": "{\\"changes\\":{\\"foo\\":\\"bar\\"}}",
+      "credentials": "same-origin",
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "v9.9.9",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;

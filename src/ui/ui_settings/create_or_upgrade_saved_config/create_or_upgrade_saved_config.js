@@ -26,7 +26,8 @@ export async function createOrUpgradeSavedConfig(options) {
     savedObjectsClient,
     version,
     buildNum,
-    log,
+    logWithMetadata,
+    onWriteError,
   } = options;
 
   // try to find an older config we can upgrade
@@ -35,24 +36,31 @@ export async function createOrUpgradeSavedConfig(options) {
     version
   });
 
-  if (upgradeableConfig) {
-    log(['plugin', 'elasticsearch'], {
-      tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
-      prevVersion: upgradeableConfig.id,
-      newVersion: version
-    });
-  }
-
   // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(
     { buildNum },
     upgradeableConfig ? upgradeableConfig.attributes : {}
   );
 
-  // create the new SavedConfig
-  await savedObjectsClient.create(
-    'config',
-    attributes,
-    { id: version }
-  );
+  try {
+    // create the new SavedConfig
+    await savedObjectsClient.create(
+      'config',
+      attributes,
+      { id: version }
+    );
+  } catch (error) {
+    if (onWriteError) {
+      return onWriteError(error, attributes);
+    }
+
+    throw error;
+  }
+
+  if (upgradeableConfig) {
+    logWithMetadata(['plugin', 'elasticsearch'], `Upgrade config from ${upgradeableConfig.id} to ${version}`, {
+      prevVersion: upgradeableConfig.id,
+      newVersion: version
+    });
+  }
 }

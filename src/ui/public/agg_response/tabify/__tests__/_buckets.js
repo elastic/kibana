@@ -53,6 +53,87 @@ describe('Buckets wrapper', function () {
     const keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
+
+    it('should accept filters agg queries with strings', () => {
+      const aggResp = {
+        buckets: {
+          'response:200': {},
+          'response:404': {},
+        }
+      };
+
+      const aggParams = {
+        filters: [
+          {
+            label: '',
+            input: { query: 'response:200' },
+          },
+          {
+            label: '',
+            input: { query: 'response:404' },
+          },
+        ],
+      };
+
+      const buckets = new TabifyBuckets(aggResp, aggParams);
+      expect(buckets).to.have.length(2);
+      buckets._keys.forEach((key) => {
+        expect(key).to.be.a('string');
+      });
+    });
+
+    it('should accept filters agg queries with query_string queries', () => {
+      const aggResp = {
+        buckets: {
+          'response:200': {},
+          'response:404': {},
+        }
+      };
+
+      const aggParams = {
+        filters: [
+          {
+            label: '',
+            input: { query: { query_string: { query: 'response:200' } } },
+          },
+          {
+            label: '',
+            input: { query: { query_string: { query: 'response:404' } } },
+          },
+        ],
+      };
+
+      const buckets = new TabifyBuckets(aggResp, aggParams);
+      expect(buckets).to.have.length(2);
+      buckets._keys.forEach((key) => {
+        expect(key).to.be.a('string');
+      });
+    });
+
+    it('should accept filters agg queries with query dsl queries', () => {
+      const aggResp = {
+        buckets: {
+          '{match_all: {}}': {},
+        }
+      };
+
+      const aggParams = {
+        filters: [
+          {
+            label: '',
+            input: { query: { match_all: {} } },
+          },
+        ],
+      };
+
+      const buckets = new TabifyBuckets(aggResp, aggParams);
+      expect(buckets).to.have.length(1);
+      buckets._keys.forEach((key) => {
+        expect(key).to.be.a('string');
+      });
+    });
+
+
   });
 
   describe('with array style buckets', function () {
@@ -78,6 +159,81 @@ describe('Buckets wrapper', function () {
       };
       const buckets = new TabifyBuckets(aggResp);
       expect(buckets).to.have.length(1);
+    });
+  });
+
+  describe('drop_partial option', function () {
+    const aggResp = {
+      buckets: [
+        { key: 0, value: {} },
+        { key: 100, value: {} },
+        { key: 200, value: {} },
+        { key: 300, value: {} }
+      ]
+    };
+
+    it('drops partial buckets when enabled', function () {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'date'
+        }
+      };
+      const timeRange = {
+        gte: 150,
+        lte: 350,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(1);
+    });
+
+    it('keeps partial buckets when disabled', function () {
+      const aggParams = {
+        drop_partials: false,
+        field: {
+          name: 'date'
+        }
+      };
+      const timeRange = {
+        gte: 150,
+        lte: 350,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(4);
+    });
+
+    it('keeps aligned buckets when enabled', function () {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'date'
+        }
+      };
+      const timeRange = {
+        gte: 100,
+        lte: 400,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(3);
+    });
+
+    it('does not drop buckets for non-timerange fields', function () {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'other_time'
+        }
+      };
+      const timeRange = {
+        gte: 150,
+        lte: 350,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(4);
     });
   });
 });

@@ -7,7 +7,6 @@
 import { isFunction, debounce } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './flot_chart.html';
-import './flot_chart.less';
 import $ from 'jquery-flot'; // webpackShim
 import { FLOT_EVENT_PLOT_HOVER_DEBOUNCE_MS } from './constants';
 

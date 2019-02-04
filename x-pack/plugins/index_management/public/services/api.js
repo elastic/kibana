@@ -9,6 +9,9 @@ let httpClient;
 export const setHttpClient = (client) => {
   httpClient = client;
 };
+export const getHttpClient = () => {
+  return httpClient;
+};
 const apiPrefix = chrome.addBasePath('/api/index_management');
 
 export async function loadIndices() {
@@ -78,6 +81,20 @@ export async function clearCacheIndices(indices) {
     indices
   };
   const response = await httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
+  return response.data;
+}
+export async function freezeIndices(indices) {
+  const body = {
+    indices
+  };
+  const response = await httpClient.post(`${apiPrefix}/indices/freeze`, body);
+  return response.data;
+}
+export async function unfreezeIndices(indices) {
+  const body = {
+    indices
+  };
+  const response = await httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
   return response.data;
 }
 

@@ -132,9 +132,9 @@ describe('KbnLoggerJsonFormat', () => {
         expect(error).toEqual({});
       });
 
-      it('event data instanceof Error', async () => {
+      it('event error instanceof Error', async () => {
         const event = {
-          data: new Error('test error 2'),
+          error: new Error('test error 2'),
         };
         const result = await createPromiseFromStreams([
           createListStream([event]),
@@ -145,16 +145,16 @@ describe('KbnLoggerJsonFormat', () => {
         expect(level).toBe('error');
         expect(message).toBe('test error 2');
 
-        expect(error.message).toBe(event.data.message);
-        expect(error.name).toBe(event.data.name);
-        expect(error.stack).toBe(event.data.stack);
-        expect(error.code).toBe(event.data.code);
-        expect(error.signal).toBe(event.data.signal);
+        expect(error.message).toBe(event.error.message);
+        expect(error.name).toBe(event.error.name);
+        expect(error.stack).toBe(event.error.stack);
+        expect(error.code).toBe(event.error.code);
+        expect(error.signal).toBe(event.error.signal);
       });
 
-      it('event data instanceof Error - fatal', async () => {
+      it('event error instanceof Error - fatal', async () => {
         const event = {
-          data: new Error('test error 2'),
+          error: new Error('test error 2'),
           tags: ['fatal', 'tag2']
         };
         const result = await createPromiseFromStreams([
@@ -167,16 +167,16 @@ describe('KbnLoggerJsonFormat', () => {
         expect(level).toBe('fatal');
         expect(message).toBe('test error 2');
 
-        expect(error.message).toBe(event.data.message);
-        expect(error.name).toBe(event.data.name);
-        expect(error.stack).toBe(event.data.stack);
-        expect(error.code).toBe(event.data.code);
-        expect(error.signal).toBe(event.data.signal);
+        expect(error.message).toBe(event.error.message);
+        expect(error.name).toBe(event.error.name);
+        expect(error.stack).toBe(event.error.stack);
+        expect(error.code).toBe(event.error.code);
+        expect(error.signal).toBe(event.error.signal);
       });
 
-      it('event data instanceof Error, no message', async () => {
+      it('event error instanceof Error, no message', async () => {
         const event = {
-          data: new Error(''),
+          error: new Error(''),
         };
         const result = await createPromiseFromStreams([
           createListStream([event]),
@@ -187,19 +187,19 @@ describe('KbnLoggerJsonFormat', () => {
         expect(level).toBe('error');
         expect(message).toBe('Unknown error object (no message)');
 
-        expect(error.message).toBe(event.data.message);
-        expect(error.name).toBe(event.data.name);
-        expect(error.stack).toBe(event.data.stack);
-        expect(error.code).toBe(event.data.code);
-        expect(error.signal).toBe(event.data.signal);
+        expect(error.message).toBe(event.error.message);
+        expect(error.name).toBe(event.error.name);
+        expect(error.stack).toBe(event.error.stack);
+        expect(error.code).toBe(event.error.code);
+        expect(error.signal).toBe(event.error.signal);
       });
     });
   });
 
-  describe('useUTC', () => {
-    it('logs in UTC when useUTC is true', async () => {
+  describe('timezone', () => {
+    it('logs in UTC', async () => {
       const format = new KbnLoggerJsonFormat({
-        useUTC: true
+        timezone: 'UTC'
       });
 
       const result = await createPromiseFromStreams([
@@ -211,10 +211,8 @@ describe('KbnLoggerJsonFormat', () => {
       expect(timestamp).toBe(moment.utc(time).format());
     });
 
-    it('logs in local timezone when useUTC is false', async () => {
-      const format = new KbnLoggerJsonFormat({
-        useUTC: false
-      });
+    it('logs in local timezone timezone is undefined', async () => {
+      const format = new KbnLoggerJsonFormat({});
 
       const result = await createPromiseFromStreams([
         createListStream([makeEvent('log')]),

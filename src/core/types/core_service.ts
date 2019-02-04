@@ -17,7 +17,8 @@
  * under the License.
  */
 
-export interface CoreService {
-  start(): Promise<void>;
+/** @internal */
+export interface CoreService<TStartContract = void> {
+  start(...params: any[]): Promise<TStartContract>;
   stop(): Promise<void>;
 }

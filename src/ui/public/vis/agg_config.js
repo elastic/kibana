@@ -26,6 +26,7 @@
 
 import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
+import { i18n } from '@kbn/i18n';
 
 class AggConfig {
 
@@ -62,11 +63,9 @@ class AggConfig {
     }, 0);
   }
 
-  constructor(vis, opts = {}, aggs) {
-    this.id = String(opts.id || AggConfig.nextId(vis.aggs));
-    this.vis = vis;
-    this._indexPattern = vis.indexPattern;
-    this._aggs = aggs || vis.aggs;
+  constructor(aggConfigs, opts = {}) {
+    this.aggConfigs = aggConfigs;
+    this.id = String(opts.id || AggConfig.nextId(aggConfigs));
     this._opts = opts;
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
@@ -261,28 +260,25 @@ class AggConfig {
     return this.params.field;
   }
 
-  makeLabel() {
+  makeLabel(percentageMode = false) {
     if (this.params.customLabel) {
       return this.params.customLabel;
     }
 
     if (!this.type) return '';
-    let pre = (_.get(this.vis, 'params.mode') === 'percentage') ? 'Percentage of ' : '';
-    return pre += this.type.makeLabel(this);
+    return percentageMode ?
+      i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', {
+        defaultMessage: 'Percentage of {label}',
+        values: { label: this.type.makeLabel(this) },
+      }) : `${this.type.makeLabel(this)}`;
   }
 
   getIndexPattern() {
-    return this.vis.indexPattern;
+    return _.get(this.aggConfigs, 'indexPattern', null);
   }
 
-  getFieldOptions() {
-    const fieldParamType = this.type && this.type.params.byName.field;
-
-    if (!fieldParamType || !fieldParamType.getFieldOptions) {
-      return null;
-    }
-
-    return fieldParamType.getFieldOptions(this);
+  getTimeRange() {
+    return _.get(this.aggConfigs, 'timeRange', null);
   }
 
   fieldFormatter(contentType, defaultFormat) {
@@ -305,7 +301,7 @@ class AggConfig {
   }
 
   fieldIsTimeField() {
-    const timeFieldName = this.vis.indexPattern.timeFieldName;
+    const timeFieldName = this.getIndexPattern().timeFieldName;
     return timeFieldName && this.fieldName() === timeFieldName;
   }
 
@@ -333,13 +329,15 @@ class AggConfig {
 
     this.__type = type;
 
+    const fieldParam = _.get(this, 'type.params.byName.field');
+    const availableFields = fieldParam ? fieldParam.getAvailableFields(this.getIndexPattern().fields) : [];
     // clear out the previous params except for a few special ones
     this.setParams({
       // split row/columns is "outside" of the agg, so don't reset it
       row: this.params.row,
 
       // almost every agg has fields, so we try to persist that when type changes
-      field: _.get(this.getFieldOptions(), ['byName', this.getField()])
+      field: _.get(availableFields, ['byName', this.getField()])
     });
   }
 
@@ -348,8 +346,8 @@ class AggConfig {
   }
 
   set schema(schema) {
-    if (_.isString(schema)) {
-      schema = this.vis.type.schemas.all.byName[schema];
+    if (_.isString(schema) && this.aggConfigs.schemas) {
+      schema = this.aggConfigs.schemas.byName[schema];
     }
 
     this.__schema = schema;

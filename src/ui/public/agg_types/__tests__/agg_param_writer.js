@@ -46,55 +46,57 @@ export default function AggParamWriterHelper(Private) {
    * @param {object} opts - describe the properties of this paramWriter
    * @param {string} opts.aggType - the name of the aggType we want to test. ('histogram', 'filter', etc.)
    */
-  function AggParamWriter(opts) {
-    const self = this;
+  class AggParamWriter {
 
-    self.aggType = opts.aggType;
-    if (_.isString(self.aggType)) {
-      self.aggType = aggTypes.byName[self.aggType];
+    constructor(opts) {
+      this.aggType = opts.aggType;
+      if (_.isString(this.aggType)) {
+        this.aggType = aggTypes.byName[this.aggType];
+      }
+
+      // not configurable right now, but totally required
+      this.indexPattern = stubbedLogstashIndexPattern;
+
+      // the schema that the aggType satisfies
+      this.visAggSchema = null;
+
+      this.vis = new Vis(this.indexPattern, {
+        type: 'histogram',
+        aggs: [{
+          id: 1,
+          type: this.aggType.name,
+          params: {}
+        }]
+      });
     }
 
-    // not configurable right now, but totally required
-    self.indexPattern = stubbedLogstashIndexPattern;
+    write(paramValues, modifyAggConfig = null) {
+      paramValues = _.clone(paramValues);
 
-    // the schema that the aggType satisfies
-    self.visAggSchema = null;
+      if (this.aggType.params.byName.field && !paramValues.field) {
+        // pick a field rather than force a field to be specified everywhere
+        if (this.aggType.type === 'metrics') {
+          paramValues.field = _.sample(this.indexPattern.fields.byType.number);
+        } else {
+          const type = this.aggType.params.byName.field.filterFieldTypes || 'string';
+          let field;
+          do {
+            field = _.sample(this.indexPattern.fields.byType[type]);
+          } while (!field.aggregatable);
+          paramValues.field = field.name;
+        }
+      }
 
-    self.vis = new Vis(self.indexPattern, {
-      type: 'histogram',
-      aggs: [{
-        id: 1,
-        type: self.aggType.name,
-        params: {}
-      }]
-    });
+      const aggConfig = this.vis.aggs[0];
+      aggConfig.setParams(paramValues);
+
+      if (modifyAggConfig) {
+        modifyAggConfig(aggConfig);
+      }
+
+      return aggConfig.write(this.vis.aggs);
+    }
   }
 
-  AggParamWriter.prototype.write = function (paramValues) {
-    const self = this;
-    paramValues = _.clone(paramValues);
-
-    if (self.aggType.params.byName.field && !paramValues.field) {
-      // pick a field rather than force a field to be specified everywhere
-      if (self.aggType.type === 'metrics') {
-        paramValues.field = _.sample(self.indexPattern.fields.byType.number);
-      } else {
-        const type = self.aggType.params.byName.field.filterFieldTypes || 'string';
-        let field;
-        do {
-          field = _.sample(self.indexPattern.fields.byType[type]);
-        } while (!field.aggregatable);
-        paramValues.field = field.name;
-      }
-    }
-
-
-    const aggConfig = self.vis.aggs[0];
-    aggConfig.setParams(paramValues);
-
-    return aggConfig.write(self.vis.aggs);
-  };
-
   return AggParamWriter;
-
 }

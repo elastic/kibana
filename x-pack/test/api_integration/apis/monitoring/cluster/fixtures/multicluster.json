@@ -85,11 +85,19 @@
       "memory_limit": 0,
       "count": 0
     },
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
+      "apms": {
+        "total": 0
+      }
+    },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },
@@ -192,11 +200,19 @@
       "memory_limit": 0,
       "count": 0
     },
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
+      "apms": {
+        "total": 0
+      }
+    },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },
@@ -301,11 +317,19 @@
       "memory_limit": 1501560832,
       "count": 1
     },
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
+      "apms": {
+        "total": 0
+      }
+    },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },

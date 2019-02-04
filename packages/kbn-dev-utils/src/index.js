@@ -18,4 +18,5 @@
  */
 
 export { withProcRunner } from './proc_runner';
-export { createToolingLog, pickLevelFromFlags } from './tooling_log';
+export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
+export { createAbsolutePathSerializer } from './serializers';

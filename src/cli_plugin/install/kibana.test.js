@@ -17,12 +17,18 @@
  * under the License.
  */
 
+jest.mock('fs', () => ({
+  statSync: jest.fn().mockImplementation(() => require('fs').statSync),
+  unlinkSync: jest.fn().mockImplementation(() => require('fs').unlinkSync),
+  mkdirSync: jest.fn().mockImplementation(() => require('fs').mkdirSync),
+}));
+
 import sinon from 'sinon';
-import mockFs from 'mock-fs';
 import Logger from '../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
+import fs from 'fs';
 import { existingInstall, assertVersion } from './kibana';
 
 describe('kibana cli', function () {
@@ -81,7 +87,7 @@ describe('kibana cli', function () {
         it('should throw an error if plugin kibanaVersion does not match kibana version', function () {
           settings.plugins[0].kibanaVersion = '1.2.3.4';
 
-          expect(() => assertVersion(settings)).toThrow(/incorrect kibana version/i);
+          expect(() => assertVersion(settings)).toThrow(/incompatible with Kibana/i);
         });
 
         it('should not throw an error if plugin kibanaVersion matches kibana version', function () {
@@ -99,7 +105,7 @@ describe('kibana cli', function () {
         it('should ignore version info after the dash in checks on invalid version', function () {
           settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
 
-          expect(() => assertVersion(settings)).toThrow(/incorrect kibana version/i);
+          expect(() => assertVersion(settings)).toThrow(/incompatible with Kibana/i);
         });
       });
 
@@ -119,20 +125,24 @@ describe('kibana cli', function () {
         });
 
         it('should throw an error if the plugin already exists.', function () {
-          mockFs({ [`${pluginDir}/foo`]: {} });
-
+          fs.statSync = jest.fn().mockImplementationOnce(() => true);
           existingInstall(settings, logger);
           expect(logger.error.firstCall.args[0]).toMatch(/already exists/);
           expect(process.exit.called).toBe(true);
-
-          mockFs.restore();
         });
 
         it('should not throw an error if the plugin does not exist.', function () {
+          fs.statSync = jest.fn().mockImplementationOnce(() => {
+            throw { code: 'ENOENT' };
+          });
           existingInstall(settings, logger);
           expect(logger.error.called).toBe(false);
         });
       });
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 });

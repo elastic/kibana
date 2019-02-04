@@ -21,8 +21,8 @@ import d3 from 'd3';
 
 export function VislibLibLayoutSplitsPieChartChartTitleSplitProvider() {
   /*
-   * Adds div DOM elements to either the `.y-axis-chart-title` element or the
-   * `.x-axis-chart-title` element based on the data layout.
+   * Adds div DOM elements to either the `.visAxis__splitTitles--y` element or the
+   * `.visAxis__splitTitles--x` element based on the data layout.
    * For example, if the data has rows, it returns the same number of
    * `.chart-title` elements as row objects.
    * if not data.rows or data.columns, return no chart titles
@@ -43,9 +43,9 @@ export function VislibLibLayoutSplitsPieChartChartTitleSplitProvider() {
           .attr('class', 'chart-title');
 
         if (data.rows) {
-          d3.select(parent).select('.x-axis-chart-title').remove();
+          d3.select(parent).select('.visAxis__splitTitles--x').remove();
         } else {
-          d3.select(parent).select('.y-axis-chart-title').remove();
+          d3.select(parent).select('.visAxis__splitTitles--y').remove();
         }
 
         return div;

@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`does right thing when non-error is thrown 1`] = `
+"
+[31m'foo bar' thrown![39m
+    ...stack trace...
+"
+`;
+
+exports[`logs no stack trace then exits when stack missing 1`] = `
+"
+[31mfoo error[39m
+  (no stack trace)
+
+"
+`;
+
+exports[`logs the stack then exits when run function throws an error 1`] = `
+"
+[31mfoo error[39m
+  stack 1
+  stack 2
+  stack 3
+
+"
+`;

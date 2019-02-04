@@ -25,6 +25,7 @@ import { siblingPipelineAggController } from './sibling_pipeline_agg_controller'
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import metricAggTemplate from '../../controls/sub_metric.html';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
+import { i18n } from '@kbn/i18n';
 
 const metricAggFilter = [
   '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
@@ -36,7 +37,9 @@ const metricAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'metricAgg',
-    title: 'Metric Agg',
+    title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
+      defaultMessage: 'Metric Agg'
+    }),
     aggFilter: metricAggFilter
   }
 ])).all[0];
@@ -45,14 +48,18 @@ const bucketAggFilter = [];
 const bucketAggSchema = (new Schemas([
   {
     group: 'none',
-    title: 'Bucket Agg',
+    title: i18n.translate('common.ui.aggTypes.metrics.bucketAggTitle', {
+      defaultMessage: 'Bucket Agg'
+    }),
     name: 'bucketAgg',
     aggFilter: bucketAggFilter
   }
 ])).all[0];
 
 const siblingPipelineAggHelper = {
-  subtype: 'Sibling Pipeline Aggregations',
+  subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
+    defaultMessage: 'Sibling Pipeline Aggregations'
+  }),
   params: function () {
     return [
       {
@@ -68,7 +75,7 @@ const siblingPipelineAggHelper = {
         makeAgg: function (agg, state) {
           state = state || { type: 'date_histogram' };
           state.schema = bucketAggSchema;
-          const orderAgg = new AggConfig(agg.vis, state);
+          const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-bucket';
           return orderAgg;
         },
@@ -90,7 +97,7 @@ const siblingPipelineAggHelper = {
         makeAgg: function (agg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
-          const orderAgg = new AggConfig(agg.vis, state);
+          const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
         },

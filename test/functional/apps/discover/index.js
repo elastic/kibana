@@ -19,11 +19,13 @@
 
 export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('discover app', function () {
+    this.tags('ciGroup6');
+
     before(function () {
-      return remote.setWindowSize(1200, 800);
+      return browser.setWindowSize(1300, 800);
     });
 
     after(function unloadMakelogs() {
@@ -34,8 +36,9 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
     loadTestFile(require.resolve('./_shared_links'));
-    loadTestFile(require.resolve('./_collapse_expand'));
+    loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
+    loadTestFile(require.resolve('./_inspector'));
   });
 }

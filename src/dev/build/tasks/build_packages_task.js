@@ -18,6 +18,7 @@
  */
 
 import { buildProductionProjects } from '@kbn/pm';
+import { mkdirp } from '../lib';
 
 /**
  * High-level overview of how we enable shared packages in production:
@@ -67,12 +68,13 @@ import { buildProductionProjects } from '@kbn/pm';
  */
 
 export const BuildPackagesTask = {
+  global: true,
   description: 'Building distributable versions of packages',
-  async run(config, log, build) {
+  async run(config, log, builds) {
+    await mkdirp(config.resolveFromRepo('target'));
     await buildProductionProjects({
       kibanaRoot: config.resolveFromRepo(),
-      buildRoot: build.resolvePath(),
-      oss: build.isOss(),
+      buildRoots: builds.map(build => build.resolvePath()),
     });
   },
 };

@@ -29,11 +29,11 @@ export function CollapsibleStatement(props) {
       responsive={false}
       gutterSize="none"
       alignItems="center"
-      className="pipelineViewer__statement"
+      className="monPipelineViewer__statement"
     >
       <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon
-          aria-label
+          aria-label="collapse"
           color="text"
           iconType={getToggleIconType(isCollapsed)}
           onClick={toggleClicked}

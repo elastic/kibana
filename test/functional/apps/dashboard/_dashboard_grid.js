@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
     });
 
     describe('move panel', () => {
@@ -38,11 +38,10 @@ export default function ({ getService, getPageObjects }) {
         const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position1 = await panelTitleBeforeMove.getPosition();
 
-        remote
-          .moveMouseTo(panelTitleBeforeMove)
-          .pressMouseButton()
-          .moveMouseTo(null, -20, -450)
-          .releaseMouseButton();
+        await browser.dragAndDrop(
+          { element: panelTitleBeforeMove },
+          { element: null, xOffset: -20, yOffset: -450 }
+        );
 
         const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position2 = await panelTitleAfterMove.getPosition();

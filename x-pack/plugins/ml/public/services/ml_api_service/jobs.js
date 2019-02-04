@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -36,6 +36,16 @@ export const jobs = {
     return http({
       url: `${basePath}/jobs/groups`,
       method: 'GET',
+    });
+  },
+
+  updateGroups(updatedJobs) {
+    return http({
+      url: `${basePath}/jobs/update_groups`,
+      method: 'POST',
+      data: {
+        jobs: updatedJobs,
+      }
     });
   },
 
@@ -86,13 +96,6 @@ export const jobs = {
     const fromString = (from !== undefined) ? `?from=${from}` : '';
     return http({
       url: `${basePath}/job_audit_messages/messages${jobIdString}${fromString}`,
-      method: 'GET',
-    });
-  },
-
-  jobAuditSummary() {
-    return http({
-      url: `${basePath}/job_audit_messages/summary`,
       method: 'GET',
     });
   },

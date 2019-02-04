@@ -44,8 +44,8 @@ export const setRoute = {
         value: Joi.any().required()
       }).required()
     },
-    handler(request, reply) {
-      reply(handleRequest(request));
+    handler(request) {
+      return handleRequest(request);
     }
   }
 };

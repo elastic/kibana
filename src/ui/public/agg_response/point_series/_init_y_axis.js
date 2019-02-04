@@ -17,29 +17,23 @@
  * under the License.
  */
 
-export function PointSeriesInitYAxisProvider() {
+export function initYAxis(chart) {
+  const y = chart.aspects.y;
 
-  return function initYAxis(chart) {
-    const y = chart.aspects.y;
+  if (Array.isArray(y)) {
+    // TODO: vis option should allow choosing this format
+    chart.yAxisFormat = y[0].format;
+    chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
+  }
 
-    if (Array.isArray(y)) {
-      // TODO: vis option should allow choosing this format
-      chart.yAxisFormatter = y[0].agg.fieldFormatter();
-      chart.yAxisLabel = ''; // use the legend
+  const z = chart.aspects.series;
+  if (z) {
+    if (Array.isArray(z)) {
+      chart.zAxisFormat = z[0].format;
+      chart.zAxisLabel = '';
     } else {
-      chart.yAxisFormatter = y.agg.fieldFormatter();
-      chart.yAxisLabel = y.col.title;
+      chart.zAxisFormat = z.format;
+      chart.zAxisLabel = z.title;
     }
-
-    const z = chart.aspects.series;
-    if (z) {
-      if (Array.isArray(z)) {
-        chart.zAxisFormatter = z[0].agg.fieldFormatter();
-        chart.zAxisLabel = ''; // use the legend
-      } else {
-        chart.zAxisFormatter = z.agg.fieldFormatter();
-        chart.zAxisLabel = z.col.title;
-      }
-    }
-  };
+  }
 }

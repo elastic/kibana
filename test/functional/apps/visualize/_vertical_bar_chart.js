@@ -22,6 +22,8 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const inspector = getService('inspector');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('vertical bar chart', function () {
@@ -45,27 +47,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
     };
 
 
     before(initBarChart);
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart', async function () {
@@ -109,10 +104,128 @@ export default function ({ getService, getPageObjects }) {
         [ '2015-09-22 09:00', '1,408' ],
       ];
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
+      await inspector.close();
+    });
+
+    it('should have `drop partial buckets` option', async () => {
+      const fromTime = '2015-09-20 06:31:44.000';
+      const toTime = '2015-09-22 18:31:44.000';
+
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+
+      let expectedChartValues = [
+        82, 218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
+        11, 14, 17, 38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230,
+        170, 99, 48, 30, 15, 10, 2, 8, 7, 17, 34, 37, 104, 153, 241, 313, 404, 492, 512,
+        503, 473, 379, 293, 277, 156, 56
+      ];
+
+      // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
+      // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
+      // try sleeping a bit before getting that data
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData();
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        expect(data).to.eql(expectedChartValues);
+      });
+
+      await PageObjects.visualize.toggleOpenEditor(2);
+      await PageObjects.visualize.clickDropPartialBuckets();
+      await PageObjects.visualize.clickGo();
+
+      expectedChartValues = [
+        218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
+        11, 14, 17, 38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230,
+        170, 99, 48, 30, 15, 10, 2, 8, 7, 17, 34, 37, 104, 153, 241, 313, 404, 492, 512,
+        503, 473, 379, 293, 277, 156
+      ];
+
+      // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
+      // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
+      // try sleeping a bit before getting that data
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData();
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        expect(data).to.eql(expectedChartValues);
+      });
+    });
+
+    describe.skip('switch between Y axis scale types', () => {
+      before(initBarChart);
+      const axisId = 'ValueAxis-1';
+
+      it('should show ticks on selecting log scale', async () => {
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
+        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting log scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        log.debug(labels);
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
     });
 
     describe('vertical bar with split series', function () {
@@ -133,6 +246,27 @@ export default function ({ getService, getPageObjects }) {
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it('should allow custom sorting of series', async () => {
+        await PageObjects.visualize.toggleOpenEditor(1, 'false');
+        await PageObjects.visualize.selectCustomSortMetric(3, 'Min', 'bytes');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = ['404', '200', '503'];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it ('should correctly filter by legend', async () => {
+        await PageObjects.visualize.filterLegend('200');
+        await PageObjects.visualize.waitForVisualization();
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        const expectedEntries = ['200'];
+        expect(legendEntries).to.eql(expectedEntries);
+        await filterBar.removeFilter('response.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
     });
 
@@ -197,6 +331,17 @@ export default function ({ getService, getPageObjects }) {
         ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it('should show an error if last bucket aggregation is terms', async () => {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('response.raw');
+
+        const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
+        expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
       });
 
     });

@@ -18,12 +18,16 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
-export const all = [
+export const getAll = () => [
   {
     id: 'red',
-    title: 'Red',
+    title: i18n.translate('server.status.redTitle', {
+      defaultMessage: 'Red'
+    }),
     icon: 'danger',
+    uiColor: 'danger',
     severity: 1000,
     nicknames: [
       'Danger Will Robinson! Danger!'
@@ -31,8 +35,11 @@ export const all = [
   },
   {
     id: 'uninitialized',
-    title: 'Uninitialized',
+    title: i18n.translate('server.status.uninitializedTitle', {
+      defaultMessage: 'Uninitialized'
+    }),
     icon: 'spinner',
+    uiColor: 'default',
     severity: 900,
     nicknames: [
       'Initializing'
@@ -40,8 +47,11 @@ export const all = [
   },
   {
     id: 'yellow',
-    title: 'Yellow',
+    title: i18n.translate('server.status.yellowTitle', {
+      defaultMessage: 'Yellow'
+    }),
     icon: 'warning',
+    uiColor: 'warning',
     severity: 800,
     nicknames: [
       'S.N.A.F.U',
@@ -51,8 +61,11 @@ export const all = [
   },
   {
     id: 'green',
-    title: 'Green',
+    title: i18n.translate('server.status.greenTitle', {
+      defaultMessage: 'Green'
+    }),
     icon: 'success',
+    uiColor: 'secondary',
     severity: 0,
     nicknames: [
       'Looking good'
@@ -60,16 +73,19 @@ export const all = [
   },
   {
     id: 'disabled',
-    title: 'Disabled',
+    title: i18n.translate('server.status.disabledTitle', {
+      defaultMessage: 'Disabled'
+    }),
     severity: -1,
     icon: 'toggle-off',
+    uiColor: 'default',
     nicknames: [
       'Am I even a thing?'
     ]
   }
 ];
 
-export const allById = _.indexBy(exports.all, 'id');
+export const getAllById = () => _.indexBy(exports.getAll(), 'id');
 
 export const defaults = {
   icon: 'question',
@@ -77,5 +93,5 @@ export const defaults = {
 };
 
 export function get(id) {
-  return exports.allById[id] || _.defaults({ id: id }, exports.defaults);
+  return exports.getAllById()[id] || _.defaults({ id: id }, exports.defaults);
 }

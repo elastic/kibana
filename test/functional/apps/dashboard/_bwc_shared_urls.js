@@ -22,7 +22,8 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
-  const remote = getService('remote');
+  const pieChart = getService('pieChart');
+  const browser = getService('browser');
   const log = getService('log');
   const queryBar = getService('queryBar');
 
@@ -33,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
     `_a=(description:'',filters:!(),` +
         `fullScreenMode:!f,` +
-        `options:(darkTheme:!f),` +
+        `options:(),` +
         `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
                  `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
         `query:(language:lucene,query:'memory:%3E220000'),` +
@@ -52,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
 
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
     });
 
@@ -61,13 +62,13 @@ export default function ({ getService, getPageObjects }) {
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
-        await remote.get(url, true);
+        await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
@@ -77,13 +78,13 @@ export default function ({ getService, getPageObjects }) {
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
-        await remote.get(url, true);
+        await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
@@ -93,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
         const url = `${kibanaBaseUrl}#/dashboard/${id}?${updatedQuery}`;
 
-        await remote.get(url, true);
+        await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await dashboardExpect.selectedLegendColorCount('#000000', 5);

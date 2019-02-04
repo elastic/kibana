@@ -2,7 +2,7 @@
 
 exports[`VisualizationNoResults should render according to snapshot 1`] = `
 <div
-  class="text-center visualize-error visualize-chart"
+  class="text-center visError visChart"
 >
   <div
     class="item top"

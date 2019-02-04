@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './chart_tooltip.html';
-import './chart_tooltip.less';
 
 function calculateTooltipPosition(pointPosition, plotPosition, tooltipWidth, tooltipHeight) {
 

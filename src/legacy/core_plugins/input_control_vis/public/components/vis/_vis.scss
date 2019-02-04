@@ -1,0 +1,25 @@
+.icvContainer {
+  width: 100%;
+  margin: 0 $euiSizeXS;
+
+  // Removes the browser's number stepper
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  // hide slider labels since they are displayed in inputs
+  .input-range__track .input-range__label-container {
+    display: none;
+  }
+
+  // do not center min/max labels - otherwise the overflow slider sides
+  .input-range__label-container {
+    left: 0% !important;
+  }
+}
+
+.icvInputRange__container {
+  min-width: $euiSize * 10 !important; // !important needed for IE
+}

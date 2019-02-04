@@ -120,5 +120,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
       aggregatable: isAggregatable,
       readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
     };
+  }).filter(field => {
+    return !['object', 'nested'].includes(field.type);
   });
 }

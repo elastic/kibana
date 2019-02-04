@@ -1,0 +1,143 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Filter Lists Header renders header 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        component="div"
+        direction="row"
+        gutterSize="m"
+        justifyContent="flexStart"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiTitle
+            size="m"
+            textTransform="none"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Filter Lists"
+                id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
+                values={Object {}}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiTextColor
+            color="subdued"
+            component="span"
+          >
+            <p>
+              <FormattedMessage
+                defaultMessage="{totalCount} in total"
+                id="xpack.ml.settings.filterLists.listHeader.filterListsDescription"
+                values={
+                  Object {
+                    "totalCount": 3,
+                  }
+                }
+              />
+            </p>
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+        component="div"
+        direction="row"
+        gutterSize="m"
+        justifyContent="flexStart"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButtonEmpty
+            color="primary"
+            iconSide="left"
+            iconType="refresh"
+            onClick={[Function]}
+            size="s"
+            type="button"
+          >
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText
+    grow={true}
+    size="m"
+  >
+    <p>
+      <EuiTextColor
+        color="subdued"
+        component="span"
+      >
+        <FormattedMessage
+          defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
+You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
+          id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription"
+          values={
+            Object {
+              "br": <br />,
+              "learnMoreLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="Learn more"
+                  id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;

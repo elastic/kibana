@@ -15,6 +15,7 @@ import { ModelUpdater } from './model_updater';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
@@ -69,7 +70,9 @@ export class NoDataController {
       () => model,
       props => {
         render(
-          <NoData {...props} enabler={enabler} />,
+          <I18nContext>
+            <NoData {...props} enabler={enabler} />
+          </I18nContext>,
           document.getElementById(REACT_NODE_ID_NO_DATA)
         );
       },

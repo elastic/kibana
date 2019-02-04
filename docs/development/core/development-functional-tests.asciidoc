@@ -64,7 +64,10 @@ node scripts/functional_test_runner
 [float]
 ===== More about `node scripts/functional_test_runner`
 
-When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag.
+When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
+
+* `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the selenium tests configuration.
+* `--config test/api_integration/config.js` starts Elasticsearch and Kibana servers with the api integration tests configuration.
 
 There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
 

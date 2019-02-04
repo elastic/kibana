@@ -7,22 +7,20 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { XYPlot, VerticalGridLines } from 'react-vis';
-import { colors } from '../../../../style/variables';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 class VerticalLines extends PureComponent {
   render() {
+    const { traceRootDuration } = this.props;
     const {
       width,
       height,
       margins,
       xDomain,
-      tickValues,
-      xMax
+      tickValues
     } = this.props.plotValues;
 
-    const agentMarkTimes = this.props.agentMarks.map(
-      ({ timeAxis }) => timeAxis
-    );
+    const agentMarkTimes = this.props.agentMarks.map(({ us }) => us);
 
     return (
       <div
@@ -41,13 +39,20 @@ class VerticalLines extends PureComponent {
         >
           <VerticalGridLines
             tickValues={tickValues}
-            style={{ stroke: colors.gray5 }}
+            style={{ stroke: theme.euiColorLightestShade }}
           />
 
           <VerticalGridLines
-            tickValues={[...agentMarkTimes, xMax]}
-            style={{ stroke: colors.gray3 }}
+            tickValues={agentMarkTimes}
+            style={{ stroke: theme.euiColorMediumShade }}
           />
+
+          {traceRootDuration && (
+            <VerticalGridLines
+              tickValues={[traceRootDuration]}
+              style={{ stroke: theme.gray3euiColorMediumShade }}
+            />
+          )}
         </XYPlot>
       </div>
     );

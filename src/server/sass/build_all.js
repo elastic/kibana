@@ -17,22 +17,28 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import { Build } from './build';
-import { collectUiExports } from '../../ui/ui_exports';
 
-export function buildAll(enabledPluginSpecs, { onSuccess, onError }) {
-  const { uiAppSpecs = [] } = collectUiExports(enabledPluginSpecs);
+export async function buildAll(styleSheets, log, buildDir) {
+  const bundles = await Promise.all(styleSheets.map(async styleSheet => {
 
-  return Promise.all(uiAppSpecs.reduce((acc, uiAppSpec) => {
-    if (!uiAppSpec.styleSheetPath) {
-      return acc;
+    if (!styleSheet.localPath.endsWith('.scss')) {
+      return;
     }
 
-    const builder = new Build(uiAppSpec.styleSheetPath, {
-      onSuccess,
-      onError,
+    const bundle = new Build({
+      sourcePath: styleSheet.localPath,
+      log,
+      theme: styleSheet.theme,
+      targetPath: resolve(buildDir, styleSheet.publicPath),
+      urlImports: styleSheet.urlImports
     });
+    await bundle.build();
 
-    return [...acc, builder.build()];
-  }, []));
+    return bundle;
+  }));
+
+  return bundles.filter(v => v);
 }

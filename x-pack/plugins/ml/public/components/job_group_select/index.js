@@ -7,4 +7,3 @@
 
 
 import './job_group_select';
-import './styles/main.less';

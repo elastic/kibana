@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`\`create()\` fails to create legacy appender if kbnServer is not provided. 1`] = `"Legacy appender requires kbnServer."`;

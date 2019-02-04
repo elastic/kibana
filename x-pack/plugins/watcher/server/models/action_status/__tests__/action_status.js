@@ -36,7 +36,7 @@ describe('action_status', () => {
               'timestamp': '2017-03-01T20:55:49.679Z',
               'successful': true
             }
-          }
+          },
         };
       });
 
@@ -53,7 +53,7 @@ describe('action_status', () => {
       });
 
       it('returns correct ActionStatus instance', () => {
-        const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
+        const actionStatus = ActionStatus.fromUpstreamJson({ ...upstreamJson, errors: { foo: 'bar' } });
 
         expect(actionStatus.id).to.be(upstreamJson.id);
         expect(actionStatus.lastAcknowledged).to
@@ -68,6 +68,8 @@ describe('action_status', () => {
           .eql(moment(upstreamJson.actionStatusJson.last_throttle.timestamp));
         expect(actionStatus.lastSuccessfulExecution).to
           .eql(moment(upstreamJson.actionStatusJson.last_successful_execution.timestamp));
+        expect(actionStatus.errors).to
+          .eql({ foo: 'bar' });
       });
 
     });
@@ -105,6 +107,12 @@ describe('action_status', () => {
 
         expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
       });
+
+      it('correctly calculates ACTION_STATES.CONFIG_ERROR', () => {
+        const actionStatus = ActionStatus.fromUpstreamJson({ ...upstreamJson, errors: { foo: 'bar' } });
+        expect(actionStatus.state).to.be(ACTION_STATES.CONFIG_ERROR);
+      });
+
 
       it(`correctly calculates ACTION_STATES.OK`, () => {
         upstreamJson.actionStatusJson.ack.state = 'awaits_successful_execution';

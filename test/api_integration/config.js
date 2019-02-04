@@ -43,7 +43,6 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'API Integration Tests'
     },
-    env: commonConfig.get('env'),
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),

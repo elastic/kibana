@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import { filter as filterAsync, props as propsAsync } from 'bluebird';
 import { times, mapValues } from 'lodash';
 
 export function PipelineListProvider({ getService }) {
@@ -26,16 +25,16 @@ export function PipelineListProvider({ getService }) {
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
   const SUBJ_BTN_ADD = `pipelineList btnAdd`;
-  const SUBJ_BTN_DELETE = `pipelineList btnDelete`;
+  const SUBJ_BTN_DELETE = `pipelineList btnDeletePipeline`;
   const getCloneLinkSubjForId = id => `pipelineList lnkPipelineClone-${id}`;
   const SUBJ_FILTER = `pipelineList filter`;
-  const SUBJ_SELECT_ALL = `pipelineList pipelineTable chkSelectAll`;
-  const SUBJ_ROW_SELECT = `pipelineList pipelineTable chkSelectRow`;
+  const SUBJ_SELECT_ALL = `pipelineList pipelineTable checkboxSelectAll`;
+  const getSelectCheckbox = id => `pipelineList pipelineTable checkboxSelectRow-${id}`;
   const SUBJ_CELL_ID = `pipelineList pipelineTable cellId`;
   const SUBJ_CELL_DESCRIPTION = `pipelineList pipelineTable cellDescription`;
   const SUBJ_CELL_LAST_MODIFIED = `pipelineList pipelineTable cellLastModified`;
   const SUBJ_CELL_USERNAME = `pipelineList pipelineTable cellUsername`;
-  const SUBJ_BTN_NEXT_PAGE = `pipelineList btnNextPage`;
+  const SUBJ_BTN_NEXT_PAGE = `pipelineList pagination-button-next`;
 
   return new class PipelineList {
     /**
@@ -53,7 +52,10 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Object>}
      */
     async getRowCounts() {
-      const isSelecteds = await testSubjects.isSelectedAll(SUBJ_ROW_SELECT);
+      const ids = await this.getRowIds();
+      const isSelecteds = await Promise.all(
+        ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id)))
+      );
       const total = isSelecteds.length;
       const isSelected = isSelecteds.filter(Boolean).length;
       const isUnselected = total - isSelected;
@@ -66,13 +68,12 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Array<Object>>}
      */
     async getRowsFromTable() {
-      const valuesByKey = await propsAsync({
-        selected: testSubjects.isSelectedAll(SUBJ_ROW_SELECT),
-        id: testSubjects.getVisibleTextAll(SUBJ_CELL_ID),
-        description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
-        lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
-        username: testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME)
-      });
+      const ids = await this.getRowIds();
+      const selected = await Promise.all(ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id))));
+      const description = await testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION);
+      const lastModified = await testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED);
+      const username = await testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME);
+      const valuesByKey = { selected, id: ids, description, lastModified, username };
 
       // ensure that we got values for every row, otherwise we can't
       // recombine these into a list of rows
@@ -129,12 +130,16 @@ export function PipelineListProvider({ getService }) {
 
       // get pick an unselected selectbox and click it
       await retry.try(async () => {
-        const rows = await testSubjects.findAll(SUBJ_ROW_SELECT);
-        const unselected = await filterAsync(rows, async row => {
-          return !await row.isSelected();
-        });
+        const ids = await this.getRowIds();
+        const rowToClick = await random.pickOne(ids);
+        const checkboxId = getSelectCheckbox(rowToClick);
+        const isSelected = await testSubjects.isSelected(checkboxId);
 
-        await random.pickOne(unselected).click();
+        if (isSelected) {
+          throw new Error('randomly chosen row was already selected');
+        }
+
+        await testSubjects.click(checkboxId);
       });
 
       // wait for the selected count to grow
@@ -144,6 +149,14 @@ export function PipelineListProvider({ getService }) {
           throw new Error(`randomly selected row still not selected`);
         }
       });
+    }
+
+    /**
+     * Get a list of all pipeline IDs in the current table
+     * @return {Promise<any>}
+     */
+    async getRowIds() {
+      return await testSubjects.getVisibleTextAll(SUBJ_CELL_ID);
     }
 
     /**
@@ -184,7 +197,7 @@ export function PipelineListProvider({ getService }) {
      */
     async assertExists() {
       await retry.try(async () => {
-        if (!await testSubjects.exists(SUBJ_CONTAINER)) {
+        if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
           throw new Error('Expected to find the pipeline list');
         }
       });
@@ -204,6 +217,18 @@ export function PipelineListProvider({ getService }) {
       const actual = await testSubjects.isEnabled(SUBJ_BTN_DELETE);
       if (enabled !== actual) {
         throw new Error(`Expected delete button to be ${enabled ? 'enabled' : 'disabled'}`);
+      }
+    }
+
+    /**
+     * Check if the delete button has been rendered on the page
+     * and throw an error if it has
+     */
+    async assertDeleteButtonMissing() {
+      try {
+        await testSubjects.missingOrFail(SUBJ_BTN_DELETE);
+      } catch (e) {
+        throw e;
       }
     }
 
@@ -230,5 +255,5 @@ export function PipelineListProvider({ getService }) {
         throw new Error(`Expected next page button to be ${enabled ? 'enabled' : 'disabled'}`);
       }
     }
-  };
+  }();
 }

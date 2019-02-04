@@ -34,6 +34,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('PercentFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(PercentFormatEditor.formatId).toEqual('percent');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <PercentFormatEditor

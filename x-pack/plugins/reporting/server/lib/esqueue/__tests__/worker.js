@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import moment from 'moment';
-import { noop, random, get, find } from 'lodash';
+import { noop, random, get, find, identity } from 'lodash';
 import { ClientMock } from './fixtures/elasticsearch';
 import { QueueMock } from './fixtures/queue';
 import { Worker } from '../worker';
@@ -354,7 +354,7 @@ describe('Worker class', function () {
     });
 
     describe('query body', function () {
-      const conditionPath = 'query.constant_score.filter.bool';
+      const conditionPath = 'query.bool.filter.bool';
       const jobtype = 'test_jobtype';
 
       beforeEach(() => {
@@ -377,7 +377,7 @@ describe('Worker class', function () {
       it('should search by job type', function () {
         const { body } = getSearchParams(jobtype);
         const conditions = get(body, conditionPath);
-        expect(conditions.filter).to.eql({ term: { jobtype: jobtype } });
+        expect(conditions.must).to.eql({ term: { jobtype: jobtype } });
       });
 
       it('should search for pending or expired jobs', function () {
@@ -388,7 +388,7 @@ describe('Worker class', function () {
         // this works because we are stopping the clock, so all times match
         const nowTime = moment().toISOString();
         const pending = { term: { status: 'pending' } };
-        const expired = { bool: { filter: [
+        const expired = { bool: { must: [
           { term: { status: 'processing' } },
           { range: { process_expiration: { lte: nowTime } } }
         ] } };
@@ -398,6 +398,12 @@ describe('Worker class', function () {
 
         const expiredMatch = find(conditions.should, expired);
         expect(expiredMatch).to.not.be(undefined);
+      });
+
+      it('specify that there should be at least one match', function () {
+        const { body } = getSearchParams(jobtype);
+        const conditions = get(body, conditionPath);
+        expect(conditions).to.have.property('minimum_should_match', 1);
       });
 
       it('should use default size', function () {
@@ -494,25 +500,57 @@ describe('Worker class', function () {
       expect(msg).to.equal(false);
     });
 
-    it('should return true on version errors', function () {
+    it('should reject the promise on version errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
       return worker._claimJob(job)
-        .then((res) => expect(res).to.equal(true));
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 409 });
+        });
     });
 
-    it('should return false on other errors', function () {
+    it('should reject the promise on other errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
       return worker._claimJob(job)
-        .then((res) => expect(res).to.equal(false));
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 401 });
+        });
+    });
+  });
+
+  describe('find a pending job to claim', function () {
+    const getMockJobs = (status = 'pending') => ([{
+      _index: 'myIndex',
+      _type: 'test',
+      _id: 12345,
+      _version: 3,
+      found: true,
+      _source: {
+        jobtype: 'jobtype',
+        created_by: false,
+        payload: { id: 'sample-job-1', now: 'Mon Apr 25 2016 14:13:04 GMT-0700 (MST)' },
+        priority: 10,
+        timeout: 10000,
+        created_at: '2016-04-25T21:13:04.738Z',
+        attempts: 0,
+        max_attempts: 3,
+        status
+      },
+    }]);
+
+    beforeEach(function () {
+      worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
     });
 
-    it('should emit on other errors', function (done) {
+    afterEach(() => {
       mockQueue.client.update.restore();
+    });
+
+    it('should emit for errors from claiming job', function (done) {
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
 
-      worker.on(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
+      worker.once(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
         try {
           expect(err).to.have.property('error');
           expect(err).to.have.property('job');
@@ -523,7 +561,30 @@ describe('Worker class', function () {
           done(e);
         }
       });
-      worker._claimJob(job);
+
+      worker._claimPendingJobs(getMockJobs());
+    });
+
+    it('should reject the promise if an error claiming the job', function () {
+      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
+      return worker._claimPendingJobs(getMockJobs())
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 409 });
+        });
+    });
+
+    it('should get the pending job', function () {
+      sinon.stub(mockQueue.client, 'update').returns(Promise.resolve({ test: 'cool' }));
+      sinon.stub(worker, '_performJob').callsFake(identity);
+      return worker._claimPendingJobs(getMockJobs())
+        .then(claimedJob => {
+          expect(claimedJob._index).to.be('myIndex');
+          expect(claimedJob._type).to.be('test');
+          expect(claimedJob._source.jobtype).to.be('jobtype');
+          expect(claimedJob._source.status).to.be('processing');
+          expect(claimedJob.test).to.be('cool');
+          worker._performJob.restore();
+        });
     });
   });
 
@@ -805,6 +866,33 @@ describe('Worker class', function () {
     function getFailStub(workerWithFailure) {
       return sinon.stub(workerWithFailure, '_failJob').returns(Promise.resolve());
     }
+
+    describe('saving output failure', () => {
+      it('should mark the job as failed if saving to ES fails', async () => {
+        const job = {
+          _id: 'shouldSucced',
+          _source: {
+            timeout: 1000,
+            payload: 'test'
+          }
+        };
+
+        sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 413 }));
+
+        const workerFn = function (jobPayload) {
+          return new Promise(function (resolve) {
+            setTimeout(() => resolve(jobPayload), 10);
+          });
+        };
+        const worker = new Worker(mockQueue, 'test', workerFn, defaultWorkerOptions);
+        const failStub = getFailStub(worker);
+
+        await worker._performJob(job);
+        worker.destroy();
+
+        sinon.assert.called(failStub);
+      });
+    });
 
     describe('search failure', function () {
       it('causes _processPendingJobs to reject the Promise', function () {

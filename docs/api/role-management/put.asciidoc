@@ -1,0 +1,100 @@
+[[role-management-api-put]]
+=== Create or Update Role
+
+experimental[This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental.]
+
+Creates a new {kib} role or updates the attributes of an existing role. {kib} roles are stored in the
+{es} native realm.
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Authorization
+
+To use this API, you must have at least the `manage_security` cluster privilege.
+
+==== Request
+
+To create or update a role, issue a PUT request to the 
+`/api/security/role/<rolename>` endpoint.
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+--------------------------------------------------
+
+==== Request Body
+
+The following parameters can be specified in the body of a PUT request to add or update a role:
+
+`metadata`:: (object) Optional meta-data. Within the `metadata` object, keys
+that begin with `_` are reserved for system usage.
+
+`elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
+`cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
+
+`kibana`:: (object) An object that specifies the <<kibana-privileges>>. Valid keys are `global` and `space`. Privileges defined in the `global` key will apply to all spaces within Kibana, and will take precedent over any privileges defined in the `space` key. For example, specifying `global: ["all"]` will grant full access to all spaces within Kibana, even if the role indicates that a specific space should only have `read` privileges. 
+
+===== Example
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ "all" ],
+    "indices" : [ {
+      "names" : [ "index1", "index2" ],
+      "privileges" : [ "all" ],
+      "field_security" : {
+        "grant" : [ "title", "body" ]
+      },
+      "query" : "{\"match\": {\"title\": \"foo\"}}"
+    } ]
+  },
+  "kibana": {
+    "global": ["all"]
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+==== Response
+
+A successful call returns a response code of `204` and no response body.
+
+
+==== Granting access to specific spaces
+To grant access to individual spaces within {kib}, specify the space identifier within the `kibana` object.
+
+Note: granting access 
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ "all" ],
+    "indices" : [ {
+      "names" : [ "index1", "index2" ],
+      "privileges" : [ "all" ],
+      "field_security" : {
+        "grant" : [ "title", "body" ]
+      },
+      "query" : "{\"match\": {\"title\": \"foo\"}}"
+    } ]
+  },
+  "kibana": {
+    "global": [],
+    "space": {
+      "marketing": ["all"],
+      "engineering": ["read"] 
+    }
+  }
+}
+--------------------------------------------------

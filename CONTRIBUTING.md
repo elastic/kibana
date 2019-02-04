@@ -22,6 +22,7 @@ A high level overview of our contributing guidelines.
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
   - [Testing and Building](#testing-and-building)
+    - [Debugging server code](#debugging-server-code)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
@@ -30,6 +31,7 @@ A high level overview of our contributing guidelines.
       - [Browser Automation Notes](#browser-automation-notes)
   - [Building OS packages](#building-os-packages)
   - [Writing documentation](#writing-documentation)
+  - [Release Notes Process](#release-notes-process)
 - [Signing the contributor license agreement](#signing-the-contributor-license-agreement)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Code Reviewing](#code-reviewing)
@@ -189,9 +191,10 @@ node scripts/makelogs
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
 
 Start the development server.
-  ```bash
-  yarn start
-  ```
+
+```bash
+yarn start
+```
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
@@ -226,8 +229,6 @@ you're likely running `npm`. To install dependencies in Kibana you need to run `
 The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/current/settings.html).
 
 #### Potential Optimization Pitfalls
-
-In development mode, Kibana runs a customized version of [Webpack](http://webpack.github.io/) with some optimizations enabled to make building the browser bundles as fast as possible. These optimizations make the build process about 2x as fast for initial builds, and about 7x faster for rebuilds, but are labeled "unsafe" by Webpack because they can sometimes cause changes to go unnoticed by the compiler. If you experience any of the scenarios below either restart the dev server, or add `optimize.unsafeCache: false` to your `config/kibana.dev.yml` file to disable these optimizations completely.
 
  - Webpack is trying to include a file in the bundle that I deleted and is now complaining about it is missing
  - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
@@ -271,8 +272,15 @@ You can get all build options using the following command:
 yarn build --help
 ```
 
+macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator's GPU settings. In iTerm2:
+- Open Preferences (Command + ,)
+- In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
+- Open "Advanced GPU Settings..."
+- Uncheck the "Prefer integrated to discrete GPU" option
+- Restart iTerm
+
 ### Debugging Server Code
-`yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+`yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
 ### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
@@ -396,6 +404,31 @@ README for getting the docs tooling set up.
 
 ```bash
 node scripts/docs.js --open
+```
+
+### Release Notes Process
+
+Part of this process only applies to maintainers, since it requires access to Github labels.
+
+Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html). To include your change in the Release Notes:
+
+1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
+1. Label the PR with the targeted version (ex: 6.5).
+1. Label the PR with the appropriate github labels:
+    * For a new feature or functionality, use `release_note:enhancement`.
+    * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
+    * For a deprecated feature, use `release_note:deprecation`.
+    * For a breaking change, use `release-breaking:note`.
+
+We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
+
+
+```
+# Dev Docs
+
+## Name the feature with the break (ex: Visualize Loader)
+
+Summary of the change. Anything Under `#Dev Docs` will be used in the blog.
 ```
 
 ## Signing the contributor license agreement

@@ -14,12 +14,13 @@ import {
 } from '@elastic/eui';
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
+import { injectI18n } from '@kbn/i18n/react';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [
     <Metric
       key="eventsEmitted"
-      className="pipelineViewer__metric--eventsEmitted"
+      className="monPipelineViewer__metric--eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
     />,
   ];
@@ -35,7 +36,7 @@ function getProcessorStatementMetrics(processorVertex) {
   return [
     <Metric
       key="cpuMetric"
-      className="pipelineViewer__metric--cpuTime"
+      className="monPipelineViewer__metric--cpuTime"
       warning={processorVertex.isTimeConsuming()}
       value={formatMetric(
         Math.round(percentOfTotalProcessorTime || 0),
@@ -46,13 +47,13 @@ function getProcessorStatementMetrics(processorVertex) {
     />,
     <Metric
       key="eventMillis"
-      className="pipelineViewer__metric--eventMillis"
+      className="monPipelineViewer__metric--eventMillis"
       warning={processorVertex.isSlow()}
       value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
     />,
     <Metric
       key="eventsReceived"
-      className="pipelineViewer__metric--events"
+      className="monPipelineViewer__metric--events"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
     />,
   ];
@@ -64,9 +65,10 @@ function renderPluginStatementMetrics(pluginType, vertex) {
     : getProcessorStatementMetrics(vertex);
 }
 
-export function PluginStatement({
+function PluginStatementUi({
   statement: { hasExplicitId, id, name, pluginType, vertex },
   onShowVertexDetails,
+  intl,
 }) {
   const statementMetrics = renderPluginStatementMetrics(pluginType, vertex);
   const onNameButtonClick = () => {
@@ -76,7 +78,7 @@ export function PluginStatement({
   return (
     <EuiFlexGroup
       alignItems="center"
-      className="pipelineViewer__statement"
+      className="monPipelineViewer__statement"
       gutterSize="none"
       justifyContent="spaceBetween"
     >
@@ -84,7 +86,8 @@ export function PluginStatement({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              className="pipelineViewer__plugin"
+              aria-label={name}
+              className="monPipelineViewer__plugin"
               color="primary"
               flush="left"
               iconType="dot"
@@ -98,7 +101,9 @@ export function PluginStatement({
             <EuiFlexItem grow={false}>
               <EuiBadge
                 onClick={onNameButtonClick}
-                onClickAriaLabel="View details"
+                onClickAriaLabel={intl.formatMessage({
+                  id: 'xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel', defaultMessage: 'View details'
+                })}
               >
                 {id}
               </EuiBadge>
@@ -115,7 +120,7 @@ export function PluginStatement({
   );
 }
 
-PluginStatement.propTypes = {
+PluginStatementUi.propTypes = {
   onShowVertexDetails: PropTypes.func.isRequired,
   statement: PropTypes.shape({
     hasExplicitId: PropTypes.bool.isRequired,
@@ -129,3 +134,5 @@ PluginStatement.propTypes = {
     }).isRequired,
   }).isRequired,
 };
+
+export const PluginStatement = injectI18n(PluginStatementUi);

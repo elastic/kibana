@@ -1,0 +1,30 @@
+@import '@elastic/eui/src/components/header/variables';
+
+#monitoring-app {
+  // SASSTODO: We need background colors till more of Kibana is converted
+  monitoring-main {
+    background: $euiColorLightestShade;
+    height: calc(100vh - #{$euiHeaderChildSize});
+  }
+
+  // SASSTODO: PUI tooltips can be replaced with EuiToolTip
+  .pui-tooltip-inner {
+    font-size: $euiFontSizeXS;
+  }
+
+  .monitoring-tooltip__trigger,
+  .monitoring-tooltip__trigger:hover {
+    color: $euiTextColor;
+  }
+
+  // SASSTODO: Remove font awesome
+  .monTabs--icon {
+    margin-left: $euiSizeXS;
+    color: $euiColorDarkShade;
+    font-size: $euiFontSize;
+  }
+
+  .monCallout--meta {
+    margin-top: $euiSize;
+  }
+}

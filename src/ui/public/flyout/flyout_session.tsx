@@ -85,6 +85,7 @@ class FlyoutSession extends EventEmitter {
 export function openFlyout(
   flyoutChildren: React.ReactNode,
   flyoutProps: {
+    closeButtonAriaLabel?: string;
     onClose?: () => void;
     'data-test-subj'?: string;
   } = {}

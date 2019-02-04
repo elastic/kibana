@@ -26,7 +26,7 @@ const toTime = '2015-09-23 18:31:44.000';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -42,8 +42,7 @@ export default function ({ getPageObjects, getService }) {
       it('is saved', async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
-        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        expect(isDashboardSaved).to.eql(true);
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
       });
 
       it('Does not set the time picker on open', async () => {
@@ -60,10 +59,9 @@ export default function ({ getPageObjects, getService }) {
 
     describe('dashboard with stored timed', async function () {
       it('is saved with quick time', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.header.setQuickTime('Today');
-        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-        expect(isDashboardSaved).to.eql(true);
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
       it('sets quick time on open', async function () {
@@ -76,10 +74,9 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('is saved with absolute time', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-        expect(isDashboardSaved).to.eql(true);
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
       it('sets absolute time on open', async function () {
@@ -97,14 +94,14 @@ export default function ({ getPageObjects, getService }) {
       // However, if the URL also contains time in the global state, then the global state
       // time should take precedence.
       it('should be overwritten by global state', async function () {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
         const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,mode:quick,to:now))`;
-        await remote.get(urlWithGlobalTime, false);
+        await browser.get(urlWithGlobalTime, false);
         const prettyPrint = await PageObjects.header.getPrettyDuration();
         expect(prettyPrint).to.equal('Last 1 hour');
       });

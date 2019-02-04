@@ -1,0 +1,33 @@
+// EUITODO: Convert to EuiCallout
+.tvbError {
+  padding: $euiSize;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  // Calculate colors similar to EuiCallout
+  $tempBackgroundColor: tintOrShade($euiColorDanger, 90%, 70%);
+  background-color: $tempBackgroundColor;
+
+  .tvbError__title {
+    @include euiTitle("xs");
+    color: makeHighContrastColor($euiColorDanger, $tempBackgroundColor);
+  }
+}
+
+.tvbError__additional,
+.tvbError__stack {
+  margin-top: $euiSizeS;
+}
+
+// EUITODO: Convert to EuiCodeBlock
+.tvbError__stack {
+  padding: $euiSizeS;
+  background: $euiCodeBlockBackgroundColor;
+  color: $euiCodeBlockColor;
+  line-height: $euiLineHeight;
+  font-family: $euiCodeFontFamily;
+  font-weight: $euiFontWeightRegular;
+  white-space: pre-wrap;
+}

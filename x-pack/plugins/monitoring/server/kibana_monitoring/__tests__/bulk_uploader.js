@@ -14,7 +14,14 @@ const CHECK_DELAY = 500;
 
 class MockCollectorSet {
   constructor(_mockServer, mockCollectors) {
+    this.mockServer = _mockServer;
     this.mockCollectors = mockCollectors;
+  }
+  getCollectorByType(type) {
+    return this.mockCollectors.find(collector => collector.type === type) || this.mockCollectors[0];
+  }
+  getFilteredCollectorSet(filter) {
+    return new MockCollectorSet(this.mockServer, this.mockCollectors.filter(filter));
   }
   async bulkFetch() {
     return this.mockCollectors.map(({ fetch }) => fetch());
@@ -32,7 +39,9 @@ describe('BulkUploader', () => {
             getCluster: () => ({
               createClient: () => ({
                 monitoring: {
-                  bulk: sinon.spy(),
+                  bulk: function () {
+                    return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
+                  }
                 },
               }),
               callWithInternalUser: sinon.spy(), // this tests internal collection and bulk upload, not HTTP API
@@ -47,7 +56,8 @@ describe('BulkUploader', () => {
       const collectors = new MockCollectorSet(server, [
         {
           type: 'type_collector_test',
-          fetch: noop, // empty payloads
+          fetch: noop, // empty payloads,
+          formatForBulkUpload: result => result,
         }
       ]);
 
@@ -82,7 +92,10 @@ describe('BulkUploader', () => {
 
     it('should run the bulk upload handler', done => {
       const collectors = new MockCollectorSet(server, [
-        { fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }) }
+        {
+          fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
+          formatForBulkUpload: result => result
+        }
       ]);
       const uploader = new BulkUploader(server, {
         interval: FETCH_INTERVAL
@@ -95,7 +108,9 @@ describe('BulkUploader', () => {
         uploader.stop();
 
         const loggingCalls = server.log.getCalls();
-        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, upload, fetch, upload
+        // If we are properly awaiting the bulk upload call, we shouldn't see
+        // the last 2 logs as the call takes longer than this timeout (see the above mock)
+        expect(loggingCalls.length).to.be(4);
         expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Starting monitoring stats collection',

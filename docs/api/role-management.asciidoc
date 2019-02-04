@@ -1,0 +1,20 @@
+[role="xpack"]
+[[role-management-api]]
+== Kibana Role Management API
+
+experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying mechanism of enforcing role based access control is stable, but the APIs for managing the roles are currently experimental.]
+
+The role management API allows people to manage roles that grant <<kibana-privileges>>.
+It is *not* supported to do so using the
+{ref}/security-api.html#security-role-apis[{es} role management APIs], and doing 
+so will likely cause {kib}'s authorization to behave unexpectedly. 
+
+NOTE: You cannot access these endpoints via the Console in Kibana.
+
+* <<role-management-api-put>>
+* <<role-management-api-get>>
+* <<role-management-api-delete>>
+
+include::role-management/put.asciidoc[]
+include::role-management/get.asciidoc[]
+include::role-management/delete.asciidoc[]

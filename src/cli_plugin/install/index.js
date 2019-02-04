@@ -32,7 +32,7 @@ function processCommand(command, options) {
   } catch (ex) {
     //The logger has not yet been initialized.
     console.error(ex.message);
-    process.exit(64); // eslint-disable-line no-process-exit
+    process.exit(64);
   }
 
   const logger = new Logger(settings);

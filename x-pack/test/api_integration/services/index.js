@@ -8,3 +8,4 @@ export { EsProvider } from './es';
 export { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 export { SupertestWithoutAuthProvider } from './supertest_without_auth';
 export { UsageAPIProvider } from './usage_api';
+export { InfraOpsGraphQLProvider } from './infraops_graphql_client';

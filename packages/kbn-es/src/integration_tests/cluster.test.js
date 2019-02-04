@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const { createToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
@@ -30,9 +30,7 @@ jest.mock('../install', () => ({
 
 jest.mock('execa', () => jest.fn());
 
-const log = createToolingLog('verbose');
-log.onData = jest.fn();
-log.on('data', log.onData);
+const log = new ToolingLog();
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

@@ -10,11 +10,15 @@ import chrome from 'ui/chrome';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('monitoringUiEnabled')) {
-  FeatureCatalogueRegistryProvider.register(() => {
+  FeatureCatalogueRegistryProvider.register((i18n) => {
     return {
       id: 'monitoring',
-      title: 'Monitoring',
-      description: 'Track the real-time health and performance of your Elastic Stack.',
+      title: i18n('xpack.monitoring.monitoringTitle', {
+        defaultMessage: 'Monitoring'
+      }),
+      description: i18n('xpack.monitoring.monitoringDescription', {
+        defaultMessage: 'Track the real-time health and performance of your Elastic Stack.'
+      }),
       icon: 'monitoringApp',
       path: '/app/monitoring',
       showOnHomePage: true,

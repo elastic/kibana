@@ -22,7 +22,7 @@ import { createCreateRoute } from './create';
 import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/{type}', () => {
-  const savedObjectsClient = { create: sinon.stub() };
+  const savedObjectsClient = { create: sinon.stub().returns('') };
   let server;
 
   beforeEach(() => {
@@ -31,8 +31,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };
@@ -57,7 +57,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const clientResponse = {
       type: 'index-pattern',
       id: 'logstash-*',
-      title: 'Testing'
+      title: 'Testing',
+      references: [],
     };
 
     savedObjectsClient.create.returns(Promise.resolve(clientResponse));
@@ -100,7 +101,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false, id: undefined };
+    const options = { overwrite: false, id: undefined, migrationVersion: undefined, references: [] };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);
@@ -121,7 +122,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false, id: 'logstash-*' };
+    const options = { overwrite: false, id: 'logstash-*', references: [] };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);

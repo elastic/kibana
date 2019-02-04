@@ -34,6 +34,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('DateFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(DateFormatEditor.formatId).toEqual('date');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <DateFormatEditor

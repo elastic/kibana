@@ -6,7 +6,6 @@
 
 import { uiModules } from 'ui/modules';
 import template from './testbed.html';
-import './testbed.less';
 
 const app = uiModules.get('xpack/watcher');
 

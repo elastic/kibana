@@ -57,7 +57,6 @@ export default function (chrome, internals) {
     return internals.showAppsLink == null ? internals.nav.length > 1 : internals.showAppsLink;
   };
 
-
   chrome.getKibanaVersion = function () {
     return internals.version;
   };
@@ -72,11 +71,6 @@ export default function (chrome, internals) {
 
   chrome.getAppUrl = function () {
     return get(internals, ['app', 'navLink', 'url']);
-  };
-
-  chrome.getInjected = function (name, def) {
-    if (name == null) return clone(internals.vars) || {};
-    return get(internals.vars, name, def);
   };
 
   chrome.getLastUrlFor = function (appId) {

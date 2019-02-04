@@ -32,37 +32,15 @@ import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
-import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
 
-import { Inspector } from '../inspector';
-import { RequestAdapter, DataAdapter } from '../inspector/adapters';
-
-const getTerms = (table, columnIndex, rowIndex) => {
-  if (rowIndex === -1) {
-    return [];
-  }
-
-  // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
-  const terms = rows.map(row => row[columnIndex]);
-
-  return [...new Set(terms.filter(term => {
-    const notOther = term !== '__other__';
-    const notMissing = term !== '__missing__';
-    return notOther && notMissing;
-  }))];
-};
-
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -92,80 +70,11 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         timeFilter: timefilter,
         queryFilter: queryFilter,
         events: {
-          // the filter method will be removed in the near feature
-          // you should rather use addFilter method below
-          filter: (event) => {
-            const appState = getAppState();
-            filterBarClickHandler(appState)(event);
-          },
-          addFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const agg = data.columns[columnIndex].aggConfig;
-            let filter = [];
-            const value = rowIndex > -1 ? data.rows[rowIndex][columnIndex] : cellValue;
-            if (!value) {
-              return;
-            }
-            if (agg.type.name === 'terms' && agg.params.otherBucket) {
-              const terms = getTerms(data, columnIndex, rowIndex);
-              filter = agg.createFilter(value, { terms });
-            } else {
-              filter = agg.createFilter(value);
-            }
-            queryFilter.addFilters(filter);
-          }, brush: (event) => {
-            onBrushEvent(event, getAppState());
-          }
+          filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
+          brush: data => this.eventsSubject.next({ name: 'brush', data }),
         },
-        inspectorAdapters: this._getActiveInspectorAdapters(),
+        getAppState,
       };
-    }
-
-    /**
-     * Open the inspector for this visualization.
-     * @return {InspectorSession} the handler for the session of this inspector.
-     */
-    openInspector() {
-      return Inspector.open(this.API.inspectorAdapters, {
-        title: this.title
-      });
-    }
-
-    hasInspector() {
-      return Inspector.isAvailable(this.API.inspectorAdapters);
-    }
-
-    /**
-     * Returns an object of all inspectors for this vis object.
-     * This must only be called after this.type has properly be initialized,
-     * since we need to read out data from the the vis type to check which
-     * inspectors are available.
-     */
-    _getActiveInspectorAdapters() {
-      const adapters = {};
-      const { inspectorAdapters: typeAdapters } = this.type;
-
-      // Add the requests inspector adapters if the vis type explicitly requested it via
-      // inspectorAdapters.requests: true in its definition or if it's using the courier
-      // request handler, since that will automatically log its requests.
-      if (typeAdapters && typeAdapters.requests || this.type.requestHandler === 'courier') {
-        adapters.requests = new RequestAdapter();
-      }
-
-      // Add the data inspector adapter if the vis type requested it or if the
-      // vis is using courier, since we know that courier supports logging
-      // its data.
-      if (typeAdapters && typeAdapters.data || this.type.requestHandler === 'courier') {
-        adapters.data = new DataAdapter();
-      }
-
-      // Add all inspectors, that are explicitly registered with this vis type
-      if (typeAdapters && typeAdapters.custom) {
-        Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
-          adapters[key] = new Adapter();
-        });
-      }
-
-      return adapters;
     }
 
     setCurrentState(state) {
@@ -187,7 +96,9 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
       updateVisualizationConfig(state.params, this.params);
 
-      this.aggs = new AggConfigs(this, state.aggs);
+      if (state.aggs || !this.aggs) {
+        this.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
+      }
     }
 
     setState(state, updateCurrentState = true) {
@@ -232,7 +143,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
     copyCurrentState(includeDisabled = false) {
       const state = this.getCurrentState(includeDisabled);
-      state.aggs = new AggConfigs(this, state.aggs);
+      state.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
       return state;
     }
 
@@ -251,7 +162,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     getAggConfig() {
-      return new AggConfigs(this, this.aggs.raw.filter(agg => agg.enabled));
+      return this.aggs.clone({ enabledOnly: true });
     }
 
     getState() {

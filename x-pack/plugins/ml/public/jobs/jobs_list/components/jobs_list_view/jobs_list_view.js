@@ -5,7 +5,6 @@
  */
 
 
-import './styles/main.less';
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -18,11 +17,20 @@ import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
+import { NewJobButton } from '../new_job_button';
+import { JobStatsBar } from '../jobs_stats_bar';
+import { NodeAvailableWarning } from '../node_available_warning';
+import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
-import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
@@ -33,6 +41,8 @@ export class JobsListView extends Component {
     super(props);
 
     this.state = {
+      isRefreshing: false,
+      loading: null,
       jobsSummaryList: [],
       filteredJobsSummaryList: [],
       fullJobsList: {},
@@ -52,6 +62,15 @@ export class JobsListView extends Component {
   }
 
   componentDidMount() {
+    // The advanced job wizard is still angularjs based and triggers
+    // broadcast events which it expects the jobs list to be subscribed to.
+    this.props.angularWrapperScope.$on('jobsUpdated', () => {
+      this.refreshJobSummaryList(true);
+    });
+    this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => {
+      this.showCreateWatchFlyout(job.job_id);
+    });
+
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -65,9 +84,10 @@ export class JobsListView extends Component {
   }
 
   initAutoRefresh() {
-    const { value, pause } = timefilter.getRefreshInterval();
-    if (pause === false && value === 0) {
-      // if the auto refresher isn't set, set it to the default
+    const { value } = timefilter.getRefreshInterval();
+    if (value === 0) {
+      // the auto refresher starts in an off state
+      // so switch it on and set the interval to 30s
       timefilter.setRefreshInterval({
         pause: false,
         value: DEFAULT_REFRESH_INTERVAL_MS
@@ -203,7 +223,6 @@ export class JobsListView extends Component {
     return this.showCreateWatchFlyout;
   }
 
-
   selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
   }
@@ -228,42 +247,60 @@ export class JobsListView extends Component {
     });
   }
 
-  refreshJobSummaryList(forceRefresh = false) {
-    if (forceRefresh === true || this.blockRefresh === false) {
-      const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
-      ml.jobs.jobsSummary(expandedJobsIds)
-        .then((jobs) => {
-          const fullJobsList = {};
-          const jobsSummaryList = jobs.map((job) => {
-            if (job.fullJob !== undefined) {
-              fullJobsList[job.id] = job.fullJob;
-              delete job.fullJob;
-            }
-            job.latestTimeStampUnix = job.latestTimeStamp.unix;
-            return job;
-          });
-          const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-          this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
-            this.refreshSelectedJobs();
-            this.props.updateJobStats(jobsSummaryList);
-          });
+  onRefreshClick = () => {
+    this.setState({ isRefreshing: true });
+    this.refreshJobSummaryList(true);
+  }
+  isDoneRefreshing = () => {
+    this.setState({ isRefreshing: false });
+  }
 
-          Object.keys(this.updateFunctions).forEach((j) => {
-            this.updateFunctions[j].setState({ job: fullJobsList[j] });
-          });
-        })
-        .catch((error) => {
-          console.error(error);
+  async refreshJobSummaryList(forceRefresh = false) {
+    if (forceRefresh === true || this.blockRefresh === false) {
+
+      // Set loading to true for jobs_list table for initial job loading
+      if (this.state.loading === null) {
+        this.setState({ loading: true });
+      }
+
+      const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
+      try {
+        const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
+        const fullJobsList = {};
+        const jobsSummaryList = jobs.map((job) => {
+          if (job.fullJob !== undefined) {
+            fullJobsList[job.id] = job.fullJob;
+            delete job.fullJob;
+          }
+          job.latestTimestampSortValue = (job.latestTimestampMs || 0);
+          return job;
         });
+        const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
+        this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false }, () => {
+          this.refreshSelectedJobs();
+        });
+
+        Object.keys(this.updateFunctions).forEach((j) => {
+          this.updateFunctions[j].setState({ job: fullJobsList[j] });
+        });
+
+        this.isDoneRefreshing();
+      } catch (error) {
+        console.error(error);
+        this.setState({ loading: false });
+      }
     }
   }
 
-  render() {
+  renderJobsListComponents() {
+    const { loading, jobsSummaryList } = this.state;
+    const jobIds = jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
           <MultiJobActions
             selectedJobs={this.state.selectedJobs}
+            allJobIds={jobIds}
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(true)}
@@ -281,11 +318,13 @@ export class JobsListView extends Component {
           showStartDatafeedModal={this.showStartDatafeedModal}
           refreshJobs={() => this.refreshJobSummaryList(true)}
           selectedJobsCount={this.state.selectedJobs.length}
+          loading={loading}
         />
         <EditJobFlyout
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+          allJobIds={jobIds}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}
@@ -306,7 +345,41 @@ export class JobsListView extends Component {
       </div>
     );
   }
+
+  render() {
+    const { isRefreshing, jobsSummaryList } = this.state;
+
+    return (
+      <React.Fragment>
+        <JobStatsBar
+          jobsSummaryList={jobsSummaryList}
+        />
+        <div className="job-management">
+          <NodeAvailableWarning />
+          <header>
+            <div className="job-buttons-container">
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <RefreshJobsListButton
+                    onRefreshClick={this.onRefreshClick}
+                    isRefreshing={isRefreshing}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NewJobButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </header>
+
+          <div className="clear" />
+
+          <EuiSpacer size="s" />
+
+          { this.renderJobsListComponents() }
+        </ div>
+      </React.Fragment>
+    );
+  }
 }
-JobsListView.propTypes = {
-  updateJobStats: PropTypes.func.isRequired,
-};
+

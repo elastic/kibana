@@ -17,11 +17,14 @@
  * under the License.
  */
 
+import React, { Fragment } from 'react';
 import _ from 'lodash';
-import { format as formatUrl, parse as parseUrl } from 'url';
+import { modifyUrl } from 'ui/url';
+import { i18n }  from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { uiModules } from '../../modules';
-import { Notifier } from '../../notify';
+import { toastNotifications } from '../../notify';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';
@@ -66,40 +69,59 @@ export function initAngularApi(chrome, internals) {
         $locationProvider.hashPrefix('');
       })
       .run(internals.capture$httpLoadingCount)
+      .run(internals.$setupBreadcrumbsAutoClear)
+      .run(internals.$setupHelpExtensionAutoClear)
+      .run(internals.$initNavLinksDeepWatch)
       .run(($location, $rootScope, Private, config) => {
         chrome.getFirstPathSegment = () => {
           return $location.path().split('/')[1];
         };
 
-        const notify = new Notifier();
         const urlOverflow = Private(UrlOverflowServiceProvider);
         const check = () => {
-        // disable long url checks when storing state in session storage
-          if (config.get('state:storeInSessionStorage')) return;
-          if ($location.path() === '/error/url-overflow') return;
+          // disable long url checks when storing state in session storage
+          if (config.get('state:storeInSessionStorage')) {
+            return;
+          }
+
+          if ($location.path() === '/error/url-overflow') {
+            return;
+          }
 
           try {
             if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-              notify.directive({
-                template: `
-                <p>
-                  The URL has gotten big and may cause Kibana
-                  to stop working. Please either enable the
-                  <code>state:storeInSessionStorage</code>
-                  option in the <a href="#/management/kibana/settings">advanced
-                  settings</a> or simplify the onscreen visuals.
-                </p>
-              `
-              }, {
-                type: 'error',
-                actions: [{ text: 'close' }]
+              toastNotifications.addWarning({
+                title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
+                  defaultMessage: 'The URL is big and Kibana might stop working'
+                }),
+                text: (
+                  <Fragment>
+                    <FormattedMessage
+                      id="common.ui.chrome.bigUrlWarningNotificationMessage"
+                      defaultMessage="Either enable the {storeInSessionStorageParam} option
+                        in {advancedSettingsLink} or simplify the onscreen visuals."
+                      values={{
+                        storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
+                        advancedSettingsLink: (
+                          <a href="#/management/kibana/settings">
+                            <FormattedMessage
+                              id="common.ui.chrome.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
+                              defaultMessage="advanced settings"
+                            />
+                          </a>
+                        )
+                      }}
+                    />
+                  </Fragment>
+                ),
               });
             }
           } catch (e) {
-            const { host, path, search, protocol } = parseUrl(window.location.href);
-            // rewrite the entire url to force the browser to reload and
-            // discard any potentially unstable state from before
-            window.location.href = formatUrl({ host, path, search, protocol, hash: '#/error/url-overflow' });
+            window.location.href = modifyUrl(window.location.href, parts => {
+              parts.hash = '#/error/url-overflow';
+            });
+            // force the browser to reload to that Kibana's potentially unstable state is unloaded
+            window.location.reload();
           }
         };
 

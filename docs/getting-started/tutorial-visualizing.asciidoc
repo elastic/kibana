@@ -1,5 +1,5 @@
 [[tutorial-visualizing]]
-== Visualizing Your Data
+=== Visualizing your data
 
 In the Visualize application, you can shape your data using a variety
 of charts, tables, and maps, and more. You'll create four
@@ -19,7 +19,7 @@ gain insight into the account balances in the bank account data.
 [role="screenshot"]
 image::images/tutorial-visualize-wizard-step-2.png[]
 
-=== Pie Chart
+=== Pie chart
 
 Initially, the pie contains a single "slice."
 That's because the default search matched all documents.
@@ -73,15 +73,17 @@ in a ring around the balance ranges.
 [role="screenshot"]
 image::images/tutorial-visualize-pie-3.png[]
 
-To save this chart so you can use it later, click *Save* in the top menu bar
-and enter `Pie Example`.
+To save this chart so you can use it later:
 
-=== Bar Chart
+* Click *Save* in the top menu bar and enter `Pie Example`.
+
+=== Bar chart
 
 You'll use a bar chart to look at the Shakespeare data set and compare
 the number of speaking parts in the plays.
 
-Create a *Vertical Bar* chart and set the search source to `shakes*`.
+* Create a *Vertical Bar* chart and set the search source to `shakes*`.
+
 Initially, the chart is a single bar that shows the total count
 of documents that match the default wildcard query.
 
@@ -120,32 +122,12 @@ that play.
 
 Notice how the individual play names show up as whole phrases, instead of
 broken into individual words. This is the result of the mapping
-you did at the beginning of the tutorial, when your marked the `play_name` field
+you did at the beginning of the tutorial, when you marked the `play_name` field
 as `not analyzed`.
 
-
-////
-You might
-also be curious to see which plays make the greatest demands on an
-individual actor. Let's show the maximum number of speeches for a given part.
-
-. Click *Add metrics* to add a Y-axis aggregation.
-. Set *Aggregation* to `Max` and *Field* to `speech_number`.
-. Click *Metrics & Axes* and then change *Mode* from `stacked` to `normal`.
-. Click  *Apply changes* image:images/apply-changes-button.png[].
-
-[role="screenshot"]
-image::images/tutorial-visualize-bar-3.png[]
-
-The play Love's Labours Lost has an unusually high maximum speech number compared to the other plays.
-
-Note how the *Number of speaking parts* Y-axis starts at zero, but the bars don't begin to differentiate until 18. To
-make the differences stand out, starting the Y-axis at a value closer to the minimum, go to Options and select
-*Scale Y-Axis to data bounds*.
-////
 *Save* this chart with the name `Bar Example`.
 
-=== Coordinate Map
+=== Coordinate map
 
 Using a coordinate map, you can visualize geographic information in the log file sample data.
 
@@ -175,18 +157,6 @@ You can navigate the map by clicking and dragging.  The controls
 on the top left of the map enable you to zoom the map and set filters.
 Give them a try.
 
-////
-- Zoom image:images/viz-zoom.png[] buttons,
-- *Fit Data Bounds*
-image:images/viz-fit-bounds.png[] button to zoom to the lowest level that
-includes all the points.
-- Include or exclude a rectangular area
-by clicking the *Latitude/Longitude Filter* image:images/viz-lat-long-filter.png[]
-button and drawing a bounding box on the map. Applied filters are displayed
-below the query bar. Hovering over a filter displays controls to toggle,
-pin, invert, or delete the filter.
-
-////
 [role="screenshot"]
 image::images/tutorial-visualize-map-3.png[]
 

@@ -28,6 +28,38 @@ const { installArchive } = require('./archive');
 const { log: defaultLog, cache } = require('../utils');
 
 /**
+ * Download an ES snapshot
+ *
+ * @param {Object} options
+ * @property {('oss'|'basic'|'trial')} options.license
+ * @property {String} options.version
+ * @property {String} options.basePath
+ * @property {String} options.installPath
+ * @property {ToolingLog} options.log
+ */
+exports.downloadSnapshot = async function installSnapshot({
+  license = 'basic',
+  version,
+  basePath = BASE_PATH,
+  installPath = path.resolve(basePath, version),
+  log = defaultLog,
+}) {
+  const fileName = getFilename(license, version);
+  const url = getUrl(fileName);
+  const dest = path.resolve(basePath, 'cache', fileName);
+
+  log.info('version: %s', chalk.bold(version));
+  log.info('install path: %s', chalk.bold(installPath));
+  log.info('license: %s', chalk.bold(license));
+
+  await downloadFile(url, dest, log);
+
+  return {
+    downloadPath: dest,
+  };
+};
+
+/**
  * Installs ES from snapshot
  *
  * @param {Object} options
@@ -46,16 +78,15 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
 }) {
-  const fileName = getFilename(license, version);
-  const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
-  const dest = path.resolve(basePath, 'cache', fileName);
+  const { downloadPath } = await exports.downloadSnapshot({
+    license,
+    version,
+    basePath,
+    installPath,
+    log,
+  });
 
-  log.info('version: %s', chalk.bold(version));
-  log.info('install path: %s', chalk.bold(installPath));
-  log.info('license: %s', chalk.bold(license));
-
-  await downloadFile(url, dest, log);
-  return await installArchive(dest, {
+  return await installArchive(downloadPath, {
     license,
     password,
     basePath,
@@ -89,7 +120,7 @@ function downloadFile(url, dest, log) {
         }
 
         if (!res.ok) {
-          return reject(new Error(res.statusText));
+          return reject(new Error(`Unable to download elasticsearch snapshot: ${res.statusText}`));
         }
 
         const stream = fs.createWriteStream(downloadPath);
@@ -114,8 +145,32 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
-  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
+  const platform = os.platform();
+  let suffix = null;
+  switch (platform) {
+    case 'darwin':
+      suffix = 'darwin-x86_64.tar.gz';
+      break;
+    case 'linux':
+      suffix = 'linux-x86_64.tar.gz';
+      break;
+    case 'win32':
+      suffix = 'windows-x86_64.zip';
+      break;
+    default:
+      throw new Error(`Unsupported platform ${platform}`);
+  }
 
-  return `${basename}-SNAPSHOT.${extension}`;
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
+  return `${basename}-SNAPSHOT-${suffix}`;
+}
+
+function getUrl(fileName) {
+  if (process.env.TEST_ES_SNAPSHOT_VERSION) {
+    return `https://snapshots.elastic.co/${
+      process.env.TEST_ES_SNAPSHOT_VERSION
+    }/downloads/elasticsearch/${fileName}`;
+  } else {
+    return `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  }
 }

@@ -1,0 +1,4 @@
+{
+  "common.ui.welcomeMessage": "Cargando Kibana",
+  "common.ui.welcomeError": "Kibana no se cargó correctamente. Heck la salida del servidor para obtener más información."
+}

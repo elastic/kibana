@@ -2,7 +2,7 @@
 
 exports[`<EditorOptionsGroup/> renders as expected 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero editorOptionsGroup__panel"
+  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero visEditorOptionsGroup__panel"
 >
   <div
     class="euiAccordion euiAccordion-isOpen"
@@ -17,6 +17,7 @@ exports[`<EditorOptionsGroup/> renders as expected 1`] = `
           aria-controls="eog_staticId"
           aria-expanded="true"
           class="euiAccordion__button"
+          type="button"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -84,7 +85,7 @@ exports[`<EditorOptionsGroup/> renders as expected 1`] = `
 
 exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero editorOptionsGroup__panel"
+  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero visEditorOptionsGroup__panel"
 >
   <div
     class="euiAccordion euiAccordion-isOpen"
@@ -99,6 +100,7 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
           aria-controls="eog_staticId"
           aria-expanded="true"
           class="euiAccordion__button"
+          type="button"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -193,7 +195,7 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
 
 exports[`<EditorOptionsGroup/> renders as expected with initial collapsed 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero editorOptionsGroup__panel"
+  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero visEditorOptionsGroup__panel"
 >
   <div
     class="euiAccordion"
@@ -208,6 +210,7 @@ exports[`<EditorOptionsGroup/> renders as expected with initial collapsed 1`] = 
           aria-controls="eog_staticId"
           aria-expanded="false"
           class="euiAccordion__button"
+          type="button"
         >
           <div
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

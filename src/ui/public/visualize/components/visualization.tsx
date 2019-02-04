@@ -25,15 +25,21 @@ import { memoizeLast } from '../../utils/memoize';
 import { Vis } from '../../vis';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
-
-import './visualization.less';
+import { VisualizationRequestError } from './visualization_requesterror';
 
 function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
   const requiresSearch = get(vis, 'type.requiresSearch');
-  const isZeroHits = get(visData, 'hits.total') === 0;
-  const shouldShowMessage = !get(vis, 'params.handleNoResults');
+  const rows: object[] | undefined = get(visData, 'rows');
+  const isZeroHits = get(visData, 'hits') === 0 || (rows && !rows.length);
+  const shouldShowMessage = !get(vis, 'type.useCustomNoDataScreen');
 
   return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
+}
+
+function shouldShowRequestErrorMessage(vis: Vis, visData: any): boolean {
+  const requestError = get(vis, 'requestError');
+  const showRequestError = get(vis, 'showRequestError');
+  return Boolean(!visData && requestError && showRequestError);
 }
 
 interface VisualizationProps {
@@ -50,25 +56,29 @@ export class Visualization extends React.Component<VisualizationProps> {
   constructor(props: VisualizationProps) {
     super(props);
 
-    const { vis, uiState, listenOnChange } = props;
-
-    vis._setUiState(props.uiState);
-    if (listenOnChange) {
-      uiState.on('change', this.onUiStateChanged);
-    }
+    props.vis._setUiState(props.uiState);
   }
 
   public render() {
-    const { vis, visData, onInit, uiState } = this.props;
+    const { vis, visData, onInit, uiState, listenOnChange } = this.props;
 
     const noResults = this.showNoResultsMessage(vis, visData);
+    const requestError = shouldShowRequestErrorMessage(vis, visData);
 
     return (
       <div className="visualization">
-        {noResults ? (
+        {requestError ? (
+          <VisualizationRequestError onInit={onInit} error={vis.requestError} />
+        ) : noResults ? (
           <VisualizationNoResults onInit={onInit} />
         ) : (
-          <VisualizationChart vis={vis} visData={visData} onInit={onInit} uiState={uiState} />
+          <VisualizationChart
+            vis={vis}
+            visData={visData}
+            onInit={onInit}
+            uiState={uiState}
+            listenOnChange={listenOnChange}
+          />
         )}
       </div>
     );
@@ -79,29 +89,5 @@ export class Visualization extends React.Component<VisualizationProps> {
       throw new Error('Changing uiState on <Visualization/> is not supported!');
     }
     return true;
-  }
-
-  public componentWillUnmount() {
-    this.props.uiState.off('change', this.onUiStateChanged);
-  }
-
-  public componentDidUpdate(prevProps: VisualizationProps) {
-    const { listenOnChange } = this.props;
-    // If the listenOnChange prop changed, we need to register or deregister from uiState
-    if (prevProps.listenOnChange !== listenOnChange) {
-      if (listenOnChange) {
-        this.props.uiState.on('change', this.onUiStateChanged);
-      } else {
-        this.props.uiState.off('change', this.onUiStateChanged);
-      }
-    }
-  }
-
-  /**
-   * In case something in the uiState changed, we need to force a redraw of
-   * the visualization, since these changes could effect visualization rendering.
-   */
-  private onUiStateChanged() {
-    this.forceUpdate();
   }
 }

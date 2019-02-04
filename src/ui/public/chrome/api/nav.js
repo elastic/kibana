@@ -17,14 +17,49 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
+import { mapTo } from 'rxjs/operators';
 import { remove } from 'lodash';
-import { prependPath } from '../../url/prepend_path';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 
 export function initChromeNavApi(chrome, internals) {
+  const navUpdate$ = new Rx.BehaviorSubject(undefined);
+
   chrome.getNavLinks = function () {
     return internals.nav;
+  };
+
+  chrome.getNavLinks$ = function () {
+    return navUpdate$.pipe(mapTo(internals.nav));
+  };
+
+  // track navLinks with $rootScope.$watch like the old nav used to, necessary
+  // as long as random parts of the app are directly mutating the navLinks
+  internals.$initNavLinksDeepWatch = function ($rootScope) {
+    $rootScope.$watch(
+      () => internals.nav,
+      () => navUpdate$.next(),
+      true
+    );
+  };
+
+
+  const forceAppSwitcherNavigation$ = new Rx.BehaviorSubject(false);
+  /**
+   * Enable forced navigation mode, which will trigger a page refresh
+   * when a nav link is clicked and only the hash is updated. This is only
+   * necessary when rendering the status page in place of another app, as
+   * links to that app will set the current URL and change the hash, but
+   * the routes for the correct are not loaded so nothing will happen.
+   * https://github.com/elastic/kibana/pull/29770
+   */
+  chrome.enableForcedAppSwitcherNavigation = () => {
+    forceAppSwitcherNavigation$.next(true);
+    return chrome;
+  };
+  chrome.getForceAppSwitcherNavigation$ = () => {
+    return forceAppSwitcherNavigation$.asObservable();
   };
 
   chrome.navLinkExists = (id) => {
@@ -41,28 +76,6 @@ export function initChromeNavApi(chrome, internals) {
 
   chrome.showOnlyById = (id) => {
     remove(internals.nav, app => app.id !== id);
-  };
-
-  chrome.getBasePath = function () {
-    return internals.basePath || '';
-  };
-
-  /**
-   *
-   * @param url {string} a relative url. ex: /app/kibana#/management
-   * @return {string} the relative url with the basePath prepended to it. ex: rkz/app/kibana#/management
-   */
-  chrome.addBasePath = function (url) {
-    return prependPath(url, chrome.getBasePath());
-  };
-
-  chrome.removeBasePath = function (url) {
-    if (!internals.basePath) {
-      return url;
-    }
-
-    const basePathRegExp = new RegExp(`^${internals.basePath}`);
-    return url.replace(basePathRegExp, '');
   };
 
   function lastSubUrlKey(link) {
@@ -154,8 +167,8 @@ export function initChromeNavApi(chrome, internals) {
   };
 
   internals.nav.forEach(link => {
-    link.url = relativeToAbsolute(link.url);
-    link.subUrlBase = relativeToAbsolute(link.subUrlBase);
+    link.url = relativeToAbsolute(chrome.addBasePath(link.url));
+    link.subUrlBase = relativeToAbsolute(chrome.addBasePath(link.subUrlBase));
   });
 
   // simulate a possible change in url to initialize the

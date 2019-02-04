@@ -1,27 +1,19 @@
-window.onload = function () {
-  function createAnchor(href) {
-    var anchor = document.createElement('a');
-    anchor.setAttribute('href', href);
-    return anchor.href;
+if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
+  var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
+  legacyBrowserError.style.display = 'flex';
+} else {
+  if (!window.__kbnCspNotEnforced__ && window.console) {
+    window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
+  var loadingMessage = document.getElementById('kbn_loading_message');
+  loadingMessage.style.display = 'flex';
 
-  var files = [
-    createAnchor('{{bundlePath}}/vendors.style.css'),
-    createAnchor('{{bundlePath}}/commons.style.css'),
-    createAnchor('{{bundlePath}}/{{appId}}.style.css'),
-
-    createAnchor('{{bundlePath}}/vendors.bundle.js'),
-    createAnchor('{{bundlePath}}/commons.bundle.js'),
-    createAnchor('{{bundlePath}}/{{appId}}.bundle.js')
-  ];
-
-  if ('{{styleSheetPath}}' !== '') {
-    files.push(createAnchor('{{styleSheetPath}}'));
-  }
-
-  (function next() {
-    var file = files.shift();
-    if (!file) return;
+  window.onload = function () {
+    var files = [
+      '{{dllBundlePath}}/vendors.bundle.dll.js',
+      '{{regularBundlePath}}/commons.bundle.js',
+      '{{regularBundlePath}}/{{appId}}.bundle.js'
+    ];
 
     var failure = function () {
       // make subsequent calls to failure() noop
@@ -33,25 +25,46 @@ window.onload = function () {
       err.style['text-align'] = 'center';
       err.style['background'] = '#F44336';
       err.style['padding'] = '25px';
-      err.innerText = '{{i18n 'UI-WELCOME_ERROR' '{"defaultMessage": "Kibana did not load properly. Check the server output for more information."}'}}';
+      err.innerText = document.querySelector('[data-error-message]').dataset.errorMessage;
 
       document.body.innerHTML = err.outerHTML;
     }
 
-    var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
-    var dom = document.createElement(type);
-    dom.setAttribute('async', '');
-    dom.addEventListener('error', failure);
+    function loadStyleSheet(path) {
+      var dom = document.createElement('link');
 
-    if (type === 'script') {
+      dom.addEventListener('error', failure);
+      dom.setAttribute('rel', 'stylesheet');
+      dom.setAttribute('href', path);
+      document.head.appendChild(dom);
+    }
+
+    function createJavascriptElement(path) {
+      var dom = document.createElement('script');
+
+      dom.setAttribute('async', '');
+      dom.addEventListener('error', failure);
       dom.setAttribute('src', file);
       dom.addEventListener('load', next);
       document.head.appendChild(dom);
-    } else {
-      dom.setAttribute('rel', 'stylesheet');
-      dom.setAttribute('href', file);
-      document.head.appendChild(dom);
-      next();
     }
-  }());
-};
+
+    {{#each styleSheetPaths}}
+      loadStyleSheet('{{this}}');
+    {{/each}}
+
+    (function next() {
+      var file = files.shift();
+      if (!file) return;
+
+      var dom = document.createElement('script');
+
+      dom.setAttribute('async', '');
+      dom.setAttribute('nonce', window.__webpack_nonce__);
+      dom.addEventListener('error', failure);
+      dom.setAttribute('src', file);
+      dom.addEventListener('load', next);
+      document.head.appendChild(dom);
+    }());
+  };
+}

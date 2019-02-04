@@ -14,6 +14,9 @@ numeric field. Select a field from the drop-down.
 the number of unique values in a field. Select a field from the drop-down.
 *Standard Deviation*:: The {ref}/search-aggregations-metrics-extendedstats-aggregation.html[_extended stats_]
 aggregation returns the standard deviation of data in a numeric field. Select a field from the drop-down.
+*Top Hit*:: The {ref}/search-aggregations-metrics-top-hits-aggregation.html[_top hits_]
+aggregation returns one or more of the top values from a specific field in your documents. Select a field from the drop-down,
+how you want to sort the documents and choose the top fields, and how many values should be returned.
 *Percentiles*:: The {ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the
 values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one
 or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a

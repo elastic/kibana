@@ -1,4 +1,0 @@
-[[monitoring-cluster]]
-== Monitoring Elasticsearch
-
-See {ref}/es-monitoring.html[Monitoring {es}].

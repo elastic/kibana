@@ -1,0 +1,19 @@
+[role="xpack"]
+[[spaces-api]]
+== Kibana Spaces API
+
+experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+
+The spaces API allows people to manage their spaces within {kib}.
+
+NOTE: You cannot access these endpoints via the Console in Kibana.
+
+* <<spaces-api-post>>
+* <<spaces-api-put>>
+* <<spaces-api-get>>
+* <<spaces-api-delete>>
+
+include::spaces-management/post.asciidoc[]
+include::spaces-management/put.asciidoc[]
+include::spaces-management/get.asciidoc[]
+include::spaces-management/delete.asciidoc[]
