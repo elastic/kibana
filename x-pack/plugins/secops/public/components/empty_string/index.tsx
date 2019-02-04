@@ -7,6 +7,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import * as i18n from './translations';
+
 export const EmptyString = styled.span`
   color: ${({
     theme: {
@@ -15,7 +17,7 @@ export const EmptyString = styled.span`
   }) => euiColorMediumShade};
 `;
 
-export const getEmptyString = () => '(Empty String)';
+export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
 export const getEmptyStringTag = () => <EmptyString>{getEmptyString()}</EmptyString>;
 

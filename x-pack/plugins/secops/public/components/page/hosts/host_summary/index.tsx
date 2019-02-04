@@ -77,7 +77,7 @@ export const getEuiDescriptionList = (
     {Object.entries(fieldTitleMapping).map(([field, title]) => {
       const summaryValue: string | string[] | null = get(field, host);
       return (
-        <React.Fragment key={field}>
+        <React.Fragment key={`host-summary-${field}-${title}`}>
           <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
           {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
           <div>
@@ -104,7 +104,7 @@ export const createDraggable = (
     <>{getEmptyValue()}</>
   ) : (
     <DraggableWrapper
-      key={summaryValue}
+      key={`host-summary-${field}-${summaryValue}`}
       dataProvider={{
         and: [],
         enabled: true,
