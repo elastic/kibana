@@ -54,8 +54,7 @@ export function initRoutes(server, licenseUid) {
       try {
         ems = await getEMSResources(licenseUid);
       } catch (e) {
-        console.error('Cannot connect to EMS');
-        console.error(e);
+        server.log('warning', `Cannot connect to EMS, error: ${e}`);
         ems = {
           fileLayers: [],
           tmsServices: []
