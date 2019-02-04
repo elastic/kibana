@@ -257,7 +257,7 @@ export class EmbeddedVisualizeHandler {
       return;
     }
     renderer
-      .render(this.element, get(data, 'value') || { visType: this.vis.type.name }, this.handlers)
+      .render(this.element, get(data, 'value', { visType: this.vis.type.name }), this.handlers)
       .then(() => {
         if (!this.loaded) {
           this.loaded = true;
