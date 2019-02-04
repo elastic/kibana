@@ -26,6 +26,7 @@ export interface BaseOptions {
 export interface CreateOptions extends BaseOptions {
   id?: string;
   override?: boolean;
+  references?: SavedObjectReference[];
 }
 
 export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
@@ -48,6 +49,7 @@ export interface FindOptions extends BaseOptions {
   fields?: string[];
   search?: string;
   searchFields?: string[];
+  hasReference?: { type: string; id: string };
 }
 
 export interface FindResponse<T extends SavedObjectAttributes = any> {
@@ -71,6 +73,10 @@ export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
+export interface MigrationVersion {
+  [pluginName: string]: string;
+}
+
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
@@ -85,6 +91,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   };
   attributes: T;
   references: SavedObjectReference[];
+  migrationVersion?: MigrationVersion;
 }
 
 export interface SavedObjectReference {

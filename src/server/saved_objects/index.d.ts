@@ -18,8 +18,12 @@
  */
 
 export {
+  FindOptions,
+  MigrationVersion,
   SavedObject,
+  SavedObjectAttributes,
   SavedObjectsClient,
   SavedObjectsClientWrapperFactory,
+  SavedObjectReference,
   SavedObjectsService,
 } from './service';
