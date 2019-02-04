@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 import chrome from 'ui/chrome';
@@ -33,13 +33,13 @@ if (chrome.getInjected('remoteClustersUiEnabled')) {
 
   const renderReact = async (elem) => {
     render(
-      <I18nProvider>
+      <I18nContext>
         <Provider store={remoteClustersStore}>
           <HashRouter>
             <App />
           </HashRouter>
         </Provider>
-      </I18nProvider>,
+      </I18nContext>,
       elem
     );
   };
