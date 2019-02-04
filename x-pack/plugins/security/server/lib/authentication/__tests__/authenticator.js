@@ -27,7 +27,7 @@ describe('Authenticator', () => {
     server = serverFixture();
     session = sinon.createStubInstance(Session);
 
-    config = { get: sinon.stub() };
+    config = { get: sinon.stub(), has: sinon.stub() };
     cluster = { callWithRequest: sinon.stub() };
 
     // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
