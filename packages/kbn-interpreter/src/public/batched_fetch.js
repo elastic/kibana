@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const batchUrl = '/api/canvas/fns';
+import { FUNCTIONS_URL } from './consts';
 
 /**
  * Create a function which executes a Canvas function on the
@@ -88,7 +88,7 @@ function createFuture() {
 async function processBatch(kfetch, batch) {
   try {
     const { results } = await kfetch({
-      pathname: batchUrl,
+      pathname: FUNCTIONS_URL,
       method: 'POST',
       body: JSON.stringify({
         functions: Object.values(batch).map(({ request }) => request),

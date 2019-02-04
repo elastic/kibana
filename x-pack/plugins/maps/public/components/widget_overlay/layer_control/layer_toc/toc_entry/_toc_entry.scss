@@ -1,0 +1,21 @@
+.mapTocEntry {
+  padding: $euiSizeS $euiSize;
+  position: relative;
+}
+
+.mapTocEntry-visible {
+  opacity: 1;
+}
+
+.mapTocEntry-notVisible {
+  opacity: 0.5;
+}
+
+.mapTocEntry__grab {
+  margin-left: $euiSizeXS;
+}
+
+.mapTocEntry__grab:hover {
+  cursor: grab;
+}
+

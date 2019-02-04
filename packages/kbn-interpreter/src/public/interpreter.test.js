@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { FUNCTIONS_URL } from './consts';
 import { initializeInterpreter } from './interpreter';
 
-jest.mock('../common/interpreter/socket_interpret', () => ({
-  socketInterpreterProvider: () => () => ({}),
+jest.mock('../common/interpreter/interpreter_provider', () => ({
+  interpreterProvider: () => () => ({}),
 }));
 
 jest.mock('../common/lib/serialize', () => ({
@@ -38,7 +39,7 @@ describe('kbn-interpreter/interpreter', () => {
     await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register: () => {} }));
 
     expect(kfetch).toHaveBeenCalledTimes(1);
-    expect(kfetch).toHaveBeenCalledWith({ pathname: '/api/canvas/fns' });
+    expect(kfetch).toHaveBeenCalledWith({ pathname: FUNCTIONS_URL });
   });
 
   it('registers client-side functions that pass through to the server', async () => {
@@ -81,7 +82,7 @@ describe('kbn-interpreter/interpreter', () => {
     expect(result).toEqual({ hello: 'world' });
 
     expect(kfetch).toHaveBeenCalledWith({
-      pathname: '/api/canvas/fns',
+      pathname: FUNCTIONS_URL,
       method: 'POST',
       body: JSON.stringify({
         functions: [{
