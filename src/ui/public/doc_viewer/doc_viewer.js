@@ -39,25 +39,26 @@ uiModules.get('kibana')
       template: function ($el) {
         const $viewer = $('<div class="kbnDocViewer">');
         $el.append($viewer);
-        const $tabs = $('<ul class="nav nav-tabs" role="tablist">');
+        const $tabs = $('<ul class="euiTabs euiTabs--small" role="tablist">');
         const $content = $('<div class="kbnDocViewer__content" role="tabpanel">');
         $viewer.append($tabs);
         $viewer.append($content);
         docViews.inOrder.forEach(view => {
           const $tab = $(
-            `<li
+            `<button
             ng-show="docViews['${view.name}'].shouldShow(hit)"
-            ng-class="{active: mode == '${view.name}'}"
+            class="euiTab"
+            ng-class="{euiTab-isSelected: mode == '${view.name}'}"
             role="tab"
             aria-selected="{{mode === '${view.name}'}}"
+            ng-click="mode='${view.name}'"
           >
-            <a
-              ng-click="mode='${view.name}'"
-              kbn-accessible-click
+            <span
+              class="euiTab__content"
             >
               ${view.title}
-            </a>
-          </li>`
+            </span>
+          </button>`
           );
           $tabs.append($tab);
           const $viewAttrs = `

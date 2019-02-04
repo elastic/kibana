@@ -110,8 +110,9 @@
     }
   }
 
-  .index-pattern-selection .ui-select-toggle {
-    border-radius: 0;
+  .index-pattern-selection {
+    padding: $euiSizeS;
+    padding-bottom: 0;
   }
 
   .index-pattern-selection .ui-select-choices {
