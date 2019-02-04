@@ -18,6 +18,7 @@
  */
 
 import { DllCompiler } from './dll_compiler';
+import { notInNodeModulesOrWebpackShims, inPluginNodeModules } from './dll_allowed_modules';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
@@ -28,15 +29,6 @@ import { promisify } from 'util';
 
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
-
-function inNodeModulesOrWebpackShims(checkPath) {
-  return checkPath.includes(`${path.sep}node_modules${path.sep}`)
-    || checkPath.includes(`${path.sep}webpackShims${path.sep}`);
-}
-
-function inPluginNodeModules(checkPath) {
-  return checkPath.match(/[\/\\]plugins.*[\/\\]node_modules/);
-}
 
 export class DynamicDllPlugin {
   constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
@@ -214,18 +206,14 @@ export class DynamicDllPlugin {
   registerDoneHook(compiler) {
     compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
       if (stats.compilation.needsDLLCompilation) {
-        // Logic to run the max compilation requirements.
-        // Only enable this for CI builds in order to ensure
-        // we have an healthy dll ecosystem.
-        if (this.performedCompilations === this.maxCompilations) {
-          return Promise.reject('All the allowed dll compilations were already performed and one more is needed which is not possible');
-        }
-
         // Run the dlls compiler and increment
         // the performed compilations
-        // TODO: ADD Try catch here to get not allowed modules reject exception
-        await this.runDLLCompiler(compiler);
-        this.performedCompilations++;
+        try {
+          await this.runDLLCompiler(compiler);
+        } catch (error) {
+          throw error;
+        }
+
         return;
       }
 
@@ -259,13 +247,13 @@ export class DynamicDllPlugin {
     }
 
     // ignore files that are not in node_modules
-    if (!inNodeModulesOrWebpackShims(module.resource)) {
+    if (notInNodeModulesOrWebpackShims(module.resource)) {
       return;
     }
 
     // also ignore files that are symlinked into node_modules, but only
     // do the `realpath` call after checking the plain resource path
-    if (!inNodeModulesOrWebpackShims(await realPathAsync(module.resource))) {
+    if (notInNodeModulesOrWebpackShims(await realPathAsync(module.resource))) {
       return;
     }
 
@@ -303,12 +291,43 @@ export class DynamicDllPlugin {
     return stubModule;
   }
 
+  async areMaxCompilationsPerformed() {
+    // Logic to run the max compilation requirements.
+    // Only enable this for CI builds in order to ensure
+    // we have an healthy dll ecosystem.
+    if (this.performedCompilations === this.maxCompilations) {
+      return Promise.reject('All the allowed dll compilations were already performed and one more is needed which is not possible');
+    }
+
+    return Promise.resolve();
+  }
+
   async runDLLCompiler(mainCompiler) {
-    await this.dllCompiler.run(this.entryPaths);
+    const runCompilerErrors = [];
+
+    try {
+      await this.dllCompiler.run(this.entryPaths);
+    } catch (e) {
+      runCompilerErrors.push(e);
+    }
+
+    try {
+      await this.areMaxCompilationsPerformed();
+    } catch (e) {
+      runCompilerErrors.push(e);
+    }
 
     // We need to purge the cache into the inputFileSystem
     // for every single built in previous compilation
     // that we rely in next ones.
     mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
+
+    this.performedCompilations++;
+
+    if (!runCompilerErrors.length) {
+      return Promise.resolve();
+    }
+
+    return Promise.reject(runCompilerErrors.join('\n-'));
   }
 }
