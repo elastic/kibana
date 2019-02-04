@@ -19,7 +19,6 @@ import {
   Coordinate,
   RectCoordinate
 } from 'x-pack/plugins/apm/typings/timeseries';
-import { colors } from '../../style/variables';
 import {
   asDecimal,
   asMillis,

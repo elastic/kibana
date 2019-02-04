@@ -15,7 +15,6 @@ import {
   uniq,
   zipObject
 } from 'lodash';
-import { colors } from 'x-pack/plugins/apm/public/style/variables';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 

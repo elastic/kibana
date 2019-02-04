@@ -14,14 +14,7 @@ import styled from 'styled-components';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontSize,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import { PROPERTY_CONFIG } from './propertyConfig';
