@@ -209,6 +209,14 @@ export default function ({ getService }) {
         'stack_stats.kibana.plugins.spaces.available',
         'stack_stats.kibana.plugins.spaces.count',
         'stack_stats.kibana.plugins.spaces.enabled',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.features.deprecation_logging.enabled',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_open.cluster',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_open.indices',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_open.overview',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.close',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.open',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.start',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.stop',
         'stack_stats.kibana.search.total',
         'stack_stats.kibana.timelion_sheet.total',
         'stack_stats.kibana.versions.0.count',
@@ -385,4 +393,3 @@ export default function ({ getService }) {
     });
   });
 }
-
