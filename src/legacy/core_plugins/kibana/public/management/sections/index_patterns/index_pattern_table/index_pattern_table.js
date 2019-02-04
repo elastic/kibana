@@ -78,7 +78,7 @@ const Table = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem  grow={false}>
-        <EuiButton fill href="#/management/kibana/index_pattern">
+        <EuiButton fill href="#/management/kibana/index_pattern" data-test-subj="createIndexPatternButton">
           <FormattedMessage id="kbn.management.indexPatternTable.createBtn" defaultMessage="Create index pattern" />
         </EuiButton>
       </EuiFlexItem>
