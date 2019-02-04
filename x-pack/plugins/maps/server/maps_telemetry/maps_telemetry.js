@@ -60,6 +60,8 @@ export function buildMapsTelemetry(savedObjects) {
   const mapsTelem = {
     // Total count of maps
     mapsTotalCount: mapsCount,
+    // Time of capture
+    timeCaptured: (new Date()).toISOString(),
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {

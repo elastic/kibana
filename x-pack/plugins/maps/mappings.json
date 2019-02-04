@@ -29,6 +29,9 @@
       "mapsTotalCount": {
         "type": "long"
       },
+      "timeCaptured": {
+        "type": "text"
+      },
       "attributesPerMap": {
         "properties": {
           "dataSourcesCount": {
