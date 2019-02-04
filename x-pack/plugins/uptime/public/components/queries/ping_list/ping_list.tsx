@@ -71,7 +71,7 @@ export class Pings extends React.Component<Props, PingListState> {
     this.state = {
       statusOptions,
       selectedOption: statusOptions[2],
-      maxSearchSize: 200,
+      maxSearchSize: 100,
     };
   }
   public render() {
@@ -97,7 +97,7 @@ export class Pings extends React.Component<Props, PingListState> {
               ? selectedOption.value
               : '',
           // TODO: get rid of the magic number
-          size: this.state.maxSearchSize || size || 200,
+          size: this.state.maxSearchSize || size || 100,
           sort: sort || 'desc',
         }}
         query={getPingsQuery}
@@ -237,27 +237,6 @@ export class Pings extends React.Component<Props, PingListState> {
                         onChange={selectedOptions => {
                           if (selectedOptions[0]) {
                             this.setState({ selectedOption: selectedOptions[0] });
-                          }
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.uptime.pingList.maxSearchSizeLabel', {
-                        defaultMessage: 'Max Search Size',
-                      })}
-                    >
-                      <EuiFieldNumber
-                        defaultValue={this.state.maxSearchSize.toString()}
-                        min={0}
-                        max={10000} // 10k is the max default size in ES, and a good max sane size for this page
-                        onBlur={e => {
-                          const sanitizedValue = parseInt(e.target.value, 10);
-                          if (!isNaN(sanitizedValue)) {
-                            this.setState({
-                              maxSearchSize: sanitizedValue >= 10000 ? 10000 : sanitizedValue,
-                            });
                           }
                         }}
                       />
