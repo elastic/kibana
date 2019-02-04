@@ -33,6 +33,8 @@ import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
 
+document.title = 'Maps - Kibana';
+
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
 app.directive('mapListing', function (reactDirective) {
