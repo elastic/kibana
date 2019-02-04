@@ -9,6 +9,7 @@ import { beatsIndexTemplate } from './index_templates';
 import { CMServerLibs } from './lib/types';
 import { createGetBeatConfigurationRoute } from './rest_api/beats/configuration';
 import { createBeatEnrollmentRoute } from './rest_api/beats/enroll';
+import { beatEventsRoute } from './rest_api/beats/events';
 import { createGetBeatRoute } from './rest_api/beats/get';
 import { createListAgentsRoute } from './rest_api/beats/list';
 import { createTagAssignmentsRoute } from './rest_api/beats/tag_assignment';
@@ -47,4 +48,5 @@ export const initManagementServer = (libs: CMServerLibs) => {
   libs.framework.registerRoute(createGetConfigurationBlocksRoute(libs));
   libs.framework.registerRoute(upsertConfigurationRoute(libs));
   libs.framework.registerRoute(createAssignableTagsRoute(libs));
+  libs.framework.registerRoute(beatEventsRoute(libs));
 };
