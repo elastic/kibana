@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { capitalize } from 'lodash';
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -17,7 +18,7 @@ import { EuiMonitoringTable } from '../../../components/table';
 import { KibanaStatusIcon } from '../../../components/kibana/status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const getColumns = (kbnUrl, scope) => ([
   {
@@ -145,7 +146,7 @@ uiRoutes.when('/kibana/instances', {
         }));
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
                 <EuiPanel>
@@ -168,12 +169,15 @@ uiRoutes.when('/kibana/instances', {
                       },
                     }}
                     onTableChange={this.onTableChange}
+                    executeQueryOptions={{
+                      defaultFields: ['name']
+                    }}
                   />
 
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

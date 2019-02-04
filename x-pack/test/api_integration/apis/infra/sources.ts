@@ -34,6 +34,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         const sourceStatus = response.data.source.status;
 
         // shipped default values
+        expect(sourceConfiguration.name).to.be('Default');
         expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
         expect(sourceConfiguration.logAlias).to.be('filebeat-*');
         expect(sourceConfiguration.fields.container).to.be('docker.container.id');

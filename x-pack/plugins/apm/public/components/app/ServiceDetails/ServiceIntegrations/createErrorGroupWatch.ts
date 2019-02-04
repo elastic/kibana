@@ -17,7 +17,7 @@ import {
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
 // @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 
@@ -84,7 +84,7 @@ export async function createErrorGroupWatch({
         errorGroupsBuckets:
           '{{#ctx.payload.aggregations.error_groups.buckets}}',
         errorLogMessage:
-          '<strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>',
+          '<strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.0.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>',
         errorCulprit:
           '{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}',
         slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',
@@ -113,7 +113,7 @@ export async function createErrorGroupWatch({
         errorGroupsBuckets:
           '{{#ctx.payload.aggregations.error_groups.buckets}}',
         errorLogMessage:
-          '>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*',
+          '>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.0.message}}{{/sample.hits.hits.0._source.error.log.message}}*',
         errorCulprit:
           '>{{#sample.hits.hits.0._source.error.culprit}}`{{sample.hits.hits.0._source.error.culprit}}`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}',
         slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',
