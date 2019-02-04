@@ -58,12 +58,3 @@ export function getTileBoundingBox(tileKey) {
     right: tileToLongitude(x + 1, tileCount),
   };
 }
-
-export function getTileCenter(tileKey) {
-  const { x, y, tileCount } = parseTileKey(tileKey);
-
-  return {
-    lat: tileToLatitude(y + 0.5, tileCount),
-    lon: tileToLongitude(x + 0.5, tileCount),
-  };
-}

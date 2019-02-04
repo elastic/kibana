@@ -5,7 +5,7 @@
  */
 
 import { RENDER_AS } from './render_as';
-import { getTileBoundingBox, getTileCenter } from './geo_tile_utils';
+import { getTileBoundingBox } from './geo_tile_utils';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -88,18 +88,11 @@ function rowToGeometry({
     };
   }
 
-  let pointCoordinates;
-  if (geocentroidColumn) {
-    const { lat, lon } = row[geocentroidColumn.id];
-    // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
-    pointCoordinates = [
-      clampGrid(lon, left, right),
-      clampGrid(lat, bottom, top)
-    ];
-  } else {
-    const { lat, lon } = getTileCenter(gridKey);
-    pointCoordinates = [lon, lat];
-  }
+  // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
+  const pointCoordinates = [
+    clampGrid(row[geocentroidColumn.id].lon, left, right),
+    clampGrid(row[geocentroidColumn.id].lat, bottom, top)
+  ];
 
   return {
     type: 'Point',

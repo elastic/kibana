@@ -23,6 +23,7 @@ import { GRID_RESOLUTION } from '../../grid_resolution';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
+const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
   {
@@ -59,7 +60,7 @@ export class ESGeoGridSource extends AbstractESSource {
       indexPatternId: indexPatternId,
       geoField: geoField,
       requestType: requestType,
-      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
+      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE
     };
   }
 
@@ -118,7 +119,7 @@ export class ESGeoGridSource extends AbstractESSource {
 
   getGeoGridPrecision(zoom) {
     const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
-    return Math.min(targetGeotileLevel, 22);
+    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
   _getGeoGridPrecisionResolutionDelta() {
