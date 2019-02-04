@@ -69,18 +69,18 @@ export function maps(kibana) {
           .registerLicenseCheckResultsGenerator(checkLicense);
 
         xpackMainPlugin.registerFeature({
-          id: 'gis',
-          name: i18n.translate('xpack.gis.featureRegistry.gisFeatureName', {
+          id: 'maps',
+          name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
             defaultMessage: 'Maps',
           }),
           icon: 'gisApp',
-          navLinkId: 'gis',
-          app: ['gis', 'kibana'],
-          catalogue: ['gis'],
+          navLinkId: 'maps',
+          app: ['maps', 'kibana'],
+          catalogue: ['maps'],
           privileges: {
             all: {
               savedObject: {
-                all: ['gis-map'],
+                all: ['map'],
                 read: ['config']
               },
               ui: [],
@@ -88,7 +88,7 @@ export function maps(kibana) {
             read: {
               savedObject: {
                 all: [],
-                read: ['gis-map', 'config']
+                read: ['map', 'config']
               },
               ui: [],
             },
