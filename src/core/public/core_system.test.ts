@@ -385,7 +385,10 @@ describe('#start()', () => {
     startCore();
     const [mockInstance] = MockChromeService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      notifications: mockNotificationStartContract,
+      injectedMetadata: mockInjectedMetadataStartContract,
+    });
   });
 
   it('returns start contract', () => {

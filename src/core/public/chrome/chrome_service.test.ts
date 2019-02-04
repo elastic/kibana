@@ -35,6 +35,7 @@ const defaultStartDeps: any = {
   },
   injectedMetadata: {
     injectedMetadataStartContract: true,
+    getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
     getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
     getLegacyMetadata: jest.fn().mockReturnValue({
       uiSettings: {
