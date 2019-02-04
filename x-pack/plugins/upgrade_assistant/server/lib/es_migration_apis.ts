@@ -7,7 +7,11 @@
 import _ from 'lodash';
 
 import { Request } from 'hapi';
-import { DeprecationAPIResponse, DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+import {
+  CallClusterWithRequest,
+  DeprecationAPIResponse,
+  DeprecationInfo,
+} from 'src/legacy/core_plugins/elasticsearch';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
@@ -15,24 +19,31 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
 }
 
 export interface UpgradeAssistantStatus {
+  readyForUpgrade: boolean;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
-
-  [checkupType: string]: EnrichedDeprecationInfo[];
 }
 
 export async function getUpgradeAssistantStatus(
-  callWithRequest: any,
+  callWithRequest: CallClusterWithRequest,
   req: Request
 ): Promise<UpgradeAssistantStatus> {
-  const deprecations = (await callWithRequest(req, 'transport.request', {
+  const deprecations = await callWithRequest(req, 'transport.request', {
     path: '/_xpack/migration/deprecations',
     method: 'GET',
-  })) as DeprecationAPIResponse;
+  });
+
+  const cluster = deprecations.cluster_settings
+    .concat(deprecations.ml_settings)
+    .concat(deprecations.node_settings);
+  const indices = getCombinedIndexInfos(deprecations);
+
+  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 
   return {
-    cluster: deprecations.cluster_settings.concat(deprecations.node_settings),
-    indices: getCombinedIndexInfos(deprecations),
+    readyForUpgrade: criticalWarnings.length === 0,
+    cluster,
+    indices,
   };
 }
 
