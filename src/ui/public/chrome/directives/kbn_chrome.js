@@ -32,7 +32,7 @@ import {
   banners,
 } from '../../notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
-import { I18nContext } from '../../i18n/context';
+import { I18nContext } from '../../i18n';
 
 export function kbnChromeProvider(chrome, internals) {
 
