@@ -5,12 +5,20 @@
  */
 
 import React from 'react';
-import { RRRRender } from 'react-redux-request';
+import { Request, RRRRender } from 'react-redux-request';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { IWaterfall } from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import {
+  getWaterfall,
+  IWaterfall
+} from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { loadTrace } from '../../services/rest/apm/traces';
 import { IUrlParams } from '../urlParams';
-import { WaterfallV1Request } from './waterfallV1';
-import { WaterfallV2Request } from './waterfallV2';
+// @ts-ignore
+import { createInitialDataSelector } from './helpers';
+
+export const ID = 'waterfall';
 
 interface Props {
   urlParams: IUrlParams;
@@ -19,22 +27,22 @@ interface Props {
 }
 
 export function WaterfallRequest({ urlParams, transaction, render }: Props) {
-  const hasTrace = transaction.hasOwnProperty('trace');
-  if (hasTrace) {
-    return (
-      <WaterfallV2Request
-        urlParams={urlParams}
-        transaction={transaction}
-        render={render}
-      />
-    );
-  } else {
-    return (
-      <WaterfallV1Request
-        urlParams={urlParams}
-        transaction={transaction}
-        render={render}
-      />
-    );
+  const { start, end } = urlParams;
+  const traceId = idx(transaction, _ => _.trace.id);
+
+  if (!(traceId && start && end)) {
+    return null;
   }
+
+  return (
+    <Request<TraceAPIResponse>
+      id={ID}
+      fn={loadTrace}
+      args={[{ traceId, start, end }]}
+      render={({ args, data = [], status }) => {
+        const waterfall = getWaterfall(data, transaction);
+        return render({ args, data: waterfall, status });
+      }}
+    />
+  );
 }

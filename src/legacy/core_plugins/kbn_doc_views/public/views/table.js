@@ -21,10 +21,13 @@ import _ from 'lodash';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import tableHtml from './table.html';
+import { i18n } from '@kbn/i18n';
 
 DocViewsRegistryProvider.register(function () {
   return {
-    title: 'Table',
+    title: i18n.translate('kbnDocViews.table.tableTitle', {
+      defaultMessage: 'Table'
+    }),
     order: 10,
     directive: {
       template: tableHtml,

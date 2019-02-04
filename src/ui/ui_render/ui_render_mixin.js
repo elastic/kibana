@@ -17,13 +17,16 @@
  * under the License.
  */
 
+import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 import { fromRoot } from '../../utils';
+import { generateCSPNonce, createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -51,53 +54,110 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
-  // expose built css
-  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+  server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
+  server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
 
+  const translationsCache = { translations: null, hash: null };
   server.route({
-    path: '/bundles/app/{id}/bootstrap.js',
+    path: '/translations/{locale}.json',
     method: 'GET',
     config: { auth: false },
-    async handler(request, h) {
-      const { id } = request.params;
-      const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-      if (!app) {
-        throw Boom.notFound(`Unknown app: ${id}`);
+    handler(request, h) {
+      // Kibana server loads translations only for a single locale
+      // that is specified in `i18n.locale` config value.
+      const { locale } = request.params;
+      if (i18n.getLocale() !== locale.toLowerCase()) {
+        throw Boom.notFound(`Unknown locale: ${locale}`);
       }
 
-      const basePath = config.get('server.basePath');
-      const regularBundlePath = `${basePath}/bundles`;
-      const dllBundlePath = `${basePath}/built_assets/dlls`;
-      const styleSheetPaths = [
-        `${dllBundlePath}/vendors.style.dll.css`,
-        `${regularBundlePath}/commons.style.css`,
-        `${regularBundlePath}/${app.getId()}.style.css`,
-        ...kbnServer.uiExports.styleSheetPaths
-          .map(path => (
-            path.localPath.endsWith('.scss')
-              ? `${basePath}/built_assets/css/${path.publicPath}`
-              : `${basePath}/${path.publicPath}`
-          ))
-          .reverse()
-      ];
+      // Stringifying thousands of labels and calculating hash on the resulting
+      // string can be expensive so it makes sense to do it once and cache.
+      if (translationsCache.translations == null) {
+        translationsCache.translations = JSON.stringify(i18n.getTranslation());
+        translationsCache.hash = createHash('sha1')
+          .update(translationsCache.translations)
+          .digest('hex');
+      }
 
-      const bootstrap = new AppBootstrap({
-        templateData: {
-          appId: app.getId(),
-          regularBundlePath,
-          dllBundlePath,
-          styleSheetPaths,
-        }
-      });
-
-      const body = await bootstrap.getJsFile();
-      const etag = await bootstrap.getJsFileHash();
-
-      return h.response(body)
+      return h.response(translationsCache.translations)
         .header('cache-control', 'must-revalidate')
-        .header('content-type', 'application/javascript')
-        .etag(etag);
+        .header('content-type', 'application/json')
+        .etag(translationsCache.hash);
     }
+  });
+
+  // register the bootstrap.js route after plugins are initialized so that we can
+  // detect if any default auth strategies were registered
+  kbnServer.afterPluginsInit(() => {
+    const authEnabled = !!server.auth.settings.default;
+
+    server.route({
+      path: '/bundles/app/{id}/bootstrap.js',
+      method: 'GET',
+      config: {
+        tags: ['api'],
+        auth: authEnabled ? { mode: 'try' } : false,
+      },
+      async handler(request, h) {
+        const { id } = request.params;
+        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+        if (!app) {
+          throw Boom.notFound(`Unknown app: ${id}`);
+        }
+
+        const uiSettings = request.getUiSettingsService();
+        const darkMode = !authEnabled || request.auth.isAuthenticated
+          ? await uiSettings.get('theme:darkMode')
+          : false;
+
+        const basePath = config.get('server.basePath');
+        const regularBundlePath = `${basePath}/bundles`;
+        const dllBundlePath = `${basePath}/built_assets/dlls`;
+        const styleSheetPaths = [
+          `${dllBundlePath}/vendors.style.dll.css`,
+          ...(
+            darkMode ?
+              [
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+              ] : [
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+              ]
+          ),
+          `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
+          `${regularBundlePath}/commons.style.css`,
+          `${regularBundlePath}/${app.getId()}.style.css`,
+          ...kbnServer.uiExports.styleSheetPaths
+            .filter(path => (
+              path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+            ))
+            .map(path => (
+              path.localPath.endsWith('.scss')
+                ? `${basePath}/built_assets/css/${path.publicPath}`
+                : `${basePath}/${path.publicPath}`
+            ))
+            .reverse()
+        ];
+
+        const bootstrap = new AppBootstrap({
+          templateData: {
+            appId: app.getId(),
+            regularBundlePath,
+            dllBundlePath,
+            styleSheetPaths,
+          }
+        });
+
+        const body = await bootstrap.getJsFile();
+        const etag = await bootstrap.getJsFileHash();
+
+        return h.response(body)
+          .header('cache-control', 'must-revalidate')
+          .header('content-type', 'application/javascript')
+          .etag(etag);
+      }
+    });
   });
 
   server.route({
@@ -144,18 +204,33 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     const request = h.request;
-    const translations = await server.getUiTranslations();
     const basePath = request.getBasePath();
 
-    return h.view('ui_app', {
+    const legacyMetadata = await getLegacyKibanaPayload({
+      app,
+      request,
+      includeUserProvidedConfig,
+      injectedVarsOverrides
+    });
+
+    const nonce = await generateCSPNonce();
+
+    const response = h.view('ui_app', {
+      nonce,
+      strictCsp: config.get('csp.strict'),
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
+      locale: i18n.getLocale(),
+      darkMode: get(legacyMetadata.uiSettings.user, ['theme:darkMode', 'userValue'], false),
 
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
         basePath,
+        i18n: {
+          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+        },
         vars: await replaceInjectedVars(
           request,
           mergeVariables(
@@ -165,15 +240,14 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
         ),
 
-        legacyMetadata: await getLegacyKibanaPayload({
-          app,
-          translations,
-          request,
-          includeUserProvidedConfig,
-          injectedVarsOverrides
-        }),
+        legacyMetadata,
       },
     });
+
+    const csp = createCSPRuleString(config.get('csp.rules'), nonce);
+    response.header('content-security-policy', csp);
+
+    return response;
   }
 
   server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {

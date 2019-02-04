@@ -5,17 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import idx from 'idx';
-import { get } from 'lodash';
 import React from 'react';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import {
-  REQUEST_URL_FULL,
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
+  URL_FULL,
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
@@ -25,16 +26,18 @@ import {
 interface Props {
   transaction: Transaction;
   totalDuration?: number;
+  errorCount?: number;
 }
 
 export function StickyTransactionProperties({
   transaction,
-  totalDuration
+  totalDuration,
+  errorCount
 }: Props) {
   const timestamp = transaction['@timestamp'];
   const url =
     idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.context.request.url.full) ||
+    idx(transaction, _ => _.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
@@ -48,7 +51,7 @@ export function StickyTransactionProperties({
       width: '50%'
     },
     {
-      fieldName: REQUEST_URL_FULL,
+      fieldName: URL_FULL,
       label: 'URL',
       val: url,
       truncated: true,
@@ -77,7 +80,7 @@ export function StickyTransactionProperties({
         defaultMessage: 'Result'
       }),
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, NOT_AVAILABLE_LABEL),
+      val: idx(transaction, _ => _.transaction.result) || NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {
@@ -85,11 +88,49 @@ export function StickyTransactionProperties({
         defaultMessage: 'User ID'
       }),
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, NOT_AVAILABLE_LABEL),
+      val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '25%'
     }
   ];
+
+  if (errorCount !== undefined) {
+    const errorsOverviewLink = (
+      <KibanaLink
+        pathname={'/app/apm'}
+        hash={`/${idx(transaction, _ => _.service.name)}/errors`}
+        query={{
+          kuery: legacyEncodeURIComponent(
+            `transaction.id : "${transaction.transaction.id}"`
+          )
+        }}
+      >
+        {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
+          values: { errorCount },
+          defaultMessage:
+            '{errorCount, plural, one {View 1 error} other {View # errors}}'
+        })}
+      </KibanaLink>
+    );
+
+    const noErrorsText = i18n.translate(
+      'xpack.apm.transactionDetails.errorsNone',
+      {
+        defaultMessage: 'None'
+      }
+    );
+
+    stickyProperties.push({
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.errorsOverviewLabel',
+        {
+          defaultMessage: 'Errors'
+        }
+      ),
+      val: errorCount === 0 ? noErrorsText : errorsOverviewLink,
+      width: '25%'
+    });
+  }
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }

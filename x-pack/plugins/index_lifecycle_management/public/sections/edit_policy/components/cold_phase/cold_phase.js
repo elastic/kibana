@@ -32,6 +32,7 @@ import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { NodeAllocation } from '../node_allocation';
+import { SetPriorityInput } from '../set_priority_input';
 
 class ColdPhaseUi extends PureComponent {
   static propTypes = {
@@ -183,38 +184,47 @@ class ColdPhaseUi extends PureComponent {
           </div>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
-          <EuiDescribedFormGroup
-            title={
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
-                  defaultMessage="Freeze"
-                />
-              </p>
-            }
-            description={
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                  defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
+          <Fragment>
+            <EuiDescribedFormGroup
+              title={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                    defaultMessage="Freeze"
+                  />
+                </p>
+              }
+              description={
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                    defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
                     You can search a frozen index, but expect queries to be slower."
-                />{' '}
-                <LearnMoreLink docPath="frozen-indices.html" />
-              </EuiTextColor>
-            }
-            fullWidth
-            titleSize="xs"
-          >
-            <EuiSwitch
-              data-test-subj="freezeSwitch"
-              checked={phaseData[PHASE_FREEZE_ENABLED]}
-              onChange={async e => {
-                await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
-              }}
-              label={freezeLabel}
-              aria-label={freezeLabel}
+                  />{' '}
+                  <LearnMoreLink docPath="frozen-indices.html" />
+                </EuiTextColor>
+              }
+              fullWidth
+              titleSize="xs"
+            >
+              <EuiSwitch
+                data-test-subj="freezeSwitch"
+                checked={phaseData[PHASE_FREEZE_ENABLED]}
+                onChange={async e => {
+                  await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+                }}
+                label={freezeLabel}
+                aria-label={freezeLabel}
+              />
+            </EuiDescribedFormGroup>
+            <SetPriorityInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_COLD}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
             />
-          </EuiDescribedFormGroup>
+          </Fragment>
         ) : null }
       </Fragment>
     );

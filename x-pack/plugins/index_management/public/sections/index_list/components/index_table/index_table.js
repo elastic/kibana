@@ -13,7 +13,6 @@ import { healthToColor } from '../../../../services';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiHealth,
@@ -44,8 +43,8 @@ import {
   getBannerExtensions,
   getFilterExtensions,
   getToggleExtensions,
-  getBadgeExtensions,
 } from '../../../../index_management_extensions';
+import { renderBadges } from '../../../../lib/render_badges';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -213,40 +212,24 @@ export class IndexTableUi extends Component {
     });
   }
 
-  renderBadges(index) {
-    const badgeLabels = [];
-    getBadgeExtensions().forEach(({ matchIndex, label }) => {
-      if (matchIndex(index)) {
-        badgeLabels.push(label);
-      }
-    });
-    return (
-      <Fragment>
-        {badgeLabels.map((badgeLabel) => {
-          return (
-            <Fragment key={badgeLabel}>
-              {' '}<EuiBadge color="primary">{badgeLabel}</EuiBadge>
-            </Fragment>
-          );
-        })}
-      </Fragment>
-    );
-  }
   buildRowCell(fieldName, value, index) {
-    const { openDetailPanel } = this.props;
+    const { openDetailPanel, filterChanged } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
     } else if (fieldName === 'name') {
       return (
-        <EuiLink
-          className="indTable__link"
-          data-test-subj="indexTableIndexNameLink"
-          onClick={() => {
-            openDetailPanel(value);
-          }}
-        >
-          {value}{this.renderBadges(index)}
-        </EuiLink>
+        <Fragment>
+          <EuiLink
+            className="indTable__link"
+            data-test-subj="indexTableIndexNameLink"
+            onClick={() => {
+              openDetailPanel(value);
+            }}
+          >
+            {value}
+          </EuiLink>
+          {renderBadges(index, filterChanged)}
+        </Fragment>
       );
     }
     return value;
@@ -386,7 +369,7 @@ export class IndexTableUi extends Component {
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionDescription"

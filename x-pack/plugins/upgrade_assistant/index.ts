@@ -15,6 +15,12 @@ export function upgradeAssistant(kibana: any) {
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings: require('./mappings.json'),
+      savedObjectSchemas: {
+        'upgrade-assistant-reindex-operation': {
+          isNamespaceAgnostic: true,
+        },
+      },
     },
     publicDir: resolve(__dirname, 'public'),
 

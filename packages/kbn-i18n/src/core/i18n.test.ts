@@ -29,6 +29,7 @@ describe('I18n engine', () => {
   afterEach(() => {
     // isolate modules for every test so that local module state doesn't conflict between tests
     jest.resetModules();
+    jest.clearAllMocks();
   });
 
   describe('addMessages', () => {
@@ -153,8 +154,7 @@ describe('I18n engine', () => {
     });
 
     test('should add messages with normalized passed locale', () => {
-      const locale = 'en-us';
-      i18n.setLocale(locale);
+      i18n.setLocale('en-US');
 
       i18n.addTranslation(
         {
@@ -162,10 +162,10 @@ describe('I18n engine', () => {
             ['a.b.c']: 'bar',
           },
         },
-        'en_US'
+        'en-us'
       );
 
-      expect(i18n.getLocale()).toBe(locale);
+      expect(i18n.getLocale()).toBe('en-us');
       expect(i18n.getTranslation()).toEqual({
         messages: {
           ['a.b.c']: 'bar',
@@ -234,7 +234,7 @@ describe('I18n engine', () => {
     });
 
     test('should normalize passed locale', () => {
-      i18n.setLocale('en_US');
+      i18n.setLocale('en-US');
       expect(i18n.getLocale()).toBe('en-us');
     });
   });
@@ -267,7 +267,7 @@ describe('I18n engine', () => {
     });
 
     test('should normalize passed locale', () => {
-      i18n.setDefaultLocale('en_US');
+      i18n.setDefaultLocale('en-US');
       expect(i18n.getDefaultLocale()).toBe('en-us');
     });
 
@@ -881,6 +881,49 @@ describe('I18n engine', () => {
       });
 
       expect(message).toMatchSnapshot();
+    });
+  });
+
+  describe('load', () => {
+    let mockFetch: jest.Mock<unknown>;
+    beforeEach(() => {
+      mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
+    });
+
+    test('fails if server returns >= 300 status code', async () => {
+      mockFetch.mockResolvedValue({ status: 301 });
+
+      await expect(i18n.load('some-url')).rejects.toMatchInlineSnapshot(
+        `[Error: Translations request failed with status code: 301]`
+      );
+
+      mockFetch.mockResolvedValue({ status: 404 });
+
+      await expect(i18n.load('some-url')).rejects.toMatchInlineSnapshot(
+        `[Error: Translations request failed with status code: 404]`
+      );
+    });
+
+    test('initializes engine with received translations', async () => {
+      const translations = {
+        locale: 'en-XA',
+        formats: {
+          number: { currency: { style: 'currency' } },
+        },
+        messages: { 'common.ui.someLabel': 'some label' },
+      };
+
+      mockFetch.mockResolvedValue({
+        status: 200,
+        json: jest.fn().mockResolvedValue(translations),
+      });
+
+      await expect(i18n.load('some-url')).resolves.toBeUndefined();
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith('some-url');
+
+      expect(i18n.getTranslation()).toEqual(translations);
     });
   });
 });

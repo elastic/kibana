@@ -5,46 +5,47 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb">
-          <span ng-show="opts.savedSearch.id" class="kuiLocalBreadcrumb__emphasis">
+        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
+          <span class="kuiLocalBreadcrumb__emphasis">
             <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle" ng-hide="k7design"></span>
             <span
               id="reload_saved_search"
-              aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload Saved Search'} }}"
-              tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload Saved Search'} }}"
+              aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload saved search'} }}"
+              tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload saved search'} }}"
+              tooltip-placement="right"
+              tooltip-append-to-body="1"
               ng-click="resetQuery()"
               kbn-accessible-click
               class="kuiIcon fa-undo small"
             ></span>&nbsp;
           </span>
+        </h1>
+        <div class="kuiLocalBreadcrumb">
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
           <span
             i18n-id="kbn.discover.hitsPluralTitle"
             i18n-default-message="{hits, plural, one {hit} other {hits}}"
             i18n-values="{ hits }"
           ></span>
-        </h1>
+        </div>
       </div>
 
       <!-- Search. -->
       <div data-transclude-slot="bottomRow" class="fullWidth">
-        <query-bar
+        <search-bar
           query="state.query"
-          on-submit="updateQueryAndFetch"
+          on-query-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
-        ></query-bar>
+          filters="filters"
+          on-filters-updated="onFiltersUpdated"
+          watch-depth="reference"
+        ></search-bar>
       </div>
     </div>
   </kbn-top-nav>
 
   <main class="container-fluid">
-    <div class="row">
-      <filter-bar
-        state="state"
-        index-patterns="[indexPattern]"
-      ></filter-bar>
-    </div>
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <disc-field-chooser
@@ -90,7 +91,7 @@
               ng-hide="fetchError"
               class="dscOverlay"
             >
-              <div class="euiTitle" >
+              <div class="euiTitle">
                 <h2
                   i18n-id="kbn.discover.searchingTitle"
                   i18n-default-message="Searching"
@@ -138,7 +139,7 @@
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
                       ng-blur="toggleInterval()"
                       data-test-subj="discoverIntervalSelect"
-                      >
+                    >
                     </select>
                     <span ng-if="bucketInterval.scaled">
                       <icon-tip
@@ -159,9 +160,9 @@
               </header>
 
               <div id="discoverHistogram"
-                 ng-show="vis && rows.length !== 0"
-                 style="display: flex; height: 200px"
-                >
+                ng-show="vis && rows.length !== 0"
+                style="display: flex; height: 200px"
+              >
               </div>
             </section>
 

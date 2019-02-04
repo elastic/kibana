@@ -28,6 +28,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.uniqueVisitorsTitle', {
         defaultMessage: '[Logs] Unique Visitors vs. Average Bytes',
@@ -46,6 +47,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.uniqueVisitorsByCountryTitle', {
         defaultMessage: '[Logs] Unique Visitors by Country',
@@ -64,6 +66,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Heatmap',
@@ -82,6 +85,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:23:20.897Z",
     "version": 2,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.hostVisitsBytesTableTitle', {
         defaultMessage: '[Logs] Host, Visits and Bytes Table',
@@ -100,6 +104,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:24:46.136Z",
     "version": 2,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.goalsTitle', {
         defaultMessage: '[Logs] Goals',
@@ -118,6 +123,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.fileTypeScatterPlotTitle', {
         defaultMessage: '[Logs] File Type Scatter Plot',
@@ -136,6 +142,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
         defaultMessage: '[Logs] Source and Destination Sankey Chart',
@@ -154,6 +161,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.responseCodesOverTimeTitle', {
         defaultMessage: '[Logs] Response Codes Over Time + Annotations',
@@ -172,6 +180,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.inputControlsTitle', {
         defaultMessage: '[Logs] Input Controls',
@@ -190,6 +199,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.articleTagsTitle', {
         defaultMessage: '[Logs] Article Tags',
@@ -208,6 +218,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Logs] Markdown Instructions',
@@ -226,6 +237,7 @@ export const getSavedObjects = () => [
     "type": "index-pattern",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": "kibana_sample_data_logs",
       "timeFieldName": "timestamp",
@@ -238,6 +250,7 @@ export const getSavedObjects = () => [
     "type": "dashboard",
     "updated_at": "2018-08-29T13:26:13.463Z",
     "version": 3,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.webTrafficTitle', {
         defaultMessage: '[Logs] Web Traffic',
@@ -247,7 +260,7 @@ export const getSavedObjects = () => [
         defaultMessage: 'Analyze mock web traffic log data for Elastic\'s website',
       }),
       "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Avg. Bytes\":\"#6ED0E0\",\"Unique Visitors\":\"#0A437C\"},\"legendOpen\":false}},\"gridData\":{\"x\":27,\"y\":11,\"w\":21,\"h\":13,\"i\":\"2\"},\"id\":\"e1d0f010-9ee7-11e7-8711-e7a007dcef99\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"gridData\":{\"x\":0,\"y\":49,\"w\":24,\"h\":18,\"i\":\"4\"},\"id\":\"06cf9c40-9ee8-11e7-8711-e7a007dcef99\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 22\":\"rgb(247,251,255)\",\"22 - 44\":\"rgb(208,225,242)\",\"44 - 66\":\"rgb(148,196,223)\",\"66 - 88\":\"rgb(74,152,201)\",\"88 - 110\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"gridData\":{\"x\":0,\"y\":36,\"w\":24,\"h\":13,\"i\":\"7\"},\"id\":\"935afa20-e0cd-11e7-9d07-1398ccfcefa3\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"mapCenter\":[36.8092847020594,-96.94335937500001],\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"x\":27,\"y\":24,\"w\":21,\"h\":12,\"i\":\"9\"},\"id\":\"4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 500\":\"#BF1B00\",\"1000 - 1500\":\"#7EB26D\",\"500 - 1000\":\"#F2C96D\"},\"defaultColors\":{\"0 - 500\":\"rgb(165,0,38)\",\"1000 - 1500\":\"rgb(0,104,55)\",\"500 - 1000\":\"rgb(255,255,190)\"},\"legendOpen\":false}},\"gridData\":{\"x\":10,\"y\":0,\"w\":9,\"h\":11,\"i\":\"11\"},\"id\":\"69a34b00-9ee8-11e7-8711-e7a007dcef99\",\"panelIndex\":\"11\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":0,\"y\":24,\"w\":27,\"h\":12,\"i\":\"13\"},\"id\":\"42b997f0-0c26-11e8-b0ec-3bb475f6b6ff\",\"panelIndex\":\"13\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":24,\"y\":36,\"w\":24,\"h\":31,\"i\":\"14\"},\"id\":\"7cbd2350-2223-11e8-b802-5bcf64c2cfb4\",\"panelIndex\":\"14\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":0,\"y\":11,\"w\":27,\"h\":13,\"i\":\"15\"},\"id\":\"314c6f60-2224-11e8-b802-5bcf64c2cfb4\",\"panelIndex\":\"15\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":19,\"y\":0,\"w\":15,\"h\":11,\"i\":\"16\"},\"id\":\"24a3e970-4257-11e8-b3aa-73fdaf54bfc9\",\"panelIndex\":\"16\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"x\":34,\"y\":0,\"w\":14,\"h\":11,\"i\":\"17\"},\"id\":\"14e2e710-4258-11e8-b3aa-73fdaf54bfc9\",\"panelIndex\":\"17\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":10,\"h\":11,\"i\":\"18\"},\"id\":\"47f2c680-a6e3-11e8-94b4-c30c0228351b\",\"panelIndex\":\"18\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
-      "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
       "timeTo": "now",

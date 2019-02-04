@@ -23,11 +23,14 @@ import chrome from 'ui/chrome';
 import { functions } from './functions';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
+import { renderFunctionsRegistry } from './render_functions_registry';
+import { visualization } from './renderers/visualization';
 
-const basePath = chrome.getBasePath();
+const basePath = chrome.getInjected('serverBasePath');
 
 const types = {
   browserFunctions: functionsRegistry,
+  renderers: renderFunctionsRegistry,
   types: typesRegistry
 };
 
@@ -36,6 +39,7 @@ function addFunction(fnDef) {
 }
 
 functions.forEach(addFunction);
+renderFunctionsRegistry.register(visualization);
 
 let _resolve;
 let _interpreterPromise;

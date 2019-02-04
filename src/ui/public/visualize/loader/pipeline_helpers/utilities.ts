@@ -19,8 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
+import { AggConfig, Vis } from 'ui/vis';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
+// @ts-ignore
+import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
@@ -43,26 +46,23 @@ export const getFormat = (mapping: any) => {
   if (!mapping) {
     return defaultFormat;
   }
-  let { id } = mapping;
+  const { id } = mapping;
   if (id === 'range') {
-    id = mapping.params.id;
-
     const RangeFormat = FieldFormat.from((range: any) => {
-      const format = getFieldFormat(id, mapping.params).convert;
+      const format = getFieldFormat(id, mapping.params);
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
         defaultMessage: '{from} to {to}',
         values: {
-          from: format(range.gte),
-          to: format(range.lt),
+          from: format.convert(range.gte),
+          to: format.convert(range.lt),
         },
       });
     });
     return new RangeFormat();
   } else if (id === 'terms') {
-    id = mapping.params.id;
     return {
       getConverterFor: (type: string) => {
-        const format = getFieldFormat(id, mapping.params).convert;
+        const format = getFieldFormat(mapping.params.id, mapping.params);
         return (val: string) => {
           if (val === '__other__') {
             return mapping.params.otherBucketLabel;
@@ -75,11 +75,11 @@ export const getFormat = (mapping: any) => {
             pathname: window.location.pathname,
             basePath: chrome.getBasePath(),
           };
-          return format(val, undefined, undefined, parsedUrl);
+          return format.convert(val, undefined, undefined, parsedUrl);
         };
       },
       convert: (val: string, type: string) => {
-        const format = getFieldFormat(id, mapping.params);
+        const format = getFieldFormat(mapping.params.id, mapping.params);
         if (val === '__other__') {
           return mapping.params.otherBucketLabel;
         }
@@ -97,4 +97,12 @@ export const getFormat = (mapping: any) => {
   } else {
     return getFieldFormat(id, mapping.params);
   }
+};
+
+export const getTableAggs = (vis: Vis): AggConfig[] => {
+  if (!vis.aggs || !vis.aggs.getResponseAggs) {
+    return [];
+  }
+  const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
+  return columns.map((c: any) => c.aggConfig);
 };

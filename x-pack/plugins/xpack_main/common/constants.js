@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /*
  * config options opt into telemetry
  * @type {string}
@@ -13,9 +15,12 @@ export const CONFIG_TELEMETRY = 'telemetry:optIn';
  * config description for opting into telemetry
  * @type {string}
  */
-export const CONFIG_TELEMETRY_DESC = (
-  'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.'
-);
+export const getConfigTelemetryDesc = () => {
+  return i18n.translate('xpack.main.telemetry.telemetryConfigDescription', {
+    defaultMessage:
+      'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.'
+  });
+};
 
 /**
  * The name of the Kibana System ID used to publish and look up Kibana stats through the Monitoring system.
@@ -28,6 +33,12 @@ export const KIBANA_SYSTEM_ID = 'kibana';
  * @type {string}
  */
 export const BEATS_SYSTEM_ID = 'beats';
+
+/**
+ * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.
+ * @type {string}
+ */
+export const APM_SYSTEM_ID = 'beats';
 
 /**
  * The name of the Kibana System ID used to look up Logstash stats through the Monitoring system.

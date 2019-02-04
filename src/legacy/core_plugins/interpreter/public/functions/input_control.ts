@@ -20,13 +20,13 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionDefinition } from '@kbn/interpreter/types';
 
-export const inputControlVis = (): FunctionDefinition<any, any, Args> => ({
+export const inputControlVis = (): FunctionDefinition<any, any, { visConfig: string }> => ({
   name: 'input_control_vis',
   type: 'render',
   context: {
     types: [],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.input_control.help', {
+  help: i18n.translate('interpreter.functions.input_control.help', {
     defaultMessage: 'Input control visualization',
   }),
   args: {
@@ -41,10 +41,8 @@ export const inputControlVis = (): FunctionDefinition<any, any, Args> => ({
       type: 'render',
       as: 'visualization',
       value: {
-        visConfig: {
-          type: 'input_controls_vis',
-          params,
-        },
+        visType: 'input_control_vis',
+        visConfig: params,
       },
     };
   },

@@ -52,7 +52,7 @@ export const SuggestionComponent: SFC<Props> = props => {
   return (
     <div
       className={classNames({
-        'typeahead-item': true,
+        kbnTypeahead__item: true,
         active: props.selected,
       })}
       role="option"
@@ -62,13 +62,13 @@ export const SuggestionComponent: SFC<Props> = props => {
       id={props.ariaId}
       aria-selected={props.selected}
     >
-      <div className={'suggestionItem suggestionItem--' + props.suggestion.type}>
-        <div className="suggestionItem__type">
+      <div className={'kbnSuggestionItem kbnSuggestionItem--' + props.suggestion.type}>
+        <div className="kbnSuggestionItem__type">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
-        <div className="suggestionItem__text">{props.suggestion.text}</div>
+        <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
         <div
-          className="suggestionItem__description"
+          className="kbnSuggestionItem__description"
           // Description currently always comes from us and we escape any potential user input
           // at the time we're generating the description text
           // eslint-disable-next-line react/no-danger

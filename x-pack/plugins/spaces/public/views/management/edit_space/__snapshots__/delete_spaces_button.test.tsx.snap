@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DeleteSpacesButton renders as expected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiButton
     aria-label="Delete this space"
     color="danger"
@@ -16,5 +16,5 @@ exports[`DeleteSpacesButton renders as expected 1`] = `
       values={Object {}}
     />
   </EuiButton>
-</React.Fragment>
+</Fragment>
 `;

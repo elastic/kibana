@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Search should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSearchBar
     box={
       Object {
@@ -57,5 +57,5 @@ exports[`Search should render normally 1`] = `
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;

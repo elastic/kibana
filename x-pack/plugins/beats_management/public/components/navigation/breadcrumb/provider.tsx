@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Component, ReactElement } from 'react';
+import chrome from 'ui/chrome';
 import { Provider } from './context';
 import { Breadcrumb } from './types';
 
 interface ComponentProps {
+  useGlobalBreadcrumbs: boolean;
   children: ReactElement<any> | Array<ReactElement<any>>;
 }
 
 interface ComponentState {
   breadcrumbs: Array<{
-    href: string;
+    href?: string;
     breadcrumb: Breadcrumb;
     parents?: Breadcrumb[];
   }>;
@@ -64,6 +66,9 @@ export class BreadcrumbProvider extends Component<ComponentProps, ComponentState
       addCrumb: this.addCrumb,
       removeCrumb: this.removeCrumb,
     };
+    if (this.props.useGlobalBreadcrumbs) {
+      chrome.breadcrumbs.set(context.breadcrumbs);
+    }
     return <Provider value={context}>{this.props.children}</Provider>;
   }
 }

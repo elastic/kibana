@@ -369,15 +369,6 @@ export class DashboardStateManager {
     this.saveState();
   }
 
-  getDarkTheme() {
-    return this.appState.options.darkTheme;
-  }
-
-  setDarkTheme(darkTheme) {
-    this.appState.options.darkTheme = darkTheme;
-    this.saveState();
-  }
-
   getTimeRestore() {
     return this.appState.timeRestore;
   }

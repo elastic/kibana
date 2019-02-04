@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, size } from 'lodash';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { size } from 'lodash';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore
@@ -14,13 +15,14 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 // @ts-ignore
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
-import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import {
   borderRadius,
   colors,
@@ -53,7 +55,10 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   top: 0;
   left: 0;
   border-radius: 0 0 0 ${borderRadius};
-  background: ${props => (props.isLibraryFrame ? colors.white : colors.gray5)};
+  background: ${props =>
+    props.isLibraryFrame
+      ? theme.euiColorEmptyShade
+      : theme.euiColorLightestShade};
 `;
 
 const LineNumber = styled.div<{ highlight: boolean }>`
@@ -61,10 +66,10 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   min-width: ${px(units.eighth * 21)};
   padding-left: ${px(units.half)};
   padding-right: ${px(units.quarter)};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   line-height: ${px(unit + units.eighth)};
   text-align: right;
-  border-right: 1px solid ${colors.gray4};
+  border-right: 1px solid ${theme.euiColorLightShade};
   background-color: ${props => (props.highlight ? colors.yellow : null)};
 
   &:last-of-type {
@@ -76,7 +81,7 @@ const LineContainer = styled.div`
   overflow: auto;
   margin: 0 0 0 ${px(units.eighth * 21)};
   padding: 0;
-  background-color: ${colors.white};
+  background-color: ${theme.euiColorEmptyShade};
 
   &:last-of-type {
     border-radius: 0 0 ${borderRadius} 0;
@@ -105,13 +110,13 @@ const Code = styled.code`
 
 function getStackframeLines(stackframe: IStackframeWithLineContext) {
   const line = stackframe.line.context;
-  const preLines: string[] = get(stackframe, 'context.pre', []);
-  const postLines: string[] = get(stackframe, 'context.post', []);
+  const preLines = idx(stackframe, _ => _.context.pre) || [];
+  const postLines = idx(stackframe, _ => _.context.post) || [];
   return [...preLines, line, ...postLines];
 }
 
 function getStartLineNumber(stackframe: IStackframeWithLineContext) {
-  const preLines = size(get(stackframe, 'context.pre', []));
+  const preLines = size(idx(stackframe, _ => _.context.pre) || []);
   return stackframe.line.number - preLines;
 }
 
@@ -124,7 +129,7 @@ interface Props {
 export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
   const lines = getStackframeLines(stackframe);
   const startLineNumber = getStartLineNumber(stackframe);
-  const highlightedLineIndex = size(get(stackframe, 'context.pre', []));
+  const highlightedLineIndex = size(idx(stackframe, _ => _.context.pre) || []);
   const language = codeLanguage || 'javascript'; // TODO: Add support for more languages
 
   return (

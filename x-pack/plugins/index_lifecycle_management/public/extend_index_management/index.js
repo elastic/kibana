@@ -31,11 +31,11 @@ export const retryLifecycleActionExtension = indices => {
     requestMethod: retryLifecycleForIndex,
     icon: 'play',
     indexNames: [indexNames],
-    buttonLabel: i18n.translate('xpack.idxMgmt.retryIndexLifecycleActionButtonLabel', {
+    buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.retryIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Retry lifecycle step',
     }),
     successMessage: i18n.translate(
-      'xpack.idxMgmt.retryIndexLifecycleAction.retriedLifecycleMessage',
+      'xpack.indexLifecycleMgmt.retryIndexLifecycleAction.retriedLifecycleMessage',
       {
         defaultMessage: 'Called retry lifecycle step for: {indexNames}',
         values: { indexNames: indexNames.map(indexName => `"${indexName}"`).join(', ') },
@@ -65,7 +65,7 @@ export const removeLifecyclePolicyActionExtension = (indices, reloadIndices) => 
     },
     icon: 'stopFilled',
     indexNames: [indexNames],
-    buttonLabel: i18n.translate('xpack.idxMgmt.removeIndexLifecycleActionButtonLabel', {
+    buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.removeIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Remove lifecycle policy',
     }),
   };
@@ -95,7 +95,7 @@ export const addLifecyclePolicyActionExtension = (indices, reloadIndices) => {
       );
     },
     icon: 'plusInCircle',
-    buttonLabel: i18n.translate('xpack.idxMgmt.addLifecyclePolicyActionButtonLabel', {
+    buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.addLifecyclePolicyActionButtonLabel', {
       defaultMessage: 'Add lifecycle policy',
     }),
   };

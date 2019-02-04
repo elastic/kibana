@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -57,18 +56,14 @@ describe('NewVisModal', () => {
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(
-      <I18nProvider>
-        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
-      </I18nProvider>
+      <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('should show a button for regular visualizations', () => {
     const wrapper = mountWithIntl(
-      <I18nProvider>
-        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
-      </I18nProvider>
+      <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
     );
     expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
   });
@@ -77,9 +72,7 @@ describe('NewVisModal', () => {
     it('should open the editor for visualizations without search', () => {
       window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
-        <I18nProvider>
-          <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
-        </I18nProvider>
+        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
@@ -89,14 +82,12 @@ describe('NewVisModal', () => {
     it('passes through editor params to the editor URL', () => {
       window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
-        <I18nProvider>
-          <NewVisModal
-            isOpen={true}
-            onClose={() => null}
-            visTypesRegistry={visTypes}
-            editorParams={['foo=true', 'bar=42']}
-          />
-        </I18nProvider>
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={visTypes}
+          editorParams={['foo=true', 'bar=42']}
+        />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
@@ -104,13 +95,22 @@ describe('NewVisModal', () => {
     });
   });
 
+  describe('filter for visualization types', () => {
+    it('should render as expected', () => {
+      const wrapper = mountWithIntl(
+        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+      );
+      const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
+      searchBox.simulate('change', { target: { value: 'with' } });
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
+
   describe('experimental visualizations', () => {
     it('should not show experimental visualizations if visualize:enableLabs is false', () => {
       settingsGet.mockReturnValue(false);
       const wrapper = mountWithIntl(
-        <I18nProvider>
-          <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
-        </I18nProvider>
+        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
       );
       expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
     });
@@ -118,9 +118,7 @@ describe('NewVisModal', () => {
     it('should show experimental visualizations if visualize:enableLabs is true', () => {
       settingsGet.mockReturnValue(true);
       const wrapper = mountWithIntl(
-        <I18nProvider>
-          <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
-        </I18nProvider>
+        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
       );
       expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
     });
