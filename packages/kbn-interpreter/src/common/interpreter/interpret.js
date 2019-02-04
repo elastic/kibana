@@ -54,8 +54,6 @@ export function interpreterProvider(config) {
     const { function: fnName, arguments: fnArgs } = link;
     const fnDef = getByAlias(functions, fnName);
 
-    // if the function is not found, pass the expression chain to the not found handler
-    // in this case, it will try to execute the function in another context
     if (!fnDef) {
       createError({ message: `Function ${fnName} could not be found.` });
     }
