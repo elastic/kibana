@@ -114,7 +114,7 @@ export class EditorComponent extends React.Component<IProps> {
         <EuiFlexItem
           tabIndex={0}
           grow={1}
-          className="code-editor-container code-no-overflow"
+          className="code-editor-container"
           id="mainEditor"
           style={{ paddingLeft: this.props.showBlame ? 300 : 0 }}
         />
