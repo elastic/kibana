@@ -28,7 +28,7 @@ function generator({ imageFlavor }) {
   # Default Kibana configuration for docker target
   server.name: kibana
   server.host: "0"
-  elasticsearch.url: http://elasticsearch:9200
+  elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   ${ !imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : '' }
   `);
 }
