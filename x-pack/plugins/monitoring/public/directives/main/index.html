@@ -64,7 +64,7 @@
             i18n-default-message="Jobs"
           ></a>
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="(monitoringMain.isCcrEnabled || monitoringMain.isActiveTab('ccr')) && !monitoringMain.instance"
             kbn-href="#/elasticsearch/ccr"
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ccr')}"
