@@ -31,6 +31,7 @@ export interface NavLink {
   active: boolean;
   lastSubUrl?: string;
   hidden?: boolean;
+  disabled?: boolean;
 }
 
 export interface ChromeNavLinks {
@@ -41,4 +42,6 @@ export interface ChromeNavLinks {
   showOnlyById(id: string): void;
   untrackNavLinksForDeletedSavedObjects(deletedIds: string[]): void;
   trackSubUrlForApp(linkId: string, parsedKibanaUrl: KibanaParsedUrl): void;
+  enableForcedAppSwitcherNavigation(): this;
+  getForcedAppSwitcherNavigation$(): Rx.Observable<boolean>;
 }

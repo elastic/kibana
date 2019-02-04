@@ -8,7 +8,7 @@ import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
 
-  const PageObjects = getPageObjects(['gis']);
+  const PageObjects = getPageObjects(['maps']);
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
@@ -20,9 +20,9 @@ export default function ({ getPageObjects, getService }) {
     const DATA_CENTER_LAT = 38;
 
     async function getRequestTimestamp() {
-      await PageObjects.gis.openInspectorRequestsView();
+      await PageObjects.maps.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
       return requestTimestamp;
     }
@@ -32,18 +32,18 @@ export default function ({ getPageObjects, getService }) {
       describe('geoprecision - requests', async () => {
         let beforeTimestamp;
         beforeEach(async () => {
-          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
           beforeTimestamp = await getRequestTimestamp();
         });
 
         it('should not rerequest when zoom changes do not cause geohash precision to change', async () => {
-          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
         });
 
         it('should rerequest when zoom changes causes the geohash precision to change', async () => {
-          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).not.to.equal(beforeTimestamp);
         });
@@ -52,24 +52,24 @@ export default function ({ getPageObjects, getService }) {
       describe('geoprecision - data', async ()=> {
 
         beforeEach(async () => {
-          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
         });
 
         it ('should not return any data when the extent does not cover the data bounds', async () => {
-          await PageObjects.gis.setView(64, 179, 5);
-          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          await PageObjects.maps.setView(64, 179, 5);
+          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
         });
 
         it ('should request the data when the map covers the databounds', async () => {
-          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
         });
 
         it ('should request only partial data when the map only covers part of the databounds', async () => {
           //todo this verifies the extent-filtering behavior (not really the correct application of geohash-precision), and should ideally be moved to its own section
-          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
-          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
+          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
         });
       });
@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('heatmap', () => {
       before(async () => {
-        await PageObjects.gis.loadSavedMap('geohashgrid heatmap example');
+        await PageObjects.maps.loadSavedMap('geohashgrid heatmap example');
       });
 
       const LAYER_ID = '3xlvm';
@@ -86,13 +86,13 @@ export default function ({ getPageObjects, getService }) {
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
         const beforeRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp.length).to.be(24);
-        await PageObjects.gis.triggerSingleRefresh(1000);
+        await PageObjects.maps.triggerSingleRefresh(1000);
         const afterRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
       });
 
       it('should decorate feature properties with scaled doc_count property', async () => {
-        const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }) {
         before(async () => {
           await queryBar.setQuery('machine.os.raw : "win 8"');
           await queryBar.submitQuery();
-          await PageObjects.gis.setView(0, 0, 0);
+          await PageObjects.maps.setView(0, 0, 0);
         });
 
         after(async () => {
@@ -116,9 +116,9 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geohashgrid aggregation request', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
+          await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           await inspector.close();
           expect(hits).to.equal('1');
         });
@@ -130,19 +130,19 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geohashgrid aggregation elasticsearch request', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
+          await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
-          const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           expect(hits).to.equal('0'); // aggregation requests do not return any documents
-          const indexPatternName =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Index pattern');
+          const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
           expect(indexPatternName).to.equal('logstash-*');
         });
 
         it('should not contain any elasticsearch request after layer is deleted', async () => {
-          await PageObjects.gis.removeLayer('logstash-*');
-          const noRequests = await PageObjects.gis.doesInspectorHaveRequests();
+          await PageObjects.maps.removeLayer('logstash-*');
+          const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
           expect(noRequests).to.equal(true);
         });
       });
@@ -150,7 +150,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('vector(grid)', () => {
       before(async () => {
-        await PageObjects.gis.loadSavedMap('geohashgrid vector grid example');
+        await PageObjects.maps.loadSavedMap('geohashgrid vector grid example');
       });
 
       const LAYER_ID = 'g1xkv';
@@ -160,13 +160,13 @@ export default function ({ getPageObjects, getService }) {
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
         const beforeRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp.length).to.be(24);
-        await PageObjects.gis.triggerSingleRefresh(1000);
+        await PageObjects.maps.triggerSingleRefresh(1000);
         const afterRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
       });
 
       it('should decorate feature properties with metrics properterties', async () => {
-        const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
@@ -180,7 +180,7 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
-          await PageObjects.gis.setView(0, 0, 0);
+          await PageObjects.maps.setView(0, 0, 0);
           await queryBar.setQuery('machine.os.raw : "win 8"');
           await queryBar.submitQuery();
         });
@@ -191,9 +191,9 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geohashgrid aggregation request', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
+          await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           await inspector.close();
           expect(hits).to.equal('1');
         });
@@ -205,19 +205,19 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geohashgrid aggregation elasticsearch request', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
+          await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
-          const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           expect(hits).to.equal('0'); // aggregation requests do not return any documents
-          const indexPatternName =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Index pattern');
+          const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
           expect(indexPatternName).to.equal('logstash-*');
         });
 
         it('should not contain any elasticsearch request after layer is deleted', async () => {
-          await PageObjects.gis.removeLayer('logstash-*');
-          const noRequests = await PageObjects.gis.doesInspectorHaveRequests();
+          await PageObjects.maps.removeLayer('logstash-*');
+          const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
           expect(noRequests).to.equal(true);
         });
       });

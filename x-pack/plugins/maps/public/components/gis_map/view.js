@@ -11,6 +11,7 @@ import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Toasts } from '../toasts';
+import { ExitFullScreenButton } from 'ui/exit_full_screen';
 
 export class GisMap extends Component {
 
@@ -59,7 +60,9 @@ export class GisMap extends Component {
     const {
       layerDetailsVisible,
       addLayerVisible,
-      noFlyoutVisible
+      noFlyoutVisible,
+      isFullScreen,
+      exitFullScreen,
     } = this.props;
 
     let currentPanel;
@@ -68,26 +71,36 @@ export class GisMap extends Component {
     if (noFlyoutVisible) {
       currentPanel = null;
     } else if (addLayerVisible) {
-      currentPanelClassName = "gisMapLayerPanel-isVisible";
+      currentPanelClassName = "mapMapLayerPanel-isVisible";
       currentPanel = <AddLayerPanel/>;
     } else if (layerDetailsVisible) {
-      currentPanelClassName = "gisMapLayerPanel-isVisible";
+      currentPanelClassName = "mapMapLayerPanel-isVisible";
       currentPanel = (
         <LayerPanel/>
       );
     }
+
+    let exitFullScreenButton;
+    if (isFullScreen) {
+      exitFullScreenButton = (
+        <ExitFullScreenButton
+          onExitFullScreenMode={exitFullScreen}
+        />
+      );
+    }
     return (
       <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem className="gisMapWrapper">
+        <EuiFlexItem className="mapMapWrapper">
           <MBMapContainer/>
           <WidgetOverlay/>
         </EuiFlexItem>
 
-        <EuiFlexItem className={`gisMapLayerPanel ${currentPanelClassName}`} grow={false}>
+        <EuiFlexItem className={`mapMapLayerPanel ${currentPanelClassName}`} grow={false}>
           {currentPanel}
         </EuiFlexItem>
 
         <Toasts/>
+        {exitFullScreenButton}
       </EuiFlexGroup>
     );
   }

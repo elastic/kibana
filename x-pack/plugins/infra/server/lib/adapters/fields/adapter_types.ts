@@ -7,7 +7,7 @@
 import { InfraFrameworkRequest } from '../framework';
 
 export interface FieldsAdapter {
-  getIndexFields(req: InfraFrameworkRequest, indices: string[]): Promise<IndexFieldDescriptor[]>;
+  getIndexFields(req: InfraFrameworkRequest, indices: string): Promise<IndexFieldDescriptor[]>;
 }
 
 export interface IndexFieldDescriptor {

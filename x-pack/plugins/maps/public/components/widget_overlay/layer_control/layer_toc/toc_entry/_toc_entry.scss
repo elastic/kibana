@@ -1,21 +1,21 @@
-.gisTocEntry {
+.mapTocEntry {
   padding: $euiSizeS $euiSize;
   position: relative;
 }
 
-.gisTocEntry-visible {
+.mapTocEntry-visible {
   opacity: 1;
 }
 
-.gisTocEntry-notVisible {
+.mapTocEntry-notVisible {
   opacity: 0.5;
 }
 
-.gisTocEntry__grab {
+.mapTocEntry__grab {
   margin-left: $euiSizeXS;
 }
 
-.gisTocEntry__grab:hover {
+.mapTocEntry__grab:hover {
   cursor: grab;
 }
 
