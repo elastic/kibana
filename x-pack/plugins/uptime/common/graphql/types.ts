@@ -399,6 +399,8 @@ export interface StatusData {
 export interface FilterBar {
   ids?: MonitorKey[] | null;
 
+  names?: string[] | null;
+
   ports?: number[] | null;
 
   schemes?: string[] | null;

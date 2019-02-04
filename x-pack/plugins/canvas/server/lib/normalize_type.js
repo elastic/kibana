@@ -19,7 +19,7 @@ export function normalizeType(type) {
       'token_count',
       '_version',
     ],
-    date: ['date'],
+    date: ['date', 'datetime'],
     boolean: ['boolean'],
     null: ['null'],
   };

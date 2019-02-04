@@ -16,7 +16,7 @@ import { timefilter } from 'ui/timefilter';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
@@ -83,7 +83,7 @@ uiRoutes.when('/logstash/node/:uuid', {
         ];
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
                 <EuiPanel>
@@ -106,7 +106,7 @@ uiRoutes.when('/logstash/node/:uuid', {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }
