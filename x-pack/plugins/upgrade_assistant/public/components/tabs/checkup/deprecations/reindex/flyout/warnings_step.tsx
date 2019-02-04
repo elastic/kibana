@@ -123,14 +123,10 @@ export class WarningsFlyoutStep extends React.Component<
                   Schema. Historical APM data will not visible until it's reindexed.
                   <br />
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/apm/server/master/breaking-changes.html"
+                    href="https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html"
                     target="_blank"
                   >
                     Documentation
-                  </EuiLink>
-                  <br />
-                  <EuiLink href="https://github.com/elastic/ecs" target="_blank">
-                    More about ECS
                   </EuiLink>
                 </p>
               </EuiText>

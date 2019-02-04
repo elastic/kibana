@@ -30,9 +30,9 @@ export async function getDeprecatedApmIndices(
     if (semver.lt(get(indices[index], 'mappings._meta.version', '0.0.0'), pkg.version)) {
       deprecations.push({
         level: 'critical',
-        message: 'APM index needs converted to ECS format',
-        url: 'https://www.elastic.co/guide/en/apm/server/master/breaking-changes.html',
-        details: 'This index was created prior to 7.0.',
+        message: 'APM index needs converted to 7.x format',
+        url: 'https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html',
+        details: 'This index was created prior to 7.0',
         reindex: true,
         index,
       });
