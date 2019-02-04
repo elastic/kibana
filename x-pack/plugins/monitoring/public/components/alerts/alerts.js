@@ -162,6 +162,9 @@ const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl })
         },
       }}
       onTableChange={onTableChange}
+      executeQueryOptions={{
+        defaultFields: ['message', 'category']
+      }}
     />
   );
 };

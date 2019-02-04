@@ -150,6 +150,9 @@ class ListingUI extends PureComponent {
                 },
               }}
               onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['name']
+              }}
             />
           </EuiPageContent>
         </EuiPageBody>
