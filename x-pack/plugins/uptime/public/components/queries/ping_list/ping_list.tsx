@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionProps,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -29,6 +28,8 @@ import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { getPingsQuery } from './get_pings';
+
+const DEFAULT_MAX_SEARCH_SIZE = 100;
 
 interface PingListProps {
   monitorId?: string;
@@ -71,7 +72,7 @@ export class Pings extends React.Component<Props, PingListState> {
     this.state = {
       statusOptions,
       selectedOption: statusOptions[2],
-      maxSearchSize: 100,
+      maxSearchSize: DEFAULT_MAX_SEARCH_SIZE,
     };
   }
   public render() {
@@ -97,7 +98,7 @@ export class Pings extends React.Component<Props, PingListState> {
               ? selectedOption.value
               : '',
           // TODO: get rid of the magic number
-          size: this.state.maxSearchSize || size || 100,
+          size: this.state.maxSearchSize || size || DEFAULT_MAX_SEARCH_SIZE,
           sort: sort || 'desc',
         }}
         query={getPingsQuery}
