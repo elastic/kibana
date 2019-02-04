@@ -15,17 +15,12 @@ import 'ui/autoload/all';
 import 'uiExports/autocompleteProviders';
 import 'react-vis/dist/style.css';
 import './style/global_overrides.css';
-
 import template from './templates/index.html';
 import Main from './components/app/Main';
-
 import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
-import LicenseChecker from './components/app/Main/LicenseChecker';
-
 import { history } from './components/shared/Links/url_helpers';
-
 import { I18nContext } from 'ui/i18n';
 
 chrome.setRootTemplate(template);
@@ -37,7 +32,6 @@ initTimepicker(history, store.dispatch).then(() => {
       <Provider store={store}>
         <Fragment>
           <GlobalProgress />
-          <LicenseChecker />
           <Router history={history}>
             <Main />
           </Router>
