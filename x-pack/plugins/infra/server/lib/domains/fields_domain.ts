@@ -26,8 +26,9 @@ export class InfraFieldsDomain {
 
     const fields = await this.adapter.getIndexFields(
       request,
-      // tslint:disable-next-line:prettier
-      `${includeMetricIndices ? configuration.metricAlias : ''},${includeLogIndices ? configuration.logAlias : ''}`
+      `${includeMetricIndices ? configuration.metricAlias : ''},${
+        includeLogIndices ? configuration.logAlias : ''
+      }`
     );
 
     return fields;
