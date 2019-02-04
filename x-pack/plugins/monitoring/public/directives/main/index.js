@@ -97,7 +97,8 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
             tabIconLabel: attributes.tabIconLabel,
             pipelineId: attributes.pipelineId,
             pipelineHash: attributes.pipelineHash,
-            pipelineVersions: get(scope, 'pageData.versions')
+            pipelineVersions: get(scope, 'pageData.versions'),
+            isCcrEnabled: attributes.isCcrEnabled
           },
           clusterName: get(scope, 'cluster.cluster_name')
         };
