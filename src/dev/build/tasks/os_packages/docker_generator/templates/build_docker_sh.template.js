@@ -27,12 +27,6 @@ function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
   #
   set -euo pipefail
   
-  clean_docker() {
-    docker rmi ${ imageTag }${ imageFlavor }:${ versionTag }
-  }
-  
-  trap clean_docker EXIT
-  
   docker pull centos:7
   
   echo "Building: kibana${ imageFlavor }-docker"; \\
