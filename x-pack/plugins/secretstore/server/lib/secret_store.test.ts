@@ -18,7 +18,7 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
     update: sinon.stub(),
   };
 
-  const subject = new SecretStore(savedObjectsClient, 'testSecretType');
+  const subject = new SecretStore(savedObjectsClient as any, 'testSecretType');
 
   it('should not expose the password field', () => {
     const field = 'password';

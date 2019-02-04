@@ -5,14 +5,9 @@
  */
 
 import crypto from 'crypto';
-import { join, resolve } from 'path';
-import { Keystore } from '../../../src/server/keystore';
-import { getData } from '../../../src/server/path';
+import { resolve } from 'path';
 import mappings from './mappings.json';
 import { SecretStore } from './server';
-
-const path = join(getData(), 'kibana.keystore');
-const keystore = new Keystore(path);
 
 export const secretstore = (kibana: any) => {
   return new kibana.Plugin({
@@ -37,6 +32,8 @@ export const secretstore = (kibana: any) => {
     },
 
     init(server: any) {
+      const keystore: any = new server.Keystore(server.config().get('path.data'));
+
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
 
       // const secret = server.config().get('xpack.secretstore.secret');

@@ -17,7 +17,7 @@ describe('CryptKeeper', () => {
           extra: 'me unique',
         }
       );
-      expect(encrypted.message).toBeUndefined();
+      expect(encrypted).not.toHaveProperty('message');
       expect(encrypted).not.toEqual('some super secret data to keep safe');
     });
 
