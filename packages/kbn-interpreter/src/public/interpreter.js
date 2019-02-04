@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { interpreterProvider } from '../common/interpreter/interpreter_provider';
+import { interpreterProvider } from '../common/interpreter/interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
 
+export const FUNCTIONS_URL = '/api/canvas/fns';
+
 export async function initializeInterpreter(kfetch, typesRegistry, functionsRegistry) {
-  const serverFunctionList = await kfetch({ pathname: '/api/canvas/fns' });
+  const serverFunctionList = await kfetch({ pathname: FUNCTIONS_URL });
 
   // For every sever-side function, register a client-side
   // function that matches its definition, but which simply
@@ -34,7 +36,7 @@ export async function initializeInterpreter(kfetch, typesRegistry, functionsRegi
         const types = typesRegistry.toJS();
         const { serialize } = serializeProvider(types);
         const result = await kfetch({
-          pathname: `/api/canvas/fns/${functionName}`,
+          pathname: `${FUNCTIONS_URL}/${functionName}`,
           method: 'POST',
           body: JSON.stringify({
             args,
@@ -52,7 +54,6 @@ export async function initializeInterpreter(kfetch, typesRegistry, functionsRegi
       types: typesRegistry.toJS(),
       handlers: { ...handlers, ...createHandlers() },
       functions: functionsRegistry.toJS(),
-      referableFunctions: serverFunctionList,
     });
     return interpretFn(ast, context);
   };

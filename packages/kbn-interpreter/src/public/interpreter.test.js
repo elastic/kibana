@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { initializeInterpreter } from './interpreter';
+import { initializeInterpreter, FUNCTIONS_URL } from './interpreter';
 
 jest.mock('../common/interpreter/interpreter_provider', () => ({
   interpreterProvider: () => () => ({}),
@@ -38,7 +38,7 @@ describe('kbn-interpreter/interpreter', () => {
     await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register: () => {} }));
 
     expect(kfetch).toHaveBeenCalledTimes(1);
-    expect(kfetch).toHaveBeenCalledWith({ pathname: '/api/canvas/fns' });
+    expect(kfetch).toHaveBeenCalledWith({ pathname: FUNCTIONS_URL });
   });
 
   it('registers client-side functions that pass through to the server', async () => {
@@ -66,7 +66,7 @@ describe('kbn-interpreter/interpreter', () => {
     await hello.fn(context, args);
 
     expect(kfetch).toHaveBeenCalledWith({
-      pathname: '/api/canvas/fns/hello',
+      pathname: `${FUNCTIONS_URL}/hello`,
       method: 'POST',
       body: JSON.stringify({ args, context }),
     });

@@ -36,7 +36,7 @@ export function getRequest(server, { headers }) {
             new Error(`Auth request failed: [${res.statusCode}] ${res.result.message}`)
           );
         }
-        throw boom.unauthorized('Failed to authenticate socket connection');
+        throw boom.unauthorized('Failed to authenticate connection');
       }
 
       return res.request;
