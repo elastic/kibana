@@ -48,9 +48,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
+          description: 'forbidden login and unknown search field',
+          statusCode: 403,
+          response: createExpectRbacForbidden('url'),
         },
         noType: {
           description: 'bad request, type is required',
@@ -120,9 +120,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
+          description: 'forbidden login and unknown search field',
+          statusCode: 403,
+          response: createExpectRbacForbidden('url'),
         },
         noType: {
           description: 'bad request, type is required',
@@ -300,9 +300,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
+          description: 'forbidden login and unknown search field',
+          statusCode: 403,
+          response: createExpectRbacForbidden('url'),
         },
         noType: {
           description: 'bad request, type is required',
@@ -336,9 +336,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
+          description: 'forbidden login and unknown search field',
+          statusCode: 403,
+          response: createExpectRbacForbidden('url'),
         },
         noType: {
           description: 'bad request, type is required',
@@ -372,9 +372,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
+          description: 'forbidden login and unknown search field',
+          statusCode: 403,
+          response: createExpectRbacForbidden('url'),
         },
         noType: {
           description: 'bad request, type is required',
@@ -408,9 +408,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
+          description: 'forbidden login and unknown search field',
+          statusCode: 403,
+          response: createExpectRbacForbidden('url'),
         },
         noType: {
           description: 'bad request, type is required',
