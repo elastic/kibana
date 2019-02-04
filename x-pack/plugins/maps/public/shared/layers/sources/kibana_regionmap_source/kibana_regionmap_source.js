@@ -60,7 +60,11 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta() {
     const vectorFileMeta = await this._getVectorFileMeta();
-    const featureCollection = await AbstractVectorSource.getGeoJson(vectorFileMeta, vectorFileMeta.url);
+    const featureCollection = await AbstractVectorSource.getGeoJson({
+      format: vectorFileMeta.format.type,
+      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
+      fetchUrl: vectorFileMeta.url
+    });
     return {
       data: featureCollection
     };

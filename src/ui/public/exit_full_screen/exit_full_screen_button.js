@@ -57,7 +57,7 @@ class ExitFullScreenButtonUi extends PureComponent {
         <EuiScreenReaderOnly>
           <p aria-live="polite">
             <FormattedMessage
-              id="kbn.dashboard.exitFullScreenButton.fullScreenModeDescription"
+              id="common.ui.exitFullScreenButton.fullScreenModeDescription"
               defaultMessage="In full screen mode, press ESC to exit."
             />
           </p>
@@ -68,7 +68,7 @@ class ExitFullScreenButtonUi extends PureComponent {
           <KuiButton
             type="hollow"
             aria-label={intl.formatMessage({
-              id: 'kbn.dashboard.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
+              id: 'common.ui.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
               defaultMessage: 'Exit full screen mode',
             })}
             className="dshExitFullScreenButton__mode"
@@ -77,7 +77,7 @@ class ExitFullScreenButtonUi extends PureComponent {
             <span className="dshExitFullScreenButton__logo" data-test-subj="exitFullScreenModeLogo"/>
             <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
               <FormattedMessage
-                id="kbn.dashboard.exitFullScreenButton.exitFullScreenModeButtonLabel"
+                id="common.ui.exitFullScreenButton.exitFullScreenModeButtonLabel"
                 defaultMessage="Exit full screen"
               />
               <span className="kuiIcon fa fa-angle-left"/>

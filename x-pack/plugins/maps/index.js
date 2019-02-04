@@ -27,6 +27,13 @@ export function maps(kibana) {
         icon: 'plugins/maps/icon.svg',
         euiIconType: 'gisApp',
       },
+      injectDefaultVars(server) {
+        const serverConfig = server.config();
+        const mapConfig = serverConfig.get('map');
+        return {
+          isEmsEnabled: mapConfig.includeElasticMapsService
+        };
+      },
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',
       ],

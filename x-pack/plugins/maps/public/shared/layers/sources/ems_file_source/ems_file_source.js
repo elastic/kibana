@@ -26,8 +26,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   static renderEditor({ onPreviewSource }) {
-    const onChange = ({ target }) => {
-      const selectedId = target.options[target.selectedIndex].value;
+    const onChange = (selectedId) => {
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
       const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
@@ -50,8 +49,11 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta() {
     const emsVectorFileMeta = await this._getEmsVectorFileMeta();
-    const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
-    const featureCollection = await AbstractVectorSource.getGeoJson(emsVectorFileMeta, fetchUrl);
+    const featureCollection = await AbstractVectorSource.getGeoJson({
+      format: emsVectorFileMeta.format,
+      featureCollectionPath: 'data',
+      fetchUrl: `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`
+    });
     return {
       data: featureCollection,
       meta: {}

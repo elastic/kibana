@@ -29,7 +29,7 @@ import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
-import { WithOptions } from '../../containers/with_options';
+import { WithSource } from '../../containers/with_source';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
@@ -83,7 +83,7 @@ export const MetricDetail = withTheme(
         const layouts = layoutCreator(this.props.theme);
 
         return (
-          <WithOptions>
+          <WithSource>
             {({ sourceId }) => (
               <WithMetricsTime resetOnUnmount>
                 {({
@@ -113,7 +113,7 @@ export const MetricDetail = withTheme(
                               nodeType={nodeType}
                               nodeId={nodeId}
                             >
-                              {({ metrics, error, loading }) => {
+                              {({ metrics, error, loading, refetch }) => {
                                 if (error) {
                                   return <ErrorPageBody message={error} />;
                                 }
@@ -160,6 +160,7 @@ export const MetricDetail = withTheme(
                                                       ? false
                                                       : loading
                                                   }
+                                                  refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
                                                 />
                                               </EuiPageContentWithRelative>
@@ -180,7 +181,7 @@ export const MetricDetail = withTheme(
                 )}
               </WithMetricsTime>
             )}
-          </WithOptions>
+          </WithSource>
         );
       }
 
