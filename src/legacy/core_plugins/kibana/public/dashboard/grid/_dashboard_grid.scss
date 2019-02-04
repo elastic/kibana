@@ -79,7 +79,7 @@
 
     &:hover,
     &:focus {
-      background-color: transparentize($euiColorWarning, .9);
+      background-color: $dshEditingModeHoverColor;
     }
   }
 
@@ -109,7 +109,7 @@
 
 // When in view-mode only, and on tiny mobile screens, just stack each of the grid-items
 
-@include euiBreakpoint('xs') {
+@include euiBreakpoint('xs', 's') {
   .dshLayout--viewing {
     .react-grid-item {
       position: static !important;
