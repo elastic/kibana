@@ -16,23 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
 
-import { I18nProvider } from './provider';
+import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { I18nStartContract } from '../../../core/public/i18n';
 
-export function injectI18nProvider<P>(WrappedComponent: React.ComponentType<P>) {
-  const I18nProviderWrapper: React.SFC<P> = props => {
+export let I18nContext: I18nStartContract['Context'] = null!;
+export function __newPlatformInit__(context: typeof I18nContext) {
+  if (I18nContext) {
+    throw new Error('ui/i18n already initialized with new platform apis');
+  }
+
+  I18nContext = context;
+}
+
+export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
+  const ContextWrapper: React.SFC<P> = props => {
     return (
-      <I18nProvider>
-        <WrappedComponent {...props} />
-      </I18nProvider>
+      <I18nContext>
+        <ComponentToWrap {...props} />
+      </I18nContext>
     );
   };
 
   // Original propTypes from the wrapped component should be re-exposed
   // since it will be used by reactDirective Angular service
   // that will rely on propTypes to watch attributes with these names
-  I18nProviderWrapper.propTypes = WrappedComponent.propTypes;
+  ContextWrapper.propTypes = ComponentToWrap.propTypes;
 
-  return I18nProviderWrapper;
+  return ContextWrapper;
 }
+
+uiModules
+  .get('i18n')
+  .provider('i18n', I18nProvider)
+  .filter('i18n', i18nFilter)
+  .directive('i18nId', i18nDirective);
