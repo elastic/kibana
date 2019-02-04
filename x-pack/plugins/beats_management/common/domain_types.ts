@@ -45,7 +45,6 @@ export interface CMBeat {
   access_token: string;
   verified_on?: string;
   type: string;
-  // TODO-VERSION
   version?: string;
   host_ip: string;
   host_name: string;
@@ -63,7 +62,6 @@ export interface CMBeat {
 export interface ConfigBlockSchema {
   id: string;
   name: string;
-  // TODO-VERSION
   version: number;
   allowOtherConfigs?: boolean;
   configs: BeatConfigSchema[];

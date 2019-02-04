@@ -27,7 +27,6 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
         host_name: Joi.string().required(),
         name: Joi.string().required(),
         type: Joi.string().required(),
-        // TODO-VERSION
         version: Joi.string().required(),
       }).required(),
     },
