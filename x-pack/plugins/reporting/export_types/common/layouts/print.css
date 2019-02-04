@@ -19,7 +19,9 @@
 kbn-top-nav,
 .kbnToaster__container,
 filter-bar,
-::-webkit-scrollbar {
+::-webkit-scrollbar,
+.euiHeader,
+.euiNavDrawer {
   display: none !important;
 }
 

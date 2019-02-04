@@ -19,7 +19,9 @@
 kbn-top-nav,
 .kbnToaster__container,
 filter-bar,
-::-webkit-scrollbar {
+::-webkit-scrollbar,
+.euiHeader,
+.euiNavDrawer {
   display: none !important;
 }
 
@@ -101,13 +103,4 @@ visualize-app .visEditor__canvas {
 /* Ensure the min-height of the small breakpoint isn't used */
 .vis-editor visualization {
   min-height: 0 !important;
-}
-
-/**
-*  Dashboard tweaks
-*/
-
-.dshPanel__headerButtonGroup {
-  /* hide the panel heading with the controls in it like expand */
-  display: none !important;
 }
