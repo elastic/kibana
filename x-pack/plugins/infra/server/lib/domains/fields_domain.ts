@@ -24,10 +24,11 @@ export class InfraFieldsDomain {
     const includeMetricIndices = [InfraIndexType.ANY, InfraIndexType.METRICS].includes(indexType);
     const includeLogIndices = [InfraIndexType.ANY, InfraIndexType.LOGS].includes(indexType);
 
-    const fields = await this.adapter.getIndexFields(request, [
-      ...(includeMetricIndices ? [configuration.metricAlias] : []),
-      ...(includeLogIndices ? [configuration.logAlias] : []),
-    ]);
+    const fields = await this.adapter.getIndexFields(
+      request,
+      // tslint:disable-next-line:prettier
+      `${includeMetricIndices ? configuration.metricAlias : ''},${includeLogIndices ? configuration.logAlias : ''}`
+    );
 
     return fields;
   }
