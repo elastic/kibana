@@ -123,12 +123,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true } = {}) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
-        hash: appConfig.hash
+        hash: hash || appConfig.hash,
       });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
