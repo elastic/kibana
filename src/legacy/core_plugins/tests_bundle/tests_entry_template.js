@@ -56,7 +56,7 @@ new CoreSystem({
       }
     },
     csp: {
-      warnLegacyBrowsers: true,
+      warnLegacyBrowsers: false,
     },
     vars: {
       kbnIndex: '.kibana',
