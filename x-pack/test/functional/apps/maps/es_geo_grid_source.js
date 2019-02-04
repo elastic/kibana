@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should not rerequest when zoom changes do not cause geohash precision to change', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+          await PageObjects.maps.setView(DATA_CENTER_LAT + 10, DATA_CENTER_LON + 10, 1);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
         });
