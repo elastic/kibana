@@ -51,6 +51,11 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
+      oidc: Joi.object({
+        realm: Joi.string().required(),
+        state: Joi.string(),
+        nonce: Joi.string()
+      }).default(),
     }).default();
   },
 
