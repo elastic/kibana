@@ -8,10 +8,12 @@ import gql from 'graphql-tag';
 
 import { sourceFieldsFragment } from './source_fields_fragment.gql_query';
 
-export const sourceQuery = gql`
-  query SourceQuery($sourceId: ID = "default") {
-    source(id: $sourceId) {
-      ...SourceFields
+export const createSourceMutation = gql`
+  mutation createSourceMutation($sourceId: ID!, $sourceConfiguration: CreateSourceInput!) {
+    createSource(id: $sourceId, source: $sourceConfiguration) {
+      source {
+        ...SourceFields
+      }
     }
   }
 
