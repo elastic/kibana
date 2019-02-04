@@ -12,6 +12,7 @@ import { getIndexListUri } from '../../../../../../../../index_management/public
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeEditor,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -145,10 +146,22 @@ export class DetailPanelUi extends Component {
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            {isPaused ? null : (
+            {isPaused ? (
+              <Fragment>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
+                      defaultMessage="There are no settings or shard stats associated with a paused follower index."
+                    />
+                  }
+                />
+              </Fragment>
+            ) : (
               <Fragment>
                 <EuiSpacer size="s" />
-
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiDescriptionListTitle>
