@@ -34,6 +34,8 @@ interface BaseArgumentDefinition<T> {
       ? 'string'
       : T extends number | number[]
       ? 'number'
+      : T extends boolean | boolean[]
+      ? 'boolean'
       : T extends null
       ? 'null'
       : never
