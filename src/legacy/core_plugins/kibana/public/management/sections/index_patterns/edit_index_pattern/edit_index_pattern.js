@@ -33,7 +33,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
-import { I18nContext, i18n } from 'ui/i18n';
+import { I18nContext } from 'ui/i18n';
+import { i18n } from '@kbn/i18n';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 

@@ -133,6 +133,7 @@ export default function ({ getService, getPageObjects }) {
       before(async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await (await find.clickByPartialLinkText('logstash-*'));
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
