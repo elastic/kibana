@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService, updateBaselines }) {
-  const PageObjects = getPageObjects(['common', 'maps', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
   describe('maps loaded from sample data', () => {
@@ -21,22 +21,31 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       past.setMonth(past.getMonth() - 6);
       const future = new Date();
       future.setMonth(future.getMonth() + 6);
-      await PageObjects.header.setAbsoluteRange(
-        PageObjects.header.formatDateToAbsoluteTimeString(past),
-        PageObjects.header.formatDateToAbsoluteTimeString(future)
+      await PageObjects.timePicker.setAbsoluteRange(
+        PageObjects.timePicker.formatDateToAbsoluteTimeString(past),
+        PageObjects.timePicker.formatDateToAbsoluteTimeString(future)
       );
     }
 
     // Skipped because EMS vectors are not accessible in CI
-    describe.skip('ecommerce', () => {
+    describe('ecommerce', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
+        await setTimerangeToCoverAllSampleData();
+        await PageObjects.maps.waitForLayersToLoad();
+        await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('United Kingdom');
+        await PageObjects.maps.toggleLayerVisibility('France');
+        await PageObjects.maps.toggleLayerVisibility('United States');
+        await PageObjects.maps.toggleLayerVisibility('World Countries');
       });
 
       after(async () => {
+        await PageObjects.maps.existFullScreen();
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('ecommerce');
@@ -54,12 +63,14 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.waitForLayersToLoad();
+        await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.toggleLayerVisibility('road_map');
       });
 
       after(async () => {
+        await PageObjects.maps.existFullScreen();
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('flights');
@@ -72,18 +83,21 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     });
 
     // Skipped because EMS vectors are not accessible in CI
-    describe.skip('web logs', () => {
+    describe('web logs', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.waitForLayersToLoad();
+        await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
       });
 
       after(async () => {
+        await PageObjects.maps.existFullScreen();
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('logs');
