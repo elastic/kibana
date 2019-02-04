@@ -8,7 +8,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-interface EmptyPageProps {
+interface NoIndicesProps {
   message: string;
   title: string;
   actionLabel: string;
@@ -16,7 +16,7 @@ interface EmptyPageProps {
   'data-test-subj'?: string;
 }
 
-export const EmptyPage: React.SFC<EmptyPageProps> = ({
+export const NoIndices: React.SFC<NoIndicesProps> = ({
   actionLabel,
   actionUrl,
   message,
