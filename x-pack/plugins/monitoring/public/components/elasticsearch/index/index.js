@@ -51,7 +51,7 @@ export const Index = ({
             ))}
           </EuiFlexGrid>
           <EuiSpacer size="m"/>
-          <ShardAllocation scope={scope} {...props} kbnUrl={kbnUrl} type="index" />
+          <ShardAllocation scope={scope} kbnUrl={kbnUrl} type="index" />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
