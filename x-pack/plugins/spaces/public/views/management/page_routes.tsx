@@ -107,7 +107,6 @@ routes.when('/management/spaces/edit/:spaceId', {
     $http: any,
     $route: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
