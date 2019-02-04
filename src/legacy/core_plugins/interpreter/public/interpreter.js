@@ -29,7 +29,6 @@ import { visualization } from './renderers/visualization';
 const basePath = chrome.getInjected('serverBasePath');
 
 const types = {
-  browserFunctions: functionsRegistry,
   renderers: renderFunctionsRegistry,
   types: typesRegistry
 };

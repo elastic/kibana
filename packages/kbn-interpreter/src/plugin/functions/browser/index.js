@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { clog } from './clog';
-
-export const browserFunctions = [
-  clog,
-];
+export const browserFunctions = [];
