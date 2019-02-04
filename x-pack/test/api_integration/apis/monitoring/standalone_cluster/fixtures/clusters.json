@@ -1,5 +1,6 @@
 [{
-  "cluster_uuid": "BsqrVriJSu21Q-MkOr6vTA",
+  "isSupported": true,
+  "cluster_uuid": "lfhHkgqfTy2Vy3SvlPSvXg",
   "cluster_name": "monitoring",
   "version": "7.0.0",
   "license": {
@@ -11,8 +12,8 @@
       "indices": {
         "count": 5,
         "docs": {
-          "count": 7814,
-          "deleted": 169
+          "count": 522,
+          "deleted": 122
         },
         "shards": {
           "total": 7,
@@ -37,22 +38,22 @@
           }
         },
         "store": {
-          "size_in_bytes": 9230231
+          "size_in_bytes": 1245010
         }
       },
       "nodes": {
         "fs": {
           "total_in_bytes": 499963174912,
-          "free_in_bytes": 83429146624,
-          "available_in_bytes": 70893522944
+          "free_in_bytes": 107874111488,
+          "available_in_bytes": 101780008960
         },
         "count": {
           "total": 1
         },
         "jvm": {
-          "max_uptime_in_millis": 190074,
+          "max_uptime_in_millis": 190457,
           "mem": {
-            "heap_used_in_bytes": 114044640,
+            "heap_used_in_bytes": 341382816,
             "heap_max_in_bytes": 1038876672
           }
         }
@@ -76,10 +77,10 @@
   },
   "kibana": {
     "status": "green",
-    "requests_total": 3,
-    "concurrent_connections": 2,
-    "response_time_max": 58,
-    "memory_size": 255426560,
+    "requests_total": 42,
+    "concurrent_connections": 0,
+    "response_time_max": 864,
+    "memory_size": 127283200,
     "memory_limit": 8564343808,
     "count": 1
   },
@@ -108,10 +109,9 @@
       "message": "Cluster [monitoring] license type [basic] does not support Cluster Alerts"
     }
   },
-  "isCcrEnabled": true,
   "isPrimary": true,
-  "isSupported": true,
-  "status": "yellow"
+  "status": "yellow",
+  "isCcrEnabled": false
 }, {
   "isSupported": true,
   "cluster_uuid": "__standalone_cluster__",
@@ -149,8 +149,8 @@
     "count": 0
   },
   "beats": {
-    "totalEvents": 6963,
-    "bytesSent": 6283358,
+    "totalEvents": 348,
+    "bytesSent": 319913,
     "beats": {
       "total": 1,
       "types": [{
@@ -176,6 +176,6 @@
       "message": "Cluster [] license type [undefined] does not support Cluster Alerts"
     }
   },
-  "isCcrEnabled": true,
-  "isPrimary": false
+  "isPrimary": false,
+  "isCcrEnabled": false
 }]

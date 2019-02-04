@@ -45,6 +45,8 @@ export async function checkCcrEnabled(req, esIndexPattern) {
     ]
   };
 
+  console.log(JSON.stringify(params));
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
   return handleResponse(response);
