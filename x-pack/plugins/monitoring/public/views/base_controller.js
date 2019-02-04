@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 /**
  * Class to manage common instantiation behaviors in a view controller

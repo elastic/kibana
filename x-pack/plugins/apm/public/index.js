@@ -26,7 +26,7 @@ import LicenseChecker from './components/app/Main/LicenseChecker';
 
 import { history } from './components/shared/Links/url_helpers';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 chrome.setRootTemplate(template);
 const store = configureStore();

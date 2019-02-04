@@ -8,7 +8,7 @@ import React from 'react';
 import { find } from 'lodash';
 import { MonitoringViewBaseController } from '../../';
 import { ElasticsearchOverview } from 'plugins/monitoring/components';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 export class ElasticsearchOverviewController extends MonitoringViewBaseController {
   constructor($injector, $scope) {

@@ -16,7 +16,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import ReactDOM from 'react-dom';
 import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 // @ts-ignore

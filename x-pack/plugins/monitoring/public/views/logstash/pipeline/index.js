@@ -21,7 +21,7 @@ import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_v
 import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import {
   EuiPageBody,
   EuiPage,

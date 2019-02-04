@@ -11,7 +11,7 @@ import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { timefilter } from 'ui/timefilter';
 import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';

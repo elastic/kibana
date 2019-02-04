@@ -67,7 +67,7 @@ export class LegacyPlatformService {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
-    require('ui/i18n/context').__newPlatformInit__(i18n.Context);
+    require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
     require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);

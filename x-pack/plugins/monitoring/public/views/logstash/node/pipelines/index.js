@@ -18,7 +18,7 @@ import {
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
 
 const getPageData = ($injector) => {

@@ -12,7 +12,7 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const REACT_NODE_ID = 'licenseReact';
 

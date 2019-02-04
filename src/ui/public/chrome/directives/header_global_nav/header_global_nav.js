@@ -20,7 +20,7 @@
 
 import { uiModules } from '../../../modules';
 import { Header } from './components/header';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 
 const module = uiModules.get('kibana');

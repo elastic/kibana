@@ -14,7 +14,7 @@ import { EditUser } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { createApiClient } from '../../lib/api';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from './breadcrumbs';
 
 const renderReact = (elem, httpClient, changeUrl, username) => {

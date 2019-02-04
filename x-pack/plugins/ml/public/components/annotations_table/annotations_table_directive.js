@@ -23,7 +23,7 @@ const module = uiModules.get('apps/ml');
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 module.directive('mlAnnotationTable', function () {
 

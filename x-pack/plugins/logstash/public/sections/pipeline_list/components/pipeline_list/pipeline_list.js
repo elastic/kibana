@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { toastNotifications } from 'ui/notify';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { PipelineList } from '../../../../components/pipeline_list';
 import 'plugins/logstash/services/pipelines';
 import 'plugins/logstash/services/license';

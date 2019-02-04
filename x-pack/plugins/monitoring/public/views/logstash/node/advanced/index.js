@@ -17,7 +17,7 @@ import { MonitoringViewBaseController } from '../../../base_controller';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../../components/chart';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');

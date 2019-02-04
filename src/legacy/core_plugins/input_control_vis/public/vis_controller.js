@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';

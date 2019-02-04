@@ -27,7 +27,7 @@ const module = uiModules.get('apps/ml');
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);

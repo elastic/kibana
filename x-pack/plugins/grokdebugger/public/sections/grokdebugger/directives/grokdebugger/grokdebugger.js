@@ -9,7 +9,7 @@ import 'plugins/grokdebugger/services/grokdebugger';
 import { GrokDebugger } from '../../components/grok_debugger';
 import { render } from 'react-dom';
 import React from 'react';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const app = uiModules.get('xpack/grokdebugger');
 

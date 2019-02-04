@@ -24,7 +24,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { Label } from './label';
 import { FeedbackMessage } from './feedback_message';
 

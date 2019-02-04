@@ -11,7 +11,7 @@ import { BucketSpanEstimator } from './bucket_span_estimator_view';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

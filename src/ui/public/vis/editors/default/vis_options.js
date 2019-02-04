@@ -22,7 +22,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from '../../../modules';
 import visOptionsTemplate from './vis_options.html';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.

@@ -17,7 +17,7 @@ import { timefilter } from 'ui/timefilter';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {

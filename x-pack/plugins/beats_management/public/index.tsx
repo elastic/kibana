@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';

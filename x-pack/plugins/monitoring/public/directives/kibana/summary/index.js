@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringKibanaSummary', () => {

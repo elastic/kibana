@@ -21,7 +21,7 @@ import { render } from 'enzyme';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { __newPlatformInit__, wrapInI18nContext } from './context';
+import { __newPlatformInit__, wrapInI18nContext } from '.';
 
 describe('ui/i18n', () => {
   test('renders children and forwards properties', () => {

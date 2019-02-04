@@ -12,7 +12,7 @@ import chrome from 'ui/chrome';
 import { App } from './app';
 import { BASE_PATH } from '../common/constants';
 import { indexLifecycleManagementStore } from './store';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { setUrlService } from './services/navigation';
 
 import routes from 'ui/routes';

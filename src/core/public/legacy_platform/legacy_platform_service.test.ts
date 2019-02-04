@@ -47,8 +47,8 @@ jest.mock('ui/test_harness', () => {
 });
 
 const mockI18nContextInit = jest.fn();
-jest.mock('ui/i18n/context', () => {
-  mockLoadOrder.push('ui/i18n/context');
+jest.mock('ui/i18n', () => {
+  mockLoadOrder.push('ui/i18n');
   return {
     __newPlatformInit__: mockI18nContextInit,
   };
@@ -202,7 +202,7 @@ describe('#start()', () => {
       expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
     });
 
-    it('passes i18n.Context to ui/i18n/context', () => {
+    it('passes i18n.Context to ui/i18n', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });

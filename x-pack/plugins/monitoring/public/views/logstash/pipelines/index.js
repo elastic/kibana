@@ -16,7 +16,7 @@ import {
 } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { MonitoringViewBaseEuiTableController } from '../..';
 

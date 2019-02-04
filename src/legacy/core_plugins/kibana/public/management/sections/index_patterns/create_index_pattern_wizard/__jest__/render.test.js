@@ -35,7 +35,7 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => { },
 }));
 
-jest.mock('ui/i18n/context', () => ({
+jest.mock('ui/i18n', () => ({
   I18nContext: () => {},
 }));
 

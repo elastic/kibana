@@ -22,7 +22,7 @@ import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';

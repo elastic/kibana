@@ -19,7 +19,7 @@ import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../
 
 import uiRoutes from 'ui/routes';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const template = `
   <ml-nav-menu name="settings" />

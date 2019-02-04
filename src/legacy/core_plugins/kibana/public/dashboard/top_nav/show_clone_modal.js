@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { DashboardCloneModal } from './clone_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';

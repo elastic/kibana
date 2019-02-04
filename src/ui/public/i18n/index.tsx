@@ -18,12 +18,16 @@
  */
 
 import React from 'react';
+
+import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
 import { I18nStartContract } from '../../../core/public/i18n';
 
 export let I18nContext: I18nStartContract['Context'] = null!;
 export function __newPlatformInit__(context: typeof I18nContext) {
   if (I18nContext) {
-    throw new Error('ui/i18n/context already initialized with new platform apis');
+    throw new Error('ui/i18n already initialized with new platform apis');
   }
 
   I18nContext = context;
@@ -45,3 +49,9 @@ export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
 
   return ContextWrapper;
 }
+
+uiModules
+  .get('i18n')
+  .provider('i18n', I18nProvider)
+  .filter('i18n', i18nFilter)
+  .directive('i18nId', i18nDirective);

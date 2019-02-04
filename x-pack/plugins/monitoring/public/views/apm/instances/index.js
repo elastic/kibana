@@ -11,7 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances', {
   template,

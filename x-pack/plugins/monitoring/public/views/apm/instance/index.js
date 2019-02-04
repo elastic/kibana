@@ -19,7 +19,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
 import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,

@@ -14,7 +14,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
 import { Node } from '../../../components/elasticsearch/node/node';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';

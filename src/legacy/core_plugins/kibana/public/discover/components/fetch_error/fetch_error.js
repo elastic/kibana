@@ -21,7 +21,7 @@ import 'ngreact';
 import React, { Fragment } from 'react';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {

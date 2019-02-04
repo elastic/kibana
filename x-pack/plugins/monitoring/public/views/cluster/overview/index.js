@@ -9,7 +9,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/overview', {
   template,

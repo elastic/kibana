@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {

@@ -8,7 +8,7 @@ import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { render } from 'react-dom';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { MachineLearningJobStatusIcon } from 'plugins/monitoring/components/elasticsearch/ml_job_listing/status_icon';

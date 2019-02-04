@@ -14,7 +14,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../../base_controller';
 
 function getPageData($injector) {

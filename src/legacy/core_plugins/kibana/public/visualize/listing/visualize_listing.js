@@ -24,7 +24,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';

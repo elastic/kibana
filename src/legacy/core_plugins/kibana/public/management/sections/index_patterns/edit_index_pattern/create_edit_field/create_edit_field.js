@@ -29,7 +29,7 @@ import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadc
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';

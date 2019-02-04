@@ -16,7 +16,7 @@ import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import template from './main.html';

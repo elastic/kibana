@@ -13,7 +13,7 @@ import template from 'plugins/reporting/views/management/jobs.html';
 
 import { ReportListing } from '../../components/report_listing';
 import { i18n } from '@kbn/i18n';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'reportListingAnchor';

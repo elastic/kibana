@@ -13,7 +13,7 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { Overview } from '../../../components/logstash/overview';
 import { MonitoringViewBaseController } from '../../base_controller';
 

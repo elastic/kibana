@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { constant } from 'lodash';

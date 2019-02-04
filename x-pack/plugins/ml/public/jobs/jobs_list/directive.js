@@ -36,7 +36,7 @@ uiRoutes
   });
 
 import { JobsPage } from './jobs';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 module.directive('jobsPage', function () {
   return {

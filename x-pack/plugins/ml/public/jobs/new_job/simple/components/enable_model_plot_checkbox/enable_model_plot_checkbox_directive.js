@@ -11,7 +11,7 @@ import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
 import { ml } from '../../../../../services/ml_api_service';
 import { checkCardinalitySuccess } from '../../../utils/new_job_utils';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

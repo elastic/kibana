@@ -10,7 +10,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 import { LoggedOutPage } from './components';
 

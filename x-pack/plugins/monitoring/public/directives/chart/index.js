@@ -11,7 +11,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { MonitoringTimeseriesContainer } from '../../components/chart/monitoring_timeseries_container';
 import { EuiSpacer } from '@elastic/eui';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
 uiModule.directive('monitoringChart', () => {

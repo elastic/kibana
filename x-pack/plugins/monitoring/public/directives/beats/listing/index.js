@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
 
 const uiModule = uiModules.get('monitoring/directives', []);

@@ -29,7 +29,7 @@ import { EditRolePage } from './components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,

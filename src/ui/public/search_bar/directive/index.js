@@ -18,7 +18,7 @@
  */
 
 import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../modules';
 import { SearchBar } from '../components';
 

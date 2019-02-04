@@ -16,7 +16,7 @@ import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {

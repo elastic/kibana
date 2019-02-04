@@ -25,7 +25,7 @@ import './sections';
 import 'ui/filters/start_from';
 import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';

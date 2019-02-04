@@ -16,7 +16,7 @@ import { timefilter } from 'ui/timefilter';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {

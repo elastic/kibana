@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Embeddable } from 'ui/embeddable';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 
 export class DisabledLabEmbeddable extends Embeddable {

@@ -15,7 +15,7 @@ import { ModelUpdater } from './model_updater';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 

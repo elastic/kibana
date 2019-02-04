@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { setTelemetryOptInService, setTelemetryEnabled, setHttpClient, TelemetryOptInProvider } from './lib/telemetry';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 
 import App from './app';

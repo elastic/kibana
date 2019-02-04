@@ -25,7 +25,7 @@ import { ShareActionProvider } from './share_action';
 
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 let isOpen = false;
 

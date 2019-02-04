@@ -7,7 +7,7 @@
 
 import 'ngreact';
 
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 
 import { uiModules } from 'ui/modules';

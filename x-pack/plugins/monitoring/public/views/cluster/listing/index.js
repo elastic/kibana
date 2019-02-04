@@ -8,7 +8,7 @@ import React from 'react';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { Listing } from '../../../components/cluster/listing';
 

@@ -9,7 +9,7 @@ import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { Notifier, toastNotifications } from 'ui/notify';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';

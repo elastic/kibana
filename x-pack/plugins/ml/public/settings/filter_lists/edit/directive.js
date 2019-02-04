@@ -9,7 +9,7 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);

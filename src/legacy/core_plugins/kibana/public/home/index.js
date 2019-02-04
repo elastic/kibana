@@ -21,7 +21,7 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp

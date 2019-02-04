@@ -22,7 +22,7 @@ import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/search_bar';

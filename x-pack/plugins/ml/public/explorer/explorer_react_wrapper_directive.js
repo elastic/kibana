@@ -16,7 +16,7 @@ import { Explorer } from './explorer';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 import { mapScopeToProps } from './explorer_utils';
 
 import { EXPLORER_ACTION } from './explorer_constants';

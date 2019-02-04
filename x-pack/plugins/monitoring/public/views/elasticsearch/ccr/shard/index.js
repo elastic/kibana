@@ -12,7 +12,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,

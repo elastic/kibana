@@ -21,7 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 
-import { I18nContext } from 'ui/i18n/context';
+import { I18nContext } from 'ui/i18n';
 
 const CREATE_INDEX_PATTERN_DOM_ELEMENT_ID = 'createIndexPatternReact';
 
