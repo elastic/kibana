@@ -40,7 +40,7 @@ export function mssqlMetricsSpecProvider(server, context) {
       },
     }),
     euiIconType: 'logoMSSQL',
-    isBeta: true,
+    isBeta: false,
     artifacts: {
       dashboards: [
         {
