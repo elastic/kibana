@@ -19,6 +19,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     'spaceSelector',
   ]);
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -71,7 +72,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
@@ -127,7 +130,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 

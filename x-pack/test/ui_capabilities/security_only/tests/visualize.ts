@@ -57,10 +57,10 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           case 'discover_read':
           case 'graph_all':
           case 'graph_read':
-          case 'gis_all':
-          case 'gis_read':
           case 'infrastructure_read':
           case 'logs_read':
+          case 'maps_all':
+          case 'maps_read':
           case 'ml_all':
           case 'monitoring_all':
           case 'timelion_all':
