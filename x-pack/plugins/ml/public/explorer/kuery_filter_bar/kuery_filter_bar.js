@@ -12,6 +12,7 @@ import {
   convertKueryToEsQuery,
   getSuggestions,
 } from '../../../../apm/public/services/kuery';
+import { fromKueryExpression } from '@kbn/es-query'; // toElasticsearchQuery
 
 export class KueryFilterBar extends Component {
   state = {
@@ -52,14 +53,21 @@ export class KueryFilterBar extends Component {
   onSubmit = inputValue => {
     const { indexPattern } = this.state;
     const { onSubmit } = this.props;
+    let filteredFields = [];
 
     try {
-      const res = convertKueryToEsQuery(inputValue, indexPattern);
-      if (!res) {
+      const ast = fromKueryExpression(inputValue);
+      const query = convertKueryToEsQuery(inputValue, indexPattern);
+
+      if (!query) {
         return;
       }
+      // TODO: do some cleanup on what gets returned in this array (Remove bools, etc)
+      if (ast && Array.isArray(ast.arguments)) {
+        filteredFields = ast.arguments.map(arg => arg.value);
+      }
 
-      onSubmit(res);
+      onSubmit(query, filteredFields);
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
     }

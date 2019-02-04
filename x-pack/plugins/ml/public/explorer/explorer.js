@@ -93,6 +93,7 @@ function getExplorerDefaultState() {
     chartsData: getDefaultChartsData(),
     filterActive: false,
     filterData: null,
+    filteredFields: [],
     influencersFilterQuery: undefined,
     hasResults: false,
     influencers: {},
@@ -703,7 +704,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             overallSwimlaneData,
             selectedJobs,
             viewBySwimlaneOptions.swimlaneViewByFieldName,
-            // influencersFilterQuery
+            influencersFilterQuery
           ),
         );
       }
@@ -934,7 +935,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       };
     }
 
-    applyInfluencersFilterQuery = (influencersFilterQuery) => {
+    applyInfluencersFilterQuery = (influencersFilterQuery, filteredFields) => {
+      const { swimlaneViewByFieldName } = this.state;
+
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
         const stateUpdate = {
           ...{
@@ -950,9 +953,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       } else {
         this.updateExplorer({
           filterActive: true,
+          filteredFields,
           influencersFilterQuery,
-          // filterData,
-          // maskAll
+          maskAll: (swimlaneViewByFieldName === VIEW_BY_JOB_LABEL ||
+            filteredFields.includes(swimlaneViewByFieldName) === false)
         }, false);
       }
     }
@@ -967,6 +971,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         annotationsData,
         anomalyChartRecords,
         chartsData,
+        filterActive,
+        maskAll,
         influencers,
         hasResults,
         noInfluencersConfigured,
@@ -1064,6 +1070,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             >
               <ExplorerSwimlane
                 chartWidth={swimlaneWidth}
+                filterActive={filterActive}
+                maskAll={maskAll}
                 MlTimeBuckets={MlTimeBuckets}
                 swimlaneCellClick={this.swimlaneCellClick}
                 swimlaneData={overallSwimlaneData}
@@ -1130,6 +1138,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   >
                     <ExplorerSwimlane
                       chartWidth={swimlaneWidth}
+                      filterActive={filterActive}
+                      maskAll={maskAll}
                       MlTimeBuckets={MlTimeBuckets}
                       swimlaneCellClick={this.swimlaneCellClick}
                       swimlaneData={viewBySwimlaneData}
