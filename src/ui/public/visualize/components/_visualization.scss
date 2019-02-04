@@ -2,11 +2,13 @@
 .visualize {
   display: flex;
   flex: 1 1 100%;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 // SASSTODO: Too risky to change to BEM naming
 .visualization {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   overflow: auto;
@@ -19,10 +21,10 @@
    *    that it disappears entirely.
    */
   .visChart__container {
+    flex: 1 1 0; /* 1 */
     display: flex;
     flex-direction: row;
     overflow: auto;
-    height: 100%;
     transition: opacity 0.01s;
 
     // IE11 Hack
