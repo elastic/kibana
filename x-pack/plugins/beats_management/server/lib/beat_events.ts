@@ -24,7 +24,10 @@ export class BeatEventsLib {
         if (events.length - 1 === i) {
           this.beats
             .update(user, beatId, {
-              status: events[events.length - 2],
+              status: {
+                ...events[events.length - 2],
+                timestamp: new Date(events[events.length - 2].timestamp),
+              },
             })
             .catch(e => {
               // tslint:disable-next-line
@@ -39,7 +42,10 @@ export class BeatEventsLib {
       if (events.length - 1 === i) {
         this.beats
           .update(user, beatId, {
-            status: events[events.length - 1],
+            status: {
+              ...events[events.length - 1],
+              timestamp: new Date(events[events.length - 1].timestamp),
+            },
           })
           .catch(e => {
             // tslint:disable-next-line

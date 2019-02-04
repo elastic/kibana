@@ -5,6 +5,7 @@
  */
 import * as t from 'io-ts';
 import { configBlockSchemas } from './config_schemas';
+import { DateFromString } from './io_ts_types';
 
 export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 
@@ -109,7 +110,7 @@ export const RuntimeBeatEvent = t.interface(
   {
     type: t.union([t.literal('STATE'), t.literal('ERROR')]),
     beat: t.union([t.undefined, t.string]),
-    timestamp: t.string,
+    timestamp: DateFromString,
     event: t.type({
       type: t.union([
         t.literal('RUNNING'),
@@ -125,6 +126,11 @@ export const RuntimeBeatEvent = t.interface(
   },
   'BeatEvent'
 );
-export interface BeatEvent extends t.TypeOf<typeof RuntimeBeatEvent> {
+export interface BeatEvent
+  extends Pick<
+    t.TypeOf<typeof RuntimeBeatEvent>,
+    Exclude<keyof t.TypeOf<typeof RuntimeBeatEvent>, 'timestamp'>
+  > {
   beat: string;
+  timestamp: Date;
 }
