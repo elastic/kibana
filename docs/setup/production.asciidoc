@@ -2,6 +2,7 @@
 == Using Kibana in a production environment
 
 * <<configuring-kibana-shield>>
+* <<csp-strict-mode>>
 * <<enabling-ssl>>
 * <<load-balancing>>
 
@@ -35,6 +36,25 @@ which users can load which dashboards.
 
 For information about setting up Kibana users, see
 {kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana].
+
+[float]
+[[csp-strict-mode]]
+=== Require Content Security Policy
+
+Kibana uses a Content Security Policy to help prevent the browser from allowing
+unsafe scripting, but older browsers will silently ignore this policy. If your
+organization does not need to support Internet Explorer 11 or much older
+versions of our other supported browsers, we recommend that you enable Kibana's
+`strict` mode for content security policy, which will block access to Kibana
+for any browser that does not enforce even a rudimentary set of CSP
+protections.
+
+To do this, set `csp.strict` to `true` in your `kibana.yml`:
+
+--------
+csp.strict: true
+--------
+
 
 [float]
 [[enabling-ssl]]

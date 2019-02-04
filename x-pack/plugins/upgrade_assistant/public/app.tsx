@@ -7,12 +7,12 @@
 import React, { Fragment } from 'react';
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
-import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { UpgradeAssistantTabs } from './components/tabs';
 
-export const RootComponentUI: React.StatelessComponent = () => (
+export const RootComponent: React.StatelessComponent = () => (
   <Fragment>
     <EuiPageHeader>
       <EuiPageHeaderSection>
@@ -30,5 +30,3 @@ export const RootComponentUI: React.StatelessComponent = () => (
     <UpgradeAssistantTabs />
   </Fragment>
 );
-
-export const RootComponent = injectI18nProvider(RootComponentUI);

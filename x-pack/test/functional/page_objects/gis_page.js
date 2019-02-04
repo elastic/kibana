@@ -5,7 +5,7 @@
  */
 
 export function GisPageProvider({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -64,7 +64,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('gisListingPage');
+      const exists = await testSubjects.exists('mapsListingPage');
       return exists;
     }
 
@@ -93,7 +93,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('gis', '/');
+          await PageObjects.common.navigateToUrl('maps', '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -113,11 +113,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
      * Layer TOC (table to contents) utility functions
      */
     async setView(lat, lon, zoom) {
-      log.debug(`Set view lat: ${lat}, lon: ${lon}, zoom: ${zoom}`);
+      log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
-      await testSubjects.setValue('latitudeInput', lat);
-      await testSubjects.setValue('longitudeInput', lon);
-      await testSubjects.setValue('zoomInput', zoom);
+      await testSubjects.setValue('latitudeInput', lat.toString());
+      await testSubjects.setValue('longitudeInput', lon.toString());
+      await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -154,6 +154,12 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       await testSubjects.click(`mapRemoveLayerButton`);
+    }
+
+    async getLayerErrorText(layerName) {
+      log.debug(`Remove layer ${layerName}`);
+      await this.openLayerPanel(layerName);
+      return await testSubjects.getVisibleText(`layerErrorMessage`);
     }
 
     async openInspectorView(viewId) {
@@ -217,10 +223,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async triggerSingleRefresh(refreshInterval) {
       log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
-      await PageObjects.header.resumeAutoRefresh();
+      await PageObjects.timePicker.resumeAutoRefresh();
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
-      await PageObjects.header.pauseAutoRefresh();
+      await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }

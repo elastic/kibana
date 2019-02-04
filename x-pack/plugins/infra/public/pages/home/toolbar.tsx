@@ -11,6 +11,7 @@ import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
 import { Toolbar } from '../../components/eui/toolbar';
+import { SourceConfigurationButton } from '../../components/source_configuration';
 import { WaffleGroupByControls } from '../../components/waffle/waffle_group_by_controls';
 import { WaffleMetricControls } from '../../components/waffle/waffle_metric_controls';
 import { WaffleNodeTypeSwitcher } from '../../components/waffle/waffle_node_type_switcher';
@@ -47,13 +48,20 @@ export const HomeToolbar = injectI18n(({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <WithWaffleOptions>
-          {({ nodeType }) => (
-            <EuiTitle size="m">
-              <h1>{getTitle(nodeType)}</h1>
-            </EuiTitle>
-          )}
-        </WithWaffleOptions>
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <WithWaffleOptions>
+              {({ nodeType }) => (
+                <EuiTitle size="m">
+                  <h1>{getTitle(nodeType)}</h1>
+                </EuiTitle>
+              )}
+            </WithWaffleOptions>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SourceConfigurationButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiText color="subdued">
           <p>
             <FormattedMessage
@@ -109,22 +117,41 @@ export const HomeToolbar = injectI18n(({ intl }) => (
           )}
         </WithSource>
       </EuiFlexItem>
-      <WithWaffleOptions>
-        {({ changeMetric, changeGroupBy, groupBy, metric, nodeType }) => (
-          <React.Fragment>
-            <EuiFlexItem grow={false}>
-              <WaffleMetricControls metric={metric} nodeType={nodeType} onChange={changeMetric} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <WaffleGroupByControls
-                groupBy={groupBy}
-                nodeType={nodeType}
-                onChange={changeGroupBy}
-              />
-            </EuiFlexItem>
-          </React.Fragment>
+      <WithSource>
+        {({ derivedIndexPattern }) => (
+          <WithWaffleOptions>
+            {({
+              changeMetric,
+              changeGroupBy,
+              changeCustomOptions,
+              customOptions,
+              groupBy,
+              metric,
+              nodeType,
+            }) => (
+              <React.Fragment>
+                <EuiFlexItem grow={false}>
+                  <WaffleMetricControls
+                    metric={metric}
+                    nodeType={nodeType}
+                    onChange={changeMetric}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <WaffleGroupByControls
+                    groupBy={groupBy}
+                    nodeType={nodeType}
+                    onChange={changeGroupBy}
+                    fields={derivedIndexPattern.fields}
+                    onChangeCustomOptions={changeCustomOptions}
+                    customOptions={customOptions}
+                  />
+                </EuiFlexItem>
+              </React.Fragment>
+            )}
+          </WithWaffleOptions>
         )}
-      </WithWaffleOptions>
+      </WithSource>
       <EuiFlexItem grow={false}>
         <WithWaffleTime resetOnUnmount>
           {({ currentTime, isAutoReloading, jumpToTime, startAutoReload, stopAutoReload }) => (

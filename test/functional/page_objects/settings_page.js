@@ -47,9 +47,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('objects');
     }
 
-    async clickKibanaIndices() {
-      log.debug('clickKibanaIndices link');
-      await testSubjects.click('indices');
+    async clickKibanaIndexPatterns() {
+      log.debug('clickKibanaIndexPatterns link');
+      await testSubjects.click('index_patterns');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -271,12 +271,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickKibanaIndices();
+        await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField(indexPatternName);
+          await this.setIndexPatternField({ indexPatternName });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -290,7 +290,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/indices\/.+\?/)) {
+        if (!currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
@@ -316,14 +316,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-') {
+    async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName);
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(`${indexPatternName}*`);
+      expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
@@ -354,7 +354,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
-        if (currentUrl.match(/indices\/.+\?/)) {
+        if (currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
       });
@@ -517,17 +517,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async closeScriptedFieldHelp() {
-      log.debug('close Scripted Fields help');
-      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('scriptedFieldsHelpFlyout');
-          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-          if (isOpen) {
-            throw new Error('Failed to close scripted fields help');
-          }
-        });
-      }
+      await flyout.ensureClosed('scriptedFieldsHelpFlyout');
     }
 
     async executeScriptedField(script, additionalField) {

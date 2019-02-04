@@ -1,8 +1,7 @@
 <div class="form-group">
   <div ng-repeat="filter in agg.params.filters">
-    <div class="visEditorAggHeader">
+    <div class="visEditorSidebar__collapsibleTitle">
       <label
-        class="visEditorAggHeader__title visEditorAggHeader__title--grow"
         for="visEditorFilterInput{{agg.id}}"
       >
         <span
@@ -13,7 +12,7 @@
         <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
 
-      <div class="visEditorAggHeader__controls kuiButtonGroup kuiButtonGroup--united">
+      <div class="kuiButtonGroup kuiButtonGroup--united">
         <button
           ng-click="showConfig = !showConfig"
           type="button"
@@ -50,6 +49,7 @@
         i18n-id="common.ui.aggTypes.filters.definiteFilterLabel"
         i18n-default-message="Filter {index} label"
         i18n-values="{ index: $index + 1 }"
+        i18n-description="'Filter {index}' represents the name of the filter as a noun, similar to 'label for filter 1'."
       ></label>
       <input
         id="visEditorFilterLabelInput{{agg.id}}"

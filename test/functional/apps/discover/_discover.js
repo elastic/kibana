@@ -18,6 +18,7 @@
  */
 
 import expect from 'expect.js';
+import moment from 'moment';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize']);
   const defaultSettings = {
     'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
@@ -126,22 +127,45 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show bars in the correct time zone', async function () {
-        const ticks = await PageObjects.discover.getBarChartXTicks();
-        expect(ticks).to.eql(['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00']);
+        const maxTicks = [
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
+          '2015-09-23 12:00'
+        ];
+
+        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+          if (!maxTicks.includes(tick)) {
+            throw new Error(`unexpected x-axis tick "${tick}"`);
+          }
+        }
       });
 
       it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickHistogramBar(0);
+        await PageObjects.visualize.waitForVisualization();
         const actualTimeString = await PageObjects.header.getPrettyDuration();
         expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 19th 2015, 23:52:17.080 to September 20th 2015, 02:59:51.112');
+        await PageObjects.visualize.waitForVisualization();
+        const newFromTime = await PageObjects.header.getFromTime();
+        const newToTime = await PageObjects.header.getToTime();
+
+        const newDurationHours = moment.duration(moment(newToTime) - moment(newFromTime)).asHours();
+        if (newDurationHours < 1 || newDurationHours >= 5) {
+          throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
+        }
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -400,7 +424,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the phrases if you re-open a phrases filter', async function () {
         await filterBar.clickEditFilter('extension.raw', 'jpg');
-        const phrases = await filterBar.getFilterEditorPhrases();
+        const phrases = await filterBar.getFilterEditorSelectedPhrases();
         expect(phrases.length).to.be(1);
         expect(phrases[0]).to.be('jpg');
       });
@@ -430,8 +454,23 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        const ticks = await PageObjects.discover.getBarChartXTicks();
-        expect(ticks).to.eql(['2015-09-19 17:00', '2015-09-20 17:00', '2015-09-21 17:00', '2015-09-22 17:00']);
+
+        const maxTicks = [
+          '2015-09-19 17:00',
+          '2015-09-20 05:00',
+          '2015-09-20 17:00',
+          '2015-09-21 05:00',
+          '2015-09-21 17:00',
+          '2015-09-22 05:00',
+          '2015-09-22 17:00',
+          '2015-09-23 05:00'
+        ];
+
+        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+          if (!maxTicks.includes(tick)) {
+            throw new Error(`unexpected x-axis tick "${tick}"`);
+          }
+        }
       });
     });
   });

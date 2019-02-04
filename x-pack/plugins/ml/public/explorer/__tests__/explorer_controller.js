@@ -19,9 +19,7 @@ describe('ML - Explorer Controller', () => {
       const scope = $rootScope.$new();
       $controller('MlExplorerController', { $scope: scope });
 
-      expect(Array.isArray(scope.annotationsData)).to.be(true);
-      expect(Array.isArray(scope.anomalyChartRecords)).to.be(true);
-      expect(scope.loading).to.be(true);
+      expect(Array.isArray(scope.jobs)).to.be(true);
     });
   });
 });

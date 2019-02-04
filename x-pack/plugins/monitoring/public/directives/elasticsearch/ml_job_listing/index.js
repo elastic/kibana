@@ -8,6 +8,7 @@ import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { render } from 'react-dom';
+import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { MachineLearningJobStatusIcon } from 'plugins/monitoring/components/elasticsearch/ml_job_listing/status_icon';
@@ -17,10 +18,12 @@ import {
   EuiPage,
   EuiPageContent,
   EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/elasticsearch/cluster_status';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const getColumns = (kbnUrl, scope) => ([
   {
@@ -128,11 +131,14 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <ClusterStatus stats={scope.status} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
                   <EuiMonitoringTable
                     className="mlJobsTable"
                     rows={jobs}
@@ -159,7 +165,7 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
         render(mlTable, $el[0]);
       });

@@ -24,21 +24,13 @@ export const tagcloud = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.tagcloud.help', {
+  help: i18n.translate('interpreter.functions.tagcloud.help', {
     defaultMessage: 'Tagcloud visualization'
   }),
   args: {
-    bucket: {
-      types: ['string'],
-      default: '0',
-    },
-    metric: {
-      types: ['string'],
-      default: '1',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -46,25 +38,14 @@ export const tagcloud = () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    const metricColumn = context.columns.find((column, i) =>
-      column.id === args.metric || column.name === args.metric || i === parseInt(args.metric)
-    );
-    const bucketColumn = context.columns.find((column, i) =>
-      column.id === args.bucket || column.name === args.bucket || i === parseInt(args.bucket)
-    );
-
-    metricColumn.aggConfig.schema = 'metric';
-    bucketColumn.aggConfig.schema = 'segment';
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: context,
-        visConfig: {
-          type: 'tag_cloud',
-          params: visConfigParams,
-        },
+        visType: 'tagcloud',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

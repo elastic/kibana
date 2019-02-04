@@ -16,13 +16,11 @@ exports[`Header should render a different name, prompt, and beta tag if provided
           }
         }
       />
-      <React.Fragment>
-         
-        <EuiBetaBadge
-          label="Beta"
-          tooltipPosition="top"
-        />
-      </React.Fragment>
+       
+      <EuiBetaBadge
+        label="Beta"
+        tooltipPosition="top"
+      />
     </h1>
   </EuiTitle>
   <EuiFlexGroup
@@ -40,7 +38,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -57,14 +55,12 @@ exports[`Header should render a different name, prompt, and beta tag if provided
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <React.Fragment>
-    <EuiSpacer
-      size="s"
-    />
-    <div>
-      Test prompt
-    </div>
-  </React.Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    Test prompt
+  </div>
   <EuiSpacer
     size="m"
   />
@@ -104,7 +100,7 @@ exports[`Header should render normally 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -160,7 +156,7 @@ exports[`Header should render without including system indices 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
