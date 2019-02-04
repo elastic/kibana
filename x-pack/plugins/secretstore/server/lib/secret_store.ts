@@ -18,26 +18,14 @@ export class SecretStore {
     key = key || crypto.randomBytes(128);
     const crypt = buildCrypt({ key: key.toString('hex') });
 
-    this.hideAttribute = async (deets: any, attributeToHide: string) => {
-      // extract attribute to hide from object
-      const toEncrypt = { [attributeToHide]: deets[attributeToHide] };
-      delete deets[attributeToHide];
-
-      // actually create the saved object to know the id
-      const savedObject = await savedObjectsClient.create(this.type, deets, {
-        id: crypto.randomBytes(32).toString('base64'),
-      });
+    this.hideAttribute = async (toEncrypt: any) => {
+      const id = crypto.randomBytes(32).toString('base64');
 
       // now encrypt
-      const hidden = crypt.encrypt(toEncrypt, savedObject);
+      const secret = crypt.encrypt(JSON.stringify(toEncrypt), id);
 
       // lastly put the encrypted details into the saved object
-      return await savedObjectsClient.update(
-        savedObject.type,
-        savedObject.id,
-        { secret: hidden },
-        { version: savedObject.version } // keep the same version
-      );
+      return await savedObjectsClient.create(this.type, { secret }, { id });
     };
 
     this.unhideAttribute = async (id: string) => {
@@ -48,19 +36,19 @@ export class SecretStore {
 
       // extract the hidden secret value
       const toDecrypt = savedObject.attributes[encKey];
-      delete savedObject.attributes[encKey];
 
       // decrypt the details
       try {
-        const unhidden = crypt.decrypt(toDecrypt, savedObject);
+        const unhidden = crypt.decrypt(toDecrypt, id);
 
         // return the details only if the saved object was not modified
         if (unhidden) {
-          savedObject.attributes = {
-            ...savedObject.attributes,
-            ...unhidden,
+          return {
+            ...savedObject,
+            attributes: {
+              ...JSON.parse(unhidden),
+            },
           };
-          return savedObject;
         }
       } catch (e) {
         throw Error(`SecretStore Decrypt Failed: ${e.message}`);

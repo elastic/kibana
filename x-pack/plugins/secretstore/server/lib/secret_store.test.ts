@@ -31,34 +31,21 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
     let insideJob: any = null;
     savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
       insideJob = {
-        id: 'testId',
+        id: options.id,
         type: 'testSecretType',
         attributes,
       };
       return insideJob;
     });
-    savedObjectsClient.update.callsFake(
-      (type: string, id: string, attributes: any, options?: any) => {
-        return {
-          id,
-          type,
-          attributes: {
-            ...attributes,
-            ...insideJob.attributes,
-          },
-        };
-      }
-    );
 
     const hidden = await subject.hideAttribute(hideMe, 'message');
     sinon.assert.calledOnce(savedObjectsClient.create);
-    sinon.assert.calledOnce(savedObjectsClient.update);
     expect(savedObjectsClient.update.notCalled).toBeTruthy();
     expect(hidden).toBeDefined();
     expect(hidden.attributes.message).toBeUndefined();
     expect(hidden.attributes.secret).toBeDefined();
     expect(hidden.attributes.secret).not.toContain('my secret message');
-    expect(hidden.attributes.nonSecret).toEqual('this is unhidden');
+    expect(hidden.attributes.nonSecret).toBeUndefined();
     expect(subject);
   });
 
@@ -70,29 +57,16 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
       someOtherProp: 'check me',
     };
     let insideJob: any = null;
-    let internalSavedObject: any = null;
     savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
       insideJob = {
-        id: 'testId',
+        id: options.id,
         type: 'testSecretType',
         attributes,
       };
       return insideJob;
     });
-    savedObjectsClient.update.callsFake(
-      (type: string, id: string, attributes: any, options?: any) => {
-        return (internalSavedObject = {
-          id,
-          type,
-          attributes: {
-            ...attributes,
-            ...insideJob.attributes,
-          },
-        });
-      }
-    );
     savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
-      return internalSavedObject;
+      return insideJob;
     });
     const hidden = await subject.hideAttribute(hideMe, 'message');
     const unhidden = await subject.unhideAttribute(hidden.id);
