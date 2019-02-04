@@ -18,6 +18,7 @@ export default function({ getService }: TestInvoker) {
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
     expectTypeRequired,
+    expectValidType,
     findTest,
   } = findTestSuiteFactory(esArchiver, supertest);
 
@@ -36,9 +37,9 @@ export default function({ getService }: TestInvoker) {
           response: expectNotSpaceAwareResults,
         },
         unknownType: {
-          description: 'empty result',
+          description: 'bad request, must use a valid type',
           statusCode: 400,
-          response: createExpectEmpty(1, 20, 0),
+          response: expectValidType,
         },
         pageBeyondTotal: {
           description: 'empty result',
@@ -72,9 +73,9 @@ export default function({ getService }: TestInvoker) {
           response: expectNotSpaceAwareResults,
         },
         unknownType: {
-          description: 'empty result',
+          description: 'bad request, must use a valid type',
           statusCode: 400,
-          response: createExpectEmpty(1, 20, 0),
+          response: expectValidType,
         },
         pageBeyondTotal: {
           description: 'empty result',
