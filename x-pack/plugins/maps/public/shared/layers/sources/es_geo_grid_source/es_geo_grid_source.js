@@ -169,7 +169,6 @@ export class ESGeoGridSource extends AbstractESSource {
     const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
-    console.log('tabifiedResp', tabifiedResp);
     const { featureCollection } = convertToGeoJson({
       table: tabifiedResp,
       renderAs: this._descriptor.requestType,
