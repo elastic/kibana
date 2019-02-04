@@ -26,15 +26,13 @@ const optionalFields = [
 
 const allFields = [...requiredFields, ...optionalFields];
 
-export class WebhookAction extends BaseAction {
+export class IndexAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
     allFields.forEach((field) => {
       this[field] = get(props, field);
     });
-
-    this.fullPath = this.url ? this.url : this.host + this.port + this.path;
   }
 
   get upstreamJson() {
@@ -56,34 +54,34 @@ export class WebhookAction extends BaseAction {
   }
 
   get description() {
-    return i18n.translate('xpack.watcher.models.webhookAction.description', {
-      defaultMessage: 'Webhook will trigger a {method} request on {fullPath}',
+    return i18n.translate('xpack.watcher.models.indexAction.description', {
+      defaultMessage: 'The {index} will be indexed as {docType}',
       values: {
-        method: this.method,
-        fullPath: this.fullPath
+        index: this.index,
+        docType: this.doc_type,
       }
     });
   }
 
   get simulateMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateMessage', {
-      defaultMessage: 'Sample request sent to {fullPath}',
+    return i18n.translate('xpack.watcher.models.indexAction.simulateMessage', {
+      defaultMessage: 'Index {index} has been indexed.',
       values: {
-        fullPath: this.fullPath
+        index: this.index,
       }
     });
   }
 
   get simulateFailMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send request to {fullPath}.',
+    return i18n.translate('xpack.watcher.models.indexAction.simulateFailMessage', {
+      defaultMessage: 'Failed to index {index}.',
       values: {
-        fullPath: this.fullPath
+        index: this.index
       }
     });
   }
 
   static fromUpstreamJson(upstreamAction) {
-    return new WebhookAction(upstreamAction);
+    return new IndexAction(upstreamAction);
   }
 }
