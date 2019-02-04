@@ -19,6 +19,7 @@
 
 import * as Url from 'url';
 
+import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { InjectedMetadataStartContract } from '../injected_metadata';
@@ -73,7 +74,10 @@ export class ChromeService {
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
-        'Your browser is not enforcing the basic security protections of this application.'
+        i18n.translate('core.chrome.legacyBrowserWarning', {
+          defaultMessage:
+            'Your browser does not meet the basic security requirements of this installation of Kibana.',
+        })
       );
     }
 
