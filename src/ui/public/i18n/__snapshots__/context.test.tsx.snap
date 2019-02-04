@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ui/i18n/wrapIntoI18nContext renders children and forwards properties 1`] = `
+exports[`ui/i18n renders children and forwards properties 1`] = `
 <div>
   Context: 
   <span>

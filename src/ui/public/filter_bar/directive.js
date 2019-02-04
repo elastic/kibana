@@ -18,12 +18,12 @@
  */
 
 import 'ngreact';
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 import { uiModules } from '../modules';
 import { FilterBar } from './filter_bar';
 
 const app = uiModules.get('app/kibana', ['react']);
 
 app.directive('filterBar', reactDirective => {
-  return reactDirective(wrapIntoI18nContext(FilterBar));
+  return reactDirective(wrapInI18nContext(FilterBar));
 });

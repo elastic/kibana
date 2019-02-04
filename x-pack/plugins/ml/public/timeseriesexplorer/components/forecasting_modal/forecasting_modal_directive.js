@@ -7,7 +7,7 @@
 
 import 'ngreact';
 
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
@@ -17,7 +17,7 @@ import { ForecastingModal } from './forecasting_modal';
 module.directive('mlForecastingModal', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
   return reactDirective(
-    wrapIntoI18nContext(ForecastingModal),
+    wrapInI18nContext(ForecastingModal),
     // reactDirective service requires for react component to have propTypes, but injectI18n doesn't copy propTypes from wrapped component.
     // That's why we pass propTypes directly to reactDirective service.
     Object.keys(ForecastingModal.WrappedComponent.propTypes || {}),

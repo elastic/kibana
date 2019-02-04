@@ -24,7 +24,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
@@ -33,8 +33,8 @@ import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', reactDirective => reactDirective(wrapIntoI18nContext(VisualizeListingTable)));
-app.directive('newVisModal', reactDirective => reactDirective(wrapIntoI18nContext(NewVisModal)));
+app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
   const Notifier = $injector.get('Notifier');

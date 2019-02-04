@@ -7,7 +7,7 @@
 
 import 'ngreact';
 
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml', ['react']);
@@ -18,7 +18,7 @@ module.directive('mlAnomaliesTable', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
 
   return reactDirective(
-    wrapIntoI18nContext(AnomaliesTable),
+    wrapInI18nContext(AnomaliesTable),
     [
       ['filter', { watchDepth: 'reference' }],
       ['tableData', { watchDepth: 'reference' }]

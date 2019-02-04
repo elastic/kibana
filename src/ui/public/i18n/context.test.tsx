@@ -21,9 +21,9 @@ import { render } from 'enzyme';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { __newPlatformInit__, wrapIntoI18nContext } from './context';
+import { __newPlatformInit__, wrapInI18nContext } from './context';
 
-describe('ui/i18n/wrapIntoI18nContext', () => {
+describe('ui/i18n', () => {
   test('renders children and forwards properties', () => {
     __newPlatformInit__(({ children }) => <div>Context: {children}</div>);
 
@@ -32,7 +32,7 @@ describe('ui/i18n/wrapIntoI18nContext', () => {
       numberProp: PropTypes.number,
     };
 
-    const WrappedComponent = wrapIntoI18nContext(
+    const WrappedComponent = wrapInI18nContext(
       class extends React.PureComponent<{ [P in keyof typeof mockPropTypes]: unknown }> {
         public static propTypes = mockPropTypes;
 

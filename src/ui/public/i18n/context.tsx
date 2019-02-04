@@ -29,7 +29,7 @@ export function __newPlatformInit__(context: typeof I18nContext) {
   I18nContext = context;
 }
 
-export function wrapIntoI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
+export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
   const ContextWrapper: React.SFC<P> = props => {
     return (
       <I18nContext>

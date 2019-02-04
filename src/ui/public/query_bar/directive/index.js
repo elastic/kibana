@@ -20,7 +20,7 @@
 
 
 import 'ngreact';
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 import { uiModules } from '../../modules';
 import { QueryBar } from '../components';
 
@@ -28,7 +28,7 @@ const app = uiModules.get('app/kibana', ['react']);
 
 app.directive('queryBar', (reactDirective, localStorage) => {
   return reactDirective(
-    wrapIntoI18nContext(QueryBar),
+    wrapInI18nContext(QueryBar),
     undefined,
     {},
     {

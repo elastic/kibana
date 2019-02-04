@@ -22,7 +22,7 @@ import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -43,7 +43,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardListing', function (reactDirective) {
-  return reactDirective(wrapIntoI18nContext(DashboardListing));
+  return reactDirective(wrapInI18nContext(DashboardListing));
 });
 
 function createNewDashboardCtrl($scope, i18n) {

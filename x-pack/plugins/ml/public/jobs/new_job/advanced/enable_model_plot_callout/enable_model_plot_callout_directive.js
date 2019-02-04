@@ -8,7 +8,7 @@
 
 import 'ngreact';
 
-import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { wrapInI18nContext } from 'ui/i18n/context';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
@@ -16,7 +16,7 @@ import { EnableModelPlotCallout } from './enable_model_plot_callout_view.js';
 
 module.directive('mlEnableModelPlotCallout', function (reactDirective) {
   return reactDirective(
-    wrapIntoI18nContext(
+    wrapInI18nContext(
       EnableModelPlotCallout,
       undefined,
       { restrict: 'E' }
