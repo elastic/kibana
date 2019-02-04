@@ -61,8 +61,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dev_tools_read':
           case 'graph_all':
           case 'graph_read':
-          case 'gis_all':
-          case 'gis_read':
+          case 'maps_all':
+          case 'maps_read':
           case 'infrastructure_read':
           case 'logs_read':
           case 'ml_all':

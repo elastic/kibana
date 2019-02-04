@@ -21,11 +21,17 @@ export function getWorkpad(state) {
   return get(state, workpadRoot);
 }
 
-export function getWorkpadPersisted(state) {
+// should we split `workpad.js` to eg. `workpad.js` (full) and `persistentWorkpadStructure.js` (persistent.workpad)?
+// how can we better disambiguate the two? now both the entire state and `persistent.workpad` are informally called workpad
+export function getFullWorkpadPersisted(state) {
   return {
     ...getWorkpad(state),
     assets: getAssets(state),
   };
+}
+
+export function getWorkpadPersisted(state) {
+  return getWorkpad(state);
 }
 
 export function getWorkpadInfo(state) {

@@ -13,7 +13,7 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
 
@@ -72,13 +72,13 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
         }));
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <AdvancedNode
               nodeSummary={data.nodeSummary}
               metrics={data.metrics}
               onBrush={this.onBrush}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }
