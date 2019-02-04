@@ -6,13 +6,14 @@
 
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { units, px, colors, fontSizes } from '../../../../style/variables';
+import { units, px, fontSizes } from '../../../../style/variables';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const Container = styled.div`
   display: flex;
   align-items: center;
   font-size: ${props => props.fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   cursor: ${props => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${props => (props.disabled ? 0.4 : 1)};
   user-select: none;
@@ -31,7 +32,7 @@ export default class Legend extends PureComponent {
     const {
       onClick,
       text,
-      color = colors.apmBlue,
+      color = theme.euiColorVis1,
       fontSize = fontSizes.small,
       radius = units.minus - 1,
       disabled = false,
