@@ -68,7 +68,6 @@ export function registerReindexIndicesRoutes(
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
-
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
@@ -141,10 +140,26 @@ export function registerReindexIndicesRoutes(
 
   // Cancel reindex
   server.route({
-    path: `${BASE_PATH}/{indexName}`,
-    method: 'DELETE',
+    path: `${BASE_PATH}/{indexName}/cancel`,
+    method: 'POST',
     async handler(request) {
-      return Boom.notImplemented();
+      const client = request.getSavedObjectsClient();
+      const { indexName } = request.params;
+      const callCluster = callWithRequest.bind(null, request) as CallCluster;
+      const reindexActions = reindexActionsFactory(client, callCluster);
+      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+
+      try {
+        await reindexService.cancelReindexing(indexName);
+
+        return { acknowledged: true };
+      } catch (e) {
+        if (!e.isBoom) {
+          return Boom.boomify(e, { statusCode: 500 });
+        }
+
+        return e;
+      }
     },
   });
 }
