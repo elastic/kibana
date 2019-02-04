@@ -13,6 +13,7 @@ import {
   DeprecationInfo,
   IndexSettingsDeprecationInfo,
 } from 'src/legacy/core_plugins/elasticsearch';
+
 import { getDeprecatedApmIndices } from './apm';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
@@ -22,36 +23,49 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
 }
 
 export interface UpgradeAssistantStatus {
+  readyForUpgrade: boolean;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
 }
 
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
-  request: Request,
+  req: Request,
   basePath: string,
   apmIndices: string[]
 ): Promise<UpgradeAssistantStatus> {
   const [deprecations, apmIndexDeprecations] = await Promise.all([
-    (await callWithRequest(request, 'transport.request', {
+    (await callWithRequest(req, 'transport.request', {
       path: '/_migration/deprecations',
       method: 'GET',
     })) as DeprecationAPIResponse,
-    getDeprecatedApmIndices(callWithRequest, request, apmIndices),
+    getDeprecatedApmIndices(callWithRequest, req, apmIndices),
   ]);
 
+  const cluster = deprecations.cluster_settings
+    .concat(deprecations.ml_settings)
+    .concat(deprecations.node_settings);
+  const indices = getCombinedIndexInfos(
+    deprecations.index_settings,
+    basePath,
+    apmIndexDeprecations
+  );
+
+  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+
   return {
-    cluster: deprecations.cluster_settings.concat(deprecations.node_settings),
-    indices: getCombinedIndexInfos(deprecations.index_settings, basePath, apmIndexDeprecations),
+    readyForUpgrade: criticalWarnings.length === 0,
+    cluster,
+    indices,
   };
 }
 
-// Combines the information from the migration assistance API and the required APM indices for re-index
+// Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = (
   indexSettings: IndexSettingsDeprecationInfo,
   basePath: string,
   apmIndexDeprecations: EnrichedDeprecationInfo[]
-): EnrichedDeprecationInfo[] => {
+) => {
   const apmIndices = apmIndexDeprecations.reduce((acc, dep) => acc.add(dep.index), new Set());
 
   return Object.keys(indexSettings)

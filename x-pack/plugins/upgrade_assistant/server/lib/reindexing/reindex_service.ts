@@ -7,7 +7,9 @@
 import Boom from 'boom';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import {
+  IndexGroup,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -22,11 +24,23 @@ const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 
 export interface ReindexService {
   /**
+   * Checks whether or not the user has proper privileges required to reindex this index.
+   * @param indexName
+   */
+  hasRequiredPrivileges(indexName: string): Promise<boolean>;
+
+  /**
    * Checks an index's settings and mappings to flag potential issues during reindex.
    * Resolves to null if index does not exist.
    * @param indexName
    */
   detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
+
+  /**
+   * Returns an IndexGroup if the index belongs to one, otherwise undefined.
+   * @param indexName
+   */
+  getIndexGroup(indexName: string): IndexGroup | undefined;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -69,6 +83,7 @@ export interface ReindexService {
 
 export const reindexServiceFactory = (
   callCluster: CallCluster,
+  xpackInfo: XPackInfo,
   actions: ReindexActions,
   apmIndexPatterns: string[] = []
 ): ReindexService => {
@@ -80,8 +95,8 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const stopMlJobs = async () => {
-    await actions.incrementMlReindexes();
-    await actions.runWhileMlLocked(async mlDoc => {
+    await actions.incrementIndexGroupReindexes(IndexGroup.ml);
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
       await validateNodesMinimumVersion(6, 7);
 
       const res = await callCluster('transport.request', {
@@ -101,9 +116,9 @@ export const reindexServiceFactory = (
    * Resumes ML jobs if there are no more remaining reindex operations.
    */
   const resumeMlJobs = async () => {
-    await actions.decrementMlReindexes();
-    await actions.runWhileMlLocked(async mlDoc => {
-      if (mlDoc.attributes.mlReindexCount === 0) {
+    await actions.decrementIndexGroupReindexes(IndexGroup.ml);
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+      if (mlDoc.attributes.runningReindexCount === 0) {
         const res = await callCluster('transport.request', {
           path: '/_ml/set_upgrade_mode?enabled=false',
           method: 'POST',
@@ -122,28 +137,40 @@ export const reindexServiceFactory = (
    * Stops Watcher in Elasticsearch.
    */
   const stopWatcher = async () => {
-    const { acknowledged } = await callCluster('transport.request', {
-      path: '/_watcher/_stop',
-      method: 'POST',
-    });
+    await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
+      const { acknowledged } = await callCluster('transport.request', {
+        path: '/_watcher/_stop',
+        method: 'POST',
+      });
 
-    if (!acknowledged) {
-      throw new Error('Could not stop Watcher');
-    }
+      if (!acknowledged) {
+        throw new Error('Could not stop Watcher');
+      }
+
+      return watcherDoc;
+    });
   };
 
   /**
    * Starts Watcher in Elasticsearch.
    */
   const startWatcher = async () => {
-    const { acknowledged } = await callCluster('transport.request', {
-      path: '/_watcher/_start',
-      method: 'POST',
-    });
+    await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
+      if (watcherDoc.attributes.runningReindexCount === 0) {
+        const { acknowledged } = await callCluster('transport.request', {
+          path: '/_watcher/_start',
+          method: 'POST',
+        });
 
-    if (!acknowledged) {
-      throw new Error('Could not start Watcher');
-    }
+        if (!acknowledged) {
+          throw new Error('Could not start Watcher');
+        }
+      }
+
+      return watcherDoc;
+    });
   };
 
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
@@ -156,8 +183,8 @@ export const reindexServiceFactory = (
     }
 
     // Stop consumers if we ever got past this point.
-    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexConsumersStopped) {
-      await resumeConsumers(reindexOp);
+    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexGroupServicesStopped) {
+      await resumeIndexGroupServices(reindexOp);
     }
   };
 
@@ -186,7 +213,7 @@ export const reindexServiceFactory = (
     }
   };
 
-  const stopConsumers = async (reindexOp: ReindexSavedObject) => {
+  const stopIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
     if (isMlIndex(reindexOp.attributes.indexName)) {
       await stopMlJobs();
     } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
@@ -194,7 +221,7 @@ export const reindexServiceFactory = (
     }
 
     return actions.updateReindexOp(reindexOp, {
-      lastCompletedStep: ReindexStep.indexConsumersStopped,
+      lastCompletedStep: ReindexStep.indexGroupServicesStopped,
     });
   };
 
@@ -369,7 +396,7 @@ export const reindexServiceFactory = (
     });
   };
 
-  const resumeConsumers = async (reindexOp: ReindexSavedObject) => {
+  const resumeIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
     if (isMlIndex(reindexOp.attributes.indexName)) {
       await resumeMlJobs();
     } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
@@ -379,7 +406,7 @@ export const reindexServiceFactory = (
     // Only change the status if we're still in-progress (this function is also called when the reindex fails)
     if (reindexOp.attributes.status === ReindexStatus.inProgress) {
       return actions.updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.indexConsumersStarted,
+        lastCompletedStep: ReindexStep.indexGroupServicesStarted,
         status: ReindexStatus.completed,
       });
     } else {
@@ -390,12 +417,59 @@ export const reindexServiceFactory = (
   // ------ The service itself
 
   return {
+    async hasRequiredPrivileges(indexName: string) {
+      // If security is disabled or unavailable, return true.
+      const security = xpackInfo.feature('security');
+      if (!security.isAvailable() || !security.isEnabled()) {
+        return true;
+      }
+
+      // Otherwise, query for required privileges for this index.
+      const body = {
+        cluster: ['manage'],
+        index: [
+          {
+            names: [`${indexName}*`],
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read', 'delete'],
+          },
+        ],
+      } as any;
+
+      if (isMlIndex(indexName)) {
+        body.cluster = [...body.cluster, 'manage_ml'];
+      }
+
+      if (isWatcherIndex(indexName)) {
+        body.cluster = [...body.cluster, 'manage_watcher'];
+      }
+
+      const resp = await callCluster('transport.request', {
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body,
+      });
+
+      return resp.has_all_requested;
+    },
+
     async detectReindexWarnings(indexName: string) {
       const flatSettings = await actions.getFlatSettings(indexName);
       if (!flatSettings) {
         return null;
       } else {
         return getReindexWarnings(flatSettings, apmIndexPatterns);
+      }
+    },
+
+    getIndexGroup(indexName: string) {
+      if (isMlIndex(indexName)) {
+        return IndexGroup.ml;
+      } else if (isWatcherIndex(indexName)) {
+        return IndexGroup.watcher;
       }
     },
 
@@ -439,9 +513,9 @@ export const reindexServiceFactory = (
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
-              lockedReindexOp = await stopConsumers(lockedReindexOp);
+              lockedReindexOp = await stopIndexGroupServices(lockedReindexOp);
               break;
-            case ReindexStep.indexConsumersStopped:
+            case ReindexStep.indexGroupServicesStopped:
               lockedReindexOp = await setReadonly(lockedReindexOp);
               break;
             case ReindexStep.readonly:
@@ -457,7 +531,7 @@ export const reindexServiceFactory = (
               lockedReindexOp = await switchAlias(lockedReindexOp);
               break;
             case ReindexStep.aliasCreated:
-              lockedReindexOp = await resumeConsumers(lockedReindexOp);
+              lockedReindexOp = await resumeIndexGroupServices(lockedReindexOp);
               break;
             default:
               break;
@@ -520,4 +594,5 @@ export const reindexServiceFactory = (
 const isMlIndex = (indexName: string) =>
   indexName.startsWith('.ml-state') || indexName.startsWith('.ml-anomalies');
 
-const isWatcherIndex = (indexName: string) => indexName.startsWith('.watches');
+const isWatcherIndex = (indexName: string) =>
+  indexName.startsWith('.watches') || indexName.startsWith('.triggered-watches');

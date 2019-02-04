@@ -18,6 +18,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'
   );
+  const xpackInfo = server.plugins.xpack_main.info;
   const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
@@ -38,6 +39,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
     credentialStore,
     callWithRequest,
     callWithInternalUser,
+    xpackInfo,
     log,
     server.plugins.apm_oss.indexPatterns
   );
@@ -57,6 +59,8 @@ export function registerReindexIndicesRoutes(
   credentialStore: CredentialStore
 ) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  const xpackInfo = server.plugins.xpack_main.info;
+  const apmIndexPatterns = server.plugins.apm_oss.indexPatterns;
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
@@ -71,11 +75,16 @@ export function registerReindexIndicesRoutes(
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
         callCluster,
+        xpackInfo,
         reindexActions,
-        server.plugins.apm_oss.indexPatterns
+        apmIndexPatterns
       );
 
       try {
+        if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+          throw Boom.forbidden(`You do not have adequate privileges to reindex this index.`);
+        }
+
         const existingOp = await reindexService.findReindexOperation(indexName);
 
         // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
@@ -112,17 +121,25 @@ export function registerReindexIndicesRoutes(
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
         callCluster,
+        xpackInfo,
         reindexActions,
-        server.plugins.apm_oss.indexPatterns
+        apmIndexPatterns
       );
 
       try {
+        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
         const reindexOp = await reindexService.findReindexOperation(indexName);
-        const reindexWarnings = await reindexService.detectReindexWarnings(indexName);
+        // If the user doesn't have privileges than querying for warnings is going to fail.
+        const warnings = hasRequiredPrivileges
+          ? await reindexService.detectReindexWarnings(indexName)
+          : [];
+        const indexGroup = reindexService.getIndexGroup(indexName);
 
         return {
-          warnings: reindexWarnings,
           reindexOp: reindexOp ? reindexOp.attributes : null,
+          warnings,
+          indexGroup,
+          hasRequiredPrivileges,
         };
       } catch (e) {
         if (!e.isBoom) {

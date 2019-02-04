@@ -9,7 +9,7 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverLink } from './DiscoverLink';
 

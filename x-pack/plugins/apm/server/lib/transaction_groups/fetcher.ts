@@ -9,7 +9,7 @@ import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
@@ -51,7 +51,7 @@ export function transactionGroupsFetcher(
       aggs: {
         transactions: {
           terms: {
-            field: `${TRANSACTION_NAME}.keyword`,
+            field: TRANSACTION_NAME,
             order: { sum: 'desc' },
             size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },

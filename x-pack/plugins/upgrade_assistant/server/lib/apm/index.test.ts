@@ -62,12 +62,12 @@ describe('getDeprecatedApmIndices', () => {
     // @ts-ignore
     const [deprecation, _] = await getDeprecatedApmIndices(callWithRequest, {} as any, ['foo-*']);
 
-    expect(deprecation.level).toEqual('critical');
-    expect(deprecation.message).toEqual('APM index needs converted to ECS format');
+    expect(deprecation.level).toEqual('warning');
+    expect(deprecation.message).toEqual('APM index needs converted to 7.x format');
     expect(deprecation.url).toEqual(
-      'https://www.elastic.co/guide/en/apm/server/master/breaking-changes.html'
+      'https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html'
     );
-    expect(deprecation.details).toEqual('This index was created prior to 7.0.');
+    expect(deprecation.details).toEqual('This index was created prior to 7.0');
     expect(deprecation.reindex).toBe(true);
   });
 });

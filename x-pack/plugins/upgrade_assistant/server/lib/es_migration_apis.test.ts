@@ -39,4 +39,17 @@ describe('getUpgradeAssistantStatus', () => {
     const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/', []);
     expect(resp).toMatchSnapshot();
   });
+
+  it('returns readyForUpgrade === true when no critical issues found', async () => {
+    deprecationsResponse = {
+      cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {},
+    };
+
+    await expect(
+      getUpgradeAssistantStatus(callWithRequest, {} as any, '/', [])
+    ).resolves.toHaveProperty('readyForUpgrade', true);
+  });
 });
