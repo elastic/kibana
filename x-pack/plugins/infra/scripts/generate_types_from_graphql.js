@@ -17,6 +17,7 @@ const CLIENT_CONFIG_PATH = resolve(__dirname, 'gql_gen_client.json');
 const SERVER_CONFIG_PATH = resolve(__dirname, 'gql_gen_server.json');
 const OUTPUT_INTROSPECTION_PATH = resolve('public', 'graphql', 'introspection.json');
 const OUTPUT_CLIENT_TYPES_PATH = resolve('public', 'graphql', 'types.ts');
+const OUTPUT_COMMON_TYPES_PATH = resolve('common', 'graphql', 'types.ts');
 const OUTPUT_SERVER_TYPES_PATH = resolve('server', 'graphql', 'types.ts');
 const SCHEMA_PATH = resolve(__dirname, 'combined_schema.ts');
 
@@ -38,6 +39,17 @@ async function main() {
       args: GRAPHQL_GLOBS,
       config: CLIENT_CONFIG_PATH,
       out: OUTPUT_CLIENT_TYPES_PATH,
+      overwrite: true,
+      schema: SCHEMA_PATH,
+      template: 'graphql-codegen-typescript-template',
+    },
+    true
+  );
+  await generate(
+    {
+      args: GRAPHQL_GLOBS,
+      config: CLIENT_CONFIG_PATH,
+      out: OUTPUT_COMMON_TYPES_PATH,
       overwrite: true,
       schema: SCHEMA_PATH,
       template: 'graphql-codegen-typescript-template',
