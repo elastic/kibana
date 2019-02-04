@@ -13,13 +13,13 @@ import {
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,
-  indexConsumersStopped = 10,
+  indexGroupServicesStopped = 10,
   readonly = 20,
   newIndexCreated = 30,
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
-  indexConsumersStarted = 70,
+  indexGroupServicesStarted = 70,
 }
 
 export enum ReindexStatus {
@@ -39,7 +39,9 @@ export interface ReindexOperation extends SavedObjectAttributes {
   reindexTaskId: string | null;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
-  mlReindexCount: number | null;
+
+  // This field is only used for the singleton IndexConsumerType documents.
+  runningReindexCount: number | null;
 }
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
@@ -50,6 +52,11 @@ export enum ReindexWarning {
   booleanFields = 1,
 
   // 7.0 -> 8.0 warnings
+}
+
+export enum IndexGroup {
+  ml = '___ML_REINDEX_LOCK___',
+  watcher = '___WATCHER_REINDEX_LOCK___',
 }
 
 // Telemetry types

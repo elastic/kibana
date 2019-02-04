@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiCallOut, EuiProgress, EuiText } from '@elastic/eui';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { StepProgress, StepProgressStep } from './step_progress';
 
 const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = ({
@@ -37,9 +37,16 @@ const orderedSteps = Object.values(ReindexStep).sort() as number[];
 export const ReindexProgress: React.StatelessComponent<{
   lastCompletedStep?: ReindexStep;
   reindexStatus?: ReindexStatus;
+  indexGroup?: IndexGroup;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
-}> = ({ lastCompletedStep = -1, reindexStatus, reindexTaskPercComplete, errorMessage }) => {
+}> = ({
+  lastCompletedStep = -1,
+  reindexStatus,
+  indexGroup,
+  reindexTaskPercComplete,
+  errorMessage,
+}) => {
   const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
 
@@ -101,23 +108,42 @@ export const ReindexProgress: React.StatelessComponent<{
     );
   }
 
-  return (
-    <StepProgress
-      steps={[
-        {
-          title: 'Setting old index to read-only',
-          ...stepDetails(ReindexStep.readonly),
-        },
-        {
-          title: 'Creating new index',
-          ...stepDetails(ReindexStep.newIndexCreated),
-        },
-        reindexingDocsStep,
-        {
-          title: 'Swapping original index with alias',
-          ...stepDetails(ReindexStep.aliasCreated),
-        },
-      ]}
-    />
-  );
+  const steps = [
+    {
+      title: 'Setting old index to read-only',
+      ...stepDetails(ReindexStep.readonly),
+    },
+    {
+      title: 'Creating new index',
+      ...stepDetails(ReindexStep.newIndexCreated),
+    },
+    reindexingDocsStep,
+    {
+      title: 'Swapping original index with alias',
+      ...stepDetails(ReindexStep.aliasCreated),
+    },
+  ];
+
+  // If this index is part of an index group, add the approriate group services steps.
+  if (indexGroup === IndexGroup.ml) {
+    steps.unshift({
+      title: 'Pausing Machine Learning jobs',
+      ...stepDetails(ReindexStep.indexGroupServicesStopped),
+    });
+    steps.push({
+      title: 'Resuming Machine Learning jobs',
+      ...stepDetails(ReindexStep.indexGroupServicesStarted),
+    });
+  } else if (indexGroup === IndexGroup.watcher) {
+    steps.unshift({
+      title: 'Stopping Watcher',
+      ...stepDetails(ReindexStep.indexGroupServicesStopped),
+    });
+    steps.push({
+      title: 'Resuming Watcher',
+      ...stepDetails(ReindexStep.indexGroupServicesStarted),
+    });
+  }
+
+  return <StepProgress steps={steps} />;
 };

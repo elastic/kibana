@@ -1,12 +1,12 @@
 {
   "groups": ["apache"],
-  "description": "HTTP Access Logs: Detect unusual visitor rate (ECS)",
+  "description": "HTTP Access Logs: Detect unusual visitor rates (ECS)",
   "analysis_config" : {
     "bucket_span": "15m",
     "summary_count_field_name": "dc_source_address",
     "detectors": [
       {
-        "detector_description": "apache_access_visitor_rate",
+        "detector_description": "Apache access visitor rate",
         "function": "non_zero_count"
       }
     ],
