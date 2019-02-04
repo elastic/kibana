@@ -27,7 +27,7 @@ const registries = {
   types: new TypesRegistry(),
 };
 
-const registeredPaths = JSON.parse(process.argv.pop());
+const registeredPaths = JSON.parse(process.env.interpreterPluginPaths);
 const pathsRegistry = new PathsRegistry();
 pathsRegistry.register(registeredPaths);
 

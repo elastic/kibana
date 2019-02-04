@@ -23,8 +23,6 @@ import chrome from 'ui/chrome';
 import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 
-console.log('vega function');
-
 export const vega = () => ({
   name: 'vega',
   type: 'render',

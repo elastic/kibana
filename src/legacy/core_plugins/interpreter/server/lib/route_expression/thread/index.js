@@ -29,7 +29,12 @@ let worker = null;
 
 export function getWorker(registeredPaths) {
   if (worker) return worker;
-  worker = fork(workerPath, [ JSON.stringify(registeredPaths) ]);
+  worker = fork(workerPath, [], {
+    env: {
+      ...process.env,
+      interpreterPluginPaths: JSON.stringify(registeredPaths)
+    }
+  });
 
   // handle run requests
   worker.on('message', msg => {

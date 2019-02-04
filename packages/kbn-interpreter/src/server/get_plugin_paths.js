@@ -55,10 +55,10 @@ export const getPluginPaths = (pathsRegistry, type) => {
       if (!dir) return list;
       return list.concat(dir);
     }, []))
-    .then(possibleCanvasPlugins => filterDirectories(possibleCanvasPlugins, { exclude: false }))
-    .then(canvasPluginDirectories => {
+    .then(possiblePlugins => filterDirectories(possiblePlugins, { exclude: false }))
+    .then(pluginDirectories => {
       return Promise.all(
-        canvasPluginDirectories.map(dir =>
+        pluginDirectories.map(dir =>
           // Get the full path of all files in the directory
           readdir(dir).then(files => files.map(file => path.resolve(dir, file)))
         )
