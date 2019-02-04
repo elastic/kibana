@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function createHandlers(/*socket*/) {
+export function createHandlers() {
   return {
     environment: 'client',
   };
