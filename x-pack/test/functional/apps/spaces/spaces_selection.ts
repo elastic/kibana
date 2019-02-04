@@ -10,7 +10,6 @@ export default function spaceSelectorFunctonalTests({
   getService,
   getPageObjects,
 }: KibanaFunctionalTestDefaultProviders) {
-  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
