@@ -11,7 +11,7 @@ import React from 'react';
 import { LogsPageContent } from './page_content';
 import { LogsToolbar } from './toolbar';
 
-import { EmptyPage } from '../../components/empty_page';
+import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
@@ -105,7 +105,7 @@ export const LogsPage = injectI18n(
                 ) : (
                   <WithKibanaChrome>
                     {({ basePath }) => (
-                      <EmptyPage
+                      <NoIndices
                         title={intl.formatMessage({
                           id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
                           defaultMessage: "Looks like you don't have any logging indices.",
