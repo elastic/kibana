@@ -126,6 +126,7 @@ interface State {
   outsideClickDisabled: boolean;
   isManagingFocus: boolean;
   navLinks: Array<ReturnType<typeof extendNavLink>>;
+  isExpandable: boolean;
   recentlyAccessed: Array<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
   forceNavigation: boolean;
 }
@@ -133,6 +134,8 @@ interface State {
 class HeaderUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
   private timeoutID?: ReturnType<typeof setTimeout>;
+  private timeoutExpand?: ReturnType<typeof setTimeout>;
+  private timeoutScrollbar?: ReturnType<typeof setTimeout>;
 
   constructor(props: Props) {
     super(props);
@@ -147,6 +150,7 @@ class HeaderUI extends Component<Props, State> {
       showScrollbar: false,
       outsideClickDisabled: true,
       isManagingFocus: false,
+      isExpandable: true,
       navLinks: [],
       recentlyAccessed: [],
       forceNavigation: false,
@@ -244,18 +248,28 @@ class HeaderUI extends Component<Props, State> {
             isCollapsed={this.state.isCollapsed}
             flyoutIsCollapsed={this.state.flyoutIsCollapsed}
             flyoutIsAnimating={this.state.flyoutIsAnimating}
-            onMouseOver={this.expandDrawer}
+            onMouseEnter={this.expandDrawer}
             onFocus={this.expandDrawer}
             onBlur={this.focusOut}
             onMouseLeave={this.collapseDrawer}
             mobileIsHidden={this.state.mobileIsHidden}
             showScrollbar={this.state.showScrollbar}
+            isExpandable={this.state.isExpandable}
             data-test-subj={classNames(
               'navDrawer',
               this.state.isCollapsed ? 'collapsed' : 'expanded'
             )}
           >
-            <EuiNavDrawerMenu id="navDrawerMenu" onClick={this.onNavClick}>
+            <EuiNavDrawerMenu
+              id="navDrawerMenu"
+              onClick={this.onNavClick}
+              footerLink={{
+                iconType: this.state.isExpandable ? 'arrowLeft' : 'arrowRight',
+                label: 'Collapse',
+                size: 's',
+                // onClick: () => this.toggleHover(),
+              }}
+            >
               <EuiListGroup>
                 <EuiListGroupItem
                   label="Recently viewed"
@@ -369,13 +383,22 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private expandDrawer = () => {
-    this.setState({ isCollapsed: false });
+    // Stop the collapse animation
+    if (this.timeoutCollapse) {
+      clearTimeout(this.timeoutCollapse);
+    }
 
-    setTimeout(() => {
+    this.timeoutExpand = setTimeout(() => {
+      this.setState({
+        isCollapsed: false,
+      });
+    }, this.getTimeoutMs(750));
+
+    this.timeoutScrollbar = setTimeout(() => {
       this.setState({
         showScrollbar: true,
       });
-    }, this.getTimeoutMs(350));
+    }, this.getTimeoutMs(1200));
 
     // This prevents the drawer from collapsing when tabbing through children
     // by clearing the timeout thus cancelling the onBlur event (see focusOut).
@@ -395,6 +418,15 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private collapseDrawer = () => {
+    // Stop the exapdn animation
+    if (this.timeoutExpand) {
+      clearTimeout(this.timeoutExpand);
+    }
+
+    if (this.timeoutScrollbar) {
+      clearTimeout(this.timeoutScrollbar);
+    }
+
     this.setState({
       flyoutIsAnimating: false,
     });
@@ -407,7 +439,7 @@ class HeaderUI extends Component<Props, State> {
         showScrollbar: false,
         outsideClickDisabled: true,
       });
-    }, this.getTimeoutMs(350));
+    }, this.getTimeoutMs(250));
 
     // Scrolls the menu and flyout back to top when the nav drawer collapses
     setTimeout(() => {
@@ -420,7 +452,7 @@ class HeaderUI extends Component<Props, State> {
       if (flyoutEl) {
         flyoutEl.scrollTop = 0;
       }
-    }, this.getTimeoutMs(300));
+    }, this.getTimeoutMs(240));
   };
 
   private focusOut = () => {
