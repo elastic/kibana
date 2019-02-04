@@ -26,8 +26,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   static renderEditor({ onPreviewSource }) {
-    const onChange = ({ target }) => {
-      const selectedId = target.options[target.selectedIndex].value;
+    const onChange = (selectedId) => {
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
       const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
