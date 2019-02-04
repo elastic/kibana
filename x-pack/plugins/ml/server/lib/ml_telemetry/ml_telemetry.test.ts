@@ -7,6 +7,7 @@
 import {
   createMlTelemetry,
   getSavedObjectsClient,
+  incrementFileDataVisualizerIndexCreationCount,
   ML_TELEMETRY_DOC_ID,
   MlTelemetry,
   storeMlTelemetry,
@@ -96,6 +97,103 @@ describe('ml_telemetry', () => {
 
       expect(result).toBe(savedObjectsClientInstance);
       expect(server.savedObjects.SavedObjectsClient).toHaveBeenCalledWith(internalRepository);
+    });
+  });
+
+  describe('incrementFileDataVisualizerIndexCreationCount', () => {
+    let server: any;
+    let savedObjectsClientInstance: any;
+    let callWithInternalUser: any;
+    let internalRepository: any;
+
+    function createSavedObjectsClientInstance(
+      telemetryEnabled?: boolean,
+      indexCreationCount?: number
+    ) {
+      return {
+        create: jest.fn(),
+        get: jest.fn(obj => {
+          switch (obj) {
+            case 'telemetry':
+              if (telemetryEnabled === undefined) {
+                throw Error;
+              }
+              return {
+                attributes: {
+                  telemetry: {
+                    enabled: telemetryEnabled,
+                  },
+                },
+              };
+            case 'ml-telemetry':
+              // emulate that a non-existing saved object will throw an error
+              if (indexCreationCount === undefined) {
+                throw Error;
+              }
+              return {
+                attributes: {
+                  file_data_visualizer: {
+                    index_creation_count: indexCreationCount,
+                  },
+                },
+              };
+          }
+        }),
+      };
+    }
+
+    function mockInit(telemetryEnabled?: boolean, indexCreationCount?: number): void {
+      savedObjectsClientInstance = createSavedObjectsClientInstance(
+        telemetryEnabled,
+        indexCreationCount
+      );
+      callWithInternalUser = jest.fn();
+      internalRepository = jest.fn();
+      server = {
+        savedObjects: {
+          SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
+          getSavedObjectsRepository: jest.fn(() => internalRepository),
+        },
+        plugins: {
+          elasticsearch: {
+            getCluster: jest.fn(() => ({ callWithInternalUser })),
+          },
+        },
+      };
+    }
+
+    it('should not increment if telemetry status cannot be determined', async () => {
+      mockInit();
+      await incrementFileDataVisualizerIndexCreationCount(server);
+
+      expect(savedObjectsClientInstance.create.mock.calls).toHaveLength(0);
+    });
+
+    it('should not increment if telemetry status is disabled', async () => {
+      mockInit(false);
+      await incrementFileDataVisualizerIndexCreationCount(server);
+
+      expect(savedObjectsClientInstance.create.mock.calls).toHaveLength(0);
+    });
+
+    it('should initialize index_creation_count with 1', async () => {
+      mockInit(true);
+      await incrementFileDataVisualizerIndexCreationCount(server);
+
+      expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('ml-telemetry');
+      expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
+        file_data_visualizer: { index_creation_count: 1 },
+      });
+    });
+
+    it('should increment index_creation_count to 2', async () => {
+      mockInit(true, 1);
+      await incrementFileDataVisualizerIndexCreationCount(server);
+
+      expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('ml-telemetry');
+      expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
+        file_data_visualizer: { index_creation_count: 2 },
+      });
     });
   });
 });
