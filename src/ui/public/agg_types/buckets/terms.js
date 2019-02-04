@@ -108,10 +108,15 @@ export const termsBucketAgg = new BucketAggType({
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.setField('aggs', filterAgg);
 
-      const request = inspectorAdapters.requests.start('Other bucket', {
-        description: `This request counts the number of documents that fall
-          outside the criterion of the data buckets.`
-      });
+      const request = inspectorAdapters.requests.start(
+        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', { defaultMessage: 'Other bucket' }),
+        {
+          description: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketDescription', {
+            defaultMessage: 'This request counts the number of documents that fall ' +
+              'outside the criterion of the data buckets.'
+          }),
+        }
+      );
       nestedSearchSource.getSearchRequestBody().then(body => {
         request.json(body);
       });
@@ -161,7 +166,9 @@ export const termsBucketAgg = new BucketAggType({
           try {
             return agg.makeLabel();
           } catch (e) {
-            return '- agg not valid -';
+            return i18n.translate('common.ui.aggTypes.buckets.terms.aggNotValidLabel', {
+              defaultMessage: '- agg not valid -',
+            });
           }
         };
 

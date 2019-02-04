@@ -11,7 +11,7 @@ import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -52,7 +52,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       this.renderReact = ({ clusterStatus, nodes }) => {
         super.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <ElasticsearchNodes
               clusterStatus={clusterStatus}
               nodes={nodes}
@@ -61,7 +61,7 @@ uiRoutes.when('/elasticsearch/nodes', {
               pagination={this.pagination}
               onTableChange={this.onTableChange}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       };
     }
