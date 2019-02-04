@@ -39,7 +39,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'canvas',
             'infrastructure',
             'logs',
-            'gis',
+            'maps',
             'uptime',
           ].sort()
         );
