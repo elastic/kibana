@@ -17,24 +17,25 @@
  * under the License.
  */
 
-import 'ui/autoload/modules';
-import 'ui/autoload/styles';
-import 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { destroyStatusPage, renderStatusPage } from './components/render';
+import { randomBytes } from 'crypto';
+import { promisify } from 'util';
 
-chrome
-  .enableForcedAppSwitcherNavigation()
-  .setRootTemplate(require('plugins/status_page/status_page.html'))
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
-  });
+const randomBytesAsync = promisify(randomBytes);
 
-uiModules.get('kibana')
-  .config(function (appSwitcherEnsureNavigationProvider) {
-    appSwitcherEnsureNavigationProvider.forceNavigation(true);
-  });
+export const DEFAULT_CSP_RULES = Object.freeze([
+  `script-src 'unsafe-eval' 'nonce-{nonce}'`,
+  'worker-src blob:',
+  'child-src blob:',
+]);
+
+export async function generateCSPNonce() {
+  return (await randomBytesAsync(12)).toString('base64');
+}
+
+export function createCSPRuleString(rules: string[], nonce?: string) {
+  let ruleString = rules.join('; ');
+  if (nonce) {
+    ruleString = ruleString.replace(/\{nonce\}/g, nonce);
+  }
+  return ruleString;
+}

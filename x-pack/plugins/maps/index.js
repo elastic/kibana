@@ -27,6 +27,13 @@ export function maps(kibana) {
         icon: 'plugins/maps/icon.svg',
         euiIconType: 'gisApp',
       },
+      injectDefaultVars(server) {
+        const serverConfig = server.config();
+        const mapConfig = serverConfig.get('map');
+        return {
+          isEmsEnabled: mapConfig.includeElasticMapsService
+        };
+      },
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',
       ],
@@ -41,16 +48,16 @@ export function maps(kibana) {
     },
 
     init(server) {
-      const gisEnabled = server.config().get('xpack.maps.enabled');
+      const mapsEnabled = server.config().get('xpack.maps.enabled');
 
-      if (gisEnabled) {
+      if (mapsEnabled) {
         const thisPlugin = this;
         const xpackMainPlugin = server.plugins.xpack_main;
         let routesInitialized = false;
 
         watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
           async license => {
-            if (license && license.gis && !routesInitialized) {
+            if (license && license.maps && !routesInitialized) {
               routesInitialized = true;
               initRoutes(server, license.uid);
             }

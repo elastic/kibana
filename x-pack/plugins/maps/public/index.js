@@ -31,6 +31,7 @@ import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
+import { recentlyAccessed } from 'ui/persisted_log';
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
@@ -84,6 +85,10 @@ routes
       map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route) {
         const id = $route.current.params.id;
         return gisMapSavedObjectLoader.get(id)
+          .then((savedMap) => {
+            recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
+            return savedMap;
+          })
           .catch(redirectWhenMissing({
             'map': '/'
           }));

@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 
 export default function ({ getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'gis', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'maps', 'header', 'home']);
 
   describe('maps loaded from sample data', () => {
     describe('web logs', () => {
@@ -16,7 +16,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
-        await PageObjects.gis.loadSavedMap('[Logs] Web Traffic');
+        await PageObjects.maps.loadSavedMap('[Logs] Web Traffic');
       });
 
       after(async () => {
@@ -26,12 +26,12 @@ export default function ({ getPageObjects }) {
       });
 
       it('should contain web log heatmap layer', async () => {
-        const exists = await PageObjects.gis.doesLayerExist('logs(heatmap)');
+        const exists = await PageObjects.maps.doesLayerExist('logs(heatmap)');
         expect(exists).to.be(true);
       });
 
       it('should contain web log document layer', async () => {
-        const exists = await PageObjects.gis.doesLayerExist('logs(documents)');
+        const exists = await PageObjects.maps.doesLayerExist('logs(documents)');
         expect(exists).to.be(true);
       });
     });

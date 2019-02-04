@@ -101,7 +101,12 @@ export class Join extends Component {
   }
 
   async _loadLeftFields() {
-    const stringFields = await this.props.layer.getStringFields();
+    let stringFields;
+    try {
+      stringFields = await this.props.layer.getStringFields();
+    } catch (error) {
+      stringFields = [];
+    }
     if (!this._isMounted) {
       return;
     }
@@ -173,7 +178,7 @@ export class Join extends Component {
     }
 
     return (
-      <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
+      <EuiFlexGroup className="mapJoinItem" responsive={false} wrap={true} gutterSize="s">
 
         <EuiFlexItem grow={false}>
           <JoinExpression
@@ -195,7 +200,7 @@ export class Join extends Component {
         {metricsExpression}
 
         <EuiButtonIcon
-          className="gisJoinItem__delete"
+          className="mapJoinItem__delete"
           iconType="trash"
           color="danger"
           aria-label="Delete join"

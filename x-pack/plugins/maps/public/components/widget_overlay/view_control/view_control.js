@@ -31,7 +31,7 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
       anchorPosition="upRight"
       button={(
         <EuiButton
-          className="gisViewControl__gotoButton"
+          className="mapViewControl__gotoButton"
           fill
           size="s"
           onClick={toggleSetViewVisibility}
@@ -54,7 +54,7 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
       ? _.round(mouseCoordinates.lon, DECIMAL_DEGREES_PRECISION)
       : '';
     return (
-      <EuiPanel className="gisWidgetControl gisViewControl__coordinates" paddingSize="none">
+      <EuiPanel className="mapWidgetControl mapViewControl__coordinates" paddingSize="none">
         <EuiText size="xs">
           <p>
             <strong>lat:</strong> {lat},{' '}
