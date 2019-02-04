@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-export const EmptyString = styled.span`
+const EmptyString = styled.span`
   color: ${({
     theme: {
       eui: { euiColorMediumShade },

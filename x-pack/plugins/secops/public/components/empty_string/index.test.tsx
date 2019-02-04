@@ -26,6 +26,15 @@ describe('empty_string', () => {
   });
 
   describe('#getEmptyStringTag', () => {
+    test('should turn into an span that has length of 1', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <p>{getEmptyStringTag()}</p>
+        </ThemeProvider>
+      );
+      expect(wrapper.find('span')).toHaveLength(1);
+    });
+
     test('should turn into an empty string tag place holder', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
