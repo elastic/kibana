@@ -184,3 +184,15 @@ dependent on an unspecified port set to 9200, `:9200` will have to be appended t
 
 *Impact:* Users with `elasticsearch.ssl.verify` set should use `elasticsearch.ssl.verificationMode` instead. 
 Previously set `elasticsearch.ssl.verify` is equal to `elasticsearch.ssl.verificationMode: full`.
+
+[float]
+=== Change in API `/api/kibana/management/saved_objects/relationships/{type}/{id}`
+*Details:* The response attribute names have changed to be named by object type instead. The mapping of attributes is as follows:
+
+- `searches` becomes `search`
+- `visualizations` becomes `visualization`
+- `dashboards` becomes `dashboard`
+- `indexPatterns` becomes `index-pattern`
+
+*Impact:* Users will have to reference the new attributes when processing the API response.
+
