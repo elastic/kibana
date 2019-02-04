@@ -107,7 +107,7 @@ export interface BeatTag
 
 export const RuntimeBeatEvent = t.interface(
   {
-    type: t.union(['STATE', 'ERROR'].map(value => t.literal(value))),
+    type: t.union([t.literal('STATE'), t.literal('ERROR')]),
     beat: t.union([t.undefined, t.string]),
     timestamp: t.string,
     event: t.type({
