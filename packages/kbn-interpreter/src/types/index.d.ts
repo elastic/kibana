@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FunctionDefinition, FunctionRegistration } from './functions';
+export { FunctionDefinition } from './functions';
