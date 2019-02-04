@@ -75,6 +75,7 @@ export class LegacyPlatformService {
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
     require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
     require('ui/chrome/api/controls').__newPlatformInit__(chrome);
+    require('ui/chrome/api/help_extension').__newPlatformInit__(chrome);
     require('ui/chrome/api/theme').__newPlatformInit__(chrome);
     require('ui/chrome/api/breadcrumbs').__newPlatformInit__(chrome);
     require('ui/chrome/services/global_nav_state').__newPlatformInit__(chrome);
