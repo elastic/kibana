@@ -14,7 +14,7 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
 import { I18nContext } from 'ui/i18n';
@@ -74,51 +74,55 @@ uiRoutes.when('/kibana/instances/:uuid', {
           <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <DetailStatus stats={data.kibanaSummary} />
-                  <EuiSpacer size="m"/>
-                  <EuiFlexGroup>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGrid columns={2} gutterSize="s">
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_requests}
                         onBrush={this.onBrush}
                       />
+                      <EuiSpacer />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_response_times}
                         onBrush={this.onBrush}
                       />
+                      <EuiSpacer />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexGroup>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_memory}
                         onBrush={this.onBrush}
                       />
+                      <EuiSpacer />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_average_concurrent_connections}
                         onBrush={this.onBrush}
                       />
+                      <EuiSpacer />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexGroup>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_os_load}
                         onBrush={this.onBrush}
                       />
+                      <EuiSpacer />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_process_delay}
                         onBrush={this.onBrush}
                       />
+                      <EuiSpacer />
                     </EuiFlexItem>
-                  </EuiFlexGroup>
+                  </EuiFlexGrid>
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
