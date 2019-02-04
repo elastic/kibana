@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const find = getService('find');
+  const appsMenu = getService('appsMenu');
 
   describe('spaces feature controls', () => {
     before(async () => {
@@ -46,7 +47,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).to.contain('Canvas');
       });
 
@@ -110,7 +113,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).not.to.contain('Canvas');
       });
 

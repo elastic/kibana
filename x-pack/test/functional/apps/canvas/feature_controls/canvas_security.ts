@@ -13,6 +13,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const find = getService('find');
+  const appsMenu = getService('appsMenu');
 
   describe('security feature controls', () => {
     before(async () => {
@@ -70,7 +71,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).to.eql(['Canvas', 'Management']);
       });
 
@@ -142,7 +145,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).to.eql(['Canvas', 'Management']);
       });
 
