@@ -12,8 +12,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+
+  async function setDiscoverTimeRange() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
+    await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+  }
 
   describe('discover', () => {
     before(async () => {
@@ -55,6 +61,15 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           basePath: '/s/custom_space',
         });
         await testSubjects.existOrFail('discoverSaveButton', 10000);
+      });
+
+      it('shows "visualize" field button', async () => {
+        await PageObjects.common.navigateToApp('discover', {
+          basePath: '/s/custom_space',
+        });
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -99,6 +114,38 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
         });
         await PageObjects.spaceSelector.expectHomePage('custom_space');
+      });
+    });
+
+    describe('space with Visualize disabled', async () => {
+      before(async () => {
+        // we need to load the following in every situation as deleting
+        // a space deletes all of the associated saved objects
+        await esArchiver.load('spaces/disabled_features');
+        await kibanaServer.uiSettings.replace({
+          'accessibility:disableAnimations': true,
+          'telemetry:optIn': false,
+          defaultIndex: 'logstash-*',
+        });
+        await spacesService.create({
+          id: 'custom_space',
+          name: 'custom_space',
+          disabledFeatures: ['visualize'],
+        });
+      });
+
+      after(async () => {
+        await spacesService.delete('custom_space');
+        await esArchiver.unload('spaces/disabled_features');
+      });
+
+      it('Does not show the "visualize" field button', async () => {
+        await PageObjects.common.navigateToApp('discover', {
+          basePath: '/s/custom_space',
+        });
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectNoFieldListItemVisualize('bytes');
       });
     });
   });

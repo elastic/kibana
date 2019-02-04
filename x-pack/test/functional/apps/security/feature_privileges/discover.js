@@ -9,8 +9,14 @@ export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+
+  async function setDiscoverTimeRange() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
+    await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+  }
 
   describe('discover', () => {
     before(async () => {
@@ -121,6 +127,56 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverNewButton', 10000);
         await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it(`doesn't show visualize button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectNoFieldListItemVisualize('bytes');
+      });
+    });
+
+    describe('discover and visualize privileges', () => {
+      before(async () => {
+        await security.role.create('global_discover_visualize_read_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+                visualize: ['read']
+              },
+              spaces: ['*']
+            }
+          ]
+        });
+
+        await security.user.create('global_discover_visualize_read_user', {
+          password: 'global_discover_visualize_read_user-password',
+          roles: ['global_discover_visualize_read_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login('global_discover_visualize_read_user', 'global_discover_visualize_read_user-password', {
+          expectSpaceSelector: false,
+        });
+      });
+
+      after(async () => {
+        await security.role.delete('global_discover_visualize_read_role');
+        await security.user.delete('global_discover_visualize_read_user');
+      });
+
+      it(`shows the visualize button`, async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await setDiscoverTimeRange();
+        await PageObjects.discover.clickFieldListItem('bytes');
+        await PageObjects.discover.expectFieldListItemVisualize('bytes');
       });
     });
 

@@ -244,6 +244,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
+    }
+
+    async expectNoFieldListItemVisualize(field) {
+      const exists = await testSubjects.exists(`fieldVisualize-${field}`);
+      expect(exists).to.be(false);
+    }
+
     async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
