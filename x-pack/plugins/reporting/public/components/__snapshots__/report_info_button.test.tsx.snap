@@ -63,7 +63,15 @@ Array [
       />
       <EuiOverlayMask
         onClick={[Function]}
-      />
+      >
+        <Portal
+          containerInfo={
+            <div
+              class="euiOverlayMask"
+            />
+          }
+        />
+      </EuiOverlayMask>
       <Component
         focusTrapOptions={
           Object {
@@ -287,7 +295,15 @@ Array [
       />
       <EuiOverlayMask
         onClick={[Function]}
-      />
+      >
+        <Portal
+          containerInfo={
+            <div
+              class="euiOverlayMask"
+            />
+          }
+        />
+      </EuiOverlayMask>
       <Component
         focusTrapOptions={
           Object {

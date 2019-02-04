@@ -54,15 +54,6 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
-    });
-  };
-
   const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       page: 1,
@@ -76,8 +67,22 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
+    });
+  };
+
+  const expectValidType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.have.keys('statusCode', 'error', 'message', 'validation');
+    expect(resp.body).to.have.property('statusCode', 400);
+    expect(resp.body).to.have.property('error', 'Bad Request');
+    expect(resp.body.message).to.match(
+      /child \"type\" fails because \[single value of \"type\" fails because \[\"type\" must be one of \[.*\]\]\]/
+    );
+    expect(resp.body.validation).to.eql({
+      keys: ['type'],
+      source: 'query',
     });
   };
 
@@ -108,6 +113,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             title: 'Count of requests',
           },
+          references: [],
         },
       ],
     });
@@ -172,7 +178,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           tests.unknownSearchField.description
         }`, async () =>
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
             .auth(user.username, user.password)
             .expect(tests.unknownSearchField.statusCode)
             .then(tests.unknownSearchField.response));
@@ -195,11 +201,11 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
 
   return {
     createExpectEmpty,
-    createExpectLegacyForbidden,
     createExpectRbacForbidden,
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
     expectTypeRequired,
+    expectValidType,
     findTest,
   };
 }

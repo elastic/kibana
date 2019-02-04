@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
@@ -32,7 +32,7 @@ function ReactEditorControllerProvider(Private, config) {
     async render(params) {
       const Component = this.vis.type.editorConfig.component;
       render(
-        <I18nProvider>
+        <I18nContext>
           <Component
             config={config}
             vis={this.vis}
@@ -42,7 +42,8 @@ function ReactEditorControllerProvider(Private, config) {
             isEditorMode={true}
             appState={params.appState}
           />
-        </I18nProvider>, this.el);
+        </I18nContext>,
+        this.el);
     }
 
     resize() {

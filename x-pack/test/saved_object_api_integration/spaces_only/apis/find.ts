@@ -37,7 +37,7 @@ export default function({ getService }: TestInvoker) {
         },
         unknownType: {
           description: 'empty result',
-          statusCode: 200,
+          statusCode: 400,
           response: createExpectEmpty(1, 20, 0),
         },
         pageBeyondTotal: {
@@ -73,7 +73,7 @@ export default function({ getService }: TestInvoker) {
         },
         unknownType: {
           description: 'empty result',
-          statusCode: 200,
+          statusCode: 400,
           response: createExpectEmpty(1, 20, 0),
         },
         pageBeyondTotal: {

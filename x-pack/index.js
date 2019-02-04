@@ -18,7 +18,7 @@ import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
 import { beats } from './plugins/beats_management';
 import { apm } from './plugins/apm';
-import { gis } from './plugins/gis';
+import { maps } from './plugins/maps';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
@@ -36,6 +36,7 @@ import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { secretstore } from './plugins/secretstore';
+import { ossTelemetry } from './plugins/oss_telemetry';
 
 module.exports = function (kibana) {
   return [
@@ -54,7 +55,7 @@ module.exports = function (kibana) {
     logstash(kibana),
     beats(kibana),
     apm(kibana),
-    gis(kibana),
+    maps(kibana),
     canvas(kibana),
     licenseManagement(kibana),
     cloud(kibana),
@@ -71,5 +72,6 @@ module.exports = function (kibana) {
     upgradeAssistant(kibana),
     uptime(kibana),
     secretstore(kibana),
+    ossTelemetry(kibana),
   ];
 };

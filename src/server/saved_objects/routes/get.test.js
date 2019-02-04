@@ -29,6 +29,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     server = new MockServer();
 
     const prereqs = {
+      types: ['index-pattern'],
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
@@ -53,7 +54,8 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       id: 'logstash-*',
       title: 'logstash-*',
       timeFieldName: '@timestamp',
-      notExpandable: true
+      notExpandable: true,
+      references: [],
     };
 
     savedObjectsClient.get.returns(Promise.resolve(clientResponse));
@@ -78,4 +80,17 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     expect(args).toEqual(['index-pattern', 'logstash-*']);
   });
 
+  it('should return 400 if type is not allowed', async () => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/invalid-type/abc123',
+    };
+
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+
+    expect(statusCode).toBe(400);
+    expect(response.message).toMatch(/one of/);
+    expect(response.message).toMatch(/index-pattern/);
+  });
 });

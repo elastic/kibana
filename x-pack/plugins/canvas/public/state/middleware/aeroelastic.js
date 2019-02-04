@@ -344,7 +344,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
           populateWithElements(page);
         }
 
-        if (action.type !== setMultiplePositions.toString()) {
+        if (
+          action.type !== setMultiplePositions.toString() &&
+          action.type !== elementLayer.toString()
+        ) {
           unselectShape(prevPage);
         }
 

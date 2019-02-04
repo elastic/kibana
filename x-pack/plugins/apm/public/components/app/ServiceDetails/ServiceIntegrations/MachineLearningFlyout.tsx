@@ -142,7 +142,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 'The analysis is now running for {serviceName} ({transactionType}). It might take a while before results are added to the response times graph.',
               values: {
                 serviceName,
-                transactionType: transactionType as string
+                transactionType
               }
             }
           )}{' '}
@@ -224,7 +224,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                               'There is currently a job running for {serviceName} ({transactionType}).',
                             values: {
                               serviceName,
-                              transactionType: transactionType as string
+                              transactionType
                             }
                           }
                         )}{' '}

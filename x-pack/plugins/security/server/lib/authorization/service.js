@@ -16,13 +16,7 @@ export function createAuthorizationService(server, xpackInfoFeature) {
   const actions = actionsFactory(config);
   const application = `kibana-${config.get('kibana.index')}`;
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(actions, application, shieldClient);
-  const mode = authorizationModeFactory(
-    application,
-    config,
-    (...args) => server.log(...args),
-    shieldClient,
-    xpackInfoFeature,
-  );
+  const mode = authorizationModeFactory(xpackInfoFeature);
 
   return {
     actions,

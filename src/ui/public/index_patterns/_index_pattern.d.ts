@@ -17,11 +17,18 @@
  * under the License.
  */
 
+import { Field } from 'ui/index_patterns/_field';
+
 /**
  * WARNING: these types are incomplete
  */
 
-export type IndexPattern = any;
+export interface IndexPattern {
+  id: string;
+  fields: Field[];
+  title: string;
+  timeFieldName?: string;
+}
 
 export interface StaticIndexPatternField {
   name: string;

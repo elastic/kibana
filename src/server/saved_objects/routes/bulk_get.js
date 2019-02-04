@@ -26,7 +26,7 @@ export const createBulkGetRoute = (prereqs) => ({
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       payload: Joi.array().items(Joi.object({
-        type: Joi.string().required(),
+        type: Joi.string().valid(prereqs.types).required(),
         id: Joi.string().required(),
       }).required())
     },

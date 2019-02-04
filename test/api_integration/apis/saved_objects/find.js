@@ -45,7 +45,8 @@ export default function ({ getService }) {
                   version: 1,
                   attributes: {
                     'title': 'Count of requests'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });
@@ -53,17 +54,12 @@ export default function ({ getService }) {
       ));
 
       describe('unknown type', () => {
-        it('should return 200 with empty response', async () => (
+        it('should return 400', async () => (
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
-            .expect(200)
+            .expect(400)
             .then(resp => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 0,
-                saved_objects: []
-              });
+              expect(resp.body.message).to.match(/one of.*/);
             })
         ));
       });
@@ -87,7 +83,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -125,17 +121,13 @@ export default function ({ getService }) {
       ));
 
       describe('unknown type', () => {
-        it('should return 200 with empty response', async () => (
+        it('should return 400', async () => (
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
-            .expect(200)
+            .expect(400)
             .then(resp => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 0,
-                saved_objects: []
-              });
+              expect(resp.body).to.have.keys('message');
+              expect(resp.body.message).to.match(/one of.*/);
             })
         ));
       });
@@ -178,7 +170,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({

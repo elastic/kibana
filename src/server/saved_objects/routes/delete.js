@@ -26,7 +26,7 @@ export const createDeleteRoute = (prereqs) => ({
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       params: Joi.object().keys({
-        type: Joi.string().required(),
+        type: Joi.string().valid(prereqs.types).required(),
         id: Joi.string().required(),
       }).required()
     },

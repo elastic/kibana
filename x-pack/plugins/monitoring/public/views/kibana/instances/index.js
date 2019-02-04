@@ -6,18 +6,19 @@
 
 import React from 'react';
 import { capitalize } from 'lodash';
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { EuiMonitoringTable } from '../../../components/table';
 import { KibanaStatusIcon } from '../../../components/kibana/status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const getColumns = (kbnUrl, scope) => ([
   {
@@ -145,12 +146,14 @@ uiRoutes.when('/kibana/instances', {
         }));
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <ClusterStatus stats={$scope.pageData.clusterStatus} />
-                  <EuiSpacer size="m"/>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
                   <EuiMonitoringTable
                     className="kibanaInstancesTable"
                     rows={dataFlattened}
@@ -171,7 +174,7 @@ uiRoutes.when('/kibana/instances', {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

@@ -29,10 +29,16 @@ export const createFindRoute = (prereqs) => ({
       query: Joi.object().keys({
         per_page: Joi.number().min(0).default(20),
         page: Joi.number().min(0).default(1),
-        type: Joi.array().items(Joi.string()).single().required(),
+        type: Joi.array().items(Joi.string().valid(prereqs.types)).single().required(),
         search: Joi.string().allow('').optional(),
+        default_search_operator: Joi.string().valid('OR', 'AND').default('OR'),
         search_fields: Joi.array().items(Joi.string()).single(),
         sort_field: Joi.array().items(Joi.string()).single(),
+        has_reference: Joi.object()
+          .keys({
+            type: Joi.string().valid(prereqs.types).required(),
+            id: Joi.string().required(),
+          }).optional(),
         fields: Joi.array().items(Joi.string()).single()
       }).default()
     },
