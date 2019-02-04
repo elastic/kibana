@@ -219,13 +219,13 @@ export const ChartSection = injectI18n(
       const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
       const { startX, endX } = area.domainArea;
       if (onChangeRangeTime) {
+        if (isLiveStreaming && stopLiveStreaming) {
+          stopLiveStreaming();
+        }
         onChangeRangeTime({
           to: endX.valueOf(),
           from: startX.valueOf(),
         } as metricTimeActions.MetricRangeTimeState);
-      }
-      if (isLiveStreaming && stopLiveStreaming) {
-        stopLiveStreaming();
       }
     };
   }
