@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { SnapshotHistogram } from '../../functional';
+import { SnapshotHistogram, SnapshotLoading } from '../../functional';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotProps {
@@ -51,9 +51,7 @@ export const Snapshot = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return i18n.translate('xpack.uptime.snapshot.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
+        return <SnapshotLoading />;
       }
       if (error) {
         return i18n.translate('xpack.uptime.snapshot.errorMessage', {

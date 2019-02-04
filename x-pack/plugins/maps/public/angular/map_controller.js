@@ -248,9 +248,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     description: 'Full screen',
     testId: 'fullScreenMode',
     run() {
-      getStore().then(store => {
-        store.dispatch(enableFullScreen());
-      });
+      getStore().dispatch(enableFullScreen());
     }
   }, {
     key: 'inspect',
