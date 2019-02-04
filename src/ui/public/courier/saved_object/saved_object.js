@@ -311,30 +311,41 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
-        const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
+        let searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
           const { id: indexId } = searchSourceFields.index;
-          searchSourceFields.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+          const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
-            name: searchSourceFields.indexRefName,
+            name: refName,
             type: 'index-pattern',
             id: indexId,
           });
-          delete searchSourceFields.index;
+          searchSourceFields = {
+            ...searchSourceFields,
+            indexRefName: refName,
+            index: undefined,
+          };
         }
         if (searchSourceFields.filter) {
-          searchSourceFields.filter.forEach((filterRow, i) => {
-            if (!filterRow.meta || !filterRow.meta.index) {
-              return;
-            }
-            filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-            references.push({
-              name: filterRow.meta.indexRefName,
-              type: 'index-pattern',
-              id: filterRow.meta.index,
-            });
-            delete filterRow.meta.index;
-          });
+          searchSourceFields = {
+            ...searchSourceFields,
+            filter: searchSourceFields.filter.map((filterRow, i) => {
+              if (!filterRow.meta || !filterRow.meta.index) {
+                return filterRow;
+              }
+              const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+              references.push({
+                name: refName,
+                type: 'index-pattern',
+                id: filterRow.meta.index,
+              });
+              return {
+                ...filterRow,
+                indexRefName: refName,
+                index: undefined,
+              };
+            }),
+          };
         }
         attributes.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceFields)
