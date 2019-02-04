@@ -6,8 +6,8 @@
     "bucket_span": "10m",
     "detectors": [
       {
-        "detector_description": "high_count partitionfield=\"host.name\"",
-        "function": "high_count",
+        "detector_description": "high_non_zero_count partition host.name",
+        "function": "high_non_zero_count",
         "partition_field_name": "host.name"
       }
     ],
