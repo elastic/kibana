@@ -24,7 +24,7 @@ export interface BreadcrumbRoute<T = any> extends RouteProps {
   breadcrumb: string | BreadcrumbFunction<T> | null;
 }
 
-export interface Breadcrumb extends LocationMatch {
+export interface Breadcrumb<T = any> extends LocationMatch<T> {
   value: string;
 }
 
@@ -54,16 +54,16 @@ const parse = (options: ParseOptions) => {
   return { value, match, location };
 };
 
-const getBreadcrumb = ({
+export function getBreadcrumb<T = any>({
   location,
   currentPath,
   routes
 }: {
   location: Location;
   currentPath: string;
-  routes: BreadcrumbRoute[];
-}) =>
-  routes.reduce<Breadcrumb | null>((found, { breadcrumb, ...route }) => {
+  routes: Array<BreadcrumbRoute<T>>;
+}) {
+  return routes.reduce<Breadcrumb | null>((found, { breadcrumb, ...route }) => {
     if (found) {
       return found;
     }
@@ -84,15 +84,16 @@ const getBreadcrumb = ({
 
     return null;
   }, null);
+}
 
-export const getBreadcrumbs = ({
+export function getBreadcrumbs<T = any>({
   routes,
   location
 }: {
   routes: BreadcrumbRoute[];
   location: Location;
-}) => {
-  const matches: Breadcrumb[] = [];
+}) {
+  const breadcrumbs: Array<Breadcrumb<T>> = [];
   const { pathname } = location;
 
   pathname
@@ -102,21 +103,21 @@ export const getBreadcrumbs = ({
     .reduce((acc, next) => {
       // `/1/2/3` results in match checks for `/1`, `/1/2`, `/1/2/3`.
       const currentPath = !next ? '/' : `${acc}/${next}`;
-      const breadcrumb = getBreadcrumb({
+      const breadcrumb = getBreadcrumb<T>({
         location,
         currentPath,
         routes
       });
 
       if (breadcrumb) {
-        matches.push(breadcrumb);
+        breadcrumbs.push(breadcrumb);
       }
 
       return currentPath === '/' ? '' : currentPath;
     }, '');
 
-  return matches;
-};
+  return breadcrumbs;
+}
 
 function ProvideBreadcrumbsComponent({
   routes = [],
