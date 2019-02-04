@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('gauge chart', function indexPatternCreation() {
@@ -40,8 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show Count', function () {
@@ -55,7 +55,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show Split Gauges', async function () {
-      const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios' ];
       await PageObjects.visualize.clickMetricEditor();
       log.debug('Bucket = Split Group');
       await PageObjects.visualize.clickBucket('Split Group');
@@ -66,9 +65,14 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Size = 4');
       await PageObjects.visualize.setSize('4');
       await PageObjects.visualize.clickGo();
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getGaugeValue();
-        expect(expectedTexts).to.eql(metricValue);
+
+      await retry.try(async () => {
+        expect(await PageObjects.visualize.getGaugeValue()).to.eql([
+          'win 8',
+          'win xp',
+          'win 7',
+          'ios'
+        ]);
       });
     });
 

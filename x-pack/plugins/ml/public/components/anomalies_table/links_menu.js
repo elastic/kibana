@@ -17,6 +17,7 @@ import {
   EuiContextMenuItem,
   EuiPopover
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
@@ -36,7 +37,16 @@ import { replaceStringTokens } from '../../util/string_utils';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
-export class LinksMenu extends Component {
+export const LinksMenu = injectI18n(class LinksMenu extends Component {
+  static propTypes = {
+    anomaly: PropTypes.object.isRequired,
+    showViewSeriesLink: PropTypes.bool,
+    isAggregatedData: PropTypes.bool,
+    interval: PropTypes.string,
+    timefilter: PropTypes.object.isRequired,
+    showRuleEditorFlyout: PropTypes.func
+  };
+
   constructor(props) {
     super(props);
 
@@ -47,7 +57,7 @@ export class LinksMenu extends Component {
   }
 
   openCustomUrl = (customUrl) => {
-    const { anomaly, interval, isAggregatedData } = this.props;
+    const { anomaly, interval, isAggregatedData, intl } = this.props;
 
     console.log('Anomalies Table - open customUrl for record:', anomaly);
 
@@ -112,8 +122,12 @@ export class LinksMenu extends Component {
 
         }).catch((resp) => {
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
-          toastNotifications.addDanger(
-            `Unable to open link as an error occurred loading details on category ID ${categoryId}`);
+          toastNotifications.addDanger(intl.formatMessage({
+            id: 'xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage',
+            defaultMessage: 'Unable to open link as an error occurred loading details on category ID {categoryId}'
+          }, {
+            categoryId,
+          }));
         });
 
     } else {
@@ -180,7 +194,6 @@ export class LinksMenu extends Component {
         detectorIndex: record.detector_index,
         entities: entityCondition,
       },
-      filters: [],
       query: {
         query_string: {
           analyze_wildcard: true,
@@ -196,6 +209,7 @@ export class LinksMenu extends Component {
   }
 
   viewExamples = () => {
+    const { intl } = this.props;
     const categoryId = this.props.anomaly.entityValue;
     const record = this.props.anomaly.source;
     const indexPatterns = getIndexPatterns();
@@ -203,8 +217,12 @@ export class LinksMenu extends Component {
     const job = mlJobService.getJob(this.props.anomaly.jobId);
     if (job === undefined) {
       console.log(`viewExamples(): no job found with ID: ${this.props.anomaly.jobId}`);
-      toastNotifications.addDanger(
-        `Unable to view examples as no details could be found for job ID ${this.props.anomaly.jobId}`);
+      toastNotifications.addDanger(intl.formatMessage({
+        id: 'xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage',
+        defaultMessage: 'Unable to view examples as no details could be found for job ID {jobId}'
+      }, {
+        jobId: this.props.anomaly.jobId,
+      }));
       return;
     }
     const categorizationFieldName = job.analysis_config.categorization_field_name;
@@ -308,8 +326,12 @@ export class LinksMenu extends Component {
 
         }).catch((resp) => {
           console.log('viewExamples(): error loading categoryDefinition:', resp);
-          toastNotifications.addDanger(
-            `Unable to view examples as an error occurred loading details on category ID ${categoryId}`);
+          toastNotifications.addDanger(intl.formatMessage({
+            id: 'xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage',
+            defaultMessage: 'Unable to view examples as an error occurred loading details on category ID {categoryId}'
+          }, {
+            categoryId,
+          }));
         });
 
     }
@@ -317,9 +339,14 @@ export class LinksMenu extends Component {
     function error() {
       console.log(`viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
         datafeedIndices);
-      toastNotifications.addDanger(
-        `Unable to view examples of documents with mlcategory ${categoryId} ` +
-        `as no mapping could be found for the categorization field ${categorizationFieldName}`);
+      toastNotifications.addDanger(intl.formatMessage({
+        id: 'xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage',
+        defaultMessage: 'Unable to view examples of documents with mlcategory {categoryId} ' +
+          'as no mapping could be found for the categorization field {categorizationFieldName}'
+      }, {
+        categoryId,
+        categorizationFieldName,
+      }));
     }
   };
 
@@ -336,7 +363,7 @@ export class LinksMenu extends Component {
   };
 
   render() {
-    const { anomaly, showViewSeriesLink } = this.props;
+    const { anomaly, showViewSeriesLink, intl } = this.props;
     const canConfigureRules = (isRuleSupported(anomaly.source) && checkPermission('canUpdateJob'));
 
     const button = (
@@ -345,7 +372,10 @@ export class LinksMenu extends Component {
         color="text"
         onClick={this.onButtonClick}
         iconType="gear"
-        aria-label="Select action"
+        aria-label={intl.formatMessage({
+          id: 'xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel',
+          defaultMessage: 'Select action',
+        })}
       />
     );
 
@@ -371,7 +401,10 @@ export class LinksMenu extends Component {
           icon="popout"
           onClick={() => { this.closePopover(); this.viewSeries(); }}
         >
-          View series
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
+            defaultMessage="View series"
+          />
         </EuiContextMenuItem>
       );
     }
@@ -383,7 +416,10 @@ export class LinksMenu extends Component {
           icon="popout"
           onClick={() => { this.closePopover(); this.viewExamples(); }}
         >
-          View examples
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
+            defaultMessage="View examples"
+          />
         </EuiContextMenuItem>
       );
     }
@@ -395,7 +431,10 @@ export class LinksMenu extends Component {
           icon="controlsHorizontal"
           onClick={() => { this.closePopover(); this.props.showRuleEditorFlyout(anomaly); }}
         >
-          Configure rules
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
+            defaultMessage="Configure rules"
+          />
         </EuiContextMenuItem>
       );
     }
@@ -415,13 +454,4 @@ export class LinksMenu extends Component {
       </EuiPopover>
     );
   }
-}
-
-LinksMenu.propTypes = {
-  anomaly: PropTypes.object.isRequired,
-  showViewSeriesLink: PropTypes.bool,
-  isAggregatedData: PropTypes.bool,
-  interval: PropTypes.string,
-  timefilter: PropTypes.object.isRequired,
-  showRuleEditorFlyout: PropTypes.func
-};
+});

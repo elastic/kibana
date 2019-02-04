@@ -23,7 +23,7 @@
  */
 
 import _ from 'lodash';
-import { MigrationVersion, ROOT_TYPE } from '../../serialization';
+import { MigrationVersion } from '../../serialization';
 import {
   AliasAction,
   CallCluster,
@@ -33,10 +33,8 @@ import {
   ShardsInfo,
 } from './call_cluster';
 
-// Require rather than import gets us around the lack of TypeScript definitions
-// for "getTypes"
-// tslint:disable-next-line:no-var-requires
-const { getTypes } = require('../../../mappings');
+// @ts-ignore untyped dependency
+import { getTypes } from '../../../mappings';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
 
@@ -55,7 +53,6 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
   const result = await callCluster('indices.get', {
     ignore: [404],
     index,
-    include_type_name: true,
   });
 
   if ((result as NotFound).status === 404) {
@@ -63,7 +60,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
       aliases: {},
       exists: false,
       indexName: index,
-      mappings: { doc: { dynamic: 'strict', properties: {} } },
+      mappings: { dynamic: 'strict', properties: {} },
     };
   }
 
@@ -128,7 +125,6 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
         index: {
           _id: doc._id,
           _index: index,
-          _type: ROOT_TYPE,
         },
       });
 
@@ -171,7 +167,7 @@ export async function migrationsUpToDate(
   try {
     const indexInfo = await fetchInfo(callCluster, index);
 
-    if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
+    if (!_.get(indexInfo, 'mappings.properties.migrationVersion')) {
       return false;
     }
 
@@ -196,7 +192,6 @@ export async function migrationsUpToDate(
         },
       },
       index,
-      type: ROOT_TYPE,
     });
 
     assertResponseIncludeAllShards(response);
@@ -222,7 +217,16 @@ export async function migrationsUpToDate(
  * @param {IndexMapping} mappings
  */
 export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
+  return callCluster('indices.putMapping', {
+    index,
+
+    // HACK: This is a temporary workaround for a disconnect between
+    // elasticsearchjs and Elasticsearch 7.0. The JS library requires
+    // type, but Elasticsearch 7.0 has deprecated type...
+    include_type_name: true,
+    type: '_doc',
+    body: mappings,
+  } as any);
 }
 
 export async function createIndex(
@@ -230,7 +234,10 @@ export async function createIndex(
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', { body: { mappings, settings }, index });
+  await callCluster('indices.create', {
+    body: { mappings, settings },
+    index,
+  });
 }
 
 export async function deleteIndex(callCluster: CallCluster, index: string) {
@@ -301,14 +308,16 @@ export async function claimAlias(
  * @param {FullIndexInfo} indexInfo
  */
 function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
-  const currentTypes = getTypes(indexInfo.mappings);
-  const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
-  if (isV5Index) {
+  const mappings = indexInfo.mappings as any;
+  const isV7Index = !!mappings.properties;
+
+  if (!isV7Index) {
     throw new Error(
       `Index ${indexInfo.indexName} belongs to a version of Kibana ` +
         `that cannot be automatically migrated. Reset it or use the X-Pack upgrade assistant.`
     );
   }
+
   return indexInfo;
 }
 

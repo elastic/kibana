@@ -20,6 +20,8 @@
 import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { modifyUrl } from 'ui/url';
+import { i18n }  from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { uiModules } from '../../modules';
 import { toastNotifications } from '../../notify';
@@ -68,6 +70,8 @@ export function initAngularApi(chrome, internals) {
       })
       .run(internals.capture$httpLoadingCount)
       .run(internals.$setupBreadcrumbsAutoClear)
+      .run(internals.$setupHelpExtensionAutoClear)
+      .run(internals.$initNavLinksDeepWatch)
       .run(($location, $rootScope, Private, config) => {
         chrome.getFirstPathSegment = () => {
           return $location.path().split('/')[1];
@@ -87,12 +91,27 @@ export function initAngularApi(chrome, internals) {
           try {
             if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
               toastNotifications.addWarning({
-                title: 'The URL is big and Kibana might stop working',
+                title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
+                  defaultMessage: 'The URL is big and Kibana might stop working'
+                }),
                 text: (
                   <Fragment>
-                    Either enable the <code>state:storeInSessionStorage</code> option
-                    in <a href="#/management/kibana/settings">advanced settings</a> or
-                    simplify the onscreen visuals.
+                    <FormattedMessage
+                      id="common.ui.chrome.bigUrlWarningNotificationMessage"
+                      defaultMessage="Either enable the {storeInSessionStorageParam} option
+                        in {advancedSettingsLink} or simplify the onscreen visuals."
+                      values={{
+                        storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
+                        advancedSettingsLink: (
+                          <a href="#/management/kibana/settings">
+                            <FormattedMessage
+                              id="common.ui.chrome.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
+                              defaultMessage="advanced settings"
+                            />
+                          </a>
+                        )
+                      }}
+                    />
                   </Fragment>
                 ),
               });

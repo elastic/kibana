@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   first,
   flatten,
@@ -14,7 +15,6 @@ import {
   uniq,
   zipObject
 } from 'lodash';
-import { colors } from 'x-pack/plugins/apm/public/style/variables';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 
@@ -84,24 +84,10 @@ export type IWaterfallItem = IWaterfallItemSpan | IWaterfallItemTransaction;
 function getTransactionItem(
   transaction: Transaction
 ): IWaterfallItemTransaction {
-  if (transaction.version === 'v1') {
-    return {
-      id: transaction.transaction.id,
-      serviceName: transaction.context.service.name,
-      name: transaction.transaction.name,
-      duration: transaction.transaction.duration.us,
-      timestamp: new Date(transaction['@timestamp']).getTime() * 1000,
-      offset: 0,
-      skew: 0,
-      docType: 'transaction',
-      transaction
-    };
-  }
-
   return {
     id: transaction.transaction.id,
     parentId: transaction.parent && transaction.parent.id,
-    serviceName: transaction.context.service.name,
+    serviceName: transaction.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
     timestamp: transaction.timestamp.us,
@@ -113,26 +99,10 @@ function getTransactionItem(
 }
 
 function getSpanItem(span: Span): IWaterfallItemSpan {
-  if (span.version === 'v1') {
-    return {
-      id: span.span.id,
-      parentId: span.span.parent || span.transaction.id,
-      serviceName: span.context.service.name,
-      name: span.span.name,
-      duration: span.span.duration.us,
-      timestamp:
-        new Date(span['@timestamp']).getTime() * 1000 + span.span.start.us,
-      offset: 0,
-      skew: 0,
-      docType: 'span',
-      span
-    };
-  }
-
   return {
-    id: span.span.hex_id,
+    id: span.span.id,
     parentId: span.parent && span.parent.id,
-    serviceName: span.context.service.name,
+    serviceName: span.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
     timestamp: span.timestamp.us,
@@ -185,10 +155,15 @@ export function getWaterfallItems(
   childrenByParentId: IWaterfallGroup,
   entryTransactionItem: IWaterfallItem
 ) {
+  const visitedWaterfallItemSet = new Set();
   function getSortedChildren(
     item: IWaterfallItem,
     parentItem?: IWaterfallItem
   ): IWaterfallItem[] {
+    if (visitedWaterfallItemSet.has(item)) {
+      return [];
+    }
+    visitedWaterfallItemSet.add(item);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
@@ -222,13 +197,13 @@ export interface IServiceColors {
 
 function getServiceColors(services: string[]) {
   const assignedColors = [
-    colors.apmBlue,
-    colors.apmGreen,
-    colors.apmPurple,
-    colors.apmRed2,
-    colors.apmTan,
-    colors.apmOrange,
-    colors.apmYellow
+    theme.euiColorVis1,
+    theme.euiColorVis0,
+    theme.euiColorVis3,
+    theme.euiColorVis2,
+    theme.euiColorVis6,
+    theme.euiColorVis7,
+    theme.euiColorVis5
   ];
 
   return zipObject(services, assignedColors) as IServiceColors;

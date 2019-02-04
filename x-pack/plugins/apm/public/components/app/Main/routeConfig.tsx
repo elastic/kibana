@@ -6,10 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-
+import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
+import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from '../../../../typings/common';
-import { legacyDecodeURIComponent } from '../../../utils/url';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';
@@ -22,15 +21,19 @@ interface BreadcrumbArgs {
   };
 }
 
-interface RenderArgs {
-  location: StringMap;
-  match: {
-    params: StringMap;
-  };
+interface RouteParams {
+  serviceName: string;
+}
+
+type BreadcrumbFunction = (args: BreadcrumbArgs) => string | null;
+
+interface Route extends RouteProps {
+  switchRoutes?: Route[];
+  breadcrumb?: string | BreadcrumbFunction | null;
 }
 
 const renderAsRedirectTo = (to: string) => {
-  return ({ location }: RenderArgs) => (
+  return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{
         ...location,
@@ -40,7 +43,7 @@ const renderAsRedirectTo = (to: string) => {
   );
 };
 
-export const routes = [
+export const routes: Route[] = [
   {
     exact: true,
     path: '/',
@@ -62,8 +65,7 @@ export const routes = [
     })
   },
   {
-    switch: true,
-    routes: [
+    switchRoutes: [
       {
         exact: true,
         path: '/invalid-license',
@@ -98,7 +100,7 @@ export const routes = [
         exact: true,
         path: '/:serviceName',
         breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
-        render: (props: RenderArgs) =>
+        render: (props: RouteComponentProps<RouteParams>) =>
           renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
             props
           )

@@ -89,9 +89,8 @@ const unescapeTemplateVars = url => {
 };
 
 
+//this is not the default locale from Kibana, but the default locale supported by the Elastic Maps Service
 const DEFAULT_LANGUAGE = 'en';
-
-
 
 export class EMSClientV66 {
 
@@ -107,19 +106,22 @@ export class EMSClientV66 {
     this._manifestServiceUrl = manifestServiceUrl;
     this._loadFileLayers = null;
     this._loadTMSServices = null;
-    this._emsLandingPageUrl = landingPageUrl;
+    this._emsLandingPageUrl = typeof landingPageUrl === 'string' ? landingPageUrl : '';
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
     this._invalidateSettings();
 
   }
 
+  getLocale() {
+    return this._language;
+  }
 
   getValueInLanguage(i18nObject) {
     if (!i18nObject) {
       return '';
     }
-    return i18nObject[this._language] ? i18nObject[this._language] : i18nObject[DEFAULT_LANGUAGE];
+    return i18nObject[this._language] ? i18nObject[this._language]  : i18nObject[DEFAULT_LANGUAGE];
   }
 
   /**
@@ -139,9 +141,7 @@ export class EMSClientV66 {
       }
       throw new Error(`Unable to retrieve manifest from ${manifestUrl}: ${e.message}`);
     } finally {
-      return result
-        ? await result.json()
-        : null;
+      return result ? await result.json() : null;
     }
   }
 

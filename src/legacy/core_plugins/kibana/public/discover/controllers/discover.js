@@ -33,7 +33,7 @@ import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/query_bar';
+import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -65,6 +65,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -350,6 +351,24 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.applyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.applyFilters(filters);
+    }
+  });
+
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -487,6 +506,7 @@ function discoverController(
 
         // update data source when filters update
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.filters = queryFilter.getFilters();
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
@@ -524,7 +544,9 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', $scope.updateQueryAndFetch);
+        $scope.$watch('state.query', (query) => {
+          $scope.updateQueryAndFetch({ query });
+        });
 
         $scope.$watchMulti([
           'rows',
@@ -642,7 +664,7 @@ function discoverController(
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
@@ -760,9 +782,17 @@ function discoverController(
         const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
         $scope.searchSource.rawResponse = merged;
         Promise
-          .resolve(responseHandler(tabifiedData))
+          .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
           .then(resp => {
-            visualizeHandler.render({ value: resp });
+            visualizeHandler.render({
+              as: 'visualization',
+              value: {
+                visType: 'histogram',
+                visData: resp,
+                visConfig: $scope.vis.params,
+                params: {},
+              }
+            });
           });
       }
 

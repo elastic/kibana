@@ -14,7 +14,8 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_ROLLOVER_ALIAS,
   PHASE_SHRINK_ENABLED,
-  WARM_PHASE_ON_ROLLOVER
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_INDEX_PRIORITY
 } from '../constants';
 
 export const defaultWarmPhase = {
@@ -28,5 +29,6 @@ export const defaultWarmPhase = {
   [PHASE_SHRINK_ENABLED]: false,
   [PHASE_PRIMARY_SHARD_COUNT]: '',
   [PHASE_REPLICA_COUNT]: '',
-  [WARM_PHASE_ON_ROLLOVER]: true
+  [WARM_PHASE_ON_ROLLOVER]: true,
+  [PHASE_INDEX_PRIORITY]: 50
 };

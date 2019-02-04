@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
+import { InfraLogItem } from '../../../graphql/types';
 import {
   InfraLogEntry,
   InfraLogMessageSegment,
@@ -14,6 +16,7 @@ import {
 import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
 import { builtinRules } from './builtin_rules';
+import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
 import { compileFormattingRules } from './message';
 
 export class InfraLogEntriesDomain {
@@ -38,12 +41,12 @@ export class InfraLogEntriesDomain {
       };
     }
 
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
 
     const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
       request,
-      sourceConfiguration,
+      configuration,
       formattingRules.requiredFields,
       key,
       'desc',
@@ -61,7 +64,7 @@ export class InfraLogEntriesDomain {
 
     const documentsAfter = await this.adapter.getAdjacentLogEntryDocuments(
       request,
-      sourceConfiguration,
+      configuration,
       formattingRules.requiredFields,
       lastKeyBefore,
       'asc',
@@ -86,11 +89,11 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
     const documents = await this.adapter.getContainedLogEntryDocuments(
       request,
-      sourceConfiguration,
+      configuration,
       formattingRules.requiredFields,
       startKey,
       endKey,
@@ -109,10 +112,10 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryBucket[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       request,
-      sourceConfiguration,
+      configuration,
       start,
       end,
       bucketSize,
@@ -121,6 +124,32 @@ export class InfraLogEntriesDomain {
     const buckets = dateRangeBuckets.map(convertDateRangeBucketToSummaryBucket);
     return buckets;
   }
+
+  public async getLogItem(
+    request: InfraFrameworkRequest,
+    id: string,
+    sourceConfiguration: InfraSourceConfiguration
+  ): Promise<InfraLogItem> {
+    const document = await this.adapter.getLogItem(request, id, sourceConfiguration);
+    const defaultFields = [
+      { field: '_index', value: document._index },
+      { field: '_id', value: document._id },
+    ];
+    return {
+      id: document._id,
+      index: document._index,
+      fields: sortBy(
+        [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],
+        'field'
+      ),
+    };
+  }
+}
+
+interface LogItemHit {
+  _index: string;
+  _id: string;
+  _source: JsonObject;
 }
 
 export interface LogEntriesAdapter {
@@ -153,6 +182,12 @@ export interface LogEntriesAdapter {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<InfraDateRangeAggregationBucket[]>;
+
+  getLogItem(
+    request: InfraFrameworkRequest,
+    id: string,
+    source: InfraSourceConfiguration
+  ): Promise<LogItemHit>;
 }
 
 export type LogEntryQuery = JsonObject;
@@ -164,7 +199,7 @@ export interface LogEntryDocument {
 }
 
 export interface LogEntryDocumentFields {
-  [fieldName: string]: string | number | null;
+  [fieldName: string]: string | number | boolean | null;
 }
 
 const convertLogDocumentToEntry = (

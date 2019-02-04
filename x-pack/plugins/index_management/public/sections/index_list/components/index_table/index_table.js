@@ -10,8 +10,8 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
-import '../../../../styles/table.less';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
+
 import {
   EuiButton,
   EuiCallOut,
@@ -39,7 +39,12 @@ import {
 } from '@elastic/eui';
 
 import { IndexActionsContextMenu } from '../../components';
-import { getBannerExtensions, getFilterExtensions } from '../../../../index_management_extensions';
+import {
+  getBannerExtensions,
+  getFilterExtensions,
+  getToggleExtensions,
+} from '../../../../index_management_extensions';
+import { renderBadges } from '../../../../lib/render_badges';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -198,8 +203,8 @@ export class IndexTableUi extends Component {
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
+          className={'indTable__header--' + fieldName}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
-          className={'indexTable__header--' + fieldName}
         >
           {label}
         </EuiTableHeaderCell>
@@ -207,21 +212,24 @@ export class IndexTableUi extends Component {
     });
   }
 
-  buildRowCell(fieldName, value) {
-    const { openDetailPanel } = this.props;
+  buildRowCell(fieldName, value, index) {
+    const { openDetailPanel, filterChanged } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
     } else if (fieldName === 'name') {
       return (
-        <EuiLink
-          className="indTable__link"
-          data-test-subj="indexTableIndexNameLink"
-          onClick={() => {
-            openDetailPanel(value);
-          }}
-        >
-          {value}
-        </EuiLink>
+        <Fragment>
+          <EuiLink
+            className="indTable__link"
+            data-test-subj="indexTableIndexNameLink"
+            onClick={() => {
+              openDetailPanel(value);
+            }}
+          >
+            {value}
+          </EuiLink>
+          {renderBadges(index, filterChanged)}
+        </Fragment>
       );
     }
     return value;
@@ -236,8 +244,10 @@ export class IndexTableUi extends Component {
           key={`${fieldName}-${name}`}
           truncateText={false}
           data-test-subj={`indexTableCell-${fieldName}`}
+          className={'indTable__cell--' + fieldName}
+          header={fieldName}
         >
-          {this.buildRowCell(fieldName, value)}
+          {this.buildRowCell(fieldName, value, index)}
         </EuiTableRowCell>
       );
     });
@@ -274,6 +284,7 @@ export class IndexTableUi extends Component {
       return (
         <EuiTableRow
           isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
+          isSelectable
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
@@ -310,7 +321,19 @@ export class IndexTableUi extends Component {
   onItemSelectionChanged = selectedIndices => {
     this.setState({ selectedIndices });
   };
-
+  renderToggleControl({ name, label }) {
+    const { toggleNameToVisibleMap, toggleChanged } = this.props;
+    return (
+      <EuiFlexItem key={name} grow={false}>
+        <EuiSwitch
+          id={`checkboxToggles-{name}`}
+          checked={toggleNameToVisibleMap[name]}
+          onChange={event => toggleChanged(name, event.target.checked)}
+          label={label}
+        />
+      </EuiFlexItem>
+    );
+  }
   render() {
     const {
       filter,
@@ -320,7 +343,7 @@ export class IndexTableUi extends Component {
       intl,
       loadIndices,
       indicesLoading,
-      allIndices
+      allIndices,
     } = this.props;
     const emptyState = indicesLoading ? (
       <EuiFlexGroup justifyContent="spaceAround">
@@ -346,7 +369,7 @@ export class IndexTableUi extends Component {
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionDescription"
@@ -356,21 +379,26 @@ export class IndexTableUi extends Component {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {indicesLoading && allIndices.length === 0 ? null :
-              (
-                <EuiSwitch
-                  id="checkboxShowSystemIndices"
-                  checked={showSystemIndices}
-                  onChange={event => showSystemIndicesChanged(event.target.checked)}
-                  label={
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                      defaultMessage="Include system indices"
-                    />
-                  }
-                />
-              )
-            }
+            {indicesLoading && allIndices.length === 0 ? null : (
+              <EuiFlexGroup>
+                {getToggleExtensions().map((toggle) => {
+                  return this.renderToggleControl(toggle);
+                })}
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    id="checkboxShowSystemIndices"
+                    checked={showSystemIndices}
+                    onChange={event => showSystemIndicesChanged(event.target.checked)}
+                    label={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                        defaultMessage="Include system indices"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
@@ -395,7 +423,7 @@ export class IndexTableUi extends Component {
             <Fragment>
               <EuiFlexItem>
                 <EuiSearchBar
-                  filters={this.getFilters()}
+                  filters={(this.getFilters().length > 0) ? this.getFilters() : null}
                   defaultQuery={filter}
                   query={filter}
                   box={{
@@ -435,20 +463,22 @@ export class IndexTableUi extends Component {
         <EuiSpacer size="m" />
 
         {indices.length > 0 ? (
-          <EuiTable>
-            <EuiTableHeader>
-              <EuiTableHeaderCellCheckbox>
-                <EuiCheckbox
-                  id="selectAllIndexes"
-                  checked={this.areAllItemsSelected()}
-                  onChange={this.toggleAll}
-                  type="inList"
-                />
-              </EuiTableHeaderCellCheckbox>
-              {this.buildHeader()}
-            </EuiTableHeader>
-            <EuiTableBody>{this.buildRows()}</EuiTableBody>
-          </EuiTable>
+          <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+            <EuiTable className="indTable">
+              <EuiTableHeader>
+                <EuiTableHeaderCellCheckbox>
+                  <EuiCheckbox
+                    id="selectAllIndexes"
+                    checked={this.areAllItemsSelected()}
+                    onChange={this.toggleAll}
+                    type="inList"
+                  />
+                </EuiTableHeaderCellCheckbox>
+                {this.buildHeader()}
+              </EuiTableHeader>
+              <EuiTableBody>{this.buildRows()}</EuiTableBody>
+            </EuiTable>
+          </div>
         ) : (
           emptyState
         )}

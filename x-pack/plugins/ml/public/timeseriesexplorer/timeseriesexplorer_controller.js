@@ -81,7 +81,8 @@ module.controller('MlTimeSeriesExplorerController', function (
   AppState,
   config,
   mlSelectIntervalService,
-  mlSelectSeverityService) {
+  mlSelectSeverityService,
+  i18n) {
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -143,10 +144,17 @@ module.controller('MlTimeSeriesExplorerController', function (
           const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
-            const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `You can't view requested job${s} ${invalidIds} in this dashboard`;
+            let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+              values: {
+                invalidIdsCount: invalidIds.length,
+                invalidIds
+              }
+            });
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-              warningText += ', auto selecting first job';
+              warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+                defaultMessage: ', auto selecting first job'
+              });
             }
             toastNotifications.addWarning(warningText);
           }
@@ -155,13 +163,21 @@ module.controller('MlTimeSeriesExplorerController', function (
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+              toastNotifications.addWarning(
+                i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                  defaultMessage: 'You can only view one job at a time in this dashboard'
+                })
+              );
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+                toastNotifications.addWarning(
+                  i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                    defaultMessage: 'You can only view one job at a time in this dashboard'
+                  })
+                );
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -557,10 +573,12 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Store forecast ID in the appState.
       $scope.appState.mlTimeSeriesExplorer.forecastId = forecastId;
 
-      // Set the zoom to show backwards from the end of the forecast range.
+      // Set the zoom to centre on the start of the forecast range, depending
+      // on the time range of the forecast and data.
       const earliestDataDate = _.first($scope.contextChartData).date;
-      const zoomLatestMs = resp.latest;
-      const zoomEarliestMs = Math.max(earliestDataDate.getTime(), zoomLatestMs - $scope.autoZoomDuration);
+      const zoomLatestMs = Math.min(earliest + ($scope.autoZoomDuration / 2), latest.valueOf());
+      const zoomEarliestMs = Math.max(zoomLatestMs - $scope.autoZoomDuration, earliestDataDate.getTime());
+
       const zoomState = {
         from: moment(zoomEarliestMs).toISOString(),
         to: moment(zoomLatestMs).toISOString()
@@ -572,9 +590,11 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Ensure the forecast data will be shown if hidden previously.
       $scope.showForecast = true;
 
+
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
         const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
+
         timefilter.setTime({
           from: moment(earliestMs).toISOString(),
           to: moment(latestMs).toISOString()
@@ -661,6 +681,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
 
     const defaultRange = calculateDefaultFocusRange();
+
     if ((selection.from.getTime() !== defaultRange[0].getTime() || selection.to.getTime() !== defaultRange[1].getTime()) &&
       (isNaN(Date.parse(selection.from)) === false && isNaN(Date.parse(selection.to)) === false)) {
       const zoomState = { from: selection.from.toISOString(), to: selection.to.toISOString() };
@@ -714,7 +735,13 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
+      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+        defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
+        values: {
+          detectorIndex,
+          jobId: $scope.selectedJob.job_id
+        }
+      });
       toastNotifications.addWarning(warningText);
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
@@ -883,18 +910,34 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   function calculateDefaultFocusRange() {
-    // Returns the range that shows the most recent data at bucket span granularity.
+
     $scope.autoZoomDuration = getAutoZoomDuration();
+    const isForecastData = $scope.contextForecastData !== undefined && $scope.contextForecastData.length > 0;
 
-    const combinedData = $scope.contextForecastData === undefined ?
+    const combinedData = (isForecastData === false) ?
       $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-
     const earliestDataDate = _.first(combinedData).date;
     const latestDataDate = _.last(combinedData).date;
-    const latestMsToLoad = latestDataDate.getTime() + $scope.contextAggregationInterval.asMilliseconds();
-    const earliestMsToLoad = Math.max(earliestDataDate.getTime(), latestMsToLoad - $scope.autoZoomDuration);
 
-    return [new Date(earliestMsToLoad), new Date(latestMsToLoad)];
+    let rangeEarliestMs;
+    let rangeLatestMs;
+
+    if (isForecastData === true) {
+      // Return a range centred on the start of the forecast range, depending
+      // on the time range of the forecast and data.
+      const earliestForecastDataDate = _.first($scope.contextForecastData).date;
+      const latestForecastDataDate = _.last($scope.contextForecastData).date;
+
+      rangeLatestMs = Math.min(earliestForecastDataDate.getTime() + ($scope.autoZoomDuration / 2), latestForecastDataDate.getTime());
+      rangeEarliestMs = Math.max(rangeLatestMs - $scope.autoZoomDuration, earliestDataDate.getTime());
+    } else {
+      // Returns the range that shows the most recent data at bucket span granularity.
+      rangeLatestMs = latestDataDate.getTime() + $scope.contextAggregationInterval.asMilliseconds();
+      rangeEarliestMs = Math.max(earliestDataDate.getTime(), rangeLatestMs - $scope.autoZoomDuration);
+    }
+
+    return [new Date(rangeEarliestMs), new Date(rangeLatestMs)];
+
   }
 
   function calculateAggregationInterval(bounds, bucketsTarget) {

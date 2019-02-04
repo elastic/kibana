@@ -4,73 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel } from '@elastic/eui';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { ApolloError } from 'apollo-client';
+import { get } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { createGetMonitorStatusBarQuery } from './get_monitor_status_bar';
+import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
+import { StatusBar } from '../../functional';
+import { EmptyStatusBar } from '../../functional/empty_status_bar';
+import { formatDuration } from './format_duration';
+import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   monitorId: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
 }
+
+interface MonitorStatusBarQueryParams {
+  loading: boolean;
+  error?: ApolloError | any;
+  data?: { monitorStatus: Ping[] };
+}
+
+type Props = MonitorStatusBarProps & UptimeCommonProps;
 
 export const MonitorStatusBar = ({
   dateRangeStart,
   dateRangeEnd,
   monitorId,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   autorefreshInterval,
-}: MonitorStatusBarProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
-    query={createGetMonitorStatusBarQuery}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+    query={getMonitorStatusBarQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
-    {({ loading, error, data }) => {
+    {({ loading, error, data }: MonitorStatusBarQueryParams) => {
       if (loading) {
-        return 'Loading...';
+        return <EmptyStatusBar message="Fetching data" monitorId={monitorId} />;
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.monitorStatusBar.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
-      const { monitorStatus } = data;
-      if (!monitorStatus.length) {
-        return `No data found for monitor id ${monitorId}`;
+
+      const monitorStatus: Ping[] = get(data, 'monitorStatus');
+      if (!monitorStatus || !monitorStatus.length) {
+        return <EmptyStatusBar monitorId={monitorId} />;
       }
-      const { monitor, tcp } = monitorStatus[0];
+      const { monitor, timestamp, url } = monitorStatus[0];
+      const status = get(monitor, 'status', undefined);
+      const duration = parseInt(get(monitor, 'duration.us'), 10);
+      const full = get(url, 'full', undefined);
 
       return (
-        <EuiPanel>
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>Status&#58;</EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiHealth
-                    color={monitor.status === 'up' ? 'success' : 'danger'}
-                    style={{ lineHeight: 'inherit' }}
-                  >
-                    {monitor.status === 'up' ? 'Up' : 'Down'}
-                  </EuiHealth>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              Last update: {moment(monitor.timestamp).fromNow()}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>Host: {monitor.host}</EuiFlexItem>
-            <EuiFlexItem grow={false}>Port: {tcp.port}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              Duration: {monitor.duration.us / 1000}
-              ms
-            </EuiFlexItem>
-            <EuiFlexItem>Scheme: {monitor.scheme}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <StatusBar
+          duration={formatDuration(duration)}
+          status={status}
+          timestamp={timestamp}
+          url={full}
+        />
       );
     }}
   </Query>

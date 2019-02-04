@@ -6,21 +6,40 @@
 
 // @ts-ignore Missing typings for series charts
 import { EuiHistogramSeries, EuiSeriesChart, EuiSeriesChartUtils } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { HistogramSeries } from '../../../common/graphql/types';
 import { formatHistogramData } from '../../lib/adapters/monitors/format_histogram_data';
 
 interface SnapshotHistogramProps {
+  primaryColor: string;
+  dangerColor: string;
   histogram: HistogramSeries[];
 }
 
-export const SnapshotHistogram = ({ histogram }: SnapshotHistogramProps) => {
+export const SnapshotHistogram = ({
+  dangerColor,
+  histogram,
+  primaryColor,
+}: SnapshotHistogramProps) => {
   const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
   return (
     <EuiSeriesChart width={600} height={107} stackBy="y" xType={EuiSeriesChartUtils.SCALE.TIME}>
-      <EuiHistogramSeries data={upSeriesData} name="Up" color="green" />
-      <EuiHistogramSeries data={downSeriesData} name="Down" color="red" />
+      <EuiHistogramSeries
+        data={upSeriesData}
+        name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
+          defaultMessage: 'Up',
+        })}
+        color={primaryColor}
+      />
+      <EuiHistogramSeries
+        data={downSeriesData}
+        name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+          defaultMessage: 'Down',
+        })}
+        color={dangerColor}
+      />
     </EuiSeriesChart>
   );
 };

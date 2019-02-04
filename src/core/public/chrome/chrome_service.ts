@@ -37,7 +37,10 @@ export interface Brand {
 export interface Breadcrumb {
   text: string;
   href?: string;
+  'data-test-subj'?: string;
 }
+
+export type HelpExtension = (element: HTMLDivElement) => (() => void);
 
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
@@ -49,6 +52,7 @@ export class ChromeService {
     const isVisible$ = new Rx.BehaviorSubject(true);
     const isCollapsed$ = new Rx.BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
+    const helpExtension$ = new Rx.BehaviorSubject<HelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<Breadcrumb[]>([]);
 
     return {
@@ -152,6 +156,18 @@ export class ChromeService {
        */
       setBreadcrumbs: (newBreadcrumbs: Breadcrumb[]) => {
         breadcrumbs$.next(newBreadcrumbs);
+      },
+
+      /**
+       * Get an observable of the current custom help conttent
+       */
+      getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
+
+      /**
+       * Override the current set of breadcrumbs
+       */
+      setHelpExtension: (helpExtension?: HelpExtension) => {
+        helpExtension$.next(helpExtension);
       },
     };
   }

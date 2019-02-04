@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 
 import { FieldTypeIcon } from '../field_type_icon';
+import { i18n } from '@kbn/i18n';
 
 export function FieldTitleBar({ card }) {
   // don't render and fail gracefully if card prop isn't set
@@ -26,7 +27,9 @@ export function FieldTitleBar({ card }) {
     classNames.push(card.type);
   }
 
-  const fieldName = card.fieldName || 'document count';
+  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
+    defaultMessage: 'document count'
+  });
 
   return (
     <EuiText className={classNames.join(' ')}>

@@ -10,6 +10,13 @@ your application to Kibana 7.0.
 See also <<release-highlights>> and <<release-notes>>.
 
 [float]
+=== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
+*Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users 
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies upon direct index privileges logs into Kibana, a deprecation warning is logged. If you are using the `kibana_user` or `kibana_dashboard_only_user` role to grant access to Kibana, or a custom role using <<kibana-privileges>>, no changes are required.
+
+*Impact:* You must change any roles which grant access to Kibana using index privileges to instead use <<kibana-privileges>>. Watcher jobs using the Reporting attachment type must be updated as well.
+
+[float]
 === Removed support for tribe nodes
 *Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
 
@@ -79,6 +86,34 @@ on each Elasticsearch node, Logstash node, Kibana instance, and Beat to collect 
 considered unique based on its persistent UUID, which is written to the path.data directory when the node or instance starts.
 
 [float]
+=== kibana.yml setting `xpack.monitoring.elasticsearch.url` is no longer valid
+*Details:* This deprecated setting has been removed and `xpack.monitoring.elasticsearch.hosts` should be used instead.
+In prior versions of Kibana, if no port was specified in `xpack.monitoring.elasticsearch.url` a default of 9200 was chosen. 
+The port in `xpack.monitoring.elasticsearch.hosts` is protocol dependent: https ports will use 443, and http ports will use 80.
+
+*Impact:* Users with `xpack.monitoring.elasticsearch.url` set should use `xpack.monitoring.elasticsearch.hosts` instead and if 
+`xpack.monitoring.elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.
+
+[float]
+=== kibana.yml setting `xpack.monitoring.elasticsearch.ssl.cert` is no longer valid
+*Details:* This deprecated setting has been removed and `xpack.monitoring.elasticsearch.ssl.certificate` should be used instead.
+
+*Impact:* Users with `xpack.monitoring.elasticsearch.ssl.cert` set should use `xpack.monitoring.elasticsearch.ssl.certificate` instead
+
+[float]
+=== kibana.yml setting `xpack.monitoring.elasticsearch.ssl.ca` is no longer valid
+*Details:* This deprecated setting has been removed and `xpack.monitoring.elasticsearch.ssl.certificateAuthorities` should be used instead.
+
+*Impact:* Users with `xpack.monitoring.elasticsearch.ssl.ca` set should use `xpack.monitoring.elasticsearch.ssl.certificateAuthorities` instead
+
+[float]
+=== kibana.yml setting `xpack.monitoring.elasticsearch.ssl.verify` is no longer valid
+*Details:* This deprecated setting has been removed and `xpack.monitoring.elasticsearch.ssl.verificationMode` should be used instead.
+
+*Impact:* Users with `xpack.monitoring.elasticsearch.ssl.verify` set should use `xpack.monitoring.elasticsearch.ssl.verificationMode` instead. 
+Previously set `xpack.monitoring.elasticsearch.ssl.verify` is equal to `xpack.monitoring.elasticsearch.ssl.verificationMode: full`.
+
+[float]
 === Deprecated API `/shorten` has been removed
 *Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
 
@@ -91,15 +126,61 @@ considered unique based on its persistent UUID, which is written to the path.dat
 *Impact:* The logging.useUTC flag will have to be replaced with a timezone id.  If set to true the id is `UTC`.
 
 [float]
-=== kibana.yml setting `elasticsearch.url` sets port based on protocol
-*Details:* In prior versions of Kibana, if no port was specified in `elasticsearch.url` a default of 9200 was chosen.
-The port is now protocol dependent: https ports will use 443, and http ports will use 80.
-
-*Impact:* If your `elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.
-
-[float]
 === kibana.yml setting `server.ssl.supportedProtocols` excludes TLSv1 by default
 *Details:* TLSv1 support has been removed by default, it's still possible to opt-in to TLSv1 support by explicitly setting
 `server.ssl.supportedProtocols`
 
 *Impact:* Users relying upon TLSv1 will be unable to use Kibana unless `server.ssl.supportedProtocols` is explicitly set.
+
+[float]
+=== kibana.yml setting `server.ssl.cert` is no longer valid
+*Details:* This deprecated setting has been removed and `server.ssl.certificate` should be used instead.
+
+*Impact:* Users with `server.ssl.cert` set should use `server.ssl.certificate` instead
+
+[float]
+=== kibana.yml `server.ssl.enabled` must be set to `true` to enable SSL
+*Details:* Previously, if `server.ssl.certificate` and `server.ssl.key` were set, SSL would automatically be enabled. 
+It's now required that the user sets `server.ssl.enabled` to true for this to occur.
+
+*Impact:* Users with both `server.ssl.certificate` and `server.ssl.key` set must now also set `server.ssl.enabled` to enable SSL.
+
+[float]
+=== Optimization step deferred until server start
+*Details:* Prior versions of Kibana would run the optimization step after each plugin installation.  This is now run on server start when necessary.
+
+*Impact:* Users can trigger a standalone optimization after all plugins have been installed with `bin/kibana --optimize` or let the server manage it on startup.
+
+[float]
+=== kibana.yml setting `i18n.defaultLocale` is no longer valid
+*Details:* This deprecated setting has been removed and `i18n.locale` should be used instead.
+
+*Impact:* Users with `i18n.defaultLocale` set should use `i18n.locale` instead
+
+[float]
+=== kibana.yml setting `elasticsearch.url` is no longer valid
+*Details:* This deprecated setting has been removed and `elasticsearch.hosts` should be used instead.
+In prior versions of Kibana, if no port was specified in `elasticsearch.url` a default of 9200 was chosen. The port in 
+`elasticsearch.hosts` is protocol dependent: https ports will use 443, and http ports will use 80.
+
+*Impact:* Users with `elasticsearch.url` set should use `elasticsearch.hosts` instead and if `elasticsearch.url` was 
+dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.
+
+[float]
+=== kibana.yml setting `elasticsearch.ssl.cert` is no longer valid
+*Details:* This deprecated setting has been removed and `elasticsearch.ssl.certificate` should be used instead.
+
+*Impact:* Users with `elasticsearch.ssl.cert` set should use `elasticsearch.ssl.certificate` instead
+
+[float]
+=== kibana.yml setting `elasticsearch.ssl.ca` is no longer valid
+*Details:* This deprecated setting has been removed and `elasticsearch.ssl.certificateAuthorities` should be used instead.
+
+*Impact:* Users with `elasticsearch.ssl.ca` set should use `elasticsearch.ssl.certificateAuthorities` instead
+
+[float]
+=== kibana.yml setting `elasticsearch.ssl.verify` is no longer valid
+*Details:* This deprecated setting has been removed and `elasticsearch.ssl.verificationMode` should be used instead.
+
+*Impact:* Users with `elasticsearch.ssl.verify` set should use `elasticsearch.ssl.verificationMode` instead. 
+Previously set `elasticsearch.ssl.verify` is equal to `elasticsearch.ssl.verificationMode: full`.

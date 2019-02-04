@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { errors, SavedObjectsRepository } from './lib';
+
 export interface BaseOptions {
   namespace?: string;
 }
@@ -26,30 +28,32 @@ export interface CreateOptions extends BaseOptions {
   override?: boolean;
 }
 
-export interface BulkCreateObject {
+export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
   id?: string;
   type: string;
-  attributes: SavedObjectAttributes;
+  attributes: T;
   extraDocumentProperties?: string[];
 }
 
-export interface BulkCreateResponse {
-  savedObjects: SavedObject[];
+export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
 }
 
 export interface FindOptions extends BaseOptions {
+  type?: string | string[];
   page?: number;
   perPage?: number;
   sortField?: string;
   sortOrder?: string;
   fields?: string[];
-  type?: string | string[];
+  search?: string;
+  searchFields?: string[];
 }
 
-export interface FindResponse {
-  savedObjects: SavedObject[];
+export interface FindResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
   total: number;
-  perPage: number;
+  per_page: number;
   page: number;
 }
 
@@ -63,41 +67,64 @@ export interface BulkGetObject {
 }
 export type BulkGetObjects = BulkGetObject[];
 
-export interface BulkGetResponse {
-  savedObjects: SavedObject[];
+export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
 }
 
 export interface SavedObjectAttributes {
-  [key: string]: string | number | boolean | null;
+  [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
 
-export interface SavedObject {
+export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
   version?: number;
-  updatedAt?: string;
+  updated_at?: string;
   error?: {
     message: string;
   };
-  attributes: SavedObjectAttributes;
+  attributes: T;
+  references: SavedObjectReference[];
 }
 
-export interface SavedObjectsClient {
-  errors: any;
-  create: (
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+export declare class SavedObjectsClient {
+  public static errors: typeof errors;
+  public errors: typeof errors;
+
+  constructor(repository: SavedObjectsRepository);
+
+  public create<T extends SavedObjectAttributes = any>(
     type: string,
-    attributes: SavedObjectAttributes,
+    attributes: T,
     options?: CreateOptions
-  ) => Promise<SavedObject>;
-  bulkCreate: (objects: BulkCreateObject[], options?: CreateOptions) => Promise<BulkCreateResponse>;
-  delete: (type: string, id: string, options?: BaseOptions) => Promise<{}>;
-  find: (options: FindOptions) => Promise<FindResponse>;
-  bulkGet: (objects: BulkGetObjects, options?: BaseOptions) => Promise<BulkGetResponse>;
-  get: (type: string, id: string, options?: BaseOptions) => Promise<SavedObject>;
-  update: (
+  ): Promise<SavedObject<T>>;
+  public bulkCreate<T extends SavedObjectAttributes = any>(
+    objects: Array<BulkCreateObject<T>>,
+    options?: CreateOptions
+  ): Promise<BulkCreateResponse<T>>;
+  public delete(type: string, id: string, options?: BaseOptions): Promise<{}>;
+  public find<T extends SavedObjectAttributes = any>(
+    options: FindOptions
+  ): Promise<FindResponse<T>>;
+  public bulkGet<T extends SavedObjectAttributes = any>(
+    objects: BulkGetObjects,
+    options?: BaseOptions
+  ): Promise<BulkGetResponse<T>>;
+  public get<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
-    attributes: SavedObjectAttributes,
+    options?: BaseOptions
+  ): Promise<SavedObject<T>>;
+  public update<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    attributes: Partial<T>,
     options?: UpdateOptions
-  ) => Promise<SavedObject>;
+  ): Promise<SavedObject<T>>;
 }

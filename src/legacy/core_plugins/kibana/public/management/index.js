@@ -19,12 +19,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import './sections';
 import 'ui/filters/start_from';
 import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
+import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
@@ -51,7 +52,7 @@ uiRoutes
   });
 
 require('ui/index_patterns/route_setup/load_default')({
-  whenMissingRedirectTo: '/management/kibana/index'
+  whenMissingRedirectTo: '/management/kibana/index_pattern'
 });
 
 export function updateLandingPage(version) {
@@ -61,8 +62,8 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <EuiPageContent verticalPosition="center"  horizontalPosition="center">
-      <I18nProvider>
+    <EuiPageContent horizontalPosition="center">
+      <I18nContext>
         <div>
           <div className="eui-textCenter">
             <EuiIcon type="managementApp" size="xxl" />
@@ -95,7 +96,7 @@ export function updateLandingPage(version) {
             </p>
           </EuiText>
         </div>
-      </I18nProvider>
+      </I18nContext>
     </EuiPageContent>,
     node,
   );
@@ -110,13 +111,13 @@ export function updateSidebar(
   }
 
   render(
-    <I18nProvider>
+    <I18nContext>
       <SidebarNav
         sections={items}
         selectedId={id}
-        style={{ width: 192 }}
+        className="mgtSideNav"
       />
-    </I18nProvider>,
+    </I18nContext>,
     node,
   );
 }

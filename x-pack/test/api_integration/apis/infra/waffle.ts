@@ -16,8 +16,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('waffle nodes', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should basically work', () => {
       return client
@@ -48,6 +48,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
             expect(firstNode.metric).to.eql({
               name: 'cpu',
               value: 0.011,
+              avg: 0.012215686274509805,
+              max: 0.020999999999999998,
               __typename: 'InfraNodeMetric',
             });
           }

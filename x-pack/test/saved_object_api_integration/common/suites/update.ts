@@ -29,15 +29,6 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -87,6 +78,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       attributes: {
         name: 'My second favorite',
       },
+      references: [],
     });
   };
 
@@ -111,6 +103,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       attributes: {
         title: 'My second favorite vis',
       },
+      references: [],
     });
   };
 
@@ -183,7 +176,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   updateTest.only = makeUpdateTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     createExpectDoesntExistNotFound,
     createExpectSpaceAwareNotFound,
     expectDoesntExistRbacForbidden,

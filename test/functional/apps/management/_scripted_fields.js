@@ -36,7 +36,9 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
@@ -46,20 +48,20 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.removeIndexPattern();
     });
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
@@ -76,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -127,17 +129,13 @@ export default function ({ getService, getPageObjects }) {
           ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'],
           ['16', '17'], ['5', '16'], ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
         ];
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedChartValues);
       });
     });
 
@@ -146,7 +144,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -188,19 +186,15 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql([
+        await inspector.open();
+        await inspector.expectTableData([
           ['good', '359'],
           ['bad', '27']
         ]);
@@ -212,7 +206,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -254,19 +248,15 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql([
+        await inspector.open();
+        await inspector.expectTableData([
           ['true', '359'],
           ['false', '27']
         ]);
@@ -278,7 +268,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -320,20 +310,16 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql([
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData([
           ['2015-09-17 20:00', '1'],
           ['2015-09-17 21:00', '1'],
           ['2015-09-17 23:00', '1'],

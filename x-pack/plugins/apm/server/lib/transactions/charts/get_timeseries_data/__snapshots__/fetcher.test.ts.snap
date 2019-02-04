@@ -55,7 +55,7 @@ Array [
             },
             "terms": Object {
               "field": "transaction.result",
-              "missing": "transaction_result_missing",
+              "missing": "",
             },
           },
         },
@@ -64,7 +64,12 @@ Array [
             "filter": Array [
               Object {
                 "term": Object {
-                  "context.service.name": "myServiceName",
+                  "processor.event": "transaction",
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.name": "myServiceName",
                 },
               },
               Object {
