@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
+import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../common/model';
 import { copyRole } from '../../lib/role_utils';
 import { KibanaPrivilegeCalculator } from './kibana_privilege_calculator';
 import { compareActions } from './privilege_calculator_utils';
 
 export class KibanaPrivilegeCalculatorFactory {
   /** All feature privileges, sorted from most permissive => least permissive. */
-  public readonly rankedFeaturePrivileges: FeaturePrivilegeSet;
+  public readonly rankedFeaturePrivileges: FeaturesPrivileges;
 
-  constructor(private readonly privilegeDefinition: PrivilegeDefinition) {
+  constructor(private readonly kibanaPrivileges: KibanaPrivileges) {
     this.rankedFeaturePrivileges = {};
-    const featurePrivilegeSet = privilegeDefinition.getFeaturePrivileges().getAllPrivileges();
+    const featurePrivilegeSet = kibanaPrivileges.getFeaturePrivileges().getAllPrivileges();
 
     Object.entries(featurePrivilegeSet).forEach(([featureId, privileges]) => {
       this.rankedFeaturePrivileges[featureId] = privileges.sort((privilege1, privilege2) => {
-        const privilege1Actions = privilegeDefinition
+        const privilege1Actions = kibanaPrivileges
           .getFeaturePrivileges()
           .getActions(featureId, privilege1);
-        const privilege2Actions = privilegeDefinition
+        const privilege2Actions = kibanaPrivileges
           .getFeaturePrivileges()
           .getActions(featureId, privilege2);
         return compareActions(privilege1Actions, privilege2Actions);
@@ -39,7 +39,7 @@ export class KibanaPrivilegeCalculatorFactory {
 
     this.sortPrivileges(roleCopy);
     return new KibanaPrivilegeCalculator(
-      this.privilegeDefinition,
+      this.kibanaPrivileges,
       roleCopy,
       this.rankedFeaturePrivileges
     );
@@ -48,11 +48,11 @@ export class KibanaPrivilegeCalculatorFactory {
   private sortPrivileges(role: Role) {
     role.kibana.forEach(privilege => {
       privilege.base.sort((privilege1, privilege2) => {
-        const privilege1Actions = this.privilegeDefinition
+        const privilege1Actions = this.kibanaPrivileges
           .getSpacesPrivileges()
           .getActions(privilege1);
 
-        const privilege2Actions = this.privilegeDefinition
+        const privilege2Actions = this.kibanaPrivileges
           .getSpacesPrivileges()
           .getActions(privilege2);
 
@@ -61,11 +61,11 @@ export class KibanaPrivilegeCalculatorFactory {
 
       Object.entries(privilege.feature).forEach(([featureId, featurePrivs]) => {
         featurePrivs.sort((privilege1, privilege2) => {
-          const privilege1Actions = this.privilegeDefinition
+          const privilege1Actions = this.kibanaPrivileges
             .getFeaturePrivileges()
             .getActions(featureId, privilege1);
 
-          const privilege2Actions = this.privilegeDefinition
+          const privilege2Actions = this.kibanaPrivileges
             .getFeaturePrivileges()
             .getActions(featureId, privilege2);
 

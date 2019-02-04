@@ -6,6 +6,8 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
+import { INDEX_PATTERN_KIBANA, INDEX_PATTERN_BEATS, INDEX_PATTERN_LOGSTASH } from '../../../../../monitoring/common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 /**
  * Update a counter associated with the {@code key}.
@@ -140,6 +142,24 @@ function mapToList(map, keyName) {
 }
 
 /**
+ * Returns the right index pattern to find monitoring documents based on the product id
+ *
+ * @param {*} product The product id, which should be in the constants file
+ */
+function getIndexPatternForStackProduct(product) {
+  switch (product) {
+    case KIBANA_SYSTEM_ID:
+      return INDEX_PATTERN_KIBANA;
+    case BEATS_SYSTEM_ID:
+    case APM_SYSTEM_ID:
+      return INDEX_PATTERN_BEATS;
+    case LOGSTASH_SYSTEM_ID:
+      return INDEX_PATTERN_LOGSTASH;
+  }
+  return null;
+}
+
+/**
  * Get statistics about selected Elasticsearch clusters, for the selected {@code product}.
  *
  * @param {Object} server The server instance
@@ -170,7 +190,7 @@ export function getHighLevelStats(server, callCluster, clusterUuids, start, end,
 export function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
   const config = server.config();
   const params = {
-    index: config.get(`xpack.monitoring.${product}.index_pattern`),
+    index: getIndexPatternForStackProduct(product),
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [

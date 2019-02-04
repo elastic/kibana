@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PrivilegeDefinition, Role } from '../../../common/model';
+import { KibanaPrivileges, Role } from '../../../common/model';
 import {
   buildRole,
   defaultPrivilegeDefinition,
@@ -17,16 +17,16 @@ import { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator
 
 const buildAllowedPrivilegesCalculator = (
   role: Role,
-  privilegeDefinition: PrivilegeDefinition = defaultPrivilegeDefinition
+  kibanaPrivilege: KibanaPrivileges = defaultPrivilegeDefinition
 ) => {
-  return new KibanaAllowedPrivilegesCalculator(privilegeDefinition, role);
+  return new KibanaAllowedPrivilegesCalculator(kibanaPrivilege, role);
 };
 
 const buildEffectivePrivilegesCalculator = (
   role: Role,
-  privilegeDefinition: PrivilegeDefinition = defaultPrivilegeDefinition
+  kibanaPrivileges: KibanaPrivileges = defaultPrivilegeDefinition
 ) => {
-  const factory = new KibanaPrivilegeCalculatorFactory(privilegeDefinition);
+  const factory = new KibanaPrivilegeCalculatorFactory(kibanaPrivileges);
   return factory.getInstance(role);
 };
 

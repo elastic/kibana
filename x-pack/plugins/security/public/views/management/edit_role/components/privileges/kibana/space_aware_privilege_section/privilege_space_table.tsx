@@ -17,9 +17,9 @@ import React, { Component } from 'react';
 import { getSpaceColor } from '../../../../../../../../../spaces/common';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import {
-  FeaturePrivilegeSet,
-  KibanaPrivilegeSpec,
+  FeaturesPrivileges,
   Role,
+  RoleKibanaPrivilege,
 } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import {
@@ -59,7 +59,7 @@ interface TableRow {
   privileges: {
     spaces: string[];
     base: string[];
-    feature: FeaturePrivilegeSet;
+    feature: FeaturesPrivileges;
   };
 }
 
@@ -182,7 +182,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       {
         field: 'privileges',
         name: 'Privileges',
-        render: (privileges: KibanaPrivilegeSpec, record: TableRow) => {
+        render: (privileges: RoleKibanaPrivilege, record: TableRow) => {
           const hasCustomizations = hasAssignedFeaturePrivileges(privileges);
           const basePrivilege = effectivePrivileges[record.spacesIndex].base;
 
@@ -260,10 +260,12 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     }
 
     return (
+      // @ts-ignore missing rowProps from typedef
       <EuiInMemoryTable
         columns={columns}
         items={rows}
         hasActions
+        // @ts-ignore missing rowProps from typedef
         rowProps={(item: TableRow) => {
           return {
             className: isGlobalPrivilegeDefinition(item.privileges)

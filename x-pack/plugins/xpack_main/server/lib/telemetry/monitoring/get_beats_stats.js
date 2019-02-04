@@ -6,6 +6,7 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
+import { INDEX_PATTERN_BEATS } from '../../../../../monitoring/common/constants';
 
 const HITS_SIZE = 10000; // maximum hits to receive from ES with each search
 
@@ -173,10 +174,8 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
  * @return {Promise}
  */
 async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, { page = 0, ...options } = {}, type) {
-  const config = server.config();
-
   const params = {
-    index: config.get('xpack.monitoring.beats.index_pattern'),
+    index: INDEX_PATTERN_BEATS,
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',

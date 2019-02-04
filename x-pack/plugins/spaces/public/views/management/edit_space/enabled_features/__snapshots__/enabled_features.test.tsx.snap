@@ -171,9 +171,30 @@ exports[`EnabledFeatures renders as expected 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="This is not a security mechanism."
+            defaultMessage="Hiding a feature does not disable the underlying functionality, such as the Saved Object APIs."
             id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
             values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="Want to secure access? Go to {rolesLink}."
+            id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
+            values={
+              Object {
+                "rolesLink": <EuiLink
+                  color="primary"
+                  href="#/management/security/roles"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Roles"
+                    id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
           />
         </p>
       </EuiText>

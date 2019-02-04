@@ -169,6 +169,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EnabledFeatures
           space={this.state.space}
           features={this.props.features}
+          uiCapabilities={uiCapabilities}
           onChange={this.onSpaceChange}
           intl={this.props.intl}
         />

@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FeaturePrivilegeSet, Role } from '../../../../common/model';
+import { FeaturesPrivileges, Role } from '../../../../common/model';
 
 export interface BuildRoleOpts {
   spacesPrivileges?: Array<{
     spaces: string[];
     base: string[];
-    feature: FeaturePrivilegeSet;
+    feature: FeaturesPrivileges;
   }>;
 }
 

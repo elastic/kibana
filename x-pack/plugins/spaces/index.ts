@@ -138,7 +138,7 @@ export const spaces = (kibana: any) =>
       const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
 
       server.expose('spacesClient', {
-        getScopedClient: (request: any) => {
+        getScopedClient: (request: Record<string, any>) => {
           const adminCluster = server.plugins.elasticsearch.getCluster('admin');
           const { callWithRequest, callWithInternalUser } = adminCluster;
           const callCluster = (...args: any[]) => callWithRequest(request, ...args);

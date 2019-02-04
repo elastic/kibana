@@ -24,7 +24,7 @@ import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
-import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
+import { FeaturesPrivileges, Role } from '../../../../../../../../common/model';
 import { CalculatedPrivilege } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
@@ -56,7 +56,7 @@ interface SpacesColumn {
   spaces: Space[];
   privileges: {
     base: string[];
-    feature: FeaturePrivilegeSet;
+    feature: FeaturesPrivileges;
   };
 }
 
@@ -74,7 +74,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
               <EuiModalHeaderTitle>
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeMatrix.modalTitle"
-                  defaultMessage="Privilege summary matrix"
+                  defaultMessage="Privilege summary"
                 />
               </EuiModalHeaderTitle>
             </EuiModalHeader>
@@ -97,7 +97,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
         <EuiButtonEmpty onClick={this.showModal}>
           <FormattedMessage
             id="xpack.security.management.editRole.spacePrivilegeMatrix.showSummaryText"
-            defaultMessage="Show privilege summary"
+            defaultMessage="View privilege summary"
           />
         </EuiButtonEmpty>
         {modal}
@@ -171,7 +171,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 content={intl.formatMessage({
                   id:
                     'xpack.security.management.editRole.spacePrivilegeMatrix.basePrivilegeTooltip',
-                  defaultMessage: 'Lowest privilege level allowed',
+                  defaultMessage: 'Lowest privilege level allowed.',
                 })}
                 color="subdued"
               />
@@ -253,9 +253,11 @@ export class PrivilegeMatrix extends Component<Props, State> {
     ];
 
     return (
+      // @ts-ignore missing rowProps from typedef
       <EuiInMemoryTable
         columns={columns}
         items={rows}
+        // @ts-ignore missing rowProps from typedef
         rowProps={(item: TableRow) => {
           return {
             className: item.feature.isBase ? 'secPrivilegeMatrix__row--isBasePrivilege' : '',

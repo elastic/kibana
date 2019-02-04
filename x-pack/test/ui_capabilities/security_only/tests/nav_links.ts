@@ -80,12 +80,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('graph', 'management')
             );
             break;
-          case 'gis_all':
-          case 'gis_read':
+          case 'maps_all':
+          case 'maps_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('gis', 'management')
+              navLinksBuilder.only('maps', 'management')
             );
             break;
           case 'infrastructure_read':

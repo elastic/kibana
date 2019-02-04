@@ -14,7 +14,7 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
   >
     <p>
       <FormattedMessage
-        defaultMessage="Want to assign a role to a space? Go to Management and select {rolesLink}."
+        defaultMessage="Want to assign a role to a space? Go to {rolesLink}."
         id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
         values={
           Object {

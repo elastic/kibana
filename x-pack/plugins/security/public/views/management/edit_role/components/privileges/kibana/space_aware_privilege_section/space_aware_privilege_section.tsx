@@ -17,7 +17,7 @@ import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
+import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
@@ -25,7 +25,7 @@ import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
-  privilegeDefinition: PrivilegeDefinition;
+  kibanaPrivileges: KibanaPrivileges;
   role: Role;
   privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   spaces: Space[];
@@ -119,7 +119,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           <PrivilegeSpaceForm
             role={this.props.role}
             privilegeCalculatorFactory={privilegeCalculatorFactory}
-            privilegeDefinition={this.props.privilegeDefinition}
+            kibanaPrivileges={this.props.kibanaPrivileges}
             features={this.props.features}
             intl={this.props.intl}
             onChange={this.onSpacesPrivilegeChange}
@@ -167,21 +167,11 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           <h2>
             <FormattedMessage
               id="xpack.security.management.editRole.spacePrivilegeSection.noAccessToKibanaTitle"
-              defaultMessage="No access to Kibana"
+              defaultMessage="This role does not grant access to Kibana"
             />
           </h2>
         }
         titleSize={'s'}
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spacePrivilegeSection.noAccessToKibanaDescription"
-                defaultMessage="This role does not grant any access to Kibana. Add privileges to existing spaces or groups of existing spaces using the button below."
-              />
-            </p>
-          </Fragment>
-        }
         actions={this.getAvailablePrivilegeButtons(false)}
       />
     );

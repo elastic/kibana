@@ -17,6 +17,7 @@ import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privi
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { getSettingsBreadcrumbs } from './breadcrumbs';
 
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 
@@ -55,10 +56,14 @@ module.directive('mlSettings', function () {
     scope: {},
     link: function (scope, element) {
       ReactDOM.render(
-        React.createElement(Settings, {
-          canGetFilters,
-          canGetCalendars
-        }),
+        <I18nContext>
+          {React.createElement(
+            Settings, {
+              canGetFilters,
+              canGetCalendars
+            })
+          }
+        </I18nContext>,
         element[0]
       );
     }

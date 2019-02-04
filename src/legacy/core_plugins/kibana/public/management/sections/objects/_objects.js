@@ -28,7 +28,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { getInAppUrl } from './lib/get_in_app_url';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
@@ -55,7 +55,7 @@ function updateObjectsTable($scope, $injector, i18n) {
     }
 
     render(
-      <I18nProvider>
+      <I18nContext>
         <ObjectsTable
           savedObjectsClient={savedObjectsClient}
           services={services}
@@ -63,10 +63,10 @@ function updateObjectsTable($scope, $injector, i18n) {
           $http={$http}
           perPageConfig={config.get('savedObjects:perPage')}
           basePath={chrome.getBasePath()}
-          newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
+          newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
           getEditUrl={(id, type) => {
             if (type === 'index-pattern' || type === 'indexPatterns') {
-              return kbnUrl.eval(`#/management/kibana/indices/${id}`);
+              return kbnUrl.eval(`#/management/kibana/index_patterns/${id}`);
             }
             const serviceName = typeToServiceName(type);
             if (!serviceName) {
@@ -84,7 +84,7 @@ function updateObjectsTable($scope, $injector, i18n) {
             $scope.$apply();
           }}
         />
-      </I18nProvider>,
+      </I18nContext>,
       node,
     );
   });
