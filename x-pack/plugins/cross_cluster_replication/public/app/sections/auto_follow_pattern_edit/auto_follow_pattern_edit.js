@@ -11,10 +11,11 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPageContent,
   EuiButtonEmpty,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
@@ -89,6 +90,9 @@ export const AutoFollowPatternEdit = injectI18n(
       return (
         <Fragment>
           <SectionError title={title} error={errorMessage} />
+
+          <EuiSpacer size="m" />
+
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -162,6 +166,12 @@ export const AutoFollowPatternEdit = injectI18n(
                     remoteClusters={error ? [] : remoteClusters}
                     autoFollowPattern={autoFollowPattern}
                     saveAutoFollowPattern={saveAutoFollowPattern}
+                    saveButtonLabel={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternEditForm.saveButtonLabel"
+                        defaultMessage="Update"
+                      />
+                    )}
                   />
                 );
               }}

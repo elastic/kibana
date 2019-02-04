@@ -66,6 +66,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
     apiStatus: PropTypes.string.isRequired,
     currentUrl: PropTypes.string.isRequired,
     remoteClusters: PropTypes.array,
+    saveButtonLabel: PropTypes.node,
   }
 
   constructor(props) {
@@ -216,9 +217,15 @@ export class AutoFollowPatternFormUI extends PureComponent {
     if (apiError) {
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.autoFollowPatternForm.savingErrorTitle',
-        defaultMessage: 'Error creating auto-follow pattern',
+        defaultMessage: `Can't create auto-follow pattern`,
       });
-      return <SectionError title={title} error={apiError} />;
+
+      return (
+        <Fragment>
+          <SectionError title={title} error={apiError} />
+          <EuiSpacer size="l" />
+        </Fragment>
+      );
     }
 
     return null;
@@ -295,20 +302,35 @@ export class AutoFollowPatternFormUI extends PureComponent {
       const { remoteClusters, currentUrl } = this.props;
 
       const errorMessages = {
-        noClusterFound: () => (<FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternForm.emptyRemoteClustersCallOutDescription"
-          defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add a remote cluster."
-        />),
-        remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
-          defaultMessage="You need to connect it before editing this auto-follow pattern. Edit the remote cluster to
-            fix the problem."
-        />),
-        remoteClusterDoesNotExist: () => (<FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
-          defaultMessage="It might have been removed. In order to edit this auto-follow pattern,
-            you need to add a remote cluster with the same name."
-        />)
+        noClusterFound: () => (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternForm.emptyRemoteClustersCallOutDescription"
+            defaultMessage="Auto-follow patterns capture indices on remote clusters."
+          />
+        ),
+        remoteClusterNotConnectedNotEditable: (name) => ({
+          title: (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutTitle"
+              defaultMessage="Can't edit auto-follow pattern because remote cluster '{name}' is not connected"
+              values={{ name }}
+            />
+          ),
+          description: (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
+              defaultMessage="You can address this by editing the remote cluster."
+            />
+          ),
+        }),
+        remoteClusterDoesNotExist: (name) => (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
+            defaultMessage="To edit this auto-follow pattern, you must add a remote cluster
+              named '{name}'."
+            values={{ name }}
+          />
+        ),
       };
 
       return (
@@ -379,7 +401,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.sectionLeaderIndexPatternsDescription2"
-                  defaultMessage="{note} indices that already exist are not replicated."
+                  defaultMessage="{note} Indices that already exist are not replicated."
                   values={{ note: (
                     <strong>
                       <FormattedMessage
@@ -539,7 +561,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
       return (
         <Fragment>
-          <EuiSpacer size="m" />
           <EuiCallOut
             title={(
               <FormattedMessage
@@ -550,6 +571,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
             color="danger"
             iconType="cross"
           />
+          <EuiSpacer size="l" />
         </Fragment>
       );
     };
@@ -558,7 +580,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
      * Form Actions
      */
     const renderActions = () => {
-      const { apiStatus } = this.props;
+      const { apiStatus, saveButtonLabel } = this.props;
       const { areErrorsVisible } = this.state;
 
       if (apiStatus === API_STATUS.SAVING) {
@@ -592,10 +614,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               fill
               disabled={isSaveDisabled}
             >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternForm.saveButtonLabel"
-                defaultMessage="Save"
-              />
+              {saveButtonLabel}
             </EuiButton>
           </EuiFlexItem>
 
@@ -623,7 +642,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
         {renderFormErrorWarning()}
-        <EuiSpacer size="l" />
+        {this.renderApiErrors()}
         {renderActions()}
       </Fragment>
     );
@@ -645,7 +664,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
   render() {
     return (
       <Fragment>
-        {this.renderApiErrors()}
         {this.renderForm()}
         {this.renderLoading()}
       </Fragment>

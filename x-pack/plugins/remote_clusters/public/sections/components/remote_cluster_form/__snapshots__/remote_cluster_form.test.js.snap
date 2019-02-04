@@ -166,7 +166,16 @@ Array [
               class="euiFormHelpText euiFormRow__text"
               id="mockId-help"
             >
-              An IP address or host name, followed by the transport port of the remote cluster.
+              An IP address or host name, followed by the 
+              <a
+                class="euiLink euiLink--primary"
+                href="undefinedguide/en/elasticsearch/reference/undefined/modules-transport.html"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                transport port
+              </a>
+               of the remote cluster.
             </div>
           </div>
         </div>
@@ -430,7 +439,16 @@ Array [
       class="euiFormHelpText euiFormRow__text"
       id="mockId-help"
     >
-      An IP address or host name, followed by the transport port of the remote cluster.
+      An IP address or host name, followed by the 
+      <a
+        class="euiLink euiLink--primary"
+        href="undefinedguide/en/elasticsearch/reference/undefined/modules-transport.html"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        transport port
+      </a>
+       of the remote cluster.
     </div>
   </div>,
   <div

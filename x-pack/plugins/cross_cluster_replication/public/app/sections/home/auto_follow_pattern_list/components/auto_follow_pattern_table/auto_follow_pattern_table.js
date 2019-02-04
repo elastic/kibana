@@ -82,7 +82,7 @@ export const AutoFollowPatternTable = injectI18n(
         field: 'remoteCluster',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
-          defaultMessage: 'Cluster',
+          defaultMessage: 'Remote cluster',
         }),
         truncateText: true,
         sortable: true,
@@ -97,14 +97,14 @@ export const AutoFollowPatternTable = injectI18n(
         field: 'followIndexPatternPrefix',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
-          defaultMessage: 'Follower pattern prefix',
+          defaultMessage: 'Follower index prefix',
         }),
         sortable: true,
       }, {
         field: 'followIndexPatternSuffix',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
-          defaultMessage: 'Follower pattern suffix',
+          defaultMessage: 'Follower index suffix',
         }),
         sortable: true,
       }, {

@@ -78,11 +78,11 @@ export const FollowerIndicesTable = injectI18n(
             const label = isPaused
               ? intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
-                defaultMessage: 'Resume follower index',
+                defaultMessage: 'Resume replication',
               })
               : intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
-                defaultMessage: 'Pause follower index',
+                defaultMessage: 'Pause replication',
               });
 
             return isPaused ? (
@@ -204,7 +204,7 @@ export const FollowerIndicesTable = injectI18n(
         field: 'remoteCluster',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
-          defaultMessage: 'Cluster',
+          defaultMessage: 'Remote cluster',
         }),
         truncateText: true,
         sortable: true,

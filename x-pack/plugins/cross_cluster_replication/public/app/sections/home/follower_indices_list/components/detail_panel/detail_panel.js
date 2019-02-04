@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiCodeEditor,
   EuiDescriptionList,
@@ -23,7 +24,6 @@ import {
   EuiFlyoutHeader,
   EuiHealth,
   EuiIcon,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -48,7 +48,6 @@ export class DetailPanelUi extends Component {
   renderFollowerIndex() {
     const {
       followerIndex: {
-        name,
         remoteCluster,
         leaderIndex,
         isPaused,
@@ -65,8 +64,6 @@ export class DetailPanelUi extends Component {
         readPollTimeout,
       },
     } = this.props;
-
-    const indexManagementUri = getIndexListUri(`name:${name}`);
 
     return (
       <Fragment>
@@ -324,15 +321,6 @@ export class DetailPanelUi extends Component {
 
             <EuiSpacer size="l" />
 
-            <EuiLink
-              href={indexManagementUri}
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexDetailPanel.viewIndexLink"
-                defaultMessage="View your follower index in Index Management"
-              />
-            </EuiLink>
-
             {shards && shards.map((shard, i) => (
               <Fragment key={i}>
                 <EuiSpacer size="m" />
@@ -432,9 +420,13 @@ export class DetailPanelUi extends Component {
 
   renderFooter() {
     const {
+      followerIndexId,
       followerIndex,
       closeDetailPanel,
     } = this.props;
+
+    // Use ID instead of followerIndex, because followerIndex may not be loaded yet.
+    const indexManagementUri = getIndexListUri(`name:${followerIndexId}`);
 
     return (
       <EuiFlyoutFooter>
@@ -452,22 +444,37 @@ export class DetailPanelUi extends Component {
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {followerIndex && (
-            <EuiFlexItem grow={false}>
-              <ContextMenu
-                iconSide="left"
-                iconType="arrowUp"
-                anchorPosition="upRight"
-                label={(
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  href={indexManagementUri}
+                >
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexDetailPanel.manageButtonLabel"
-                    defaultMessage="Manage"
+                    id="xpack.crossClusterReplication.followerIndexDetailPanel.viewIndexLink"
+                    defaultMessage="View in Index Management"
                   />
-                )}
-                followerIndices={[followerIndex]}
-              />
-            </EuiFlexItem>
-          )}
+                </EuiButton>
+              </EuiFlexItem>
+
+              {followerIndex && (
+                <EuiFlexItem grow={false}>
+                  <ContextMenu
+                    iconSide="left"
+                    iconType="arrowUp"
+                    anchorPosition="upRight"
+                    label={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.manageButtonLabel"
+                        defaultMessage="Manage"
+                      />
+                    )}
+                    followerIndices={[followerIndex]}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     );

@@ -102,7 +102,7 @@ export const FollowerIndicesList = injectI18n(
                 <p>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-                    defaultMessage="Followers replicate operations from the leader index to the follower index."
+                    defaultMessage="A follower index replicates a leader index on a remote cluster."
                   />
                 </p>
               </EuiText>
@@ -124,7 +124,7 @@ export const FollowerIndicesList = injectI18n(
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer />
+          <EuiSpacer size="m" />
         </Fragment>
       );
     }
@@ -155,7 +155,13 @@ export const FollowerIndicesList = injectI18n(
           id: 'xpack.crossClusterReplication.followerIndexList.loadingErrorTitle',
           defaultMessage: 'Error loading follower indices',
         });
-        return <SectionError title={title} error={apiError} />;
+
+        return (
+          <Fragment>
+            <SectionError title={title} error={apiError} />
+            <EuiSpacer size="m" />
+          </Fragment>
+        );
       }
 
       if (isEmpty) {
@@ -182,8 +188,7 @@ export const FollowerIndicesList = injectI18n(
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexList.emptyPromptDescription"
-                  defaultMessage="Use a follower to start replicating operations from
-                    the leader index to the follower index."
+                  defaultMessage="Use a follower index to replicate a leader index on a remote cluster."
                 />
               </p>
             </Fragment>

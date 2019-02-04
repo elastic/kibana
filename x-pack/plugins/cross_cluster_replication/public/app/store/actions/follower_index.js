@@ -75,7 +75,7 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) => (
 
       toastNotifications.addSuccess(successMessage);
       routing.navigate(`/follower_indices`, undefined, {
-        pattern: encodeURIComponent(name),
+        name: encodeURIComponent(name),
       });
     },
   })
@@ -110,9 +110,9 @@ export const pauseFollowerIndex = (id) => (
       }
 
       if (response.itemsPaused.length) {
-        const hasMultipleDelete = response.itemsPaused.length > 1;
+        const hasMultiplePaused = response.itemsPaused.length > 1;
 
-        const successMessage = hasMultipleDelete
+        const successMessage = hasMultiplePaused
           ? i18n.translate('xpack.crossClusterReplication.followerIndex.pauseAction.successMultipleNotificationTitle', {
             defaultMessage: `{count} follower indices were paused`,
             values: { count: response.itemsPaused.length },
@@ -160,9 +160,9 @@ export const resumeFollowerIndex = (id) => (
       }
 
       if (response.itemsResumed.length) {
-        const hasMultipleDelete = response.itemsResumed.length > 1;
+        const hasMultipleResumed = response.itemsResumed.length > 1;
 
-        const successMessage = hasMultipleDelete
+        const successMessage = hasMultipleResumed
           ? i18n.translate('xpack.crossClusterReplication.followerIndex.resumeAction.successMultipleNotificationTitle', {
             defaultMessage: `{count} follower indices were resumed`,
             values: { count: response.itemsResumed.length },
@@ -210,9 +210,9 @@ export const unfollowLeaderIndex = (id) => (
       }
 
       if (response.itemsUnfollowed.length) {
-        const hasMultipleDelete = response.itemsUnfollowed.length > 1;
+        const hasMultipleUnfollow = response.itemsUnfollowed.length > 1;
 
-        const successMessage = hasMultipleDelete
+        const successMessage = hasMultipleUnfollow
           ? i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.successMultipleNotificationTitle', {
             defaultMessage: `Leader indices of {count} follower indices were unfollowed`,
             values: { count: response.itemsUnfollowed.length },
@@ -223,6 +223,22 @@ export const unfollowLeaderIndex = (id) => (
           });
 
         toastNotifications.addSuccess(successMessage);
+      }
+
+      if (response.itemsNotOpen.length) {
+        const hasMultipleNotOpen = response.itemsNotOpen.length > 1;
+
+        const warningMessage = hasMultipleNotOpen
+          ? i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningMultipleNotificationTitle', {
+            defaultMessage: `{count} indices could not be re-opened`,
+            values: { count: response.itemsNotOpen.length },
+          })
+          : i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningSingleNotificationTitle', {
+            defaultMessage: `Index '{name}' could not be re-opened`,
+            values: { name: response.itemsNotOpen[0] },
+          });
+
+        toastNotifications.addWarning(warningMessage);
       }
 
       // If we've just unfollowed a follower index we were looking at, we need to close the panel.

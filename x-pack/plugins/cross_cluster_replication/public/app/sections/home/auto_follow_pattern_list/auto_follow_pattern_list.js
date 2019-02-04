@@ -105,8 +105,8 @@ export const AutoFollowPatternList = injectI18n(
                 <p>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
-                      cluster to follower indices on the local cluster."
+                    defaultMessage="An auto-follow pattern replicates leader indices from a remote
+                      cluster and copies them to follower indices on the local cluster."
                   />
                 </p>
               </EuiText>
@@ -128,7 +128,7 @@ export const AutoFollowPatternList = injectI18n(
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer />
+          <EuiSpacer size="m" />
         </Fragment>
       );
     }
@@ -158,7 +158,13 @@ export const AutoFollowPatternList = injectI18n(
           id: 'xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle',
           defaultMessage: 'Error loading auto-follow patterns',
         });
-        return <SectionError title={title} error={apiError} />;
+
+        return (
+          <Fragment>
+            <SectionError title={title} error={apiError} />
+            <EuiSpacer size="m" />
+          </Fragment>
+        );
       }
 
       if (isEmpty) {
