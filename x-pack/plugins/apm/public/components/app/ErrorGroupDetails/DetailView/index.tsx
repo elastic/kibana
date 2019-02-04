@@ -11,6 +11,7 @@ import {
   EuiTabs,
   EuiTitle
 } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first, get, isEmpty } from 'lodash';
@@ -38,13 +39,7 @@ import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import {
-  borderRadius,
-  colors,
-  px,
-  unit,
-  units
-} from '../../../../style/variables';
+import { borderRadius, px, unit, units } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
@@ -56,7 +51,7 @@ import { StickyProperties } from '../../../shared/StickyProperties';
 
 const Container = styled.div`
   position: relative;
-  border: 1px solid ${colors.gray4};
+  border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${borderRadius};
   margin-top: ${px(units.plus)};
 `;

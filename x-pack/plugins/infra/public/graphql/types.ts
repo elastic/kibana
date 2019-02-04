@@ -730,6 +730,27 @@ export namespace WaffleNodesQuery {
   };
 }
 
+export namespace CreateSourceMutation {
+  export type Variables = {
+    sourceId: string;
+    sourceConfiguration: CreateSourceInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    createSource: CreateSource;
+  };
+
+  export type CreateSource = {
+    __typename?: 'CreateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = SourceFields.Fragment;
+}
+
 export namespace SourceQuery {
   export type Variables = {
     sourceId?: string | null;
@@ -741,57 +762,28 @@ export namespace SourceQuery {
     source: Source;
   };
 
-  export type Source = {
-    __typename?: 'InfraSource';
+  export type Source = SourceFields.Fragment;
+}
 
-    id: string;
-
-    configuration: Configuration;
-
-    status: Status;
+export namespace UpdateSourceMutation {
+  export type Variables = {
+    sourceId?: string | null;
+    changes: UpdateSourceInput[];
   };
 
-  export type Configuration = {
-    __typename?: 'InfraSourceConfiguration';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
-    metricAlias: string;
-
-    logAlias: string;
-
-    fields: Fields;
+    updateSource: UpdateSource;
   };
 
-  export type Fields = {
-    __typename?: 'InfraSourceFields';
+  export type UpdateSource = {
+    __typename?: 'UpdateSourceResult';
 
-    container: string;
-
-    host: string;
-
-    pod: string;
+    source: Source;
   };
 
-  export type Status = {
-    __typename?: 'InfraSourceStatus';
-
-    indexFields: IndexFields[];
-
-    logIndicesExist: boolean;
-
-    metricIndicesExist: boolean;
-  };
-
-  export type IndexFields = {
-    __typename?: 'InfraIndexField';
-
-    name: string;
-
-    type: string;
-
-    searchable: boolean;
-
-    aggregatable: boolean;
-  };
+  export type Source = SourceFields.Fragment;
 }
 
 export namespace LogEntries {
@@ -913,6 +905,72 @@ export namespace LogSummary {
     end: number;
 
     entriesCount: number;
+  };
+}
+
+export namespace SourceFields {
+  export type Fragment = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    version?: number | null;
+
+    updatedAt?: number | null;
+
+    configuration: Configuration;
+
+    status: Status;
+  };
+
+  export type Configuration = {
+    __typename?: 'InfraSourceConfiguration';
+
+    name: string;
+
+    description: string;
+
+    metricAlias: string;
+
+    logAlias: string;
+
+    fields: Fields;
+  };
+
+  export type Fields = {
+    __typename?: 'InfraSourceFields';
+
+    container: string;
+
+    host: string;
+
+    pod: string;
+
+    tiebreaker: string;
+
+    timestamp: string;
+  };
+
+  export type Status = {
+    __typename?: 'InfraSourceStatus';
+
+    indexFields: IndexFields[];
+
+    logIndicesExist: boolean;
+
+    metricIndicesExist: boolean;
+  };
+
+  export type IndexFields = {
+    __typename?: 'InfraIndexField';
+
+    name: string;
+
+    type: string;
+
+    searchable: boolean;
+
+    aggregatable: boolean;
   };
 }
 
