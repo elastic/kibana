@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.7.4",
+    "@elastic/eui": "6.8.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -375,6 +375,7 @@
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.3.0",
     "mocha": "3.3.0",
+    "multistream": "^2.1.1",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "8.0.0",
