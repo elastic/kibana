@@ -149,6 +149,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await (await find.clickByPartialLinkText('logstash-*'));
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');
