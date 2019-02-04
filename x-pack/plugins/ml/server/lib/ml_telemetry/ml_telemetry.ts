@@ -5,7 +5,6 @@
  */
 
 import { Server } from 'hapi';
-
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 
 export interface MlTelemetry {
@@ -43,18 +42,30 @@ export function getSavedObjectsClient(server: Server): any {
   return new SavedObjectsClient(internalRepository);
 }
 
-export async function incrementFileDataVisualizerIndexCreationCount(server: Server) {
-  let indicesCount = 0;
+export async function incrementFileDataVisualizerIndexCreationCount(server: Server): Promise<void> {
+  const savedObjectsClient = getSavedObjectsClient(server);
 
   try {
-    const savedObjectsClient = getSavedObjectsClient(server);
-    const mlTelemetrySavedObject = (await savedObjectsClient.get(
+    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
+    if (attributes.enabled === false) {
+      return;
+    }
+  } catch (error) {
+    // if we aren't allowed to get the telemetry document,
+    // we assume we couldn't opt in to telemetry and won't increment the index count.
+    return;
+  }
+
+  let indicesCount = 1;
+
+  try {
+    const { attributes } = (await savedObjectsClient.get(
       'ml-telemetry',
       ML_TELEMETRY_DOC_ID
     )) as MlTelemetrySavedObject;
-    indicesCount = mlTelemetrySavedObject.attributes.file_data_visualizer.index_creation_count + 1;
+    indicesCount = attributes.file_data_visualizer.index_creation_count + 1;
   } catch (e) {
-    /* silently fail on telemetry error */
+    /* silently fail, this will happen if the saved object doesn't exist yet. */
   }
 
   const mlTelemetry = createMlTelemetry(indicesCount);
