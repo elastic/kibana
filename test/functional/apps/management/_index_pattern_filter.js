@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
+  const find = getService('find');
 
   describe('index pattern filter', function describeIndexTests() {
     before(async function () {
@@ -44,6 +45,7 @@ export default function ({ getService, getPageObjects }) {
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await (await find.clickByPartialLinkText('logstash-*'));
       console.log('**** clickKibanaIndexPatterns');
       await PageObjects.settings.getFieldTypes();
       await PageObjects.settings.setFieldTypeFilter('string');
