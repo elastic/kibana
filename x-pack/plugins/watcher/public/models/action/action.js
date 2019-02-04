@@ -11,6 +11,7 @@ import { LoggingAction } from './logging_action';
 import { SlackAction } from './slack_action';
 import { WebhookAction } from './webhook.action';
 import { IndexAction } from './index.action';
+import { HipchatAction } from './hipchat.action';
 import { UnknownAction } from './unknown_action';
 
 const ActionTypes = {};
@@ -19,6 +20,7 @@ set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
 set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
 set(ActionTypes, ACTION_TYPES.WEBHOOK, WebhookAction);
 set(ActionTypes, ACTION_TYPES.INDEX, IndexAction);
+set(ActionTypes, ACTION_TYPES.HIPCHAT, HipchatAction);
 
 export class Action {
   static getActionTypes = () => {
