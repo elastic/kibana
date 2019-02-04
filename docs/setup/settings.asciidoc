@@ -54,6 +54,10 @@ authority for your Elasticsearch instance.
 
 `elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
 
+`elasticsearch.ssl.verify:`:: *Default: true* To disregard the validity of SSL
+certificates, change this setting’s value to `false`.
+deprecated[5.3.0,Replaced by `elasticsearch.ssl.verificationMode`]
+
 `elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values are `none`, `certificate`, and `full`.
 `full` performs hostname verification, and `certificate` does not.
 
