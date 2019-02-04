@@ -18,7 +18,6 @@ export const EmptyStateError = ({ errorMessage }: EmptyStateErrorProps) => (
       <EuiTitle size="l">
         <h3>
           {i18n.translate('xpack.uptime.emptyState.errorMessage', {
-            values: { message: '' },
             defaultMessage: 'Error',
           })}
         </h3>
