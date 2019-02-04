@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { euiFontSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 // @ts-ignore
 import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
 // @ts-ignore
 import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
 import React from 'react';
+import styled from 'styled-components';
 import { MarkedString } from 'vscode-languageserver-types';
+
+const Text = styled(EuiText)`
+  p {
+    color: #8c8c8c;
+    font-size: ${euiFontSizeXs};
+  }
+`;
 
 export interface HoverWidgetProps {
   state: HoverState;
@@ -21,7 +30,7 @@ export interface HoverWidgetProps {
 
 export enum HoverState {
   LOADING,
-  INITIALTING,
+  INITIALIZING,
   READY,
 }
 
@@ -33,27 +42,14 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
       case HoverState.READY:
         contents = this.renderContents();
         break;
-      case HoverState.INITIALTING:
+      case HoverState.INITIALIZING:
         contents = this.renderInitialting();
         break;
       case HoverState.LOADING:
       default:
         contents = this.renderLoading();
     }
-    return (
-      <div className="monaco-editor-hover-content">
-        {contents}
-        <EuiFlexGroup className="button-group euiFlexGroup" gutterSize="none" responsive={true}>
-          <EuiButton size="s" onClick={this.props.gotoDefinition}>
-            Goto Definition
-          </EuiButton>
-          <EuiButton size="s" onClick={this.props.findReferences}>
-            Find Reference
-          </EuiButton>
-          <EuiButton size="s">Go to Type</EuiButton>
-        </EuiFlexGroup>
-      </div>
-    );
+    return <React.Fragment>{contents}</React.Fragment>;
   }
 
   private renderLoading() {
@@ -100,12 +96,12 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
   private renderInitialting() {
     return (
       <div className="hover-row">
-        <EuiText>
-          <h4 style={{ textAlign: 'center' }}>Language Server is initializing…</h4>
-          <p style={{ color: '#8C8C8C', textAlign: 'center', fontSize: '12px' }}>
-            Depending on the size of your repo, this could take a few minutes.
-          </p>
-        </EuiText>
+        {/*
+              // @ts-ignore */}
+        <Text textAlign="center">
+          <h4>Language Server is initializing…</h4>
+          <p>Depending on the size of your repo, this could take a few minutes.</p>
+        </Text>
       </div>
     );
   }

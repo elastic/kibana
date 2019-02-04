@@ -9,7 +9,6 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { SearchScope } from '../../../model';
 import { MainRouteParams, SearchScopeText } from '../../common/types';
-import { pxToRem } from '../../style/variables';
 import {
   AutocompleteSuggestion,
   FileSuggestionsProvider,
@@ -20,7 +19,7 @@ import {
 import { Shortcut } from '../shortcuts';
 
 const SearchBarContainer = styled.div`
-  width: ${pxToRem(800)};
+  width: 100%;
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {

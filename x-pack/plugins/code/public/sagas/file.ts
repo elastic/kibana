@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { some } from 'lodash';
 import { Action } from 'redux-actions';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
@@ -45,12 +44,21 @@ import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
-    const { uri, revision, path, parents } = action.payload!;
+    const { uri, revision, path, parents, isDir } = action.payload!;
     if (path) {
       const requestedPaths: string[] = yield select(requestedPathsSelector);
-      const shouldFetch = !some(requestedPaths, p => p.startsWith(path));
+      const isPathNotRequested = (p: string) => !requestedPaths.includes(p);
+      const shouldFetch = isDir
+        ? isPathNotRequested(path)
+        : requestedPaths.length === 0 ||
+          isPathNotRequested(
+            path
+              .split('/')
+              .slice(0, -1)
+              .join('/')
+          );
       if (shouldFetch) {
-        yield call(fetchPath, { uri, revision, path, parents });
+        yield call(fetchPath, { uri, revision, path, parents, isDir });
       }
       const pathSegments = path.split('/');
       let currentPath = '';
@@ -161,7 +169,8 @@ function* handleFetchTreeCommits(action: Action<FetchFilePayload>) {
 function requestCommits(
   { uri, revision }: FetchRepoPayloadWithRevision,
   path?: string,
-  loadMore?: boolean
+  loadMore?: boolean,
+  count?: number
 ) {
   const pathStr = path ? `/${path}` : '';
   const options: any = {
@@ -169,6 +178,9 @@ function requestCommits(
   };
   if (loadMore) {
     options.query = { after: 1 };
+  }
+  if (count) {
+    options.count = count;
   }
   return kfetch(options);
 }
@@ -183,7 +195,7 @@ export async function requestFile(
     url += '?line=' + line;
   }
   const response: Response = await fetch(url);
-  if (response.status === 200) {
+  if (response.status >= 200 && response.status < 300) {
     const contentType = response.headers.get('Content-Type');
 
     if (contentType && contentType.startsWith('text/')) {
@@ -192,6 +204,7 @@ export async function requestFile(
         payload,
         lang,
         content: await response.text(),
+        isUnsupported: false,
       };
     } else if (contentType && contentType.startsWith('image/')) {
       return {
@@ -199,6 +212,15 @@ export async function requestFile(
         isImage: true,
         content: await response.text(),
         url,
+        isUnsupported: false,
+      };
+    } else {
+      return {
+        payload,
+        isImage: false,
+        content: await response.text(),
+        url,
+        isUnsupported: true,
       };
     }
   } else if (response.status === 404) {

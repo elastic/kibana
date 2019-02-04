@@ -9,12 +9,12 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { EditorActions } from '../components/editor/editor';
 import { provideDefinition } from './definition/definition_provider';
 
-import { parseSchema, toCanonicalUrl } from '../../common/uri_util';
-import { history } from '../utils/url';
+import { toCanonicalUrl } from '../../common/uri_util';
 import { EditorService } from './editor_service';
 import { HoverController } from './hover/hover_controller';
 import { monaco } from './monaco';
 import { registerReferencesAction } from './references/references_action';
+import { registerEditor } from './single_selection_helper';
 import { TextModelResolverService } from './textmodel_resolver';
 
 export class MonacoHelper {
@@ -22,12 +22,12 @@ export class MonacoHelper {
     return this.monaco !== null;
   }
   public decorations: string[] = [];
+  public editor: editor.IStandaloneCodeEditor | null = null;
   private monaco: any | null = null;
-  private editor: editor.IStandaloneCodeEditor | null = null;
   private resizeChecker: ResizeChecker | null = null;
 
   constructor(
-    private readonly container: HTMLElement,
+    public readonly container: HTMLElement,
     private readonly editorActions: EditorActions
   ) {
     this.handleCopy = this.handleCopy.bind(this);
@@ -42,6 +42,7 @@ export class MonacoHelper {
       };
       this.monaco.languages.registerDefinitionProvider('java', definitionProvider);
       this.monaco.languages.registerDefinitionProvider('typescript', definitionProvider);
+      this.monaco.languages.registerDefinitionProvider('javascript', definitionProvider);
       const codeEditorService = new EditorService();
       codeEditorService.setMonacoHelper(this);
       this.editor = monaco.editor.create(
@@ -59,12 +60,14 @@ export class MonacoHelper {
           renderLineHighlight: 'none',
           contextmenu: false,
           folding: true,
+          scrollBeyondLastLine: false,
         },
         {
           textModelService: new TextModelResolverService(monaco),
           codeEditorService,
         }
       );
+      registerEditor(this.editor);
       this.resizeChecker = new ResizeChecker(this.container);
       this.resizeChecker.on('resize', () => {
         setTimeout(() => {
@@ -72,13 +75,6 @@ export class MonacoHelper {
         });
       });
       registerReferencesAction(this.editor);
-      this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
-        if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-          const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
-          history.push(`${uri}!L${e.target.position.lineNumber}:0`);
-        }
-        this.container.focus();
-      });
       const hoverController: HoverController = new HoverController(this.editor);
       hoverController.setReduxActions(this.editorActions);
       document.addEventListener('copy', this.handleCopy);
@@ -126,24 +122,6 @@ export class MonacoHelper {
     return ed;
   }
 
-  public revealLine(line: number) {
-    this.editor!.revealLineInCenter(line);
-    this.editor!.setPosition({
-      lineNumber: line,
-      column: 1,
-    });
-    this.decorations = this.editor!.deltaDecorations(this.decorations, [
-      {
-        range: new this.monaco!.Range(line, 0, line, 0),
-        options: {
-          isWholeLine: true,
-          className: 'highlightLine',
-          linesDecorationsClassName: 'markLineNumber',
-        },
-      },
-    ]);
-  }
-
   public revealPosition(line: number, pos: number) {
     const position = {
       lineNumber: line,
@@ -154,13 +132,17 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          className: 'highlightLine',
-          linesDecorationsClassName: 'markLineNumber',
+          className: 'code-monaco-highlight-line',
+          linesDecorationsClassName: 'code-mark-line-number',
         },
       },
     ]);
-    this.editor!.revealPositionInCenter(position);
     this.editor!.setPosition(position);
+    this.editor!.revealLineInCenterIfOutsideViewport(line);
+  }
+
+  public clearLineSelection() {
+    this.decorations = this.editor!.deltaDecorations(this.decorations, []);
   }
 
   private handleCopy(e: any) {

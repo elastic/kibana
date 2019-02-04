@@ -165,7 +165,8 @@ export function repositoryRoute(
         try {
           deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
         } catch (error) {
-          log.error(`Get repository delete status ${repoUri} error: ${error}`);
+          // delete status is not always there, so suppress the error log to debug level.
+          log.debug(`Get repository delete status ${repoUri} error: ${error}`);
         }
         return {
           gitStatus,

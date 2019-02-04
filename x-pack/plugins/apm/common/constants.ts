@@ -6,8 +6,8 @@
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_AGENT_NAME = 'agent.name';
 export const SERVICE_LANGUAGE_NAME = 'service.language.name';
-export const REQUEST_URL_FULL = 'url.full';
-export const REQUEST_METHOD = 'http.request.method';
+export const URL_FULL = 'url.full';
+export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';
 
 export const OBSERVER_LISTENING = 'observer.listening';

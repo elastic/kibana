@@ -10,6 +10,7 @@ import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
 import { InstallManager } from './lsp/install_manager';
+import { LanguageServers, LanguageServersDeveloping } from './lsp/language_servers';
 import { LspService } from './lsp/lsp_service';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryConfigController } from './repository_config_controller';
@@ -22,6 +23,7 @@ import { redirectRoute } from './routes/redirect';
 import { redirectSocketRoute } from './routes/redirect_socket';
 import { repositoryRoute } from './routes/repository';
 import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from './routes/search';
+import { setupRoute } from './routes/setup';
 import { socketRoute } from './routes/socket';
 import { userRoute } from './routes/user';
 import { workspaceRoute } from './routes/workspace';
@@ -86,7 +88,7 @@ export function init(server: Server, options: any) {
         if (serverHost !== undefined && serverHost !== 'localhost') {
           const serverPort = server.config().get('server.port');
           const schema = server.config().get('server.ssl.enabled') ? 'https' : 'http';
-          let basePath: string = server.config().get('basePath') || '';
+          let basePath: string = server.config().get('server.basePath') || '';
           if (!basePath.startsWith('/')) {
             basePath = '/' + basePath;
           }
@@ -142,6 +144,11 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   // @ts-ignore
   const esClient: EsClient = adminCluster.getClient();
   const repoConfigController = new RepositoryConfigController(esClient);
+
+  // Enable the developing language servers in development mode.
+  if (server.config().get('env.dev') === true) {
+    LanguageServers.push(...LanguageServersDeveloping);
+  }
 
   const installManager = new InstallManager(server, serverOptions);
   const lspService = new LspService(
@@ -233,4 +240,5 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   userRoute(server, serverOptions);
   installRoute(server, socketService, lspService, installManager, serverOptions);
   lspRoute(server, lspService, serverOptions);
+  setupRoute(server);
 }

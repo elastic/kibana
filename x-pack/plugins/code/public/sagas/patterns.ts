@@ -10,7 +10,7 @@ import * as ROUTES from '../components/routes';
 
 export const generatePattern = (path: string) => (action: Action<Match>) =>
   action.type === String(routeChange) && action.payload!.path === path;
-
+export const rootRoutePattern = generatePattern(ROUTES.ROOT);
 export const adminRoutePattern = generatePattern(ROUTES.ADMIN);
 export const repoRoutePattern = generatePattern(ROUTES.REPO);
 export const mainRoutePattern = (action: Action<Match>) =>
@@ -21,3 +21,6 @@ export const commitRoutePattern = generatePattern(ROUTES.DIFF);
 
 export const sourceFilePattern = (action: Action<Match>) =>
   mainRoutePattern(action) && action.payload!.params.pathType === PathTypes.blob;
+
+export const blamePattern = (action: Action<Match>) =>
+  mainRoutePattern(action) && action.payload!.params.pathType === PathTypes.blame;

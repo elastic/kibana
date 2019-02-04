@@ -29,6 +29,9 @@ export class RepositoryConfigController {
       }
     }
 
+    if (lang === 'go' && repoConfig.disableGo === true) {
+      return true;
+    }
     if (lang === 'java' && repoConfig.disableJava === true) {
       return true;
     }

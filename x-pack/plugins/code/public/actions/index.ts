@@ -26,3 +26,6 @@ export interface Match {
 }
 
 export const routeChange = createAction<Match>('CODE SEARCH ROUTE CHANGE');
+
+export const checkSetupSuccess = createAction('SETUP CHECK SUCCESS');
+export const checkSetupFailed = createAction('SETUP CHECK FAILED');

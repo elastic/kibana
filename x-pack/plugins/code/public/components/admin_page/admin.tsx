@@ -12,6 +12,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 
 import styled from 'styled-components';
 
+import { euiSizeXl } from '@elastic/eui/dist/eui_theme_light.json';
 import { parse as parseQuery } from 'querystring';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Repository } from '../../../model';
@@ -21,7 +22,7 @@ import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
 
 const Container = styled.div`
-  margin: 0 32px;
+  margin: 0 ${euiSizeXl};
   flex-grow: 1;
 `;
 

@@ -21,6 +21,7 @@ export interface FetchFilePayload extends FetchRepoPayloadWithRevision {
 export interface FetchRepoTreePayload extends FetchFilePayload {
   limit?: number;
   parents?: boolean;
+  isDir: boolean;
 }
 
 export interface FetchFileResponse {
@@ -29,6 +30,7 @@ export interface FetchFileResponse {
   content?: string;
   lang?: string;
   isImage?: boolean;
+  isUnsupported?: boolean;
   url?: string;
 }
 

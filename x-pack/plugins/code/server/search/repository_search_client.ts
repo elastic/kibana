@@ -65,11 +65,14 @@ export class RepositorySearchClient extends AbstractSearchClient {
         const repo: Repository = hit._source[RepositoryReservedField];
         return repo;
       });
-    const result: RepositorySearchResult = {
+    const total = rawRes.hits.total.value;
+    return {
       repositories: repos,
       took: rawRes.took,
-      total: rawRes.hits.total.value,
+      total,
+      from,
+      page: req.page,
+      totalPage: Math.ceil(total / resultsPerPage),
     };
-    return result;
   }
 }

@@ -7,6 +7,8 @@
 import React from 'react';
 import { HashRouter as Router, Redirect, Switch } from 'react-router-dom';
 
+import { connect } from 'react-redux';
+import { RootState } from '../reducers';
 import { Admin } from './admin_page/admin';
 import { SetupGuide } from './admin_page/setup_guide';
 import { Diff } from './diff_page/diff';
@@ -18,19 +20,31 @@ import { Search } from './search_page/search';
 
 const Empty = () => null;
 
+const RooComponent = (props: { setupOk: boolean }) => {
+  if (props.setupOk) {
+    return <Redirect to={'/admin'} />;
+  }
+  return <SetupGuide setupFailed={true} />;
+};
+
+const mapStateToProps = (state: RootState) => ({
+  setupOk: state.setup.ok,
+});
+
+const Root = connect(mapStateToProps)(RooComponent);
+
 export const App = () => {
-  const redirectToAdmin = () => <Redirect to="/admin" />;
   return (
     <Router>
       <Switch>
-        <Route path={ROUTES.DIFF} component={Diff} />
-        <Route path={ROUTES.ROOT} exact={true} render={redirectToAdmin} />
+        <Route path={ROUTES.DIFF} exact={true} component={Diff} />
+        <Route path={ROUTES.ROOT} exact={true} component={Root} />
         <Route path={ROUTES.MAIN} component={Main} exact={true} />
         <Route path={ROUTES.MAIN_ROOT} component={Main} />
         <Route path={ROUTES.ADMIN} component={Admin} />
         <Route path={ROUTES.SEARCH} component={Search} />
         <Route path={ROUTES.REPO} render={Empty} exact={true} />
-        <Route path="/setup-guide" render={SetupGuide} exact={true} />
+        <Route path="/setup-guide" render={() => <SetupGuide setupFailed={false} />} exact={true} />
         <Route path="*" component={NotFound} />
       </Switch>
     </Router>

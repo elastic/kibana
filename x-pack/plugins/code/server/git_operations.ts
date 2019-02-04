@@ -267,12 +267,7 @@ export class GitOperations {
     const diffs = await commit.getDiff();
 
     const commitDiff: CommitDiff = {
-      commit: {
-        sha: commit.sha(),
-        author: commit.author().name(),
-        message: commit.message(),
-        date: commit.date(),
-      },
+      commit: commitInfo(commit),
       additions: 0,
       deletions: 0,
       files: [],
@@ -446,6 +441,7 @@ export function commitInfo(commit: Commit): CommitInfo {
     message: commit.message(),
     committer: commit.committer().name(),
     id: commit.sha().substr(0, 7),
+    parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
   };
 }
 

@@ -17,12 +17,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { euiSizeS } from '@elastic/eui/dist/eui_theme_light.json';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { RepositoryUtils } from 'x-pack/plugins/code/common/repository_utils';
 import { LanguageServer } from '../../../common/language_server';
+import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepositoryConfig } from '../../../model';
 import { RepoConfigPayload, switchLanguageServer } from '../../actions';
 import { RootState } from '../../reducers';
@@ -31,10 +32,11 @@ import { JavaIcon, TypeScriptIcon } from '../shared/icons';
 const IconContainer = styled.div`
   display: inline-block;
   position: relative;
-  top: 8px;
+  top: ${euiSizeS};
 `;
 
 const defaultConfig = {
+  disableGo: true,
   disableJava: true,
   disableTypescript: true,
 };

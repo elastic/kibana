@@ -14,7 +14,7 @@ import { FileTree } from '../../model';
 import {
   closeReferences,
   fetchFile,
-  FetchFilePayload,
+  FetchFileResponse,
   fetchRepoTree,
   fetchTreeCommits,
   findReferences,
@@ -55,20 +55,22 @@ export function* watchLspMethods() {
   yield takeLatest(String(findReferences), handleReferences);
 }
 
-function handleCloseReferences() {
-  const { pathname, search } = history.location;
-  const queryParams = queryString.parse(search);
-  if (queryParams.tab) {
-    delete queryParams.tab;
-  }
-  if (queryParams.refUrl) {
-    delete queryParams.refUrl;
-  }
-  const query = queryString.stringify(queryParams);
-  if (query) {
-    history.push(`${pathname}?${query}`);
-  } else {
-    history.push(pathname);
+function handleCloseReferences(action: Action<boolean>) {
+  if (action.payload) {
+    const { pathname, search } = history.location;
+    const queryParams = queryString.parse(search);
+    if (queryParams.tab) {
+      delete queryParams.tab;
+    }
+    if (queryParams.refUrl) {
+      delete queryParams.refUrl;
+    }
+    const query = queryString.stringify(queryParams);
+    if (query) {
+      history.push(`${pathname}?${query}`);
+    } else {
+      history.push(pathname);
+    }
   }
 }
 
@@ -95,7 +97,8 @@ function* handleReference(url: string) {
 }
 
 function* handleFile(repoUri: string, file: string, revision: string) {
-  const payload: FetchFilePayload = yield select(fileSelector);
+  const response: FetchFileResponse = yield select(fileSelector);
+  const payload = response && response.payload;
   if (
     payload &&
     payload.path === file &&
@@ -142,14 +145,14 @@ function* handleMainRouteChange(action: Action<Match>) {
   }
   yield put(loadRepo(repoUri));
   if (file) {
-    if (pathType === PathTypes.blob) {
+    if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
       yield call(handleFile, repoUri, file, revision);
-      if (position) {
-        yield put(revealPosition(position));
-      }
+      yield put(revealPosition(position));
       const { tab, refUrl } = queryParams;
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl as string));
+      } else {
+        yield put(closeReferences(false));
       }
     }
     const commits = yield select((state: RootState) => state.file.treeCommits[file]);
@@ -163,12 +166,14 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (currentTree.repoUri !== repoUri) {
     yield put(resetRepoTree());
   }
+  const tree = yield select(getTree);
   yield put(
     fetchRepoTree({
       uri: repoUri,
       revision,
       path: file || '',
-      parents: true,
+      parents: tree.children == null,
+      isDir: pathType === PathTypes.tree,
     })
   );
   if (file && pathType === PathTypes.blob) {

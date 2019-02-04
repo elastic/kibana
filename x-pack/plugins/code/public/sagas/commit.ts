@@ -28,5 +28,5 @@ function* handleLoadCommit(action: Action<Match>) {
 }
 
 export function* watchLoadCommit() {
-  yield takeEvery(String(commitRoutePattern), handleLoadCommit);
+  yield takeEvery(commitRoutePattern, handleLoadCommit);
 }

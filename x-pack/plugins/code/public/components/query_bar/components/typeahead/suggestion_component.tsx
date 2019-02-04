@@ -34,7 +34,7 @@ interface Props {
 
 const SuggestionItem = styled.div`
   background: ${(props: any) => (props.active ? euiColorHighlight : 'white')};
-  height: 48px;
+  height: calc(48rem / 14);
   margin: 0 ${euiSize};
   border-radius: ${euiSizeXs} ${euiSizeXs} ${euiSizeXs} ${euiSizeXs};
   cursor: pointer;
@@ -132,7 +132,9 @@ export const SuggestionComponent: SFC<Props> = props => {
       <SuggestionItemInner>
         {icon}
         <div>
-          <SuggestionItemText>{renderMatchingText(props.suggestion.text)}</SuggestionItemText>
+          <SuggestionItemText data-test-subj={`codeTypeaheadItem`}>
+            {renderMatchingText(props.suggestion.text)}
+          </SuggestionItemText>
           <SuggestionItemDescription>{props.suggestion.description}</SuggestionItemDescription>
         </div>
       </SuggestionItemInner>

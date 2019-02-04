@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiIcon, EuiSideNav } from '@elastic/eui';
 import classes from 'classnames';
 
+import { euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,7 +19,7 @@ import { RootState } from '../../reducers';
 import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
 const DirectoryNode = styled.span`
-  margin-left: 4px;
+  margin-left: ${euiSizeXs};
   vertical-align: middle;
 `;
 
@@ -30,12 +31,13 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 }
 
 export class CodeFileTree extends React.Component<Props> {
-  public fetchTree(path = '') {
+  public fetchTree(path = '', isDir: boolean) {
     const { resource, org, repo, revision } = this.props.match.params;
     this.props.fetchRepoTree({
       uri: `${resource}/${org}/${repo}`,
       revision,
       path: path || '',
+      isDir,
     });
   }
 
@@ -52,11 +54,11 @@ export class CodeFileTree extends React.Component<Props> {
     }
   };
 
-  public getTreeToggler = (path: string) => () => {
+  public getTreeToggler = (path: string, isDir: boolean) => () => {
     if (this.props.openedPaths.includes(path)) {
       this.props.closeTreePath(path);
     } else {
-      this.fetchTree(path);
+      this.fetchTree(path, isDir);
     }
   };
 
@@ -69,28 +71,45 @@ export class CodeFileTree extends React.Component<Props> {
   };
 
   public getItemRenderer = (node: Tree, forceOpen: boolean) => () => {
-    const className = this.props.match.params.path === node.path ? 'activeFileNode' : 'fileNode';
-    const onClick = () => this.onClick(node);
+    const className =
+      this.props.match.params.path === node.path ? 'code-active-file-node' : 'code-file-node';
+    const onClick = (evt: React.MouseEvent<Element>) => {
+      // @ts-ignore
+      if (evt.target && evt.target.tagName === 'I') {
+        return;
+      }
+      this.onClick(node);
+    };
     switch (node.type) {
       case FileTreeItemType.Directory: {
         const onFolderClick = () => {
-          this.getTreeToggler(node.path || '')();
+          this.getTreeToggler(node.path || '', true)();
         };
         return (
-          <div className={className}>
+          <div
+            data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
+            className={className}
+            role="button"
+            onClick={onClick}
+          >
             {forceOpen ? (
               <FolderOpenTriangle onClick={onFolderClick} />
             ) : (
               <FolderClosedTriangle onClick={onFolderClick} />
             )}
-            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} onClick={onClick} />
-            <DirectoryNode onClick={onClick}>{`${node.name}/`}</DirectoryNode>
+            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
+            <DirectoryNode>{`${node.name}/`}</DirectoryNode>
           </div>
         );
       }
       case FileTreeItemType.Submodule: {
         return (
-          <div onClick={onClick} className={className} role="button">
+          <div
+            data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
+            onClick={onClick}
+            className={className}
+            role="button"
+          >
             <EuiIcon type="submodule" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
@@ -98,7 +117,12 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.Link: {
         return (
-          <div onClick={onClick} className={classes(className, 'fileTreeFile')} role="button">
+          <div
+            data-test-subj={`codeFileTreeNode-Link-${node.path}`}
+            onClick={onClick}
+            className={classes(className, 'code-file-tree-file')}
+            role="button"
+          >
             <EuiIcon type="symlink" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
@@ -106,7 +130,12 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.File: {
         return (
-          <div onClick={onClick} className={classes(className, 'fileTreeFile')} role="button">
+          <div
+            data-test-subj={`codeFileTreeNode-File-${node.path}`}
+            onClick={onClick}
+            className={classes(className, 'code-file-tree-file')}
+            role="button"
+          >
             <EuiIcon type="document" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
@@ -116,7 +145,10 @@ export class CodeFileTree extends React.Component<Props> {
   };
 
   public treeToItems = (node: Tree): EuiSideNavItem => {
-    const forceOpen = this.props.openedPaths.includes(node.path!);
+    const forceOpen =
+      node.type === FileTreeItemType.Directory
+        ? this.props.openedPaths.includes(node.path!)
+        : false;
     const data: EuiSideNavItem = {
       id: node.name,
       name: node.name,
@@ -125,7 +157,7 @@ export class CodeFileTree extends React.Component<Props> {
       forceOpen,
       onClick: () => void 0,
     };
-    if (node.type === FileTreeItemType.Directory && Number(node.childrenCount) > 0) {
+    if (node.type === FileTreeItemType.Directory && Number(node.childrenCount) > 0 && forceOpen) {
       const nodes = this.flattenDirectory(node);
       const length = nodes.length;
       if (length > 1 && !(this.props.match.params.path === node.path)) {

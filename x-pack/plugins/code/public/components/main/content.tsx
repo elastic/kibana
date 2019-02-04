@@ -5,7 +5,8 @@
  */
 
 // @ts-ignore
-import { EuiButton, EuiButtonGroup } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiTitle } from '@elastic/eui';
+import { euiSize, euiSizeS, euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -14,29 +15,33 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { GitBlame } from '../../../common/git_blame';
-import { FileTree } from '../../../model';
+
+import { RepositoryUtils } from '../../../common/repository_utils';
+import { FileTree, FileTreeItemType, SearchScope, WorkerReservedProgress } from '../../../model';
 import { CommitInfo } from '../../../model/commit';
-import { FetchFileResponse, fetchMoreCommits } from '../../actions';
+import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { RootState } from '../../reducers';
-import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
+import { RepoState, RepoStatus, RootState } from '../../reducers';
+import {
+  currentTreeSelector,
+  hasMoreCommitsSelector,
+  statusSelector,
+  treeCommitsSelector,
+} from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
-import { Blame } from './blame';
-import { CommitHistory } from './commit_history';
+import { UnsupportedFileIcon } from '../shared/icons';
+import { CloneStatus } from './clone_status';
+import { CommitHistory, CommitHistoryLoading } from './commit_history';
 import { Directory } from './directory';
-
-const LARGE_Z_INDEX_NUMBER = 99;
+import { TopBar } from './top_bar';
+import { UnsupportedFile } from './unsupported_file';
 
 const ButtonsContainer = styled.div`
   display: flex;
   flex-direction: row;
-  position: absolute;
-  right: 1rem;
-  z-index: ${LARGE_Z_INDEX_NUMBER};
-  & > div:first-child {
-    margin-right: 8px;
+  & > *:first-child {
+    margin-right: ${euiSizeS};
   }
 `;
 
@@ -45,28 +50,33 @@ const EditorBlameContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-grow: 1;
-  overflow: auto;
-`;
-
-const BlameContainer = styled.div`
-  flex-grow: 3;
-  flex-basis: 400px;
-  height: 100%;
-  overflow: auto;
 `;
 
 const DirectoryViewContainer = styled.div`
   overflow: auto;
   flex-grow: 1;
 `;
+const CommitHistoryContainer = styled.div`
+  overflow: auto;
+  flex-grow: 1;
+`;
+
+const Root = styled.div`
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
+  repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
+  currentTree: FileTree | undefined;
   commits: CommitInfo[];
-  blames: GitBlame[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
+  onSearchScopeChanged: (s: SearchScope) => void;
   fetchMoreCommits(repoUri: string): void;
 }
 
@@ -74,14 +84,11 @@ enum ButtonOption {
   Code = 'Code',
   Blame = 'Blame',
   History = 'History',
-  Folder = 'Folder',
+  Folder = 'Directory',
 }
 
-const Title = styled.div`
-  color: #1a1a1a;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 4px 0 18px;
+const Title = styled(EuiTitle)`
+  margin: ${euiSizeXs} 0 ${euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {
@@ -120,23 +127,6 @@ class CodeContent extends React.PureComponent<Props> {
     }
   };
 
-  public scrollBlameInResponseOfScrollingEditor = (ele: HTMLDivElement) => {
-    const observer = new MutationObserver(records => {
-      if (!ele) {
-        observer.disconnect();
-        return;
-      }
-      const target = records[records.length - 1].target as HTMLElement;
-      const scrollTop = -parseInt(target.style.top!, 10);
-      ele.scrollTop = scrollTop;
-    });
-    const targetNode = document.querySelector('#mainEditor:first-child:first-child:first-child');
-    observer.observe(targetNode!, {
-      attributes: true,
-      subtree: true,
-    });
-  };
-
   public switchButton = (id: string) => {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
@@ -162,9 +152,29 @@ class CodeContent extends React.PureComponent<Props> {
     window.open(`../api/code/repo/${repoUri}/blob/${revision}/${path}`);
   };
 
-  public renderButtons = (buttonId: ButtonOption) => {
-    const { file } = this.props;
-    if (file) {
+  public renderButtons = () => {
+    let buttonId = null;
+    switch (this.props.match.params.pathType) {
+      case PathTypes.blame:
+        buttonId = ButtonOption.Blame;
+        break;
+      case PathTypes.blob:
+        buttonId = ButtonOption.Code;
+        break;
+      case PathTypes.tree:
+        buttonId = ButtonOption.Folder;
+        break;
+      case PathTypes.commits:
+        buttonId = ButtonOption.History;
+        break;
+      default:
+        break;
+    }
+    const currentTree = this.props.currentTree;
+    if (
+      currentTree &&
+      (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
+    ) {
       return (
         <ButtonsContainer>
           <EuiButtonGroup
@@ -208,7 +218,52 @@ class CodeContent extends React.PureComponent<Props> {
   };
 
   public render() {
-    const { file, blames, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
+    return (
+      <Root>
+        <TopBar
+          routeParams={this.props.match.params}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+          buttons={this.renderButtons()}
+        />
+        {this.renderContent()}
+      </Root>
+    );
+  }
+
+  public shouldRenderProgress() {
+    if (!this.props.repoStatus) {
+      return false;
+    }
+    const { progress, cloneProgress, state } = this.props.repoStatus;
+    return (
+      !!progress &&
+      state === RepoState.CLONING &&
+      progress < WorkerReservedProgress.COMPLETED &&
+      !RepositoryUtils.hasFullyCloned(cloneProgress)
+    );
+  }
+
+  public renderProgress() {
+    if (!this.props.repoStatus) {
+      return null;
+    }
+    const { progress, cloneProgress } = this.props.repoStatus;
+    const { org, repo } = this.props.match.params;
+    return (
+      <CloneStatus
+        repoName={`${org}/${repo}`}
+        progress={progress ? progress : 0}
+        cloneProgress={cloneProgress}
+      />
+    );
+  }
+
+  public renderContent() {
+    if (this.shouldRenderProgress()) {
+      return this.renderProgress();
+    }
+
+    const { file, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -222,7 +277,9 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <React.Fragment>
-                  <Title>Recent Commits</Title>
+                  <Title>
+                    <h3>Recent Commits</h3>
+                  </Title>
                   <EuiButton
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${revision}/${path ||
                       ''}`}
@@ -238,10 +295,19 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url } = file;
+        const { lang: fileLanguage, content: fileContent, url, isUnsupported } = file;
+        if (isUnsupported) {
+          return (
+            <UnsupportedFile
+              icon={<UnsupportedFileIcon />}
+              title={<h2>Unsupported File</h2>}
+              content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
+            />
+          );
+        }
         if (fileLanguage === 'markdown') {
           return (
-            <div className="markdown-body markdownContainer">
+            <div className="markdown-body code-markdown-container">
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
             </div>
           );
@@ -254,49 +320,37 @@ class CodeContent extends React.PureComponent<Props> {
         }
         return (
           <EditorBlameContainer>
-            {this.renderButtons(ButtonOption.Code)}
-            <Editor />
+            <Editor showBlame={false} />
           </EditorBlameContainer>
         );
       case PathTypes.blame:
-        const blamesHeight = `calc(100% + ${blames.map(bl => bl.lines).reduce((a, b) => a + 6, 0) *
-          18}px)`;
-        const blame = (
-          <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
-            <div style={{ height: blamesHeight }}>
-              <Blame blames={blames} lineHeight={18} />
-            </div>
-          </BlameContainer>
-        );
         return (
           <EditorBlameContainer>
-            {this.renderButtons(ButtonOption.Blame)}
-            {blame}
-            <Editor />
+            <Editor showBlame={true} />
           </EditorBlameContainer>
         );
       case PathTypes.commits:
         return (
-          <React.Fragment>
-            {this.renderButtons(ButtonOption.History)}
+          <CommitHistoryContainer>
             <InfiniteScroll
-              initialLoad={false}
+              initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
               hasMore={!loadingCommits && hasMoreCommits}
-              useWindow={true}
-              loader={
-                <div className="loader" key={0}>
-                  Loading ...
-                </div>
-              }
+              useWindow={false}
+              loader={<CommitHistoryLoading />}
             >
               <CommitHistory
+                hideLoading={true}
                 commits={commits}
                 repoUri={repoUri}
-                header={<Title>Commit History</Title>}
+                header={
+                  <Title>
+                    <h3>Commit History</h3>
+                  </Title>
+                }
               />
             </InfiniteScroll>
-          </React.Fragment>
+          </CommitHistoryContainer>
         );
     }
   }
@@ -305,19 +359,22 @@ class CodeContent extends React.PureComponent<Props> {
 const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
   tree: state.file.tree,
+  currentTree: currentTreeSelector(state),
   commits: treeCommitsSelector(state),
-  blames: state.blame.blames,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
+  repoStatus: statusSelector(state),
 });
 
 const mapDispatchToProps = {
   fetchMoreCommits,
+  onSearchScopeChanged: changeSearchScope,
 };
 
 export const Content = withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
+    // @ts-ignore
   )(CodeContent)
 );

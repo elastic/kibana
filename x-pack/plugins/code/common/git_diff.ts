@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Commit {
-  sha: string;
-  author: string;
-  message: string;
-  date: Date;
-}
+import { CommitInfo } from '../model/commit';
+
 export interface CommitDiff {
-  commit: Commit;
+  commit: CommitInfo;
   additions: number;
   deletions: number;
   files: FileDiff[];

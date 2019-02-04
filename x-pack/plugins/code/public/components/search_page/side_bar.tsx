@@ -18,6 +18,7 @@ import {
 import {
   euiBorderColor,
   euiBorderWidthThin,
+  euiColorLightestShade,
   euiSizeS,
 } from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
@@ -28,7 +29,7 @@ import { SearchScope } from '../../../model';
 import { ScopeTabs } from './scope_tabs';
 
 const SideBarContainer = styled.div`
-  background-color: #f5f7fa;
+  background-color: ${euiColorLightestShade};
   border-right: ${euiBorderWidthThin} solid ${euiBorderColor};
   flex-grow: 1;
   flex-shrink: 1;
@@ -44,7 +45,7 @@ const FacetTitle = styled(EuiFlexGroup)`
 `;
 
 const FacetItem = styled(EuiFacetButton)`
-  height: 32px;
+  height: calc(32rem / 14);
 `;
 
 interface Props {
@@ -94,6 +95,7 @@ export class SideBar extends React.PureComponent<Props> {
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
             isSelected={true}
+            data-test-subj="codeSearchLanguageFilterItem"
           >
             {item.name}
           </FacetItem>
@@ -101,9 +103,10 @@ export class SideBar extends React.PureComponent<Props> {
       } else {
         return (
           <FacetItem
-            key={`repostats${index}`}
+            key={`langstats${index}`}
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
+            data-test-subj="codeSearchLanguageFilterItem"
           >
             {item.name}
           </FacetItem>
@@ -140,7 +143,9 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </FacetTitle>
-          <EuiFacetGroup>{langStatsComp}</EuiFacetGroup>
+          <EuiFacetGroup data-test-subj="codeSearchLanguageFilterList">
+            {langStatsComp}
+          </EuiFacetGroup>
         </FacetContainer>
       </SideBarContainer>
     );

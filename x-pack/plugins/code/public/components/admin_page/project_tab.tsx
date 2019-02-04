@@ -27,7 +27,7 @@ import {
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Repository } from 'x-pack/plugins/code/model';
+import { Repository } from '../../../model';
 import { importRepo } from '../../actions';
 import { RootState } from '../../reducers';
 import { ProjectItem } from './project_item';
@@ -167,7 +167,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         key={repo.uri}
         project={repo}
         status={status[repo.uri]}
-        isAdmin={isAdmin}
+        enableManagement={isAdmin}
       />
     ));
 

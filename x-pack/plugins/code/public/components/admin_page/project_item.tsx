@@ -18,7 +18,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Repository, WorkerReservedProgress } from 'x-pack/plugins/code/model';
+import { Repository, WorkerReservedProgress } from '../../../model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RepoState, RepoStatus } from '../../reducers/status';
 
@@ -44,24 +44,30 @@ const stateColor = {
 
 class CodeProjectItem extends React.PureComponent<{
   project: Repository;
-  isAdmin: boolean;
-  status: RepoStatus;
-  deleteRepo: (uri: string) => void;
-  indexRepo: (uri: string) => void;
-  initRepoCommand: (uri: string) => void;
-  openSettings: (uri: string, url: string) => void;
+  enableManagement: boolean;
+  status?: RepoStatus;
+  deleteRepo?: (uri: string) => void;
+  indexRepo?: (uri: string) => void;
+  initRepoCommand?: (uri: string) => void;
+  openSettings?: (uri: string, url: string) => void;
 }> {
   public render() {
-    const { project, status } = this.props;
+    const { project, status, enableManagement } = this.props;
     const { name, org, nextUpdateTimestamp, uri, url } = project;
-    const onClickDelete = () => this.props.deleteRepo(uri);
-    const onClickIndex = () => this.props.indexRepo(uri);
-    const onClickSettings = () => this.props.openSettings(uri, url);
+    const onClickDelete = () => this.props.deleteRepo && this.props.deleteRepo(uri);
+    const onClickIndex = () => this.props.indexRepo && this.props.indexRepo(uri);
+    const onClickSettings = () => this.props.openSettings && this.props.openSettings(uri, url);
     let footer = null;
     let disableRepoLink = false;
     let hasError = false;
-    if (!status || status.state === RepoState.READY) {
-      footer = <Footer>LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}</Footer>;
+    if (!status) {
+      footer = <Footer>INIT...</Footer>;
+    } else if (status.state === RepoState.READY) {
+      footer = (
+        <Footer data-test-subj="repositoryIndexDone">
+          LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}
+        </Footer>
+      );
     } else if (status.state === RepoState.DELETING) {
       footer = <Footer>DELETING...</Footer>;
     } else if (status.state === RepoState.INDEXING) {
@@ -89,6 +95,46 @@ class CodeProjectItem extends React.PureComponent<{
 
     const Panel = hasError ? ErrorProjectItemPanel : ProjectItemPanel;
 
+    const projectManagement = (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="none">
+          {status && status.state !== RepoState.CLONING && (
+            <EuiFlexItem grow={false}>
+              <div className="code-project-button" onClick={onClickSettings} role="button">
+                <EuiIcon type="gear" />
+                <EuiText size="xs" color="subdued">
+                  Settings
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          )}
+          {status && status.state !== RepoState.CLONING && (
+            <EuiFlexItem grow={false}>
+              <div className="code-project-button" onClick={onClickIndex} role="button">
+                <EuiIcon type="indexSettings" />
+                <EuiText size="xs" color="subdued">
+                  Index
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <div
+              className="code-project-button"
+              data-test-subj="deleteRepositoryButton"
+              onClick={onClickDelete}
+              role="button"
+            >
+              <EuiIcon type="trash" color="danger" />
+              <EuiText size="xs" color="subdued">
+                Delete
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+
     return (
       <Panel>
         {this.renderProgress()}
@@ -108,34 +154,7 @@ class CodeProjectItem extends React.PureComponent<{
               </a>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <div className="code-project-button" onClick={onClickSettings} role="button">
-                  <EuiIcon type="gear" />
-                  <EuiText size="xs" color="subdued">
-                    Settings
-                  </EuiText>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div className="code-project-button" onClick={onClickIndex} role="button">
-                  <EuiIcon type="indexSettings" />
-                  <EuiText size="xs" color="subdued">
-                    Index
-                  </EuiText>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div className="code-project-button" onClick={onClickDelete} role="button">
-                  <EuiIcon type="trash" color="danger" />
-                  <EuiText size="xs" color="subdued">
-                    Delete
-                  </EuiText>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {enableManagement && projectManagement}
         </EuiFlexGroup>
       </Panel>
     );

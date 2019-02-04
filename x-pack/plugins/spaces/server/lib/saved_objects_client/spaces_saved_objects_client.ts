@@ -84,7 +84,11 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async create(type: string, attributes = {}, options: CreateOptions = {}) {
+  public async create<T extends SavedObjectAttributes>(
+    type: string,
+    attributes: T = {} as T,
+    options: CreateOptions = {}
+  ) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
@@ -136,6 +140,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.defaultSearchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
@@ -215,10 +220,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  public async update(
+  public async update<T extends SavedObjectAttributes>(
     type: string,
     id: string,
-    attributes: SavedObjectAttributes,
+    attributes: Partial<T>,
     options: UpdateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);

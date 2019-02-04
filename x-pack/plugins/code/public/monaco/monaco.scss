@@ -1,25 +1,26 @@
-.highlightLine {
-  background: lightblue;
+.code-monaco-highlight-line {
+  background: $euiCodeBlockBuiltInColor;
 
 }
 
-.markLineNumber {
-  background: lightblue;
-	width: 5px;
+.code-mark-line-number {
+  background: $euiCodeBlockBuiltInColor;
+	width: $euiSizeXS;
 }
 
 .monaco-editor .margin-view-overlays .line-numbers {
   text-align: center;
-  border-right: solid 1px rgba(188, 188, 188, 1);
+  border-right: $euiBorderThin;
 }
 
 
 
 .monaco-editor-hover {
+  min-width: 350px;
   border: 1px solid #c8c8c8;
   cursor: default;
   position: absolute;
-  overflow: hidden;
+  overflow-y: auto;
   z-index: 5;
   -webkit-user-select: text;
   -ms-user-select: text;
@@ -55,6 +56,7 @@
   font-weight: normal;
   border: 0;
   border-radius: 0;
+  flex: 1;
 }
 
 .text-placeholder {

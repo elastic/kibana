@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { euiCodeBlockTagColor } from '@elastic/eui/dist/eui_theme_light.json';
 import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
 import styled from 'styled-components';
 import { ResizeChecker } from 'ui/resize_checker';
 import { monaco } from '../../monaco/monaco';
+import { registerEditor } from '../../monaco/single_selection_helper';
 
-const FileTitle = styled.h5`
-  color: #0079a5;
-  font-size: 13px;
-  font-weight: normal;
-  height: 15px;
-  text-decoration: underline;
-  margin-bottom: 8px;
+const U = styled.u`
+  color: ${euiCodeBlockTagColor};
 `;
 
 interface Props {
@@ -74,12 +72,13 @@ export class CodeBlock extends React.PureComponent<Props> {
           });
         }
       });
+      registerEditor(this.ed);
       if (this.props.highlightRanges) {
         const decorations = this.props.highlightRanges.map((range: IRange) => {
           return {
             range,
             options: {
-              inlineClassName: 'searchHighlight',
+              inlineClassName: 'code-search-highlight',
             },
           };
         });
@@ -107,7 +106,7 @@ export class CodeBlock extends React.PureComponent<Props> {
             return {
               range,
               options: {
-                inlineClassName: 'searchHighlight',
+                inlineClassName: 'code-search-highlight',
               },
             };
           });
@@ -130,7 +129,14 @@ export class CodeBlock extends React.PureComponent<Props> {
     const linesCount = this.props.code.split('\n').length;
     return (
       <EuiPanel style={{ marginBottom: '2rem' }} paddingSize="s">
-        {this.props.file && <FileTitle>{this.props.file}</FileTitle>}
+        {this.props.file && (
+          <React.Fragment>
+            <EuiText>
+              <U>{this.props.file}</U>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </React.Fragment>
+        )}
         <div ref={r => (this.el = r)} style={{ height: linesCount * 18 }} />
       </EuiPanel>
     );

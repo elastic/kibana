@@ -4,29 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  euiBorderThin,
+  euiSizeM,
+  euiSizeXxl,
+  paddingSizes,
+} from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 import { CloneProgress } from '../../../model';
 
-export const Caption = styled.div`
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+export const TextProgress = styled.div`
+  font-size: ${euiSizeM};
+  color: #98a2b3;
 `;
 
 export const ProgressContainer = styled.div`
   width: 40rem;
-  padding: 2px;
-  border: 1px solid;
+  padding: ${paddingSizes.xs};
+  border: ${euiBorderThin};
 `;
 
 interface Props {
+  repoName: string;
   progress: number;
   cloneProgress: CloneProgress;
 }
 
 export const CloneStatus = (props: Props) => {
-  const { progress: progressRate, cloneProgress } = props;
+  const { progress: progressRate, cloneProgress, repoName } = props;
   let progress = `Receiving objects: ${progressRate.toFixed(2)}%`;
   if (progressRate < 0) {
     progress = 'Clone Failed';
@@ -44,11 +51,25 @@ export const CloneStatus = (props: Props) => {
     }
   }
   return (
-    <div>
-      <Caption>{progress}</Caption>
-      <ProgressContainer>
-        <EuiProgress size="l" max={100} value={progressRate} />
-      </ProgressContainer>
-    </div>
+    <EuiFlexGroup direction="column" alignItems="center">
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+      <EuiFlexItem grow={false}>
+        <EuiText style={{ fontSize: euiSizeXxl, color: '#1A1A1A' }}>{repoName} is cloning</EuiText>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexItem grow={false}>
+        <EuiText style={{ fontSize: euiSizeM, color: '#69707D' }}>
+          Your project will be available when this process is complete
+        </EuiText>
+      </EuiFlexItem>
+      <EuiSpacer size="xl" />
+      <EuiFlexItem grow={false}>
+        <TextProgress>{progress}</TextProgress>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ minWidth: 640 }}>
+        <EuiProgress color="primary" size="s" max={100} value={progressRate} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

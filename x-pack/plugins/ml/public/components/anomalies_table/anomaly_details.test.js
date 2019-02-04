@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {
@@ -68,7 +68,7 @@ const props = {
 describe('AnomalyDetails', () => {
 
   test('Renders with anomaly details tab selected by default', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AnomalyDetails {...props} />
     );
 
@@ -81,7 +81,7 @@ describe('AnomalyDetails', () => {
       ...props,
       tabIndex: 1
     };
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AnomalyDetails {...categoryTabProps} />
     );
     expect(wrapper.prop('initialSelectedTab').id).toBe('Category examples');
@@ -97,7 +97,7 @@ describe('AnomalyDetails', () => {
       }
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AnomalyDetails {...categoryTabProps} />
     );
 
@@ -113,7 +113,7 @@ describe('AnomalyDetails', () => {
       definition: undefined
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AnomalyDetails {...categoryTabProps} />
     );
 
@@ -131,7 +131,7 @@ describe('AnomalyDetails', () => {
       }
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AnomalyDetails {...categoryTabProps} />
     );
 
@@ -149,7 +149,7 @@ describe('AnomalyDetails', () => {
       }
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AnomalyDetails {...categoryTabProps} />
     );
 

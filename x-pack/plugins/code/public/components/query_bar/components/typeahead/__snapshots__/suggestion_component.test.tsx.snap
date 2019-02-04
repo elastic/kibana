@@ -29,7 +29,7 @@ exports[`render file item 1`] = `
   >
     <div
       aria-selected={false}
-      className="sc-bdVaJa kFePkC"
+      className="sc-bdVaJa jlNfAS"
       id="suggestion-1-1"
       onClick={[Function]}
       onMouseEnter={[Function]}
@@ -40,12 +40,16 @@ exports[`render file item 1`] = `
           className="sc-bwzfXH dIdIHh"
         >
           <div>
-            <Styled(styled.div)>
+            <Styled(styled.div)
+              data-test-subj="codeTypeaheadItem"
+            >
               <styled.div
-                className="sc-ifAKCX joLhfG"
+                className="sc-ifAKCX byMHiA"
+                data-test-subj="codeTypeaheadItem"
               >
                 <div
-                  className="sc-ifAKCX joLhfG sc-htpNat bUoeMH"
+                  className="sc-ifAKCX byMHiA sc-htpNat bUoeMH"
+                  data-test-subj="codeTypeaheadItem"
                 >
                   <span>
                     src/foo/
@@ -105,7 +109,7 @@ exports[`render repository item 1`] = `
   >
     <div
       aria-selected={false}
-      className="sc-bdVaJa kFePkC"
+      className="sc-bdVaJa jlNfAS"
       id="suggestion-1-1"
       onClick={[Function]}
       onMouseEnter={[Function]}
@@ -116,12 +120,16 @@ exports[`render repository item 1`] = `
           className="sc-bwzfXH dIdIHh"
         >
           <div>
-            <Styled(styled.div)>
+            <Styled(styled.div)
+              data-test-subj="codeTypeaheadItem"
+            >
               <styled.div
-                className="sc-ifAKCX joLhfG"
+                className="sc-ifAKCX byMHiA"
+                data-test-subj="codeTypeaheadItem"
               >
                 <div
-                  className="sc-ifAKCX joLhfG sc-htpNat bUoeMH"
+                  className="sc-ifAKCX byMHiA sc-htpNat bUoeMH"
+                  data-test-subj="codeTypeaheadItem"
                 >
                   <span>
                     elastic/
@@ -178,7 +186,7 @@ exports[`render symbol item 1`] = `
   >
     <div
       aria-selected={false}
-      className="sc-bdVaJa kFePkC"
+      className="sc-bdVaJa jlNfAS"
       id="suggestion-1-1"
       onClick={[Function]}
       onMouseEnter={[Function]}
@@ -238,12 +246,16 @@ exports[`render symbol item 1`] = `
             </styled.div>
           </Styled(styled.div)>
           <div>
-            <Styled(styled.div)>
+            <Styled(styled.div)
+              data-test-subj="codeTypeaheadItem"
+            >
               <styled.div
-                className="sc-ifAKCX joLhfG"
+                className="sc-ifAKCX byMHiA"
+                data-test-subj="codeTypeaheadItem"
               >
                 <div
-                  className="sc-ifAKCX joLhfG sc-htpNat bUoeMH"
+                  className="sc-ifAKCX byMHiA sc-htpNat bUoeMH"
+                  data-test-subj="codeTypeaheadItem"
                 >
                   <span>
                     java.lang.

@@ -75,9 +75,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-android"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -85,7 +88,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -97,7 +99,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               android/
             </span>
@@ -107,9 +108,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-futures"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -117,7 +121,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -129,7 +132,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               futures/
             </span>
@@ -139,9 +141,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-guava"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -149,7 +154,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -161,7 +165,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava/
             </span>
@@ -173,9 +176,12 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch"
             >
               <div
-                className="fileNode"
+                className="code-file-node"
+                data-test-subj="codeFileTreeNode-Directory-guava/javadoc-link"
+                onClick={[Function]}
+                role="button"
               >
-                <span
+                <i
                   className="sc-bdVaJa fsxEnI"
                   onClick={[Function]}
                 />
@@ -183,7 +189,6 @@ exports[`render correctly 1`] = `
                   className="euiIcon euiIcon--medium"
                   focusable="false"
                   height="16"
-                  onClick={[Function]}
                   style={null}
                   viewBox="0 0 16 16"
                   width="16"
@@ -195,7 +200,6 @@ exports[`render correctly 1`] = `
                 </svg>
                 <span
                   className="sc-htpNat hyFNl"
-                  onClick={[Function]}
                 >
                   javadoc-link/
                 </span>
@@ -205,7 +209,8 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch"
             >
               <div
-                className="fileNode fileTreeFile"
+                className="code-file-node code-file-tree-file"
+                data-test-subj="codeFileTreeNode-File-guava/pom.xml"
                 onClick={[Function]}
                 role="button"
               >
@@ -240,9 +245,12 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
             >
               <div
-                className="activeFileNode"
+                className="code-active-file-node"
+                data-test-subj="codeFileTreeNode-Directory-guava/src/com/google"
+                onClick={[Function]}
+                role="button"
               >
-                <span
+                <i
                   className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
                   onClick={[Function]}
                 />
@@ -250,7 +258,6 @@ exports[`render correctly 1`] = `
                   className="euiIcon euiIcon--medium"
                   focusable="false"
                   height="16"
-                  onClick={[Function]}
                   style={null}
                   viewBox="0 0 16 16"
                   width="16"
@@ -262,7 +269,6 @@ exports[`render correctly 1`] = `
                 </svg>
                 <span
                   className="sc-htpNat hyFNl"
-                  onClick={[Function]}
                 >
                   src/com/google/
                 </span>
@@ -274,9 +280,12 @@ exports[`render correctly 1`] = `
                   className="euiSideNavItem euiSideNavItem--branch"
                 >
                   <div
-                    className="fileNode"
+                    className="code-file-node"
+                    data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/common"
+                    onClick={[Function]}
+                    role="button"
                   >
-                    <span
+                    <i
                       className="sc-bdVaJa fsxEnI"
                       onClick={[Function]}
                     />
@@ -284,7 +293,6 @@ exports[`render correctly 1`] = `
                       className="euiIcon euiIcon--medium"
                       focusable="false"
                       height="16"
-                      onClick={[Function]}
                       style={null}
                       viewBox="0 0 16 16"
                       width="16"
@@ -296,7 +304,6 @@ exports[`render correctly 1`] = `
                     </svg>
                     <span
                       className="sc-htpNat hyFNl"
-                      onClick={[Function]}
                     >
                       common/
                     </span>
@@ -306,9 +313,12 @@ exports[`render correctly 1`] = `
                   className="euiSideNavItem euiSideNavItem--branch"
                 >
                   <div
-                    className="fileNode"
+                    className="code-file-node"
+                    data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/thirdparty"
+                    onClick={[Function]}
+                    role="button"
                   >
-                    <span
+                    <i
                       className="sc-bdVaJa fsxEnI"
                       onClick={[Function]}
                     />
@@ -316,7 +326,6 @@ exports[`render correctly 1`] = `
                       className="euiIcon euiIcon--medium"
                       focusable="false"
                       height="16"
-                      onClick={[Function]}
                       style={null}
                       viewBox="0 0 16 16"
                       width="16"
@@ -328,9 +337,8 @@ exports[`render correctly 1`] = `
                     </svg>
                     <span
                       className="sc-htpNat hyFNl"
-                      onClick={[Function]}
                     >
-                      thirdparty/publicsuffix/
+                      thirdparty/
                     </span>
                   </div>
                 </div>
@@ -342,9 +350,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-guava-bom"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -352,7 +363,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -364,7 +374,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-bom/
             </span>
@@ -374,9 +383,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-guava-gwt"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -384,7 +396,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -396,7 +407,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-gwt/
             </span>
@@ -406,9 +416,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-guava-testlib"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -416,7 +429,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -428,7 +440,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-testlib/
             </span>
@@ -438,9 +449,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-guava-tests"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -448,7 +462,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -460,7 +473,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-tests/
             </span>
@@ -470,9 +482,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-refactorings"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -480,7 +495,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -492,7 +506,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               refactorings/
             </span>
@@ -502,9 +515,12 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
+            data-test-subj="codeFileTreeNode-Directory-util"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -512,7 +528,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -524,7 +539,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               util/
             </span>
@@ -534,7 +548,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-.gitattributes"
             onClick={[Function]}
             role="button"
           >
@@ -569,7 +584,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-.gitignore"
             onClick={[Function]}
             role="button"
           >
@@ -604,7 +620,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-.travis.yml"
             onClick={[Function]}
             role="button"
           >
@@ -639,7 +656,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-CONTRIBUTING.md"
             onClick={[Function]}
             role="button"
           >
@@ -674,7 +692,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-CONTRIBUTORS"
             onClick={[Function]}
             role="button"
           >
@@ -709,7 +728,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-COPYING"
             onClick={[Function]}
             role="button"
           >
@@ -744,7 +764,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-README.md"
             onClick={[Function]}
             role="button"
           >
@@ -779,7 +800,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-cycle_whitelist.txt"
             onClick={[Function]}
             role="button"
           >
@@ -814,7 +836,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-javadoc-stylesheet.css"
             onClick={[Function]}
             role="button"
           >
@@ -849,7 +872,8 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
+            data-test-subj="codeFileTreeNode-File-pom.xml"
             onClick={[Function]}
             role="button"
           >

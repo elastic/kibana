@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { ESResponse } from './fetcher';
 
 export interface IBucket {
@@ -40,11 +40,11 @@ function getDefaultSample(buckets: IBucket[]) {
 
 export function bucketTransformer(response: ESResponse): IBucketsResponse {
   const buckets = response.aggregations.distribution.buckets.map(bucket => {
-    const sampleSource = oc(bucket).sample.hits.hits[0]._source();
-    const isSampled = oc(sampleSource).transaction.sampled(false);
+    const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source);
+    const isSampled = idx(sampleSource, _ => _.transaction.sampled);
     const sample = {
-      traceId: oc(sampleSource).trace.id(),
-      transactionId: oc(sampleSource).transaction.id()
+      traceId: idx(sampleSource, _ => _.trace.id),
+      transactionId: idx(sampleSource, _ => _.transaction.id)
     };
 
     return {
