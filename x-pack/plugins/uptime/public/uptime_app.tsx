@@ -22,10 +22,11 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
@@ -111,7 +112,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   public render() {
     const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
     return (
-      <I18nProvider>
+      <I18nContext>
         <Router basename={routerBasename}>
           <ApolloProvider client={graphQLClient}>
             <EuiPage className="app-wrapper-panel">
@@ -232,7 +233,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             </EuiPage>
           </ApolloProvider>
         </Router>
-      </I18nProvider>
+      </I18nContext>
     );
   }
 

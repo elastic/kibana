@@ -26,8 +26,6 @@ import {
   getFieldFormat
 } from './lib';
 
-import { I18nProvider } from '@kbn/i18n/react';
-
 export class IndexedFieldsTable extends Component {
   static propTypes = {
     fields: PropTypes.array.isRequired,
@@ -102,15 +100,13 @@ export class IndexedFieldsTable extends Component {
     const fields = this.getFilteredFields(this.state, this.props);
 
     return (
-      <I18nProvider>
-        <div>
-          <Table
-            indexPattern={indexPattern}
-            items={fields}
-            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-          />
-        </div>
-      </I18nProvider>
+      <div>
+        <Table
+          indexPattern={indexPattern}
+          items={fields}
+          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+        />
+      </div>
     );
   }
 }

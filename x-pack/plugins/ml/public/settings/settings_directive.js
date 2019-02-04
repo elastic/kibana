@@ -16,9 +16,9 @@ import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
 
 const template = `
   <ml-nav-menu name="settings" />
@@ -54,14 +54,14 @@ module.directive('mlSettings', function () {
     scope: {},
     link: function (scope, element) {
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(
             Settings, {
               canGetFilters,
               canGetCalendars
             })
           }
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }

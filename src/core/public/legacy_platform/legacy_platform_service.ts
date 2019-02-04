@@ -21,12 +21,14 @@ import angular from 'angular';
 import { BasePathStartContract } from '../base_path';
 import { ChromeStartContract } from '../chrome';
 import { FatalErrorsStartContract } from '../fatal_errors';
+import { I18nStartContract } from '../i18n';
 import { InjectedMetadataStartContract } from '../injected_metadata';
 import { LoadingCountStartContract } from '../loading_count';
 import { NotificationsStartContract } from '../notifications';
 import { UiSettingsClient } from '../ui_settings';
 
 interface Deps {
+  i18n: I18nStartContract;
   injectedMetadata: InjectedMetadataStartContract;
   fatalErrors: FatalErrorsStartContract;
   notifications: NotificationsStartContract;
@@ -46,13 +48,14 @@ export interface LegacyPlatformParams {
  * The LegacyPlatformService is responsible for initializing
  * the legacy platform by injecting parts of the new platform
  * services into the legacy platform modules, like ui/modules,
- * and then bootstraping the ui/chrome or ui/test_harness to
+ * and then bootstrapping the ui/chrome or ui/test_harness to
  * start either the app or browser tests.
  */
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
   public start({
+    i18n,
     injectedMetadata,
     fatalErrors,
     notifications,
@@ -64,6 +67,7 @@ export class LegacyPlatformService {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
+    require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
     require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
