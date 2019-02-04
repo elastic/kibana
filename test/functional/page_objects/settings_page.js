@@ -268,23 +268,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
-      console.log('********* createIndexPattern');
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        console.log('********* createIndexPattern one');
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        console.log('********* createIndexPattern two');
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
           await this.setIndexPatternField({ indexPatternName });
         });
-        console.log('********* createIndexPattern three');
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
-        console.log('********* createIndexPattern four');
         await PageObjects.common.sleep(2000);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
@@ -302,7 +297,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         }
       });
 
-      console.log('********* createIndexPattern end');
       return await this.getIndexPatternIdFromUrl();
     }
 

@@ -23,7 +23,6 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard']);
 
   async function loadCurrentData() {
-    console.log('**************************');
     await browser.setWindowSize(1300, 900);
     await PageObjects.dashboard.initTests({
       kibanaIndex: 'dashboard/current/kibana',

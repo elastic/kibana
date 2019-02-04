@@ -46,10 +46,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await find.clickByPartialLinkText('logstash-*');
-      console.log('**** clickKibanaIndexPatterns');
       await PageObjects.settings.getFieldTypes();
       await PageObjects.settings.setFieldTypeFilter('string');
-      console.log('**** set field type');
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();

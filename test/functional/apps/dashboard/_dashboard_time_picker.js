@@ -27,11 +27,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
-      console.log('pre initTests');
       await PageObjects.dashboard.initTests();
-      console.log('initTests');
       await PageObjects.dashboard.preserveCrossAppState();
-      console.log('preserveCrossAppState');
     });
 
     after(async function () {
