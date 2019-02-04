@@ -16,32 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mount, shallow } from 'enzyme';
-import * as React from 'react';
-import { intlShape } from 'react-intl';
 
-import { injectI18n } from './inject';
-import { injectI18nProvider } from './inject_i18n_provider';
+import { shallow } from 'enzyme';
 
-describe('injectI18nProvider', () => {
-  test('renders children', () => {
-    const ChildrenMock = () => null;
-    const Injected = injectI18nProvider(ChildrenMock);
+jest.mock('@elastic/eui', () => {
+  return {
+    EuiContext: function MockEuiContext() {
+      // no-op
+    },
+  };
+});
 
-    expect(shallow(<Injected />)).toMatchSnapshot();
-  });
+jest.mock('@kbn/i18n/react', () => {
+  return {
+    I18nProvider: function MockI18nProvider() {
+      // no-op
+    },
+  };
+});
 
-  test('provides with context', () => {
-    const ChildrenMock = () => <div />;
-    const WithIntl = injectI18n(ChildrenMock);
-    const Injected = injectI18nProvider(WithIntl);
+import React from 'react';
 
-    const wrapper = mount(<Injected />, {
-      childContextTypes: {
-        intl: intlShape,
-      },
-    });
+import { I18nService } from './i18n_service';
 
-    expect(wrapper.find(ChildrenMock).prop('intl')).toMatchSnapshot();
+afterEach(() => {
+  jest.clearAllMocks();
+  jest.resetModules();
+});
+
+describe('#start()', () => {
+  it('returns `Context` component', () => {
+    const i18nService = new I18nService();
+
+    const i18n = i18nService.start();
+
+    expect(shallow(<i18n.Context>content</i18n.Context>)).toMatchSnapshot();
   });
 });
