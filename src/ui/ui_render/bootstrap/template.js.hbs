@@ -50,6 +50,7 @@ window.onload = function () {
     var dom = document.createElement('script');
 
     dom.setAttribute('async', '');
+    dom.setAttribute('nonce', window.__webpack_nonce__);
     dom.addEventListener('error', failure);
     dom.setAttribute('src', file);
     dom.addEventListener('load', next);

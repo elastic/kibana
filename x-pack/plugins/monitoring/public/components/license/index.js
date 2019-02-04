@@ -63,7 +63,7 @@ export function License(props) {
             expiryDate={expiryDate}
           />
 
-          <EuiSpacer size="l" />
+          <EuiSpacer />
 
           <LicenseUpdateInfoForPrimary {...props} />
           <LicenseUpdateInfoForRemote {...props} />

@@ -58,6 +58,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async enterMarkdown(markdown) {
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
@@ -70,7 +71,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
       await input.type(markdown);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     async getMarkdownText() {

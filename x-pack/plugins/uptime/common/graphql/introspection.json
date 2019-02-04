@@ -1699,14 +1699,6 @@
             "deprecationReason": null
           },
           {
-            "name": "trouble",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "total",
             "description": "",
             "args": [],
@@ -2001,6 +1993,22 @@
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": { "kind": "OBJECT", "name": "MonitorKey", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "names",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
               }
             },
             "isDeprecated": false,

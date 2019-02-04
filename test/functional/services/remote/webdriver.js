@@ -33,38 +33,42 @@ async function attemptToCreateCommand(log, browserType) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
-  const buildDriverInstance = async (browserType) => {
-    switch (browserType) {
-      case 'chrome':
-        const chromeOptions = new chrome.Options();
-        const prefs = new logging.Preferences();
-        const loggingPref = prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.addArguments('verbose');
-        if (process.env.TEST_BROWSER_HEADLESS) {
-          // Use --disable-gpu to avoid an error from a missing Mesa library, as per
-          // https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.addArguments('headless', 'disable-gpu');
-        }
-        chromeOptions.setLoggingPrefs(loggingPref);
-        const chromeService = new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging();
-        return new Builder()
-          .forBrowser(browserType)
-          .setChromeOptions(chromeOptions)
-          .setChromeService(chromeService)
-          .build();
-      case 'firefox':
-        const firefoxOptions = new firefox.Options();
-        const firefoxService = new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging();
-        return new Builder()
-          .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(firefoxService)
-          .build();
-      default:
-        throw new Error(`${browserType} is not supported yet`);
+  const chromeOptions = new chrome.Options();
+  const firefoxOptions = new firefox.Options();
+  const chromeService = new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging();
+  const firefoxService = new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging();
+  const prefs = new logging.Preferences();
+  const loggingPref = prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
+
+  if (process.env.TEST_BROWSER_HEADLESS) {
+    // Use --disable-gpu to avoid an error from a missing Mesa library, as per
+    // https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
+    chromeOptions.addArguments('headless', 'disable-gpu');
+    firefoxOptions.addArguments('headless', 'disable-gpu');
+  }
+
+  const buildDriverInstance = async (browserOptions) => {
+
+    browserOptions.addArguments('verbose');
+    browserOptions.setLoggingPrefs(loggingPref);
+
+    if (browserType === 'chrome') {
+      return new Builder()
+        .forBrowser(browserType)
+        .setChromeOptions(browserOptions)
+        .setChromeService(chromeService)
+        .build();
+    } else {
+      return new Builder()
+        .forBrowser(browserType)
+        .setFirefoxOptions(firefoxOptions)
+        .setFirefoxService(firefoxService)
+        .build();
     }
   };
-  const session = await buildDriverInstance(browserType);
+
+  const session = browserType === 'chrome' ? await buildDriverInstance(chromeOptions) :
+    await buildDriverInstance(firefoxOptions);
 
   if (attemptId !== attemptCounter) return; // abort
 
