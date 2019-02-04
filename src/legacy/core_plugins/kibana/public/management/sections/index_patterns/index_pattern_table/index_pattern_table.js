@@ -24,7 +24,8 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -62,7 +63,7 @@ const search = {
 const Table = ({
   indexPatterns
 }) => (
-  <div>
+  <EuiPanel paddingSize="l">
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiText>
@@ -91,7 +92,7 @@ const Table = ({
       sorting={sorting}
       search={search}
     />
-  </div>
+  </EuiPanel>
 );
 
 export const IndexPatternTable = injectI18n(Table);

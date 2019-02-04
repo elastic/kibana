@@ -66,6 +66,7 @@ export class EsArchiver {
   async load(name, options = {}) {
     const { skipExisting } = options;
 
+    console.log('************************ esArchiver load');
     return await loadAction({
       name,
       skipExisting: !!skipExisting,

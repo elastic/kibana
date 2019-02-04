@@ -45,20 +45,24 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
-      log.debug('load kibana index with visualizations and log data');
+      log.debug('***************** load kibana index with visualizations and log data');
       await Promise.all([
         esArchiver.load(kibanaIndex),
         esArchiver.loadIfNeeded(dataIndex)
       ]);
-
+      console.log('******************* loaded');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': defaultIndex,
         'telemetry:optIn': false
       });
+      console.log('*************** settings');
       await this.selectDefaultIndex(defaultIndex);
+      console.log('*************** settings 2');
       await kibanaServer.uiSettings.disableToastAutohide();
+      console.log('*************** settings 3');
       await PageObjects.common.navigateToApp('dashboard');
+      console.log('*********** end init');
     }
 
     async preserveCrossAppState() {
@@ -69,9 +73,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async selectDefaultIndex(indexName) {
       await PageObjects.settings.navigateTo();
+      console.log('*************** navTo');
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickLinkText(indexName);
+      console.log('*************** clickKiInPa');
+      //
+      await find.clickByPartialLinkText(indexName);
+      // await PageObjects.settings.clickLinkText(indexName);
+      console.log('*************** clickLinkText');
       await PageObjects.settings.clickDefaultIndexButton();
+      console.log('*************** clickDefaultIndexButton');
     }
 
     async clickFullScreenMode() {

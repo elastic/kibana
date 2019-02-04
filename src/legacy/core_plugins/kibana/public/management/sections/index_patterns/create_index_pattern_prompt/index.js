@@ -86,7 +86,7 @@ export const Prompt = () => (<EuiEmptyPrompt
       href="#/management/kibana/index_pattern"
       iconSide="right"
       iconType="arrowDown"
-      data-test-subj="createIndexPatternCreateButton"
+      data-test-subj="createIndexPatternButton"
     >
       <FormattedMessage id="kbn.management.indexPatternPrompt.createBtn" defaultMessage="Create index pattern" />
     </EuiButton>,
