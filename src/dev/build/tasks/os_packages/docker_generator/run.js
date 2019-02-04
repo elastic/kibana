@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import { access, link, unlink } from 'fs';
+import { access, link, unlink, chmod } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
-import { write, copyAll, exec, mkdirp } from '../../../lib';
+import { write, copyAll, mkdirp, exec } from '../../../lib';
 import * as dockerTemplates from './templates';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
 const unlinkAsync = promisify(unlink);
+const chmodAsync = promisify(chmod);
 
 export async function runDockerGenerator(config, log, build) {
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
@@ -90,11 +91,8 @@ export async function runDockerGenerator(config, log, build) {
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  const args = [
-    `${resolve(dockerBuildDir, 'build_docker.sh')}`
-  ];
-
-  await exec(log, `sh`, args, {
+  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  await exec(log, `./build_docker.sh`, [], {
     cwd: dockerBuildDir,
     level: 'info',
   });
