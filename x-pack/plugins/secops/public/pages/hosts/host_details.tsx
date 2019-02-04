@@ -32,6 +32,7 @@ import { PageContent, PageContentBody } from './styles';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
+const type = hostsModel.HostsType.details;
 
 const HostSummaryManage = manageQuery(HostSummary);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
@@ -55,7 +56,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
       {({ auditbeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
           <>
-            <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.details} />
+            <HostsKql indexPattern={indexPattern} type={type} />
             <PageContent data-test-subj="pageContent" panelPaddingSize="none">
               <PageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>
@@ -67,7 +68,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         endDate={to}
                         poll={poll}
                         filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                        type={hostsModel.HostsType.details}
+                        type={type}
                       >
                         {({ hosts, loading, id, refetch, startDate, endDate }) => (
                           <HostSummaryManage
@@ -87,7 +88,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         endDate={to}
                         poll={poll}
                         filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                        type={hostsModel.HostsType.details}
+                        type={type}
                       >
                         {({
                           authentications,
@@ -109,7 +110,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loadMore={loadMore}
-                            type={hostsModel.HostsType.details}
+                            type={type}
                           />
                         )}
                       </AuthenticationsQuery>
@@ -120,7 +121,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         poll={poll}
                         cursor={null}
                         filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                        type={hostsModel.HostsType.details}
+                        type={type}
                       >
                         {({
                           uncommonProcesses,
@@ -142,7 +143,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loadMore={loadMore}
-                            type={hostsModel.HostsType.details}
+                            type={type}
                           />
                         )}
                       </UncommonProcessesQuery>
@@ -152,7 +153,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         poll={poll}
                         sourceId="default"
                         startDate={from}
-                        type={hostsModel.HostsType.page}
+                        type={type}
                       >
                         {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
                           <EventsTableManage
@@ -167,7 +168,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loadMore={loadMore}
-                            type={hostsModel.HostsType.page}
+                            type={type}
                           />
                         )}
                       </EventsQuery>
@@ -192,10 +193,9 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
 const makeMapStateToProps = () => {
   const getHostsFilterQuery = hostsSelectors.hostsFilterQueryExpression();
-  const mapStateToProps = (state: State) => ({
-    filterQueryExpression: getHostsFilterQuery(state, hostsModel.HostsType.details) || '',
+  return (state: State) => ({
+    filterQueryExpression: getHostsFilterQuery(state, type) || '',
   });
-  return mapStateToProps;
 };
 
 export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
