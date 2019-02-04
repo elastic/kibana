@@ -493,7 +493,7 @@ class ObjectsTableUI extends Component {
               {
                 field: 'title',
                 name: intl.formatMessage({
-                  id: `kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName`,
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                   defaultMessage: 'Title',
                 }),
               },
