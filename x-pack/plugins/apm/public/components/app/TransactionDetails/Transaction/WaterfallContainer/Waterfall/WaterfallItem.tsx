@@ -129,13 +129,12 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
 function NameLabel({ item }: { item: IWaterfallItem }) {
   if (item.docType === 'span') {
     return <EuiText size="s">{item.name}</EuiText>;
-  } else {
-    return (
-      <EuiTitle size="xxs">
-        <h5>{item.name}</h5>
-      </EuiTitle>
-    );
   }
+  return (
+    <EuiTitle size="xxs">
+      <h5>{item.name}</h5>
+    </EuiTitle>
+  );
 }
 
 export function WaterfallItem({
