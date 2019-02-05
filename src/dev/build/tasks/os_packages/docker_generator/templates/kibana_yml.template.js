@@ -17,35 +17,23 @@
  * under the License.
  */
 
-import { runFpm } from './run_fpm';
-import { runDockerGenerator } from './docker_generator';
+import dedent from 'dedent';
 
-export const CreateDebPackageTask = {
-  description: 'Creating deb package',
+function generator({ imageFlavor }) {
+  return dedent(`
+  #
+  # ** THIS IS AN AUTO-GENERATED FILE **
+  #
+  
+  # Default Kibana configuration for docker target
+  server.name: kibana
+  server.host: "0"
+  elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+  ${ !imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : '' }
+  `);
+}
 
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'deb', [
-      '--architecture', 'amd64',
-      '--deb-priority', 'optional'
-    ]);
-  }
-};
-
-export const CreateRpmPackageTask = {
-  description: 'Creating rpm package',
-
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', [
-      '--architecture', 'x86_64',
-      '--rpm-os', 'linux'
-    ]);
-  }
-};
-
-export const CreateDockerPackageTask = {
-  description: 'Creating docker package',
-
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build);
-  }
+export const kibanaYMLTemplate = {
+  name: 'config/kibana.yml',
+  generator,
 };
