@@ -37,7 +37,7 @@ export const SET_JOINS = 'SET_JOINS';
 export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
-export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER';
+export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
@@ -335,7 +335,7 @@ export function updateSourceProp(layerId, propName, value) {
       propName,
       value,
     });
-    dispatch(scrubLayerStyleProperties(layerId));
+    dispatch(clearMissingStyleProperties(layerId));
     dispatch(syncDataForLayer(layerId));
   };
 }
@@ -459,7 +459,7 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function scrubLayerStyleProperties(layerId) {
+export function clearMissingStyleProperties(layerId) {
   return async (dispatch, getState) => {
     const targetLayer = getLayerList(getState()).find(layer => {
       return layer.getId() === layerId;
@@ -469,36 +469,52 @@ export function scrubLayerStyleProperties(layerId) {
     }
 
     const style = targetLayer.getCurrentStyle();
-    if (!style || !style.getDescriptorOnOrdinalFieldsChange) {
+    if (!style || !style.getDescriptorWithMissingStylePropsRemoved) {
       return;
     }
-
     const ordinalFields = await targetLayer.getOrdinalFields();
-    const scrubbedStyleDescriptor = style.getDescriptorOnOrdinalFieldsChange(ordinalFields);
+    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
+    if (hasChanges) {
+      dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
+    }
+  };
+}
 
-    console.log('styleDescriptor', scrubbedStyleDescriptor);
-  }
+export function updateLayerStyle(layerId, styleDescriptor, temporary = true) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_STYLE,
+      layerId,
+      style: {
+        ...styleDescriptor,
+        temporary
+      },
+    });
+
+    // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
+    dispatch(syncDataForLayer(layerId));
+  };
 }
 
 export function updateLayerStyleForSelectedLayer(styleDescriptor, temporary = true) {
-  return {
-    type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
-    style: {
-      ...styleDescriptor,
-      temporary
-    },
+  return (dispatch, getState) => {
+    const selectedLayer = getSelectedLayer(getState());
+    if (!selectedLayer) {
+      return;
+    }
+    dispatch(updateLayerStyle(selectedLayer.getId(), styleDescriptor, temporary));
   };
 }
 
 export function setJoinsForLayer(layer, joins) {
   return async (dispatch) => {
-    console.warn('Not Implemented: must remove any styles that are driven by join-fields that are no longer present');
     await dispatch({
       type: SET_JOINS,
       layer: layer,
       joins: joins
     });
 
+    dispatch(clearMissingStyleProperties(layer.getId()));
     dispatch(syncDataForLayer(layer.getId()));
   };
 }

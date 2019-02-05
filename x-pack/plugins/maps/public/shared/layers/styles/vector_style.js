@@ -65,7 +65,7 @@ export class VectorStyle {
     );
   }
 
-  getDescriptorOnOrdinalFieldsChange(nextOrdinalFields) {
+  getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
     const originalProperties = this.getProperties();
     const updatedProperties = {};
     Object.keys(originalProperties).forEach(propertyName => {
@@ -92,17 +92,23 @@ export class VectorStyle {
           ...originalProperties[propertyName].options
         }
       };
-      updatedProperties[propertyName].options.field = null;
+      delete updatedProperties[propertyName].options.field;
     });
 
     if (Object.keys(updatedProperties).length === 0) {
-      return null;
+      return {
+        hasChanges: false,
+        nextStyleDescriptor: { ...this._descriptor },
+      };
     }
 
-    return VectorStyle.createDescriptor({
-      ...originalProperties,
-      ...updatedProperties,
-    });
+    return {
+      hasChanges: true,
+      nextStyleDescriptor: VectorStyle.createDescriptor({
+        ...originalProperties,
+        ...updatedProperties,
+      })
+    };
   }
 
   getSourceFieldNames() {
