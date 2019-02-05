@@ -28,10 +28,10 @@ export class CreateSourceEditor extends Component {
   _loadUrl = async () => {
     const tilemap = await getKibanaTileMap();
     if (this._isMounted) {
-      this.setState({
-        url: tilemap.url
-      });
-      this.props.previewTilemap(this.state.url);
+      this.setState(
+        { url: tilemap.url },
+        () => this.props.previewTilemap(this.state.url)
+      );
     }
   };
 
