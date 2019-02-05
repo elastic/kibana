@@ -36,7 +36,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
-      allowedTypes = [],
+      allowedTypes,
       onBeforeWrite = () => { },
     } = options;
 
@@ -51,6 +51,9 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
+    if(!allowedTypes || allowedTypes.length === 0) {
+      throw new Error('Empty or missing types for saved object repository!');
+    }
     this._allowedTypes = allowedTypes;
 
     // ES7 and up expects the root type to be _doc
@@ -408,10 +411,13 @@ export class SavedObjectsRepository {
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.filter(object => !this._schema.isHiddenType(object.type)).map(object => ({
-          _id: this._serializer.generateRawId(namespace, object.type, object.id),
-          _type: this._type,
-        }))
+        docs: objects.map(object => {
+          this._assertAllowedType(object.type);
+          return {
+            _id: this._serializer.generateRawId(namespace, object.type, object.id),
+            _type: this._type,
+          };
+        })
       }
     });
 
@@ -646,7 +652,7 @@ export class SavedObjectsRepository {
   _assertAllowedType(types) {
     [].concat(types).forEach(type => {
       if(!this._allowedTypes.includes(type)) {
-        throw Error('Type not allowed!');
+        throw Error(`Unsupported saved object type: ${type}`);
       }
     });
   }
