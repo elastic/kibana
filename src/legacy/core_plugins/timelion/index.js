@@ -27,6 +27,15 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
 export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
+
+    config(Joi) {
+      return Joi.object({
+        ui: Joi.object({
+          enabled: Joi.boolean().default(false),
+        }).default(),
+      }).default();
+    },
+
     uiExports: {
       app: {
         title: 'Timelion',
@@ -39,7 +48,13 @@ export default function (kibana) {
         main: 'plugins/timelion/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      injectDefaultVars(server) {
+        return {
+          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
+        };
+      },
       hacks: [
+        'plugins/timelion/hacks/toggle_app_link_in_nav',
         'plugins/timelion/lib/panel_registry',
         'plugins/timelion/panels/timechart/timechart'
       ],
