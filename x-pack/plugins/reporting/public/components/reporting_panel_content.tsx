@@ -19,6 +19,7 @@ import { reportingClient } from '../lib/reporting_client';
 
 interface Props {
   reportType: string;
+  layoutId: string;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
@@ -31,6 +32,7 @@ interface Props {
 interface State {
   isStale: boolean;
   absoluteUrl: string;
+  layoutId: string;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -42,6 +44,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.state = {
       isStale: false,
       absoluteUrl: '',
+      layoutId: '',
     };
   }
 
@@ -54,10 +57,16 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    this.setAbsoluteReportGenerationUrl();
 
     window.addEventListener('hashchange', this.markAsStale, false);
     window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
+  }
+
+  public getDerivedStateFromProps(newProps: Props) {
+    if (newProps.layoutId !== this.state.layoutId) {
+      this.setAbsoluteReportGenerationUrl(); // changes state.absoluteUrl
+    }
+    return this.state;
   }
 
   public render() {
