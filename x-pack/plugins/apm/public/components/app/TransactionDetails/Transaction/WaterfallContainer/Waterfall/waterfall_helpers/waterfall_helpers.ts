@@ -249,31 +249,24 @@ export function getWaterfall(
     };
   }
 
-  const filteredHits = hits
-    .filter(hit => {
-      const docType = hit.processor.event;
-      return ['span', 'transaction'].includes(docType);
-    })
-    .map(hit => {
-      const docType = hit.processor.event;
-      switch (docType) {
-        case 'span':
-          return getSpanItem(hit as Span);
-        case 'transaction':
-          return getTransactionItem(hit as Transaction, errorsPerTransaction);
-        default:
-          throw new Error(`Unknown type ${docType}`);
-      }
-    });
+  const waterfallItems = hits.map(hit => {
+    const docType = hit.processor.event;
+    switch (docType) {
+      case 'span':
+        return getSpanItem(hit as Span);
+      case 'transaction':
+        return getTransactionItem(hit as Transaction, errorsPerTransaction);
+    }
+  });
 
-  const childrenByParentId = groupBy(filteredHits, hit =>
-    hit.parentId ? hit.parentId : 'root'
+  const childrenByParentId = groupBy(waterfallItems, item =>
+    item.parentId ? item.parentId : 'root'
   );
   const entryTransactionItem = getTransactionItem(
     entryTransaction,
     errorsPerTransaction
   );
-  const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
+  const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
   const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
   const traceRoot = getTraceRoot(childrenByParentId);
   const duration = getDuration(items);
