@@ -126,7 +126,10 @@ export const App = injectI18n(
           >
             {getReason()}
             {' '}
-            <a href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}>
+            <a
+              data-test-subj="ccrManageLicenseLink"
+              href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}
+            >
               <FormattedMessage
                 id="xpack.crossClusterReplication.app.licenseErrorLinkText"
                 defaultMessage="Manage your license."

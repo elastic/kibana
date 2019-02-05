@@ -129,7 +129,7 @@ export const RemoteClustersFormField = injectI18n(
             onChange={(e) => { this.onRemoteClusterChange(e.target.value); }}
             hasNoInitialSelection={!hasClusters}
             isInvalid={areErrorsVisible && Boolean(errorMessage)}
-            data-test-subj="ccrFollowerIndexFormRemoteClusterSelect"
+            data-test-subj="ccrRemoteClusterSelect"
           />
           { areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null }
           { errorMessage }
@@ -142,7 +142,7 @@ export const RemoteClustersFormField = injectI18n(
                 size="s"
                 iconType="plusInCircle"
                 flush="left"
-                data-test-subj="ccrFollowerIndexFormRemoteClusterInlineAddButton"
+                data-test-subj="ccrRemoteClusterInlineAddButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
@@ -177,7 +177,7 @@ export const RemoteClustersFormField = injectI18n(
               {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
               iconType="plusInCircle"
               color="danger"
-              data-test-subj="ccrFollowerIndexFormRemoteClusterAddButton"
+              data-test-subj="ccrRemoteClusterAddButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
@@ -213,7 +213,7 @@ export const RemoteClustersFormField = injectI18n(
           <EuiButton
             {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
             color={fatal ? 'danger' : 'warning'}
-            data-test-subj="ccrFollowerIndexFormRemoteClusterEditButton"
+            data-test-subj="ccrRemoteClusterEditButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.forms.viewRemoteClusterButtonLabel"
@@ -244,7 +244,7 @@ export const RemoteClustersFormField = injectI18n(
             {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
             iconType="plusInCircle"
             color="danger"
-            data-test-subj="ccrFollowerIndexFormRemoteClusterAddButton"
+            data-test-subj="ccrRemoteClusterAddButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
