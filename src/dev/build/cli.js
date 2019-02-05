@@ -39,6 +39,7 @@ const flags = getopts(process.argv.slice(0), {
     'skip-os-packages',
     'rpm',
     'deb',
+    'docker',
     'release',
     'skip-node-download',
     'verbose',
@@ -75,10 +76,11 @@ if (flags.help) {
         --oss                   {dim Only produce the OSS distributable of Kibana}
         --no-oss                {dim Only produce the default distributable of Kibana}
         --skip-archives         {dim Don't produce tar/zip archives}
-        --skip-os-packages      {dim Don't produce rpm/deb packages}
+        --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
         --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
+        --docker                {dim Only build the docker image}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
@@ -87,6 +89,12 @@ if (flags.help) {
     `) + '\n'
   );
   process.exit(1);
+}
+
+// In order to build a docker image we always need
+// to generate all the platforms
+if (flags.docker) {
+  flags['all-platforms'] = true;
 }
 
 const log = new ToolingLog({
@@ -102,7 +110,7 @@ function isOsPackageDesired(name) {
   }
 
   // build all if no flags specified
-  if (flags.rpm === undefined && flags.deb === undefined) {
+  if (flags.rpm === undefined && flags.deb === undefined && flags.docker === undefined) {
     return true;
   }
 
@@ -119,6 +127,7 @@ buildDistributables({
   createArchives: !Boolean(flags['skip-archives']),
   createRpmPackage: isOsPackageDesired('rpm'),
   createDebPackage: isOsPackageDesired('deb'),
+  createDockerPackage: isOsPackageDesired('docker'),
   targetAllPlatforms: Boolean(flags['all-platforms']),
 }).catch(error => {
   if (!isErrorLogged(error)) {
