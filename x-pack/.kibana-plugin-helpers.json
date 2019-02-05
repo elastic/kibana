@@ -26,7 +26,7 @@
     "!plugins/**/*.test.js",
     "!plugins/**/__snapshots__",
     "!plugins/**/__snapshots__/*",
-    "!plugins/**/__mocks__/*",
+    "!plugins/**/__mocks__/*"
   ],
   "skipInstallDependencies": true
 }
