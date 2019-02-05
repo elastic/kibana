@@ -11,7 +11,7 @@ import { Dictionary } from '../../common/types/common';
 
 // Sets up a ObservableComponent which subscribes to given observable updates and
 // and passes them on as prop values to the given WrappedComponent.
-// This give us the befenits of abstracting away the need to set up subscribers and callbacks,
+// This give us the benefit of abstracting away the need to set up subscribers and callbacks,
 // and the passed down props can be used in pure/functional components without
 // the need for their own state management.
 export function injectObservablesAsProps(
