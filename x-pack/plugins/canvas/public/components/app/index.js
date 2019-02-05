@@ -5,7 +5,12 @@
  */
 
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { loadBrowserRegistries, registries } from '@kbn/interpreter/public';
+import {
+  loadBrowserRegistries,
+  registries,
+  register,
+  addRegistries,
+} from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
@@ -14,6 +19,7 @@ import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_func
 import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
+import { elementSpecs } from '../../../canvas_plugin_src/elements';
 
 import {
   argTypeRegistry,
@@ -35,7 +41,7 @@ const mapStateToProps = state => {
   };
 };
 
-const types = {
+const types = addRegistries({
   elements: elementsRegistry,
   transformUIs: transformRegistry,
   datasourceUIs: datasourceRegistry,
@@ -44,7 +50,11 @@ const types = {
   argumentUIs: argTypeRegistry,
   templates: templatesRegistry,
   tagUIs: tagsRegistry,
-};
+});
+
+register({
+  elements: elementSpecs,
+});
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal

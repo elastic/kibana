@@ -20,4 +20,4 @@
 export { loadBrowserRegistries } from './browser_registries';
 export { initializeInterpreter } from './interpreter';
 export { RenderFunctionsRegistry } from './render_functions_registry';
-export { registries, register } from './registries';
+export { registries, register, addRegistries } from './registries';

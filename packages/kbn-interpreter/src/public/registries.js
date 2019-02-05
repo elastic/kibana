@@ -27,10 +27,21 @@ export const registries = {
   types: new TypesRegistry(),
 };
 
+export function addRegistries(newRegistries) {
+  Object.keys(newRegistries).forEach(registryName => {
+    if (registries[registryName]) {
+      throw new Error(`There already a registry named ${registryName}.`);
+    }
+    registries[registryName] = newRegistries[registryName];
+  });
+
+  return registries;
+}
+
 export function register(specs) {
   Object.keys(specs).forEach(registryName => {
     if (!registries[registryName]) {
-      throw new Error(`There is no registry called ${registryName}.`);
+      throw new Error(`There is no registry named ${registryName}.`);
     }
     specs[registryName].forEach(f => registries[registryName].register(f));
   });
