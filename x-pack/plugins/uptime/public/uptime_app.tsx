@@ -6,7 +6,6 @@
 
 import {
   EuiHeader,
-  EuiHeaderBreadcrumbs,
   // @ts-ignore missing typings for EuiHeaderLink
   EuiHeaderLink,
   // @ts-ignore missing typings for EuiHeaderLinks
@@ -62,7 +61,6 @@ export interface UptimeAppProps {
   initialDateRangeEnd: string;
   initialAutorefreshInterval: number;
   initialAutorefreshIsPaused: boolean;
-  isUsingK7Design: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
@@ -100,20 +98,11 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       initialAutorefreshInterval: autorefreshInterval,
       initialDateRangeStart: dateRangeStart,
       initialDateRangeEnd: dateRangeEnd,
-      isUsingK7Design,
       kibanaBreadcrumbs,
       updateBreadcrumbs,
     } = props;
 
-    let initialBreadcrumbs: UMBreadcrumb[];
-
-    if (isUsingK7Design) {
-      this.setBreadcrumbs = updateBreadcrumbs;
-      initialBreadcrumbs = kibanaBreadcrumbs;
-    } else {
-      this.setBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => this.setState({ breadcrumbs });
-      initialBreadcrumbs = [overviewBreadcrumb];
-    }
+    this.setBreadcrumbs = updateBreadcrumbs;
 
     let colors: UptimeAppColors;
     if (darkMode) {
@@ -133,7 +122,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.state = {
       autorefreshIsPaused,
       autorefreshInterval,
-      breadcrumbs: initialBreadcrumbs,
+      breadcrumbs: kibanaBreadcrumbs,
       colors,
       dateRangeStart,
       dateRangeEnd,
@@ -145,7 +134,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
+    const { routerBasename, graphQLClient } = this.props;
     return (
       <I18nContext>
         <Router basename={routerBasename}>
@@ -172,13 +161,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       />
                     </EuiHeaderLogo>
                   </EuiHeaderSectionItem>
-                  {!isUsingK7Design && (
-                    <EuiHeaderSectionItem>
-                      <div style={{ paddingTop: '20px', paddingRight: '8px' }}>
-                        <EuiHeaderBreadcrumbs breadcrumbs={this.state.breadcrumbs} />
-                      </div>
-                    </EuiHeaderSectionItem>
-                  )}
                 </EuiHeaderSection>
                 <EuiHeaderSection side="right">
                   <EuiHeaderSectionItem border="none">

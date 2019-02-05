@@ -57,6 +57,7 @@ export default () => Joi.object({
   csp: Joi.object({
     rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
     strict: Joi.boolean().default(false),
+    warnLegacyBrowsers: Joi.boolean().default(true),
   }).default(),
 
   cpu: Joi.object({

@@ -1,16 +1,5 @@
 <kbn-top-nav name="dashboard" config="topNavMenu">
-<div data-transclude-slots>
-    <!-- Breadcrumbs. -->
-    <div data-transclude-slot="topLeftCorner">
-      <div
-        ng-if="showPluginBreadcrumbs"
-        class="kuiLocalBreadcrumbs">
-        <div ng-repeat="crumb in breadcrumbs" class="kuiLocalBreadcrumb">
-          <a ng-if="crumb.url" kbn-href="{{ crumb.url }}" class="kuiLocalBreadcrumb__link">{{ crumb.label }}</a>
-          <span ng-if="!crumb.url" class="kuiLocalBreadcrumb__link">{{ crumb.label }}</span>
-        </div>
-      </div>
-    </div>
+  <div data-transclude-slots>
     <!-- Tabs -->
     <div data-transclude-slot="bottomRow">
       <div ng-if="showTabs" class="kuiLocalTabs" role="tablist">
