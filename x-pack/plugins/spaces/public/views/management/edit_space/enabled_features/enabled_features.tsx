@@ -127,7 +127,7 @@ export class EnabledFeatures extends Component<Props, {}> {
           <p>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
-              defaultMessage="Hiding a feature does not disable the underlying functionality, it is only hidden in the UI."
+              defaultMessage="The feature is hidden in the UI, but is not disabled."
             />
           </p>
           {this.props.uiCapabilities.spaces.manage && (
