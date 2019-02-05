@@ -16,7 +16,7 @@ export const RootComponent: React.StatelessComponent = () => (
   <div data-test-subj="upgradeAssistantRoot">
     <EuiPageHeader data-test-subj="upgradeAssistantRoot">
       <EuiPageHeaderSection>
-        <EuiTitle size="m">
+        <EuiTitle size="l">
           <h1>
             <FormattedMessage
               id="xpack.upgradeAssistant.appTitle"
