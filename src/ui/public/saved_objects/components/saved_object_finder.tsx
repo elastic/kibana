@@ -23,11 +23,7 @@ import React from 'react';
 import { InjectedIntlProps } from 'react-intl';
 import chrome from 'ui/chrome';
 
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiBasicTable: React.SFC<any>;
-}
-
+// @ts-ignore
 import { EuiBasicTable, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { injectI18n } from '@kbn/i18n/react';
@@ -144,7 +140,16 @@ class SavedObjectFinderUI extends React.Component<
     this.fetchItems();
   }
 
-  public onTableChange = ({ page, sort = {} }: TableCriteria) => {
+  public render() {
+    return (
+      <React.Fragment>
+        {this.renderSearchBar()}
+        {this.renderTable()}
+      </React.Fragment>
+    );
+  }
+
+  private onTableChange = ({ page, sort = {} }: TableCriteria) => {
     let sortField: string | undefined = sort.field;
     let sortDirection: Direction | undefined = sort.direction;
 
@@ -172,7 +177,7 @@ class SavedObjectFinderUI extends React.Component<
   // 2) can not search on anything other than title because all other fields are stored in opaque JSON strings,
   //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
   //    with the current mappings
-  public getPageOfItems = () => {
+  private getPageOfItems = () => {
     // do not sort original list to preserve elasticsearch ranking order
     const items = this.state.items.slice();
     const { sortField } = this.state;
@@ -196,7 +201,7 @@ class SavedObjectFinderUI extends React.Component<
     return items.slice(startIndex, lastIndex);
   };
 
-  public fetchItems = () => {
+  private fetchItems = () => {
     this.setState(
       {
         isFetchingItems: true,
@@ -205,7 +210,7 @@ class SavedObjectFinderUI extends React.Component<
     );
   };
 
-  public renderSearchBar() {
+  private renderSearchBar() {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
@@ -235,7 +240,7 @@ class SavedObjectFinderUI extends React.Component<
     );
   }
 
-  public renderTable() {
+  private renderTable() {
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
@@ -294,15 +299,6 @@ class SavedObjectFinderUI extends React.Component<
         onChange={this.onTableChange}
         noItemsMessage={this.props.noItemsMessage}
       />
-    );
-  }
-
-  public render() {
-    return (
-      <React.Fragment>
-        {this.renderSearchBar()}
-        {this.renderTable()}
-      </React.Fragment>
     );
   }
 }
