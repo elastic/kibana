@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('heatmap', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geotile_grid heatmap example');
+        await PageObjects.maps.loadSavedMap('geohashgrid heatmap example');
       });
 
       const LAYER_ID = '3xlvm';
@@ -159,7 +159,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('vector(grid)', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geotile_grid vector grid example');
+        await PageObjects.maps.loadSavedMap('geohashgrid vector grid example');
       });
 
       const LAYER_ID = 'g1xkv';
