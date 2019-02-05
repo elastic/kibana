@@ -65,6 +65,46 @@ export class VectorStyle {
     );
   }
 
+  getDescriptorOnOrdinalFieldsChange(nextOrdinalFields) {
+    const originalProperties = this.getProperties();
+    const updatedProperties = {};
+    Object.keys(originalProperties).forEach(propertyName => {
+      if (!this._isPropertyDynamic(propertyName)) {
+        return;
+      }
+
+      const fieldName = _.get(originalProperties[propertyName], 'options.field.name');
+      if (!fieldName) {
+        return;
+      }
+
+      const matchingOrdinalField = nextOrdinalFields.find(oridinalField => {
+        return fieldName === oridinalField.name;
+      });
+
+      if (matchingOrdinalField) {
+        return;
+      }
+
+      updatedProperties[propertyName] = {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          ...originalProperties[propertyName].options
+        }
+      };
+      updatedProperties[propertyName].options.field = null;
+    });
+
+    if (Object.keys(updatedProperties).length === 0) {
+      return null;
+    }
+
+    return VectorStyle.createDescriptor({
+      ...originalProperties,
+      ...updatedProperties,
+    });
+  }
+
   getSourceFieldNames() {
     const properties = this.getProperties();
     const fieldNames = [];
@@ -246,7 +286,7 @@ export class VectorStyle {
       return _.get(styleDescriptor, 'options.color', null);
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field')
+    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.color');
     if (isDynamicConfigComplete) {
       return this._getMBDataDrivenColor({
@@ -263,7 +303,7 @@ export class VectorStyle {
       return styleDescriptor.options.size;
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field')
+    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.minSize')
       && _.has(styleDescriptor, 'options.maxSize');
     if (isDynamicConfigComplete) {

@@ -37,7 +37,7 @@ export const SET_JOINS = 'SET_JOINS';
 export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
-export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
+export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
@@ -335,6 +335,7 @@ export function updateSourceProp(layerId, propName, value) {
       propName,
       value,
     });
+    dispatch(scrubLayerStyleProperties(layerId));
     dispatch(syncDataForLayer(layerId));
   };
 }
@@ -458,11 +459,32 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function updateLayerStyleForSelectedLayer(style, temporary = true) {
+export function scrubLayerStyleProperties(layerId) {
+  return async (dispatch, getState) => {
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
+    if (!targetLayer) {
+      return;
+    }
+
+    const style = targetLayer.getCurrentStyle();
+    if (!style || !style.getDescriptorOnOrdinalFieldsChange) {
+      return;
+    }
+
+    const ordinalFields = await targetLayer.getOrdinalFields();
+    const scrubbedStyleDescriptor = style.getDescriptorOnOrdinalFieldsChange(ordinalFields);
+
+    console.log('styleDescriptor', scrubbedStyleDescriptor);
+  }
+}
+
+export function updateLayerStyleForSelectedLayer(styleDescriptor, temporary = true) {
   return {
     type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
     style: {
-      ...style,
+      ...styleDescriptor,
       temporary
     },
   };

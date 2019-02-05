@@ -96,6 +96,8 @@ const INITIAL_STATE = {
 
 export function map(state = INITIAL_STATE, action) {
   window._state = state;
+  console.log(action.type);
+  console.log(action);
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case SET_MOUSE_COORDINATES:
