@@ -46,10 +46,9 @@ export default function ({ getService, getPageObjects }) {
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
-        await queryBar.setQuery('php');
-        await queryBar.submitQuery();
-
-        await retry.try(async function tryingForTime() {
+        await retry.try(async function () {
+          await queryBar.setQuery('php');
+          await queryBar.submitQuery();
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });

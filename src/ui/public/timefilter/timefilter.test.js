@@ -90,10 +90,10 @@ describe('setTime', () => {
     expect(timefilter.getTime()).to.eql({ from: 5, to: 10 });
   });
 
-  test('not emit anything if the time has not changed', () => {
+  test('should emit fetch but not update if the time has not changed', () => {
     timefilter.setTime({ from: 0, to: 1 });
     expect(update.called).to.be(false);
-    expect(fetch.called).to.be(false);
+    expect(fetch.called).to.be(true);
   });
 
   test('emit update and fetch if the time has changed', () => {
