@@ -71,9 +71,7 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function (gisMapSavedObjectLoader, redirectWhenMissing, Private) {
-        const docTitle = Private(DocTitleProvider);
-        docTitle.change("Maps");
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing) {
         return gisMapSavedObjectLoader.get()
           .catch(redirectWhenMissing({
             'map': '/'
