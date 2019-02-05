@@ -9,7 +9,7 @@ import React, { Fragment, ReactNode } from 'react';
 
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
-type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused';
+type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused' | 'cancelled';
 
 const StepStatus: React.StatelessComponent<{ status: STATUS; idx: number }> = ({ status, idx }) => {
   if (status === 'incomplete') {
@@ -26,6 +26,12 @@ const StepStatus: React.StatelessComponent<{ status: STATUS; idx: number }> = ({
     return (
       <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-paused">
         <EuiIcon type="pause" size="s" />
+      </span>
+    );
+  } else if (status === 'cancelled') {
+    return (
+      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-cancelled">
+        <EuiIcon type="cross" size="s" />
       </span>
     );
   } else if (status === 'failed') {
@@ -47,7 +53,10 @@ const Step: React.StatelessComponent<StepProgressStep & { idx: number }> = ({
 }) => {
   const titleClassName = classNames('upgStepProgress__title', {
     'upgStepProgress__title--currentStep':
-      status === 'inProgress' || status === 'paused' || status === 'failed',
+      status === 'inProgress' ||
+      status === 'paused' ||
+      status === 'failed' ||
+      status === 'cancelled',
   });
 
   return (
