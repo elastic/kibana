@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { socketApi } from './socket';
 import { translate } from './translate';
 import { plugins } from './plugins';
+import { registerServerFunctions } from './server_functions';
 
 export function routes(server) {
   plugins(server);
-  socketApi(server);
   translate(server);
+  registerServerFunctions(server);
 }

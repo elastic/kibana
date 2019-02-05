@@ -181,7 +181,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
         .addDanger(
           intl.formatMessage({
             id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
-            defaultMessage: 'An error occured deleting the annotation for job with ID {jobId}: {error}',
+            defaultMessage: 'An error occurred deleting the annotation for job with ID {jobId}: {error}',
           }, { jobId: annotation.job_id, error: JSON.stringify(err) })
         );
     }
@@ -226,14 +226,14 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
           toastNotifications.addDanger(
             intl.formatMessage({
               id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
-              defaultMessage: 'An error occured creating the annotation for job with ID {jobId}: {error}',
+              defaultMessage: 'An error occurred creating the annotation for job with ID {jobId}: {error}',
             }, { jobId: annotation.job_id, error: JSON.stringify(resp) })
           );
         } else {
           toastNotifications.addDanger(
             intl.formatMessage({
               id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
-              defaultMessage: 'An error occured updating the annotation for job with ID {jobId}: {error}',
+              defaultMessage: 'An error occurred updating the annotation for job with ID {jobId}: {error}',
             }, { jobId: annotation.job_id, error: JSON.stringify(resp) })
           );
         }
