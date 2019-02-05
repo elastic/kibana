@@ -9,7 +9,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import { setHttpClient } from './services/api';
 import { setUrlService } from './services/navigation';
 
@@ -17,6 +16,7 @@ import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
+import { I18nContext } from 'ui/i18n';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import template from './main.html';
@@ -26,13 +26,13 @@ import { indexManagementStore } from './store';
 let elem;
 const renderReact = async (elem) => {
   render(
-    <I18nProvider>
+    <I18nContext>
       <Provider store={indexManagementStore()}>
         <HashRouter>
           <App />
         </HashRouter>
       </Provider>
-    </I18nProvider>,
+    </I18nContext>,
     elem
   );
 };
