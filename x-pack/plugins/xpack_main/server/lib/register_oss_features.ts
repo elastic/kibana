@@ -119,6 +119,10 @@ const kibanaFeatures: Feature[] = [
         ui: [],
       },
     },
+    privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+      defaultMessage:
+        'User should also be granted the appropriate Elasticsearch cluster and index privileges',
+    }),
   },
   {
     id: 'advancedSettings',

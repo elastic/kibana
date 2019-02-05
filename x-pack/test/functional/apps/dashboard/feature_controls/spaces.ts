@@ -46,8 +46,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((navLink: any) => navLink.text)).to.contain('Dashboard');
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).to.contain('Dashboard');
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -108,8 +110,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((navLink: any) => navLink.text)).not.to.contain('Dashboard');
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).not.to.contain('Dashboard');
       });
 
       it(`create new dashboard redirects to the home page`, async () => {

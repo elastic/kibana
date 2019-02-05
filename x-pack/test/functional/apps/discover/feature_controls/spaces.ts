@@ -41,8 +41,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((navLink: any) => navLink.text)).to.contain('Discover');
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).to.contain('Discover');
       });
 
       it('shows save button', async () => {
@@ -74,9 +76,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-
-        const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((navLink: any) => navLink.text)).not.to.contain('Discover');
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).not.to.contain('Discover');
       });
 
       it(`redirects to the home page`, async () => {

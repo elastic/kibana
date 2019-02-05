@@ -43,9 +43,16 @@ function setup() {
 
   const stopCoreSystem = jest.fn();
 
+  const i18n: any = {
+    Context: function I18nContext() {
+      return '';
+    },
+  };
+
   return {
     rootDomElement,
     injectedMetadata,
+    i18n,
     stopCoreSystem,
     fatalErrors: new FatalErrorsService({
       injectedMetadata: injectedMetadata as any,
@@ -91,25 +98,43 @@ describe('#add()', () => {
 
 describe('start.add()', () => {
   it('exposes a function that passes its two arguments to fatalErrors.add()', () => {
-    const { fatalErrors } = setup();
+    const { fatalErrors, i18n } = setup();
 
     jest.spyOn(fatalErrors, 'add').mockImplementation(() => {
       /* noop */
     });
 
     expect(fatalErrors.add).not.toHaveBeenCalled();
-    const { add } = fatalErrors.start();
+    const { add } = fatalErrors.start({ i18n });
     add('foo', 'bar');
     expect(fatalErrors.add).toHaveBeenCalledTimes(1);
     expect(fatalErrors.add).toHaveBeenCalledWith('foo', 'bar');
+  });
+
+  it('deletes all children of rootDomElement and renders <FatalErrorScreen /> into it', () => {
+    const { fatalErrors, i18n, rootDomElement } = setup();
+
+    rootDomElement.innerHTML = `
+      <h1>Loading...</h1>
+      <div class="someSpinner"></div>
+    `;
+
+    expect(mockRender).not.toHaveBeenCalled();
+    expect(rootDomElement.children).toHaveLength(2);
+
+    const { add } = fatalErrors.start({ i18n });
+
+    expect(() => add(new Error('foo'))).toThrowError();
+    expect(rootDomElement).toMatchSnapshot('fatal error screen container');
+    expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
   });
 });
 
 describe('start.get$()', () => {
   it('provides info about the errors passed to fatalErrors.add()', () => {
-    const { fatalErrors } = setup();
+    const { fatalErrors, i18n } = setup();
 
-    const startContract = fatalErrors.start();
+    const startContract = fatalErrors.start({ i18n });
 
     const onError = jest.fn();
     startContract.get$().subscribe(onError);

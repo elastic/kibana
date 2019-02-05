@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { I18nProvider } from '@kbn/i18n/react';
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'ui/autoload/styles';
+import { I18nContext } from 'ui/i18n';
 import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import routes from 'ui/routes';
@@ -38,13 +37,13 @@ routes.when('/management/spaces/list', {
       const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <SpacesGridPage
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
             features={features}
           />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
 
@@ -76,13 +75,13 @@ routes.when('/management/spaces/create', {
       const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <ManageSpacePage
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
             features={features}
           />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
 
@@ -108,7 +107,6 @@ routes.when('/management/spaces/edit/:spaceId', {
     $http: any,
     $route: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
@@ -122,7 +120,7 @@ routes.when('/management/spaces/edit/:spaceId', {
       const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
             spacesManager={spacesManager}
@@ -132,7 +130,7 @@ routes.when('/management/spaces/edit/:spaceId', {
               chrome.breadcrumbs.set(breadcrumbs);
             }}
           />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
 
