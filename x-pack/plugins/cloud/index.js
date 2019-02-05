@@ -32,5 +32,12 @@ export const cloud = kibana => {
         }).default(),
       }).default();
     },
+
+    init(server) {
+      const config = server.config().get(`xpack.cloud`);
+      server.expose('config', {
+        isCloudEnabled: !!config.id
+      });
+    }
   });
 };

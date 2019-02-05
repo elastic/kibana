@@ -6,36 +6,48 @@
 
 import { HistogramDataPoint, HistogramSeries } from '../../../../common/graphql/types';
 
-export const formatHistogramData = (histogram: HistogramSeries[]) => {
-  const histogramSeriesData: { upSeriesData: any[]; downSeriesData: any[] } = {
-    upSeriesData: [],
-    downSeriesData: [],
-  };
-  // TODO: there's a lot of nesting here, refactor this function
-  histogram.forEach(({ data }) => {
-    if (data) {
-      data.forEach(dataPoint => {
-        if (dataPoint) {
-          const { x, x0, downCount } = dataPoint;
+interface FormattedHistogramData {
+  upSeriesData: HistogramDataPoint[];
+  downSeriesData: HistogramDataPoint[];
+}
+
+/**
+ * This function reduces a series of monitors' histograms into a singular
+ * series, which is then displayed as a unified snapshot of the performance
+ * of all the monitors over time.
+ * @param histograms The series data for the provided monitors
+ */
+export const formatHistogramData = (histograms: HistogramSeries[]): FormattedHistogramData => {
+  return histograms
+    .map(({ data }) => data)
+    .filter(series => series !== null && series !== undefined)
+    .reduce(
+      (accumulatedData: FormattedHistogramData, data) => {
+        // `data` will not be null/undefined because those elements are filtered
+        data!.forEach(dataPoint => {
+          const { x, x0, downCount, upCount } = dataPoint;
           const findPointInSeries = (hdp: HistogramDataPoint) => hdp.x === x && hdp.x0 === x0;
-          const upEntry = histogramSeriesData.upSeriesData.find(findPointInSeries);
-          const downEntry = histogramSeriesData.downSeriesData.find(findPointInSeries);
+          const upEntry = accumulatedData.upSeriesData.find(findPointInSeries);
+          const downEntry = accumulatedData.downSeriesData.find(findPointInSeries);
           if (downCount) {
             if (downEntry) {
               downEntry.y += 1;
             } else {
-              histogramSeriesData.downSeriesData.push({ x, x0, y: 1 });
+              accumulatedData.downSeriesData.push({ x, x0, y: 1 });
             }
-          } else {
+          } else if (upCount) {
             if (upEntry) {
               upEntry.y += 1;
             } else {
-              histogramSeriesData.upSeriesData.push({ x, x0, y: 1 });
+              accumulatedData.upSeriesData.push({ x, x0, y: 1 });
             }
           }
-        }
-      });
-    }
-  });
-  return histogramSeriesData;
+        });
+        return accumulatedData;
+      },
+      {
+        upSeriesData: [],
+        downSeriesData: [],
+      }
+    );
 };

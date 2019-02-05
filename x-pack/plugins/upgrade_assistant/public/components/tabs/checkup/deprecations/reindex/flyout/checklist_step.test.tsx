@@ -5,10 +5,12 @@
  */
 
 import { shallow } from 'enzyme';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep, ReindexWarning } from '../../../../../../../common/types';
+import { ReindexStatus, ReindexWarning } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
+import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
 
 describe('ChecklistFlyout', () => {
@@ -18,14 +20,16 @@ describe('ChecklistFlyout', () => {
     confirmInputValue: 'CONFIRM',
     onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
+    cancelReindex: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
-      lastCompletedStep: ReindexStep.readonly,
-      status: ReindexStatus.inProgress,
+      lastCompletedStep: undefined,
+      status: undefined,
       reindexTaskPercComplete: null,
       errorMessage: null,
       reindexWarnings: [ReindexWarning.allField],
-    },
+      hasRequiredPrivileges: true,
+    } as ReindexState,
   };
 
   it('renders', () => {
@@ -33,7 +37,16 @@ describe('ChecklistFlyout', () => {
   });
 
   it('disables button while reindexing', () => {
-    const wrapper = shallow(<ChecklistFlyoutStep {...defaultProps} />);
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.inProgress;
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    expect((wrapper.find('EuiButton').props() as any).isLoading).toBe(true);
+  });
+
+  it('disables button if hasRequiredPrivileges is false', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.hasRequiredPrivileges = false;
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
     expect(wrapper.find('EuiButton').props().disabled).toBe(true);
   });
 

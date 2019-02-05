@@ -36,7 +36,17 @@ export const HomePage = injectI18n(
 
       return (
         <ColumnarPage>
-          <Header />
+          <Header
+            breadcrumbs={[
+              {
+                href: '#/',
+                text: intl.formatMessage({
+                  id: 'xpack.infra.header.infrastructureTitle',
+                  defaultMessage: 'Infrastructure',
+                }),
+              },
+            ]}
+          />
           <SourceConfigurationFlyout />
           <WithSource>
             {({
