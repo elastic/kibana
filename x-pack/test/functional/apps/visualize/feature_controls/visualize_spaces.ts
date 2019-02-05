@@ -28,11 +28,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await esArchiver.load('visualize/default');
-        await kibanaServer.uiSettings.replace({
-          'accessibility:disableAnimations': true,
-          'telemetry:optIn': false,
-          defaultIndex: 'logstash-*',
-        });
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -74,11 +69,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await esArchiver.load('visualize/default');
-        await kibanaServer.uiSettings.replace({
-          'accessibility:disableAnimations': true,
-          'telemetry:optIn': false,
-          defaultIndex: 'logstash-*',
-        });
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',

@@ -25,11 +25,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     before(async () => {
       await esArchiver.loadIfNeeded('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace({
-        'accessibility:disableAnimations': true,
-        'telemetry:optIn': false,
-        defaultIndex: 'logstash-*',
-      });
     });
 
     describe('global visualize all privileges', () => {
