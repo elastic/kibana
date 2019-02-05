@@ -60,6 +60,7 @@ export function maps(kibana) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
+      initTelemetryCollection(server);
 
       const xpackMainPlugin = server.plugins.xpack_main;
       let routesInitialized = false;
@@ -69,7 +70,6 @@ export function maps(kibana) {
           if (license && license.maps && !routesInitialized) {
             routesInitialized = true;
             initRoutes(server, license.uid);
-            initTelemetryCollection(server);
           }
         });
 
