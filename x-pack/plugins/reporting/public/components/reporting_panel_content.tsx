@@ -57,16 +57,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
+    this.setAbsoluteReportGenerationUrl();
 
     window.addEventListener('hashchange', this.markAsStale, false);
     window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
-  }
-
-  public getDerivedStateFromProps(newProps: Props) {
-    if (newProps.layoutId !== this.state.layoutId) {
-      this.setAbsoluteReportGenerationUrl(); // changes state.absoluteUrl
-    }
-    return this.state;
   }
 
   public render() {
