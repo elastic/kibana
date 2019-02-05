@@ -67,10 +67,12 @@ export const DeleteJobModal = injectI18n(class extends Component {
 
   deleteJob = () => {
     this.setState({ deleting: true });
-    deleteJobs(this.state.jobs, () => {
+    deleteJobs(this.state.jobs);
+
+    setTimeout(() => {
       this.refreshJobs();
-      this.closeModal();
-    });
+    }, 500);
+    this.closeModal();
   }
 
   setEL = (el) => {

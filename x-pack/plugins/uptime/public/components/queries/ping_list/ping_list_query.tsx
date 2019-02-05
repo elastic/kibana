@@ -13,6 +13,8 @@ import { UptimeCommonProps } from '../../../uptime_app';
 import { PingList } from '../../functional';
 import { getPingsQuery } from './get_pings';
 
+const DEFAULT_MAX_SEARCH_SIZE = 100;
+
 interface PingListProps {
   monitorId?: string;
   sort?: UMPingSortDirectionArg;
@@ -54,7 +56,7 @@ export class PingListQuery extends React.Component<Props, PingListState> {
     this.state = {
       statusOptions,
       selectedOption: statusOptions[2],
-      maxSearchSize: 200,
+      maxSearchSize: DEFAULT_MAX_SEARCH_SIZE,
     };
   }
   public render() {
@@ -80,7 +82,7 @@ export class PingListQuery extends React.Component<Props, PingListState> {
               ? selectedOption.value
               : '',
           // TODO: get rid of the magic number
-          size: this.state.maxSearchSize || size || 200,
+          size: this.state.maxSearchSize || size || DEFAULT_MAX_SEARCH_SIZE,
           sort: sort || 'desc',
         }}
         query={getPingsQuery}
