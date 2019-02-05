@@ -44,6 +44,7 @@ export const loadBrowserRegistries = (registries, basePath) => {
     && t !== 'argumentUIs'
     && t !== 'browserFunctions'
     && t !== 'templates'
+    && t !== 'tagUIs'
   );
   const populatedTypes = {};
 

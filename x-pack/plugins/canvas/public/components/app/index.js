@@ -26,6 +26,7 @@ import { modelSpecs } from '../../../canvas_plugin_src/uis/models';
 import { viewSpecs } from '../../../canvas_plugin_src/uis/views';
 import { datasourceSpecs } from '../../../canvas_plugin_src/uis/datasources';
 import { args as argSpecs } from '../../../canvas_plugin_src/uis/arguments';
+import { tagSpecs } from '../../../canvas_plugin_src/uis/tags';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as commonFunctions } from '../../../canvas_plugin_src/functions/common';
 import { templateSpecs } from '../../../canvas_plugin_src/templates';
@@ -71,6 +72,7 @@ register({
   argumentUIs: argSpecs,
   browserFunctions: browserFunctions.concat(commonFunctions),
   templates: templateSpecs,
+  tagUIs: tagSpecs,
 });
 
 const mapDispatchToProps = dispatch => ({
