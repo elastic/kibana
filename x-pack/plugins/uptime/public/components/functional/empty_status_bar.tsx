@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface Props {
@@ -16,7 +17,14 @@ export const EmptyStatusBar = ({ message, monitorId }: Props) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={false}>
-        {!message ? `No data found for monitor id ${monitorId}` : message}
+        {!message
+          ? i18n.translate('xpack.uptime.emptyStatusBar.defaultMessage', {
+              defaultMessage: 'No data found for monitor id {monitorId}',
+              description:
+                'This is the default message we display in a status bar when there is no data available for an uptime monitor.',
+              values: { monitorId },
+            })
+          : message}
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
