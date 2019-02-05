@@ -200,6 +200,17 @@ describe('constructor', () => {
     });
   });
 
+  it('passes browserSupportsCsp to ChromeService', () => {
+    new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    expect(MockChromeService).toHaveBeenCalledTimes(1);
+    expect(MockChromeService).toHaveBeenCalledWith({
+      browserSupportsCsp: expect.any(Boolean),
+    });
+  });
+
   it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
     const rootDomElement = document.createElement('div');
     const injectedMetadata = { injectedMetadata: true } as any;

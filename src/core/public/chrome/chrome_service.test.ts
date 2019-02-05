@@ -29,32 +29,74 @@ const store = new Map();
 
 import { ChromeService } from './chrome_service';
 
-const defaultStartDeps: any = {
-  notifications: {
-    toasts: {},
-  },
-  injectedMetadata: {
-    injectedMetadataStartContract: true,
-    getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
-    getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-    getLegacyMetadata: jest.fn().mockReturnValue({
-      uiSettings: {
-        defaults: { legacyInjectedUiSettingDefaults: true },
-        user: { legacyInjectedUiSettingUserValues: true },
+function defaultStartDeps(): any {
+  return {
+    notifications: {
+      toasts: {
+        addWarning: jest.fn(),
       },
-    }),
-  },
-};
+    },
+    injectedMetadata: {
+      injectedMetadataStartContract: true,
+      getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
+      getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
+      getLegacyMetadata: jest.fn().mockReturnValue({
+        uiSettings: {
+          defaults: { legacyInjectedUiSettingDefaults: true },
+          user: { legacyInjectedUiSettingUserValues: true },
+        },
+      }),
+    },
+  };
+}
 
 beforeEach(() => {
   store.clear();
 });
 
 describe('start', () => {
+  it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', () => {
+    const service = new ChromeService({ browserSupportsCsp: false });
+    const startDeps = defaultStartDeps();
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+    service.start(startDeps);
+    expect(startDeps.notifications.toasts.addWarning).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "Your browser does not meet the basic security requirements of this installation of Kibana.",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`);
+  });
+
+  it('does not add legacy browser warning if browser supports CSP', () => {
+    const service = new ChromeService({ browserSupportsCsp: true });
+    const startDeps = defaultStartDeps();
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+    service.start(startDeps);
+    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
+  it('does not add legacy browser warning if warnLegacyBrowsers is disabled', () => {
+    const service = new ChromeService({ browserSupportsCsp: false });
+    const startDeps = defaultStartDeps();
+    startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: false });
+    service.start(startDeps);
+    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
   describe('brand', () => {
     it('updates/emits the brand as it changes', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getBrand$()
         .pipe(toArray())
@@ -88,7 +130,7 @@ Array [
   describe('visibility', () => {
     it('updates/emits the visibility', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getIsVisible$()
         .pipe(toArray())
@@ -113,7 +155,7 @@ Array [
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getIsVisible$()
         .pipe(toArray())
@@ -138,7 +180,7 @@ Array [
   describe('is collapsed', () => {
     it('updates/emits isCollapsed', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getIsCollapsed$()
         .pipe(toArray())
@@ -161,7 +203,7 @@ Array [
 
     it('only stores true in localStorage', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
 
       start.setIsCollapsed(true);
       expect(store.size).toBe(1);
@@ -174,7 +216,7 @@ Array [
   describe('application classes', () => {
     it('updates/emits the application classes', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getApplicationClasses$()
         .pipe(toArray())
@@ -226,7 +268,7 @@ Array [
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getBreadcrumbs$()
         .pipe(toArray())
@@ -268,7 +310,7 @@ Array [
   describe('help extension', () => {
     it('updates/emits the current help extension', async () => {
       const service = new ChromeService({ browserSupportsCsp: true });
-      const start = service.start(defaultStartDeps);
+      const start = service.start(defaultStartDeps());
       const promise = start
         .getHelpExtension$()
         .pipe(toArray())
@@ -292,7 +334,7 @@ Array [
 describe('stop', () => {
   it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const service = new ChromeService({ browserSupportsCsp: true });
-    const start = service.start(defaultStartDeps);
+    const start = service.start(defaultStartDeps());
     const promise = Rx.combineLatest(
       start.getBrand$(),
       start.getApplicationClasses$(),
@@ -308,7 +350,7 @@ describe('stop', () => {
 
   it('completes immediately if service already stopped', async () => {
     const service = new ChromeService({ browserSupportsCsp: true });
-    const start = service.start(defaultStartDeps);
+    const start = service.start(defaultStartDeps());
     service.stop();
 
     await expect(
