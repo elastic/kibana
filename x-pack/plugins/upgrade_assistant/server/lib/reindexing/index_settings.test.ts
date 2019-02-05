@@ -163,21 +163,16 @@ describe('transformFlatSettings', () => {
 });
 
 describe('parseIndexName', () => {
-  it('parases internal indices', () => {
-    const { isInternal, baseName } = parseIndexName('.watches');
-    expect(isInternal).toBe(true);
-    expect(baseName).toBe('watches');
+  it('parses internal indices', () => {
+    expect(parseIndexName('.watches').baseName).toBe('watches');
   });
 
   it('parses non-internal indices', () => {
-    const { isInternal, baseName } = parseIndexName('myIndex');
-    expect(isInternal).toBe(false);
-    expect(baseName).toBe('myIndex');
+    expect(parseIndexName('myIndex').baseName).toBe('myIndex');
   });
 
-  it('excludes appened v5 reindexing string from newIndexName', () => {
+  it('excludes appeneded v5 reindexing string from newIndexName', () => {
     expect(parseIndexName('myIndex-reindexed-v5')).toEqual({
-      isInternal: false,
       baseName: 'myIndex-reindexed-v5',
       cleanBaseName: 'myIndex',
       cleanIndexName: 'myIndex',
@@ -185,7 +180,6 @@ describe('parseIndexName', () => {
     });
 
     expect(parseIndexName('.myInternalIndex-reindexed-v5')).toEqual({
-      isInternal: true,
       baseName: 'myInternalIndex-reindexed-v5',
       cleanBaseName: 'myInternalIndex',
       cleanIndexName: '.myInternalIndex',
@@ -195,7 +189,6 @@ describe('parseIndexName', () => {
 
   it('replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION} in newIndexName', () => {
     expect(parseIndexName(`myIndex-reindexed-v${PREV_MAJOR_VERSION}`)).toEqual({
-      isInternal: false,
       baseName: `myIndex-reindexed-v${PREV_MAJOR_VERSION}`,
       cleanBaseName: 'myIndex',
       cleanIndexName: 'myIndex',
@@ -203,7 +196,6 @@ describe('parseIndexName', () => {
     });
 
     expect(parseIndexName(`.myInternalIndex-reindexed-v${PREV_MAJOR_VERSION}`)).toEqual({
-      isInternal: true,
       baseName: `myInternalIndex-reindexed-v${PREV_MAJOR_VERSION}`,
       cleanBaseName: 'myInternalIndex',
       cleanIndexName: '.myInternalIndex',

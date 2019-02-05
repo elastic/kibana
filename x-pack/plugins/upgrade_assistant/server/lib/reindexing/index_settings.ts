@@ -13,7 +13,6 @@ import { ReindexWarning } from '../../../common/types';
 import { FlatSettings, MappingProperties, TypeMapping } from './types';
 
 export interface ParsedIndexName {
-  isInternal: boolean;
   cleanIndexName: string;
   baseName: string;
   newIndexName: string;
@@ -37,7 +36,7 @@ export const transformFlatSettings = (flatSettings: FlatSettings) => {
  */
 export const parseIndexName = (indexName: string): ParsedIndexName => {
   const matches = indexName.match(/^([\.])?(.*)$/) || [];
-  const isInternal = matches[1] === '.';
+  const internal = matches[1] || '';
   const baseName = matches[2];
 
   const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
@@ -49,11 +48,10 @@ export const parseIndexName = (indexName: string): ParsedIndexName => {
   const cleanBaseName = baseName.replace(reindexedMatcher, '');
 
   return {
-    isInternal,
-    cleanIndexName: `${isInternal ? '.' : ''}${cleanBaseName}`,
+    cleanIndexName: `${internal}${cleanBaseName}`,
     baseName,
     cleanBaseName,
-    newIndexName: `${isInternal ? '.' : ''}${currentVersion}-${cleanBaseName}`,
+    newIndexName: `${internal}${currentVersion}-${cleanBaseName}`,
   };
 };
 
