@@ -59,8 +59,8 @@ function getProviderOptions(server) {
  */
 function getProviderSpecificOptions(server, providerName) {
   const config = server.config();
-  if (config.has(`xpack.security.${providerName}`)) {
-    return config.get(`xpack.security.${providerName}`);
+  if (config.has(`xpack.security.auth.${providerName}`)) {
+    return config.get(`xpack.security.auth.${providerName}`);
   } else {
     return {};
   }

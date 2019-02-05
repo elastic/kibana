@@ -154,8 +154,7 @@ export class OpenIdConnectAuthenticationProvider {
     // then something unexpected happened and we should fail because Elasticsearch won't be able to validate the
     // response.
     const { nonce: stateNonce, state: stateOidcState, nextURL: stateRedirectURL } = sessionState || {};
-    this._options.log(['debug', 'security', 'oidc-SESSIONSTATE'], sessionState);
-    if (sessionState && (!stateNonce || !stateOidcState || !stateRedirectURL)) {
+    if (!sessionState || (!stateNonce || !stateOidcState || !stateRedirectURL)) {
       const message = 'Response session state does not have corresponding state or nonce parameters or redirect URL.';
       this._options.log(['debug', 'security', 'oidc'], message);
 
@@ -182,7 +181,7 @@ export class OpenIdConnectAuthenticationProvider {
         { accessToken, refreshToken }
       );
     } catch (err) {
-      console.log(
+      this._options.log(
         ['debug', 'security', 'oidc'],
         `Failed to authenticate request via OpenIdConnect: ${err.message}`
       );
@@ -390,7 +389,7 @@ export class OpenIdConnectAuthenticationProvider {
       // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
       if (isInvalidRefreshTokenError(err)) {
         if (canRedirectRequest(request)) {
-          console.log(
+          this._options.log(
             ['debug', 'security', 'oidc'],
             'Both access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
           );
