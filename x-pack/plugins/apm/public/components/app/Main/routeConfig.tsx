@@ -68,20 +68,6 @@ export const routes: Route[] = [
     switchRoutes: [
       {
         exact: true,
-        path: '/invalid-license',
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.invalidLicenseTitle', {
-          defaultMessage: 'Invalid License'
-        }),
-        render: () => (
-          <div>
-            {i18n.translate('xpack.apm.invalidLicenseLabel', {
-              defaultMessage: 'Invalid license'
-            })}
-          </div>
-        )
-      },
-      {
-        exact: true,
         path: '/services',
         component: Home,
         breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {

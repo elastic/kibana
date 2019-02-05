@@ -7,35 +7,32 @@
 import { PROCESSOR_EVENT } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-interface ServerStatusESResponse {
-  hits: {
-    hits: Array<{
-      observer: {
-        listening: string;
-        hostname: string;
-        id: string;
-        ephemeral_id: string;
-        type: string;
-        version: string;
-        version_major: number;
-      };
-      '@timestamp': string;
-      ecs: {
-        version: string;
-      };
-      host: {
-        name: string;
-      };
-      processor: {
-        name: 'onboarding';
-        event: 'onboarding';
-      };
-    }>;
+interface APMServerOnboardingDocument {
+  observer: {
+    listening: string;
+    hostname: string;
+    id: string;
+    ephemeral_id: string;
+    type: string;
+    version: string;
+    version_major: number;
+  };
+  '@timestamp': string;
+  ecs: {
+    version: string;
+  };
+  host: {
+    name: string;
+  };
+  processor: {
+    name: 'onboarding';
+    event: 'onboarding';
   };
 }
+
 export interface ServerStatusAPIResponse {
   dataFound: boolean;
-  latest?: ServerStatusESResponse['hits']['hits'][0];
+  latest: APMServerOnboardingDocument | null;
 }
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
@@ -55,10 +52,11 @@ export async function getServerStatus({ setup }: { setup: Setup }) {
     }
   };
 
-  const resp = await client<ServerStatusESResponse>('search', params);
+  const resp = await client<APMServerOnboardingDocument>('search', params);
+  const latest = resp.hits.hits[0] ? resp.hits.hits[0]._source : null;
 
   return {
     dataFound: resp.hits.total >= 1,
-    latest: resp.hits.hits[0] && resp.hits.hits[0]._source
+    latest
   };
 }
