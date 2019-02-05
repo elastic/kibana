@@ -94,14 +94,21 @@ export const registerFollowerIndexRoutes = (server) => {
           throw(error);
         }
 
-        const {
-          indices: followerIndicesStats
-        } = await callWithRequest('ccr.followerIndexStats', { id });
+        // If this follower is paused, skip call to ES stats api since it will return 404
+        if(followerIndexInfo.status === 'paused') {
+          return deserializeFollowerIndex({
+            ...followerIndexInfo
+          });
+        } else {
+          const {
+            indices: followerIndicesStats
+          } = await callWithRequest('ccr.followerIndexStats', { id });
 
-        return deserializeFollowerIndex({
-          ...followerIndexInfo,
-          ...(followerIndicesStats ? followerIndicesStats[0] : {})
-        });
+          return deserializeFollowerIndex({
+            ...followerIndexInfo,
+            ...(followerIndicesStats ? followerIndicesStats[0] : {})
+          });
+        }
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
