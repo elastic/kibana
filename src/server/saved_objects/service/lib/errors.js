@@ -50,6 +50,15 @@ export function isBadRequestError(error) {
   return error && error[code] === CODE_BAD_REQUEST;
 }
 
+// 400 - invalid version
+const CODE_INVALID_VERSION = 'SavedObjectsClient/invalidVersion';
+export function createInvalidVersionError(versionInput) {
+  return decorate(Boom.badRequest(`Invalid version [${versionInput}]`), CODE_INVALID_VERSION, 400);
+}
+export function isInvalidVersionError(error) {
+  return error && error[code] === CODE_INVALID_VERSION;
+}
+
 
 // 401 - Not Authorized
 const CODE_NOT_AUTHORIZED = 'SavedObjectsClient/notAuthorized';

@@ -18,7 +18,8 @@ ClientMock.prototype.index = function (params = {}) {
     _index: params.index || 'index',
     _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
     _id: params.id || uniqueId('testDoc'),
-    _version: 1,
+    _seq_no: 1,
+    _primary_term: 1,
     _shards: { total: shardCount, successful: shardCount, failed: 0 },
     created: true
   });
@@ -53,7 +54,8 @@ ClientMock.prototype.get = function (params = {}, source = {}) {
     _index: params.index || 'index',
     _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
     _id: params.id || 'AVRPRLnlp7Ur1SZXfT-T',
-    _version: params.version || 1,
+    _seq_no: params._seq_no || 1,
+    _primary_term: params._primary_term || 1,
     found: true,
     _source: _source
   });
@@ -65,7 +67,8 @@ ClientMock.prototype.search = function (params = {}, count = 5, source = {}) {
       _index: params.index || 'index',
       _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
       _id: uniqueId('documentId'),
-      _version: random(1, 5),
+      _seq_no: random(1, 5),
+      _primar_term: random(1, 5),
       _score: null,
       _source: {
         created_at: new Date().toString(),
@@ -96,7 +99,8 @@ ClientMock.prototype.update = function (params = {}) {
     _index: params.index || 'index',
     _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
     _id: params.id || uniqueId('testDoc'),
-    _version: params.version + 1 || 2,
+    _seq_no: params.if_seq_no + 1 || 2,
+    _primary_term: params.if_primary_term + 1 || 2,
     _shards: { total: shardCount, successful: shardCount, failed: 0 },
     created: true
   });

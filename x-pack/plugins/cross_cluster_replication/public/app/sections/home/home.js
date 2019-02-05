@@ -4,130 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { BASE_PATH } from '../../../../common/constants';
 
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
-  EuiText,
+  EuiTab,
+  EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
 
+import { BASE_PATH } from '../../../../common/constants';
 import { listBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
-import { SectionUnauthorized } from '../../components';
+import { FollowerIndicesList } from './follower_indices_list';
 
 export const CrossClusterReplicationHome = injectI18n(
   class extends PureComponent {
-    static propTypes = {
-      autoFollowPatterns: PropTypes.array,
+    state = {
+      activeSection: 'follower_indices'
     }
 
-    state = {
-      sectionActive: 'auto-follow'
-    }
+    tabs = [{
+      id: 'follower_indices',
+      name: (
+        <FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
+          defaultMessage="Follower indices"
+        />
+      )
+    }, {
+      id: 'auto_follow_patterns',
+      name: (
+        <FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
+          defaultMessage="Auto-follow patterns"
+        />
+      )
+    }]
 
     componentDidMount() {
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
     }
 
-    getHeaderSection() {
-      const { isAutoFollowApiAuthorized, autoFollowPatterns } = this.props;
-
-      // We want to show the title when the user isn't authorized.
-      if (isAutoFollowApiAuthorized && !autoFollowPatterns.length) {
-        return null;
-      }
-
-      return (
-        <Fragment>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                defaultMessage="Cross Cluster Replication"
-              />
-            </h1>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
-                    defaultMessage="Auto-follow patterns"
-                  />
-                </h2>
-              </EuiTitle>
-
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
-                      cluster to follower indices on the local cluster."
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              {isAutoFollowApiAuthorized && (
-                <EuiButton
-                  {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
-                  fill
-                >
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.addAutofollowPatternButtonLabel"
-                    defaultMessage="Create an auto-follow pattern"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer />
-        </Fragment>
-      );
+    static getDerivedStateFromProps(props) {
+      const { match: { params: { section } } } = props;
+      return {
+        activeSection: section
+      };
     }
 
-    getUnauthorizedSection() {
-      const { isAutoFollowApiAuthorized } = this.props;
-      if (!isAutoFollowApiAuthorized) {
-        return (
-          <SectionUnauthorized>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
-              defaultMessage="You do not have permission to view or add auto-follow patterns."
-            />
-          </SectionUnauthorized>
-        );
-      }
+    onSectionChange = (section) => {
+      routing.navigate(`/${section}`);
     }
 
     render() {
       return (
         <EuiPageBody>
-          <EuiPageContent
-            horizontalPosition="center"
-          >
-            {this.getHeaderSection()}
-            {this.getUnauthorizedSection()}
+          <EuiPageContent>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
+                  defaultMessage="Cross Cluster Replication"
+                />
+              </h1>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            <EuiTabs>
+              {this.tabs.map(tab => (
+                <EuiTab
+                  onClick={() => this.onSectionChange(tab.id)}
+                  isSelected={tab.id === this.state.activeSection}
+                  key={tab.id}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+
+            <EuiSpacer size="m" />
+
             <Switch>
+              <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
               <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
             </Switch>
           </EuiPageContent>

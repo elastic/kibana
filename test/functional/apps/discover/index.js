@@ -25,7 +25,7 @@ export default function ({ getService, loadTestFile }) {
     this.tags('ciGroup6');
 
     before(function () {
-      return browser.setWindowSize(1200, 800);
+      return browser.setWindowSize(1300, 800);
     });
 
     after(function unloadMakelogs() {

@@ -28,10 +28,20 @@ exports[`ChecklistFlyout renders 1`] = `
       </h3>
     </EuiTitle>
     <Component
-      errorMessage={null}
-      lastCompletedStep={20}
-      reindexStatus={0}
-      reindexTaskPercComplete={null}
+      cancelReindex={[MockFunction]}
+      reindexState={
+        Object {
+          "errorMessage": null,
+          "hasRequiredPrivileges": true,
+          "lastCompletedStep": undefined,
+          "loadingState": 1,
+          "reindexTaskPercComplete": null,
+          "reindexWarnings": Array [
+            0,
+          ],
+          "status": undefined,
+        }
+      }
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -65,14 +75,14 @@ exports[`ChecklistFlyout renders 1`] = `
       >
         <EuiButton
           color="primary"
-          disabled={true}
+          disabled={false}
           fill={true}
           iconSide="left"
-          isLoading={true}
+          isLoading={false}
           onClick={[MockFunction]}
           type="button"
         >
-          Reindexing…
+          Run reindex
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

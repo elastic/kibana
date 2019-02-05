@@ -63,8 +63,8 @@ window.scrollTo = jest.fn();
 window.TextEncoder = null;
 let component;
 const activatePhase = (rendered, phase) => {
-  const testSubject = `activatePhaseButton-${phase}`;
-  findTestSubject(rendered, testSubject).simulate('click');
+  const testSubject = `enablePhaseSwitch-${phase}`;
+  findTestSubject(rendered, testSubject).simulate('change', { target: { checked: true } });
   rendered.update();
 };
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
