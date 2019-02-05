@@ -10,7 +10,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE
-} from '../../../../common/constants';
+} from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
 export async function calculateBucketSize(
@@ -30,7 +30,7 @@ export async function calculateBucketSize(
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
+            { term: { [TRANSACTION_NAME]: transactionName } },
             {
               range: {
                 '@timestamp': {

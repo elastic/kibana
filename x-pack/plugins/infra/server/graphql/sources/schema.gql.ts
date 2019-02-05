@@ -12,7 +12,7 @@ export const sourcesSchema = gql`
     "The id of the source"
     id: ID!
     "The version number the source configuration was last persisted with"
-    version: Float
+    version: String
     "The timestamp the source configuration was last persisted at"
     updatedAt: Float
     "The raw configuration of the source"
