@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
 
 import {
@@ -38,7 +38,7 @@ import { ContextMenu } from '../context_menu';
 
 import { API_STATUS } from '../../../../../constants';
 
-export class DetailPanelUi extends Component {
+export class DetailPanel extends Component {
   static propTypes = {
     apiStatus: PropTypes.string,
     followerIndexId: PropTypes.string,
@@ -518,5 +518,3 @@ export class DetailPanelUi extends Component {
     );
   }
 }
-
-export const DetailPanel = injectI18n(DetailPanelUi);
