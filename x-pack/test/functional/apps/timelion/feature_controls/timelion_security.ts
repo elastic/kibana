@@ -10,7 +10,6 @@ import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
   const find = getService('find');
   const appsMenu = getService('appsMenu');
