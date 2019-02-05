@@ -7,13 +7,6 @@ exports[`EmptyState component doesn't render child components when count is fals
       <React.Fragment>
         <p>
           <FormattedMessage
-            defaultMessage="There is no uptime data available."
-            id="xpack.uptime.emptyState.noDataDescription"
-            values={Object {}}
-          />
-        </p>
-        <p>
-          <FormattedMessage
             defaultMessage="{configureHeartbeatLink} to start logging uptime data."
             id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
             values={
@@ -44,7 +37,7 @@ exports[`EmptyState component doesn't render child components when count is fals
       >
         <h3>
           <FormattedMessage
-            defaultMessage="No Uptime Data"
+            defaultMessage="No uptime data available"
             id="xpack.uptime.emptyState.noDataTitle"
             values={Object {}}
           />
