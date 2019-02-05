@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@kbn/i18n": "1.0.0",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
+    "lodash3": "npm:@elastic/lodash@3.10.1-kibana1",
     "socket.io-client": "^2.1.1",
     "uuid": "3.0.1"
   },

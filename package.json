@@ -169,7 +169,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.1.0",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash3": "npm:@elastic/lodash@3.10.1-kibana1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "mini-css-extract-plugin": "0.4.4",
