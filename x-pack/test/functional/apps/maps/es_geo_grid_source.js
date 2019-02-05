@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }) {
           beforeTimestamp = await getRequestTimestamp();
         });
 
-        it('should not rerequest when pan changes do not cause geotile_grid precision to change', async () => {
+        it('should not rerequest when pan changes do not move map view area outside of buffer', async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT + 10, DATA_CENTER_LON + 10, 1);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);

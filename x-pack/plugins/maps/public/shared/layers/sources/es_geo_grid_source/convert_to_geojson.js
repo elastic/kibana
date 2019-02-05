@@ -19,12 +19,8 @@ export function convertToGeoJson({ table, renderAs }) {
   }
 
   const geoGridColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geotile_grid');
-
   if (!geoGridColumn) {
-    return {
-      type: 'FeatureCollection',
-      features: []
-    };
+    return EMPTY_FEATURE_COLLECTION;
   }
 
   const metricColumns = table.columns.filter(column => {
@@ -32,6 +28,9 @@ export function convertToGeoJson({ table, renderAs }) {
       && column.aggConfig.type.dslName !== 'geo_centroid';
   });
   const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
+  if (!geocentroidColumn) {
+    return EMPTY_FEATURE_COLLECTION;
+  }
 
   const features = [];
   table.rows.forEach(row => {
