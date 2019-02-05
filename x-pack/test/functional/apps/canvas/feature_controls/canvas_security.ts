@@ -210,7 +210,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           'no_canvas_privileges_user-password',
           {
             expectSpaceSelector: false,
-            shouldLoginIfPrompted: false,
           }
         );
       });
