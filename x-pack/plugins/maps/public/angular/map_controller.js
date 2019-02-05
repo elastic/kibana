@@ -217,7 +217,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     try {
       id = await savedMap.save(saveOptions);
-      docTitle.change(`[${savedMap.title}] Maps`);
+      docTitle.change(`${savedMap.title}`);
     } catch(err) {
       toastNotifications.addDanger({
         title: `Error on saving '${savedMap.title}'`,
