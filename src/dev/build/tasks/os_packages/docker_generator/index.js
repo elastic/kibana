@@ -17,5 +17,4 @@
  * under the License.
  */
 
-require('../../../../../../../setup_node_env');
-require('./worker');
+export * from './run';

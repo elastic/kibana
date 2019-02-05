@@ -42,11 +42,11 @@ export class HeatmapStyle {
   setMBPaintProperties({ alpha, mbMap, layerId, propertyName, resolution }) {
     let radius;
     if (resolution === GRID_RESOLUTION.COARSE) {
-      radius = 64;
+      radius = 128;
     } else if (resolution === GRID_RESOLUTION.FINE) {
-      radius = 32;
+      radius = 64;
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
-      radius = 16;
+      radius = 32;
     } else {
       throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
     }
