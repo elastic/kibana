@@ -1,12 +1,12 @@
 {
   "groups": ["apache"],
-  "description": "HTTP Access Logs: Detect low request rate (ECS)",
+  "description": "HTTP Access Logs: Detect low request rates (ECS)",
   "analysis_config" : {
     "bucket_span": "15m",
     "summary_count_field_name": "doc_count",
     "detectors": [
       {
-        "detector_description": "apache_access_low_request_rate",
+        "detector_description": "Apache access low request rate",
         "function": "low_count"
       }
     ],

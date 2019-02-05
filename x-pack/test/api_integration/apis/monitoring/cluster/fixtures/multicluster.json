@@ -110,6 +110,7 @@
         "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
       }
     },
+    "isCcrEnabled": true,
     "isPrimary": false,
     "status": "green"
   },
@@ -225,6 +226,7 @@
       "medium": 1,
       "high": 0
     },
+    "isCcrEnabled": true,
     "isPrimary": false,
     "status": "yellow"
   },
@@ -338,6 +340,7 @@
         "enabled": true
       }
     },
+    "isCcrEnabled": true,
     "isPrimary": false,
     "status": "green"
   }
