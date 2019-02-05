@@ -442,7 +442,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         selectedJobs,
         swimlaneLimit,
         swimlaneViewByFieldName,
-        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        influencersFilterQuery
       };
 
       return new Promise((resolve) => {
@@ -804,9 +805,16 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     viewByChangeHandler = e => this.setSwimlaneViewBy(e.target.value);
     setSwimlaneViewBy = (swimlaneViewByFieldName) => {
+      let maskAll = false;
+
+      if (this.state.influencersFilterQuery !== undefined) {
+        maskAll = (swimlaneViewByFieldName === VIEW_BY_JOB_LABEL ||
+          this.state.filteredFields.includes(swimlaneViewByFieldName) === false);
+      }
+
       this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
       this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
-      this.setState({ swimlaneViewByFieldName }, () => {
+      this.setState({ swimlaneViewByFieldName, maskAll }, () => {
         this.updateExplorer({
           swimlaneViewByFieldName,
           ...getClearedSelectedAnomaliesState(),

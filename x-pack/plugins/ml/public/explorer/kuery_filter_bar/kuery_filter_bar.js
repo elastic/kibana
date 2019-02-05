@@ -63,8 +63,13 @@ export class KueryFilterBar extends Component {
         return;
       }
       // TODO: do some cleanup on what gets returned in this array (Remove bools, etc)
+      // Test that all relevant values get returned
       if (ast && Array.isArray(ast.arguments)) {
-        filteredFields = ast.arguments.map(arg => arg.value);
+        filteredFields = ast.arguments.map(arg => {
+          if (typeof arg.value === 'string') {
+            return arg.value;
+          }
+        });
       }
 
       onSubmit(query, filteredFields);
