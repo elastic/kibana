@@ -396,13 +396,13 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
         const editAnnotationsTooltipText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltip"
-            defaultMessage="Edit Annotation"
+            defaultMessage="Edit annotation"
           />
         );
         const editAnnotationsTooltipAriaLabelText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel"
-            defaultMessage="Edit Annotation"
+            defaultMessage="Edit annotation"
           />
         );
         return (
