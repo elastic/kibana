@@ -195,6 +195,7 @@ export interface DeprecationInfo {
 
 export interface DeprecationAPIResponse {
   cluster_settings: DeprecationInfo[];
+  ml_settings: DeprecationInfo[];
   node_settings: DeprecationInfo[];
   index_settings: {
     [indexName: string]: DeprecationInfo[];

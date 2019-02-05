@@ -165,8 +165,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should preserve saved axis titles after a vis is saved and reopened', async function () {
         await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
-        await PageObjects.visualize.loadSavedVisualization(visName);
         await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.loadSavedVisualization(visName);
+        await PageObjects.visualize.waitForRenderingCount();
         await PageObjects.visualize.clickData();
         await PageObjects.visualize.toggleOpenEditor(1);
         await PageObjects.visualize.setCustomLabel('test', 1);

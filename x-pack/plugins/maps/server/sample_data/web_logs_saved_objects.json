@@ -1,29 +1,16 @@
 [
   {
-    "id" : "map:40298610-039e-11e9-b546-bdfedfa6a4c0",
-    "type": "map",
-    "updated_at" : "2018-12-19T14:56:22.769Z",
-    "version": 1,
-    "migrationVersion": {},
-    "attributes" : {
-      "title" : "[Logs] Web Traffic",
-      "description" : "",
-      "mapStateJSON" : "{\"zoom\":3.92,\"center\":{\"lon\":-83.95443,\"lat\":38.02463},\"timeFilters\":{\"from\":\"now-7d\",\"to\":\"now\"}}",
-      "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"alpha\":1,\"minZoom\":0,\"maxZoom\":24},{\"id\":\"ajk2l\",\"label\":\"logs(heatmap)\",\"alpha\":1,\"minZoom\":0,\"maxZoom\":9,\"sourceDescriptor\":{\"resolution\": \"COARSE\", \"type\":\"ES_GEO_GRID\",\"id\":\"60c5dffb-7fca-431c-b1f0-9cc2e6697e8c\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{\"alphaValue\":0.75},\"previousStyle\":null},\"type\":\"HEATMAP\"},{\"id\":\"6hgh2\",\"label\":\"logs(documents)\",\"alpha\":1,\"minZoom\":7,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"541f2ca1-6a0f-4937-8846-a589222b7f28\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[\"timestamp\",\"clientip\",\"url\"]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":0.75},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
-      "uiStateJSON" : "{\"isDarkMode\":false}",
-      "bounds" : {
-        "type" : "envelope",
-        "coordinates" : [
-          [
-            -117.8416,
-            51.03159
-          ],
-          [
-            -50.06726,
-            22.22805
-          ]
-        ]
-      }
+    "id":"de71f4f0-1902-11e9-919b-ffe5949a18d2",
+    "type":"map",
+    "updated_at":"2019-01-15T20:30:25.436Z",
+    "version":5,
+    "attributes":{
+      "title":"[Logs] Total Requests and Bytes",
+      "description":"",
+      "mapStateJSON":"{\"zoom\":3.64,\"center\":{\"lon\":-88.92107,\"lat\":42.16337},\"timeFilters\":{\"from\":\"now-7d\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"}}",
+      "layerListJSON":"[{\"id\":\"0hmz5\",\"alpha\":1,\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"edh66\",\"label\":\"Total Requests by Country\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.5,\"sourceDescriptor\":{\"type\":\"EMS_FILE\",\"id\":\"world_countries\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"count of kibana_sample_data_logs:geo.src\",\"name\":\"__kbnjoin__count_groupby_kibana_sample_data_logs.geo.src\",\"origin\":\"join\"},\"color\":\"Greys\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"iso2\",\"right\":{\"id\":\"673ff994-fc75-4c67-909b-69fcb0e1060e\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"indexPatternTitle\":\"kibana_sample_data_logs\",\"term\":\"geo.src\"}}]},{\"id\":\"gaxya\",\"label\":\"Actual Requests\",\"minZoom\":9,\"maxZoom\":24,\"alpha\":1,\"sourceDescriptor\":{\"id\":\"b7486535-171b-4d3b-bb2e-33c1a0a2854c\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[\"clientip\",\"timestamp\",\"host\",\"request\",\"response\",\"machine.os\",\"agent\",\"bytes\"]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#2200ff\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":2}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\"},\"minSize\":1,\"maxSize\":23}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"},{\"id\":\"tfi3f\",\"label\":\"Total Requests and Bytes\",\"minZoom\":0,\"maxZoom\":9,\"alpha\":1,\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"resolution\":\"COARSE\",\"id\":\"8aaa65b5-a4e9-448b-9560-c98cb1c5ac5b\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"geoField\":\"geo.coordinates\",\"requestType\":\"point\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"sum\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"sum of bytes\",\"name\":\"sum_of_bytes\",\"origin\":\"source\"},\"minSize\":1,\"maxSize\":25}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+      "uiStateJSON":"{\"isDarkMode\":false}",
+      "bounds":{"type":"envelope","coordinates":[[-124.45342,54.91445],[-53.38872,26.21461]]}
     }
   }
 ]
