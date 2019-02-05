@@ -31,6 +31,7 @@ export const APIClient = axios.create({
 
 export interface ReindexState {
   loadingState: LoadingState;
+  cancelLoadingState?: LoadingState;
   lastCompletedStep?: ReindexStep;
   status?: ReindexStatus;
   reindexTaskPercComplete: number | null;
@@ -103,6 +104,7 @@ export class ReindexPollingService {
         status: ReindexStatus.inProgress,
         reindexTaskPercComplete: null,
         errorMessage: null,
+        cancelLoadingState: undefined,
       });
       const { data } = await APIClient.post<ReindexOperation>(
         chrome.addBasePath(`/api/upgrade_assistant/reindex/${this.indexName}`)
@@ -115,16 +117,35 @@ export class ReindexPollingService {
     }
   };
 
+  public cancelReindex = async () => {
+    try {
+      this.status$.next({
+        ...this.status$.value,
+        cancelLoadingState: LoadingState.Loading,
+      });
+
+      await APIClient.post(
+        chrome.addBasePath(`/api/upgrade_assistant/reindex/${this.indexName}/cancel`)
+      );
+    } catch (e) {
+      this.status$.next({
+        ...this.status$.value,
+        cancelLoadingState: LoadingState.Error,
+      });
+    }
+  };
+
   private updateWithResponse = ({
     reindexOp,
     warnings,
     hasRequiredPrivileges,
     indexGroup,
   }: StatusResponse) => {
+    const currentValue = this.status$.value;
     // Next value should always include the entire state, not just what changes.
     // We make a shallow copy as a starting new state.
     const nextValue = {
-      ...this.status$.value,
+      ...currentValue,
       // If we're getting any updates, set to success.
       loadingState: LoadingState.Success,
     };
@@ -142,10 +163,15 @@ export class ReindexPollingService {
     }
 
     if (reindexOp) {
+      // Prevent the UI flickering back to inProgres after cancelling.
       nextValue.lastCompletedStep = reindexOp.lastCompletedStep;
       nextValue.status = reindexOp.status;
       nextValue.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
       nextValue.errorMessage = reindexOp.errorMessage;
+
+      if (reindexOp.status === ReindexStatus.cancelled) {
+        nextValue.cancelLoadingState = LoadingState.Success;
+      }
     }
 
     this.status$.next(nextValue);
