@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
 import { Brand } from '../../../core/public/chrome';
 import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';
 import { ChromeNavLinks } from './api/nav';
-import SavedObjectsClient = Legacy.SavedObjectsClient;
 
 interface IInjector {
   get<T>(injectable: string): T;
