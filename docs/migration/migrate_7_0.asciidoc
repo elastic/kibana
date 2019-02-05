@@ -126,7 +126,6 @@ Previously set `xpack.monitoring.elasticsearch.ssl.verify` is equal to `xpack.mo
 *Impact:* The logging.useUTC flag will have to be replaced with a timezone id.  If set to true the id is `UTC`.
 
 [float]
-<<<<<<< HEAD
 === kibana.yml setting `elasticsearch.url` sets port based on protocol
 *Details:* In prior versions of Kibana, if no port was specified in `elasticsearch.url` a default of 9200 was chosen.
 The port is now protocol dependent: https ports will use 443, and http ports will use 80.
@@ -139,8 +138,6 @@ The port is now protocol dependent: https ports will use 443, and http ports wil
 
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
-=======
->>>>>>> master
 === kibana.yml setting `server.ssl.supportedProtocols` excludes TLSv1 by default
 *Details:* TLSv1 support has been removed by default, it's still possible to opt-in to TLSv1 support by explicitly setting
 `server.ssl.supportedProtocols`
