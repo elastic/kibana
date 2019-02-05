@@ -64,7 +64,7 @@ describe('start', () => {
 [MockFunction] {
   "calls": Array [
     Array [
-      "Your browser does not meet the security requirements for Kibana",
+      "Your browser does not meet the security requirements for Kibana.",
     ],
   ],
   "results": Array [
