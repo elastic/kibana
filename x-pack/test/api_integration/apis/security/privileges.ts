@@ -248,6 +248,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:index-pattern/bulk_get',
                   'saved_object:index-pattern/get',
                   'saved_object:index-pattern/find',
+                  'ui:timelion/showWriteControls',
                   'ui:navLinks/timelion',
                   'ui:catalogue/timelion',
                 ],
