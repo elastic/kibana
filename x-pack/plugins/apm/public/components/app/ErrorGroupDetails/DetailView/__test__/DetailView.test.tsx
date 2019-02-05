@@ -85,7 +85,7 @@ describe('DetailView', () => {
           url: { full: 'myUrl' },
           service: { name: 'myService' },
           user: { id: 'myUserId' },
-          error: { exception: { handled: true } },
+          error: { exception: [{ handled: true }] },
           transaction: { id: 'myTransactionId', sampled: true }
         } as APMError
       }

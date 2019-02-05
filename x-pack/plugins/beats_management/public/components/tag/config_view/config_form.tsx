@@ -5,7 +5,6 @@
  */
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import Formsy from 'formsy-react';
 import { get } from 'lodash';
 import React from 'react';
@@ -19,7 +18,6 @@ import {
 } from '../../inputs';
 
 interface ComponentProps {
-  intl: InjectedIntl;
   values: ConfigurationBlock;
   schema: ConfigBlockSchema;
   id: string;
@@ -66,7 +64,6 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
     this.props.onSubmit(model);
   };
   public render() {
-    const { intl } = this.props;
     return (
       <div>
         <br />
@@ -151,8 +148,7 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
                     options={[
                       {
                         value: '',
-                        text: intl.formatMessage({
-                          id: 'xpack.beatsManagement.tagConfig.selectOptionLabel',
+                        text: i18n.translate('xpack.beatsManagement.table.selectOptionLabel', {
                           defaultMessage: 'Please Select An Option',
                         }),
                       },
@@ -215,4 +211,4 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
     );
   }
 }
-export const ConfigForm = injectI18n(ConfigFormUi, { withRef: true });
+export const ConfigForm = ConfigFormUi;

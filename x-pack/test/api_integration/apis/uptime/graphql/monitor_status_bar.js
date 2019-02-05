@@ -32,7 +32,6 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-
       expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
         monitorStatus
       );
