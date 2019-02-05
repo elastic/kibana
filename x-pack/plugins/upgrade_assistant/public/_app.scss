@@ -2,3 +2,7 @@ upgrade-assistant {
   flex-grow: 1;
   background-color: $euiColorLightestShade;
 }
+
+.upgradeAssistantRoot {
+  display: flex;
+}

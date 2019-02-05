@@ -13,10 +13,10 @@ import { NEXT_MAJOR_VERSION } from '../common/version';
 import { UpgradeAssistantTabs } from './components/tabs';
 
 export const RootComponent: React.StatelessComponent = () => (
-  <Fragment>
+  <div data-test-subj="upgradeAssistantRoot">
     <EuiPageHeader data-test-subj="upgradeAssistantRoot">
       <EuiPageHeaderSection>
-        <EuiTitle size="l">
+        <EuiTitle size="m">
           <h1>
             <FormattedMessage
               id="xpack.upgradeAssistant.appTitle"
@@ -28,5 +28,5 @@ export const RootComponent: React.StatelessComponent = () => (
       </EuiPageHeaderSection>
     </EuiPageHeader>
     <UpgradeAssistantTabs />
-  </Fragment>
+  </div>
 );
