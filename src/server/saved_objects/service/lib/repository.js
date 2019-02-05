@@ -23,7 +23,7 @@ import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
-import { decodeRequestVersion, encodeVersion, encodeHitVersion } from './version';
+import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
