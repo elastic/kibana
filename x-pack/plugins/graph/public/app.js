@@ -140,9 +140,6 @@ uiRoutes
 
 //========  Controller for basic UI ==================
 app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n, config) {
-
-  config.bindToScope($scope, 'k7design');
-
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
       .then(() => data);
