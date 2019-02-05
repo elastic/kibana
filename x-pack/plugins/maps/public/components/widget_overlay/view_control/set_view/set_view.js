@@ -34,7 +34,7 @@ export class SetView  extends React.Component {
   };
 
   _onChange = (name, evt) => {
-    const sanitizedValue = parseInt(evt.target.value, 10);
+    const sanitizedValue = parseFloat(evt.target.value);
     this.setState({
       [name]: isNaN(sanitizedValue) ? '' : sanitizedValue,
     });

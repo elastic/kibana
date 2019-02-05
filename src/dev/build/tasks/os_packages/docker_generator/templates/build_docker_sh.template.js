@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import boom from 'boom';
-import { API_ROUTE } from '../../common/constants';
+import dedent from 'dedent';
 
-export function getRequest(server, { headers }) {
-  const url = `${API_ROUTE}/ping`;
+function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
+  return dedent(`
+  #!/usr/bin/env bash
+  #
+  # ** THIS IS AN AUTO-GENERATED FILE **
+  #
+  set -euo pipefail
+  
+  docker pull centos:7
+  
+  echo "Building: kibana${ imageFlavor }-docker"; \\
+  docker build -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
 
-  return server
-    .inject({
-      method: 'POST',
-      url,
-      headers,
-    })
-    .then(res => {
-      if (res.statusCode !== 200) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.error(
-            new Error(`Auth request failed: [${res.statusCode}] ${res.result.message}`)
-          );
-        }
-        throw boom.unauthorized('Failed to authenticate socket connection');
-      }
-
-      return res.request;
-    });
+  docker save ${ imageTag }${ imageFlavor }:${ versionTag } | gzip -c > ${ dockerOutputDir }
+  
+  exit 0
+  `);
 }
+
+export const buildDockerSHTemplate = {
+  name: 'build_docker.sh',
+  generator,
+};
