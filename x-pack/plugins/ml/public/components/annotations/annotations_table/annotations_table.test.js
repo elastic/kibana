@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import jobConfig from '../../../common/types/__mocks__/job_config_farequote';
+import jobConfig from '../../../../common/types/__mocks__/job_config_farequote';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
@@ -17,13 +17,13 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => {}
 }));
 
-jest.mock('../../services/job_service', () => ({
+jest.mock('../../../services/job_service', () => ({
   mlJobService: {
     getJob: jest.fn()
   }
 }));
 
-jest.mock('../../services/ml_api_service', () => ({
+jest.mock('../../../services/ml_api_service', () => ({
   ml: {
     annotations: {
       getAnnotations: jest.fn().mockResolvedValue({ annotations: [] })

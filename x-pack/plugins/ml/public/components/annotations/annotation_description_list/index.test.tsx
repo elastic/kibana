@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mockAnnotations from '../../../components/annotations_table/__mocks__/mock_annotations.json';
+import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 
 import moment from 'moment-timezone';
 import React from 'react';

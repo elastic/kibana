@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import jobConfig from '../../../../common/types/__mocks__/job_config_farequote';
+import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote';
 
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { ml } from '../../../services/ml_api_service';
+import { ml } from '../../../../services/ml_api_service';
 
 describe('ML - <ml-annotation-table>', () => {
   let $scope;

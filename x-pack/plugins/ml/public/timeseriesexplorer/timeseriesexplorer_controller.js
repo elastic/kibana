@@ -15,7 +15,8 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
-import 'plugins/ml/components/annotations_table';
+import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
+import 'plugins/ml/components/annotations/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
@@ -53,6 +54,7 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
+import { annotationsRefresh$ } from '../services/annotations_service';
 
 
 import chrome from 'ui/chrome';
@@ -650,11 +652,13 @@ module.controller('MlTimeSeriesExplorerController', function (
   mlSelectIntervalService.state.watch(tableControlsListener);
   mlSelectSeverityService.state.watch(tableControlsListener);
 
+  const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
     mlSelectIntervalService.state.unwatch(tableControlsListener);
     mlSelectSeverityService.state.unwatch(tableControlsListener);
+    annotationsRefreshSub.unsubscribe();
   });
 
   // Listen for changes to job selection.
@@ -1006,5 +1010,4 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   $scope.initializeVis();
-
 });
