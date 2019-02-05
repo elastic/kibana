@@ -13,8 +13,7 @@ import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/s
 import { TransactionListRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionList';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-// @ts-ignore
-import List from './List';
+import { TransactionList } from './List';
 
 interface TransactionOverviewProps extends RouteComponentProps {
   urlParams: IUrlParams;
@@ -79,7 +78,9 @@ export class TransactionOverviewView extends React.Component<
 
         <TransactionListRequest
           urlParams={urlParams}
-          render={({ data }) => <List items={data} serviceName={serviceName} />}
+          render={({ data }) => (
+            <TransactionList items={data} serviceName={serviceName} />
+          )}
         />
       </React.Fragment>
     );
