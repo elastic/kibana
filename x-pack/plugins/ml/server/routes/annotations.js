@@ -18,7 +18,8 @@ import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 function getAnnotationsFeatureUnavailableErrorMessage() {
   return Boom.badRequest(
     i18n.translate('xpack.ml.routes.annotations.annotationsFeatureUnavailableErrorMessage', {
-      defaultMessage: 'Index and aliases required for the annotations feature have not been created.',
+      defaultMessage: 'Index and aliases required for the annotations feature have not been'
+        + ' created or are not accessible for the current user.',
     })
   );
 }
