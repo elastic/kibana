@@ -47,7 +47,6 @@ export function createDateOnServerFormat(FieldFormat) {
         }
 
         if (date.isValid()) {
-          console.log({ date: date.format(this._memoizedPattern) });
           return date.format(this._memoizedPattern);
         } else {
           return val;
