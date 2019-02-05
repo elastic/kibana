@@ -197,20 +197,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }
 
       idBuckets.forEach(bucket => {
-        const latest = get(bucket, 'latest.hits.hits', []);
-        return latest.forEach(
-          doc => {
-            const status = get(doc, '_source.monitor.status', null);
-            if (statusFilter && statusFilter !== status) {
-              if (status === 'up') {
-                up++;
-              } else {
-                down++;
-              }
-            }
-          },
-          { up: 0, down: 0 }
-        );
+        // We only get the latest doc
+        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
+        if (statusFilter && statusFilter !== status) {
+          if (status === 'up') {
+            up++;
+          } else {
+            down++;
+          }
+        }
       });
 
       searchAfter = get(queryResult, 'aggregations.ids.after_key');
