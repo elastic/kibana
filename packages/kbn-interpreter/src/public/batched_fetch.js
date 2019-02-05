@@ -20,7 +20,7 @@
 import { FUNCTIONS_URL } from './consts';
 
 /**
- * Create a function which executes a Canvas function on the
+ * Create a function which executes an Expression function on the
  * server as part of a larger batch of executions.
  */
 export function batchedFetch({ kfetch, serialize, ms = 10 }) {
