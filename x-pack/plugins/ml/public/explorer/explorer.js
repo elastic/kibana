@@ -92,7 +92,6 @@ function getExplorerDefaultState() {
     anomalyChartRecords: [],
     chartsData: getDefaultChartsData(),
     filterActive: false,
-    filterData: null,
     filteredFields: [],
     influencersFilterQuery: undefined,
     hasResults: false,
@@ -599,7 +598,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     annotationsTablePreviousData = null;
     async updateExplorer(stateUpdate = {}, showOverallLoadingIndicator = true) {
       const {
-        filterData,
         maskAll,
         influencersFilterQuery,
         noInfluencersConfigured,
@@ -749,7 +747,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       const updatedAnomalyChartRecords = await loadDataForCharts(
-        jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells, filterData, influencersFilterQuery
+        jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells, influencersFilterQuery
       );
 
       if ((selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) && updatedAnomalyChartRecords !== undefined) {
@@ -884,73 +882,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    // If query is empty object we clear any existing selection,
-    // otherwise we save the new selection in AppState and update the Explorer.
-    // TODO: deprecated - remove after reusing maskAll logic
-    applyFilter = (queryClauses) => {
-      const { swimlaneViewByFieldName } = this.state;
-      // TODO: double check
-      if (queryClauses.length === 0) {
-        const stateUpdate = { ...{
-          filterActive: false,
-          filterData: null,
-          maskAll: false
-        },
-        ...getClearedSelectedAnomaliesState()
-        };
-
-        this.updateExplorer(stateUpdate, false);
-      } else {
-        const filterData = this.getFilterData(queryClauses);
-        const maskAll = (swimlaneViewByFieldName === VIEW_BY_JOB_LABEL ||
-          filterData.fieldNames.includes(swimlaneViewByFieldName) === false);
-
-        this.updateExplorer({
-          filterActive: true,
-          filterData,
-          maskAll }, false);
-      }
-    };
-    // TODO: deprecated - remove once new filter works
-    getFilterData = (queryClauses) => {
-      const criteriaFields = [];
-      const fieldValues = []; // ['FR']
-      const fieldNames = [];
-      const influencerCriteriaFields = []; // [{ fieldName: country_code, fieldValue: 'FR' }]
-
-      queryClauses.forEach((clause) => {
-        // Each clause obj has a field property that is a string.
-        // Each clause obj has a value property that is either string/object or an array of strings/objects
-        fieldNames.push(clause.field);
-
-        if (Array.isArray(clause.value)) {
-          clause.value.forEach((value) => {
-            influencerCriteriaFields.push({
-              fieldName: clause.field,
-              fieldValue: value.raw || value
-            });
-
-            fieldValues.push(value.raw || value);
-          });
-        } else {
-          influencerCriteriaFields.push({
-            fieldName: clause.field,
-            fieldValue: clause.value.raw || clause.value
-          });
-
-          fieldValues.push(clause.value.raw || clause.value);
-        }
-      });
-
-      return {
-        type: 'viewBy',
-        criteriaFields,
-        influencerCriteriaFields,
-        fieldValues,
-        fieldNames
-      };
-    }
-
     applyInfluencersFilterQuery = (influencersFilterQuery, filteredFields) => {
       const { swimlaneViewByFieldName } = this.state;
 
@@ -958,7 +889,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         const stateUpdate = {
           ...{
             filterActive: false,
-            filterData: null,
             filteredFields: [],
             influencersFilterQuery: undefined,
             maskAll: false

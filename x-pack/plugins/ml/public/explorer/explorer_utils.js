@@ -494,7 +494,7 @@ export async function loadAnomaliesTableData(
 // track the request to be able to ignore out of date requests
 // and avoid race conditions ending up with the wrong charts.
 let requestCount = 0;
-export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = [], selectedCells, filterData, influencersFilterQuery) {
+export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = [], selectedCells, influencersFilterQuery) {
   return new Promise((resolve) => {
     // Just skip doing the request when this function
     // is called without the minimum required data.
@@ -516,7 +516,6 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
         }
 
         if ((selectedCells !== null && Object.keys(selectedCells).length > 0) ||
-          filterData !== null ||
           influencersFilterQuery !== undefined) {
           console.log('Explorer anomaly charts data set:', resp.records);
           resolve(resp.records);
