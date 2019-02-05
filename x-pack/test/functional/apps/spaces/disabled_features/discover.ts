@@ -150,7 +150,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectNoFieldListItemVisualize('bytes');
+        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
     });
   });

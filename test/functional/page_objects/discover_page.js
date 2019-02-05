@@ -248,9 +248,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.existOrFail(`fieldVisualize-${field}`);
     }
 
-    async expectNoFieldListItemVisualize(field) {
-      const exists = await testSubjects.exists(`fieldVisualize-${field}`);
-      expect(exists).to.be(false);
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
     }
 
     async clickFieldListPlusFilter(field, value) {

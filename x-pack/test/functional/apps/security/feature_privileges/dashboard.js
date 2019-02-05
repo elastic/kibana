@@ -276,7 +276,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('A Dashboard'), {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

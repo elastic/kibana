@@ -134,7 +134,7 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.common.navigateToApp('discover');
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectNoFieldListItemVisualize('bytes');
+        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
     });
 
