@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import mockAnnotations from '../../../components/annotations_table/__mocks__/mock_annotations.json';
-
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 

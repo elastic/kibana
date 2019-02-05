@@ -22,7 +22,7 @@ describe('annotations_service', () => {
     const annotation = mockAnnotations[0] as Annotation;
     annotation$.next(annotation);
 
-    // the subscribe should have been triggered with the updated annotation value
+    // the subscriber should have been triggered with the updated annotation value
     expect(subscriber.mock.calls).toHaveLength(2);
     expect(subscriber.mock.calls[1][0]).toEqual(annotation);
   });
