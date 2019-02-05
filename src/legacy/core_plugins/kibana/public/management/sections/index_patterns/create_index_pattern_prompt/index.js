@@ -25,7 +25,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Prompt = () => (<EuiEmptyPrompt
   className="euiPanel"
@@ -93,4 +93,4 @@ export const Prompt = () => (<EuiEmptyPrompt
   ]}
 />);
 
-export const CreateIndexPatternPrompt = injectI18n(Prompt);
+export const CreateIndexPatternPrompt = Prompt;
