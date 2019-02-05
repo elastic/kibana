@@ -17,11 +17,25 @@
  * under the License.
  */
 
-import buildProcessorFunction from './build_processor_function';
-import processors from './request_processors/annotations';
+export async function getIndexPatternObject(req, indexPatternString) {
+  // getting the matching index pattern
+  const savedObjectClient = req.getSavedObjectsClient();
+  const indexPatternObjects = await savedObjectClient.find({
+    type: 'index-pattern',
+    fields: ['title', 'fields'],
+    search: `"${indexPatternString}"`,
+    search_fields: ['title'],
+  });
 
-export default function buildAnnotationRequest(req, panel, annotation,  esQueryConfig, indexPattern) {
-  const processor = buildProcessorFunction(processors, req, panel, annotation,  esQueryConfig, indexPattern);
-  const doc = processor({});
-  return doc;
+  // getting the index pattern fields
+  const indexPatterns = indexPatternObjects.saved_objects
+    .filter(obj => obj.attributes.title === indexPatternString)
+    .map(indexPattern => {
+      const { title, fields } = indexPattern.attributes;
+      return {
+        title,
+        fields: JSON.parse(fields),
+      };
+    });
+  return indexPatterns.length === 1 ? indexPatterns[0] : null;
 }
