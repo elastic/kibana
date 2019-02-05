@@ -115,7 +115,7 @@ class FilterBarUI extends Component<Props, State> {
     const newFilter = buildEmptyFilter(isPinned, index);
 
     const button = (
-      <EuiButtonEmpty size="s" onClick={this.onOpenAddFilterPopover} data-test-subj="addFilter">
+      <EuiButtonEmpty size="xs" onClick={this.onOpenAddFilterPopover} data-test-subj="addFilter">
         +{' '}
         <FormattedMessage
           id="common.ui.filterBar.addFilterButtonLabel"
@@ -125,27 +125,29 @@ class FilterBarUI extends Component<Props, State> {
     );
 
     return (
-      <EuiPopover
-        id="addFilterPopover"
-        button={button}
-        isOpen={this.state.isAddFilterPopoverOpen}
-        closePopover={this.onCloseAddFilterPopover}
-        anchorPosition="downLeft"
-        withTitle
-        panelPaddingSize="none"
-        ownFocus={true}
-      >
-        <EuiFlexItem grow={false}>
-          <div style={{ width: 400 }}>
-            <FilterEditor
-              filter={newFilter}
-              indexPatterns={this.props.indexPatterns}
-              onSubmit={this.onAdd}
-              onCancel={this.onCloseAddFilterPopover}
-            />
-          </div>
-        </EuiFlexItem>
-      </EuiPopover>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          id="addFilterPopover"
+          button={button}
+          isOpen={this.state.isAddFilterPopoverOpen}
+          closePopover={this.onCloseAddFilterPopover}
+          anchorPosition="downLeft"
+          withTitle
+          panelPaddingSize="none"
+          ownFocus={true}
+        >
+          <EuiFlexItem grow={false}>
+            <div style={{ width: 400 }}>
+              <FilterEditor
+                filter={newFilter}
+                indexPatterns={this.props.indexPatterns}
+                onSubmit={this.onAdd}
+                onCancel={this.onCloseAddFilterPopover}
+              />
+            </div>
+          </EuiFlexItem>
+        </EuiPopover>
+      </EuiFlexItem>
     );
   }
 
