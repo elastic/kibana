@@ -1575,7 +1575,7 @@
   dependencies:
     "@types/lodash" "*"
 
-"@types/lodash3@npm:@types/lodash@^3.10.1", "@types/lodash@^3.10.1":
+"@types/lodash3@npm:@types/lodash@^3.10.1":
   version "3.10.2"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.2.tgz#c1fbda1562ef5603c8192fe1fe65b017849d5873"
   integrity sha512-TmlYodTNhMzVzv3CK/9sXGzh31jWsRKHE3faczhVgYFCdXIRQRCOPD+0NDlR+SvJlCj914yP3q3aAupt53p2Ug==
