@@ -328,14 +328,14 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function updateSourceProp(layerId, propName, value) {
-  return (dispatch) => {
+  return async (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName,
       value,
     });
-    dispatch(clearMissingStyleProperties(layerId));
+    await dispatch(clearMissingStyleProperties(layerId));
     dispatch(syncDataForLayer(layerId));
   };
 }
@@ -469,7 +469,7 @@ export function clearMissingStyleProperties(layerId) {
     }
 
     const style = targetLayer.getCurrentStyle();
-    if (!style || !style.getDescriptorWithMissingStylePropsRemoved) {
+    if (!style) {
       return;
     }
     const ordinalFields = await targetLayer.getOrdinalFields();
@@ -514,7 +514,7 @@ export function setJoinsForLayer(layer, joins) {
       joins: joins
     });
 
-    dispatch(clearMissingStyleProperties(layer.getId()));
+    await dispatch(clearMissingStyleProperties(layer.getId()));
     dispatch(syncDataForLayer(layer.getId()));
   };
 }

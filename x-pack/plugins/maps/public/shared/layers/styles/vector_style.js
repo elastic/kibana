@@ -12,8 +12,9 @@ import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
+import { AbstractStyle } from './abstract_style';
 
-export class VectorStyle {
+export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
@@ -23,6 +24,7 @@ export class VectorStyle {
   }
 
   constructor(descriptor = {}) {
+    super();
     this._descriptor = VectorStyle.createDescriptor(descriptor.properties);
   }
 
@@ -65,6 +67,17 @@ export class VectorStyle {
     );
   }
 
+  /*
+   * Changes to source descriptor and join descriptor will impact style properties.
+   * For instance, a style property may be dynamically tied to the value of an ordinal field defined
+   * by a join or a metric aggregation. The metric aggregation or join may be edited or removed.
+   * When this happens, the style will be linked to a no-longer-existing ordinal field.
+   * This method provides a way for a style to clean itself and return a descriptor that unsets any dynamic
+   * properties that are tied to missing oridinal fields
+   *
+   * This method does not update its descriptor. It just returns a new descriptor that the caller
+   * can then use to update store state via dispatch.
+   */
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
     const originalProperties = this.getProperties();
     const updatedProperties = {};
