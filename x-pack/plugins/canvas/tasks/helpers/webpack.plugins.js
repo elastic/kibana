@@ -20,17 +20,8 @@ export function getWebpackConfig({ devtool, watch, production } = {}) {
     devtool,
     mode: production ? 'production' : 'none',
     entry: {
-      'elements/all': path.join(sourceDir, 'elements/register.js'),
-      'renderers/all': path.join(sourceDir, 'renderers/register.js'),
-      'uis/transforms/all': path.join(sourceDir, 'uis/transforms/register.js'),
-      'uis/models/all': path.join(sourceDir, 'uis/models/register.js'),
-      'uis/views/all': path.join(sourceDir, 'uis/views/register.js'),
-      'uis/datasources/all': path.join(sourceDir, 'uis/datasources/register.js'),
-      'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
       'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
       'functions/browser/common': path.join(sourceDir, 'functions/common/register.js'),
-      'templates/all': path.join(sourceDir, 'templates/register.js'),
-      'uis/tags/all': path.join(sourceDir, 'uis/tags/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
