@@ -38,7 +38,7 @@ export async function isAnnotationsFeatureAvailable(callWithRequest) {
     if (!annotationsWriteAliasExists) return false;
 
   } catch (err) {
-    server.log(['info', 'ml'], 'Disabling ML annotations feature because the index/alias integrity check failed.');
+    /* return false if any of the server requests fails */
     return false;
   }
 
