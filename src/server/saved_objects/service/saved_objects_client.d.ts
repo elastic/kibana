@@ -73,11 +73,6 @@ export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
-// TODO find better name for that
-export interface CamelCaseBulkGetResponse<T extends SavedObjectAttributes = any> {
-  savedObjects: Array<SavedObject<T>>;
-}
-
 export interface MigrationVersion {
   [pluginName: string]: string;
 }
@@ -105,6 +100,10 @@ export interface SavedObjectReference {
   id: string;
 }
 
+export type SavedObjectsClientCreateResponse<T extends SavedObjectAttributes = any> = Promise<
+  SavedObject<T>
+>;
+
 export declare class SavedObjectsClient {
   public static errors: typeof errors;
   public errors: typeof errors;
@@ -115,7 +114,7 @@ export declare class SavedObjectsClient {
     type: string,
     attributes: T,
     options?: CreateOptions
-  ): Promise<SavedObject<T>>;
+  ): SavedObjectsClientCreateResponse<T>;
   public bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions

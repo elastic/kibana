@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep, pick, throttle } from 'lodash';
+import { resolve as resolveUrl } from 'url';
 
 import {
   FindOptions,
@@ -26,16 +27,11 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClient as SavedObjectsApi,
-} from 'src/server/saved_objects';
-import {
-  BulkGetResponse,
-  CamelCaseBulkGetResponse,
-} from 'src/server/saved_objects/service/saved_objects_client';
-import { kfetch } from 'ui/kfetch';
-import { KFetchQuery } from 'ui/kfetch/kfetch';
-import { resolve as resolveUrl } from 'url';
+} from '../../../../src/server/saved_objects';
+import { SavedObjectsClientCreateResponse } from '../../../../src/server/saved_objects/service/saved_objects_client';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
+import { kfetch, KFetchQuery } from '../kfetch';
 import { SavedObject } from './saved_object';
 
 interface RequestParams {
@@ -58,8 +54,11 @@ interface UpdateOptions {
   references?: SavedObjectReference[];
 }
 
-interface FindResults<T extends SavedObjectAttributes = any> {
+interface BatchResponse<T extends SavedObjectAttributes = any> {
   savedObjects: Array<SavedObject<T>>;
+}
+
+interface FindResults<T extends SavedObjectAttributes = any> extends BatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -150,7 +149,7 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: ReturnType<SavedObjectsApi['create']> = this.request({
+    const createRequest: SavedObjectsClientCreateResponse<T> = this.request({
       method: 'POST',
       path,
       query,
@@ -169,7 +168,7 @@ export class SavedObjectsClient {
         }
 
         throw error;
-      }) as Promise<SavedObject<T>>;
+      });
   };
 
   /**
@@ -192,7 +191,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp);
+      return keysToCamelCaseShallow(resp) as BatchResponse;
     });
   };
 
@@ -282,9 +281,9 @@ export class SavedObjectsClient {
       path,
       body: filteredObjects,
     });
-    return request.then(<T extends SavedObjectAttributes = any>(resp: BulkGetResponse<T>) => {
+    return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as CamelCaseBulkGetResponse<T>;
+      return keysToCamelCaseShallow(resp) as BatchResponse;
     });
   };
 
