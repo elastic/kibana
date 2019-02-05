@@ -19,8 +19,7 @@
 
 import { migrations } from './migrations';
 
-describe('table vis migrations', () => {
-
+describe('visualization', () => {
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
     const generateDoc = ({ type, aggs }) => ({
@@ -31,9 +30,345 @@ describe('table vis migrations', () => {
         uiStateJSON: '{}',
         version: 1,
         kibanaSavedObjectMeta: {
-          searchSourceJSON: '{}'
-        }
-      }
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('does not throw error on empty object', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: '{}',
+        },
+      });
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "visState": "{}",
+  },
+  "references": Array [],
+}
+`);
+    });
+
+    it('skips errors when searchSourceJSON is null', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: null,
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": null,
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    });
+
+    it('skips errors when searchSourceJSON is undefined', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: undefined,
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": undefined,
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    });
+
+    it('skips error when searchSourceJSON is not a string', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: 123,
+          },
+          savedSearchId: '123',
+        },
+      };
+      expect(migrate(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    });
+
+    it('skips error when searchSourceJSON is invalid json', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{abc123}',
+          },
+          savedSearchId: '123',
+        },
+      };
+      expect(migrate(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{abc123}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    });
+
+    it('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true }),
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    });
+
+    it('extracts "index" attribute from doc', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    });
+
+    it('extracts index patterns from the filter', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              bar: true,
+              filter: [
+                {
+                  meta: { index: 'my-index', foo: true },
+                },
+              ],
+            }),
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "my-index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+      /* eslint-enable max-len */
+    });
+
+    it('skips extracting savedSearchId when missing', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
+    it('extract savedSearchId from doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+}
+`);
     });
 
     it('should return a new object if vis is table and has multiple split aggs', () => {
@@ -41,17 +376,17 @@ describe('table vis migrations', () => {
         {
           id: '1',
           schema: 'metric',
-          params: {}
+          params: {},
         },
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true }
+          params: { foo: 'bar', row: true },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false }
+          params: { hey: 'ya', row: false },
         },
       ];
       const tableDoc = generateDoc({ type: 'table', aggs });
@@ -73,18 +408,18 @@ describe('table vis migrations', () => {
         {
           id: '1',
           schema: 'metric',
-          params: {}
+          params: {},
         },
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true }
+          params: { foo: 'bar', row: true },
         },
         {
           id: '3',
           schema: 'segment',
-          params: { hey: 'ya' }
-        }
+          params: { hey: 'ya' },
+        },
       ];
       const pieDoc = generateDoc({ type: 'pie', aggs });
       const expected = pieDoc;
@@ -97,13 +432,13 @@ describe('table vis migrations', () => {
         {
           id: '1',
           schema: 'metric',
-          params: {}
+          params: {},
         },
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true }
-        }
+          params: { foo: 'bar', row: true },
+        },
       ];
       const tableDoc = generateDoc({ type: 'table', aggs });
       const expected = tableDoc;
@@ -116,23 +451,23 @@ describe('table vis migrations', () => {
         {
           id: '1',
           schema: 'metric',
-          params: {}
+          params: {},
         },
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true }
+          params: { foo: 'bar', row: true },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false }
+          params: { hey: 'ya', row: false },
         },
         {
           id: '4',
           schema: 'bucket',
-          params: { heyyy: 'yaaa' }
-        }
+          params: { heyyy: 'yaaa' },
+        },
       ];
       const expected = ['metric', 'split', 'bucket', 'bucket'];
       const migrated = migrate(generateDoc({ type: 'table', aggs }));
@@ -145,18 +480,18 @@ describe('table vis migrations', () => {
         {
           id: '1',
           schema: 'metric',
-          params: {}
+          params: {},
         },
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true }
+          params: { foo: 'bar', row: true },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false }
-        }
+          params: { hey: 'ya', row: false },
+        },
       ];
       const expected = [{}, { foo: 'bar', row: true }, { hey: 'ya' }];
       const migrated = migrate(generateDoc({ type: 'table', aggs }));
@@ -173,12 +508,656 @@ describe('table vis migrations', () => {
           uiStateJSON: '{}',
           version: 1,
           kibanaSavedObjectMeta: {
-            searchSourceJSON: '{}'
-          }
-        }
+            searchSourceJSON: '{}',
+          },
+        },
       };
       expect(() => migrate(doc)).toThrowError(/My Vis/);
     });
   });
+});
 
+describe('dashboard', () => {
+  describe('7.0.0', () => {
+    const migration = migrations.dashboard['7.0.0'];
+
+    test('skips error on empty object', () => {
+      expect(migration({})).toMatchInlineSnapshot(`
+Object {
+  "references": Array [],
+}
+`);
+    });
+
+    test('skips errors when searchSourceJSON is null', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: null,
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": null,
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('skips errors when searchSourceJSON is undefined', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: undefined,
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": undefined,
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('skips error when searchSourceJSON is not a string', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: 123,
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('skips error when searchSourceJSON is invalid json', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{abc123}',
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{abc123}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true }),
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('extracts "index" attribute from doc', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('extracts index patterns from filter', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              bar: true,
+              filter: [
+                {
+                  meta: {
+                    foo: true,
+                    index: 'my-index',
+                  },
+                },
+              ],
+            }),
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "my-index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+      /* eslint-enable max-len */
+    });
+
+    test('skips error when panelsJSON is not a string', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          panelsJSON: 123,
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": 123,
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
+    test('skips error when panelsJSON is not valid JSON', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          panelsJSON: '{123abc}',
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "{123abc}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
+    test('skips panelsJSON when its not an array', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          panelsJSON: '{}',
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "{}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
+    test('skips error when a panel is missing "type" attribute', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          panelsJSON: '[{"id":"123"}]',
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "[{\\"id\\":\\"123\\"}]",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
+    test('skips error when a panel is missing "id" attribute', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          panelsJSON: '[{"type":"visualization"}]',
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "[{\\"type\\":\\"visualization\\"}]",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
+    test('extract panel references from doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+}
+`);
+    });
+  });
+});
+
+describe('search', () => {
+  describe('7.0.0', () => {
+    const migration = migrations.search['7.0.0'];
+
+    test('skips errors when searchSourceJSON is null', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: null,
+          },
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": null,
+    },
+  },
+  "id": "123",
+  "references": Array [],
+  "type": "search",
+}
+`);
+    });
+
+    test('skips errors when searchSourceJSON is undefined', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: undefined,
+          },
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": undefined,
+    },
+  },
+  "id": "123",
+  "references": Array [],
+  "type": "search",
+}
+`);
+    });
+
+    test('skips error when searchSourceJSON is not a string', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: 123,
+          },
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+  },
+  "id": "123",
+  "references": Array [],
+  "type": "search",
+}
+`);
+    });
+
+    test('skips error when searchSourceJSON is invalid json', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{abc123}',
+          },
+        },
+      };
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{abc123}",
+    },
+  },
+  "id": "123",
+  "references": Array [],
+  "type": "search",
+}
+`);
+    });
+
+    test('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true }),
+          },
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true}",
+    },
+  },
+  "id": "123",
+  "references": Array [],
+  "type": "search",
+}
+`);
+    });
+
+    test('extracts "index" attribute from doc', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
+          },
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+    },
+  },
+  "id": "123",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+    },
+  ],
+  "type": "search",
+}
+`);
+    });
+
+    test('extracts index patterns from filter', () => {
+      const doc = {
+        id: '123',
+        type: 'search',
+        attributes: {
+          foo: true,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              bar: true,
+              filter: [
+                {
+                  meta: {
+                    foo: true,
+                    index: 'my-index',
+                  },
+                },
+              ],
+            }),
+          },
+        },
+      };
+      const migratedDoc = migration(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    },
+  },
+  "id": "123",
+  "references": Array [
+    Object {
+      "id": "my-index",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+    },
+  ],
+  "type": "search",
+}
+`);
+    /* eslint-enable max-len */
+    });
+  });
 });

@@ -36,7 +36,7 @@ export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
 }
 
 export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
-  savedObjects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObject<T>>;
 }
 
 export interface FindOptions extends BaseOptions {
@@ -58,7 +58,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
 }
 
 export interface UpdateOptions extends BaseOptions {
-  version?: number;
+  version?: string;
 }
 
 export interface BulkGetObject {
@@ -68,7 +68,7 @@ export interface BulkGetObject {
 export type BulkGetObjects = BulkGetObject[];
 
 export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
-  savedObjects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObject<T>>;
 }
 
 export interface SavedObjectAttributes {
@@ -78,12 +78,19 @@ export interface SavedObjectAttributes {
 export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
-  version?: number;
+  version?: string;
   updated_at?: string;
   error?: {
     message: string;
   };
   attributes: T;
+  references: SavedObjectReference[];
+}
+
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
 }
 
 export declare class SavedObjectsClient {

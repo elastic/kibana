@@ -24,7 +24,7 @@
 
 import { once } from 'lodash';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
-import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
+import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
@@ -146,11 +146,11 @@ export class KibanaMigrator {
   /**
    * Migrates an individual doc to the latest version, as defined by the plugin migrations.
    *
-   * @param {SavedObjectDoc} doc
-   * @returns {SavedObjectDoc}
+   * @param {RawSavedObjectDoc} doc
+   * @returns {RawSavedObjectDoc}
    * @memberof KibanaMigrator
    */
-  public migrateDocument(doc: SavedObjectDoc): SavedObjectDoc {
+  public migrateDocument(doc: RawSavedObjectDoc): RawSavedObjectDoc {
     return this.documentMigrator.migrate(doc);
   }
 }

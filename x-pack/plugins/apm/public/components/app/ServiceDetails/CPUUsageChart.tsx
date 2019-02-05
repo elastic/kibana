@@ -22,7 +22,7 @@ interface Props {
 export function CPUUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <span>
           {i18n.translate(
             'xpack.apm.serviceDetails.metrics.cpuUsageChartTitle',

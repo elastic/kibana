@@ -1,0 +1,14 @@
+{
+  "ml.forecast": {
+    "url_params": {
+      "duration": "",
+      "expires_in": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/_forecast"
+    ]
+  }
+}

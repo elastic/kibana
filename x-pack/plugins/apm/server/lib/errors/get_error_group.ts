@@ -12,7 +12,7 @@ import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
@@ -74,7 +74,7 @@ export async function getErrorGroup({
   const traceId = idx(error, _ => _.trace.id);
 
   let transaction;
-  if (transactionId) {
+  if (transactionId && traceId) {
     transaction = await getTransaction(transactionId, traceId, setup);
   }
 

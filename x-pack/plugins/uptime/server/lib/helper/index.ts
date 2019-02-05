@@ -5,3 +5,4 @@
  */
 
 export { getFilteredQuery } from './get_filtered_query';
+export { getFilteredQueryAndStatusFilter } from './get_filtered_query_and_status';

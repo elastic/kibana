@@ -19,5 +19,5 @@ export const LogTextStreamItemField = styled.div.attrs<{
       [switchProp.default]: props.theme.eui.euiFontSize,
     })};
   line-height: ${props => props.theme.eui.euiLineHeight};
-  padding: 2px ${props => props.theme.eui.euiSize};
+  padding: 2px ${props => props.theme.eui.euiSize} 2px 0;
 `;

@@ -1,7 +1,10 @@
+@import '@elastic/eui/src/components/header/variables';
+
 #monitoring-app {
-    // SASSTODO: We need background colors till more of Kibana is converted
-  .tab-no-data, .tab-overview, .tab-license {
+  // SASSTODO: We need background colors till more of Kibana is converted
+  monitoring-main {
     background: $euiColorLightestShade;
+    height: calc(100vh - #{$euiHeaderChildSize});
   }
 
   // SASSTODO: PUI tooltips can be replaced with EuiToolTip
@@ -15,14 +18,13 @@
   }
 
   // SASSTODO: Remove font awesome
-  .betaIcon {
+  .monTabs--icon {
+    margin-left: $euiSizeXS;
     color: $euiColorDarkShade;
+    font-size: $euiFontSize;
   }
 
-  // SASSTOD: Remove this, it comes from xpack_main/styles/main.less and was imported into monitoring
-  .xpack-breadcrumbs {
-    min-height: 37px;
-    padding: 8px 10px;
-    margin: 0;
+  .monCallout--meta {
+    margin-top: $euiSize;
   }
 }
