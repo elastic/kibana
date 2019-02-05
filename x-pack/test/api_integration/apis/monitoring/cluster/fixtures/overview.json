@@ -116,6 +116,7 @@
     "resolved_timestamp": "2017-08-23T21:45:31.882Z",
     "timestamp": "2017-08-23T21:28:25.639Z"
   }],
+  "isCcrEnabled": true,
   "isPrimary": true,
   "status": "green"
 }]

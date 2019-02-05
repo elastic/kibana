@@ -110,7 +110,8 @@
     }
   },
   "isPrimary": false,
-  "status": "green"
+  "status": "green",
+  "isCcrEnabled": true
 }, {
   "isSupported": true,
   "cluster_uuid": "lOF8kofiS_2DX58o9mXJ1Q",
@@ -224,7 +225,8 @@
     "high": 0
   },
   "isPrimary": false,
-  "status": "yellow"
+  "status": "yellow",
+  "isCcrEnabled": true
 }, {
   "isSupported": true,
   "cluster_uuid": "TkHOX_-1TzWwbROwQJU5IA",
@@ -334,5 +336,6 @@
     }
   },
   "isPrimary": false,
-  "status": "green"
+  "status": "green",
+  "isCcrEnabled": true
 }]
