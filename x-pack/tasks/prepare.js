@@ -14,5 +14,5 @@ export default gulp => {
   gulp.task('prepare:dev', ['prepare']);
 
   // anything that needs to happen before building
-  gulp.task('prepare:build', ['prepare', 'canvas:prepare']);
+  gulp.task('prepare:build', ['prepare']);
 };
