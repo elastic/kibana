@@ -14,7 +14,7 @@ interface HeaderProps {
   breadcrumbs?: Breadcrumb[];
 }
 
-export const Header = injectI18n(({ breadcrumbs = [], intl }: HeaderProps) => (
+export const Header = ({ breadcrumbs = [] }: HeaderProps) => (
   <WithKibanaChrome>
     {({ setBreadcrumbs }) => (
       <ExternalHeader breadcrumbs={breadcrumbs} setBreadcrumbs={setBreadcrumbs} />
