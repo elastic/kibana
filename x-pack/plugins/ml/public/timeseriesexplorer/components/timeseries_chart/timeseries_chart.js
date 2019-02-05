@@ -205,7 +205,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     this.renderFocusChart();
 
-    if (this.props.annotation === null) {
+    if (mlAnnotationsEnabled && this.props.annotation === null) {
       const chartElement = d3.select(this.rootNode);
       chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
     }
