@@ -103,8 +103,6 @@ uiModules.get('apps/management')
       link: async function ($scope) {
         const indexPatternListProvider = Private(IndexPatternListFactory)();
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
-
-        // todo need to work with this
         const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
