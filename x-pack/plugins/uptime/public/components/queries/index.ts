@@ -9,7 +9,6 @@ export { ErrorListQuery } from './error_list';
 export { FilterBarQuery } from './filter_bar';
 export { MonitorChartsQuery } from './monitor_charts';
 export { MonitorListQuery } from './monitor_list';
-export { MonitorSelectQuery } from './monitor_select';
 export { MonitorStatusBarQuery } from './monitor_status_bar';
 export { PingListQuery } from './ping_list';
 export { SnapshotQuery } from './snapshot';
