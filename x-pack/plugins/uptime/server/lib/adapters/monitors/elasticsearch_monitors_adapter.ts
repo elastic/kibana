@@ -199,7 +199,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       idBuckets.forEach(bucket => {
         // We only get the latest doc
         const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (statusFilter && statusFilter !== status) {
+        if (!statusFilter || (statusFilter && statusFilter === status)) {
           if (status === 'up') {
             up++;
           } else {
