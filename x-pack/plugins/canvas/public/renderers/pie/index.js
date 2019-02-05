@@ -5,10 +5,10 @@
  */
 
 // This bit of hackiness is required because this isn't part of the main kibana bundle
-import 'jquery';
-import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
+import $ from 'jquery';
+import '../../../canvas_plugin_src/lib/flot-charts';
 import { pie as piePlugin } from './plugins/pie';
 
 export const pie = () => ({

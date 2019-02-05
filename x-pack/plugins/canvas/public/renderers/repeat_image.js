@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import $ from 'jquery';
 import { times } from 'lodash';
+import $ from 'jquery';
 import { elasticOutline } from '../lib/elastic_outline';
 import { isValidUrl } from '../../common/lib/url';
 
