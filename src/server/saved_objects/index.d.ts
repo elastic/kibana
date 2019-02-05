@@ -18,7 +18,6 @@
  */
 
 export {
-  FindOptions,
   MigrationVersion,
   SavedObject,
   SavedObjectAttributes,

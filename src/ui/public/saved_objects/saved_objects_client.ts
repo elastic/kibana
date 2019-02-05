@@ -21,14 +21,17 @@ import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
 
 import {
-  FindOptions,
   MigrationVersion,
   SavedObject as PlainSavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClient as SavedObjectsApi,
 } from '../../../../src/server/saved_objects';
-import { SavedObjectsClientCreateResponse } from '../../../../src/server/saved_objects/service/saved_objects_client';
+import {
+  CreateResponse,
+  FindOptions,
+  UpdateResponse,
+} from '../../../../src/server/saved_objects/service';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
@@ -149,7 +152,7 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: SavedObjectsClientCreateResponse<T> = this.request({
+    const createRequest: Promise<CreateResponse<T>> = this.request({
       method: 'POST',
       path,
       query,
@@ -316,14 +319,14 @@ export class SavedObjectsClient {
       version,
     };
 
-    const request: ReturnType<SavedObjectsApi['update']> = this.request({
+    const request: Promise<UpdateResponse<T>> = this.request({
       method: 'PUT',
       path,
       body,
     });
     return request.then(resp => {
       return this.createSavedObject(resp);
-    }) as Promise<SavedObject<T>>;
+    });
   }
 
   private createSavedObject<T extends SavedObjectAttributes>(
