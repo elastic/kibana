@@ -256,7 +256,6 @@ class HeaderUI extends Component<Props, State> {
               'navDrawer',
               this.state.isCollapsed ? 'collapsed' : 'expanded'
             )}
-            style={{ transitionDuration: '90ms', transitionDelay: '150ms' }} // TODO Change defaults in EUI
           >
             <EuiNavDrawerMenu id="navDrawerMenu" onClick={this.onNavClick}>
               <EuiListGroup>
