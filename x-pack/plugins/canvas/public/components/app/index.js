@@ -25,6 +25,7 @@ import { transformSpecs } from '../../../canvas_plugin_src/uis/transforms';
 import { modelSpecs } from '../../../canvas_plugin_src/uis/models';
 import { viewSpecs } from '../../../canvas_plugin_src/uis/views';
 import { datasourceSpecs } from '../../../canvas_plugin_src/uis/datasources';
+import { args as argSpecs } from '../../../canvas_plugin_src/uis/arguments';
 
 import {
   argTypeRegistry,
@@ -64,6 +65,7 @@ register({
   modelUIs: modelSpecs,
   viewUIs: viewSpecs,
   datasourceUIs: datasourceSpecs,
+  argumentUIs: argSpecs,
 });
 
 const mapDispatchToProps = dispatch => ({
