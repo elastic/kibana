@@ -59,30 +59,43 @@ function executeJobFn(server) {
     };
     const savedObjects = server.savedObjects;
     const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-    const uiSettings = server.uiSettingsServiceFactory({
+    const uiConfig = server.uiSettingsServiceFactory({
       savedObjectsClient,
     });
 
-    const fieldFormats = await server.fieldFormatServiceFactory(uiSettings);
-    const formatsMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+    const [formatsMap, uiSettings] = await Promise.all([
+      (async () => {
+        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
+        return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+      })(),
+      (async () => {
+        const [separator, quoteValues, timezone] = await Promise.all([
+          uiConfig.get('csv:separator'),
+          uiConfig.get('csv:quoteValues'),
+          uiConfig.get('dateFormat:tz'),
+        ]);
 
-    const settings = {
-      separator: await uiSettings.get('csv:separator'),
-      quoteValues: await uiSettings.get('csv:quoteValues'),
-      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-      scroll: config.get('xpack.reporting.csv.scroll'),
-      timezone: await uiSettings.get('dateFormat:tz'),
-    };
+        return {
+          separator,
+          quoteValues,
+          timezone,
+        };
+      })(),
+    ]);
 
     const { content, maxSizeReached, size } = await generateCsv({
       searchRequest,
       fields,
-      formatsMap,
       metaFields,
       conflictedTypesFields,
       callEndpoint,
       cancellationToken,
-      settings,
+      formatsMap,
+      settings: {
+        ...uiSettings,
+        maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
+        scroll: config.get('xpack.reporting.csv.scroll'),
+      },
     });
 
     return {
