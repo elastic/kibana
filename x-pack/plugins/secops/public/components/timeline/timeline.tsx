@@ -141,7 +141,7 @@ export const Timeline = pure<Props>(
                   direction: sort.sortDirection as Direction,
                 }}
               >
-                {({ events, loading, totalCount, pageInfo, loadMore, updatedAt }) => (
+                {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt }) => (
                   <>
                     <Body
                       addNoteToEvent={addNoteToEvent}
@@ -180,7 +180,7 @@ export const Timeline = pure<Props>(
                       onLoadMore={loadMore}
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                      updatedAt={updatedAt}
+                      getUpdatedAt={getUpdatedAt}
                       width={width}
                     />
                   </>

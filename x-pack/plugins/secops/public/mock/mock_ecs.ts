@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../graphql/types';
+import { Ecs, EcsEdges } from '../graphql/types';
 
 export const mockEcsData: Ecs[] = [
   {
@@ -433,3 +433,11 @@ export const mockEcsData: Ecs[] = [
     },
   },
 ];
+
+export const mockEcsEdgeData: EcsEdges[] = mockEcsData.map((ecs: Ecs) => ({
+  node: ecs,
+  cursor: {
+    value: ecs.timestamp!,
+    tiebreaker: ecs._id!,
+  },
+}));

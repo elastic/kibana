@@ -119,7 +119,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                         poll={poll}
-                        cursor={null}
                         filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
                         type={type}
                       >

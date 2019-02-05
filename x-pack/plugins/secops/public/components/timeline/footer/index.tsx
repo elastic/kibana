@@ -42,7 +42,7 @@ interface FooterProps {
   onLoadMore: OnLoadMore;
   serverSideEventCount: number;
   tieBreaker: string;
-  updatedAt: number;
+  getUpdatedAt: () => number;
   width: number;
 }
 
@@ -175,7 +175,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       onChangeItemsPerPage,
       serverSideEventCount,
       hasNextPage,
-      updatedAt,
+      getUpdatedAt,
       width,
     } = this.props;
 
@@ -237,7 +237,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LastUpdatedAt updatedAt={updatedAt} short={shortLastUpdated(width)} />
+                <LastUpdatedAt updatedAt={getUpdatedAt()} short={shortLastUpdated(width)} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </FooterContainer>

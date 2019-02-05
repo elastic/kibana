@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../graphql/types';
+import { EcsEdges } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
@@ -37,7 +37,7 @@ interface Props {
   addNoteToEvent: AddNoteToEvent;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  data: Ecs[];
+  data: EcsEdges[];
   height: number;
   id: string;
   notes: { [eventId: string]: Note[] };
@@ -151,10 +151,10 @@ export class Body extends React.PureComponent<Props, State> {
           width={columnWidths}
         >
           <EuiFlexGroup data-test-subj="events" direction="column" gutterSize="none">
-            {data.map(ecs => (
-              <EuiFlexItem data-test-subj="event" grow={true} key={ecs._id!}>
-                {getRowRenderer(ecs, rowRenderers).renderRow(
-                  ecs,
+            {data.map(ecsEdges => (
+              <EuiFlexItem data-test-subj="event" grow={true} key={ecsEdges.node._id!}>
+                {getRowRenderer(ecsEdges.node, rowRenderers).renderRow(
+                  ecsEdges.node,
                   <>
                     <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
                       <EuiFlexItem data-test-subj="event-columns" grow={true}>
@@ -162,28 +162,28 @@ export class Body extends React.PureComponent<Props, State> {
                           <EuiFlexItem grow={false}>
                             <Actions
                               associateNote={this.associateNote(
-                                ecs._id!,
+                                ecsEdges.node._id!,
                                 addNoteToEvent,
                                 onPinEvent
                               )}
-                              expanded={!!this.state.expanded[ecs._id!]}
+                              expanded={!!this.state.expanded[ecsEdges.node._id!]}
                               data-test-subj="timeline-row-actions"
-                              eventId={ecs._id!}
+                              eventId={ecsEdges.node._id!}
                               eventIsPinned={eventIsPinned({
-                                eventId: ecs._id!,
+                                eventId: ecsEdges.node._id!,
                                 pinnedEventIds,
                               })}
-                              notes={notes[ecs._id!] || emptyNotes}
-                              onEventToggled={this.onToggleExpanded(ecs._id!)}
+                              notes={notes[ecsEdges.node._id!] || emptyNotes}
+                              onEventToggled={this.onToggleExpanded(ecsEdges.node._id!)}
                               onPinClicked={getPinOnClick({
-                                allowUnpinning: !eventHasNotes(notes[ecs._id!]),
-                                eventId: ecs._id!,
+                                allowUnpinning: !eventHasNotes(notes[ecsEdges.node._id!]),
+                                eventId: ecsEdges.node._id!,
                                 onPinEvent,
                                 onUnPinEvent,
                                 pinnedEventIds,
                               })}
-                              showNotes={!!this.state.showNotes[ecs._id!]}
-                              toggleShowNotes={this.onToggleShowNotes(ecs._id!)}
+                              showNotes={!!this.state.showNotes[ecsEdges.node._id!]}
+                              toggleShowNotes={this.onToggleShowNotes(ecsEdges.node._id!)}
                               updateNote={updateNote}
                             />
                           </EuiFlexItem>
@@ -203,8 +203,8 @@ export class Body extends React.PureComponent<Props, State> {
                                     {getColumnRenderer(
                                       header.id,
                                       columnRenderers,
-                                      ecs
-                                    ).renderColumn(header.id, ecs)}
+                                      ecsEdges.node
+                                    ).renderColumn(header.id, ecsEdges.node)}
                                   </Column>
                                 </EuiFlexItem>
                               ))}
@@ -214,10 +214,10 @@ export class Body extends React.PureComponent<Props, State> {
                       </EuiFlexItem>
                       <EuiFlexItem data-test-subj="event-details" grow={true}>
                         <ExpandableEvent
-                          event={ecs}
-                          forceExpand={!!this.state.expanded[ecs._id!]}
+                          event={ecsEdges.node}
+                          forceExpand={!!this.state.expanded[ecsEdges.node._id!]}
                           hideExpandButton={true}
-                          stringifiedEvent={stringifyEvent(ecs)}
+                          stringifiedEvent={stringifyEvent(ecsEdges.node)}
                           timelineId={id}
                         />
                       </EuiFlexItem>
