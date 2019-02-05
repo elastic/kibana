@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { get, noop } from 'lodash';
+import { get, noop } from 'lodash3';
 import { exposeClient } from '../instantiate_client';
 
 function getMockServerFromConnectionUrl(monitoringClusterUrl) {

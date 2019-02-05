@@ -23,7 +23,7 @@ import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import cheerio from 'cheerio';
-import { noop } from 'lodash';
+import { noop } from 'lodash3';
 
 import * as getUiSettingsServiceForRequestNS from '../ui_settings/ui_settings_service_for_request';
 import { createRoot, getKbnServer, request } from '../../test_utils/kbn_server';

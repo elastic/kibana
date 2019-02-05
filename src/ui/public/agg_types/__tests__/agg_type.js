@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../../private';

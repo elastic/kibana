@@ -19,7 +19,7 @@
 
 const fn = require(`../abs`);
 
-import _ from 'lodash';
+import _ from 'lodash3';
 const expect = require('chai').expect;
 const seriesList = require('./fixtures/seriesList.js')();
 import invoke from './helpers/invoke_series_fn.js';

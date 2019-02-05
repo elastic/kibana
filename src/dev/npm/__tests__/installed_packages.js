@@ -19,7 +19,7 @@
 
 import { resolve, sep } from 'path';
 
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 import expect from 'expect.js';
 
 import { getInstalledPackages } from '../installed_packages';

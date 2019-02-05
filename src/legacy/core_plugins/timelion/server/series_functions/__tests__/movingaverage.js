@@ -21,7 +21,7 @@ const fn = require(`../movingaverage`);
 const expect = require('chai').expect;
 
 import moment from 'moment';
-import _ from 'lodash';
+import _ from 'lodash3';
 import buckets from './fixtures/bucketList';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';

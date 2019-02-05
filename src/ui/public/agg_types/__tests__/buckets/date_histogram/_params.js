@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import moment from 'moment';
 import expect from 'expect.js';
 import sinon from 'sinon';

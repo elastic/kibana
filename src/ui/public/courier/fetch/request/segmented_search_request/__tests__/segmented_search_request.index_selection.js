@@ -19,7 +19,7 @@
 
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { times } from 'lodash';
+import { times } from 'lodash3';
 import sinon from 'sinon';
 
 import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';

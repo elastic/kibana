@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import * as aggressiveParse from '../aggressive_parse';

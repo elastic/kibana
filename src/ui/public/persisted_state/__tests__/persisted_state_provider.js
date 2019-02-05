@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import sinon from 'sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';

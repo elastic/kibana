@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import { Fields } from '../fields';
 
 describe('fields', () => {

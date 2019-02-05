@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import expect from 'expect.js';
 import { isValidTimeField, validateTimeRange } from '../validate_time_range';
 

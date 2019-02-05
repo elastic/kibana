@@ -18,7 +18,7 @@
  */
 
 import { buildQueryFilter } from '../query';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash3';
 import expect from 'expect.js';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';

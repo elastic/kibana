@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash';
+import { pick } from 'lodash3';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';

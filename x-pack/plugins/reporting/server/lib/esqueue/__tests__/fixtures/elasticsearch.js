@@ -1,4 +1,4 @@
-import { uniqueId, times, random } from 'lodash';
+import { uniqueId, times, random } from 'lodash3';
 import elasticsearch from 'elasticsearch';
 import { constants } from '../../constants';
 

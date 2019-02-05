@@ -20,7 +20,7 @@
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'lodash3';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
 

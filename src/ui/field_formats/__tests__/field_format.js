@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import expect from 'expect.js';
 import { asPrettyString } from '../../../legacy/core_plugins/kibana/common/utils/as_pretty_string';
 import { FieldFormat } from '../field_format';

@@ -18,7 +18,7 @@
  */
 
 import * as functionType from '../function';
-import _ from 'lodash';
+import _ from 'lodash3';
 import expect from 'expect.js';
 import * as isFunction from '../../functions/is';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';

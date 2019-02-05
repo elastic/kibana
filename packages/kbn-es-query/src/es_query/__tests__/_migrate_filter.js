@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { migrateFilter } from '../migrate_filter';
 
 describe('migrateFilter', function () {

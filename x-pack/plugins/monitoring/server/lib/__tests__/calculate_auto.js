@@ -6,7 +6,7 @@
 
 import { calculateAuto } from '../calculate_auto.js';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'lodash3';
 import moment from 'moment';
 
 describe('Calculating Time Intervals Based on Size of Buckets', () => {
