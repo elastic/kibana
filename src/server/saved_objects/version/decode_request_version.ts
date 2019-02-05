@@ -17,14 +17,16 @@
  * under the License.
  */
 
-export function isBadRequestError(maybeError: any): boolean;
-export function isNotAuthorizedError(maybeError: any): boolean;
-export function isForbiddenError(maybeError: any): boolean;
-export function isRequestEntityTooLargeError(maybeError: any): boolean;
-export function isNotFoundError(maybeError: any): boolean;
-export function isConflictError(maybeError: any): boolean;
-export function isEsUnavailableError(maybeError: any): boolean;
-export function isEsAutoCreateIndexError(maybeError: any): boolean;
+import { decodeVersion } from './decode_version';
 
-export function createInvalidVersionError(version: any): Error;
-export function isInvalidVersionError(maybeError: Error): boolean;
+/**
+ * Helper for decoding version to request params that are driven
+ * by the version info
+ */
+export function decodeRequestVersion(version?: string) {
+  const decoded = decodeVersion(version);
+  return {
+    if_seq_no: decoded._seq_no,
+    if_primary_term: decoded._primary_term,
+  };
+}
