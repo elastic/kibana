@@ -5,4 +5,4 @@
  */
 
 
-export { UpgradeWarning, setUpgradeInProgress } from './upgrade_warning';
+export { UpgradeWarning } from './upgrade_warning';
