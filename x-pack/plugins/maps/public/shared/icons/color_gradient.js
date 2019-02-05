@@ -19,7 +19,7 @@ export const ColorGradient = ({ color }) => {
     const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
     return (
       <div
-        className="gisColorGradient"
+        className="mapColorGradient"
         style={{ background }}
       />
     );

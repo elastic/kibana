@@ -6,9 +6,9 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
+import { I18nContext } from 'ui/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { applyTheme } from 'ui/theme';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
@@ -20,20 +20,24 @@ import {
   replaceLayerList,
   setQuery,
 } from '../actions/store_actions';
-import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
-import {  getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import {
+  enableFullScreen,
+  getIsFullScreen,
+  updateFlyout,
+  FLYOUT_STATE
+} from '../store/ui';
+import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
 
-const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
+const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 
 const app = uiModules.get('app/maps', []);
@@ -41,7 +45,6 @@ const app = uiModules.get('app/maps', []);
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $scope.map = $route.current.locals.map;
-  let isDarkTheme;
   let unsubscribe;
 
   inspectorAdapters.requests.reset();
@@ -57,7 +60,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   const $state = new AppState();
   $scope.$listen($state, 'fetch_with_changes', function (diff) {
-    if (diff.includes('query')) {
+    if (diff.includes('query') && $state.query) {
       $scope.updateQueryAndDispatch({ query: $state.query, dateRange: $scope.time });
     }
   });
@@ -94,35 +97,23 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
     $scope.query = query;
     $scope.time = dateRange;
-    getStore().then(store => {
-      // ignore outdated query
-      if ($scope.query !== query && $scope.time !== dateRange) {
-        return;
-      }
+    syncAppAndGlobalState();
 
-      store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
-
-      syncAppAndGlobalState();
-    });
+    getStore().dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
       isPaused,
       interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
     };
-    getStore().then(store => {
-      // ignore outdated
-      if ($scope.refreshConfig.isPaused !== isPaused && $scope.refreshConfig.interval !== refreshInterval) {
-        return;
-      }
+    syncAppAndGlobalState();
 
-      store.dispatch(setRefreshConfig($scope.refreshConfig));
-
-      syncAppAndGlobalState();
-    });
+    getStore().dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
-  getStore().then(store => {
+  function renderMap() {
+    const store = getStore();
+
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -151,10 +142,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <GisMap/>
+        <I18nContext>
+          <GisMap/>
+        </I18nContext>
       </Provider>,
-      root);
-  });
+      root
+    );
+  }
+  renderMap();
 
   let prevIndexPatternIds;
   async function updateIndexPatterns(nextIndexPatternIds) {
@@ -176,13 +171,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.indexPatterns = indexPatterns;
   }
 
+  $scope.isFullScreen = false;
   function handleStoreChanges(store) {
-    const state = store.getState();
-
-    // theme changes must triggered in digest cycle because top nav is still angular
-    if (isDarkTheme !== getIsDarkTheme(state)) {
-      isDarkTheme = getIsDarkTheme(state);
-      updateTheme();
+    const nextIsFullScreen = getIsFullScreen(store.getState());
+    if (nextIsFullScreen !== $scope.isFullScreen) {
+      // Must trigger digest cycle for angular top nav to redraw itself when isFullScreen changes
+      $scope.$evalAsync(() => {
+        $scope.isFullScreen = nextIsFullScreen;
+      });
     }
 
     const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
@@ -214,8 +210,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
-    const store = await  getStore();
-    savedMap.syncWithStore(store.getState());
+    savedMap.syncWithStore(getStore().getState());
 
     let id;
     try {
@@ -249,18 +244,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
+    key: 'fullScreen',
+    description: 'Full screen',
+    testId: 'fullScreenMode',
+    run() {
+      getStore().dispatch(enableFullScreen());
+    }
+  }, {
     key: 'inspect',
     description: 'Open Inspector',
     testId: 'openInspectorButton',
     run() {
       Inspector.open(inspectorAdapters, {});
-    }
-  }, {
-    key: 'options',
-    description: 'Options',
-    testId: 'optionsButton',
-    run: async (menuItem, navController, anchorElement) => {
-      showOptionsPopover(anchorElement);
     }
   }, {
     key: 'save',
@@ -296,22 +291,4 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       showSaveModal(saveModal);
     }
   }];
-
-  function updateTheme() {
-    $scope.$evalAsync(() => {
-      isDarkTheme ? setDarkTheme() : setLightTheme();
-    });
-  }
-
-  function setDarkTheme() {
-    chrome.removeApplicationClass(['theme-light']);
-    chrome.addApplicationClass('theme-dark');
-    applyTheme('dark');
-  }
-
-  function setLightTheme() {
-    chrome.removeApplicationClass(['theme-dark']);
-    chrome.addApplicationClass('theme-light');
-    applyTheme('light');
-  }
 });

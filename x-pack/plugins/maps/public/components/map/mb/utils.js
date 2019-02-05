@@ -28,6 +28,9 @@ export async function createMbMapInstance(node, initialView) {
     const mbMap = new mapboxgl.Map(options);
     mbMap.dragRotate.disable();
     mbMap.touchZoomRotate.disableRotation();
+    mbMap.addControl(
+      new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
+    );
     mbMap.on('load', () => {
       resolve(mbMap);
     });

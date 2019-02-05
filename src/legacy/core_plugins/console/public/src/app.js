@@ -22,7 +22,7 @@ const $ = require('jquery');
 const history = require('./history');
 const mappings = require('./mappings');
 
-export default function init(input, output, sourceLocation = 'stored') {
+export default function init(input, output, sourceLocation = 'stored', source) {
   $(document.body).removeClass('fouc');
 
   // set the value of the input and clear the output
@@ -66,9 +66,9 @@ export default function init(input, output, sourceLocation = 'stored') {
         input.autoIndent();
       }
     }
-    else if (/^https?:\/\//.test(sourceLocation)) {
-      const loadFrom = { url: sourceLocation, dataType: 'text', kbnXsrfToken: false };
-      if (/https?:\/\/api.github.com/.test(sourceLocation)) {
+    else if (sourceLocation === 'http') {
+      const loadFrom = { url: source, dataType: 'text', kbnXsrfToken: false };
+      if (/https?:\/\/api.github.com/.test(source)) {
         loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
       }
       $.ajax(loadFrom).done(function (data) {
@@ -77,6 +77,13 @@ export default function init(input, output, sourceLocation = 'stored') {
         input.highlightCurrentRequestsAndUpdateActionBar();
         input.updateActionsBar();
       });
+    }
+    else if (sourceLocation === 'text') {
+      resetToValues(source);
+      input.autoIndent();
+      input.moveToNextRequestEdge(true);
+      input.highlightCurrentRequestsAndUpdateActionBar();
+      input.updateActionsBar();
     }
     else {
       resetToValues();

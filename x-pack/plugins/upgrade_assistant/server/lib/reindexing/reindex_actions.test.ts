@@ -8,6 +8,7 @@ import Boom from 'boom';
 import moment from 'moment';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
   ReindexStatus,
@@ -17,12 +18,7 @@ import {
   CURRENT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
-import {
-  LOCK_WINDOW,
-  ML_LOCK_DOC_ID,
-  ReindexActions,
-  reindexActionsFactory,
-} from './reindex_actions';
+import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -64,7 +60,7 @@ describe('ReindexActions', () => {
         reindexTaskId: null,
         reindexTaskPercComplete: null,
         errorMessage: null,
-        mlReindexCount: null,
+        runningReindexCount: null,
       });
     });
 
@@ -79,7 +75,7 @@ describe('ReindexActions', () => {
         reindexTaskId: null,
         reindexTaskPercComplete: null,
         errorMessage: null,
-        mlReindexCount: null,
+        runningReindexCount: null,
       });
     });
   });
@@ -305,45 +301,51 @@ describe('ReindexActions', () => {
     });
   });
 
-  describe('runWhileMlLocked', () => {
-    it('creates the ML doc if it does not exist and executes callback', async () => {
-      expect.assertions(3);
-      client.get.mockRejectedValueOnce(Boom.notFound()); // mock no ML doc exists yet
-      client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
-        Promise.resolve({
-          type,
-          id,
-          attributes,
-        })
-      );
+  describe('runWhileConsumerLocked', () => {
+    Object.keys(IndexGroup).forEach(typeKey => {
+      const consumerType = IndexGroup[typeKey as any] as IndexGroup;
 
-      let flip = false;
-      await actions.runWhileMlLocked(async mlDoc => {
-        expect(mlDoc.id).toEqual(ML_LOCK_DOC_ID);
-        expect(mlDoc.attributes.mlReindexCount).toEqual(0);
-        flip = true;
-        return mlDoc;
+      describe(`IndexConsumerType.${typeKey}`, () => {
+        it('creates the lock doc if it does not exist and executes callback', async () => {
+          expect.assertions(3);
+          client.get.mockRejectedValueOnce(Boom.notFound()); // mock no ML doc exists yet
+          client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
+            Promise.resolve({
+              type,
+              id,
+              attributes,
+            })
+          );
+
+          let flip = false;
+          await actions.runWhileIndexGroupLocked(consumerType, async mlDoc => {
+            expect(mlDoc.id).toEqual(consumerType);
+            expect(mlDoc.attributes.runningReindexCount).toEqual(0);
+            flip = true;
+            return mlDoc;
+          });
+          expect(flip).toEqual(true);
+        });
+
+        it('fails after 10 attempts to lock', async () => {
+          jest.setTimeout(20000); // increase the timeout
+          client.get.mockResolvedValue({
+            type: REINDEX_OP_TYPE,
+            id: consumerType,
+            attributes: { mlReindexCount: 0 },
+          });
+
+          client.update.mockRejectedValue(new Error('NO LOCKING!'));
+
+          await expect(
+            actions.runWhileIndexGroupLocked(consumerType, async m => m)
+          ).rejects.toThrow('Could not acquire lock for ML jobs');
+          expect(client.update).toHaveBeenCalledTimes(10);
+
+          // Restore default timeout.
+          jest.setTimeout(5000);
+        });
       });
-      expect(flip).toEqual(true);
-    });
-
-    it('fails after 10 attempts to lock', async () => {
-      jest.setTimeout(20000); // increase the timeout
-      client.get.mockResolvedValue({
-        type: REINDEX_OP_TYPE,
-        id: ML_LOCK_DOC_ID,
-        attributes: { mlReindexCount: 0 },
-      });
-
-      client.update.mockRejectedValue(new Error('NO LOCKING!'));
-
-      await expect(actions.runWhileMlLocked(async m => m)).rejects.toThrow(
-        'Could not acquire lock for ML jobs'
-      );
-      expect(client.update).toHaveBeenCalledTimes(10);
-
-      // Restore default timeout.
-      jest.setTimeout(5000);
     });
   });
 });

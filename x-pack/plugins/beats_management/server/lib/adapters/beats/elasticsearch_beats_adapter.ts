@@ -36,7 +36,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async insert(user: FrameworkUser, beat: CMBeat) {
-    beat.config_status = 'UNKNOWN';
     const body = {
       beat,
       type: 'beat',

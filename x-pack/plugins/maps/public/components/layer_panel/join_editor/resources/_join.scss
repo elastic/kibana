@@ -1,4 +1,4 @@
-.gisJoinItem {
+.mapJoinItem {
   background: tintOrShade($euiColorLightShade, 85%, 0);
   border-radius: $euiBorderRadius;
   padding: $euiSizeXS;
@@ -6,14 +6,14 @@
 
   &:hover,
   &:focus {
-    .gisJoinItem__delete {
+    .mapJoinItem__delete {
       visibility: visible;
       opacity: 1;
     }
   }
 }
 
-.gisJoinItem__delete {
+.mapJoinItem__delete {
   @include euiBottomShadowSmall;
   position: absolute;
   right: 0;

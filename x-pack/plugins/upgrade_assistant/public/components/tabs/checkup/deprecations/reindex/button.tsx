@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from 'lodash';
 import React, { Fragment, ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import { ReindexStatus } from '../../../../../../common/types';
+import { kfetch } from 'ui/kfetch';
+import { ReindexStatus, UIReindexOption } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
@@ -92,6 +94,12 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'pause';
           buttonContent = 'Paused';
+        case ReindexStatus.cancelled:
+          buttonProps.color = 'danger';
+          buttonProps.iconSide = 'left';
+          buttonProps.iconType = 'cross';
+          buttonContent = 'Cancelled';
+          break;
       }
     }
 
@@ -104,7 +112,8 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
             indexName={indexName}
             closeFlyout={this.closeFlyout}
             reindexState={reindexState}
-            startReindex={this.service.startReindex}
+            startReindex={this.startReindex}
+            cancelReindex={this.cancelReindex}
           />
         )}
       </Fragment>
@@ -133,11 +142,35 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     }
   }
 
+  private startReindex = async () => {
+    if (!this.state.reindexState.status) {
+      // if status didn't exist we are starting a reindex action
+      this.sendUIReindexTelemetryInfo('start');
+    }
+
+    await this.service.startReindex();
+  };
+
+  private cancelReindex = async () => {
+    this.sendUIReindexTelemetryInfo('stop');
+    await this.service.cancelReindex();
+  };
+
   private showFlyout = () => {
+    this.sendUIReindexTelemetryInfo('open');
     this.setState({ flyoutVisible: true });
   };
 
   private closeFlyout = () => {
+    this.sendUIReindexTelemetryInfo('close');
     this.setState({ flyoutVisible: false });
   };
+
+  private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
+    await kfetch({
+      pathname: '/api/upgrade_assistant/telemetry/ui_reindex',
+      method: 'PUT',
+      body: JSON.stringify(set({}, uiReindexAction, true)),
+    });
+  }
 }

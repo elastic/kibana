@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import { partialRight } from 'lodash';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
@@ -148,9 +148,11 @@ class PipelineListingUI extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent>
+          <EuiPanel>
             {this.renderStats()}
-            <EuiSpacer size="m"/>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPageContent>
             <EuiMonitoringTable
               className={className || 'logstashNodesTable'}
               rows={data}
@@ -174,6 +176,9 @@ class PipelineListingUI extends Component {
                 },
               }}
               onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['id']
+              }}
             />
           </EuiPageContent>
         </EuiPageBody>

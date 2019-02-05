@@ -4,7 +4,7 @@
  *    individual widgets.
  */
 
- .gisWidgetOverlay {
+ .mapWidgetOverlay {
   position: absolute;
   z-index: $euiZLevel1;
   top: $euiSizeM;
@@ -13,12 +13,12 @@
   pointer-events: none; /* 1 */
 }
 
-.gisWidgetOverlay__rightSide {
+.mapWidgetOverlay__rightSide {
   min-width: 17rem;
   max-width: 24rem;
 }
 
-.gisWidgetControl {
+.mapWidgetControl {
   max-height: 100%;
   overflow: hidden;
   padding-bottom: $euiSizeS; // ensures the scrollbar doesn't appear unnecessarily because of flex group negative margins
@@ -27,11 +27,11 @@
   display: flex;
   pointer-events: all; /* 1 */
 
-  &.gisWidgetControl-hasShadow {
+  &.mapWidgetControl-hasShadow {
     @include euiBottomShadowLarge;
   }
 
-  .gisWidgetControl__header {
+  .mapWidgetControl__header {
     padding: $euiSizeS $euiSize;
     flex-shrink: 0;
   }
