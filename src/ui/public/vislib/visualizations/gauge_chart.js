@@ -39,8 +39,7 @@ export function GaugeChartProvider(Private) {
 
       return element
         .call(events.addHoverEvent())
-        .call(events.addMouseoutEvent())
-        .call(events.addClickEvent());
+        .call(events.addMouseoutEvent());
     }
 
     draw() {
