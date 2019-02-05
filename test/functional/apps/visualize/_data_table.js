@@ -188,6 +188,23 @@ export default function ({ getService, getPageObjects }) {
       expect(data.length).to.be.greaterThan(0);
     });
 
+    it('should show correct data for a data table with range agg', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickBucket('Split Rows');
+      await PageObjects.visualize.selectAggregation('Range');
+      await PageObjects.visualize.selectField('bytes');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '0 to 1000', '1,351',
+        '1000 to 2000', '737',
+      ]);
+    });
+
+
     describe('otherBucket', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewVisualization();
@@ -387,21 +404,6 @@ export default function ({ getService, getPageObjects }) {
             [ 'US', '189', 'US', '13' ],
           ]
         ]);
-      });
-
-      it.skip('should allow nesting multiple splits', async () => {
-        // This test can be removed as soon as we remove the nested split table
-        // feature (https://github.com/elastic/kibana/issues/24560). (7.0)
-        await PageObjects.visualize.clickData();
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Table');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.clickSplitDirection('column');
-        await PageObjects.visualize.selectField('machine.os.raw');
-        await PageObjects.visualize.setSize(2);
-        await PageObjects.visualize.clickGo();
-        const splitCount = await PageObjects.visualize.countNestedTables();
-        expect(splitCount).to.be.eql([ 12, 10, 8 ]);
       });
     });
 

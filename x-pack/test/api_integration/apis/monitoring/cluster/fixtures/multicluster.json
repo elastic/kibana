@@ -86,18 +86,18 @@
       "count": 0
     },
     "apm": {
-      "totalEvents": null,
-      "memRss": null,
-      "memTotal": null,
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
       "apms": {
-        "total": null
+        "total": 0
       }
     },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },
@@ -110,6 +110,7 @@
         "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
       }
     },
+    "isCcrEnabled": true,
     "isPrimary": false,
     "status": "green"
   },
@@ -201,18 +202,18 @@
       "count": 0
     },
     "apm": {
-      "totalEvents": null,
-      "memRss": null,
-      "memTotal": null,
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
       "apms": {
-        "total": null
+        "total": 0
       }
     },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },
@@ -225,6 +226,7 @@
       "medium": 1,
       "high": 0
     },
+    "isCcrEnabled": true,
     "isPrimary": false,
     "status": "yellow"
   },
@@ -318,18 +320,18 @@
       "count": 1
     },
     "apm": {
-      "totalEvents": null,
-      "memRss": null,
-      "memTotal": null,
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
       "apms": {
-        "total": null
+        "total": 0
       }
     },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },
@@ -338,6 +340,7 @@
         "enabled": true
       }
     },
+    "isCcrEnabled": true,
     "isPrimary": false,
     "status": "green"
   }

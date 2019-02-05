@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { VislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import chrome from 'ui/chrome';
+import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaPie = () => ({
@@ -26,7 +25,7 @@ export const kibanaPie = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.pie.help', {
@@ -39,9 +38,7 @@ export const kibanaPie = () => ({
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
+    const responseHandler = vislibSlicesResponseHandler().handler;
     const visConfigParams = JSON.parse(args.visConfig);
 
     const convertedData = await responseHandler(context, visConfigParams.dimensions);
@@ -51,10 +48,8 @@ export const kibanaPie = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams,
-        },
+        visType: 'pie',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

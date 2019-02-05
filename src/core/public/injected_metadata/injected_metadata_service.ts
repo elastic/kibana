@@ -26,6 +26,9 @@ export interface InjectedMetadataParams {
     version: string;
     buildNumber: number;
     basePath: string;
+    csp: {
+      warnLegacyBrowsers: boolean;
+    };
     vars: {
       [key: string]: unknown;
     };
@@ -68,6 +71,10 @@ export class InjectedMetadataService {
 
       getKibanaVersion: () => {
         return this.getKibanaVersion();
+      },
+
+      getCspConfig: () => {
+        return this.state.csp;
       },
 
       getLegacyMetadata: () => {

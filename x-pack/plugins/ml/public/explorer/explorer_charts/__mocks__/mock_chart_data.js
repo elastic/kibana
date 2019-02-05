@@ -22,5 +22,10 @@ export const chartData = [
     date: new Date('2017-02-23T13:00:00.000Z'),
     value: 201039318, anomalyScore: 59.83488, numberOfCauses: 1,
     actual: [201039318], typical: [132739.5267403542]
+  },
+  {
+    date: new Date('2017-02-23T14:00:00.000Z'),
+    value: null, anomalyScore: 98.56166,
+    actual: [201039318], typical: [132739.5267403542]
   }
 ];

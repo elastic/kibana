@@ -1,58 +1,70 @@
-window.onload = function () {
-  var files = [
-    '{{dllBundlePath}}/vendors.bundle.dll.js',
-    '{{regularBundlePath}}/commons.bundle.js',
-    '{{regularBundlePath}}/{{appId}}.bundle.js'
-  ];
-
-  var failure = function () {
-    // make subsequent calls to failure() noop
-    failure = function () {};
-
-    var err = document.createElement('h1');
-    err.style['color'] = 'white';
-    err.style['font-family'] = 'monospace';
-    err.style['text-align'] = 'center';
-    err.style['background'] = '#F44336';
-    err.style['padding'] = '25px';
-    err.innerText = '{{i18n 'common.ui.welcomeError' '{"defaultMessage": "Kibana did not load properly. Check the server output for more information."}'}}';
-
-    document.body.innerHTML = err.outerHTML;
+if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
+  var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
+  legacyBrowserError.style.display = 'flex';
+} else {
+  if (!window.__kbnCspNotEnforced__ && window.console) {
+    window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
+  var loadingMessage = document.getElementById('kbn_loading_message');
+  loadingMessage.style.display = 'flex';
 
-  function loadStyleSheet(path) {
-    var dom = document.createElement('link');
+  window.onload = function () {
+    var files = [
+      '{{dllBundlePath}}/vendors.bundle.dll.js',
+      '{{regularBundlePath}}/commons.bundle.js',
+      '{{regularBundlePath}}/{{appId}}.bundle.js'
+    ];
 
-    dom.addEventListener('error', failure);
-    dom.setAttribute('rel', 'stylesheet');
-    dom.setAttribute('href', path);
-    document.head.appendChild(dom);
-  }
+    var failure = function () {
+      // make subsequent calls to failure() noop
+      failure = function () {};
 
-  function createJavascriptElement(path) {
-    var dom = document.createElement('script');
+      var err = document.createElement('h1');
+      err.style['color'] = 'white';
+      err.style['font-family'] = 'monospace';
+      err.style['text-align'] = 'center';
+      err.style['background'] = '#F44336';
+      err.style['padding'] = '25px';
+      err.innerText = document.querySelector('[data-error-message]').dataset.errorMessage;
 
-    dom.setAttribute('async', '');
-    dom.addEventListener('error', failure);
-    dom.setAttribute('src', file);
-    dom.addEventListener('load', next);
-    document.head.appendChild(dom);
-  }
+      document.body.innerHTML = err.outerHTML;
+    }
 
-  {{#each styleSheetPaths}}
-    loadStyleSheet('{{this}}');
-  {{/each}}
+    function loadStyleSheet(path) {
+      var dom = document.createElement('link');
 
-  (function next() {
-    var file = files.shift();
-    if (!file) return;
+      dom.addEventListener('error', failure);
+      dom.setAttribute('rel', 'stylesheet');
+      dom.setAttribute('href', path);
+      document.head.appendChild(dom);
+    }
 
-    var dom = document.createElement('script');
+    function createJavascriptElement(path) {
+      var dom = document.createElement('script');
 
-    dom.setAttribute('async', '');
-    dom.addEventListener('error', failure);
-    dom.setAttribute('src', file);
-    dom.addEventListener('load', next);
-    document.head.appendChild(dom);
-  }());
-};
+      dom.setAttribute('async', '');
+      dom.addEventListener('error', failure);
+      dom.setAttribute('src', file);
+      dom.addEventListener('load', next);
+      document.head.appendChild(dom);
+    }
+
+    {{#each styleSheetPaths}}
+      loadStyleSheet('{{this}}');
+    {{/each}}
+
+    (function next() {
+      var file = files.shift();
+      if (!file) return;
+
+      var dom = document.createElement('script');
+
+      dom.setAttribute('async', '');
+      dom.setAttribute('nonce', window.__webpack_nonce__);
+      dom.addEventListener('error', failure);
+      dom.setAttribute('src', file);
+      dom.addEventListener('load', next);
+      document.head.appendChild(dom);
+    }());
+  };
+}
