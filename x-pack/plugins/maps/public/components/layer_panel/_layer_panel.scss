@@ -4,13 +4,13 @@
  *    to the last child element.
  */
 
-.gisLayerPanel__header,
-.gisLayerPanel__body,
-.gisLayerPanel__footer {
+.mapLayerPanel__header,
+.mapLayerPanel__body,
+.mapLayerPanel__footer {
   padding: $euiSize;
 }
 
-.gisLayerPanel__body {
+.mapLayerPanel__body {
   flex-basis: 1px; /* Fixes scrolling for Firefox */
   padding-bottom: 0; /* 1 */
 
@@ -19,19 +19,19 @@
   }
 }
 
-.gisLayerPanel__header {
+.mapLayerPanel__header {
   box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
 }
 
-.gisLayerPanel__sourceDetails {
+.mapLayerPanel__sourceDetails {
   margin-left: $euiSizeXL;
 }
 
-.gisLayerPanel__sourceDetail {
+.mapLayerPanel__sourceDetail {
   margin-bottom: 0px !important;
 }
 
-.gisLayerPanel__footer {
+.mapLayerPanel__footer {
   border-top: $euiBorderThin;
   box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
 }

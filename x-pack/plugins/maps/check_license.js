@@ -12,7 +12,7 @@
 export function checkLicense(xPackInfo) {
   if (!xPackInfo.isAvailable()) {
     return {
-      gis: false,
+      maps: false,
     };
   }
 
@@ -26,12 +26,12 @@ export function checkLicense(xPackInfo) {
 
   if (!isAnyXpackLicense) {
     return {
-      gis: false,
+      maps: false,
     };
   }
 
   return {
-    gis: true,
+    maps: true,
     uid: xPackInfo.license.getUid(),
   };
 }

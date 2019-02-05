@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_time');
+const actionCreator = actionCreatorFactory('x-pack/infra/local/metric_time');
 
 export interface MetricRangeTimeState {
   to: number;

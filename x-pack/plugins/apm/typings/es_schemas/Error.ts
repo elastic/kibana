@@ -52,7 +52,7 @@ export interface APMError extends APMDoc {
     culprit: string;
     grouping_key: string;
     // either exception or log are given
-    exception?: Exception;
+    exception?: Exception[];
     log?: Log;
   };
 

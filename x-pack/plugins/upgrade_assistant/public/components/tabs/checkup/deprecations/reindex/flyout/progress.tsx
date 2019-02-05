@@ -6,9 +6,18 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiProgress, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiText,
+} from '@elastic/eui';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { LoadingState } from '../../../../../types';
+import { ReindexState } from '../polling_service';
 import { StepProgress, StepProgressStep } from './step_progress';
 
 const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = ({
@@ -28,6 +37,54 @@ const PausedCallout = () => (
   />
 );
 
+const ReindexProgressBar: React.StatelessComponent<{
+  reindexState: ReindexState;
+  cancelReindex: () => void;
+}> = ({
+  reindexState: { lastCompletedStep, status, reindexTaskPercComplete, cancelLoadingState },
+  cancelReindex,
+}) => {
+  const progressBar = reindexTaskPercComplete ? (
+    <EuiProgress size="s" value={reindexTaskPercComplete} max={1} />
+  ) : (
+    <EuiProgress size="s" />
+  );
+
+  let cancelText: string;
+  switch (cancelLoadingState) {
+    case LoadingState.Loading:
+      cancelText = 'Cancelling…';
+      break;
+    case LoadingState.Success:
+      cancelText = 'Cancelled';
+      break;
+    case LoadingState.Error:
+      cancelText = 'Could not cancel';
+      break;
+    default:
+      cancelText = 'Cancel';
+  }
+
+  return (
+    <EuiFlexGroup alignItems={'center'}>
+      <EuiFlexItem>{progressBar}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          onClick={cancelReindex}
+          disabled={
+            cancelLoadingState === LoadingState.Loading ||
+            status !== ReindexStatus.inProgress ||
+            lastCompletedStep !== ReindexStep.reindexStarted
+          }
+          isLoading={cancelLoadingState === LoadingState.Loading}
+        >
+          {cancelText}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const orderedSteps = Object.values(ReindexStep).sort() as number[];
 
 /**
@@ -35,25 +92,28 @@ const orderedSteps = Object.values(ReindexStep).sort() as number[];
  * and any error messages that are encountered.
  */
 export const ReindexProgress: React.StatelessComponent<{
-  lastCompletedStep?: ReindexStep;
-  reindexStatus?: ReindexStatus;
-  reindexTaskPercComplete: number | null;
-  errorMessage: string | null;
-}> = ({ lastCompletedStep = -1, reindexStatus, reindexTaskPercComplete, errorMessage }) => {
+  reindexState: ReindexState;
+  cancelReindex: () => void;
+}> = props => {
+  const { errorMessage, indexGroup, lastCompletedStep = -1, status } = props.reindexState;
   const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
 
-    if (reindexStatus === ReindexStatus.failed && lastCompletedStep === previousStep) {
+    if (status === ReindexStatus.failed && lastCompletedStep === previousStep) {
       return {
         status: 'failed',
         children: <ErrorCallout {...{ errorMessage }} />,
       };
-    } else if (reindexStatus === ReindexStatus.paused && lastCompletedStep === previousStep) {
+    } else if (status === ReindexStatus.paused && lastCompletedStep === previousStep) {
       return {
         status: 'paused',
         children: <PausedCallout />,
       };
-    } else if (reindexStatus === undefined || lastCompletedStep < previousStep) {
+    } else if (status === ReindexStatus.cancelled && lastCompletedStep === previousStep) {
+      return {
+        status: 'cancelled',
+      };
+    } else if (status === undefined || lastCompletedStep < previousStep) {
       return {
         status: 'incomplete',
       };
@@ -72,52 +132,73 @@ export const ReindexProgress: React.StatelessComponent<{
   // with a progress bar.
   const reindexingDocsStep = { title: 'Reindexing documents' } as StepProgressStep;
   if (
-    reindexStatus === ReindexStatus.failed &&
+    status === ReindexStatus.failed &&
     (lastCompletedStep === ReindexStep.newIndexCreated ||
       lastCompletedStep === ReindexStep.reindexStarted)
   ) {
     reindexingDocsStep.status = 'failed';
     reindexingDocsStep.children = <ErrorCallout {...{ errorMessage }} />;
   } else if (
-    reindexStatus === ReindexStatus.paused &&
+    status === ReindexStatus.paused &&
     (lastCompletedStep === ReindexStep.newIndexCreated ||
       lastCompletedStep === ReindexStep.reindexStarted)
   ) {
     reindexingDocsStep.status = 'paused';
     reindexingDocsStep.children = <PausedCallout />;
-  } else if (reindexStatus === undefined || lastCompletedStep < ReindexStep.newIndexCreated) {
+  } else if (
+    status === ReindexStatus.cancelled &&
+    (lastCompletedStep === ReindexStep.newIndexCreated ||
+      lastCompletedStep === ReindexStep.reindexStarted)
+  ) {
+    reindexingDocsStep.status = 'cancelled';
+  } else if (status === undefined || lastCompletedStep < ReindexStep.newIndexCreated) {
     reindexingDocsStep.status = 'incomplete';
+  } else if (
+    lastCompletedStep === ReindexStep.newIndexCreated ||
+    lastCompletedStep === ReindexStep.reindexStarted
+  ) {
+    reindexingDocsStep.status = 'inProgress';
+    reindexingDocsStep.children = <ReindexProgressBar {...props} />;
   } else {
-    reindexingDocsStep.status =
-      lastCompletedStep === ReindexStep.newIndexCreated ||
-      lastCompletedStep === ReindexStep.reindexStarted
-        ? 'inProgress'
-        : 'complete';
-
-    reindexingDocsStep.children = reindexTaskPercComplete ? (
-      <EuiProgress size="s" value={reindexTaskPercComplete} max={1} />
-    ) : (
-      <EuiProgress size="s" />
-    );
+    reindexingDocsStep.status = 'complete';
   }
 
-  return (
-    <StepProgress
-      steps={[
-        {
-          title: 'Setting old index to read-only',
-          ...stepDetails(ReindexStep.readonly),
-        },
-        {
-          title: 'Creating new index',
-          ...stepDetails(ReindexStep.newIndexCreated),
-        },
-        reindexingDocsStep,
-        {
-          title: 'Swapping original index with alias',
-          ...stepDetails(ReindexStep.aliasCreated),
-        },
-      ]}
-    />
-  );
+  const steps = [
+    {
+      title: 'Setting old index to read-only',
+      ...stepDetails(ReindexStep.readonly),
+    },
+    {
+      title: 'Creating new index',
+      ...stepDetails(ReindexStep.newIndexCreated),
+    },
+    reindexingDocsStep,
+    {
+      title: 'Swapping original index with alias',
+      ...stepDetails(ReindexStep.aliasCreated),
+    },
+  ];
+
+  // If this index is part of an index group, add the approriate group services steps.
+  if (indexGroup === IndexGroup.ml) {
+    steps.unshift({
+      title: 'Pausing Machine Learning jobs',
+      ...stepDetails(ReindexStep.indexGroupServicesStopped),
+    });
+    steps.push({
+      title: 'Resuming Machine Learning jobs',
+      ...stepDetails(ReindexStep.indexGroupServicesStarted),
+    });
+  } else if (indexGroup === IndexGroup.watcher) {
+    steps.unshift({
+      title: 'Stopping Watcher',
+      ...stepDetails(ReindexStep.indexGroupServicesStopped),
+    });
+    steps.push({
+      title: 'Resuming Watcher',
+      ...stepDetails(ReindexStep.indexGroupServicesStarted),
+    });
+  }
+
+  return <StepProgress steps={steps} />;
 };

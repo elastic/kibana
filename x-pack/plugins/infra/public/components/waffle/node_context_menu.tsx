@@ -59,7 +59,7 @@ export const NodeContextMenu = injectI18n(
         },
         { nodeType }
       ),
-      href: `../app/apm#/services?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+      href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
     };
 
     const panels: EuiContextMenuPanelDescriptor[] = [
