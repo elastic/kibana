@@ -37,6 +37,7 @@ export function infra(kibana: any) {
         listed: false,
         url: `/app/${APP_ID}#/home`,
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/infra/register_feature'],
       links: [
         {
