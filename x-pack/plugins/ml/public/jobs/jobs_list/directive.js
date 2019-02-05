@@ -47,6 +47,11 @@ module.directive('jobsPage', function () {
         </I18nContext>,
         element[0]
       );
+
+      element.on('$destroy', () => {
+        ReactDOM.unmountComponentAtNode(element[0]);
+        scope.$destroy();
+      });
     }
   };
 });
