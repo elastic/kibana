@@ -133,7 +133,8 @@ export class TaskStore {
         filter_path: '*.version',
       });
       // extract the existing version
-      existingVersion = templateCheck[templateName].version || 0;
+      const template = templateCheck[templateName] || {};
+      existingVersion = template.version || 0;
     } catch (err) {
       if (err.statusCode !== 404) {
         throw err; // ignore not found
