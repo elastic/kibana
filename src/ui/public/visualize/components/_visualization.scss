@@ -35,6 +35,10 @@
     @include internetExplorerOnly(){
       flex: 1 0;
     }
+
+    &:focus {
+      box-shadow: none;
+    }
   }
 
   // SASSTODO: Can't find exact usage
@@ -60,4 +64,7 @@
   min-width: 0;
 }
 
+.visChart--vertical {
+  flex-direction: column;
+}
 

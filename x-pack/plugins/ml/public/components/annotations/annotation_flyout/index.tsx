@@ -97,7 +97,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
             id:
               'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
             defaultMessage:
-              'An error occured deleting the annotation for job with ID {jobId}: {error}',
+              'An error occurred deleting the annotation for job with ID {jobId}: {error}',
           },
           { jobId: annotation.job_id, error: JSON.stringify(err) }
         )
@@ -158,7 +158,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
                 id:
                   'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
                 defaultMessage:
-                  'An error occured creating the annotation for job with ID {jobId}: {error}',
+                  'An error occurred creating the annotation for job with ID {jobId}: {error}',
               },
               { jobId: annotation.job_id, error: JSON.stringify(resp) }
             )
@@ -170,7 +170,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
                 id:
                   'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
                 defaultMessage:
-                  'An error occured updating the annotation for job with ID {jobId}: {error}',
+                  'An error occurred updating the annotation for job with ID {jobId}: {error}',
               },
               { jobId: annotation.job_id, error: JSON.stringify(resp) }
             )
