@@ -5,7 +5,7 @@
  */
 
 import { Fn } from '@kbn/interpreter/common';
-import { functions as browserFns } from '../../canvas_plugin_src/functions/browser';
+import { clientFunctions as browserFns } from '../../public/functions';
 import { functions as commonFns } from '../../canvas_plugin_src/functions/common';
 import { functions as serverFns } from '../../canvas_plugin_src/functions/server/src';
 
