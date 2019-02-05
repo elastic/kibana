@@ -18,13 +18,10 @@
  */
 
 
-import { initializeInterpreter, loadBrowserRegistries, registries, register } from '@kbn/interpreter/public';
+import { initializeInterpreter, registries, register } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
-import chrome from 'ui/chrome';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-
-const basePath = chrome.getInjected('serverBasePath');
 
 register({
   browserFunctions: functions,
@@ -35,7 +32,6 @@ let _resolve;
 let _interpreterPromise;
 
 const initialize = async () => {
-  await loadBrowserRegistries(registries, basePath);
   initializeInterpreter(kfetch, registries.types, registries.browserFunctions).then(interpreter => {
     _resolve({ interpreter });
   });

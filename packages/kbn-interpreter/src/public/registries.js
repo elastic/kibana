@@ -20,6 +20,8 @@
 
 import { FunctionsRegistry, TypesRegistry } from '../common';
 import { RenderFunctionsRegistry } from './render_functions_registry';
+import { browserFunctions } from '../plugin/functions/browser';
+import { typeSpecs } from '../plugin/types';
 
 export const registries = {
   browserFunctions: new FunctionsRegistry(),
@@ -46,3 +48,8 @@ export function register(specs) {
     specs[registryName].forEach(f => registries[registryName].register(f));
   });
 }
+
+register({
+  browserFunctions,
+  types: typeSpecs,
+});

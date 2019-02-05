@@ -5,17 +5,11 @@
  */
 
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-import {
-  loadBrowserRegistries,
-  registries,
-  register,
-  addRegistries,
-} from '@kbn/interpreter/public';
+import { register, addRegistries } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
-import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_functions';
 import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
@@ -28,8 +22,10 @@ import { datasourceSpecs } from '../../../canvas_plugin_src/uis/datasources';
 import { args as argSpecs } from '../../../canvas_plugin_src/uis/arguments';
 import { tagSpecs } from '../../../canvas_plugin_src/uis/tags';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
-import { functions as commonFunctions } from '../../../canvas_plugin_src/functions/common';
+import { functions as commonPluginFunctions } from '../../../canvas_plugin_src/functions/common';
 import { templateSpecs } from '../../../canvas_plugin_src/templates';
+import { commonFunctions } from '../../../common/functions';
+import { clientFunctions } from '../../functions';
 
 import {
   argTypeRegistry,
@@ -51,7 +47,7 @@ const mapStateToProps = state => {
   };
 };
 
-const types = addRegistries({
+addRegistries({
   elements: elementsRegistry,
   transformUIs: transformRegistry,
   datasourceUIs: datasourceRegistry,
@@ -70,21 +66,19 @@ register({
   viewUIs: viewSpecs,
   datasourceUIs: datasourceSpecs,
   argumentUIs: argSpecs,
-  browserFunctions: browserFunctions.concat(commonFunctions),
+  browserFunctions: browserFunctions
+    .concat(commonFunctions)
+    .concat(clientFunctions)
+    .concat(commonPluginFunctions),
   templates: templateSpecs,
   tagUIs: tagSpecs,
 });
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
-  setAppReady: basePath => async () => {
+  setAppReady: () => async () => {
     try {
-      // wait for core interpreter to load
       await getInterpreter();
-      // initialize the socket and interpreter
-      loadPrivateBrowserFunctions(registries.browserFunctions);
-
-      await loadBrowserRegistries(types, basePath);
 
       // set app state to ready
       dispatch(appReady());
