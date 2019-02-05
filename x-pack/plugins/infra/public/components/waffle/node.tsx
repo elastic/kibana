@@ -90,7 +90,9 @@ export class Node extends React.PureComponent<Props, State> {
   };
 
   private closePopover = () => {
-    this.setState({ isPopoverOpen: false });
+    if (this.state.isPopoverOpen) {
+      this.setState({ isPopoverOpen: false });
+    }
   };
 }
 

@@ -35,6 +35,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return (
       <ReportingPanelContent
         reportType={this.props.reportType}
+        layoutId={this.getLayout().id}
         objectType={this.props.objectType}
         objectId={this.props.objectId}
         getJobParams={this.getJobParams}
@@ -103,8 +104,9 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   };
 
   private getJobParams = () => {
-    const jobParams = this.props.getJobParams();
-    jobParams.layout = this.getLayout();
-    return jobParams;
+    return {
+      ...this.props.getJobParams(),
+      layout: this.getLayout(),
+    };
   };
 }

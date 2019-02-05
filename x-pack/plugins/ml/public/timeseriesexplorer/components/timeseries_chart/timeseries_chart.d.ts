@@ -14,12 +14,9 @@ interface Props {
 }
 
 interface State {
-  annotation: Annotation;
+  annotation: Annotation | null;
 }
 
 export interface TimeseriesChart extends React.Component<Props, State> {
-  closeFlyout: () => {};
-  showFlyout: (annotation: Annotation) => {};
-
   focusXScale: d3.scale.Ordinal<{}, number>;
 }

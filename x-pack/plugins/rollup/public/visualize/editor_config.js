@@ -25,13 +25,6 @@ export function initEditorConfig() {
         missingBucket: {
           hidden: true
         },
-        orderBy: {
-          fixedValue: '_key',
-          hidden: true
-        },
-        orderAgg: {
-          hidden: true,
-        }
       };
     }
 

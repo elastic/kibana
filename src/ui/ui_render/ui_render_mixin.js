@@ -231,6 +231,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
+        csp: {
+          warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
+        },
         vars: await replaceInjectedVars(
           request,
           mergeVariables(
