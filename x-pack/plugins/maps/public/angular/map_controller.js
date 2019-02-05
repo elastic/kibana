@@ -244,9 +244,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: 'fullScreen',
-    description: 'Full screen',
-    testId: 'fullScreenMode',
+    key: 'full screen',
+    description: 'full screen',
+    testId: 'mapsFullScreenMode',
     run() {
       getStore().dispatch(enableFullScreen());
     }

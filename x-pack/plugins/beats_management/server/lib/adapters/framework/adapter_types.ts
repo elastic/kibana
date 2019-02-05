@@ -27,7 +27,7 @@ export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
   info: null | FrameworkInfo;
   log(text: string): void;
-  on(event: 'xpack.status.green', cb: () => void): void;
+  on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void): void;
   getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
   registerRoute<RouteRequest extends FrameworkRequest, RouteResponse extends FrameworkResponse>(
@@ -39,7 +39,7 @@ export interface KibanaLegacyServer {
   plugins: {
     xpack_main: {
       status: {
-        once: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
+        on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
       };
       info: XpackInfo;
     };
@@ -54,6 +54,9 @@ export interface KibanaLegacyServer {
       getUser: (request: KibanaServerRequest) => any;
     };
     elasticsearch: {
+      status: {
+        on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
+      };
       getCluster: () => any;
     };
     beats_management: {};

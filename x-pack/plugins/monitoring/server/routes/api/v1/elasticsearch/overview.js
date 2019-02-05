@@ -50,7 +50,7 @@ export function esOverviewRoute(server) {
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           metrics,
-          shardActivity
+          shardActivity,
         };
       } catch (err) {
         throw handleError(err, req);

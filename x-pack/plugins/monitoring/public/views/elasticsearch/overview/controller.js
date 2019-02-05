@@ -32,6 +32,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
       $injector
     });
 
+    this.isCcrEnabled = $scope.cluster.isCcrEnabled;
     this.showShardActivityHistory = false;
     this.toggleShardActivityHistory = () => {
       this.showShardActivityHistory = !this.showShardActivityHistory;

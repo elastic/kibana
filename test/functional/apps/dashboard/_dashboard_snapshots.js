@@ -54,11 +54,11 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(percentSimilar).to.be.lessThan(0.05);
+      expect(percentDifference).to.be.lessThan(0.05);
     });
 
     it('compare area chart snapshot', async () => {
@@ -75,12 +75,12 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
       // Testing some OS/browser differences were shown to cause .009 percent difference.
-      expect(percentSimilar).to.be.lessThan(0.05);
+      expect(percentDifference).to.be.lessThan(0.05);
     });
   });
 }

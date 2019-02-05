@@ -49,7 +49,7 @@ function Distribution({
 
   return (
     <div>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
       <Histogram
