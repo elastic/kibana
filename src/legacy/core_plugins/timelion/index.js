@@ -30,6 +30,7 @@ export default function (kibana) {
 
     config(Joi) {
       return Joi.object({
+        enabled: Joi.boolean().default(true),
         ui: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
