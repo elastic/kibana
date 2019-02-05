@@ -18,7 +18,9 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce, forEach } from 'lodash';
+import { debounce, forEach, get } from 'lodash';
+// @ts-ignore
+import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -35,7 +37,12 @@ import { visualizationLoader } from './visualization_loader';
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { getTableAggs } from './pipeline_helpers/utilities';
-import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
+import {
+  VisResponseData,
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
@@ -62,6 +69,7 @@ export class EmbeddedVisualizeHandler {
   public readonly data$: Rx.Observable<any>;
   public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
+  private handlers: any;
   private loaded: boolean = false;
   private destroyed: boolean = false;
 
@@ -126,6 +134,12 @@ export class EmbeddedVisualizeHandler {
     }
     this.uiState = this.vis.getUiState();
 
+    this.handlers = {
+      vis: this.vis,
+      uiState: this.uiState,
+      onDestroy: (fn: () => never) => (this.handlers.destroyFn = fn),
+    };
+
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
     this.uiState.on('change', this.onUiStateChange);
@@ -146,8 +160,9 @@ export class EmbeddedVisualizeHandler {
       }
     });
 
-    this.vis.eventsSubject = new Rx.Subject();
-    this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
+    this.handlers.eventsSubject = new Rx.Subject();
+    this.vis.eventsSubject = this.handlers.eventsSubject;
+    this.events$ = this.handlers.eventsSubject.asObservable().pipe(share());
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
@@ -215,6 +230,9 @@ export class EmbeddedVisualizeHandler {
     this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
     this.renderCompleteHelper.destroy();
+    if (this.handlers.destroyFn) {
+      this.handlers.destroyFn();
+    }
   }
 
   /**
@@ -228,23 +246,18 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * renders visualization with provided data
-   * @param visData: visualization data
+   * @param data: visualization data
    */
-  public render = (pipelineResponse: any = null) => {
-    let visData;
-    if (pipelineResponse) {
-      if (!pipelineResponse.value) {
-        throw new Error(pipelineResponse.error);
-      }
-      visData = pipelineResponse.value.visData || pipelineResponse.value;
-      if (pipelineResponse.value.visConfig) {
-        this.vis.params = pipelineResponse.value.visConfig.params;
-      }
+  public render = (data: VisResponseData | null = null) => {
+    // TODO: we have this weird situation when we need to render first, and then we call fetch and render ....
+    // we need to get rid of that ....
+
+    const renderer = renderFunctionsRegistry.get(get(data || {}, 'as', 'visualization'));
+    if (!renderer) {
+      return;
     }
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
-        listenOnChange: false,
-      })
+    renderer
+      .render(this.element, get(data, 'value', { visType: this.vis.type.name }), this.handlers)
       .then(() => {
         if (!this.loaded) {
           this.loaded = true;
@@ -392,7 +405,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      if (data.value) {
+      if (data && data.value) {
         this.dataSubject.next(data.value);
       }
       return data;

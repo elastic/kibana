@@ -112,7 +112,7 @@ exports[`Header should render normally 1`] = `
   />
   <EuiText
     grow={true}
-    size="m"
+    size="s"
   >
     <p>
       <EuiTextColor

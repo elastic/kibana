@@ -37,11 +37,12 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ flexGrow: 0 }}>
-          <EuiFlexItem>
-            <EuiTitle tabIndex="0">
-              <Fragment>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s" tabIndex="0">
+              <h2>
+                { getTitle(series) }{ units ? ` (${units})` : '' }
                 <EuiScreenReaderOnly>
                   <span>
                     <FormattedMessage
@@ -50,10 +51,7 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
                     />
                   </span>
                 </EuiScreenReaderOnly>
-                <h2>
-                  { getTitle(series) }{ units ? ` (${units})` : '' }
-                </h2>
-              </Fragment>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

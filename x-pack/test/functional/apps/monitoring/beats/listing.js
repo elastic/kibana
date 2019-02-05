@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
         duckbeat: 1,
         sheepbeat: 1,
         winlogbeat: 1,
-        totalEvents: 'Total Events:\n699.9k',
-        bytesSent: 'Bytes Sent:\n427.9 MB',
+        totalEvents: 'Total Events\n699.9k',
+        bytesSent: 'Bytes Sent\n427.9 MB',
       });
     });
 

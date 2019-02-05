@@ -40,11 +40,10 @@ describe('DetailView', () => {
         occurrencesCount: 10,
         error: ({
           '@timestamp': 'myTimestamp',
-          context: {
-            service: { name: 'myService' },
-            user: { id: 'myUserId' },
-            request: { method: 'GET', url: { full: 'myUrl' } }
-          },
+          http: { request: { method: 'GET' } },
+          url: { full: 'myUrl' },
+          service: { name: 'myService' },
+          user: { id: 'myUserId' },
           error: { exception: { handled: true } },
           transaction: { id: 'myTransactionId', sampled: true }
         } as unknown) as APMError
@@ -68,29 +67,27 @@ describe('DetailView', () => {
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
-        transaction: ({
+        transaction: {
+          http: { request: { method: 'GET' } },
+          url: { full: 'myUrl' },
           trace: { id: 'traceId' },
           transaction: {
             type: 'myTransactionType',
             name: 'myTransactionName',
             id: 'myTransactionName'
           },
-          context: {
-            service: { name: 'myService' },
-            user: { id: 'myUserId' },
-            request: { method: 'GET', url: { full: 'myUrl' } }
-          }
-        } as unknown) as Transaction,
-        error: ({
+          service: { name: 'myService' },
+          user: { id: 'myUserId' }
+        } as Transaction,
+        error: {
           '@timestamp': 'myTimestamp',
-          context: {
-            service: { name: 'myService' },
-            user: { id: 'myUserId' },
-            request: { method: 'GET', url: { full: 'myUrl' } }
-          },
-          error: { exception: { handled: true } },
+          http: { request: { method: 'GET' } },
+          url: { full: 'myUrl' },
+          service: { name: 'myService' },
+          user: { id: 'myUserId' },
+          error: { exception: [{ handled: true }] },
           transaction: { id: 'myTransactionId', sampled: true }
-        } as unknown) as APMError
+        } as APMError
       }
     };
     const wrapper = shallow(
@@ -113,7 +110,8 @@ describe('DetailView', () => {
         occurrencesCount: 10,
         error: ({
           '@timestamp': 'myTimestamp',
-          context: { service: {}, user: {}, request: {} }
+          service: {},
+          user: {}
         } as unknown) as APMError
       }
     };

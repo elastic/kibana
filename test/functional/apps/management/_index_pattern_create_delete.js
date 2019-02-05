@@ -29,13 +29,13 @@ export default function ({ getService, getPageObjects }) {
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
-      // delete .kibana index and then wait for Kibana to re-create it
+      // Delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})
         .then(function () {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
+          return PageObjects.settings.clickKibanaIndexPatterns();
         });
     });
 
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
       });
     });
 

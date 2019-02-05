@@ -22,6 +22,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  UptimePageProvider,
 } from './page_objects';
 
 import {
@@ -52,6 +53,7 @@ import {
   AceEditorProvider,
   GrokDebuggerProvider,
   UserMenuProvider,
+  UptimeProvider,
 } from './services';
 
 // the default export of config files must be a config provider
@@ -80,9 +82,10 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/gis'),
+      resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/uptime')
     ],
 
     // define the name and providers for services that should be
@@ -118,6 +121,7 @@ export default async function ({ readConfigFile }) {
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
       userMenu: UserMenuProvider,
+      uptime: UptimeProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -134,9 +138,10 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
-      gis: GisPageProvider,
+      maps: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
+      uptime: UptimePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -178,8 +183,8 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/logstash/pipelines',
       },
-      gis: {
-        pathname: '/app/gis',
+      maps: {
+        pathname: '/app/maps',
       },
       graph: {
         pathname: '/app/graph',
@@ -198,6 +203,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      uptime: {
+        pathname: '/app/uptime',
+      }
     },
 
     // choose where esArchiver should load archives from

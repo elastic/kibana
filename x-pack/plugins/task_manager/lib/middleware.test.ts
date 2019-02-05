@@ -20,7 +20,8 @@ const getMockTaskInstance = () => ({
 const getMockConcreteTaskInstance = () => {
   const concrete: {
     id: string;
-    version: number;
+    sequenceNumber: number;
+    primaryTerm: number;
     attempts: number;
     status: TaskStatus;
     runAt: Date;
@@ -29,7 +30,8 @@ const getMockConcreteTaskInstance = () => {
     params: any;
   } = {
     id: 'hy8o99o83',
-    version: 1,
+    sequenceNumber: 1,
+    primaryTerm: 1,
     attempts: 0,
     status: 'idle',
     runAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
@@ -146,11 +148,12 @@ Object {
     "params": Object {
       "abc": "def",
     },
+    "primaryTerm": 1,
     "runAt": 2018-09-18T05:33:09.588Z,
+    "sequenceNumber": 1,
     "state": Object {},
     "status": "idle",
     "taskType": "nice_task",
-    "version": 1,
   },
 }
 `);

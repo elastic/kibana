@@ -20,7 +20,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
     items={
       Array [
         <EuiContextMenuItem
-          href="/app/infra#/link-to/pod-logs/pod123456abcdef?time=1545092070952&_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+          href="/app/infra#/link-to/pod-logs/pod123456abcdef?time=1545092070952&_g=(time:(from:now-24h,mode:quick,to:now))"
           icon="loggingApp"
           layoutAlign="center"
           toolTipPosition="right"
@@ -57,7 +57,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          href="/app/infra#/link-to/container-logs/container123456abcdef?time=1545092070952&_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+          href="/app/infra#/link-to/container-logs/container123456abcdef?time=1545092070952&_g=(time:(from:now-24h,mode:quick,to:now))"
           icon="loggingApp"
           layoutAlign="center"
           toolTipPosition="right"
@@ -94,7 +94,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          href="/app/infra#/link-to/host-logs/8acb9c1a71f3?time=1545092070952&_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+          href="/app/infra#/link-to/host-logs/227453131a17?time=1545092070952&_g=(time:(from:now-24h,mode:quick,to:now))"
           icon="loggingApp"
           layoutAlign="center"
           toolTipPosition="right"
@@ -131,7 +131,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          href="/app/infra#/link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952&_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+          href="/app/infra#/link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952&_g=(time:(from:now-24h,mode:quick,to:now))"
           icon="infraApp"
           layoutAlign="center"
           toolTipPosition="right"
@@ -168,7 +168,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          href="/app/infra#/link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952&_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+          href="/app/infra#/link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952&_g=(time:(from:now-24h,mode:quick,to:now))"
           icon="infraApp"
           layoutAlign="center"
           toolTipPosition="right"
@@ -205,7 +205,7 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          href="/app/infra#/link-to/host-detail/8acb9c1a71f3?from=1545091770952&to=1545092370952&_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+          href="/app/infra#/link-to/host-detail/227453131a17?from=1545091770952&to=1545092370952&_g=(time:(from:now-24h,mode:quick,to:now))"
           icon="infraApp"
           layoutAlign="center"
           toolTipPosition="right"

@@ -69,7 +69,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async selectDefaultIndex(indexName) {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickLinkText(indexName);
       await PageObjects.settings.clickDefaultIndexButton();
     }
@@ -528,10 +528,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());
       }
-    }
-
-    async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar .filter', timeout);
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {

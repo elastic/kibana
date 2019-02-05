@@ -4,6 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface InfraConfigurationAdapter<Configuration> {
+export interface InfraConfigurationAdapter<
+  Configuration extends InfraBaseConfiguration = InfraBaseConfiguration
+> {
   get(): Promise<Configuration>;
+}
+
+export interface InfraBaseConfiguration {
+  enabled: boolean;
+  query: {
+    partitionSize: number;
+    partitionFactor: number;
+  };
 }

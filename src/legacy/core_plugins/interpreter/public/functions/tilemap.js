@@ -25,7 +25,7 @@ export const tilemap = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.tilemap.help', {
@@ -39,11 +39,12 @@ export const tilemap = () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
+    const { geohash, metric, geocentroid } = visConfigParams.dimensions;
 
     const convertedData = convertToGeoJson(context, {
-      geohash: visConfigParams.geohash,
-      metric: visConfigParams.metric,
-      geocentroid: visConfigParams.geocentroid,
+      geohash,
+      metric,
+      geocentroid,
     });
 
     return {
@@ -51,10 +52,8 @@ export const tilemap = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: 'tile_map',
-          params: visConfigParams,
-        },
+        visType: 'tile_map',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

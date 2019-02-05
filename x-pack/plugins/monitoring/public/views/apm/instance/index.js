@@ -19,7 +19,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
@@ -69,13 +69,13 @@ uiRoutes.when('/apm/instances/:uuid', {
 
     renderReact(data, onBrush) {
       const component = (
-        <I18nProvider>
+        <I18nContext>
           <ApmServerInstance
             summary={data.apmSummary || {}}
             metrics={data.metrics || {}}
             onBrush={onBrush}
           />
-        </I18nProvider>
+        </I18nContext>
       );
       super.renderReact(component);
     }

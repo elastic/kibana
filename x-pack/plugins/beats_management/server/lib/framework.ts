@@ -16,6 +16,7 @@ import {
 
 export class BackendFrameworkLib {
   public log = this.adapter.log;
+  public on = this.adapter.on.bind(this.adapter);
   public exposeStaticDir = this.adapter.exposeStaticDir;
   public internalUser = this.adapter.internalUser;
   constructor(private readonly adapter: BackendFrameworkAdapter) {
@@ -81,7 +82,7 @@ export class BackendFrameworkLib {
       ) {
         return Boom.forbidden(
           `Your ${
-            this.license
+            this.license.type
           } license does not support this API or is expired. Please upgrade your license.`
         );
       }
