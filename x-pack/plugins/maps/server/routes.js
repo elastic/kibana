@@ -17,7 +17,7 @@ export function initRoutes(server, licenseUid) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
 
-  const emsClient = new server.plugins.tile_map.ems_client.EMSClientV66({
+  const emsClient = new server.plugins.tile_map.ems_client.EMSClient({
     language: i18n.getLocale(),
     kbnVersion: serverConfig.get('pkg.version'),
     manifestServiceUrl: mapConfig.manifestServiceUrl,
