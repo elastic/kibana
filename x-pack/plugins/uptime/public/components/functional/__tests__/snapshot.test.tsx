@@ -81,7 +81,7 @@ describe('Snapshot component', () => {
   it('renders without errors', () => {
     const { snapshot } = data;
     const wrapper = shallowWithIntl(
-      <Snapshot danger="danger" primary="primary" snapshot={snapshot} />
+      <Snapshot danger="#F050F0" primary="#000000" snapshot={snapshot} windowWidth={1600} />
     );
     expect(wrapper).toMatchSnapshot();
   });
