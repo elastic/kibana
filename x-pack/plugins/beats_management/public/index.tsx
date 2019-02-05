@@ -63,7 +63,7 @@ async function startApp(libs: FrontendLibs) {
     libs.framework.registerManagementUI({
       sectionId: 'beats',
       name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
-        defaultMessage: 'Central Management (Beta)',
+        defaultMessage: 'Central Management',
       }),
       basePath: BASE_PATH,
     });
