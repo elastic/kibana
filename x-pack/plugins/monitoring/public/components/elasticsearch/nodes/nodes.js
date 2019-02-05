@@ -17,6 +17,7 @@ import {
   EuiPage,
   EuiPageContent,
   EuiPageBody,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
@@ -207,9 +208,11 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           <ClusterStatus stats={clusterStatus} />
-          <EuiSpacer size="m"/>
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"
             rows={nodes}
@@ -226,6 +229,9 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
               },
             }}
             onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

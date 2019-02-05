@@ -28,7 +28,7 @@ import indexTemplate from './index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -48,13 +48,13 @@ export function updateIndexPatternList(
   }
 
   render(
-    <I18nProvider>
+    <I18nContext>
       <IndexPatternList
         indexPatternCreationOptions={indexPatternCreationOptions}
         defaultIndex={defaultIndex}
         indexPatterns={indexPatterns}
       />
-    </I18nProvider>,
+    </I18nContext>,
     node,
   );
 }

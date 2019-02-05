@@ -82,7 +82,7 @@ function ElasticsearchPanelUi(props) {
       title="Elasticsearch"
       extras={licenseText}
     >
-      <EuiFlexGrid columns={3}>
+      <EuiFlexGrid columns={4}>
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">

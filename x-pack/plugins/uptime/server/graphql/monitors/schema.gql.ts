@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const monitorsSchema = gql`
   type FilterBar {
     ids: [MonitorKey!]
+    names: [String!]
     ports: [Int!]
     schemes: [String!]
     statuses: [String!]
@@ -24,15 +25,14 @@ export const monitorsSchema = gql`
 
   type HistogramSeries {
     monitorId: String
-    data: [HistogramDataPoint]
+    data: [HistogramDataPoint!]
   }
 
   type Snapshot {
     up: Int
     down: Int
-    trouble: Int
     total: Int
-    histogram: [HistogramSeries]
+    histogram: [HistogramSeries!]
   }
 
   type DataPoint {
@@ -78,7 +78,7 @@ export const monitorsSchema = gql`
   }
 
   type LatestMonitorsResult {
-    monitors: [LatestMonitor]
+    monitors: [LatestMonitor!]
   }
 
   type ErrorListItem {
@@ -115,7 +115,7 @@ export const monitorsSchema = gql`
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 
-    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem]
+    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem!]
 
     getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }

@@ -46,26 +46,23 @@ export const getFormat = (mapping: any) => {
   if (!mapping) {
     return defaultFormat;
   }
-  let { id } = mapping;
+  const { id } = mapping;
   if (id === 'range') {
-    id = mapping.params.id;
-
     const RangeFormat = FieldFormat.from((range: any) => {
-      const format = getFieldFormat(id, mapping.params).convert;
+      const format = getFieldFormat(id, mapping.params);
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
         defaultMessage: '{from} to {to}',
         values: {
-          from: format(range.gte),
-          to: format(range.lt),
+          from: format.convert(range.gte),
+          to: format.convert(range.lt),
         },
       });
     });
     return new RangeFormat();
   } else if (id === 'terms') {
-    id = mapping.params.id;
     return {
       getConverterFor: (type: string) => {
-        const format = getFieldFormat(id, mapping.params).convert;
+        const format = getFieldFormat(mapping.params.id, mapping.params);
         return (val: string) => {
           if (val === '__other__') {
             return mapping.params.otherBucketLabel;
@@ -78,11 +75,11 @@ export const getFormat = (mapping: any) => {
             pathname: window.location.pathname,
             basePath: chrome.getBasePath(),
           };
-          return format(val, undefined, undefined, parsedUrl);
+          return format.convert(val, undefined, undefined, parsedUrl);
         };
       },
       convert: (val: string, type: string) => {
-        const format = getFieldFormat(id, mapping.params);
+        const format = getFieldFormat(mapping.params.id, mapping.params);
         if (val === '__other__') {
           return mapping.params.otherBucketLabel;
         }

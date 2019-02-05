@@ -79,9 +79,11 @@ exports[`DetailView should render StickyProperties 1`] = `
             Object {
               "@timestamp": "myTimestamp",
               "error": Object {
-                "exception": Object {
-                  "handled": true,
-                },
+                "exception": Array [
+                  Object {
+                    "handled": true,
+                  },
+                ],
               },
               "http": Object {
                 "request": Object {

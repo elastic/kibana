@@ -63,10 +63,11 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       },
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
-      version: 1,
+      version: resp.body.version,
       attributes: {
         title: 'My favorite vis',
       },
+      references: [],
     });
 
     const expectedSpacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}:`;
@@ -103,10 +104,11 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       id: resp.body.id,
       type: notSpaceAwareType,
       updated_at: resp.body.updated_at,
-      version: 1,
+      version: resp.body.version,
       attributes: {
         name: `Can't be contained to a space`,
       },
+      references: [],
     });
 
     // query ES directory to ensure namespace wasn't specified

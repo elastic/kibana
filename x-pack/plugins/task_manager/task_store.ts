@@ -41,7 +41,8 @@ export interface FetchResult {
 export interface RemoveResult {
   index: string;
   id: string;
-  version: string;
+  sequenceNumber: number;
+  primaryTerm: number;
   result: string;
 }
 
@@ -49,7 +50,8 @@ export interface RemoveResult {
 export interface RawTaskDoc {
   _id: string;
   _index: string;
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   _source: {
     type: string;
     kibana: {
@@ -251,7 +253,8 @@ export class TaskStore {
     return {
       ...taskInstance,
       id: result._id,
-      version: result._version,
+      sequenceNumber: result._seq_no,
+      primaryTerm: result._primary_term,
       attempts: 0,
       status: task.status,
       scheduledAt: task.scheduledAt,
@@ -299,7 +302,7 @@ export class TaskStore {
       },
       size: 10,
       sort: { 'task.runAt': { order: 'asc' } },
-      version: true,
+      seq_no_primary_term: true,
     });
 
     return docs;
@@ -315,13 +318,14 @@ export class TaskStore {
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const rawDoc = taskDocToRaw(doc, this);
 
-    const { _version } = await this.callCluster('update', {
+    const result = await this.callCluster('update', {
       body: {
         doc: rawDoc._source,
       },
       id: doc.id,
       index: this.index,
-      version: doc.version,
+      if_seq_no: doc.sequenceNumber,
+      if_primary_term: doc.primaryTerm,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
       refresh: true,
@@ -329,7 +333,8 @@ export class TaskStore {
 
     return {
       ...doc,
-      version: _version,
+      sequenceNumber: result._seq_no,
+      primaryTerm: result._primary_term,
     };
   }
 
@@ -351,7 +356,8 @@ export class TaskStore {
     return {
       index: result._index,
       id: result._id,
-      version: result._version,
+      sequenceNumber: result._seq_no,
+      primaryTerm: result._primary_term,
       result: result.result,
     };
   }
@@ -408,7 +414,8 @@ function rawSource(doc: TaskInstance, store: TaskStore) {
   };
 
   delete (source as any).id;
-  delete (source as any).version;
+  delete (source as any).sequenceNumber;
+  delete (source as any).primaryTerm;
   delete (source as any).type;
 
   return {
@@ -428,9 +435,10 @@ function taskDocToRaw(doc: ConcreteTaskInstance, store: TaskStore): RawTaskDoc {
 
   return {
     _id: doc.id,
-    _index: store.index,
+    _index: index,
     _source: { type, task, kibana },
-    _version: doc.version,
+    _seq_no: doc.sequenceNumber,
+    _primary_term: doc.primaryTerm,
   };
 }
 
@@ -438,7 +446,8 @@ function rawToTaskDoc(doc: RawTaskDoc): ConcreteTaskInstance {
   return {
     ...doc._source.task,
     id: doc._id,
-    version: doc._version,
+    sequenceNumber: doc._seq_no,
+    primaryTerm: doc._primary_term,
     params: parseJSONField(doc._source.task.params, 'params', doc),
     state: parseJSONField(doc._source.task.state, 'state', doc),
   };
