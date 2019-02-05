@@ -14,6 +14,7 @@ import { FlatSettings, MappingProperties, TypeMapping } from './types';
 
 export interface ParsedIndexName {
   isInternal: boolean;
+  cleanIndexName: string;
   baseName: string;
   newIndexName: string;
   cleanBaseName: string;
@@ -49,9 +50,10 @@ export const parseIndexName = (indexName: string): ParsedIndexName => {
 
   return {
     isInternal,
+    cleanIndexName: `${isInternal ? '.' : ''}${cleanBaseName}`,
     baseName,
-    newIndexName: `${isInternal ? '.' : ''}${currentVersion}-${cleanBaseName}`,
     cleanBaseName,
+    newIndexName: `${isInternal ? '.' : ''}${currentVersion}-${cleanBaseName}`,
   };
 };
 

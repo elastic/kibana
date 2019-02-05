@@ -180,6 +180,7 @@ describe('parseIndexName', () => {
       isInternal: false,
       baseName: 'myIndex-reindexed-v5',
       cleanBaseName: 'myIndex',
+      cleanIndexName: 'myIndex',
       newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
     });
 
@@ -187,6 +188,7 @@ describe('parseIndexName', () => {
       isInternal: true,
       baseName: 'myInternalIndex-reindexed-v5',
       cleanBaseName: 'myInternalIndex',
+      cleanIndexName: '.myInternalIndex',
       newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`,
     });
   });
@@ -196,6 +198,7 @@ describe('parseIndexName', () => {
       isInternal: false,
       baseName: `myIndex-reindexed-v${PREV_MAJOR_VERSION}`,
       cleanBaseName: 'myIndex',
+      cleanIndexName: 'myIndex',
       newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
     });
 
@@ -203,6 +206,7 @@ describe('parseIndexName', () => {
       isInternal: true,
       baseName: `myInternalIndex-reindexed-v${PREV_MAJOR_VERSION}`,
       cleanBaseName: 'myInternalIndex',
+      cleanIndexName: '.myInternalIndex',
       newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`,
     });
   });

@@ -5,7 +5,10 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
+import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
 import {
   IndexGroup,
   ReindexOperation,
@@ -111,6 +114,36 @@ describe('reindexService', () => {
           index: [
             {
               names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('includes checking for permissions on the baseName which could be an alias', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      const hasRequired = await service.hasRequiredPrivileges(
+        `reindexed-v${PREV_MAJOR_VERSION}-anIndex`
+      );
+      expect(hasRequired).toBe(true);
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names: [
+                `reindexed-v${PREV_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
+                'anIndex',
+              ],
               privileges: ['all'],
             },
             {

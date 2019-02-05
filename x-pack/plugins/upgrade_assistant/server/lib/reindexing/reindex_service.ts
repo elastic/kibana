@@ -496,13 +496,20 @@ export const reindexServiceFactory = (
       }
 
       const index = parseIndexName(indexName);
+      const names = [indexName, index.newIndexName];
+
+      // if we have re-indexed this in the past, there will be an
+      // underlying alias we will also need to update.
+      if (index.cleanIndexName !== indexName) {
+        names.push(index.cleanIndexName);
+      }
 
       // Otherwise, query for required privileges for this index.
       const body = {
         cluster: ['manage'],
         index: [
           {
-            names: [indexName, index.newIndexName],
+            names,
             privileges: ['all'],
           },
           {
