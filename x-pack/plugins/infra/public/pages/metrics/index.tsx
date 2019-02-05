@@ -166,6 +166,8 @@ export const MetricDetail = withTheme(
                                                   }
                                                   refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
+                                                  isLiveStreaming={isAutoReloading}
+                                                  stopLiveStreaming={stopMetricsAutoReload}
                                                 />
                                               </EuiPageContentWithRelative>
                                             </EuiPageBody>
