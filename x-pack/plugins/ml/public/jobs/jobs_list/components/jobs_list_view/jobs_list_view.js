@@ -20,7 +20,9 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../node_available_warning';
+import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
+import { isEqual } from 'lodash';
 
 import React, {
   Component
@@ -34,7 +36,9 @@ import {
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+const DELETING_JOBS_REFRESH_INTERVAL_MS = 2000;
 let jobsRefreshInterval =  null;
+let deletingJobsRefreshTimeout = null;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -49,6 +53,7 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
+      deletingJobIds: [],
     };
 
     this.updateFunctions = {};
@@ -284,11 +289,41 @@ export class JobsListView extends Component {
           this.updateFunctions[j].setState({ job: fullJobsList[j] });
         });
 
+        jobs.forEach((job) => {
+          if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
+            this.toggleRow(job.id);
+          }
+        });
+
         this.isDoneRefreshing();
+        if (jobsSummaryList.some(j => j.deleting === true)) {
+          // if there are some jobs in a deleting state, start polling for
+          // deleting jobs so we can update the jobs list once the
+          // deleting tasks are over
+          this.checkDeletingJobTasks();
+        }
       } catch (error) {
         console.error(error);
         this.setState({ loading: false });
       }
+    }
+  }
+
+  async checkDeletingJobTasks() {
+    const { jobIds } = await ml.jobs.deletingJobTasks();
+
+    if (jobIds.length === 0 || isEqual(jobIds.sort(), this.state.deletingJobIds.sort())) {
+      this.setState({
+        deletingJobIds: jobIds,
+      });
+      this.refreshJobSummaryList(true);
+    }
+
+    if (jobIds.length > 0 && deletingJobsRefreshTimeout === null) {
+      deletingJobsRefreshTimeout = setTimeout(() => {
+        deletingJobsRefreshTimeout = null;
+        this.checkDeletingJobTasks();
+      }, DELETING_JOBS_REFRESH_INTERVAL_MS);
     }
   }
 
@@ -356,6 +391,7 @@ export class JobsListView extends Component {
         />
         <div className="job-management">
           <NodeAvailableWarning />
+          <UpgradeWarning />
           <header>
             <div className="job-buttons-container">
               <EuiFlexGroup alignItems="center">

@@ -9,7 +9,7 @@ import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { PLUGIN } from '../../../../common/constants';
 import { UMBreadcrumb } from '../../../breadcrumbs';
-import { UptimeCommonProps } from '../../../uptime_app';
+import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 
@@ -47,20 +47,18 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
       // @ts-ignore angular
       controller: ($scope, $route, $http, config) => {
         const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
-        config.bindToScope($scope, 'k7design');
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
           let kibanaBreadcrumbs: UMBreadcrumb[] = [];
-          if ($scope.k7design) {
-            chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
-              kibanaBreadcrumbs = breadcrumbs;
-            });
-          }
+          chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
+            kibanaBreadcrumbs = breadcrumbs;
+          });
           const basePath = chrome.getBasePath();
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
           const persistedState = this.initializePersistedState();
+          const darkMode = config.get('theme:darkMode', false) || false;
           const {
             autorefreshIsPaused,
             autorefreshInterval,
@@ -69,7 +67,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           } = persistedState;
           ReactDOM.render(
             renderComponent({
-              isUsingK7Design: $scope.k7design,
+              darkMode,
               updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
               routerBasename,
@@ -108,9 +106,9 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     });
   };
 
-  private initializePersistedState = (): UptimeCommonProps => {
+  private initializePersistedState = (): UptimePersistedState => {
     const uptimeConfigurationData = window.localStorage.getItem(PLUGIN.LOCAL_STORAGE_KEY);
-    const defaultState: UptimeCommonProps = {
+    const defaultState: UptimePersistedState = {
       autorefreshIsPaused: this.defaultAutorefreshIsPaused,
       autorefreshInterval: this.defaultAutorefreshInterval,
       dateRangeStart: this.defaultDateRangeStart,
@@ -141,7 +139,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     return defaultState;
   };
 
-  private updatePersistedState = (state: UptimeCommonProps) => {
+  private updatePersistedState = (state: UptimePersistedState) => {
     window.localStorage.setItem(PLUGIN.LOCAL_STORAGE_KEY, JSON.stringify(state));
   };
 }

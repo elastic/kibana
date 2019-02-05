@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { SearchError } from 'ui/courier';
 import { dispatchRenderComplete } from '../../render_complete';
@@ -35,8 +35,12 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
     const errorMessage = (error && error.message) || error;
 
     return (
-      <div className="visError visChart" ref={this.containerDiv}>
-        <EuiText className="visError--request" color="danger" size="xs">
+      <div className="visError" ref={this.containerDiv}>
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
+
+          <EuiSpacer size="s" />
+
           {errorMessage}
         </EuiText>
       </div>

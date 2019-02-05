@@ -5,10 +5,14 @@
  */
 
 import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTab,
   // @ts-ignore types for EuiTab not currently available
   EuiTabs,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Subscribe } from 'unstated';
@@ -45,7 +49,19 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
   public render() {
     return (
       <PrimaryLayout
-        title="Beats"
+        title={
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>{'Beats'}</EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.beatsManagement.overview.betaBadgeText', {
+                  defaultMessage: 'Beta',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
       >
         {(renderAction: any) => (

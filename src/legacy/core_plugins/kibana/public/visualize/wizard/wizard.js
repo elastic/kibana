@@ -61,11 +61,10 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl, config) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl) {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-  config.bindToScope($scope, 'k7design');
 
   $scope.step2WithSearchUrl = function (hit) {
     if (addToDashMode) {

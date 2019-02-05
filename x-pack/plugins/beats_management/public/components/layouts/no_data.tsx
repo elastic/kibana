@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
-
 interface LayoutProps {
-  title: string;
+  title: string | React.ReactNode;
   actionSection?: React.ReactNode;
   modalClosePath?: string;
 }
