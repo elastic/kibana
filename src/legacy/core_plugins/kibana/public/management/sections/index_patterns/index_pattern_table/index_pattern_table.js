@@ -26,7 +26,7 @@ import {
   EuiFlexItem,
   EuiPanel,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateButton } from '../create_button';
 
 const columns = [
@@ -60,7 +60,7 @@ const search = {
   }
 };
 
-const Table = ({
+export const IndexPatternTable = ({
   indexPatterns,
   indexPatternCreationOptions,
 }) => (
@@ -98,5 +98,3 @@ const Table = ({
     />
   </EuiPanel>
 );
-
-export const IndexPatternTable = injectI18n(Table);

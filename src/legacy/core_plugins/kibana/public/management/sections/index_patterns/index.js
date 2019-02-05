@@ -52,7 +52,9 @@ export function updateIndexPatternList(
   render(
     <I18nContext>
       {indexPatterns.length === 0 ?
-        (<CreateIndexPatternPrompt />) :
+        (<CreateIndexPatternPrompt
+          indexPatternCreationOptions={indexPatternCreationOptions}
+        />) :
         (<IndexPatternTable
           indexPatterns={indexPatterns}
           navTo={kbnUrl.redirect}

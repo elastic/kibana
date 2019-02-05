@@ -20,14 +20,14 @@
 import React, { Fragment } from 'react';
 import {
   EuiEmptyPrompt,
-  EuiButton,
   EuiIcon,
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { CreateButton } from '../create_button';
 
-export const Prompt = () => (<EuiEmptyPrompt
+export const CreateIndexPatternPrompt = ({ indexPatternCreationOptions }) => (<EuiEmptyPrompt
   className="euiPanel"
   iconType="editorStrike"
   title={
@@ -80,17 +80,11 @@ export const Prompt = () => (<EuiEmptyPrompt
     </Fragment>
   }
   actions={[
-    <EuiButton
-      color="primary"
-      fill
-      href="#/management/kibana/index_pattern"
-      iconSide="right"
-      iconType="arrowDown"
-      data-test-subj="createIndexPatternButton"
-    >
-      <FormattedMessage id="kbn.management.indexPatternPrompt.createBtn" defaultMessage="Create index pattern" />
-    </EuiButton>,
+    <CreateButton options={indexPatternCreationOptions}>
+      <FormattedMessage
+        id="kbn.management.indexPatternPrompt.createBtn"
+        defaultMessage="Create index pattern"
+      />
+    </CreateButton>
   ]}
 />);
-
-export const CreateIndexPatternPrompt = Prompt;
