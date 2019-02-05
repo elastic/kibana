@@ -18,11 +18,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('canvas/default');
-      await kibanaServer.uiSettings.replace({
-        'accessibility:disableAnimations': true,
-        'telemetry:optIn': false,
-        defaultIndex: 'logstash-*',
-      });
     });
 
     after(async () => {
