@@ -36,6 +36,7 @@ function loadPath(path, callback) {
 export const loadBrowserRegistries = (registries, basePath) => {
   const remainingTypes = Object.keys(registries).filter(t =>
     t !== 'elements'
+    && t !== 'renderers'
   );
   const populatedTypes = {};
 

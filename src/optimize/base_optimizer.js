@@ -345,6 +345,10 @@ export default class BaseOptimizer {
             ],
           },
           {
+            test: /\.scss$/,
+            loaders: ['style-loader', 'css-loader', 'sass-loader'],
+          },
+          {
             test: /\.css$/,
             use: [
               ...getStyleLoaderExtractor(),
@@ -356,8 +360,8 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.png$/,
-            loader: 'url-loader'
+            test: /\.(png|jpg|gif|jpeg|svg)$/,
+            loader: ['url-loader'],
           },
           {
             test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,

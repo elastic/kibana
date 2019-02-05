@@ -20,6 +20,7 @@ import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
 import { elementSpecs } from '../../../canvas_plugin_src/elements';
+import { renderFunctions } from '../../../canvas_plugin_src/renderers';
 
 import {
   argTypeRegistry,
@@ -54,6 +55,7 @@ const types = addRegistries({
 
 register({
   elements: elementSpecs,
+  renderers: renderFunctions,
 });
 
 const mapDispatchToProps = dispatch => ({
