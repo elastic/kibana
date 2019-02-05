@@ -94,7 +94,10 @@ class Provider extends PureComponent {
                   custom advanced settings, {editLink}."
                 values={{
                   editLink: (
-                    <EuiLink href={routing.getFollowerIndexPath(ids[0])}>
+                    <EuiLink
+                      href={routing.getFollowerIndexPath(ids[0])}
+                      data-test-subj="ccrFollowerIndexConfirmResumeModalEditLink"
+                    >
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
                         defaultMessage="edit the follower index"

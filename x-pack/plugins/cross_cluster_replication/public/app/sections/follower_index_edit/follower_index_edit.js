@@ -139,6 +139,7 @@ export const FollowerIndexEdit = injectI18n(
                 {...routing.getRouterLinkProps('/follower_indices')}
                 iconType="arrowLeft"
                 flush="left"
+                data-test-subj="ccrFollowerIndexFormViewListLink"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"
