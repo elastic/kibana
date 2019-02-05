@@ -19,7 +19,7 @@ import { reportingClient } from '../lib/reporting_client';
 
 interface Props {
   reportType: string;
-  layoutId: string;
+  layoutId: string | undefined;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;

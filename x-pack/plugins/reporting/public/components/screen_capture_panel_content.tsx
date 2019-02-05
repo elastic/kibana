@@ -11,7 +11,6 @@ import { ReportingPanelContent } from './reporting_panel_content';
 
 interface Props {
   reportType: string;
-  layoutId: string;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
