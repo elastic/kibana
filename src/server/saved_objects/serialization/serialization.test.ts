@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { SavedObjectsSerializer } from '.';
 import { SavedObjectsSchema } from '../schema';
-import { encodeVersion } from '../service/lib/version';
+import { encodeVersion } from '../version';
 
 describe('saved object conversion', () => {
   describe('#rawToSavedObject', () => {

@@ -24,7 +24,7 @@
 
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
-import { decodeVersion, encodeVersion } from '../service/lib/version';
+import { decodeVersion, encodeVersion } from '../version';
 
 /**
  * A raw document as represented directly in the saved object index.

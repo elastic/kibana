@@ -26,7 +26,7 @@ import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
-import { encodeHitVersion } from './version';
+import { encodeHitVersion } from '../../version';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
