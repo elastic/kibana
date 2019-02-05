@@ -13,6 +13,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/plugin_api_integration/config.js'),
   require.resolve('../test/saml_api_integration/config.js'),
   require.resolve('../test/token_api_integration/config.js'),
+  require.resolve('../test/oidc_api_integration/config.js'),
   require.resolve('../test/spaces_api_integration/spaces_only/config'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config'),
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config'),
