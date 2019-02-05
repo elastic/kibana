@@ -123,7 +123,12 @@ jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
-  injectedMetadata: {} as any,
+  browserSupportsCsp: true,
+  injectedMetadata: {
+    csp: {
+      warnLegacyBrowsers: true,
+    },
+  } as any,
   requireLegacyFiles: jest.fn(),
 };
 
@@ -192,6 +197,17 @@ describe('constructor', () => {
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledWith({
       targetDomElement: expect.any(HTMLElement),
+    });
+  });
+
+  it('passes browserSupportsCsp to ChromeService', () => {
+    new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    expect(MockChromeService).toHaveBeenCalledTimes(1);
+    expect(MockChromeService).toHaveBeenCalledWith({
+      browserSupportsCsp: expect.any(Boolean),
     });
   });
 
@@ -380,7 +396,10 @@ describe('#start()', () => {
     startCore();
     const [mockInstance] = MockChromeService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      notifications: mockNotificationStartContract,
+      injectedMetadata: mockInjectedMetadataStartContract,
+    });
   });
 
   it('returns start contract', () => {
