@@ -134,6 +134,10 @@ export const fieldMappings = {
   timestamp: {
     type: 'date'
   },
+  '@timestamp': {
+    type: 'alias',
+    path: 'timestamp'
+  },
   phpmemory: {
     type: 'long'
   },
