@@ -184,7 +184,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     let down: number = 0;
     let searchAfter: any = null;
 
-    while (true) {
+    do {
       if (searchAfter) {
         set(params, 'body.aggs.ids.composite.after', searchAfter);
       }
@@ -198,25 +198,23 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
       idBuckets.forEach(bucket => {
         const latest = get(bucket, 'latest.hits.hits', []);
-        return latest.reduce(
-          (acc, doc) => {
+        return latest.forEach(
+          doc => {
             const status = get(doc, '_source.monitor.status', null);
             if (statusFilter && statusFilter !== status) {
-              return acc;
+              if (status === 'up') {
+                up++;
+              } else {
+                down++;
+              }
             }
-            if (status === 'up') {
-              up++;
-            } else {
-              down++;
-            }
-            return acc;
           },
           { up: 0, down: 0 }
         );
       });
 
       searchAfter = get(queryResult, 'aggregations.ids.after_key');
-    }
+    } while (searchAfter);
 
     return { up, down, total: up + down };
   }
