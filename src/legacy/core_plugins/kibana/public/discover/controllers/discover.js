@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React from 'react';
 import angular from 'angular';
 import chrome from 'ui/chrome';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, get } from 'lodash';
+import { isEmpty, get } from 'lodash3';
 import { uiModules } from 'ui/modules';
 import template from './watch_edit_execute_detail.html';
 import '../watch_action_mode_table';

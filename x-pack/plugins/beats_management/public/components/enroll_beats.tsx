@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { capitalize } from 'lodash';
+import { capitalize } from 'lodash3';
 import React from 'react';
 import { CMBeat } from '../../common/domain_types';
 

@@ -6,7 +6,7 @@
 
 
 import { GIS_API_PATH } from '../common/constants';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 

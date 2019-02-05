@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { VectorStyle } from '../vector_style';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import {
   EuiFlexGroup,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
 export function IndexPatternsGetProvider(Private) {

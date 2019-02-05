@@ -7,7 +7,7 @@
 import { I18nContext } from 'ui/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { constant } from 'lodash';
+import { constant } from 'lodash3';
 
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';

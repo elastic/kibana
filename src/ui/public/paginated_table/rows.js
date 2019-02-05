@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { uiModules } from '../modules';
 import tableCellFilterHtml from '../directives/partials/table_cell_filter.html';
 

@@ -61,7 +61,7 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
+import _ from 'lodash3';
 import Semver from 'semver';
 import { MigrationVersion, RawSavedObjectDoc } from '../../serialization';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';

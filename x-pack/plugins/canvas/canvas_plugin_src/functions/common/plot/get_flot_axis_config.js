@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, map } from 'lodash';
+import { get, map } from 'lodash3';
 import { getType } from '@kbn/interpreter/common';
 
 export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {}) => {

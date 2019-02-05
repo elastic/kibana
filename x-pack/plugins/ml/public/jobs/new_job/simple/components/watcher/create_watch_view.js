@@ -23,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { has } from 'lodash';
+import { has } from 'lodash3';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

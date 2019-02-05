@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';

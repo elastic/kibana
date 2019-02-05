@@ -7,7 +7,7 @@
 import React from 'react';
 import { PipelineViewer } from '../pipeline_viewer';
 import { shallowWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 describe('PipelineViewer component', () => {
   let pipeline;

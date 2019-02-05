@@ -10,7 +10,7 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

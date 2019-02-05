@@ -18,7 +18,7 @@
  */
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import Promise from 'bluebird';
 import { i18n } from '@kbn/i18n';
 

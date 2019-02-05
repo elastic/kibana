@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+const _ = require('lodash3');
 import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
 import {
   ConstantComponent,

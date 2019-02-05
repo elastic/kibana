@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 function mean(values) {
   return _.sum(values) / values.length;

@@ -18,7 +18,7 @@
  */
 
 import { resolve, dirname } from 'path';
-import { times } from 'lodash';
+import { times } from 'lodash3';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));

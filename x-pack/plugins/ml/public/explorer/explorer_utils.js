@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, each, get, union, uniq } from 'lodash';
+import { chain, each, get, union, uniq } from 'lodash3';
 import { parseInterval } from 'ui/utils/parse_interval';
 
 import { isTimeSeriesViewDetector } from '../../common/util/job_utils';

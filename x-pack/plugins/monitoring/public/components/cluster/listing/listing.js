@@ -7,7 +7,7 @@ import React, { Fragment, Component } from 'react';
 import chrome from 'ui/chrome';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { capitalize, partial } from 'lodash';
+import { capitalize, partial } from 'lodash3';
 import {
   EuiHealth,
   EuiLink,

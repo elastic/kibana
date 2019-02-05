@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 import { parse, getByAlias } from '@kbn/interpreter/common';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';

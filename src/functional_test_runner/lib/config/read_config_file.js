@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep } from 'lodash3';
 
 import { Config } from './config';
 import { transformDeprecations } from './transform_deprecations';

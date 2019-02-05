@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { startsWith } from 'lodash';
+import { startsWith } from 'lodash3';
 import { kfetch, KFetchOptions } from 'ui/kfetch';
 import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 

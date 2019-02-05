@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash';
+import { defaults } from 'lodash3';
 import moment from 'moment';
 
 /*

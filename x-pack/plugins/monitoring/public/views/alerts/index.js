@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { find, get } from 'lodash';
+import { find, get } from 'lodash3';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';

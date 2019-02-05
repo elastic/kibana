@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';

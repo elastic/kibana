@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash3';
 import { Hint } from 'react-vis';
 import moment from 'moment';
 import styled from 'styled-components';

@@ -19,7 +19,7 @@
 
 import { uiModules } from 'ui/modules';
 import gaugeOptionsTemplate from './gauge_options.html';
-import _ from 'lodash';
+import _ from 'lodash3';
 const module = uiModules.get('kibana');
 
 module.directive('gaugeOptions', function (i18n) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { ContainerState, Embeddable } from 'ui/embeddable';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
 import { Filters, Query, TimeRange } from 'ui/embeddable/types';

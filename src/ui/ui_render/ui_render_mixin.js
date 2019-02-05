@@ -21,7 +21,7 @@ import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';

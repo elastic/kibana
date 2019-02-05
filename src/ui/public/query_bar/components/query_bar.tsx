@@ -20,8 +20,8 @@
 import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
-import _ from 'lodash';
-import { compact, debounce, get, isEqual } from 'lodash';
+import _ from 'lodash3';
+import { compact, debounce, get, isEqual } from 'lodash3';
 import React, { Component } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';

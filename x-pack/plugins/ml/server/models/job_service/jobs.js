@@ -13,7 +13,7 @@ import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 import moment from 'moment';
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 
 export function jobsProvider(callWithRequest) {
 

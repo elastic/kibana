@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { APMError } from '../typings/es_schemas/Error';
 import { Span } from '../typings/es_schemas/Span';
 import { Transaction } from '../typings/es_schemas/Transaction';

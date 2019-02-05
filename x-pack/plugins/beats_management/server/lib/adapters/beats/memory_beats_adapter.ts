@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { intersection, omit } from 'lodash';
+import { intersection, omit } from 'lodash3';
 
 import { CMBeat } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';

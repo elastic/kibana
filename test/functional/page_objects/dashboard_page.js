@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 

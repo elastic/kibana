@@ -18,7 +18,7 @@
  */
 
 import { accessSync, R_OK } from 'fs';
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import { fromRoot } from '../../utils';
 
 const CONFIG_PATHS = [

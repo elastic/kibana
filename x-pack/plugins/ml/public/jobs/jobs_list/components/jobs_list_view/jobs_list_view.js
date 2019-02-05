@@ -22,7 +22,7 @@ import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../node_available_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash3';
 
 import React, {
   Component

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 /*
  * Create a single-level array with strings for all the paths to values in the

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import { MonitoringViewBaseController } from '../../';
 import { ElasticsearchOverview } from 'plugins/monitoring/components';
 import { I18nContext } from 'ui/i18n';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function ArgValueSuggestionsProvider(Private, indexPatterns) {

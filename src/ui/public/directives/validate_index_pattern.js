@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { uiModules } from '../modules';
 // See https://github.com/elastic/elasticsearch/issues/6736
 

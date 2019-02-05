@@ -18,7 +18,7 @@
  */
 
 import elasticsearch from 'elasticsearch';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 const {
   ConnectionFault,

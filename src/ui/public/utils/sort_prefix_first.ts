@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { partition } from 'lodash';
+import { partition } from 'lodash3';
 
 export function sortPrefixFirst(array: any[], prefix?: string | number, property?: string): any[] {
   if (!prefix) {

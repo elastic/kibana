@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';

@@ -6,7 +6,7 @@
 
 import { ResponseToolkit } from 'hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {

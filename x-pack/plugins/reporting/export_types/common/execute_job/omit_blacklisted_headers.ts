@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import { KBN_SCREENSHOT_HEADER_BLACKLIST } from '../../../common/constants';
 import { KbnServer, ReportingJob } from '../../../types';
 

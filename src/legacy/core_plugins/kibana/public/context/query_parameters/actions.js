@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterManagerProvider } from 'ui/filter_manager';

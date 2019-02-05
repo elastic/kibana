@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { contains, get, has } from 'lodash';
+import { contains, get, has } from 'lodash3';
 
 const ROUTE_TAG_API = 'api';
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';

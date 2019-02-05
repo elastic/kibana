@@ -19,7 +19,7 @@
 
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { relativeOptions } from './relative_options';
 
 export function parseRelativeString(part) {

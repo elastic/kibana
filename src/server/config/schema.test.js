@@ -19,7 +19,7 @@
 
 import schemaProvider from './schema';
 import Joi from 'joi';
-import { set } from 'lodash';
+import { set } from 'lodash3';
 
 describe('Config schema', function () {
   let schema;

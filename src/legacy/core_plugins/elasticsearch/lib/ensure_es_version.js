@@ -22,7 +22,7 @@
  * that defined in Kibana's package.json.
  */
 
-import { forEach, get } from 'lodash';
+import { forEach, get } from 'lodash3';
 import { coerce } from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 

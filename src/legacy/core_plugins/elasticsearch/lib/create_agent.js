@@ -18,7 +18,7 @@
  */
 
 import url from 'url';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import http from 'http';
 import https from 'https';
 

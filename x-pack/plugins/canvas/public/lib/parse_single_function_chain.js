@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, mapValues, map } from 'lodash';
+import { get, mapValues, map } from 'lodash3';
 import { fromExpression } from '@kbn/interpreter/common';
 
 export function parseSingleFunctionChain(filterString) {

@@ -10,7 +10,7 @@ import React, {
   Component
 } from 'react';
 
-import { sortBy } from 'lodash';
+import { sortBy } from 'lodash3';
 import moment from 'moment';
 
 import { toLocaleString } from '../../../../util/string_utils';

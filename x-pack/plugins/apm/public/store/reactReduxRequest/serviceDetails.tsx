@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, get } from 'lodash';
+import { first, get } from 'lodash3';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';

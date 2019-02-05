@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { standaloneClusterFilter } from './';
 
 export async function hasStandaloneClusters(req, indexPatterns) {

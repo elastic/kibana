@@ -6,7 +6,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, last } from 'lodash';
+import { isEmpty, last } from 'lodash3';
 import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';

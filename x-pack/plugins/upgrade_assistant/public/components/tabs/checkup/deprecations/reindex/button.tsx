@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from 'lodash3';
 import React, { Fragment, ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 

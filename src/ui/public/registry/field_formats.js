@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import chrome from '../chrome';
 import { FieldFormat } from '../../field_formats/field_format';
 import { IndexedArray } from '../indexed_array';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, get as _get, omit } from 'lodash';
+import { flatten, get as _get, omit } from 'lodash3';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { CMBeat } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';

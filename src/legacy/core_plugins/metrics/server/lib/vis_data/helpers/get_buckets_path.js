@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { startsWith } from 'lodash';
+import { startsWith } from 'lodash3';
 const percentileTest = /\[[0-9\.]+\]$/;
 const percentileNumberTest = /\d+\.\d+/;
 export default (id, metrics) => {

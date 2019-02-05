@@ -6,7 +6,7 @@
 
 import { handleActions } from 'redux-actions';
 import { assign, push, del, set } from 'object-path-immutable';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import * as actions from '../actions/elements';
 
 const getLocation = type => (type === 'group' ? 'groups' : 'elements');

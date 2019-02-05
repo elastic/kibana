@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 /**
  * Get the ResponseAggConfig class for an aggConfig,

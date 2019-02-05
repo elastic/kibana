@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { memoize } from 'lodash';
+import { memoize } from 'lodash3';
 import React from 'react';
 import chrome from 'ui/chrome';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';

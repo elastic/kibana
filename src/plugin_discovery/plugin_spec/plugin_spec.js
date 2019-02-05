@@ -19,8 +19,8 @@
 
 import { resolve, basename, isAbsolute as isAbsolutePath } from 'path';
 
-import toPath from 'lodash/internal/toPath';
-import { get } from 'lodash';
+import toPath from 'lodash3/internal/toPath';
+import { get } from 'lodash3';
 
 import { createInvalidPluginError } from '../errors';
 import { isVersionCompatible } from './is_version_compatible';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import { isFunction } from 'lodash3';
 
 /**
  * Filters out a list by a given filter. This is currently used to implement:

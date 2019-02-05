@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { getConvertedValueForField } from '../filters';
 
 export function migrateFilter(filter, indexPattern) {

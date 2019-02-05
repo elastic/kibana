@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
+import _ from 'lodash3';
 import React, { Component } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
 import { Role } from '../../../../../../../common/model/role';

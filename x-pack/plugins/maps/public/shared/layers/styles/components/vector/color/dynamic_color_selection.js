@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FieldSelect, fieldShape } from '../field_select';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize, isArray, isFunction, get } from 'lodash';
+import { capitalize, isArray, isFunction, get } from 'lodash3';
 
 import chrome from '../chrome';
 import filterTemplate from '../chrome/config/filter.html';

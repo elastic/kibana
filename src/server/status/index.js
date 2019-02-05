@@ -22,7 +22,7 @@ import { Metrics } from './lib/metrics';
 import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
 import { getOpsStatsCollector } from './collectors';
 import Oppsy from 'oppsy';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash3';
 import { getOSInfo } from './lib/get_os_info';
 
 export function statusMixin(kbnServer, server, config) {

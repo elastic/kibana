@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, get } from 'lodash';
+import { flatten, get } from 'lodash3';
 import uuidv4 from 'uuid/v4';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { ConfigurationBlock } from '../../../../common/domain_types';

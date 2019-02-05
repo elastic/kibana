@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
+import _ from 'lodash3';
 import { PROMOTE_TEMPORARY_LAYERS, LAYER_DATA_LOAD_ERROR }
   from '../actions/store_actions';
 import { RESET_LAYER_LOAD } from '../actions/ui_actions';

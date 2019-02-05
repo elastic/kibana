@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { CMTagsAdapter } from './adapter_types';

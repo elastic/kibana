@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';

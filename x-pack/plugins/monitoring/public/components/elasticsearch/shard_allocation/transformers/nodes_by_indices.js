@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { hasPrimaryChildren } from '../lib/has_primary_children';
 import { decorateShards } from '../lib/decorate_shards';
 

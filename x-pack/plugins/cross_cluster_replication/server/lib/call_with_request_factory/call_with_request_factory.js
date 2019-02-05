@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
+import { once } from 'lodash3';
 import { elasticsearchJsPlugin } from '../../client/elasticsearch_ccr';
 
 const callWithRequest = once(server => {

@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiTextArea, EuiFormRow, EuiTitle } from '@elastic/eui';
-import { debounce, startCase } from 'lodash';
+import { debounce, startCase } from 'lodash3';
 import { Autocomplete } from '../autocomplete';
 import {
   getAutocompleteSuggestions,

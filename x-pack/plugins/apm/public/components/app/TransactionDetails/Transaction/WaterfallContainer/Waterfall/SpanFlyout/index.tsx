@@ -19,7 +19,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get, keys } from 'lodash';
+import { get, keys } from 'lodash3';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';

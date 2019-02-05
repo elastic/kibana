@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { UMAuthAdapter } from './adapter_types';
 
 export class UMMemoryAuthAdapter implements UMAuthAdapter {

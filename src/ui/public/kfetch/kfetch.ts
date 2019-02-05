@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { merge } from 'lodash';
+import { merge } from 'lodash3';
 // @ts-ignore not really worth typing
 import { metadata } from 'ui/metadata';
 import url from 'url';

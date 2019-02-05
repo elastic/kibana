@@ -5,7 +5,7 @@
  */
 
 import $ from 'jquery';
-import { times } from 'lodash';
+import { times } from 'lodash3';
 import { elasticOutline } from '../lib/elastic_outline';
 import { isValidUrl } from '../../common/lib/url';
 

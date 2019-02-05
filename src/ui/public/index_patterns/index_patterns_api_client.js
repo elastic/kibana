@@ -19,7 +19,7 @@
 
 import { resolve as resolveUrl, format as formatUrl } from 'url';
 
-import { pick, mapValues } from 'lodash';
+import { pick, mapValues } from 'lodash3';
 
 import { IndexPatternMissingIndices } from '../errors';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isString } from 'lodash';
+import { isString } from 'lodash3';
 
 export class ExportTypesRegistry {
 

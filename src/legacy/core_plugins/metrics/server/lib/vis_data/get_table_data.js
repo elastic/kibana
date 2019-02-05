@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
 import processBucket from './table/process_bucket';

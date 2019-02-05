@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from '../../modules';
-import _ from 'lodash';
+import _ from 'lodash3';
 import MarkdownIt from 'markdown-it';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 import { EMSClientV66 } from '../../../../legacy/core_plugins/tile_map/common/ems_client';

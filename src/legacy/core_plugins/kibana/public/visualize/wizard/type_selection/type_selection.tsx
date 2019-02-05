@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash3';
 import React, { ChangeEvent } from 'react';
 
 import {

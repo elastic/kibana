@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty, omit } from 'lodash';
+import { get, isEmpty, omit } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 /**

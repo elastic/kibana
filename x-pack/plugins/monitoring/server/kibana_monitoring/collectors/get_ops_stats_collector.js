@@ -11,7 +11,7 @@ import {
 } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import Oppsy from 'oppsy';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash3';
 
 
 class OpsMonitor {

@@ -21,7 +21,7 @@ import classNames from 'classnames';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
-import { memoize } from 'lodash';
+import { memoize } from 'lodash3';
 
 /**
  * Return a memoized markdown rendering function that use the specified

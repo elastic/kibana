@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { ContainerState, EmbeddableMetadata, Filters, Query, TimeRange } from 'ui/embeddable';
 import { EmbeddableCustomization } from 'ui/embeddable/types';
 import { DashboardViewMode } from '../dashboard_view_mode';

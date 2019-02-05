@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { modifyUrl } from 'ui/url';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

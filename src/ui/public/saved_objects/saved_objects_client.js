@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { resolve as resolveUrl } from 'url';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';

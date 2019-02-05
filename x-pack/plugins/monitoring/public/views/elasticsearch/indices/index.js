@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';

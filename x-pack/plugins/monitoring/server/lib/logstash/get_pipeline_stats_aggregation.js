@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, last } from 'lodash';
+import { get, last } from 'lodash3';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 

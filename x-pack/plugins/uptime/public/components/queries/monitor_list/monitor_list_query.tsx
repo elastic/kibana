@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { LatestMonitor } from '../../../../common/graphql/types';

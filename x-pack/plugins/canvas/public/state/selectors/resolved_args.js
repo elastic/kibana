@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import * as argHelper from '../../lib/resolved_arg';
 import { prepend } from '../../lib/modify_path';
 

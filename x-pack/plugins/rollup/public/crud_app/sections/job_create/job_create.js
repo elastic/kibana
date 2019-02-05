@@ -6,9 +6,9 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import mapValues from 'lodash/object/mapValues';
-import cloneDeep from 'lodash/lang/cloneDeep';
-import debounce from 'lodash/function/debounce';
+import mapValues from 'lodash3/object/mapValues';
+import cloneDeep from 'lodash3/lang/cloneDeep';
+import debounce from 'lodash3/function/debounce';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';

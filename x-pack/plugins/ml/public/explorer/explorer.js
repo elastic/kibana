@@ -8,7 +8,7 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

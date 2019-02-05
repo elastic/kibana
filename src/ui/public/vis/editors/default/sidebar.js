@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import './agg_group';
 import './vis_options';
 import { uiModules } from '../../../modules';

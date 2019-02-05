@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
 import { FilterBarLibMapPhraseProvider } from './map_phrase';

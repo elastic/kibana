@@ -5,7 +5,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
 import { Stats } from 'plugins/monitoring/components/beats';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';

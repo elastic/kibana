@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function MappingSetupService() {

@@ -23,7 +23,7 @@ import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
 
 import tickFormatter from '../../lib/tick_formatter';
-import _ from 'lodash';
+import _ from 'lodash3';
 import Timeseries from '../../../visualizations/components/timeseries';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';

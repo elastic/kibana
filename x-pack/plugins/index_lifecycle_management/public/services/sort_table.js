@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy } from 'lodash3';
 
 const stringSort = (fieldName) => (item) => item[fieldName];
 const arraySort = (fieldName) => (item) => (item[fieldName] || []).length;

@@ -18,7 +18,7 @@
  */
 
 import { relativeOptions } from '../../../../../../ui/public/timepicker/relative_options';
-import _ from 'lodash';
+import _ from 'lodash3';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 

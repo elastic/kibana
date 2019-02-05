@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 const makeNestedLabel = function (aggConfig, label) {
   const uppercaseLabel = _.startCase(label);

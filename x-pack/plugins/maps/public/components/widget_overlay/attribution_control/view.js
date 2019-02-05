@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import {
   EuiText,
   EuiPanel,

@@ -53,7 +53,7 @@
  * Programmatic control of the navbar can be achieved one of two ways
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import angular from 'angular';
 import '../watch_multi';
 import '../directives/input_focus';

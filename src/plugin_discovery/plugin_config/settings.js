@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 import * as serverConfig from '../../server/config';
 import { getTransform } from '../../deprecation';

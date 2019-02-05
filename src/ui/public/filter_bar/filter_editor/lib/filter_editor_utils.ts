@@ -31,7 +31,7 @@ import {
   PhrasesFilter,
   RangeFilter,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import { Field, IndexPattern } from 'ui/index_patterns';
 import { isFilterable } from 'ui/index_patterns/static_utils';
 import Ipv4Address from 'ui/utils/ipv4_address';

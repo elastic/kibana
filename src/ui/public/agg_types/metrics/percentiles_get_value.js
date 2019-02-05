@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import { find } from 'lodash3';
 
 export function getPercentileValue(agg, bucket) {
   const values = bucket[agg.parentId] && bucket[agg.parentId].values;

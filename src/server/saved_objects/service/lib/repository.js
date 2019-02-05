@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';

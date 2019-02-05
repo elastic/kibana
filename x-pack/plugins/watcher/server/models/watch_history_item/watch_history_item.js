@@ -6,7 +6,7 @@
 
 import { badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
-import { get, cloneDeep } from 'lodash';
+import { get, cloneDeep } from 'lodash3';
 import { WatchStatus } from '../watch_status';
 import { i18n } from '@kbn/i18n';
 

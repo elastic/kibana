@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import expect from 'expect.js';
 // eslint-disable-next-line max-len
 import { getMonitorStatusBarQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_status_bar/get_monitor_status_bar';

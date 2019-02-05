@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
 export function mapToLayerWithId(prefix, layer) {

@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldSearch } from '@elastic/eui';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash3';
 
 export class WorkpadSearch extends React.PureComponent {
   static propTypes = {

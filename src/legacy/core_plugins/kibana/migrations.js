@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, get, omit } from 'lodash';
+import { cloneDeep, get, omit } from 'lodash3';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

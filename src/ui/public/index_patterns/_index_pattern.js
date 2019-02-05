@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from '../errors';
 import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';

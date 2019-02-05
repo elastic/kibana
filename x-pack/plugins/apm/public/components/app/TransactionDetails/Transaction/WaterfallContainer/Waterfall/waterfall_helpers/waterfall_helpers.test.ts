@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy } from 'lodash3';
 import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {

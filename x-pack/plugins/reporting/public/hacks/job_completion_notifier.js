@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { JobStatuses } from '../constants/job_statuses';

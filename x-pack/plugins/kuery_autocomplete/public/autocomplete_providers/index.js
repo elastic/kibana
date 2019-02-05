@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, mapValues, uniq } from 'lodash';
+import { flatten, mapValues, uniq } from 'lodash3';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getSuggestionsProvider as field } from './field';
 import { getSuggestionsProvider as value } from './value';

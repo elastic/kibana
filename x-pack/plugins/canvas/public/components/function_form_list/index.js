@@ -6,7 +6,7 @@
 
 import { interpretAst } from 'plugins/interpreter/interpreter';
 import { compose, withProps } from 'recompose';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { toExpression } from '@kbn/interpreter/common';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { FunctionFormList as Component } from './function_form_list';

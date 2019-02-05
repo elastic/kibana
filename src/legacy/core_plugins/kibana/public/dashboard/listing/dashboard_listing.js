@@ -20,7 +20,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiTitle,

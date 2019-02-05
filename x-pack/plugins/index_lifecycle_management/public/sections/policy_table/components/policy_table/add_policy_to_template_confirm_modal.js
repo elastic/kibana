@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { get, find } from 'lodash';
+import { get, find } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { LearnMoreLink } from '../../../components/learn_more_link';

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { flatten } from 'lodash';
+import { flatten } from 'lodash3';
 const type = 'operator';
 
 const equalsText = i18n.translate('xpack.kueryAutocomplete.equalOperatorDescription.equalsText', {

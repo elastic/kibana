@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash3';
 import React, { Component } from 'react';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { StringMap } from '../../../../typings/common';

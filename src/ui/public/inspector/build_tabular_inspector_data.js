@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import { set } from 'lodash3';
 import { createFilter } from '../vis/vis_filters';
 import { FormattedData } from './adapters/data';
 

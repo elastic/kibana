@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapGeoBoundingBoxProvider(Promise, indexPatterns) {

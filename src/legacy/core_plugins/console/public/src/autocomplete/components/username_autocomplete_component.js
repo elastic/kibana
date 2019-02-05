@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import _ from 'lodash3';
 import mappings from '../../mappings';
 import { ListComponent } from './list_component';
 function nonValidUsernameType(token) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { chain } from 'lodash';
+import { chain } from 'lodash3';
 import moment from 'moment';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';

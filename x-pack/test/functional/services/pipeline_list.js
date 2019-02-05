@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { times, mapValues } from 'lodash';
+import { times, mapValues } from 'lodash3';
 
 export function PipelineListProvider({ getService }) {
   const testSubjects = getService('testSubjects');

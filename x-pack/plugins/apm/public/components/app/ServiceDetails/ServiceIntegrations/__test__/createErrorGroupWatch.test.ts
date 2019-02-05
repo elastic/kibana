@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isArray, isObject, isString } from 'lodash';
+import { isArray, isObject, isString } from 'lodash3';
 import mustache from 'mustache';
 import chrome from 'ui/chrome';
 import uuid from 'uuid';

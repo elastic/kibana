@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { inRange } from 'lodash';
+import { inRange } from 'lodash3';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';

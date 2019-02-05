@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { TileLayer } from '../shared/layers/tile_layer';
 import { VectorLayer } from '../shared/layers/vector_layer';
 import { HeatmapLayer } from '../shared/layers/heatmap_layer';

@@ -6,7 +6,7 @@
 
 import { Location } from 'history';
 import createHistory from 'history/createHashHistory';
-import { isPlainObject, mapValues } from 'lodash';
+import { isPlainObject, mapValues } from 'lodash3';
 import qs from 'querystring';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';

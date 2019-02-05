@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React from 'react';
 import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';

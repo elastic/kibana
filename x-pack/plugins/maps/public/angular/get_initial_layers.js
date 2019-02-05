@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
+import _ from 'lodash3';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { isMetaDataLoaded, getDataSourcesSync } from '../meta';

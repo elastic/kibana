@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 import { Legacy } from 'kibana';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';

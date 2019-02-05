@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { EuiIcon } from '@elastic/eui';
 
 export default props => (row) => {

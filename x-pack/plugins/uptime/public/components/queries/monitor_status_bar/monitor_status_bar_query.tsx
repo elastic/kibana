@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ApolloError } from 'apollo-client';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';

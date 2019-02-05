@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import uiRoutes from 'ui/routes';
 import { getPageData } from './get_page_data';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';

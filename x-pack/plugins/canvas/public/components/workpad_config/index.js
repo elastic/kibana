@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { sizeWorkpad, setName, setWorkpadCSS } from '../../state/actions/workpad';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import numeral from '@elastic/numeral';
-import { defaults, get } from 'lodash';
+import { defaults, get } from 'lodash3';
 const KIBANA_MAX_SIZE_BYTES_PATH = 'xpack.reporting.csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, omit } from 'lodash';
+import { get, omit } from 'lodash3';
 
 /**
  * Creates a new instance of AppState based on the table vis state.

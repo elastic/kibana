@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { getType } from '@kbn/interpreter/common';
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';

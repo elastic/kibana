@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from 'lodash';
+import { find } from 'lodash3';
 import { render } from 'react-dom';
 import uiRoutes from 'ui/routes';
 import moment from 'moment';

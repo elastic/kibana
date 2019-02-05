@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import getLastValue from '../../../common/get_last_value';
 import tickFormatter from './tick_formatter';
 import moment from 'moment';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 const OPERANDS_IN_RANGE = 2;
 const operators = {
   gt: '>',

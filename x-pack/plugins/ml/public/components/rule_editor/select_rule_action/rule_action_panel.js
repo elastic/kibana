@@ -20,7 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash3';
 
 import { AddToFilterListLink } from './add_to_filter_list_link';
 import { DeleteRuleModal } from './delete_rule_modal';

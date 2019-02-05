@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { capitalize } from 'lodash';
+import { capitalize } from 'lodash3';
 import { I18nContext } from 'ui/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';

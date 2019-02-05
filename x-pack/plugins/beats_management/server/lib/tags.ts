@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants/configuration_blocks';
 import { BeatTag } from '../../common/domain_types';
 import { CMBeatsAdapter } from './adapters/beats/adapter_types';

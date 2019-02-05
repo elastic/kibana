@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { memoize } from 'lodash';
+import { memoize } from 'lodash3';
 
 export const createMockServer = ({ settings = {} }: any) => {
   const mockServer = {

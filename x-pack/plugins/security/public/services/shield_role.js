@@ -5,7 +5,7 @@
  */
 
 import 'angular-resource';
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 

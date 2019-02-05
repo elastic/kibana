@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';

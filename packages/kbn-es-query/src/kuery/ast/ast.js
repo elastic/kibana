@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
 import { parse as parseLegacyKuery } from './legacy_kuery';

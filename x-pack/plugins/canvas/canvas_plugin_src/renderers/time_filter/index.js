@@ -6,7 +6,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { get, set } from 'lodash';
+import { get, set } from 'lodash3';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { TimeFilter } from './components/time_filter';
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
-import { capitalize } from 'lodash';
+import { capitalize } from 'lodash3';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

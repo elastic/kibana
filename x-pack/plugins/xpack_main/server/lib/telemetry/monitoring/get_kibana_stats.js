@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty, omit } from 'lodash';
+import { get, isEmpty, omit } from 'lodash3';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { fetchHighLevelStats, handleHighLevelStatsResponse } from './get_high_level_stats';
 

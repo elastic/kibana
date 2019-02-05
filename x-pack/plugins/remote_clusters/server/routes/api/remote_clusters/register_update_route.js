@@ -10,7 +10,7 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapCustomError, wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';
 import { serializeCluster, deserializeCluster } from '../../../lib/cluster_serialization';
 

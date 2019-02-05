@@ -18,7 +18,7 @@
  */
 
 import L from 'leaflet';
-import _ from 'lodash';
+import _ from 'lodash3';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
 

@@ -19,7 +19,7 @@
 
 import buildProcessorFunction from '../build_processor_function';
 import processors from '../response_processors/series';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 export default function handleResponseBody(panel) {

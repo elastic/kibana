@@ -8,7 +8,7 @@ import { EuiIcon } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { get, indexBy, uniq } from 'lodash';
+import { get, indexBy, uniq } from 'lodash3';
 import React from 'react';
 import styled from 'styled-components';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';

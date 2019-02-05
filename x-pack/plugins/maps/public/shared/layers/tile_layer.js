@@ -5,7 +5,7 @@
  */
 
 import { AbstractLayer } from './layer';
-import _ from 'lodash';
+import _ from 'lodash3';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';

@@ -22,7 +22,7 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { once } from 'lodash';
+import { once } from 'lodash3';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';

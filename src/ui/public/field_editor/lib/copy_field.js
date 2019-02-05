@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { has } from 'lodash';
+import { has } from 'lodash3';
 
 /**
  * Fully clones a Field object, so that modifications can be performed on

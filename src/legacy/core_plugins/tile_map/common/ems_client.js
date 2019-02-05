@@ -18,7 +18,7 @@
  */
 
 import MarkdownIt from 'markdown-it';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
 import fetch from 'node-fetch';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { FilterUtils } from './filter_utils';
 
 export function updateSavedDashboard(savedDashboard, appState, timeFilter, toJson) {

@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 import opn from 'opn';
 
-import { debounce, invoke, bindAll, once, uniq } from 'lodash';
+import { debounce, invoke, bindAll, once, uniq } from 'lodash3';
 import * as Rx from 'rxjs';
 import { first, mapTo, filter, map, take } from 'rxjs/operators';
 

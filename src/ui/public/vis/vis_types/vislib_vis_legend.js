@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import html from './vislib_vis_legend.html';
 import { VislibLibDataProvider } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';

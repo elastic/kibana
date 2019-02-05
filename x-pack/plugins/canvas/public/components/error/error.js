@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { ShowDebugging } from './show_debugging';
 
 export const Error = ({ payload }) => {

@@ -6,7 +6,7 @@
 
 
 
-import { get, sortBy } from 'lodash';
+import { get, sortBy } from 'lodash3';
 import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';

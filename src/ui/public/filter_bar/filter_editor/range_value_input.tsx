@@ -19,7 +19,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { Component } from 'react';
 import React from 'react';
 import { getDocLink } from 'ui/documentation_links';

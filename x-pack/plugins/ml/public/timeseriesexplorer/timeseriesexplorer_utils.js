@@ -12,7 +12,7 @@
  * Viewer dashboard.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { isTimeSeriesViewJob } from '../../common/util/job_utils';

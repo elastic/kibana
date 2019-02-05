@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export function geoContains(collar, bounds) {
   //test if bounds top_left is outside collar

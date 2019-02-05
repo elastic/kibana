@@ -23,7 +23,7 @@
  * @extends SimpleEmitter
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { fatalError } from './notify';
 import { SimpleEmitter } from './utils/simple_emitter';
 import { createLegacyClass } from './utils/legacy_class';

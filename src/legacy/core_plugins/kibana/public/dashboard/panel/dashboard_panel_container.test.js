@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardPanelContainer } from './dashboard_panel_container';
 import { DashboardViewMode } from '../dashboard_view_mode';

@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';

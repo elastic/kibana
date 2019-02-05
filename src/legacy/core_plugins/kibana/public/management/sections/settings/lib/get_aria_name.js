@@ -18,7 +18,7 @@
  */
 
 
-import { words } from 'lodash';
+import { words } from 'lodash3';
 
 /**
  * @name {string} the name of the configuration object

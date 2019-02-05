@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep } from 'lodash3';
 
 import { ProxyConfig } from './proxy_config';
 import { parse as parseUrl } from 'url';

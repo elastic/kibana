@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { flatten } from 'lodash';
+import { flatten } from 'lodash3';
 import { fetch } from '../../common/lib/fetch';
 import { buildBoolArray } from '../../server/lib/build_bool_array';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { debounce } from 'lodash';
+import { debounce } from 'lodash3';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';

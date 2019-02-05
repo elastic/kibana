@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';

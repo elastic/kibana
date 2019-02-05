@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { resolve, join, sep } from 'path';
 import url from 'url';
-import { has, isEmpty, head } from 'lodash';
+import { has, isEmpty, head } from 'lodash3';
 
 import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';

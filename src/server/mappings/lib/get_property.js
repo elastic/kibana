@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import toPath from 'lodash/internal/toPath';
+import toPath from 'lodash3/internal/toPath';
 
 /**
  *  Recursively read properties from the mapping object of type "object"

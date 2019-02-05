@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, capitalize } from 'lodash';
+import { isEmpty, capitalize } from 'lodash3';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
 import { i18n } from '@kbn/i18n';

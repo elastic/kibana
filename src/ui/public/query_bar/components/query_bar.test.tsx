@@ -62,9 +62,9 @@ jest.mock('../../autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 
-import _ from 'lodash';
+import _ from 'lodash3';
 // Using doMock to avoid hoisting so that I can override only the debounce method in lodash
-jest.doMock('lodash', () => ({
+jest.doMock('lodash3', () => ({
   ..._,
   debounce: (func: () => any) => func,
 }));

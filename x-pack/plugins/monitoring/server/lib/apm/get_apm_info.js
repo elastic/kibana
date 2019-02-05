@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, capitalize } from 'lodash';
+import { get, capitalize } from 'lodash3';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { getDiffCalculation } from '../beats/_beats_stats';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {

@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios';
-import { findIndex, set } from 'lodash';
+import { findIndex, set } from 'lodash3';
 import React from 'react';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';

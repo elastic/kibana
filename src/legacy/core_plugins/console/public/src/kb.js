@@ -27,7 +27,7 @@ import {
 } from './autocomplete/components';
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import Api from './kb/api';
 

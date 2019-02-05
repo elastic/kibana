@@ -26,7 +26,7 @@ import {
 import utils from './utils';
 import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/components';
-import _ from 'lodash';
+import _ from 'lodash3';
 import ace from 'brace';
 import 'brace/ext/language_tools';
 import { i18n } from '@kbn/i18n';

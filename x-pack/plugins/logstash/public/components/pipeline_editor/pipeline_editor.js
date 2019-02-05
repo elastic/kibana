@@ -11,7 +11,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/plain_text';
 import 'brace/theme/github';
 
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash3';
 import { TOOLTIPS } from '../../../common/constants/tooltips';
 import {
   EuiButton,

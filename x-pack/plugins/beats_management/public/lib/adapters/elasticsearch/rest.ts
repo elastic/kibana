@@ -5,7 +5,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash3';
 import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { ElasticsearchAdapter } from './adapter_types';

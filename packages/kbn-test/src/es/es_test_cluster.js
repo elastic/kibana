@@ -19,8 +19,8 @@
 
 import { resolve } from 'path';
 import { format } from 'url';
-import { get } from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import { get } from 'lodash3';
+import toPath from 'lodash3/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { KIBANA_ROOT } from '../';

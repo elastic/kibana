@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { countBy, groupBy, mapValues } from 'lodash';
+import _, { countBy, groupBy, mapValues } from 'lodash3';
 import {
   ESQueryResponse,
   HapiServer,

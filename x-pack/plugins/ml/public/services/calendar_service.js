@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 import { ml } from 'plugins/ml/services/ml_api_service';

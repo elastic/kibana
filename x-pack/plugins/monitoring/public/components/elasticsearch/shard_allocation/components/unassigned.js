@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React from 'react';
 import { Shard } from './shard';
 import { i18n } from '@kbn/i18n';

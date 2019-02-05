@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import angular from 'angular';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';

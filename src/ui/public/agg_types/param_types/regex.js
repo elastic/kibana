@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import editorHtml from '../controls/regular_expression.html';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';

@@ -18,7 +18,7 @@
  */
 
 import { getUiSettingDefaults } from '../../../ui_setting_defaults';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 const uiSettingDefaults = getUiSettingDefaults();
 const defaultSearchQueryLanguageSetting = uiSettingDefaults['search:queryLanguage'].value;

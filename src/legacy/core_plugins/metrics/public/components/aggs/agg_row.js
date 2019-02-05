@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import AddDeleteButtons from '../add_delete_buttons';
 import { EuiToolTip, EuiButtonIcon, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';

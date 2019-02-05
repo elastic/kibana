@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, partition } from 'lodash';
+import { get, partition } from 'lodash3';
 import { calculateNodeType } from '../nodes';
 
 /*

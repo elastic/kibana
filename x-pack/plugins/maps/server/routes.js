@@ -7,7 +7,7 @@
 
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 const ROOT = `/${GIS_API_PATH}`;

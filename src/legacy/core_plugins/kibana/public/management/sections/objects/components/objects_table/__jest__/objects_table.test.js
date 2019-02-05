@@ -152,7 +152,7 @@ describe('ObjectsTable', () => {
   beforeEach(() => {
     defaultProps.savedObjectsClient.find.mockClear();
     // mock _.debounce to fire immediately with no internal timer
-    require('lodash').debounce = function (func) {
+    require('lodash3').debounce = function (func) {
       function debounced(...args) {
         return func.apply(this, args);
       }

@@ -8,7 +8,7 @@ import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_re
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
 import { ElementContent as Component } from './element_content';
 

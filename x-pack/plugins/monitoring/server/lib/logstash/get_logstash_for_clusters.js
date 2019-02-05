@@ -5,7 +5,7 @@
  */
 
 import Promise from 'bluebird';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
 import { LogstashClusterMetric } from '../metrics';

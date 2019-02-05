@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { parseNext } from 'plugins/security/lib/parse_next';
 import { LoginPage } from 'plugins/security/views/login/components';
 // @ts-ignore

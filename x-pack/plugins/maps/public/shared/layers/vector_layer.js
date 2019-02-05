@@ -16,7 +16,7 @@ import { LeftInnerJoin } from './joins/left_inner_join';
 import { FeatureTooltip } from '../../components/map/feature_tooltip';
 import { getStore } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',

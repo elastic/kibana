@@ -20,7 +20,7 @@
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set } from 'lodash';
+import { set } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 function checkMetric(metric, fields) {

@@ -18,7 +18,7 @@
  */
 
 import crypto from 'crypto';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 export function shortUrlLookupProvider(server) {
   async function updateMetadata(doc, req) {

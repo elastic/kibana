@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import view from './view';
-import { some, get } from 'lodash';
+import { some, get } from 'lodash3';
 import { STATUS } from '../../../../constants/index';
 
 function getIsLoading(state) {

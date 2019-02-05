@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { flatten } from 'lodash';
+import { flatten } from 'lodash3';
 // @ts-ignore
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';

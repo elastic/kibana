@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, get } from 'lodash';
+import { flatten, get } from 'lodash3';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database/adapter_types';
 import { FrameworkUser } from '../framework/adapter_types';

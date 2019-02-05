@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, last } from 'lodash';
+import { first, last } from 'lodash3';
 import { timeseriesResponse } from './mock-responses/timeseries_response';
 import {
   ApmTimeSeriesResponse,

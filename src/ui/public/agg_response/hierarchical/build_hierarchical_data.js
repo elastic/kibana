@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { toArray } from 'lodash';
+import { toArray } from 'lodash3';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 export const buildHierarchicalData = (table, { metric, buckets = [] }) => {

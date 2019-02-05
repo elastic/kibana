@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy } from 'lodash3';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 export interface AgentMark {

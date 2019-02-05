@@ -18,7 +18,7 @@ import {
   EuiEmptyPrompt,
   EuiFilePicker,
 } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash3';
 import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';

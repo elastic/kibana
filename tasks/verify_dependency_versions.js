@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { size } from 'lodash';
+import { size } from 'lodash3';
 import kibana from '../package.json';
 import xpack from '../x-pack/package.json';
 

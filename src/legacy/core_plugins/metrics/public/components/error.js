@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 function ErrorComponent(props) {

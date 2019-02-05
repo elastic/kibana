@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React, { Component, Fragment } from 'react';
 
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';

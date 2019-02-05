@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash3';
 import { uiModules } from 'ui/modules';
 import { Notifier, toastNotifications } from 'ui/notify';
 import { I18nContext } from 'ui/i18n';

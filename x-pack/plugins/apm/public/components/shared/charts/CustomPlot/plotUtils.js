@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, flatten } from 'lodash';
+import { isEmpty, flatten } from 'lodash3';
 import { scaleLinear } from 'd3-scale';
 import { XYPlot } from 'react-vis';
 import d3 from 'd3';

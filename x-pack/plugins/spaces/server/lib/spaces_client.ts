@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';
 import { SpacesAuditLogger } from './audit_logger';

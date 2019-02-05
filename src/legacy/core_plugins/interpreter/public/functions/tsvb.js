@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { MetricsRequestHandlerProvider } from 'plugins/metrics/kbn_vis_types/request_handler';
 import { PersistedState } from 'ui/persisted_state';

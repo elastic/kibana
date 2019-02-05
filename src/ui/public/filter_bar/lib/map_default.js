@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export function FilterBarLibMapDefaultProvider(Promise) {
 

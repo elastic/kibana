@@ -9,7 +9,7 @@
 import { basicJobValidation } from 'plugins/ml/../common/util/job_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 export function validateJob(job, checks) {

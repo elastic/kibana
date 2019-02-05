@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { last } from 'lodash';
+import { last } from 'lodash3';
 import {
   EuiBadge,
   EuiCodeBlock,

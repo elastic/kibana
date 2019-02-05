@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 
 export async function getFields(req) {
   const { indexPatternsService } = req.pre;

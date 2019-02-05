@@ -20,7 +20,7 @@
 import 'angular';
 import 'angular-recursion';
 import '../paginated_table';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { uiModules } from '../modules';
 import aggTableTemplate from './agg_table.html';
 import { getFormat } from '../visualize/loader/pipeline_helpers/utilities';

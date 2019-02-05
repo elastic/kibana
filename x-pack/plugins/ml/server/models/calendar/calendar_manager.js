@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import Boom from 'boom';
 import { EventManager } from './event_manager';
 

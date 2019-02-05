@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 
 export function VislibVisualizationsColumnChartProvider(Private) {

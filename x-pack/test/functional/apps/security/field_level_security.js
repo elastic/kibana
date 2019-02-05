@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { indexBy } from 'lodash';
+import { indexBy } from 'lodash3';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');

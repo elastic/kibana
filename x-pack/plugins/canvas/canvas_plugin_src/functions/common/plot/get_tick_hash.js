@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
+import { get, sortBy } from 'lodash3';
 
 export const getTickHash = (columns, rows) => {
   const ticks = {

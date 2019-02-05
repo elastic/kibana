@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { set } from 'lodash';
+import _, { set } from 'lodash3';
 import { createTransform, Deprecations } from '../../deprecation';
 import { unset } from '../../utils';
 

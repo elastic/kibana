@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'lodash';
+import { first } from 'lodash3';
 import React from 'react';
 import {
   SPAN_DURATION,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';

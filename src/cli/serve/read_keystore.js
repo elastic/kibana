@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { set } from 'lodash';
+import { set } from 'lodash3';
 
 import { Keystore } from '../../server/keystore';
 import { getData } from '../../server/path';

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { fromExpression } from '@kbn/interpreter/common';
 import { TimePicker } from '../time_picker';
 import { TimePickerMini } from '../time_picker_mini';

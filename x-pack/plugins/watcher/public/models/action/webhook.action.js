@@ -5,7 +5,7 @@
  */
 
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 

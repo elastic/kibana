@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { BeatEnrollmentStatus, CMServerLibs } from '../../lib/types';

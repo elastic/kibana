@@ -5,7 +5,7 @@
  */
 // file.skip
 
-import { camelCase } from 'lodash';
+import { camelCase } from 'lodash3';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 // @ts-ignore

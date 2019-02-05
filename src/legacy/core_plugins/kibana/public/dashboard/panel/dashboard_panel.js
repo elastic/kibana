@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';

@@ -18,7 +18,7 @@
  */
 
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { ContainerState, ContextMenuAction, ContextMenuPanel, Embeddable } from 'ui/embeddable';
 
 /**

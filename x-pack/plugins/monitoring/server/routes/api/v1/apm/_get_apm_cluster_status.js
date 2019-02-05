@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { getApmsForClusters } from '../../../../lib/apm/get_apms_for_clusters';
 
 export const getApmClusterStatus = (req, apmIndexPattern, { clusterUuid }) => {

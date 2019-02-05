@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, get } from 'lodash';
+import { difference, get } from 'lodash3';
 import { LICENSES, LicenseType } from '../../common/constants/security';
 import { FrameworkAdapter } from './adapters/framework/adapter_types';
 

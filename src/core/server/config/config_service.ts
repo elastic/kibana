@@ -18,7 +18,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash3';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 

@@ -23,7 +23,7 @@ import {
   readOnlySettings
 } from '../../../../../lib/editSettings';
 import { createAceEditor } from '../../../../../lib/ace';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { flattenObject } from '../../../../../lib/flatten_object';
 

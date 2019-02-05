@@ -6,7 +6,7 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { Location } from 'history';
-import { first, get } from 'lodash';
+import { first, get } from 'lodash3';
 import React from 'react';
 import {
   fromQuery,

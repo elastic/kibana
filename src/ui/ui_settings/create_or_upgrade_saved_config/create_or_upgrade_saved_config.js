@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults } from 'lodash';
+import { defaults } from 'lodash3';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 

@@ -14,7 +14,7 @@ import {
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { first, get, isEmpty } from 'lodash';
+import { first, get, isEmpty } from 'lodash3';
 import React, { Fragment } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flow, omit } from 'lodash';
+import { flow, omit } from 'lodash3';
 import { ReindexWarning } from '../../../common/types';
 import { FlatSettings } from './types';
 

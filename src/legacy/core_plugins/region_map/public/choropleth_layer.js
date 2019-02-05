@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import L from 'leaflet';
-import _ from 'lodash';
+import _ from 'lodash3';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { getUpgradeAssistantStatus } from './es_migration_apis';
 
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';

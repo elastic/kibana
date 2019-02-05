@@ -5,7 +5,7 @@
  */
 
 import { badRequest } from 'boom';
-import { forEach, keys, sortBy } from 'lodash';
+import { forEach, keys, sortBy } from 'lodash3';
 import { normalizedFieldTypes } from '../../lib/normalized_field_types';
 import { i18n } from '@kbn/i18n';
 

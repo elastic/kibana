@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 import chrome from 'ui/chrome';
 import { Role } from '../../../common/model/role';
 

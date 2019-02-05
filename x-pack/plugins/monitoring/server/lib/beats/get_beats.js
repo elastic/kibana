@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { capitalize, get } from 'lodash';
+import { capitalize, get } from 'lodash3';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';

@@ -20,7 +20,7 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
-import { flatten } from 'lodash';
+import { flatten } from 'lodash3';
 import { pluginPaths } from './plugin_paths';
 
 const lstat = promisify(fs.lstat);

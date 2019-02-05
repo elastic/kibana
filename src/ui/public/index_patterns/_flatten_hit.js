@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version

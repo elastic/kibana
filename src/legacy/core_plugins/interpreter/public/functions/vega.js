@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { VegaRequestHandlerProvider } from 'plugins/vega/vega_request_handler';

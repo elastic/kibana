@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge } from 'lodash';
+import { merge } from 'lodash3';
 import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
 import { ActionDefaultsRegistryProvider } from '../registry';
 

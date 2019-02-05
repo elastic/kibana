@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { omit } from 'lodash';
+import { omit } from 'lodash3';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');

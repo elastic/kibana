@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {

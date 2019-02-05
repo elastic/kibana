@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash3';
 import Promise from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';

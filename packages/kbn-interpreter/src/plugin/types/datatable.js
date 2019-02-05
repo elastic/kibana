@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map, pick, zipObject } from 'lodash';
+import { map, pick, zipObject } from 'lodash3';
 
 export const datatable = () => ({
   name: 'datatable',

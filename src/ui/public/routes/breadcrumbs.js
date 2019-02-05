@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { trim, startCase } from 'lodash';
+import { trim, startCase } from 'lodash3';
 
 /**
  *  Take a path (from $location.path() usually) and parse

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { countBy } from 'lodash';
+import { countBy } from 'lodash3';
 import React, { StatelessComponent } from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';

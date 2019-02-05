@@ -5,7 +5,7 @@
  */
 
 import { IconColor } from '@elastic/eui';
-import { invert } from 'lodash';
+import { invert } from 'lodash3';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 

@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import { template } from 'lodash';
+import { template } from 'lodash3';
 import '../filters/short_dots';
 import booleanFieldNameIcon from './field_name_icons/boolean_field_name_icon.html';
 import conflictFieldNameIcon from './field_name_icons/conflict_field_name_icon.html';

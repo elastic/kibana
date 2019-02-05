@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { createIndexName } from './lib/create_index_name';
 
 const NOT_INSTALLED = 'not_installed';

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { first, last } from 'lodash';
+import { first, last } from 'lodash3';
 
 import { metricsQuery } from '../../../../plugins/infra/public/containers/metrics/metrics.gql_query';
 import { MetricsQuery } from '../../../../plugins/infra/public/graphql/types';

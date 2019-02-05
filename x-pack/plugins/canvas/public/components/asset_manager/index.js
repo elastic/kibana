@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { set, get } from 'lodash';
+import { set, get } from 'lodash3';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { notify } from '../../lib/notify';
 import { getAssets } from '../../state/selectors/assets';

@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { ml } from '../services/ml_api_service';
 

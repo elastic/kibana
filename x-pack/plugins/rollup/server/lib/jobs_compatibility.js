@@ -4,7 +4,7 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash3';
 
 /**
  * Checks if given job configs are compatible by attempting to merge them

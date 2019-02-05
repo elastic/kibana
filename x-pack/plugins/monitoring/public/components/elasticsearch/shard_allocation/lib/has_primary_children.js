@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export function hasPrimaryChildren(item)  {
   return _.some(item.children, { primary: true });

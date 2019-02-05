@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import _ from 'lodash';
+import _ from 'lodash3';
 import newMetricAggFn from './new_metric_agg_fn';
 export default (obj = {}) => {
   return _.assign({

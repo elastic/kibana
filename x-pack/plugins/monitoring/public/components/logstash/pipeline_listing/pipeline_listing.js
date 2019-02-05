@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import moment from 'moment';
-import { partialRight } from 'lodash';
+import { partialRight } from 'lodash3';
 import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';

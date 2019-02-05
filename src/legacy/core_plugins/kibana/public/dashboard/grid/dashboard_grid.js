@@ -20,7 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n } from '@kbn/i18n/react';
-import _ from 'lodash';
+import _ from 'lodash3';
 import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
 import 'react-grid-layout/css/styles.css';

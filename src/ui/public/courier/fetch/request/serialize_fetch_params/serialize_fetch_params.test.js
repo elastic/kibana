@@ -18,7 +18,7 @@
  */
 
 import { serializeFetchParams } from './serialize_fetch_params';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 const DEFAULT_SESSION_ID = '1';
 

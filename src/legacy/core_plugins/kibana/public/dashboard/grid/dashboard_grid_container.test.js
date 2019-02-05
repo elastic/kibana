@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Provider } from 'react-redux';
-import _ from 'lodash';
+import _ from 'lodash3';
 import sizeMe from 'react-sizeme';
 
 import { getEmbeddableFactoryMock } from '../__tests__';

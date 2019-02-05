@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash3';
 import expect from 'expect.js';
 
 // expect.js's `eql` method provides nice error messages but sometimes misses things

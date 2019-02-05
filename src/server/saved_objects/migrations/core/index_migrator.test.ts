@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import sinon from 'sinon';
 import { SavedObjectsSchema } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';

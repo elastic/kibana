@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 
 /**

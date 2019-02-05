@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { uiModules } from './modules';
 const NL_RE = /\n/g;
 const events = 'keydown keypress keyup change';

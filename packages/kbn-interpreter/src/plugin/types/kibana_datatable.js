@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map } from 'lodash';
+import { map } from 'lodash3';
 
 export const kibanaDatatable = () => ({
   name: 'kibana_datatable',

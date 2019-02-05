@@ -22,7 +22,7 @@
  * elasticsearch indices.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { MigrationVersion } from '../../serialization';
 import {
   AliasAction,

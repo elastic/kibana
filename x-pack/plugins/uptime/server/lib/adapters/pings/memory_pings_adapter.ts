@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take } from 'lodash';
+import { take } from 'lodash3';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 

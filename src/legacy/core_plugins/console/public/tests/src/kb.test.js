@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { populateContext } from '../../src/autocomplete/engine';
 
 import './setup_mocks';

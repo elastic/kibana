@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { flatten } from 'lodash';
+import { flatten } from 'lodash3';
 import React from 'react';
 // @ts-ignore
 import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';

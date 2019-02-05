@@ -18,7 +18,7 @@
  */
 
 import { buildQueryFilter } from '@kbn/es-query';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export function createFilterFilters(aggConfig, key) {
   // have the aggConfig write agg dsl params

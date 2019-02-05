@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { IndexMapping } from './call_cluster';
 
 export enum MigrationAction {

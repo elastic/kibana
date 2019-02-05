@@ -7,7 +7,7 @@ import React from 'react';
 import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
-import { get, every, any } from 'lodash';
+import { get, every, any } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import {
   addSummaryExtension,

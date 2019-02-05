@@ -9,7 +9,7 @@ import { VectorLayer } from '../vector_layer';
 import { VectorStyle } from '../styles/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export class AbstractVectorSource extends AbstractSource {
 

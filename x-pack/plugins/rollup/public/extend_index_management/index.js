@@ -8,7 +8,7 @@ import {
   addToggleExtension,
   addBadgeExtension
 } from '../../../index_management/public/index_management_extensions';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 const propertyPath = 'isRollupIndex';
 export const rollupToggleExtension = {

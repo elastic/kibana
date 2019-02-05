@@ -6,7 +6,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

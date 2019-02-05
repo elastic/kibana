@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { FieldFormatsService } from './field_formats_service';
 import { FieldFormat } from './field_format';
 

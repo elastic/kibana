@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assign } from 'lodash';
+import { assign } from 'lodash3';
 import { IndexedArray } from '../indexed_array';
 
 const listeners = [];

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import handleESError from '../../../../lib/handle_es_error';
 
 export default function registerCount(server) {

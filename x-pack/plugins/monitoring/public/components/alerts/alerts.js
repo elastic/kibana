@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { capitalize } from 'lodash';
+import { capitalize } from 'lodash3';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_SINCE, EUI_SORT_DESCENDING } from '../../../common/constants';

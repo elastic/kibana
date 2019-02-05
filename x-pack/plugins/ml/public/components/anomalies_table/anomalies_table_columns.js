@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 
 import React from 'react';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { i18n } from '@kbn/i18n';
 

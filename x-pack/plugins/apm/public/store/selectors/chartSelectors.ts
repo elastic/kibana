@@ -7,8 +7,8 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
+import { difference, memoize, zipObject } from 'lodash3';
 import { rgba } from 'polished';
 import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';

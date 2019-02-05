@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { documentationLinks } from './documentation_links';
 
 export const getDocLink = (id: string) => get(documentationLinks, id);

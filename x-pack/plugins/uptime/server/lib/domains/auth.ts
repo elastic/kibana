@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { UMAuthAdapter } from '../adapters/auth/adapter_types';
 
 const supportedLicenses = ['standard', 'gold', 'platinum', 'trial'];

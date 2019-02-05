@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { difference } from 'lodash';
+import { difference } from 'lodash3';
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, defaultsDeep } from 'lodash';
+import { cloneDeep, defaultsDeep } from 'lodash3';
 import * as Rx from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 

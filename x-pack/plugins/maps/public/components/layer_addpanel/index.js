@@ -15,7 +15,7 @@ import {
   clearTemporaryLayers,
   setSelectedLayer,
 } from "../../actions/store_actions";
-import _ from 'lodash';
+import _ from 'lodash3';
 
 function mapStateToProps(state = {}) {
 

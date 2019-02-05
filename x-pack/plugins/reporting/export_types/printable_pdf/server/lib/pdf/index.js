@@ -5,7 +5,7 @@
  */
 
 import path from 'path';
-import _ from 'lodash';
+import _ from 'lodash3';
 import concat from 'concat-stream';
 import Printer from 'pdfmake';
 import xRegExp from 'xregexp';

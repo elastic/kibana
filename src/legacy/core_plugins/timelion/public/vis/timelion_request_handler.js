@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { buildEsQuery } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 

@@ -10,7 +10,7 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 

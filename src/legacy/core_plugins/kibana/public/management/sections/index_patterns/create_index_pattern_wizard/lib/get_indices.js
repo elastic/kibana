@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, sortBy } from 'lodash';
+import { get, sortBy } from 'lodash3';
 
 export async function getIndices(es, indexPatternCreationType, rawPattern, limit) {
   const pattern = rawPattern.trim();

@@ -11,7 +11,7 @@
  * in the source metric data.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 import { mlFunctionToESAggregation } from '../../common/util/job_utils';
 

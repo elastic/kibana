@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import tinycolor from 'tinycolor2';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 const comparator = (v1, v2) => {
   if (v1 < v2) {

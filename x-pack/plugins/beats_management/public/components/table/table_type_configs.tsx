@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy, uniq } from 'lodash';
+import { sortBy, uniq } from 'lodash3';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';

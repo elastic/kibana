@@ -24,7 +24,7 @@
  * the Visualize app.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { fieldFormats } from '../registry/field_formats';
 import { i18n } from '@kbn/i18n';
 

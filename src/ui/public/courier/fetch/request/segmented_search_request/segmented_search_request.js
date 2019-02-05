@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { timefilter } from 'ui/timefilter';
 import { SearchRequestProvider } from '../search_request';
 import { SegmentedHandleProvider } from './segmented_handle';

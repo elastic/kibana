@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupBy, has } from 'lodash';
+import { groupBy, has } from 'lodash3';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';

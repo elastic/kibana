@@ -5,7 +5,7 @@
  */
 
 
-import { difference } from 'lodash';
+import { difference } from 'lodash3';
 
 export function getFieldNames(results) {
   const {

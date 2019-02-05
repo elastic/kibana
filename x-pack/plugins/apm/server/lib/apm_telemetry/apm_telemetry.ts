@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { countBy } from 'lodash';
+import { countBy } from 'lodash3';
 
 // Support telemetry for additional agent types by appending definitions in
 // mappings.json and the AgentName enum.

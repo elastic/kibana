@@ -6,7 +6,7 @@
 
 
 
-import { once } from 'lodash';
+import { once } from 'lodash3';
 import { elasticsearchJsPlugin } from './elasticsearch_ml';
 
 const callWithRequest = once((server) => {

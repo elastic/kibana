@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { indexBy } from 'lodash';
+import { indexBy } from 'lodash3';
 
 const watchID = "watchID";
 const watchName = "watch Name";

@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import angular from 'angular';
 
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';

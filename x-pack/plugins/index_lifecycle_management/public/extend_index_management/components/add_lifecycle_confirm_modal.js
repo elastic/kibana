@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import {
   EuiLink,

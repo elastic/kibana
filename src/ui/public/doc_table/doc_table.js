@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
 import '../directives/truncated';

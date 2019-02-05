@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { union } from 'lodash';
+import { union } from 'lodash3';
 import { Voronoi } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';

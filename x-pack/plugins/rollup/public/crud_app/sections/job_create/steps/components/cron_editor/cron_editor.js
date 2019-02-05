@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { padLeft } from 'lodash';
+import { padLeft } from 'lodash3';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {

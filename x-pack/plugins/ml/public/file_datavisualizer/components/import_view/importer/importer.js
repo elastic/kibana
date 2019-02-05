@@ -6,7 +6,7 @@
 
 
 import { ml } from '../../../../services/ml_api_service';
-import { chunk } from 'lodash';
+import { chunk } from 'lodash3';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 

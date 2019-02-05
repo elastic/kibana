@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';

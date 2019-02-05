@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
-import { memoize, padLeft, range } from 'lodash';
+import { memoize, padLeft, range } from 'lodash3';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';

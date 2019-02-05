@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelCase } from 'lodash';
+import { camelCase } from 'lodash3';
 import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
 import { CONFIG_PREFIX } from 'x-pack/plugins/beats_management/common/constants/plugin';
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';

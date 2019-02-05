@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import _ from 'lodash3';
 import worldbank from './worldbank.js';
 import Promise from 'bluebird';
 import Datasource from '../lib/classes/datasource';

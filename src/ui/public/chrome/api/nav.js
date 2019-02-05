@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 import { mapTo } from 'rxjs/operators';
-import { remove } from 'lodash';
+import { remove } from 'lodash3';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 

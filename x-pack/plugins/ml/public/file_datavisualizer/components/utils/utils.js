@@ -5,7 +5,7 @@
  */
 
 import { overrideDefaults, DEFAULT_LINES_TO_SAMPLE } from './overrides';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash3';
 import { ml } from '../../../services/ml_api_service';
 
 export function readFile(file) {

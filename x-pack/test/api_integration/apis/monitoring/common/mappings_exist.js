@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
 import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';
 import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/metrics/logstash/metrics';

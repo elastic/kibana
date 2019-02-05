@@ -8,7 +8,7 @@ import React from 'react';
 import {
   EuiTab
 } from '@elastic/eui';
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export function StyleTab(props) {
   const { name, selected, onClick } = props;

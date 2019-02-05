@@ -19,7 +19,7 @@
 
 import { uiModules } from 'ui/modules';
 import metricVisParamsTemplate from './metric_vis_params.html';
-import _ from 'lodash';
+import _ from 'lodash3';
 const module = uiModules.get('kibana');
 
 module.directive('metricVisParams', function (i18n) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';

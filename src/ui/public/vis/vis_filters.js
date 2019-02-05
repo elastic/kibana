@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { onBrushEvent } from '../utils/brush_event';

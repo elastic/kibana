@@ -19,7 +19,7 @@
 
 import { keyCodes } from '@elastic/eui';
 
-const { memoize } = require('lodash');
+const { memoize } = require('lodash3');
 const moment = require('moment');
 
 const history = require('../history');

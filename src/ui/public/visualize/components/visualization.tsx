@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import React from 'react';
 
 import { PersistedState } from '../../persisted_state';

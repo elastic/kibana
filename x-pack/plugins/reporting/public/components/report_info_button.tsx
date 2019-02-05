@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { get, has } from 'lodash';
+import { get, has } from 'lodash3';
 import React, { Component, Fragment } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';

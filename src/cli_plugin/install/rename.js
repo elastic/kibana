@@ -18,7 +18,7 @@
  */
 
 import { rename } from 'fs';
-import { delay } from 'lodash';
+import { delay } from 'lodash3';
 
 export function renamePlugin(workingPath, finalPath) {
   return new Promise(function (resolve, reject) {

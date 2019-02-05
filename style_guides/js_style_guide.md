@@ -300,7 +300,7 @@ possible (which is almost everywhere):
 
 ```js
 // good
-import { mapValues } from 'lodash';
+import { mapValues } from 'lodash3';
 export mapValues;
 
 // bad
@@ -473,7 +473,7 @@ comprehensible.
 const userNames = users.map(user => user.name);
 
 // ok
-import { pluck } from 'lodash';
+import { pluck } from 'lodash3';
 const userNames = pluck(users, 'name');
 
 // bad

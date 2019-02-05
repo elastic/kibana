@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import 'ui/filters/moment';
-import { isNumber, forEach, merge } from 'lodash';
+import { isNumber, forEach, merge } from 'lodash3';
 import { uiModules } from 'ui/modules';
 import { TimeBuckets } from 'ui/time_buckets';
 import 'plugins/watcher/components/flot_chart';

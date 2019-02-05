@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/lang/cloneDeep';
+import cloneDeep from 'lodash3/lang/cloneDeep';
 
 import { WEEK } from '../../../services';
 

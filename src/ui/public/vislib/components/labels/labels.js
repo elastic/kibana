@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { VislibComponentsLabelsDataArrayProvider } from './data_array';
 import { VislibComponentsLabelsUniqLabelsProvider } from './uniq_labels';
 

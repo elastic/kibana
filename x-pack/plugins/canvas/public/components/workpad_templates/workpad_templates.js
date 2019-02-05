@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiSearchBar,
 } from '@elastic/eui';
-import { get, sortByOrder } from 'lodash';
+import { get, sortByOrder } from 'lodash3';
 import { getId } from '../../lib/get_id';
 import { Paginate } from '../paginate';
 

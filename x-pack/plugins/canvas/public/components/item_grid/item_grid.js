@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { last } from 'lodash';
+import { last } from 'lodash3';
 
 const defaultPerRow = 6;
 

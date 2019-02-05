@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';

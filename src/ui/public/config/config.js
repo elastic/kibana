@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import chrome from '../chrome';
-import { isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash3';
 import { uiModules } from '../modules';
 import { subscribeWithScope } from '../utils/subscribe_with_scope';
 

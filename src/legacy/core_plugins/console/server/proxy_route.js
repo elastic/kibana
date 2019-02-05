@@ -20,7 +20,7 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import Wreck from 'wreck';
-import { trimLeft, trimRight } from 'lodash';
+import { trimLeft, trimRight } from 'lodash3';
 
 function resolveUri(base, path) {
   let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;

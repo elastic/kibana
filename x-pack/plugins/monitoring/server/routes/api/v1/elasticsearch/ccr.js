@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import moment from 'moment';
-import { get, groupBy } from 'lodash';
+import { get, groupBy } from 'lodash3';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';

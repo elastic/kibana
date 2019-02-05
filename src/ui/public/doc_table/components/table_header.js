@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import '../../filters/short_dots';
 import headerHtml from './table_header.html';
 import { uiModules } from '../../modules';

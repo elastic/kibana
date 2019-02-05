@@ -5,7 +5,7 @@
  */
 
 import { getSearchValue } from 'plugins/watcher/lib/get_search_value';
-import { get, isEqual, remove, map, merge } from 'lodash';
+import { get, isEqual, remove, map, merge } from 'lodash3';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';
 import { WatchErrors } from '../watch_errors';

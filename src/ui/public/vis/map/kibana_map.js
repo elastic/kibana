@@ -21,7 +21,7 @@ import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 

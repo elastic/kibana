@@ -10,7 +10,7 @@
  * React component for rendering a select element with limit options.
  */
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import React, { Component } from 'react';
 
 import {

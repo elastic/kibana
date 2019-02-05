@@ -15,7 +15,7 @@ import {
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
-import { last } from 'lodash';
+import { last } from 'lodash3';
 import { rgba } from 'polished';
 
 import StatusText from './StatusText';

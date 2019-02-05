@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { TimelionRequestHandlerProvider } from 'plugins/timelion/vis/timelion_request_handler';
 

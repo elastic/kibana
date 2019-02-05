@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, isUndefined, noop, set } from 'lodash';
+import { get, isUndefined, noop, set } from 'lodash3';
 import { unset } from '../../utils';
 
 export function rename(oldKey, newKey) {

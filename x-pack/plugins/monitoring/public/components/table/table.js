@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { camelCase, isEqual, sortByOrder, get, includes } from 'lodash';
+import { camelCase, isEqual, sortByOrder, get, includes } from 'lodash3';
 import {
   DEFAULT_NO_DATA_MESSAGE,
   DEFAULT_NO_DATA_MESSAGE_WITH_FILTER,

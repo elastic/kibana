@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isString, omit } from 'lodash';
+import { get, isString, omit } from 'lodash3';
 import { promisify } from 'util';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';

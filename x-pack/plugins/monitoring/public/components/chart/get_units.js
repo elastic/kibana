@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, forEach, last } from 'lodash';
+import { get, forEach, last } from 'lodash3';
 import numeral from '@elastic/numeral';
 
 export function getUnits(series) {

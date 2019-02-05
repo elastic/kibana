@@ -69,7 +69,7 @@
  *    `appSearchSource`.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import angular from 'angular';
 import { buildEsQuery } from '@kbn/es-query';
 

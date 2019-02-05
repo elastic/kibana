@@ -11,7 +11,7 @@
 * to extract information for display in dashboards.
 */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';

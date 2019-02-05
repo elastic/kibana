@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import Promise from 'bluebird';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash3';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { ESResponse } from './fetcher';
 

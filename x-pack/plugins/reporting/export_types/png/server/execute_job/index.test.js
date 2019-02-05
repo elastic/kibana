@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { memoize } from 'lodash';
+import { memoize } from 'lodash3';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePngObservableFactory } from '../lib/generate_png';

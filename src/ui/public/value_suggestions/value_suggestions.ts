@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { memoize } from 'lodash';
+import { memoize } from 'lodash3';
 import { Field } from 'ui/index_patterns';
 
 export function getSuggestionsProvider(

@@ -12,7 +12,7 @@
  * to Elasticsearch to obtain the data to populate all the components in the view.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import moment from 'moment-timezone';
 
 import 'plugins/ml/components/annotations_table';

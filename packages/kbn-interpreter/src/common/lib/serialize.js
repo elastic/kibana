@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, identity } from 'lodash';
+import { get, identity } from 'lodash3';
 import { getType } from './get_type';
 
 export function serializeProvider(types) {

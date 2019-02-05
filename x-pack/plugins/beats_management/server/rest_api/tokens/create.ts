@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';

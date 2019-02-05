@@ -18,7 +18,7 @@
  */
 
 import { ReactWrapper } from 'enzyme';
-import _ from 'lodash';
+import _ from 'lodash3';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

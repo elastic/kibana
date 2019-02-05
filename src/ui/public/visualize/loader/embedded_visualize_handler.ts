@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce, forEach, get } from 'lodash';
+import { debounce, forEach, get } from 'lodash3';
 // @ts-ignore
 import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import * as Rx from 'rxjs';

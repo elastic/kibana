@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import $ from 'jquery';
 import { buildEsQuery } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';

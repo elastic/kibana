@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import _ from 'lodash3';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiTitle,

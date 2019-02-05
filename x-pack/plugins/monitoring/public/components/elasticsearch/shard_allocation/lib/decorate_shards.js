@@ -5,7 +5,7 @@
  */
 
 
-import { capitalize, find, get, includes } from 'lodash';
+import { capitalize, find, get, includes } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 
 export function decorateShards(shards, nodes) {

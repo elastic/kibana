@@ -5,7 +5,7 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { isBoolean, isNumber, isObject } from 'lodash';
+import { isBoolean, isNumber, isObject } from 'lodash3';
 import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';

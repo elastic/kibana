@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';

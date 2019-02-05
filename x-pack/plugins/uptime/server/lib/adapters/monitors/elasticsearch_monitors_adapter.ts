@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set } from 'lodash3';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
   ErrorListItem,

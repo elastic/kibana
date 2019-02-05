@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import { i18n } from '@kbn/i18n';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 import { AggConfigs } from 'ui/vis/agg_configs';

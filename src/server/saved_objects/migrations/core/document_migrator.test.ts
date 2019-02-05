@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import sinon from 'sinon';
 import { RawSavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';

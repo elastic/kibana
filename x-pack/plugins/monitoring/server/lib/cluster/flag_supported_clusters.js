@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, find } from 'lodash';
+import { get, set, find } from 'lodash3';
 import { checkParam } from '../error_missing_required';
 import { createTypeFilter } from '../create_query';
 import { LOGGING_TAG, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';

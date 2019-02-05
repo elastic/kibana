@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 import moment from 'moment';
 import Joi from 'joi';
 import { handleError } from '../../../../lib/errors/handle_error';

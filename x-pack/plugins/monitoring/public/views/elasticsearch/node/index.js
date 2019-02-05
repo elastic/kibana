@@ -8,7 +8,7 @@
  * Controller for Node Detail
  */
 import React from 'react';
-import { partial } from 'lodash';
+import { partial } from 'lodash3';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isObject, isNull, isUndefined } from 'lodash';
+import { isObject, isNull, isUndefined } from 'lodash3';
 
 export function createFormatCsvValues(escapeValue, separator, fields, formatsMap) {
   return function formatCsvValues(values) {

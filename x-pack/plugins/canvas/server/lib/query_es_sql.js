@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { map, zipObject } from 'lodash';
+import { map, zipObject } from 'lodash3';
 import { buildBoolArray } from './build_bool_array';
 import { sanitizeName } from './sanitize_name';
 import { normalizeType } from './normalize_type';

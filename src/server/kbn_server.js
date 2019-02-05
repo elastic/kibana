@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { constant, once, compact, flatten } from 'lodash';
+import { constant, once, compact, flatten } from 'lodash3';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import _ from 'lodash3';
 import processFunctionDefinition from './server/lib/process_function_definition';
 
 export default function (server) {

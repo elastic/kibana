@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import sinon from 'sinon';
 import * as Index from './elastic_index';
 

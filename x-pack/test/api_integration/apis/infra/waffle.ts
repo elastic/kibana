@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { first, last } from 'lodash';
+import { first, last } from 'lodash3';
 
 import { waffleNodesQuery } from '../../../../plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
 import { WaffleNodesQuery } from '../../../../plugins/infra/public/graphql/types';

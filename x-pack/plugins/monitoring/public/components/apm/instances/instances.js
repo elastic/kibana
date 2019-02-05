@@ -6,7 +6,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { uniq } from 'lodash';
+import { uniq } from 'lodash3';
 import { EuiMonitoringTable } from '../../table';
 import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { Status } from './status';

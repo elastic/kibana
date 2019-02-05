@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { FilterManager } from './filter_manager.js';
 import { buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
 

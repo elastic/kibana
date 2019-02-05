@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash3';
 import chrome from 'ui/chrome';
 import url from 'url';
 import uuid from 'uuid';

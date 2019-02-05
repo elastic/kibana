@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import moment from 'moment';
 import { pdf } from './pdf';
-import { groupBy } from 'lodash';
+import { groupBy } from 'lodash3';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';

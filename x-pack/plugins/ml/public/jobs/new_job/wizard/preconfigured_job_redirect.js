@@ -6,7 +6,7 @@
 
 
 import chrome from 'ui/chrome';
-import { get } from  'lodash';
+import { get } from  'lodash3';
 import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from 'plugins/ml/util/index_utils';

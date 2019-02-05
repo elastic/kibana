@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 export function luceneStringToDsl(query) {
   if (!_.isString(query)) {

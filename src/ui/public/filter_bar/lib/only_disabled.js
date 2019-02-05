@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 
 const pluckDisabled = function (filter) {
   return _.get(filter, 'meta.disabled');

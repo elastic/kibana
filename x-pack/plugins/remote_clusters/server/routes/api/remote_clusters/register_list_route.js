@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';

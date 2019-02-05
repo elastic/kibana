@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, round, sortBy } from 'lodash';
+import { isNumber, round, sortBy } from 'lodash3';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';

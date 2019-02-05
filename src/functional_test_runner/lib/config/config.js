@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { get, has, cloneDeep } from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import { get, has, cloneDeep } from 'lodash3';
+import toPath from 'lodash3/internal/toPath';
 
 import { schema } from './schema';
 

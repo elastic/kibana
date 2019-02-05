@@ -5,7 +5,7 @@
  */
 
 import yaml from 'js-yaml';
-import { get, has, omit, set } from 'lodash';
+import { get, has, omit, set } from 'lodash3';
 import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types';
 import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/adapter_types';
 

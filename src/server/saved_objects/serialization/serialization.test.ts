@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import { SavedObjectsSerializer } from '.';
 import { SavedObjectsSchema } from '../schema';
 import { encodeVersion } from '../version';

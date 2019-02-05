@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from 'lodash3';
 // @ts-ignore -- awaiting https://github.com/w33ble/rison-node/issues/1
 import rison from 'rison-node';
 

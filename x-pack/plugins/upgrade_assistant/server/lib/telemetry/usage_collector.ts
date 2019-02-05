@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from 'lodash3';
 import { SavedObjectsRepository } from 'src/server/saved_objects/service/lib/repository';
 import {
   UPGRADE_ASSISTANT_DOC_ID,

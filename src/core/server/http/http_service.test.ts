@@ -23,7 +23,7 @@ jest.mock('./http_server', () => ({
   HttpServer: mockHttpServer,
 }));
 
-import { noop } from 'lodash';
+import { noop } from 'lodash3';
 import { BehaviorSubject } from 'rxjs';
 import { HttpConfig, HttpService, Router } from '.';
 import { logger } from '../logging/__mocks__';

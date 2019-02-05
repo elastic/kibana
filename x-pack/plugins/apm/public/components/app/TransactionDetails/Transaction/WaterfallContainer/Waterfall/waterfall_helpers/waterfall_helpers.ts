@@ -14,7 +14,7 @@ import {
   sortBy,
   uniq,
   zipObject
-} from 'lodash';
+} from 'lodash3';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from 'lodash3';
 
 export async function getRelationships(type, id, $http, basePath) {
   const url = `${basePath}/api/kibana/management/saved_objects/relationships/${type}/${id}`;

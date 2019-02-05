@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, pick } from 'lodash';
+import { compact, pick } from 'lodash3';
 import { AnyAction } from 'redux';
 import { createSelector } from 'reselect';
 import {

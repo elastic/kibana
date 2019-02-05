@@ -28,7 +28,7 @@ import { BaseVisTypeProvider } from './base_vis_type';
 import VislibProvider from '../../vislib';
 import { VisFiltersProvider } from '../vis_filters';
 import $ from 'jquery';
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep } from 'lodash3';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
   const vislib = Private(VislibProvider);

@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from 'lodash3';
 import 'angular-ui-select';
 
 import { aggTypes } from 'ui/agg_types';

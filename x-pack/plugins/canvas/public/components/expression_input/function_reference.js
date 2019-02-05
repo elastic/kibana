@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'markdown-it';
 import { EuiTitle, EuiText, EuiSpacer, EuiBasicTable, EuiDescriptionList } from '@elastic/eui';
-import { startCase } from 'lodash';
+import { startCase } from 'lodash3';
 
 const md = new Markdown();
 
