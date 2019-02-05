@@ -171,7 +171,7 @@ describe('parseIndexName', () => {
     expect(parseIndexName('myIndex').baseName).toBe('myIndex');
   });
 
-  it('excludes appeneded v5 reindexing string from newIndexName', () => {
+  it('excludes appended v5 reindexing string from newIndexName', () => {
     expect(parseIndexName('myIndex-reindexed-v5')).toEqual({
       baseName: 'myIndex-reindexed-v5',
       cleanBaseName: 'myIndex',
