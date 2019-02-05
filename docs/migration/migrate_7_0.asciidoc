@@ -223,7 +223,7 @@ Example structure after:
     ...
     "panelsJSON": [{
       ...
-      "panelRef": "panel_0"
+      "panelRefName": "panel_0"
     }]
   },
   "references": [{
