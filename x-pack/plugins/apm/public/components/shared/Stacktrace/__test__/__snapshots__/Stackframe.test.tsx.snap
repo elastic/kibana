@@ -23,7 +23,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   height: 18px;
   top: 36px;
   pointer-events: none;
-  background-color: #FCF2E6;
+  background-color: rgba(245,167,0,0.1);
 }
 
 .c6 {

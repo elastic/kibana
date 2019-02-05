@@ -6,6 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { size } from 'lodash';
+import { rgba } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore
@@ -15,9 +16,9 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 // @ts-ignore
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
-import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
+import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
@@ -47,7 +48,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   height: ${px(units.eighth * 9)};
   top: ${props => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
-  background-color: ${colors.yellow};
+  background-color: ${rgba(theme.euiColorWarning, 0.1)};
 `;
 
 const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
@@ -70,7 +71,8 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   line-height: ${px(unit + units.eighth)};
   text-align: right;
   border-right: 1px solid ${theme.euiColorLightShade};
-  background-color: ${props => (props.highlight ? colors.yellow : null)};
+  background-color: ${props =>
+    props.highlight ? rgba(theme.euiColorWarning, 0.1) : null};
 
   &:last-of-type {
     border-radius: 0 0 0 ${borderRadius};
