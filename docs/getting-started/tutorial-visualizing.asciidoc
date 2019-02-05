@@ -171,7 +171,7 @@ The final visualization is a Markdown widget that renders formatted text.
 The Markdown widget uses **markdown** syntax.
 > Blockquotes in Markdown use the > character.
 
-. Click  *Apply changes* image:images/apply-changes-button.png[].
+. Click *Apply changes* image:images/apply-changes-button.png[].
 
 The Markdown renders in the preview pane:
 
