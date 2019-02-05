@@ -154,7 +154,7 @@ export class DetailPanelUi extends Component {
                   title={
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
-                      defaultMessage="There are no settings or shard stats associated with a paused follower index."
+                      defaultMessage="A paused follower index does not have settings or shard statistics."
                     />
                   }
                 />
