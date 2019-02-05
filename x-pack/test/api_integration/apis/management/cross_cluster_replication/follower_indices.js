@@ -6,7 +6,8 @@
 
 import expect from 'expect.js';
 
-import { API_BASE_PATH, FOLLOWER_INDEX_ADVANCED_SETTINGS } from './constants';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
+import { API_BASE_PATH } from './constants';
 import { initClusterHelpers, initElasticsearchIndicesHelpers, getRandomString } from './lib';
 
 const FOLLOWER_INDICES_API_BASE_PATH = API_BASE_PATH + '/follower_indices';
@@ -133,9 +134,6 @@ export default function ({ getService }) {
            * from Elasticsearch, we will create a follower index without any advanced settings.
            * When we then retrieve the follower index it will have all the advanced settings
            * coming from ES. We can then compare those settings with our hard-coded values.
-           *
-           * **Important** if this test fails, we HAVE TO update the constant values in the
-           * ./x-pack/pluggins/cross_cluster_replication/common/constants/settings.js file
            */
         const leaderIndex = await createIndex();
 

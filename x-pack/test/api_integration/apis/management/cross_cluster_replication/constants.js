@@ -6,19 +6,3 @@
 
 export const API_BASE_PATH = '/api/cross_cluster_replication';
 export const REMOTE_CLUSTERS_API_BASE_PATH = '/api/remote_clusters';
-
-/**
- * Those settings have been copied from the cross_cluster_replication/common/constants/settings.js file
- */
-export const FOLLOWER_INDEX_ADVANCED_SETTINGS = {
-  maxReadRequestOperationCount: 5120,
-  maxOutstandingReadRequests: 12,
-  maxReadRequestSize: '32mb',
-  maxWriteRequestOperationCount: 5120,
-  maxWriteRequestSize: '9223372036854775807b',
-  maxOutstandingWriteRequests: 9,
-  maxWriteBufferCount: 2147483647,
-  maxWriteBufferSize: '512mb',
-  maxRetryDelay: '500ms',
-  readPollTimeout: '1m',
-};
