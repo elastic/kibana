@@ -166,8 +166,8 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: [],
-          read: [],
+          all: ['index-pattern'],
+          read: ['config'],
         },
         ui: [],
       },
