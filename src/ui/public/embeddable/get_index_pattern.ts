@@ -40,7 +40,6 @@ export async function getIndexPattern(
       search: `"${savedVis.vis.params.index_pattern}"`,
       searchFields: ['title'],
     });
-    // @ts-ignore
     const [indexPattern] = indexPatternObjects.savedObjects.map(getFromSavedObject);
     return indexPattern;
   }
