@@ -140,7 +140,6 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
   };
 
   viewSeries = () => {
-    const { intl } = this.props;
     const record = this.props.anomaly.source;
     const bounds = this.props.timefilter.getActiveBounds();
     const from = bounds.min.toISOString();    // e.g. 2016-02-08T16:00:00.000Z
@@ -175,10 +174,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
         jobIds: [record.job_id]
       },
       refreshInterval: {
-        display: intl.formatMessage({
-          id: 'xpack.ml.anomaliesTable.linksMenu.offLabel',
-          defaultMessage: 'Off'
-        }),
+        display: 'Off',
         pause: false,
         value: 0
       },
@@ -198,7 +194,6 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
         detectorIndex: record.detector_index,
         entities: entityCondition,
       },
-      filters: [],
       query: {
         query_string: {
           analyze_wildcard: true,
@@ -297,10 +292,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
           // Use rison to build the URL .
           const _g = rison.encode({
             refreshInterval: {
-              display: intl.formatMessage({
-                id: 'xpack.ml.anomaliesTable.linksMenu.offLabel',
-                defaultMessage: 'Off'
-              }),
+              display: 'Off',
               pause: false,
               value: 0
             },

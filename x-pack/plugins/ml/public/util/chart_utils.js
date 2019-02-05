@@ -24,10 +24,16 @@ export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 const MAX_LABEL_WIDTH = 100;
 
 export function chartLimits(data = []) {
-  const limits = { max: 0, min: 0 };
+  const domain = d3.extent(data, (d) => {
+    let metricValue = d.value;
+    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+    }
+    return metricValue;
+  });
+  const limits = { max: domain[1], min: domain[0] };
 
-  limits.max = d3.max(data, (d) => d.value);
-  limits.min = d3.min(data, (d) => d.value);
   if (limits.max === limits.min) {
     limits.max = d3.max(data, (d) => {
       if (d.typical) {
@@ -196,7 +202,6 @@ export function getExploreSeriesLink(series) {
       detectorIndex: series.detectorIndex,
       entities: entityCondition,
     },
-    filters: [],
     query: {
       query_string: {
         analyze_wildcard: true,

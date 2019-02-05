@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { fromRoot } from '../../../utils';
+import { createReadStream } from 'fs';
 
+import globby from 'globby';
+import MultiStream from 'multistream';
+
+import { fromRoot } from '../../../utils';
+import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
 
@@ -70,7 +75,6 @@ export default (kibana) => {
             }
 
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
-            testGlobs.push(`built_assets/css/plugins/${plugin.id}/**/*.css`);
           });
         } else {
           // add the modules from all of the apps
@@ -80,7 +84,6 @@ export default (kibana) => {
 
           for (const plugin of plugins) {
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
-            testGlobs.push(`built_assets/css/plugins/${plugin.id}/**/*.css`);
           }
         }
 
@@ -100,6 +103,26 @@ export default (kibana) => {
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
         });
+
+        kbnServer.server.route({
+          method: 'GET',
+          path: '/test_bundle/built_css.css',
+          async handler(_, h) {
+            const cssFiles = await globby(
+              testingPluginIds
+                ? testingPluginIds.split(',').map((id) => `built_assets/css/plugins/${id}/**/*.css`)
+                : `built_assets/css/**/*.css`,
+              { cwd: fromRoot('.'), absolute: true }
+            );
+
+            const stream = replacePlaceholder(
+              new MultiStream(cssFiles.map(path => createReadStream(path))),
+              '/built_assets/css/'
+            );
+
+            return h.response(stream).code(200).type('text/css');
+          }
+        });
       },
 
       __globalImportAliases__: {
@@ -107,7 +130,7 @@ export default (kibana) => {
         'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils/public'),
-      }
-    }
+      },
+    },
   });
 };

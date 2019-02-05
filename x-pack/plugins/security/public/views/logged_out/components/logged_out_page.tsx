@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 
 interface Props {
@@ -15,32 +15,30 @@ interface Props {
 export class LoggedOutPage extends Component<Props, {}> {
   public render() {
     return (
-      <I18nProvider>
-        <div className="loggedOut">
-          <header className="loggedOut__header">
-            <div className="loggedOut__content eui-textCenter">
-              <EuiSpacer size="xxl" />
-              <span className="loggedOut__logo">
-                <EuiIcon type="logoKibana" size="xxl" />
-              </span>
-              <EuiTitle size="l" className="loggedOut__title">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.security.loggedOut.title"
-                    defaultMessage="Successfully logged out"
-                  />
-                </h1>
-              </EuiTitle>
-              <EuiSpacer size="xl" />
-            </div>
-          </header>
+      <div className="loggedOut">
+        <header className="loggedOut__header">
           <div className="loggedOut__content eui-textCenter">
-            <EuiButton href={this.props.addBasePath('/')}>
-              <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Login" />
-            </EuiButton>
+            <EuiSpacer size="xxl" />
+            <span className="loggedOut__logo">
+              <EuiIcon type="logoKibana" size="xxl" />
+            </span>
+            <EuiTitle size="l" className="loggedOut__title">
+              <h1>
+                <FormattedMessage
+                  id="xpack.security.loggedOut.title"
+                  defaultMessage="Successfully logged out"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="xl" />
           </div>
+        </header>
+        <div className="loggedOut__content eui-textCenter">
+          <EuiButton href={this.props.addBasePath('/')}>
+            <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Login" />
+          </EuiButton>
         </div>
-      </I18nProvider>
+      </div>
     );
   }
 }

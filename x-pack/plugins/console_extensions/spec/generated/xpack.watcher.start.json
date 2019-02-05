@@ -4,7 +4,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/watcher/_start"
+      "_watcher/_start"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-start.html"
   }

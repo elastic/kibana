@@ -27,28 +27,44 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      _index: '.kibana',
       get: () => ({
         attributes: {
-          panelsJSON: JSON.stringify([{ id: '1' }, { id: '2' }, { id: '3' }]),
+          panelsJSON: JSON.stringify([{ panelRefName: 'panel_0' }, { panelRefName: 'panel_1' }, { panelRefName: 'panel_2' }]),
         },
+        references: [{
+          name: 'panel_0',
+          type: 'visualization',
+          id: '1',
+        }, {
+          name: 'panel_1',
+          type: 'visualization',
+          id: '2',
+        }, {
+          name: 'panel_2',
+          type: 'visualization',
+          id: '3',
+        }],
       }),
-      bulkGet: () => ({
+      bulkGet: () => ({ saved_objects: [] }),
+      find: () => ({
         saved_objects: [
           {
             id: '1',
+            type: 'visualization',
             attributes: {
               title: 'Foo',
             },
           },
           {
             id: '2',
+            type: 'visualization',
             attributes: {
               title: 'Bar',
             },
           },
           {
             id: '3',
+            type: 'visualization',
             attributes: {
               title: 'FooBar',
             },
@@ -59,11 +75,14 @@ describe('findRelationships', () => {
     const result = await findRelationships(
       type,
       id,
-      size,
-      savedObjectsClient
+      {
+        size,
+        savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
+      },
     );
     expect(result).to.eql({
-      visualizations: [
+      visualization: [
         { id: '1', title: 'Foo' },
         { id: '2', title: 'Bar' },
         { id: '3', title: 'FooBar' },
@@ -77,11 +96,36 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      get: () => {},
+      get: () => ({
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            }),
+          },
+        },
+        references: [{
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: '1',
+        }],
+      }),
+      bulkGet: () => ({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'index-pattern',
+            attributes: {
+              title: 'My Index Pattern',
+            },
+          },
+        ],
+      }),
       find: () => ({
         saved_objects: [
           {
             id: '1',
+            type: 'dashboard',
             attributes: {
               title: 'My Dashboard',
               panelsJSON: JSON.stringify([
@@ -98,6 +142,7 @@ describe('findRelationships', () => {
           },
           {
             id: '2',
+            type: 'dashboard',
             attributes: {
               title: 'Your Dashboard',
               panelsJSON: JSON.stringify([
@@ -119,11 +164,17 @@ describe('findRelationships', () => {
     const result = await findRelationships(
       type,
       id,
-      size,
-      savedObjectsClient
+      {
+        size,
+        savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
+      },
     );
     expect(result).to.eql({
-      dashboards: [
+      'index-pattern': [
+        { id: '1', title: 'My Index Pattern' },
+      ],
+      dashboard: [
         { id: '1', title: 'My Dashboard' },
         { id: '2', title: 'Your Dashboard' },
       ],
@@ -136,43 +187,52 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      get: type => {
-        if (type === 'search') {
-          return {
-            id: '1',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  index: 'index-pattern:1',
-                }),
-              },
-            },
-          };
-        }
-
-        return {
-          id: 'index-pattern:1',
-          attributes: {
-            title: 'My Index Pattern',
+      get: () => ({
+        id: '1',
+        type: 'search',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            }),
           },
-        };
-      },
+        },
+        references: [{
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: '1',
+        }],
+      }),
+      bulkGet: () => ({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'index-pattern',
+            attributes: {
+              title: 'My Index Pattern',
+            },
+          },
+        ],
+      }),
       find: () => ({
         saved_objects: [
           {
             id: '1',
+            type: 'visualization',
             attributes: {
               title: 'Foo',
             },
           },
           {
             id: '2',
+            type: 'visualization',
             attributes: {
               title: 'Bar',
             },
           },
           {
             id: '3',
+            type: 'visualization',
             attributes: {
               title: 'FooBar',
             },
@@ -184,16 +244,19 @@ describe('findRelationships', () => {
     const result = await findRelationships(
       type,
       id,
-      size,
-      savedObjectsClient
+      {
+        size,
+        savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
+      },
     );
     expect(result).to.eql({
-      visualizations: [
+      visualization: [
         { id: '1', title: 'Foo' },
         { id: '2', title: 'Bar' },
         { id: '3', title: 'FooBar' },
       ],
-      indexPatterns: [{ id: 'index-pattern:1', title: 'My Index Pattern' }],
+      'index-pattern': [{ id: '1', title: 'My Index Pattern' }],
     });
   });
 
@@ -203,106 +266,103 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      get: () => {},
-      find: options => {
-        if (options.type === 'visualization') {
-          return {
-            saved_objects: [
-              {
-                id: '1',
-                found: true,
-                attributes: {
-                  title: 'Foo',
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: JSON.stringify({
-                      index: 'foo',
-                    }),
-                  },
-                },
-              },
-              {
-                id: '2',
-                found: true,
-                attributes: {
-                  title: 'Bar',
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: JSON.stringify({
-                      index: 'foo',
-                    }),
-                  },
-                },
-              },
-              {
-                id: '3',
-                found: true,
-                attributes: {
-                  title: 'FooBar',
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: JSON.stringify({
-                      index: 'foo2',
-                    }),
-                  },
-                },
-              },
-            ]
-          };
-        }
-
-        return {
-          saved_objects: [
-            {
-              id: '1',
-              attributes: {
-                title: 'Foo',
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    index: 'foo',
-                  }),
-                },
+      get: () => ({
+        id: '1',
+        type: 'index-pattern',
+        attributes: {
+          title: 'My Index Pattern'
+        },
+      }),
+      find: () => ({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'visualization',
+            attributes: {
+              title: 'Foo',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'foo',
+                }),
               },
             },
-            {
-              id: '2',
-              attributes: {
-                title: 'Bar',
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    index: 'foo',
-                  }),
-                },
+          },
+          {
+            id: '2',
+            type: 'visualization',
+            attributes: {
+              title: 'Bar',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'foo',
+                }),
               },
             },
-            {
-              id: '3',
-              attributes: {
-                title: 'FooBar',
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    index: 'foo2',
-                  }),
-                },
+          },
+          {
+            id: '3',
+            type: 'visualization',
+            attributes: {
+              title: 'FooBar',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'foo2',
+                }),
               },
             },
-          ]
-        };
-      }
+          },
+          {
+            id: '1',
+            type: 'search',
+            attributes: {
+              title: 'My Saved Search',
+            },
+          },
+        ],
+      }),
     };
 
     const result = await findRelationships(
       type,
       id,
-      size,
-      savedObjectsClient
+      {
+        size,
+        savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
+      },
     );
     expect(result).to.eql({
-      visualizations: [{ id: '1', title: 'Foo' }, { id: '2', title: 'Bar' }],
-      searches: [{ id: '1', title: 'Foo' }, { id: '2', title: 'Bar' }],
+      visualization: [{ id: '1', title: 'Foo' }, { id: '2', title: 'Bar' }, { id: '3', title: 'FooBar' }],
+      search: [{ id: '1', title: 'My Saved Search' }],
     });
   });
 
-  it('should return an empty object for invalid types', async () => {
+  it('should return an empty object for non related objects', async () => {
     const type = 'invalid';
-    const result = await findRelationships(type);
+    const id = 'foo';
+    const size = 10;
+
+    const savedObjectsClient = {
+      get: () => ({
+        id: '1',
+        type: 'index-pattern',
+        attributes: {
+          title: 'My Index Pattern',
+        },
+        references: [],
+      }),
+      find: () => ({ saved_objects: [] }),
+    };
+
+    const result = await findRelationships(
+      type,
+      id,
+      {
+        size,
+        savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
+      },
+    );
     expect(result).to.eql({});
   });
 });

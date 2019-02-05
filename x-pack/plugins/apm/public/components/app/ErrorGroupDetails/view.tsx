@@ -5,17 +5,17 @@
  */
 
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
 import {
-  colors,
   fontFamilyCode,
   fontSizes,
   px,
@@ -40,7 +40,7 @@ const UnhandledBadge = styled(EuiBadge)`
 const Label = styled.div`
   margin-bottom: ${px(units.quarter)};
   font-size: ${fontSizes.small};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 const Message = styled.div`
@@ -77,11 +77,12 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
         const logMessage = idx(errorGroup, _ => _.data.error.error.log.message);
         const excMessage = idx(
           errorGroup,
-          _ => _.data.error.error.exception.message
+          _ => _.data.error.error.exception[0].message
         );
         const culprit = idx(errorGroup, _ => _.data.error.error.culprit);
         const isUnhandled =
-          idx(errorGroup, _ => _.data.error.error.exception.handled) === false;
+          idx(errorGroup, _ => _.data.error.error.exception[0].handled) ===
+          false;
 
         return (
           <div>

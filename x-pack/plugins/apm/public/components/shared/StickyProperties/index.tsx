@@ -6,12 +6,12 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import {
-  colors,
   fontFamilyCode,
   fontSizes,
   px,
@@ -35,7 +35,7 @@ const TooltipFieldName = styled.span`
 const PropertyLabel = styled.div`
   margin-bottom: ${px(units.half)};
   font-size: ${fontSizes.small};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 
   span {
     cursor: help;
@@ -44,7 +44,7 @@ const PropertyLabel = styled.div`
 PropertyLabel.displayName = 'PropertyLabel';
 
 const PropertyValueDimmed = styled.span`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 const PropertyValue = styled.div`

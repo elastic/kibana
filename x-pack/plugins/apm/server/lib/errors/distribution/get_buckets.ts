@@ -9,7 +9,7 @@ import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../../common/constants';
+} from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
 export async function getBuckets({
