@@ -36,6 +36,7 @@ test('parses minimally specified config', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
+        requestHeadersWhitelist: [],
       },
       logger.get()
     )
@@ -78,6 +79,7 @@ test('parses fully specified config', () => {
           'http://domain.com:1234/elasticsearch',
           'https://es.local',
         ],
+        requestHeadersWhitelist: [],
         username: 'elastic',
         password: 'changeme',
         pingTimeout: 12345,
@@ -167,6 +169,7 @@ test('parses config timeouts of moment.Duration type', () => {
         requestTimeout: duration(30, 's'),
         sniffInterval: duration(1, 'minute'),
         hosts: ['http://localhost:9200/elasticsearch'],
+        requestHeadersWhitelist: [],
       },
       logger.get()
     )
@@ -209,6 +212,7 @@ describe('#auth', () => {
           hosts: ['http://user:password@localhost/elasticsearch', 'https://es.local'],
           username: 'elastic',
           password: 'changeme',
+          requestHeadersWhitelist: [],
         },
         logger.get(),
         { auth: false }
@@ -256,6 +260,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           password: 'changeme',
         },
         logger.get(),
@@ -294,6 +299,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           username: 'elastic',
         },
         logger.get(),
@@ -333,6 +339,7 @@ describe('#log', () => {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
+        requestHeadersWhitelist: [],
       },
       logger.get()
     );
@@ -376,6 +383,7 @@ Object {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
+        requestHeadersWhitelist: [],
       },
       logger.get()
     );
@@ -434,6 +442,7 @@ METHOD /some-path
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/elasticsearch'],
+        requestHeadersWhitelist: [],
         log: customLogger,
       },
       logger.get()
@@ -454,6 +463,7 @@ describe('#ssl', () => {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           ssl: { verificationMode: 'none' },
         },
         logger.get()
@@ -492,6 +502,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           ssl: { verificationMode: 'certificate' },
         },
         logger.get()
@@ -531,6 +542,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           ssl: { verificationMode: 'full' },
         },
         logger.get()
@@ -569,6 +581,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           ssl: { verificationMode: 'misspelled' as any },
         },
         logger.get()
@@ -588,6 +601,7 @@ Object {
           sniffOnStart: true,
           sniffOnConnectionFault: true,
           hosts: ['https://es.local'],
+          requestHeadersWhitelist: [],
           ssl: {
             verificationMode: 'certificate',
             certificateAuthorities: ['ca-path'],

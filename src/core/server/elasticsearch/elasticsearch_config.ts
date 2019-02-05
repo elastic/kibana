@@ -63,23 +63,95 @@ type SslConfigSchema = TypeOf<typeof configSchema>['ssl'];
 export class ElasticsearchConfig {
   public static schema = configSchema;
 
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch.
+   */
   public readonly healthCheckDelay: Duration;
+
+  /**
+   * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
+   */
   public readonly apiVersion: string;
+
+  /**
+   * Specifies whether all queries to the client should be logged (status code,
+   * method, query etc.).
+   */
   public readonly logQueries: boolean;
+
+  /**
+   * Hosts that the client will connect to. If sniffing is enabled, this list will
+   * be used as seeds to discover the rest of your cluster.
+   */
   public readonly hosts: string[];
+
+  /**
+   * List of Kibana client-side headers to send to Elasticsearch when request
+   * scoped cluster client is used. If this is an empty array then *no* client-side
+   * will be sent.
+   */
   public readonly requestHeadersWhitelist: string[];
+
+  /**
+   * Timeout after which PING HTTP request will be aborted and retried.
+   */
   public readonly pingTimeout: Duration;
+
+  /**
+   * Timeout after which HTTP request will be aborted and retried.
+   */
   public readonly requestTimeout: Duration;
+
+  /**
+   * Timeout for Elasticsearch to wait for responses from shards. Set to 0 to disable.
+   */
   public readonly shardTimeout: Duration;
+
+  /**
+   * Specifies whether the client should attempt to detect the rest of the cluster
+   * when it is first instantiated.
+   */
   public readonly sniffOnStart: boolean;
+
+  /**
+   * Interval to perform a sniff operation and make sure the list of nodes is complete.
+   * If `false` then sniffing is disabled.
+   */
   public readonly sniffInterval: false | Duration;
+
+  /**
+   * Specifies whether the client should immediately sniff for a more current list
+   * of nodes when a connection dies.
+   */
   public readonly sniffOnConnectionFault: boolean;
+
+  /**
+   * If Elasticsearch is protected with basic authentication, this setting provides
+   * the username that the Kibana server uses to perform its administrative functions.
+   */
   public readonly username?: string;
+
+  /**
+   * If Elasticsearch is protected with basic authentication, this setting provides
+   * the password that the Kibana server uses to perform its administrative functions.
+   */
   public readonly password?: string;
+
+  /**
+   * Set of settings configure SSL connection between Kibana and Elasticsearch that
+   * are required when `xpack.ssl.verification_mode` in Elasticsearch is set to
+   * either `certificate` or `full`.
+   */
   public readonly ssl: Pick<
     SslConfigSchema,
     Exclude<keyof SslConfigSchema, 'certificateAuthorities'>
   > & { certificateAuthorities?: string[] };
+
+  /**
+   * Header names and values to send to Elasticsearch with every request. These
+   * headers cannot be overwritten by client-side headers and aren't affected by
+   * `requestHeadersWhitelist` configuration.
+   */
   public readonly customHeaders: TypeOf<typeof configSchema>['customHeaders'];
 
   constructor(config: TypeOf<typeof configSchema>) {
