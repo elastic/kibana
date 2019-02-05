@@ -15,7 +15,7 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { getReindexWarnings, transformFlatSettings } from './index_settings';
+import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
@@ -495,12 +495,14 @@ export const reindexServiceFactory = (
         return true;
       }
 
+      const index = parseIndexName(indexName);
+
       // Otherwise, query for required privileges for this index.
       const body = {
         cluster: ['manage'],
         index: [
           {
-            names: [`${indexName}*`],
+            names: [indexName, index.newIndexName],
             privileges: ['all'],
           },
           {

@@ -5,6 +5,7 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
 import {
   IndexGroup,
   ReindexOperation,
@@ -86,7 +87,7 @@ describe('reindexService', () => {
           cluster: ['manage'],
           index: [
             {
-              names: [`anIndex*`],
+              names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
               privileges: ['all'],
             },
             {
@@ -109,7 +110,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_ml'],
           index: [
             {
-              names: [`.ml-anomalies*`],
+              names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
               privileges: ['all'],
             },
             {
@@ -132,7 +133,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_watcher'],
           index: [
             {
-              names: [`.watches*`],
+              names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
               privileges: ['all'],
             },
             {
