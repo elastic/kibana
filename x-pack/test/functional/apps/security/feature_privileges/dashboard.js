@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const panelActions = getService('dashboardPanelActions');
 
   describe('dashboard', () => {
     before(async () => {
@@ -95,6 +96,55 @@ export default function ({ getPageObjects, getService }) {
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
+      });
+
+      it(`does not allow a visualization to be edited`, async () => {
+        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await panelActions.openContextMenu();
+        await panelActions.expectMissingEditPanelAction();
+      });
+    });
+
+    describe('global dashboard & visualize all privileges', () => {
+      before(async () => {
+        await security.role.create('global_dashboard_visualize_all_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+                visualize: ['all'],
+              },
+              spaces: ['*']
+            }
+          ]
+        });
+
+        await security.user.create('global_dashboard_visualize_all_user', {
+          password: 'global_dashboard_visualize_all_user-password',
+          roles: ['global_dashboard_visualize_all_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login('global_dashboard_visualize_all_user', 'global_dashboard_visualize_all_user-password', {
+          expectSpaceSelector: false,
+        });
+      });
+
+      after(async () => {
+        await security.role.delete('global_dashboard_visualize_all_role');
+        await security.user.delete('global_dashboard_visualize_all_user');
+      });
+
+      it(`allows a visualization to be edited`, async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await panelActions.openContextMenu();
+        await panelActions.expectExistsEditPanelAction();
       });
     });
 
@@ -226,7 +276,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('A Dashboard'), {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

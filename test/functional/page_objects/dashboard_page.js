@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-
 import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -579,6 +578,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('ensure that you can click on hide title checkbox');
       await this.openOptions();
       return await testSubjects.click('dashboardPanelTitlesCheckbox');
+    }
+
+    async expectMissingSaveOption() {
+      await testSubjects.missingOrFail('dashboardSaveMenuItem');
     }
 
   }
