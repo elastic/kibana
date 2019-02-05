@@ -209,7 +209,7 @@ Example structure before:
     "panelsJSON": [{
       ...
       "type": "visualization",
-      "id": "123"
+      "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
     }]
   }
 }
