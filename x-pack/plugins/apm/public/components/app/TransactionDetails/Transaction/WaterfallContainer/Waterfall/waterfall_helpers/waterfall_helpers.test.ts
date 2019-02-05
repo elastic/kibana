@@ -144,7 +144,82 @@ describe('waterfall_helpers', () => {
 
   describe('getWaterfallItems', () => {
     it('should order items correctly', () => {
-      const items = getItems();
+      const items: IWaterfallItem[] = [
+        {
+          id: 'd',
+          parentId: 'c',
+          serviceName: 'opbeans-java',
+          name: 'SELECT',
+          duration: 210,
+          timestamp: 1536763736371000,
+          offset: 0,
+          skew: 0,
+          docType: 'span',
+          span: {
+            transaction: {
+              id: 'c'
+            }
+          } as Span
+        },
+        {
+          id: 'b',
+          parentId: 'a',
+          serviceName: 'opbeans-java',
+          name: 'GET [0:0:0:0:0:0:0:1]',
+          duration: 4694,
+          timestamp: 1536763736368000,
+          offset: 0,
+          skew: 0,
+          docType: 'span',
+          span: {
+            transaction: {
+              id: 'a'
+            }
+          } as Span
+        },
+        {
+          id: 'b2',
+          parentId: 'a',
+          serviceName: 'opbeans-java',
+          name: 'GET [0:0:0:0:0:0:0:1]',
+          duration: 4694,
+          timestamp: 1536763736367000,
+          offset: 0,
+          skew: 0,
+          docType: 'span',
+          span: {
+            transaction: {
+              id: 'a'
+            }
+          } as Span
+        },
+        {
+          id: 'c',
+          parentId: 'b',
+          serviceName: 'opbeans-java',
+          name: 'APIRestController#productsRemote',
+          duration: 3581,
+          timestamp: 1536763736369000,
+          offset: 0,
+          skew: 0,
+          docType: 'transaction',
+          transaction: {} as Transaction,
+          errorCount: 0
+        },
+        {
+          id: 'a',
+          serviceName: 'opbeans-java',
+          name: 'APIRestController#products',
+          duration: 9480,
+          timestamp: 1536763736366000,
+          offset: 0,
+          skew: 0,
+          docType: 'transaction',
+          transaction: {} as Transaction,
+          errorCount: 0
+        }
+      ];
+
       const childrenByParentId = groupBy(items, hit =>
         hit.parentId ? hit.parentId : 'root'
       );
@@ -243,81 +318,3 @@ describe('waterfall_helpers', () => {
     });
   });
 });
-
-function getItems(): IWaterfallItem[] {
-  return [
-    {
-      id: 'd',
-      parentId: 'c',
-      serviceName: 'opbeans-java',
-      name: 'SELECT',
-      duration: 210,
-      timestamp: 1536763736371000,
-      offset: 0,
-      skew: 0,
-      docType: 'span',
-      span: {
-        transaction: {
-          id: 'c'
-        }
-      } as Span
-    },
-    {
-      id: 'b',
-      parentId: 'a',
-      serviceName: 'opbeans-java',
-      name: 'GET [0:0:0:0:0:0:0:1]',
-      duration: 4694,
-      timestamp: 1536763736368000,
-      offset: 0,
-      skew: 0,
-      docType: 'span',
-      span: {
-        transaction: {
-          id: 'a'
-        }
-      } as Span
-    },
-    {
-      id: 'b2',
-      parentId: 'a',
-      serviceName: 'opbeans-java',
-      name: 'GET [0:0:0:0:0:0:0:1]',
-      duration: 4694,
-      timestamp: 1536763736367000,
-      offset: 0,
-      skew: 0,
-      docType: 'span',
-      span: {
-        transaction: {
-          id: 'a'
-        }
-      } as Span
-    },
-    {
-      id: 'c',
-      parentId: 'b',
-      serviceName: 'opbeans-java',
-      name: 'APIRestController#productsRemote',
-      duration: 3581,
-      timestamp: 1536763736369000,
-      offset: 0,
-      skew: 0,
-      docType: 'transaction',
-      transaction: {} as Transaction,
-      errorCount: 0
-    },
-    {
-      id: 'a',
-      serviceName: 'opbeans-java',
-      name: 'APIRestController#products',
-      duration: 9480,
-      timestamp: 1536763736366000,
-      offset: 0,
-      skew: 0,
-      docType: 'transaction',
-      transaction: {} as Transaction,
-      errorCount: 0
-    }
-  ];
-}
