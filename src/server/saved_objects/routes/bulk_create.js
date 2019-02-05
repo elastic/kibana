@@ -35,7 +35,7 @@ export const createBulkCreateRoute = prereqs => ({
           type: Joi.string().required(),
           id: Joi.string(),
           attributes: Joi.object().required(),
-          version: Joi.number(),
+          version: Joi.string(),
           migrationVersion: Joi.object().optional(),
         }).required()
       ),

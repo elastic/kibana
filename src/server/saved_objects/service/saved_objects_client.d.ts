@@ -58,7 +58,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
 }
 
 export interface UpdateOptions extends BaseOptions {
-  version?: number;
+  version?: string;
 }
 
 export interface BulkGetObject {
@@ -78,7 +78,7 @@ export interface SavedObjectAttributes {
 export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
-  version?: number;
+  version?: string;
   updated_at?: string;
   error?: {
     message: string;

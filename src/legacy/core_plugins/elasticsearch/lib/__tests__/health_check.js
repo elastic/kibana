@@ -61,7 +61,6 @@ describe('plugins/elasticsearch', () => {
 
       cluster = { callWithInternalUser: sinon.stub() };
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
-      cluster.callWithInternalUser.withArgs('create', sinon.match.any).returns(Promise.resolve({ _id: '1', _version: 1 }));
       cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
       cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));

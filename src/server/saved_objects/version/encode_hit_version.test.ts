@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export function isBadRequestError(maybeError: any): boolean;
-export function isNotAuthorizedError(maybeError: any): boolean;
-export function isForbiddenError(maybeError: any): boolean;
-export function isRequestEntityTooLargeError(maybeError: any): boolean;
-export function isNotFoundError(maybeError: any): boolean;
-export function isConflictError(maybeError: any): boolean;
-export function isEsUnavailableError(maybeError: any): boolean;
-export function isEsAutoCreateIndexError(maybeError: any): boolean;
+jest.mock('./encode_version', () => ({
+  encodeVersion: jest.fn().mockReturnValue('foo'),
+}));
 
-export function createInvalidVersionError(version: any): Error;
-export function isInvalidVersionError(maybeError: Error): boolean;
+import { encodeHitVersion } from './encode_hit_version';
+import { encodeVersion } from './encode_version';
+
+it('renames decodeVersion() return value to use if_seq_no and if_primary_term', () => {
+  expect(encodeHitVersion({ _seq_no: 1, _primary_term: 2 })).toMatchInlineSnapshot(`"foo"`);
+  expect(encodeVersion).toHaveBeenCalledWith(1, 2);
+});

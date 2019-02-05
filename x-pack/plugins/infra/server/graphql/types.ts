@@ -47,7 +47,7 @@ export interface InfraSource {
   /** The id of the source */
   id: string;
   /** The version number the source configuration was last persisted with */
-  version?: number | null;
+  version?: string | null;
   /** The timestamp the source configuration was last persisted at */
   updatedAt?: number | null;
   /** The raw configuration of the source */
@@ -606,7 +606,7 @@ export namespace InfraSourceResolvers {
     /** The id of the source */
     id?: IdResolver<string, TypeParent, Context>;
     /** The version number the source configuration was last persisted with */
-    version?: VersionResolver<number | null, TypeParent, Context>;
+    version?: VersionResolver<string | null, TypeParent, Context>;
     /** The timestamp the source configuration was last persisted at */
     updatedAt?: UpdatedAtResolver<number | null, TypeParent, Context>;
     /** The raw configuration of the source */
@@ -635,7 +635,7 @@ export namespace InfraSourceResolvers {
     Context
   >;
   export type VersionResolver<
-    R = number | null,
+    R = string | null,
     Parent = InfraSource,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
