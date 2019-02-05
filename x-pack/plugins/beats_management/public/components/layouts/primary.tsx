@@ -5,9 +5,6 @@
  */
 
 import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHeader,
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
@@ -19,14 +16,13 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Component, ReactNode } from 'react';
 import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
 type RenderCallback = ((component: () => JSX.Element) => void);
 interface PrimaryLayoutProps {
-  title: string;
+  title: string | JSX.Element;
   actionSection?: React.ReactNode;
   hideBreadcrumbs?: boolean;
 }
@@ -55,21 +51,9 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
           <EuiPageBody>
             <EuiPageHeader>
               <EuiPageHeaderSection>
-                <EuiFlexGroup alignItems="center" gutterSize="m">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle>
-                      <h1>{this.props.title}</h1>
-                    </EuiTitle>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={i18n.translate('xpack.beatsManagement.layout.primary.betaBadgeText', {
-                        defaultMessage: 'Beta',
-                      })}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiTitle>
+                  <h1>{this.props.title}</h1>
+                </EuiTitle>
               </EuiPageHeaderSection>
               <EuiPageHeaderSection>
                 {(this.actionSection && this.actionSection()) || this.props.actionSection}
