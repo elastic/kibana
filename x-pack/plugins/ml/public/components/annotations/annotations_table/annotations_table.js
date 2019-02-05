@@ -142,7 +142,9 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
   }
 
   componentWillUnmount() {
-    this.annotationsRefreshSubscription.unsubscribe();
+    if (this.annotationsRefreshSubscription !== null) {
+      this.annotationsRefreshSubscription.unsubscribe();
+    }
   }
 
   openSingleMetricView = (annotation = {}) => {
