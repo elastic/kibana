@@ -34,14 +34,10 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
         const dateFormat = config.get('dateFormat');
-        const esQueryConfigs = {
-          allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
-          queryStringOptions: config.get('query:queryString:options'),
-        };
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            query,
+            query: Array.isArray(query) ? query : [query],
             filters,
             panels: [panel],
             state: uiStateObj
