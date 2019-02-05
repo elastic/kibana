@@ -26,16 +26,15 @@ export interface UpgradeAssistantStatus {
 
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
-  req: Request
+  req: Request,
+  isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = await callWithRequest(req, 'transport.request', {
     path: '/_xpack/migration/deprecations',
     method: 'GET',
   });
 
-  const cluster = deprecations.cluster_settings
-    .concat(deprecations.ml_settings)
-    .concat(deprecations.node_settings);
+  const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
@@ -47,9 +46,7 @@ export async function getUpgradeAssistantStatus(
   };
 }
 
-// Combines the information from the migration assistance api and the deprecation api into a single array.
-// Enhances with information about which index the deprecation applies to and adds buttons for accessing the
-// reindex UI.
+// Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce(
     (indexDeprecations, indexName) => {
@@ -61,3 +58,16 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
     },
     [] as EnrichedDeprecationInfo[]
   );
+
+const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
+  const combined = deprecations.cluster_settings
+    .concat(deprecations.ml_settings)
+    .concat(deprecations.node_settings);
+
+  if (isCloudEnabled) {
+    // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
+    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+  } else {
+    return combined;
+  }
+};
