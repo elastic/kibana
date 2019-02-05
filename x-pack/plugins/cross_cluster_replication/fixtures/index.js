@@ -10,3 +10,10 @@ export {
 } from './auto_follow_pattern';
 
 export { esErrors } from './es_errors';
+
+export {
+  getFollowerIndexStatsMock,
+  getFollowerIndexListStatsMock,
+  getFollowerIndexInfoMock,
+  getFollowerIndexListInfoMock,
+} from './follower_index';

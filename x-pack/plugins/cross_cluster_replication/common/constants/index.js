@@ -7,3 +7,4 @@
 export * from './plugin';
 export * from './base_path';
 export * from './app';
+export * from './settings';

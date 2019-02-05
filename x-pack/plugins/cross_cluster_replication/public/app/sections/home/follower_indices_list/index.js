@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { apiMiddleware } from './api';
-export { autoFollowPatternMiddleware } from './auto_follow_pattern';
+export { FollowerIndicesList } from './follower_indices_list.container';
