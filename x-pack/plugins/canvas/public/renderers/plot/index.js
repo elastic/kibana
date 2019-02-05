@@ -11,7 +11,6 @@ import $ from 'jquery';
 import '../../../canvas_plugin_src/lib/flot-charts';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
-import './plot.scss';
 
 const render = (domNode, config, handlers) => {
   // TODO: OH NOES

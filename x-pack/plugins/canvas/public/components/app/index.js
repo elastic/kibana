@@ -5,6 +5,7 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
+import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import { getInterpreter, updateInterpreterFunctions } from 'plugins/interpreter/interpreter';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -22,6 +23,7 @@ import { viewSpecs } from '../../uis/views';
 import { args } from '../../uis/arguments';
 import { tagSpecs } from '../../uis/tags';
 import { templateSpecs } from '../../templates';
+import { renderFunctions } from '../../renderers';
 
 import {
   argTypeRegistry,
@@ -51,6 +53,7 @@ viewSpecs.forEach(spec => viewRegistry.register(spec));
 args.forEach(spec => argTypeRegistry.register(spec));
 templateSpecs.forEach(spec => templatesRegistry.register(spec));
 tagSpecs.forEach(spec => tagsRegistry.register(spec));
+renderFunctions.forEach(spec => renderFunctionsRegistry.register(spec));
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal

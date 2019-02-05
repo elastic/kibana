@@ -8,7 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { DatetimeCalendar } from '../datetime_calendar';
-import './datetime_range_absolute.scss';
 
 export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
   <div className="canvasDateTimeRangeAbsolute">

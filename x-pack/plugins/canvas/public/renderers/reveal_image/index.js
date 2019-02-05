@@ -6,7 +6,6 @@
 
 import { elasticOutline } from '../../lib/elastic_outline';
 import { isValidUrl } from '../../../common/lib/url';
-import './reveal_image.scss';
 
 export const revealImage = () => ({
   name: 'revealImage',

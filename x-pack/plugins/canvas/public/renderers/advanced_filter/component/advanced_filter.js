@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import './advanced_filter.scss';
 
 export const AdvancedFilter = ({ value, onChange, commit }) => (
   <form
