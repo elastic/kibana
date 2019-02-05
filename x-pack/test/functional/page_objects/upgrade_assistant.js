@@ -67,6 +67,14 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
         expect(summaryElText).to.eql(summary);
       });
     }
+
+    async expectTelemetryHasFinish() {
+      return await retry.try(async () => {
+        log.debug('expectTelemetryHasFinish');
+        const isTelemetryFinished = !(await testSubjects.exists('upgradeAssistantTelemetryRunning'));
+        expect(isTelemetryFinished).to.equal(true);
+      });
+    }
   }
 
   return new UpgradeAssistant();
