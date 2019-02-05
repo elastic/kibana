@@ -11,7 +11,7 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
-  field: string;
+  field: keyof T;
   name: string;
   dataType?: string;
   align?: string;
@@ -35,7 +35,7 @@ interface Props<T> {
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
-    field: string;
+    field: keyof T;
     direction: 'asc' | 'desc';
   };
   noItemsMessage?: React.ReactNode;
