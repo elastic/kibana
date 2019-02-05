@@ -13,6 +13,7 @@ import { WebhookAction } from './webhook.action';
 import { IndexAction } from './index.action';
 import { HipchatAction } from './hipchat.action';
 import { PagerDutyAction } from './pagerduty.action';
+import { JiraAction } from './jira.action';
 import { UnknownAction } from './unknown_action';
 
 const ActionTypes = {};
@@ -22,7 +23,8 @@ set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
 set(ActionTypes, ACTION_TYPES.WEBHOOK, WebhookAction);
 set(ActionTypes, ACTION_TYPES.INDEX, IndexAction);
 set(ActionTypes, ACTION_TYPES.HIPCHAT, HipchatAction);
-set(ActionTypes, ACTION_TYPES.HIPCHAT, PagerDutyAction);
+set(ActionTypes, ACTION_TYPES.PAGERDUTY, PagerDutyAction);
+set(ActionTypes, ACTION_TYPES.JIRA, JiraAction);
 
 export class Action {
   static getActionTypes = () => {
