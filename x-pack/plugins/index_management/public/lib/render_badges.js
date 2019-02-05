@@ -32,7 +32,6 @@ export const renderBadges = (index, filterChanged) => {
             color={color}
             onClick={clickHandler}
             onClickAriaLabel={ariaLabel}
-            aria-label={ariaLabel}
           >
             {label}
           </EuiBadge>
