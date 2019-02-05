@@ -5,11 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'lodash';
 import React from 'react';
 import {
+  SPAN_ACTION,
   SPAN_DURATION,
   SPAN_NAME,
+  SPAN_SUBTYPE,
   SPAN_TYPE
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
@@ -28,13 +29,30 @@ function getSpanLabel(type: string) {
           defaultMessage: 'Navigation timing'
         }
       );
+    case 'mysql':
+      return 'MySQL';
+    case 'query':
+      return i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.spanType.action.query',
+        {
+          defaultMessage: 'Query'
+        }
+      );
     default:
       return type;
   }
 }
 
-function getPrimaryType(type: string) {
-  return first(type.split('.'));
+function getSpanTypes(span: Span) {
+  const { type, subtype, action } = span.span;
+
+  const [primaryType, subtypeFromType, actionFromType] = type.split('.');
+
+  return {
+    type: primaryType,
+    subtype: subtype || subtypeFromType,
+    action: action || actionFromType
+  };
 }
 
 interface Props {
@@ -49,7 +67,10 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
 
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
-  const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
+  const { type, subtype, action } = getSpanTypes(span);
+  const spanTypeLabel = getSpanLabel(type);
+  const spanSubtypeLabel = getSpanLabel(subtype);
+  const spanActionLabel = getSpanLabel(action);
   const stickyProperties = [
     {
       label: i18n.translate(
@@ -60,18 +81,6 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       ),
       fieldName: SPAN_NAME,
       val: spanName || NOT_AVAILABLE_LABEL,
-      truncated: true,
-      width: '50%'
-    },
-    {
-      fieldName: SPAN_TYPE,
-      label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.typeLabel',
-        {
-          defaultMessage: 'Type'
-        }
-      ),
-      val: spanTypeLabel,
       truncated: true,
       width: '50%'
     },
@@ -95,8 +104,50 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       ),
       val: asPercent(spanDuration, totalDuration),
       width: '50%'
+    },
+    {
+      fieldName: SPAN_TYPE,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.typeLabel',
+        {
+          defaultMessage: 'Type'
+        }
+      ),
+      val: spanTypeLabel,
+      truncated: true,
+      width: '15%'
     }
   ];
+
+  if (spanSubtypeLabel) {
+    stickyProperties.push({
+      fieldName: SPAN_SUBTYPE,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.subtypeLabel',
+        {
+          defaultMessage: 'Subtype'
+        }
+      ),
+      val: spanSubtypeLabel,
+      truncated: true,
+      width: '15%'
+    });
+  }
+
+  if (spanActionLabel) {
+    stickyProperties.push({
+      fieldName: SPAN_ACTION,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.actionLabel',
+        {
+          defaultMessage: 'Action'
+        }
+      ),
+      val: spanActionLabel,
+      truncated: true,
+      width: '15%'
+    });
+  }
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }
