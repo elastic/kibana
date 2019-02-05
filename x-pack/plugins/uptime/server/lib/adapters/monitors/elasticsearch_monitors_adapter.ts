@@ -192,10 +192,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       const queryResult = await this.database.search(request, params);
       const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
 
-      if (idBuckets.length === 0) {
-        break;
-      }
-
       idBuckets.forEach(bucket => {
         // We only get the latest doc
         const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
