@@ -5,6 +5,11 @@
     word-break: break-all;
     word-wrap: break-word;
     white-space: pre-wrap;
+    color: $euiColorFullShade;
+  }
+
+  .dscFieldName {
+    color: $euiColorDarkShade;
   }
 
   td,
@@ -15,6 +20,12 @@
   tr:first-child td {
     border-top-color: transparent;
   }
+
+  tr:hover {
+    .kbnDocViewer__buttons {
+      visibility: visible;
+    }
+  }
 }
 
 .kbnDocViewer__content {
@@ -24,4 +35,8 @@
 .kbnDocViewer__buttons,
 .kbnDocViewer__field {
   white-space: nowrap;
+}
+
+.kbnDocViewer__buttons {
+  visibility: hidden;
 }

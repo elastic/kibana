@@ -119,7 +119,7 @@
 .dscFieldDetails {
   padding: 10px;
   background-color: shade($euiColorLightestShade, 5%);
-  color: shade($euiColorEmptyShade, 65%);
+  color: $euiColorDarkShade;
 }
 
 // SASSTODO: replace the padding and margin values with variables

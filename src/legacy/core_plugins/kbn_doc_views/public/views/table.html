@@ -1,11 +1,6 @@
 <table class="table table-condensed">
   <tbody>
     <tr ng-repeat="field in fields" data-test-subj="tableDocViewRow-{{ field }}">
-      <td field-name="field"
-          field-type="mapping[field].type"
-          width="1%"
-          class="kbnDocViewer__field">
-      </td>
       <td width="1%" class="kbnDocViewer__buttons" ng-if="filter">
         <span ng-if="mapping[field].filterable">
           <button
@@ -73,7 +68,11 @@
           <i class="fa fa-asterisk text-muted"></i>
         </span>
       </td>
-
+      <td field-name="field"
+          field-type="mapping[field].type"
+          width="1%"
+          class="kbnDocViewer__field">
+      </td>
       <td>
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"

@@ -48,7 +48,7 @@ uiModules.get('kibana')
             `<button
             ng-show="docViews['${view.name}'].shouldShow(hit)"
             class="euiTab"
-            ng-class="{euiTab-isSelected: mode == '${view.name}'}"
+            ng-class="{'euiTab euiTab-isSelected': mode === '${view.name}', 'euiTab': true}"
             role="tab"
             aria-selected="{{mode === '${view.name}'}}"
             ng-click="mode='${view.name}'"
