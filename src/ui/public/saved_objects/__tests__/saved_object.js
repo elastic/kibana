@@ -47,7 +47,6 @@ describe('SavedObject', () => {
 
     const client = sinon.stub();
     const savedObject = new SavedObject(client, { version });
-
     expect(savedObject._version).to.be(version);
   });
 });

@@ -77,11 +77,12 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
         const logMessage = idx(errorGroup, _ => _.data.error.error.log.message);
         const excMessage = idx(
           errorGroup,
-          _ => _.data.error.error.exception.message
+          _ => _.data.error.error.exception[0].message
         );
         const culprit = idx(errorGroup, _ => _.data.error.error.culprit);
         const isUnhandled =
-          idx(errorGroup, _ => _.data.error.error.exception.handled) === false;
+          idx(errorGroup, _ => _.data.error.error.exception[0].handled) ===
+          false;
 
         return (
           <div>

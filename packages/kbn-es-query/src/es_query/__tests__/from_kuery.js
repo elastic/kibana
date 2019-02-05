@@ -56,7 +56,7 @@ describe('build query', function () {
       const oldQuery = { query: 'is(foo, bar)', language: 'kuery' };
 
       expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery], true).to.throwError(
-        /It looks like you're using an outdated Kuery syntax./
+        /OutdatedKuerySyntaxError/
       );
     });
 

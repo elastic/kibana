@@ -9,7 +9,7 @@ import {
   METRIC_SYSTEM_CPU_PERCENT,
   PROCESSOR_NAME,
   SERVICE_NAME
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
