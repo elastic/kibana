@@ -70,9 +70,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         className="euiScreenReaderOnly"
         role="status"
       >
-        Below is a table of 
-        0
-         items.
+        Below is a table of 0 items.
       </caption>
       <thead>
         <tr>
@@ -387,9 +385,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         className="euiScreenReaderOnly"
         role="status"
       >
-        Below is a table of 
-        4
-         items.
+        Below is a table of 4 items.
       </caption>
       <thead>
         <tr>
