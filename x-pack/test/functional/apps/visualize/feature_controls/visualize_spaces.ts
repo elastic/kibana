@@ -13,7 +13,6 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
