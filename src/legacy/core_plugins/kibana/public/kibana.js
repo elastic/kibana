@@ -69,4 +69,13 @@ routes
     redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
   });
 
+uiModules.get('kibana', [
+  'monospaced.elastic',
+  'ui.bootstrap',
+  'ui.ace',
+  'ui.select',
+  'ngSanitize',
+  'elasticsearch',
+]);
+
 uiModules.get('kibana').run(showAppRedirectNotification);
