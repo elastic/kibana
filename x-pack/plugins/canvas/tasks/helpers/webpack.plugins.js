@@ -22,7 +22,7 @@ export function getWebpackConfig({ devtool, watch, production } = {}) {
     entry: {
       // 'elements/all': path.join(sourceDir, 'elements/register.js'),
       // 'renderers/all': path.join(sourceDir, 'renderers/register.js'),
-      'uis/transforms/all': path.join(sourceDir, 'uis/transforms/register.js'),
+      // 'uis/transforms/all': path.join(sourceDir, 'uis/transforms/register.js'),
       'uis/models/all': path.join(sourceDir, 'uis/models/register.js'),
       'uis/views/all': path.join(sourceDir, 'uis/views/register.js'),
       'uis/datasources/all': path.join(sourceDir, 'uis/datasources/register.js'),
