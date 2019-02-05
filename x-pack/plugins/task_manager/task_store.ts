@@ -8,7 +8,6 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
-import { get } from 'lodash';
 import {
   TASK_MANAGER_API_VERSION as API_VERSION,
   TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
@@ -134,7 +133,7 @@ export class TaskStore {
         filter_path: '*.version',
       });
       // extract the existing version
-      existingVersion = get(templateCheck[templateName], 'version') || 0;
+      existingVersion = templateCheck[templateName].version || 0;
     } catch (err) {
       if (err.statusCode !== 404) {
         throw err; // ignore not found
