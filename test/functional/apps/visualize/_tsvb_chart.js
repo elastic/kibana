@@ -137,11 +137,13 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify topN label and count display', async function () {
-        await PageObjects.visualize.waitForVisualization();
-        const labelString = await PageObjects.visualBuilder.getTopNLabel();
-        expect(labelString).to.be('Count');
-        const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
-        expect(gaugeCount).to.be('156');
+        await retry.try(async () => {
+          await PageObjects.visualize.waitForVisualization();
+          const labelString = await PageObjects.visualBuilder.getTopNLabel();
+          expect(labelString).to.be('Count');
+          const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
+          expect(gaugeCount).to.be('156');
+        });
       });
     });
 
