@@ -959,6 +959,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           ...{
             filterActive: false,
             filterData: null,
+            filteredFields: [],
             influencersFilterQuery: undefined,
             maskAll: false
           },

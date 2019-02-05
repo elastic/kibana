@@ -53,7 +53,7 @@ export class KueryFilterBar extends Component {
   onSubmit = inputValue => {
     const { indexPattern } = this.state;
     const { onSubmit } = this.props;
-    let filteredFields = [];
+    const filteredFields = [];
 
     try {
       const ast = fromKueryExpression(inputValue);
@@ -62,14 +62,25 @@ export class KueryFilterBar extends Component {
       if (!query) {
         return;
       }
-      // TODO: do some cleanup on what gets returned in this array (Remove bools, etc)
+      // TODO: do some cleanup on what gets returned in this array (Remove bools, etc) - is there a better way to determine maskAll?
       // Test that all relevant values get returned
+      // maybe only if arg.type is literal? Need to dig in more
+      // if ast.type == 'function' then
+      // the layout is: ast.arguments = [ { arguments: [ { type: 'literal', value: 'AAL' } ] }, { arguments: [ { type: 'literal', value: 'AAL' } ] } ]
       if (ast && Array.isArray(ast.arguments)) {
-        filteredFields = ast.arguments.map(arg => {
-          if (typeof arg.value === 'string') {
-            return arg.value;
+
+        ast.arguments.forEach((arg) => {
+          if (arg.arguments !== undefined) {
+            arg.arguments.forEach((nestedArg) => {
+              if (typeof nestedArg.value === 'string') {
+                filteredFields.push(nestedArg.value);
+              }
+            });
+          } else if (typeof arg.value === 'string') {
+            filteredFields.push(arg.value);
           }
         });
+
       }
 
       onSubmit(query, filteredFields);
