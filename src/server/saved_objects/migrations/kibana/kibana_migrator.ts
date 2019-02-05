@@ -102,8 +102,13 @@ export class KibanaMigrator {
       serializer: this.serializer,
     });
 
-    return migrator.migrate();
+    const migration = await migrator.migrate();
+    this.hasMigrated = true;
+
+    return migration;
   });
+
+  public hasMigrated: boolean;
 
   private kbnServer: KbnServer;
   private documentMigrator: VersionedTransformer;
@@ -125,6 +130,7 @@ export class KibanaMigrator {
     );
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
     this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
+    this.hasMigrated = false;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: kbnServer.version,
       migrations: kbnServer.uiExports.savedObjectMigrations || {},

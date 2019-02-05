@@ -21,10 +21,11 @@ import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
+import { ensureNoMigrations } from './ensure_no_migrations';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
-export default function (plugin, server) {
+export function healthCheck(plugin, server) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
@@ -58,7 +59,8 @@ export default function (plugin, server) {
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser)
-        .then(waitForEsVersion);
+        .then(waitForEsVersion)
+        .then(ensureNoMigrations.bind(null, plugin, server));
 
     return healthCheck
       .then(setGreenStatus)

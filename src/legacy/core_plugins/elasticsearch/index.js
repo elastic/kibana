@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import healthCheck from './lib/health_check';
+import { healthCheck } from './lib/health_check';
 import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
