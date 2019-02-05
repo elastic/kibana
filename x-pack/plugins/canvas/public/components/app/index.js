@@ -6,7 +6,6 @@
 
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 import { getInterpreter, updateInterpreterFunctions } from 'plugins/interpreter/interpreter';
-import { loadBrowserRegistries } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
@@ -15,6 +14,14 @@ import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_func
 import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
+import { elementSpecs } from '../../elements';
+import { transformSpecs } from '../../uis/transforms';
+import { datasourceSpecs } from '../../uis/datasources';
+import { modelSpecs } from '../../uis/models';
+import { viewSpecs } from '../../uis/views';
+import { args } from '../../uis/arguments';
+import { tagSpecs } from '../../uis/tags';
+import { templateSpecs } from '../../templates';
 
 import {
   argTypeRegistry,
@@ -36,28 +43,24 @@ const mapStateToProps = state => {
   };
 };
 
-const types = {
-  elements: elementsRegistry,
-  transformUIs: transformRegistry,
-  datasourceUIs: datasourceRegistry,
-  modelUIs: modelRegistry,
-  viewUIs: viewRegistry,
-  argumentUIs: argTypeRegistry,
-  templates: templatesRegistry,
-  tagUIs: tagsRegistry,
-};
+elementSpecs.forEach(spec => elementsRegistry.register(spec));
+transformSpecs.forEach(spec => transformRegistry.register(spec));
+datasourceSpecs.forEach(spec => datasourceRegistry.register(spec));
+modelSpecs.forEach(spec => modelRegistry.register(spec));
+viewSpecs.forEach(spec => viewRegistry.register(spec));
+args.forEach(spec => argTypeRegistry.register(spec));
+templateSpecs.forEach(spec => templatesRegistry.register(spec));
+tagSpecs.forEach(spec => tagsRegistry.register(spec));
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
-  setAppReady: basePath => async () => {
+  setAppReady: () => async () => {
     try {
       // wait for core interpreter to load
       await getInterpreter();
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions(functionsRegistry);
       await updateInterpreterFunctions();
-      await loadBrowserRegistries(types, basePath);
-
       // set app state to ready
       dispatch(appReady());
     } catch (e) {
