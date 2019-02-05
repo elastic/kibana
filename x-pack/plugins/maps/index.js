@@ -62,10 +62,11 @@ export function maps(kibana) {
       }
       initTelemetryCollection(server);
 
+      const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
       let routesInitialized = false;
 
-      watchStatusAndLicenseToInitialize(xpackMainPlugin, this,
+      watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
         async license => {
           if (license && license.maps && !routesInitialized) {
             routesInitialized = true;
@@ -74,7 +75,7 @@ export function maps(kibana) {
         });
 
       xpackMainPlugin.info
-        .feature(this.id)
+        .feature(thisPlugin.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
 
       server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);

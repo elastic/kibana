@@ -37,7 +37,12 @@ import { visualizationLoader } from './visualization_loader';
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { getTableAggs } from './pipeline_helpers/utilities';
-import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
+import {
+  VisResponseData,
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
@@ -241,22 +246,18 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * renders visualization with provided data
-   * @param visData: visualization data
+   * @param data: visualization data
    */
-  public render = (pipelineResponse: any = {}) => {
+  public render = (data: VisResponseData | null = null) => {
     // TODO: we have this weird situation when we need to render first, and then we call fetch and render ....
     // we need to get rid of that ....
 
-    const renderer = renderFunctionsRegistry.get(get(pipelineResponse, 'as', 'visualization'));
+    const renderer = renderFunctionsRegistry.get(get(data || {}, 'as', 'visualization'));
     if (!renderer) {
       return;
     }
     renderer
-      .render(
-        this.element,
-        pipelineResponse.value || { visType: this.vis.type.name },
-        this.handlers
-      )
+      .render(this.element, get(data, 'value', { visType: this.vis.type.name }), this.handlers)
       .then(() => {
         if (!this.loaded) {
           this.loaded = true;
@@ -404,7 +405,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      if (data.value) {
+      if (data && data.value) {
         this.dataSubject.next(data.value);
       }
       return data;

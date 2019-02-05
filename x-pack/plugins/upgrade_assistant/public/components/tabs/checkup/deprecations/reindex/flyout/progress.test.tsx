@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { ReindexProgress } from './progress';
 
 describe('ReindexProgress', () => {
@@ -76,5 +76,50 @@ describe('ReindexProgress', () => {
     const reindexStep = wrapper.props().steps[2];
     expect(reindexStep.children.type.name).toEqual('EuiProgress');
     expect(reindexStep.children.props.value).toEqual(0.25);
+  });
+
+  it('adds steps for index groups', () => {
+    const wrapper = shallow(
+      <ReindexProgress
+        lastCompletedStep={ReindexStep.created}
+        reindexStatus={ReindexStatus.inProgress}
+        indexGroup={IndexGroup.ml}
+        reindexTaskPercComplete={null}
+        errorMessage={null}
+      />
+    );
+
+    expect(wrapper).toMatchInlineSnapshot(`
+<Component
+  steps={
+    Array [
+      Object {
+        "status": "inProgress",
+        "title": "Pausing Machine Learning jobs",
+      },
+      Object {
+        "status": "incomplete",
+        "title": "Setting old index to read-only",
+      },
+      Object {
+        "status": "incomplete",
+        "title": "Creating new index",
+      },
+      Object {
+        "status": "incomplete",
+        "title": "Reindexing documents",
+      },
+      Object {
+        "status": "incomplete",
+        "title": "Swapping original index with alias",
+      },
+      Object {
+        "status": "incomplete",
+        "title": "Resuming Machine Learning jobs",
+      },
+    ]
+  }
+/>
+`);
   });
 });
