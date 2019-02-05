@@ -592,7 +592,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
-        // TODO needs revisting to be a more robust normalization
+        // TODO needs revisiting to be a more robust normalization
         yMax = yMax * (1 + (maxLevel + 1) / 5);
       }
       this.focusYScale.domain([yMin, yMax]);
