@@ -25,7 +25,7 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../common/util/anomaly_utils';
-import { annotation$ } from '../../../components/annotations/annotations_observable';
+import { annotation$ } from '../../../services/annotations_service';
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { formatValue } from '../../../formatters/format_value';
 import {

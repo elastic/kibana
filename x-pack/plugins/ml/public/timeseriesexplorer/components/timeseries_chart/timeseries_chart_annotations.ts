@@ -16,7 +16,7 @@ import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_t
 
 import { TimeseriesChart } from './timeseries_chart';
 
-import { annotation$ } from '../../../components/annotations/annotations_observable';
+import { annotation$ } from '../../../services/annotations_service';
 
 export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
 

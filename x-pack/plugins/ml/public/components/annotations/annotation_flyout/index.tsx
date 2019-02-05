@@ -22,11 +22,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import {
+  annotation$,
+  annotationsRefresh$,
+  AnnotationState,
+} from '../../../services/annotations_service';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-
-import { injectObservablesAsProps } from '../../../util/observable_utils';
-import { annotation$, annotationsRefresh$, AnnotationState } from '../annotations_observable';
 
 import { CommonProps } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

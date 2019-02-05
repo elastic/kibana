@@ -44,7 +44,7 @@ import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 
-import { annotation$, annotationsRefresh$ } from '../annotations_observable';
+import { annotation$, annotationsRefresh$ } from '../../../services/annotations_service';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 

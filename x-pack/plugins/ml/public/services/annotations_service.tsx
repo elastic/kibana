@@ -70,7 +70,7 @@ export type AnnotationState = Annotation | null;
 export const annotation$ = new BehaviorSubject<AnnotationState>(null);
 
 /*
-  This observable provides a way to trigger a reload of annotations based on a give event.
+  This observable provides a way to trigger a reload of annotations based on a given event.
   Instead of passing around callbacks or deeply nested props, it can be imported for both
   angularjs controllers/directives and React components.
 */

@@ -55,7 +55,7 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
-import { annotationsRefresh$ } from '../components/annotations/annotations_observable';
+import { annotationsRefresh$ } from '../services/annotations_service';
 
 
 import chrome from 'ui/chrome';
