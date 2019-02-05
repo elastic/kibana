@@ -22,7 +22,7 @@ import { expect } from 'chai';
 import getEsShardTimeout from '../../helpers/get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
-  it('should return the elasticsearch.shardTimeout in ms', () => {
+  it('should return the elasticsearch.shardTimeout', () => {
     const getConfig = sinon.spy(() => '30000');
     const req = {
       server: {
@@ -33,7 +33,7 @@ describe('getEsShardTimeout', () => {
     };
     const timeout = getEsShardTimeout(req);
 
-    expect(timeout).to.equal('30000ms');
+    expect(timeout).to.equal('30000');
     expect(getConfig.called).to.equal(true);
   });
 });
