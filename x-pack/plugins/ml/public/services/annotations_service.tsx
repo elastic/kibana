@@ -6,7 +6,7 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { Annotation } from '../../../common/types/annotations';
+import { Annotation } from '../../common/types/annotations';
 
 /*
   A TypeScript helper type to allow a given component state attribute to be either an annotation or null.
