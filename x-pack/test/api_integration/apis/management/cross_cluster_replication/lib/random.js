@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './plugin';
-export * from './base_path';
-export * from './app';
-export * from './settings';
+import Chance from 'chance';
+
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+export const getRandomString = () => chance.string({ pool: CHARS_POOL });

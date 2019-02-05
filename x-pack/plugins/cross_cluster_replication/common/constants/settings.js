@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const API_BASE_PATH = '/api/cross_cluster_replication';
-export const REMOTE_CLUSTERS_API_BASE_PATH = '/api/remote_clusters';
-
-/**
- * Those settings have been copied from the cross_cluster_replication/common/constants/settings.js file
- */
 export const FOLLOWER_INDEX_ADVANCED_SETTINGS = {
   maxReadRequestOperationCount: 5120,
   maxOutstandingReadRequests: 12,
