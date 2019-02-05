@@ -435,7 +435,7 @@ function taskDocToRaw(doc: ConcreteTaskInstance, store: TaskStore): RawTaskDoc {
 
   return {
     _id: doc.id,
-    _index: index,
+    _index: store.index,
     _source: { type, task, kibana },
     _seq_no: doc.sequenceNumber,
     _primary_term: doc.primaryTerm,
