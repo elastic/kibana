@@ -228,14 +228,13 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<LogEntry[]>}
      */
     async getLogsFor(...args) {
-      const capabilities = await driver.getCapabilities();
-      //#TODO: We will be able to remove this conditional once Chromedriver updates to the w3c Spec.
-      //The logs endpoint has been removed browsers other than Chrome don't have access to this endpoint.
+      //The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
+      //See: https://github.com/w3c/webdriver/issues/406
       //See: https://w3c.github.io/webdriver/#endpoints
-      if (capabilities.getBrowserName() === 'chrome') {
-        return await driver.manage().logs().get(...args);
-      } else {
+      if (driver.executor_.w3c === true) {
         return [];
+      } else {
+        return await driver.manage().logs().get(...args);
       }
     }
 

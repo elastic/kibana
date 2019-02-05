@@ -33,42 +33,39 @@ async function attemptToCreateCommand(log, browserType) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
-  const chromeOptions = new chrome.Options();
-  const firefoxOptions = new firefox.Options();
-  const chromeService = new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging();
-  const firefoxService = new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging();
-  const prefs = new logging.Preferences();
-  const loggingPref = prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-
-  if (process.env.TEST_BROWSER_HEADLESS) {
-    // Use --disable-gpu to avoid an error from a missing Mesa library, as per
-    // https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-    chromeOptions.addArguments('headless', 'disable-gpu');
-    firefoxOptions.addArguments('headless', 'disable-gpu');
-  }
-
-  const buildDriverInstance = async (browserOptions) => {
-
-    browserOptions.addArguments('verbose');
-    browserOptions.setLoggingPrefs(loggingPref);
-
-    if (browserType === 'chrome') {
-      return new Builder()
-        .forBrowser(browserType)
-        .setChromeOptions(browserOptions)
-        .setChromeService(chromeService)
-        .build();
-    } else {
-      return new Builder()
-        .forBrowser(browserType)
-        .setFirefoxOptions(firefoxOptions)
-        .setFirefoxService(firefoxService)
-        .build();
+  const buildDriverInstance = async (browserType) => {
+    switch (browserType) {
+      case 'chrome':
+        const chromeOptions = new chrome.Options();
+        const loggingPref = new logging.Preferences().setLevel(logging.Type.BROWSER, logging.Level.ALL);
+        chromeOptions.setLoggingPrefs(loggingPref);
+        if (process.env.TEST_BROWSER_HEADLESS) {
+          //Use --disable-gpu to avoid an error from a missing Mesa library, as per
+          //See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
+          chromeOptions.addArguments('headless', 'disable-gpu');
+        }
+        return new Builder()
+          .forBrowser(browserType)
+          .setChromeOptions(chromeOptions)
+          .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+          .build();
+      case 'firefox':
+        const firefoxOptions = new firefox.Options();
+        if (process.env.TEST_BROWSER_HEADLESS) {
+          //See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+          firefoxOptions.addArguments('-headless');
+        }
+        return new Builder()
+          .forBrowser(browserType)
+          .setFirefoxOptions(firefoxOptions)
+          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
+          .build();
+      default:
+        throw new Error(`${browserType} is not supported yet`);
     }
   };
 
-  const session = browserType === 'chrome' ? await buildDriverInstance(chromeOptions) :
-    await buildDriverInstance(firefoxOptions);
+  const session = await buildDriverInstance(browserType);
 
   if (attemptId !== attemptCounter) return; // abort
 
