@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['settings']);
-  const find = getService('find');
 
   describe('filter scripted fields', function describeIndexTests() {
     before(async function () {
@@ -50,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
     it('should filter scripted fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await find.clickByPartialLinkText('logstash-*');
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');

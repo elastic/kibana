@@ -267,6 +267,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickIndexPatternLogstash() {
+      await find.clickByPartialLinkText('logstash-*');
+    }
+
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();

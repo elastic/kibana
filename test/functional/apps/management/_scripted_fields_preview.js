@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings']);
-  const find = getService('find');
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
   describe('scripted fields preview', () => {
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await find.clickByPartialLinkText('logstash-*');
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(SCRIPTED_FIELD_NAME);
@@ -47,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await find.clickByPartialLinkText('logstash-*');
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 

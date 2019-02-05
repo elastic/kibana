@@ -45,10 +45,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
+
       await Promise.all([
         esArchiver.load(kibanaIndex),
         esArchiver.loadIfNeeded(dataIndex)
       ]);
+
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': defaultIndex,

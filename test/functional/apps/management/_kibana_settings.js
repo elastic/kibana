@@ -22,7 +22,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
 
   describe('kibana settings', function describeIndexTests() {
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await find.clickByPartialLinkText('logstash-*');
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 

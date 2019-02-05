@@ -40,7 +40,6 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
-  const find = getService('find');
 
   describe('scripted fields', () => {
 
@@ -57,14 +56,14 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await find.clickByPartialLinkText('logstash-*');
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await find.clickByPartialLinkText('logstash-*');
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
@@ -82,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await find.clickByPartialLinkText('logstash-*');
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -149,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await find.clickByPartialLinkText('logstash-*');
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -212,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await find.clickByPartialLinkText('logstash-*');
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -275,7 +274,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await find.clickByPartialLinkText('logstash-*');
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
