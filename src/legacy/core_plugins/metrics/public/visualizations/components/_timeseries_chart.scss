@@ -14,7 +14,7 @@
   display: flex;
   flex: 1 0 auto;
   // TODO: Remove once tooltips are portaled
-  overflow: hidden; // Ensures the tooltip doesn't cause scrollbars
+  overflow: visible; // Ensures the tooltip doesn't cause scrollbars
 }
 
 .tvbVisTimeSeries__visualization {
