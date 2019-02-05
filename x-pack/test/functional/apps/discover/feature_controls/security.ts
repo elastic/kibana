@@ -25,7 +25,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     });
 
     after(async () => {
-      await esArchiver.unload('security/feature_privileges');
+      await esArchiver.unload('discover/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.logout();
