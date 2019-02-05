@@ -18,6 +18,20 @@
  */
 
 
-import { TypesRegistry } from '@kbn/interpreter/common';
+import { FunctionsRegistry, TypesRegistry } from '../common';
+import { RenderFunctionsRegistry } from './render_functions_registry';
 
-export const typesRegistry = new TypesRegistry();
+export const registries = {
+  browserFunctions: new FunctionsRegistry(),
+  renderers: new RenderFunctionsRegistry(),
+  types: new TypesRegistry(),
+};
+
+export function register(specs) {
+  Object.keys(specs).forEach(registryName => {
+    if (!registries[registryName]) {
+      throw new Error(`There is no registry called ${registryName}.`);
+    }
+    specs[registryName].forEach(f => registries[registryName].register(f));
+  });
+}

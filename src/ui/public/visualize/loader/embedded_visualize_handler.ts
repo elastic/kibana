@@ -17,10 +17,10 @@
  * under the License.
  */
 
+// @ts-ignore
+import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
-// @ts-ignore
-import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -252,7 +252,7 @@ export class EmbeddedVisualizeHandler {
     // TODO: we have this weird situation when we need to render first, and then we call fetch and render ....
     // we need to get rid of that ....
 
-    const renderer = renderFunctionsRegistry.get(get(data || {}, 'as', 'visualization'));
+    const renderer = registries.renderers.get(get(data || {}, 'as', 'visualization'));
     if (!renderer) {
       return;
     }

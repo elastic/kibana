@@ -18,36 +18,25 @@
  */
 
 
-import { initializeInterpreter, loadBrowserRegistries } from '@kbn/interpreter/public';
+import { initializeInterpreter, loadBrowserRegistries, registries, register } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
 import chrome from 'ui/chrome';
 import { functions } from './functions';
-import { functionsRegistry } from './functions_registry';
-import { typesRegistry } from './types_registry';
-import { renderFunctionsRegistry } from './render_functions_registry';
 import { visualization } from './renderers/visualization';
 
 const basePath = chrome.getInjected('serverBasePath');
 
-const types = {
-  browserFunctions: functionsRegistry,
-  renderers: renderFunctionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-renderFunctionsRegistry.register(visualization);
+register({
+  browserFunctions: functions,
+  renderers: [visualization],
+});
 
 let _resolve;
 let _interpreterPromise;
 
 const initialize = async () => {
-  await loadBrowserRegistries(types, basePath);
-  initializeInterpreter(kfetch, typesRegistry, functionsRegistry).then(interpreter => {
+  await loadBrowserRegistries(registries, basePath);
+  initializeInterpreter(kfetch, registries.types, registries.browserFunctions).then(interpreter => {
     _resolve({ interpreter });
   });
 };
