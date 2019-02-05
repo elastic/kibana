@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementSpec } from '../../canvas_plugin_src/elements/types';
+import { ElementSpec } from '../elements/types';
 import defaultHeader from './default_header.png';
 
 export class Element {
