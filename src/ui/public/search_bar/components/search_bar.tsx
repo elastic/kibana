@@ -54,6 +54,12 @@ interface Props {
   showQueryBar: boolean;
   showFilterBar: boolean;
   intl: InjectedIntl;
+  showDatePicker?: boolean;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
+  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
 interface State {
@@ -151,6 +157,12 @@ class SearchBarUI extends Component<Props, State> {
             indexPatterns={this.props.indexPatterns}
             store={this.props.store}
             prepend={this.props.showFilterBar ? filterTriggerButton : ''}
+            showDatePicker={this.props.showDatePicker}
+            dateRangeFrom={this.props.dateRangeFrom}
+            dateRangeTo={this.props.dateRangeTo}
+            isRefreshPaused={this.props.isRefreshPaused}
+            refreshInterval={this.props.refreshInterval}
+            onRefreshChange={this.props.onRefreshChange}
           />
         ) : (
           ''

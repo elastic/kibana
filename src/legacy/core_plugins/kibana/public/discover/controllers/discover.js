@@ -183,6 +183,9 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
+
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
@@ -491,6 +494,12 @@ function discoverController(
         $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
+        $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
+          $scope.updateRefreshInterval();
+        });
+        $scope.$listen(timefilter, 'timeUpdate', () => {
+          $scope.updateTime();
+        });
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -518,12 +527,12 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
-        timefilter.enableAutoRefreshSelector();
+        $scope.enableAutoRefreshSelector = true;
         $scope.$watch('opts.timefield', function (timefield) {
           if (!!timefield) {
-            timefilter.enableTimeRangeSelector();
+            $scope.enableTimeRangeSelector = true;
           } else {
-            timefilter.disableTimeRangeSelector();
+            $scope.enableTimeRangeSelector = false;
           }
         });
 
@@ -662,7 +671,8 @@ function discoverController(
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function ({ query }) {
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
@@ -856,6 +866,18 @@ function discoverController(
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
     };
+    $scope.time = timefilter.getTime();
+  };
+
+  $scope.updateRefreshInterval = function () {
+    $scope.refreshInterval = timefilter.getRefreshInterval();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   $scope.resetQuery = function () {
