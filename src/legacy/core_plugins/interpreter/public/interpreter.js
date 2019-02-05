@@ -18,7 +18,8 @@
  */
 
 
-import { initializeInterpreter, loadBrowserRegistries, createSocket } from '@kbn/interpreter/public';
+import { initializeInterpreter, loadBrowserRegistries } from '@kbn/interpreter/public';
+import { kfetch } from 'ui/kfetch';
 import chrome from 'ui/chrome';
 import { functions } from './functions';
 import { functionsRegistry } from './functions_registry';
@@ -45,9 +46,8 @@ let _interpreterPromise;
 
 const initialize = async () => {
   await loadBrowserRegistries(types, basePath);
-  const socket = await createSocket(basePath, functionsRegistry);
-  initializeInterpreter(socket, typesRegistry, functionsRegistry).then(interpreter => {
-    _resolve({ interpreter, socket });
+  initializeInterpreter(kfetch, typesRegistry, functionsRegistry).then(interpreter => {
+    _resolve({ interpreter });
   });
 };
 
@@ -62,9 +62,4 @@ export const getInterpreter = async () => {
 export const interpretAst = async (...params) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(...params);
-};
-
-export const updateInterpreterFunctions = async () => {
-  const { socket } =  await getInterpreter();
-  socket.emit('updateFunctionList');
 };

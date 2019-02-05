@@ -56,6 +56,7 @@ export class TOCEntry extends React.Component {
         toggleVisible={() => {
           toggleVisible(layer.getId());
         }}
+        displayName={this.state.displayName}
       />
     );
     let tocDetails = layer.getTOCDetails();

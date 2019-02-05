@@ -6,7 +6,7 @@
 
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
-import { getInterpreter, updateInterpreterFunctions } from 'plugins/interpreter/interpreter';
+import { getInterpreter } from 'plugins/interpreter/interpreter';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
@@ -63,7 +63,6 @@ const mapDispatchToProps = dispatch => ({
       await getInterpreter();
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions(functionsRegistry);
-      await updateInterpreterFunctions();
       // set app state to ready
       dispatch(appReady());
     } catch (e) {

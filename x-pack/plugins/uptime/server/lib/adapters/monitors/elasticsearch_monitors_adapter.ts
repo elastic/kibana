@@ -168,6 +168,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   },
                 },
               ],
+              size: 10000,
             },
             aggs: {
               latest: {

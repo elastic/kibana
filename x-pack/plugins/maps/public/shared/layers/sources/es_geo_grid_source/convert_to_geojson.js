@@ -4,113 +4,98 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
-import { gridDimensions } from 'ui/vis/map/grid_dimensions';
+import { RENDER_AS } from './render_as';
+import { getTileBoundingBox } from './geo_tile_utils';
 
-/*
- * Fork of ui/public/vis/map/convert_to_geojson.js that supports multiple metrics
- */
-export function convertToGeoJson(tabifiedResponse) {
+const EMPTY_FEATURE_COLLECTION = {
+  type: 'FeatureCollection',
+  features: []
+};
 
-  let features;
-  const min = Infinity;
-  const max = -Infinity;
-  let geoAgg;
+export function convertToGeoJson({ table, renderAs }) {
 
-  if (tabifiedResponse && tabifiedResponse.rows) {
-
-    const table = tabifiedResponse;
-    const geohashColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geohash_grid');
-
-    if (!geohashColumn) {
-      features = [];
-    } else {
-
-      geoAgg = geohashColumn.aggConfig;
-
-      const metricColumns = table.columns.filter(column => {
-        return column.aggConfig.type.type === 'metrics'
-          && column.aggConfig.type.dslName !== 'geo_centroid';
-      });
-      const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
-
-      features = table.rows.map(row => {
-
-        const geohash = row[geohashColumn.id];
-        if (!geohash) return false;
-        const geohashLocation = decodeGeoHash(geohash);
-
-        let pointCoordinates;
-        if (geocentroidColumn) {
-          const location = row[geocentroidColumn.id];
-          pointCoordinates = [location.lon, location.lat];
-        } else {
-          pointCoordinates = [geohashLocation.longitude[2], geohashLocation.latitude[2]];
-        }
-
-        const rectangle = [
-          [geohashLocation.latitude[0], geohashLocation.longitude[0]],
-          [geohashLocation.latitude[0], geohashLocation.longitude[1]],
-          [geohashLocation.latitude[1], geohashLocation.longitude[1]],
-          [geohashLocation.latitude[1], geohashLocation.longitude[0]],
-        ];
-
-        const centerLatLng = [
-          geohashLocation.latitude[2],
-          geohashLocation.longitude[2]
-        ];
-
-        if (geoAgg.params.useGeocentroid) {
-          // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
-          pointCoordinates[0] = clampGrid(pointCoordinates[0], geohashLocation.longitude[0], geohashLocation.longitude[1]);
-          pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
-        }
-
-        const metrics = {};
-        metricColumns.forEach(metricColumn => {
-          metrics[metricColumn.aggConfig.id] = row[metricColumn.id];
-        });
-        //const value = row[metricColumn.id];
-        //min = Math.min(min, value);
-        //max = Math.max(max, value);
-
-        return {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: pointCoordinates
-          },
-          properties: {
-            geohash: geohash,
-            geohash_meta: {
-              center: centerLatLng,
-              rectangle: rectangle
-            },
-            ...metrics
-          }
-        };
-
-
-      }).filter(row => row);
-
-    }
-
-  } else {
-    features = [];
+  if (!table || !table.rows) {
+    return EMPTY_FEATURE_COLLECTION;
   }
 
-  const featureCollection = {
-    type: 'FeatureCollection',
-    features: features
-  };
+  const geoGridColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geotile_grid');
+  if (!geoGridColumn) {
+    return EMPTY_FEATURE_COLLECTION;
+  }
+
+  const metricColumns = table.columns.filter(column => {
+    return column.aggConfig.type.type === 'metrics'
+      && column.aggConfig.type.dslName !== 'geo_centroid';
+  });
+  const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
+  if (!geocentroidColumn) {
+    return EMPTY_FEATURE_COLLECTION;
+  }
+
+  const features = [];
+  table.rows.forEach(row => {
+    const gridKey = row[geoGridColumn.id];
+    if (!gridKey) {
+      return;
+    }
+
+    const properties = {};
+    metricColumns.forEach(metricColumn => {
+      properties[metricColumn.aggConfig.id] = row[metricColumn.id];
+    });
+
+    features.push({
+      type: 'Feature',
+      geometry: rowToGeometry({
+        row,
+        gridKey,
+        geocentroidColumn,
+        renderAs,
+      }),
+      properties
+    });
+  });
 
   return {
-    featureCollection: featureCollection,
-    meta: {
-      min: min,
-      max: max,
-      geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.params.precision)
+    featureCollection: {
+      type: 'FeatureCollection',
+      features: features
     }
+  };
+}
+
+function rowToGeometry({
+  row,
+  gridKey,
+  geocentroidColumn,
+  renderAs,
+}) {
+  const { top, bottom, right, left } = getTileBoundingBox(gridKey);
+
+  if (renderAs === RENDER_AS.GRID) {
+    return {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [right, top],
+          [left, top],
+          [left, bottom],
+          [right, bottom],
+          [right, top],
+        ]
+      ]
+    };
+  }
+
+  // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
+  const pointCoordinates = [
+    clampGrid(row[geocentroidColumn.id].lon, left, right),
+    clampGrid(row[geocentroidColumn.id].lat, bottom, top)
+  ];
+
+  return {
+    type: 'Point',
+    coordinates: pointCoordinates
   };
 }
 
