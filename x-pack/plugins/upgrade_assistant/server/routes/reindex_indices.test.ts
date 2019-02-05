@@ -15,6 +15,7 @@ const mockReindexService = {
   findReindexOperation: jest.fn(),
   processNextStep: jest.fn(),
   resumeReindexOperation: jest.fn(),
+  cancelReindexing: jest.fn(),
 };
 
 jest.mock('../lib/reindexing', () => {
@@ -63,6 +64,7 @@ describe('reindex API', () => {
     mockReindexService.findReindexOperation.mockReset();
     mockReindexService.processNextStep.mockReset();
     mockReindexService.resumeReindexOperation.mockReset();
+    mockReindexService.cancelReindexing.mockReset();
     worker.includes.mockReset();
     worker.forceRefresh.mockReset();
 
@@ -209,14 +211,18 @@ describe('reindex API', () => {
     });
   });
 
-  describe('DELETE /api/upgrade_assistant/reindex/{indexName}', () => {
+  describe('POST /api/upgrade_assistant/reindex/{indexName}/cancel', () => {
     it('returns a 501', async () => {
+      mockReindexService.cancelReindexing.mockResolvedValueOnce({});
+
       const resp = await server.inject({
-        method: 'DELETE',
-        url: '/api/upgrade_assistant/reindex/cancelMe',
+        method: 'POST',
+        url: '/api/upgrade_assistant/reindex/cancelMe/cancel',
       });
 
-      expect(resp.statusCode).toEqual(501);
+      expect(resp.statusCode).toEqual(200);
+      expect(resp.payload).toMatchInlineSnapshot(`"{\\"acknowledged\\":true}"`);
+      expect(mockReindexService.cancelReindexing).toHaveBeenCalledWith('cancelMe');
     });
   });
 });

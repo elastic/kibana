@@ -751,7 +751,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
 
   const managementUrl = chrome.getNavLinkById('kibana:management').url;
-  const url = `${managementUrl}/kibana/indices`;
+  const url = `${managementUrl}/kibana/index_patterns`;
 
   if ($scope.indices.length === 0) {
     toastNotifications.addWarning({
