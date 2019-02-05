@@ -11,7 +11,6 @@ import { RESET_LAYER_LOAD } from '../actions/ui_actions';
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
-export const UPDATE_IS_DARK_THEME = 'UPDATE_IS_DARK_THEME';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const FLYOUT_STATE = {
   NONE: 'NONE',
@@ -26,7 +25,6 @@ export const LAYER_LOAD_STATE = {
 
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
-  isDarkTheme: false,
   layerLoad: {
     status: LAYER_LOAD_STATE.inactive,
     time: Date()
@@ -48,8 +46,6 @@ function ui(state = INITIAL_STATE, action) {
         time: Date() } };
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
-    case UPDATE_IS_DARK_THEME:
-      return { ...state, isDarkTheme: action.isDarkTheme };
     case CLOSE_SET_VIEW:
       return { ...state, isSetViewOpen: false };
     case OPEN_SET_VIEW:
@@ -78,12 +74,6 @@ export function openSetView() {
     type: OPEN_SET_VIEW,
   };
 }
-export function updateIsDarkTheme(isDarkTheme) {
-  return {
-    type: UPDATE_IS_DARK_THEME,
-    isDarkTheme
-  };
-}
 export function exitFullScreen() {
   return {
     type: SET_FULL_SCREEN,
@@ -100,7 +90,6 @@ export function enableFullScreen() {
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
-export const getIsDarkTheme = ({ ui }) => _.get(ui, 'isDarkTheme', INITIAL_STATE.isDarkTheme);
 export const getIsSetViewOpen = ({ ui }) => _.get(ui, 'isSetViewOpen', false);
 export const getIsFullScreen = ({ ui }) => _.get(ui, 'isFullScreen', false);
 
