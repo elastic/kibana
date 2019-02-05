@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import {
   EnrichedDeprecationInfo,
   UpgradeAssistantStatus,
@@ -15,6 +16,7 @@ export interface UpgradeAssistantTabProps {
   checkupData?: UpgradeAssistantStatus;
   deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => Promise<void>;
+  loadingError?: Error;
   loadingState: LoadingState;
   setSelectedTabIndex: (tabIndex: number) => void;
 }
@@ -39,4 +41,9 @@ export enum GroupByOption {
   message = 'message',
   index = 'index',
   node = 'node',
+}
+
+export enum TelemetryState {
+  Running,
+  Complete,
 }
