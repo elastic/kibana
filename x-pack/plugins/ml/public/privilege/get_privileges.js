@@ -6,7 +6,7 @@
 
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { setUpgradeInProgress } from '../components/upgrade';
+import { setUpgradeInProgress } from '../services/upgrade_service';
 
 export function getPrivileges() {
   const privileges = {

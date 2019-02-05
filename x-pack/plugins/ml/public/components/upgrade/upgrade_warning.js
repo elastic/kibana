@@ -13,16 +13,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-let upgradeInProgress = false;
-
-export function setUpgradeInProgress(show) {
-  upgradeInProgress = show;
-}
+import { isUpgradeInProgress } from '../../services/upgrade_service';
 
 export function UpgradeWarning() {
-  if (upgradeInProgress === false) {
-    return (<span />);
-  } else {
+  if (isUpgradeInProgress() === true) {
     return (
       <React.Fragment>
         <EuiCallOut
@@ -49,4 +43,6 @@ export function UpgradeWarning() {
       </React.Fragment>
     );
   }
+
+  return null;
 }
