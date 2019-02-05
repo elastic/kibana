@@ -18,14 +18,7 @@
  */
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-// import MarkdownIt from 'markdown-it';
 import React from 'react';
-
-// TODO: User Markdown
-// const markdownIt = new MarkdownIt({
-//   html: false,
-//   linkify: true,
-// });
 
 export interface PanelErrorProps {
   error: string | React.ReactNode;

@@ -11,7 +11,7 @@
 
 /* elements can hide themselves when shared */
 .hide-for-sharing {
-  display: none;
+  display: none !important;
 }
 
 /* hide unusable controls */
@@ -20,7 +20,6 @@ kbn-top-nav,
 .kbnToaster__container,
 filter-bar,
 ::-webkit-scrollbar,
-.euiHeader,
 .euiNavDrawer {
   display: none !important;
 }
