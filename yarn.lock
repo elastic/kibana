@@ -20742,10 +20742,10 @@ textextensions@2:
   resolved "https://registry.yarnpkg.com/textextensions/-/textextensions-2.2.0.tgz#38ac676151285b658654581987a0ce1a4490d286"
   integrity sha512-j5EMxnryTvKxwH2Cq+Pb43tsf6sdEgw6Pdwxk83mPaq0ToeFJt6WE4J3s5BqY7vmjlLgkgXvhtXUxo80FyBhCA==
 
-thread-loader@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-2.1.1.tgz#c105639b4908486f7756167870ada8b5b544f0a4"
-  integrity sha512-hMaTITa01Qt/I/Q1vKYDu2wjfWhJAfP5J3gOw32ng3/7DZHOOhBGVwsRvyHKk4I/KVTPaQi6J7fdlY+2nzjguw==
+thread-loader@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-2.1.2.tgz#f585dd38e852c7f9cded5d092992108148f5eb30"
+  integrity sha512-7xpuc9Ifg6WU+QYw/8uUqNdRwMD+N5gjwHKMqETrs96Qn+7BHwECpt2Brzr4HFlf4IAkZsayNhmGdbkBsTJ//w==
   dependencies:
     loader-runner "^2.3.1"
     loader-utils "^1.1.0"
