@@ -51,6 +51,11 @@ interface CreateOptions {
   references?: SavedObjectReference[];
 }
 
+interface BulkCreateOptions<T extends SavedObjectAttributes = any> extends CreateOptions {
+  type: string;
+  attributes: T;
+}
+
 interface UpdateOptions {
   version?: string;
   migrationVersion?: MigrationVersion;
@@ -182,7 +187,7 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
    */
-  public bulkCreate = (objects = [], options: KFetchQuery = {}) => {
+  public bulkCreate = (objects: BulkCreateOptions[] = [], options: KFetchQuery = {}) => {
     const path = this.getPath(['_bulk_create']);
     const query = pick(options, ['overwrite']) as Pick<KFetchQuery, 'overwrite'>;
 

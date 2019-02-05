@@ -19,79 +19,41 @@
 
 jest.mock('ui/kfetch', () => ({}));
 
-import sinon from 'sinon';
+// @ts-ignore
 import expect from 'expect.js';
-import { SavedObjectsClient } from '../saved_objects_client';
-import { SavedObject } from '../saved_object';
+import * as sinon from 'sinon';
+import { FindOptions } from '../../../server/saved_objects/service';
+import { SavedObject } from './saved_object';
+import { SavedObjectsClient } from './saved_objects_client';
 
-describe('SavedObjectsClient', () => {
+describe.only('SavedObjectsClient', () => {
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
     attributes: { title: 'Example title' },
-    version: 'foo'
+    version: 'foo',
   };
 
-  let kfetchStub;
-  let savedObjectsClient;
+  let kfetchStub: sinon.SinonStub;
+  let savedObjectsClient: SavedObjectsClient;
   beforeEach(() => {
     kfetchStub = sinon.stub();
-    require('ui/kfetch').kfetch = async (...args) => {
+    require('ui/kfetch').kfetch = async (...args: any[]) => {
       return kfetchStub(...args);
     };
     savedObjectsClient = new SavedObjectsClient();
   });
 
-  describe('#_getPath', () => {
-    test('returns without arguments', () => {
-      const path = savedObjectsClient._getPath();
-      const expected = `/api/saved_objects/`;
-
-      expect(path).to.be(expected);
-    });
-
-    test('appends path', () => {
-      const path = savedObjectsClient._getPath(['some', 'path']);
-      const expected = `/api/saved_objects/some/path`;
-
-      expect(path).to.be(expected);
-    });
-  });
-
-  describe('#_request', () => {
-    const body = { foo: 'Foo', bar: 'Bar' };
-
-    test('passes options to kfetch', () => {
-      kfetchStub.withArgs({
-        method: 'POST',
-        pathname: '/api/path',
-        query: undefined,
-        body: JSON.stringify(body)
-      }).returns(Promise.resolve({}));
-
-      savedObjectsClient._request({ method: 'POST', path: '/api/path', body });
-
-      sinon.assert.calledOnce(kfetchStub);
-    });
-
-    test('throws error when body is provided for GET', async () => {
-      try {
-        await savedObjectsClient._request({ method: 'GET', path: '/api/path', body });
-        expect().fail('should have error');
-      } catch (e) {
-        expect(e.message).to.eql('body not permitted for GET requests');
-      }
-    });
-  });
-
   describe('#get', () => {
     beforeEach(() => {
-      kfetchStub.withArgs({
-        method: 'POST',
-        pathname: `/api/saved_objects/_bulk_get`,
-        query: undefined,
-        body: sinon.match.any
-      }).returns(Promise.resolve({ saved_objects: [doc] }));
+      kfetchStub
+        .withArgs({
+          method: 'POST',
+          pathname: `/api/saved_objects/_bulk_get`,
+          query: undefined,
+          body: sinon.match.any,
+        })
+        .returns(Promise.resolve({ saved_objects: [doc] }));
     });
 
     test('returns a promise', () => {
@@ -100,7 +62,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires type', async () => {
       try {
-        await savedObjectsClient.get();
+        await savedObjectsClient.get(undefined as any, undefined as any);
         expect().fail('should have error');
       } catch (e) {
         expect(e.message).to.be('requires type and id');
@@ -109,7 +71,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires id', async () => {
       try {
-        await savedObjectsClient.get('index-pattern');
+        await savedObjectsClient.get('index-pattern', undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be('requires type and id');
@@ -121,7 +83,6 @@ describe('SavedObjectsClient', () => {
       expect(response).to.be.a(SavedObject);
       expect(response.type).to.eql('config');
       expect(response.get('title')).to.eql('Example title');
-      expect(response._client).to.be.a(SavedObjectsClient);
     });
 
     test('makes HTTP call', async () => {
@@ -130,12 +91,14 @@ describe('SavedObjectsClient', () => {
     });
 
     test('handles HTTP call when it fails', async () => {
-      kfetchStub.withArgs({
-        method: 'POST',
-        pathname: `/api/saved_objects/_bulk_get`,
-        query: undefined,
-        body: sinon.match.any
-      }).rejects(new Error('Request failed'));
+      kfetchStub
+        .withArgs({
+          method: 'POST',
+          pathname: `/api/saved_objects/_bulk_get`,
+          query: undefined,
+          body: sinon.match.any,
+        })
+        .rejects(new Error('Request failed'));
       try {
         await savedObjectsClient.get(doc.type, doc.id);
         throw new Error('should have error');
@@ -147,12 +110,14 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     beforeEach(() => {
-      kfetchStub.withArgs({
-        method: 'DELETE',
-        pathname: `/api/saved_objects/index-pattern/logstash-*`,
-        query: undefined,
-        body: undefined,
-      }).returns(Promise.resolve({}));
+      kfetchStub
+        .withArgs({
+          method: 'DELETE',
+          pathname: `/api/saved_objects/index-pattern/logstash-*`,
+          query: undefined,
+          body: undefined,
+        })
+        .returns(Promise.resolve({}));
     });
 
     test('returns a promise', () => {
@@ -161,7 +126,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires type', async () => {
       try {
-        await savedObjectsClient.delete();
+        await savedObjectsClient.delete(undefined as any, undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be('requires type and id');
@@ -170,7 +135,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires id', async () => {
       try {
-        await savedObjectsClient.delete('index-pattern');
+        await savedObjectsClient.delete('index-pattern', undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be('requires type and id');
@@ -187,12 +152,14 @@ describe('SavedObjectsClient', () => {
     const requireMessage = 'requires type, id and attributes';
 
     beforeEach(() => {
-      kfetchStub.withArgs({
-        method: 'PUT',
-        pathname: `/api/saved_objects/index-pattern/logstash-*`,
-        query: undefined,
-        body: sinon.match.any
-      }).returns(Promise.resolve({ data: 'api-response' }));
+      kfetchStub
+        .withArgs({
+          method: 'PUT',
+          pathname: `/api/saved_objects/index-pattern/logstash-*`,
+          query: undefined,
+          body: sinon.match.any,
+        })
+        .returns(Promise.resolve({ data: 'api-response' }));
     });
 
     test('returns a promise', () => {
@@ -201,7 +168,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires type', async () => {
       try {
-        await savedObjectsClient.update();
+        await savedObjectsClient.update(undefined as any, undefined as any, undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be(requireMessage);
@@ -210,7 +177,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires id', async () => {
       try {
-        await savedObjectsClient.update('index-pattern');
+        await savedObjectsClient.update('index-pattern', undefined as any, undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be(requireMessage);
@@ -219,7 +186,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires attributes', async () => {
       try {
-        await savedObjectsClient.update('index-pattern', 'logstash-*');
+        await savedObjectsClient.update('index-pattern', 'logstash-*', undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be(requireMessage);
@@ -233,9 +200,12 @@ describe('SavedObjectsClient', () => {
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
       sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
-        body: JSON.stringify(body)
-      }));
+      sinon.assert.calledWithExactly(
+        kfetchStub,
+        sinon.match({
+          body: JSON.stringify(body),
+        })
+      );
     });
   });
 
@@ -243,12 +213,14 @@ describe('SavedObjectsClient', () => {
     const requireMessage = 'requires type and attributes';
 
     beforeEach(() => {
-      kfetchStub.withArgs({
-        method: 'POST',
-        pathname: `/api/saved_objects/index-pattern`,
-        query: undefined,
-        body: sinon.match.any
-      }).returns(Promise.resolve({}));
+      kfetchStub
+        .withArgs({
+          method: 'POST',
+          pathname: `/api/saved_objects/index-pattern`,
+          query: undefined,
+          body: sinon.match.any,
+        })
+        .returns(Promise.resolve({}));
     });
 
     test('returns a promise', () => {
@@ -257,7 +229,7 @@ describe('SavedObjectsClient', () => {
 
     test('requires type', async () => {
       try {
-        await savedObjectsClient.create();
+        await savedObjectsClient.create(undefined as any, undefined as any);
         expect().throw('should have error');
       } catch (e) {
         expect(e.message).to.be(requireMessage);
@@ -267,19 +239,24 @@ describe('SavedObjectsClient', () => {
     test('allows for id to be provided', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
       const path = `/api/saved_objects/index-pattern/myId`;
-      kfetchStub.withArgs({
-        method: 'POST',
-        pathname: path,
-        query: undefined,
-        body: sinon.match.any
-      }).returns(Promise.resolve({}));
+      kfetchStub
+        .withArgs({
+          method: 'POST',
+          pathname: path,
+          query: undefined,
+          body: sinon.match.any,
+        })
+        .returns(Promise.resolve({}));
 
       savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
 
       sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
-        pathname: path
-      }));
+      sinon.assert.calledWithExactly(
+        kfetchStub,
+        sinon.match({
+          pathname: path,
+        })
+      );
     });
 
     test('makes HTTP call', () => {
@@ -287,21 +264,26 @@ describe('SavedObjectsClient', () => {
       savedObjectsClient.create('index-pattern', attributes);
 
       sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
-        pathname: sinon.match.string,
-        body: JSON.stringify({ attributes }),
-      }));
+      sinon.assert.calledWithExactly(
+        kfetchStub,
+        sinon.match({
+          pathname: sinon.match.string,
+          body: JSON.stringify({ attributes }),
+        })
+      );
     });
   });
 
   describe('#bulk_create', () => {
     beforeEach(() => {
-      kfetchStub.withArgs({
-        method: 'POST',
-        pathname: `/api/saved_objects/_bulk_create`,
-        query: sinon.match.any,
-        body: sinon.match.any
-      }).returns(Promise.resolve({ saved_objects: [doc] }));
+      kfetchStub
+        .withArgs({
+          method: 'POST',
+          pathname: `/api/saved_objects/_bulk_create`,
+          query: sinon.match.any,
+          body: sinon.match.any,
+        })
+        .returns(Promise.resolve({ saved_objects: [doc] }));
     });
 
     test('returns a promise', () => {
@@ -337,10 +319,13 @@ describe('SavedObjectsClient', () => {
 
       savedObjectsClient.find(body);
       sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
-        pathname: `/api/saved_objects/_find`,
-        query: { type: 'index-pattern', invalid: true }
-      }));
+      sinon.assert.calledWithExactly(
+        kfetchStub,
+        sinon.match({
+          pathname: `/api/saved_objects/_find`,
+          query: { type: 'index-pattern', invalid: true },
+        })
+      );
     });
 
     test('accepts fields', () => {
@@ -348,21 +333,27 @@ describe('SavedObjectsClient', () => {
 
       savedObjectsClient.find(body);
       sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.calledWithExactly(kfetchStub, sinon.match({
-        pathname: `/api/saved_objects/_find`,
-        query: { fields: [ 'title', 'description' ] }
-      }));
+      sinon.assert.calledWithExactly(
+        kfetchStub,
+        sinon.match({
+          pathname: `/api/saved_objects/_find`,
+          query: { fields: ['title', 'description'] },
+        })
+      );
     });
 
-    test('accepts from/size', () => {
-      const body = { from: 50, size: 10 };
+    test.only('accepts pagination params', () => {
+      const options: FindOptions = { perPage: 10, page: 6 };
 
-      savedObjectsClient.find(body);
+      savedObjectsClient.find(options);
       sinon.assert.calledOnce(kfetchStub);
-      sinon.assert.alwaysCalledWith(kfetchStub, sinon.match({
-        pathname: `/api/saved_objects/_find`,
-        query: { from: 50, size: 10 }
-      }));
+      sinon.assert.alwaysCalledWith(
+        kfetchStub,
+        sinon.match({
+          pathname: `/api/saved_objects/_find`,
+          query: { per_page: 10, page: 6 },
+        })
+      );
     });
   });
 });
