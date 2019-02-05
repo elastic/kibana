@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowEqual } from './functional';
 import {
   ActionId,
   ChangeCallbackFunction,
@@ -15,6 +14,21 @@ import {
   TypeName,
   UpdaterFunction,
 } from './types';
+
+export const shallowEqual = (a: any, b: any): boolean => {
+  if (a === b) {
+    return true;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+};
 
 const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 

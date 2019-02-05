@@ -41,6 +41,45 @@ import {
   shallowEqual,
 } from './functional';
 
+const resizeVertexTuples = [
+  [-1, -1, 315],
+  [1, -1, 45],
+  [1, 1, 135],
+  [-1, 1, 225], // corners
+  [0, -1, 0],
+  [1, 0, 90],
+  [0, 1, 180],
+  [-1, 0, 270], // edge midpoints
+];
+
+const connectorVertices = [
+  [[-1, -1], [0, -1]],
+  [[0, -1], [1, -1]],
+  [[1, -1], [1, 0]],
+  [[1, 0], [1, 1]],
+  [[1, 1], [0, 1]],
+  [[0, 1], [-1, 1]],
+  [[-1, 1], [-1, 0]],
+  [[-1, 0], [-1, -1]],
+];
+
+const resizeMultiplierHorizontal = { left: -1, center: 0, right: 1 };
+const resizeMultiplierVertical = { top: -1, center: 0, bottom: 1 };
+
+const xNames = { '-1': 'left', '0': 'center', '1': 'right' };
+const yNames = { '-1': 'top', '0': 'center', '1': 'bottom' };
+
+const bidirectionalCursors = {
+  '0': 'ns-resize',
+  '45': 'nesw-resize',
+  '90': 'ew-resize',
+  '135': 'nwse-resize',
+  '180': 'ns-resize',
+  '225': 'nesw-resize',
+  '270': 'ew-resize',
+  '315': 'nwse-resize',
+};
+
 // returns the currently dragged shape, or a falsey value otherwise
 export const draggingShape = ({ draggedShape, shapes }, hoveredShape, down, mouseDowned) => {
   const dragInProgress =
@@ -699,18 +738,7 @@ function resizeAnnotation(config, shapes, selectedShapes, shape) {
   const allowResize =
     properShape.type !== 'group' ||
     (config.groupResize && magic(config, properShape, shapes.filter(s => s.type !== 'annotation')));
-  const resizeVertices = allowResize
-    ? [
-        [-1, -1, 315],
-        [1, -1, 45],
-        [1, 1, 135],
-        [-1, 1, 225], // corners
-        [0, -1, 0],
-        [1, 0, 90],
-        [0, 1, 180],
-        [-1, 0, 270], // edge midpoints
-      ]
-    : [];
+  const resizeVertices = allowResize ? resizeVertexTuples : [];
   const resizePoints = resizeVertices.map(resizePointAnnotations(config, shape, a, b));
   const connectors = connectorVertices.map(resizeEdgeAnnotations(config, shape, a, b));
   return [...resizePoints, ...connectors];
@@ -817,6 +845,8 @@ const extend = ([[xMin, yMin], [xMax, yMax]], [x0, y0], [x1, y1]) => [
   [Math.min(xMin, x0, x1), Math.min(yMin, y0, y1)],
   [Math.max(xMax, x0, x1), Math.max(yMax, y0, y1)],
 ];
+
+const cornerVertices = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
 
 const getAABB = shapes =>
   shapes.reduce(
@@ -1017,25 +1047,6 @@ const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeOb
   };
 };
 
-const resizeMultiplierHorizontal = { left: -1, center: 0, right: 1 };
-const resizeMultiplierVertical = { top: -1, center: 0, bottom: 1 };
-
-const xNames = { '-1': 'left', '0': 'center', '1': 'right' };
-const yNames = { '-1': 'top', '0': 'center', '1': 'bottom' };
-
-const connectorVertices = [
-  [[-1, -1], [0, -1]],
-  [[0, -1], [1, -1]],
-  [[1, -1], [1, 0]],
-  [[1, 0], [1, 1]],
-  [[1, 1], [0, 1]],
-  [[0, 1], [-1, 1]],
-  [[-1, 1], [-1, 0]],
-  [[-1, 0], [-1, -1]],
-];
-
-const cornerVertices = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
-
 export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
   const childOfGroup = shape => shape.parent && shape.parent.startsWith(config.groupName);
   const isAdHocGroup = shape =>
@@ -1134,17 +1145,6 @@ export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
       selectedShapes: [group],
     };
   }
-};
-
-const bidirectionalCursors = {
-  '0': 'ns-resize',
-  '45': 'nesw-resize',
-  '90': 'ew-resize',
-  '135': 'nwse-resize',
-  '180': 'ns-resize',
-  '225': 'nesw-resize',
-  '270': 'ew-resize',
-  '315': 'nwse-resize',
 };
 
 export const getCursor = (config, shape, draggedPrimaryShape) => {
