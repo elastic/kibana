@@ -159,12 +159,12 @@ class SavedObjectFinderUI extends React.Component<
       sortDirection = undefined;
     }
 
-    this.setState(() => ({
+    this.setState({
       page: page.index,
       perPage: page.size,
       sortField,
       sortDirection,
-    }));
+    });
   };
 
   // server-side paging not supported
