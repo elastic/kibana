@@ -18,7 +18,6 @@ import React from 'react';
 import styled, { withTheme } from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { MetricsSideNav } from '../../components/metrics/side_nav';
@@ -101,13 +100,19 @@ export const MetricDetail = withTheme(
                     nodeId={nodeId}
                   >
                     {({ name, filteredLayouts, loading: metadataLoading }) => {
-                      const breadcrumbs = [{ text: name }];
+                      const breadcrumbs = [
+                        {
+                          href: '#/',
+                          text: intl.formatMessage({
+                            id: 'xpack.infra.header.infrastructureTitle',
+                            defaultMessage: 'Infrastructure',
+                          }),
+                        },
+                        { text: name },
+                      ];
                       return (
                         <ColumnarPage>
-                          <Header
-                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
-                            breadcrumbs={breadcrumbs}
-                          />
+                          <Header breadcrumbs={breadcrumbs} />
                           <WithMetricsTimeUrlState />
                           <DetailPageContent>
                             <WithMetrics
@@ -166,6 +171,8 @@ export const MetricDetail = withTheme(
                                                   }
                                                   refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
+                                                  isLiveStreaming={isAutoReloading}
+                                                  stopLiveStreaming={stopMetricsAutoReload}
                                                 />
                                               </EuiPageContentWithRelative>
                                             </EuiPageBody>

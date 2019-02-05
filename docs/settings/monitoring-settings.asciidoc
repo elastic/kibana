@@ -54,9 +54,6 @@ Specifies the password that {kib} uses for authentication when it retrieves data
 from the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.password` setting.
 
-`xpack.monitoring.report_stats`::
-deprecated[6.3.0, Use `xpack.xpack_main.telemetry.enabled` instead.]
-
 `xpack.xpack_main.telemetry.enabled`::
 Set to `true` (default) to send cluster statistics to Elastic. Reporting your
 cluster statistics helps us improve your user experience. Your data is never

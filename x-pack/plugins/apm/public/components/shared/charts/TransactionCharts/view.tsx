@@ -138,7 +138,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
               <ChartWrapper>
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem>
-                    <EuiTitle size="s">
+                    <EuiTitle size="xs">
                       <span>{responseTimeLabel(transactionType)}</span>
                     </EuiTitle>
                   </EuiFlexItem>
@@ -156,7 +156,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <ChartWrapper>
-                <EuiTitle size="s">
+                <EuiTitle size="xs">
                   <span>{tpmLabel(transactionType)}</span>
                 </EuiTitle>
                 <CustomPlot

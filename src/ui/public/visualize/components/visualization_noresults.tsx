@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { dispatchRenderComplete } from '../../render_complete';
 
@@ -29,13 +30,16 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
 
   public render() {
     return (
-      <div className="text-center visError visChart" ref={this.containerDiv}>
+      <div className="visError" ref={this.containerDiv}>
         <div className="item top" />
         <div className="item">
-          <h2 aria-hidden="true">
-            <i aria-hidden="true" className="fa fa-meh-o" />
-          </h2>
-          <h4>No results found</h4>
+          <EuiText size="xs" color="subdued">
+            <EuiIcon type="visualizeApp" size="m" color="subdued" aria-hidden="true" />
+
+            <EuiSpacer size="s" />
+
+            <p>No results found</p>
+          </EuiText>
         </div>
         <div className="item bottom" />
       </div>

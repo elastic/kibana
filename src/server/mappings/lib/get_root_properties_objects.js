@@ -33,12 +33,18 @@ import { getRootProperties } from './get_root_properties';
  *  @param  {EsMappingsDsl} mappings
  *  @return {EsPropertyMappings}
  */
+
+const blacklist = [
+  'migrationVersion',
+  'references',
+];
+
 export function getRootPropertiesObjects(mappings) {
   const rootProperties = getRootProperties(mappings);
   return Object.entries(rootProperties).reduce((acc, [key, value]) => {
 
     // we consider the existence of the properties or type of object to designate that this is an object datatype
-    if (value.properties || value.type === 'object') {
+    if (!blacklist.includes(key) && (value.properties || value.type === 'object')) {
       acc[key] = value;
     }
 

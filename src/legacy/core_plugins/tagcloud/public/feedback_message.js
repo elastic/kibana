@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIconTip } from '@elastic/eui';
 
 export class FeedbackMessage extends Component {
 
@@ -28,21 +29,35 @@ export class FeedbackMessage extends Component {
   }
 
   render() {
+    if (!this.state.shouldShowTruncate && !this.state.shouldShowIncomplete) {
+      return '';
+    }
+
     return (
-      <div className="tgcVisFeedback" >
-        <div className="tgcVisFeedback__message" style={{ display: this.state.shouldShowTruncate ? 'block' : 'none' }}>
-          <FormattedMessage
-            id="tagCloud.feedbackMessage.truncatedTagsDescription"
-            defaultMessage="The number of tags has been truncated to avoid long draw times."
-          />
-        </div>
-        <div className="tgcVisFeedback__message" style={{ display: this.state.shouldShowIncomplete ? 'block' : 'none' }}>
-          <FormattedMessage
-            id="tagCloud.feedbackMessage.tooSmallContainerDescription"
-            defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
-          />
-        </div>
-      </div>
+      <EuiIconTip
+        type="alert"
+        color="warning"
+        content={(
+          <Fragment>
+            {this.state.shouldShowTruncate &&
+              <p>
+                <FormattedMessage
+                  id="tagCloud.feedbackMessage.truncatedTagsDescription"
+                  defaultMessage="The number of tags has been truncated to avoid long draw times."
+                />
+              </p>
+            }
+            {this.state.shouldShowIncomplete &&
+              <p>
+                <FormattedMessage
+                  id="tagCloud.feedbackMessage.tooSmallContainerDescription"
+                  defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
+                />
+              </p>
+            }
+          </Fragment>
+        )}
+      />
     );
   }
 }
