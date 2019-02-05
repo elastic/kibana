@@ -167,3 +167,25 @@ test(`includes one object with type === 'object' and excludes one object without
     }
   });
 });
+
+test('excludes references and migrationVersion which are part of the blacklist', () => {
+  const mappings = {
+    properties: {
+      references: {
+        type: 'object',
+      },
+      migrationVersion: {
+        type: 'object',
+      },
+      foo: {
+        type: 'object',
+      },
+    },
+  };
+  const result = getRootPropertiesObjects(mappings);
+  expect(result).toEqual({
+    foo: {
+      type: 'object',
+    },
+  });
+});
