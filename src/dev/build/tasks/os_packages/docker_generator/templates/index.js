@@ -17,35 +17,6 @@
  * under the License.
  */
 
-import { runFpm } from './run_fpm';
-import { runDockerGenerator } from './docker_generator';
-
-export const CreateDebPackageTask = {
-  description: 'Creating deb package',
-
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'deb', [
-      '--architecture', 'amd64',
-      '--deb-priority', 'optional'
-    ]);
-  }
-};
-
-export const CreateRpmPackageTask = {
-  description: 'Creating rpm package',
-
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', [
-      '--architecture', 'x86_64',
-      '--rpm-os', 'linux'
-    ]);
-  }
-};
-
-export const CreateDockerPackageTask = {
-  description: 'Creating docker package',
-
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build);
-  }
-};
+export { buildDockerSHTemplate } from './build_docker_sh.template';
+export { dockerfileTemplate } from './dockerfile.template';
+export { kibanaYMLTemplate } from './kibana_yml.template';

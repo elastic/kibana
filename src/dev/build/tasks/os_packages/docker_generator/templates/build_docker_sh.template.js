@@ -17,35 +17,28 @@
  * under the License.
  */
 
-import { runFpm } from './run_fpm';
-import { runDockerGenerator } from './docker_generator';
+import dedent from 'dedent';
 
-export const CreateDebPackageTask = {
-  description: 'Creating deb package',
+function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
+  return dedent(`
+  #!/usr/bin/env bash
+  #
+  # ** THIS IS AN AUTO-GENERATED FILE **
+  #
+  set -euo pipefail
+  
+  docker pull centos:7
+  
+  echo "Building: kibana${ imageFlavor }-docker"; \\
+  docker build -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
 
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'deb', [
-      '--architecture', 'amd64',
-      '--deb-priority', 'optional'
-    ]);
-  }
-};
+  docker save ${ imageTag }${ imageFlavor }:${ versionTag } | gzip -c > ${ dockerOutputDir }
+  
+  exit 0
+  `);
+}
 
-export const CreateRpmPackageTask = {
-  description: 'Creating rpm package',
-
-  async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', [
-      '--architecture', 'x86_64',
-      '--rpm-os', 'linux'
-    ]);
-  }
-};
-
-export const CreateDockerPackageTask = {
-  description: 'Creating docker package',
-
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build);
-  }
+export const buildDockerSHTemplate = {
+  name: 'build_docker.sh',
+  generator,
 };
