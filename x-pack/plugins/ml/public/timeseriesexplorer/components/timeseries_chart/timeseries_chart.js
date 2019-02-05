@@ -170,7 +170,7 @@ export class TimeseriesChart extends React.Component {
       toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
     } catch (err) {
       toastNotifications
-        .addDanger(`An error occured deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(err)}`);
+        .addDanger(`An error occurred deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(err)}`);
     }
 
     this.closeDeleteModal();
@@ -201,7 +201,7 @@ export class TimeseriesChart extends React.Component {
       .catch((resp) => {
         const action = (typeof annotation._id === 'undefined') ? 'creating' : 'updating';
         toastNotifications
-          .addDanger(`An error occured ${action} the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
+          .addDanger(`An error occurred ${action} the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
       });
   }
 

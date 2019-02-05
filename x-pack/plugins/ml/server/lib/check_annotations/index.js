@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
-
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -19,30 +17,28 @@ import { FEATURE_ANNOTATIONS_ENABLED } from '../../../common/constants/feature_f
 // - ML_ANNOTATIONS_INDEX_PATTERN index is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_READ alias is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_WRITE alias is present
-export async function isAnnotationsFeatureAvailable(server) {
+export async function isAnnotationsFeatureAvailable(callWithRequest) {
   if (!FEATURE_ANNOTATIONS_ENABLED) return false;
 
   try {
-    const callWithInternalUser = callWithInternalUserFactory(server);
-
     const indexParams = { index: ML_ANNOTATIONS_INDEX_PATTERN };
 
-    const annotationsIndexExists = await callWithInternalUser('indices.exists', indexParams);
+    const annotationsIndexExists = await callWithRequest('indices.exists', indexParams);
     if (!annotationsIndexExists) return false;
 
-    const annotationsReadAliasExists = await callWithInternalUser('indices.existsAlias', {
+    const annotationsReadAliasExists = await callWithRequest('indices.existsAlias', {
       name: ML_ANNOTATIONS_INDEX_ALIAS_READ
     });
 
     if (!annotationsReadAliasExists) return false;
 
-    const annotationsWriteAliasExists = await callWithInternalUser('indices.existsAlias', {
+    const annotationsWriteAliasExists = await callWithRequest('indices.existsAlias', {
       name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE
     });
     if (!annotationsWriteAliasExists) return false;
 
   } catch (err) {
-    server.log(['info', 'ml'], 'Disabling ML annotations feature because the index/alias integrity check failed.');
+    /* return false if any of the server requests fails */
     return false;
   }
 
