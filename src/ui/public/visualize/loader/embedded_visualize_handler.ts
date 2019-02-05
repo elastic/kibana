@@ -424,28 +424,24 @@ export class EmbeddedVisualizeHandler {
   };
 
   private rendererProvider = (response: VisResponseData | null) => {
-    const pipelineArgs = [
-      this.element,
-      get(response, 'value', { visType: this.vis.type.name }),
-      this.handlers,
-    ];
-    const visLoaderArgs = [
-      this.element,
-      this.vis,
-      get(response, 'value.visData', null),
-      this.uiState,
-      {
-        listenOnChange: false,
-      },
-    ];
+    let renderer: any = null;
+    let args: any[] = [];
 
-    const args = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
-      ? pipelineArgs
-      : visLoaderArgs;
-
-    const renderer = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
-      ? renderFunctionsRegistry.get(get(response || {}, 'as', 'visualization'))
-      : visualizationLoader;
+    if (EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__) {
+      renderer = renderFunctionsRegistry.get(get(response || {}, 'as', 'visualization'));
+      args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
+    } else {
+      renderer = visualizationLoader;
+      args = [
+        this.element,
+        this.vis,
+        get(response, 'value.visData', null),
+        this.uiState,
+        {
+          listenOnChange: false,
+        },
+      ];
+    }
 
     if (!renderer) {
       return null;
