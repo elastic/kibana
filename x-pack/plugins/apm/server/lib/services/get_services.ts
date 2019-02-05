@@ -12,7 +12,7 @@ import {
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_DURATION
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 
 export interface IServiceListItem {
