@@ -5,7 +5,7 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
-import { getInterpreter, updateInterpreterFunctions } from 'plugins/interpreter/interpreter';
+import { getInterpreter } from 'plugins/interpreter/interpreter';
 import { loadBrowserRegistries } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -56,7 +56,7 @@ const mapDispatchToProps = dispatch => ({
       await getInterpreter();
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions(functionsRegistry);
-      await updateInterpreterFunctions();
+
       await loadBrowserRegistries(types, basePath);
 
       // set app state to ready
