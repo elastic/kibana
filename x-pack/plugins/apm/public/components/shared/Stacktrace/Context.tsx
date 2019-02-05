@@ -24,13 +24,7 @@ import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import {
-  borderRadius,
-  colors,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { borderRadius, px, unit, units } from '../../../style/variables';
 
 registerLanguage('javascript', javascript);
 registerLanguage('python', python);
