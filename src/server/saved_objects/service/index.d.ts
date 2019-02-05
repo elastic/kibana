@@ -21,6 +21,9 @@ export { SavedObjectsService } from './create_saved_objects_service';
 export { SavedObjectsClientWrapperFactory } from './lib';
 export {
   FindOptions,
+  GetResponse,
+  UpdateResponse,
+  CreateResponse,
   MigrationVersion,
   SavedObject,
   SavedObjectAttributes,

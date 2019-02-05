@@ -100,9 +100,9 @@ export interface SavedObjectReference {
   id: string;
 }
 
-export type SavedObjectsClientCreateResponse<T extends SavedObjectAttributes = any> = Promise<
-  SavedObject<T>
->;
+export type GetResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+export type CreateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+export type UpdateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
 
 export declare class SavedObjectsClient {
   public static errors: typeof errors;
@@ -114,7 +114,7 @@ export declare class SavedObjectsClient {
     type: string,
     attributes: T,
     options?: CreateOptions
-  ): SavedObjectsClientCreateResponse<T>;
+  ): Promise<CreateResponse<T>>;
   public bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions
@@ -131,11 +131,11 @@ export declare class SavedObjectsClient {
     type: string,
     id: string,
     options?: BaseOptions
-  ): Promise<SavedObject<T>>;
+  ): Promise<GetResponse<T>>;
   public update<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
     attributes: Partial<T>,
     options?: UpdateOptions
-  ): Promise<SavedObject<T>>;
+  ): Promise<UpdateResponse<T>>;
 }
