@@ -334,10 +334,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await testSubjects.find('createIndexPatternGoToStep2Button');
     }
 
-    async clickOnOnlyIndexPattern() {
-      return await find.clickByPartialLinkText('logstash-*');
-    }
-
     async removeIndexPattern() {
       let alertText;
       await retry.try(async () => {

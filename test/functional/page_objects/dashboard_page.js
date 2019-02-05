@@ -45,7 +45,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
-
+      log.debug('load kibana index with visualizations and log data');
       await Promise.all([
         esArchiver.load(kibanaIndex),
         esArchiver.loadIfNeeded(dataIndex)
