@@ -488,6 +488,7 @@ export class EmbeddedVisualizeHandler {
         this.element,
         this.vis,
         get(response, 'value.visData', null),
+        get(response, 'value.visConfig', null),
         this.uiState,
         {
           listenOnChange: false,

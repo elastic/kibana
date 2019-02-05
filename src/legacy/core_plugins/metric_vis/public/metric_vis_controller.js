@@ -28,7 +28,7 @@ import { MetricVisValue } from './components/metric_vis_value';
 export class MetricVisComponent extends Component {
 
   _getLabels() {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
     const max = _.last(colorsRange).to;
@@ -43,7 +43,7 @@ export class MetricVisComponent extends Component {
   }
 
   _getColors() {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     const invertColors = config.invertColors;
     const colorSchema = config.colorSchema;
     const colorsRange = config.colorsRange;
@@ -58,7 +58,7 @@ export class MetricVisComponent extends Component {
   }
 
   _getBucket(val) {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     let bucket = _.findIndex(config.colorsRange, range => {
       return range.from <= val && range.to > val;
     });
@@ -91,7 +91,7 @@ export class MetricVisComponent extends Component {
   };
 
   _processTableGroups(table) {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
     const max = _.last(config.colorsRange).to;
@@ -146,7 +146,7 @@ export class MetricVisComponent extends Component {
   }
 
   _filterBucket = (metric) => {
-    const config = this.props.vis.params.metric;
+    const config = this.props.visParams.metric;
     if (!config.bucket) {
       return;
     }
@@ -159,9 +159,9 @@ export class MetricVisComponent extends Component {
       <MetricVisValue
         key={index}
         metric={metric}
-        fontSize={this.props.vis.params.metric.style.fontSize}
+        fontSize={this.props.visParams.metric.style.fontSize}
         onFilter={metric.filterKey && metric.bucketAgg ? this._filterBucket : null}
-        showLabel={this.props.vis.params.metric.labels.show}
+        showLabel={this.props.visParams.metric.labels.show}
       />
     );
   };

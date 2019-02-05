@@ -58,7 +58,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
 
     }
 
-    render(esResponse) {
+    render(esResponse, visParams) {
       if (this.vis.vislibVis) {
         this.destroy();
       }
@@ -68,28 +68,29 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           return resolve();
         }
 
-        if (this.vis.params.addLegend) {
+        if (visParams.addLegend) {
           $(this.container).attr('class', (i, cls) => {
             return cls.replace(/visLib--legend-\S+/g, '');
-          }).addClass(legendClassName[this.vis.params.legendPosition]);
+          }).addClass(legendClassName[visParams.legendPosition]);
 
           this.$scope = $rootScope.$new();
           this.$scope.refreshLegend = 0;
           this.$scope.vis = this.vis;
           this.$scope.visData = esResponse;
+          this.$scope.visParams = visParams;
           this.$scope.uiState = this.$scope.vis.getUiState();
           const legendHtml = $compile('<vislib-legend></vislib-legend>')(this.$scope);
           this.container.appendChild(legendHtml[0]);
           this.$scope.$digest();
         }
 
-        this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
+        this.vis.vislibVis = new vislib.Vis(this.chartEl, visParams);
         this.vis.vislibVis.on('brush', this.vis.API.events.brush);
         this.vis.vislibVis.on('click', this.vis.API.events.filter);
         this.vis.vislibVis.on('renderComplete', resolve);
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
 
-        if (this.vis.params.addLegend) {
+        if (visParams.addLegend) {
           this.$scope.refreshLegend++;
           this.$scope.$digest();
         }

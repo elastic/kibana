@@ -36,7 +36,7 @@ class VisEditor extends Component {
     const { vis } = props;
     this.appState = vis.API.getAppState();
     this.state = {
-      model: props.vis.params,
+      model: props.visParams,
       dirty: false,
       autoApply: true,
       visFields: {},
@@ -72,12 +72,12 @@ class VisEditor extends Component {
   }
 
   setDefaultIndexPattern = async () => {
-    if (this.props.vis.params.index_pattern === '') {
+    if (this.props.visParams.index_pattern === '') {
       // set the default index pattern if none is defined.
       const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
       const defaultIndexPattern = indexPattern.attributes.title;
-      this.props.vis.params.index_pattern = defaultIndexPattern;
+      this.props.visParams.index_pattern = defaultIndexPattern;
     }
   }
 
@@ -109,7 +109,7 @@ class VisEditor extends Component {
 
   render() {
     if (!this.props.isEditorMode) {
-      if (!this.props.vis.params || !this.props.visData) {
+      if (!this.props.visParams || !this.props.visData) {
         return null;
       }
       return (
@@ -119,7 +119,7 @@ class VisEditor extends Component {
           onUiState={this.handleUiState}
           uiState={this.props.vis.getUiState()}
           fields={this.state.visFields}
-          model={this.props.vis.params}
+          model={this.props.visParams}
           visData={this.props.visData}
           getConfig={this.getConfig}
         />

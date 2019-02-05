@@ -101,7 +101,7 @@ export class VisualizeDataLoader {
       value: {
         visType: this.vis.type.name,
         visData: this.visData,
-        visConfig: this.vis.params,
+        visConfig: visParams,
         params: {},
       },
     };

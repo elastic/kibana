@@ -67,7 +67,7 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
      * @param {*} status
      * @returns {Promise<void>}
      */
-    async render(visData, status) {
+    async render(visData, visParams, status) {
       if (!visData && !this._vegaView) {
         toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
           defaultMessage: 'Unable to render without data',

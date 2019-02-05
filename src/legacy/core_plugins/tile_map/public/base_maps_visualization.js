@@ -71,7 +71,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, status) {
+    async render(esResponse, visParams, status) {
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
@@ -83,7 +83,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         this._kibanaMap.resize();
       }
       if (status.params || status.aggs) {
-        await this._updateParams();
+        await this._updateParams(visParams);
       }
 
       if (this._hasESResponseChanged(esResponse)) {
@@ -220,7 +220,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
     /**
      * called on options change (vis.params change)
      */
-    async _updateParams() {
+    async _updateParams(visParams) {
+      this._params = visParams;
       const mapParams = this._getMapsParams();
       await this._updateBaseLayer();
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
@@ -233,7 +234,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         {},
         this.vis.type.visConfig.defaults,
         { type: this.vis.type.name },
-        this.vis.params
+        this._params
       );
     }
 

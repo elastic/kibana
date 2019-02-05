@@ -71,11 +71,11 @@ export class TagCloudVisualization {
 
   }
 
-  async render(data, status) {
+  async render(data, visParams, status) {
     if (!(status.resize || status.data || status.params)) return;
 
     if (status.params || status.aggs) {
-      this._updateParams();
+      this._updateParams(visParams);
     }
 
     if (status.data || status.params) {
@@ -99,7 +99,7 @@ export class TagCloudVisualization {
 
     this._label.current.setState({
       label: `${data.columns[0].name} - ${data.columns[1].name}`,
-      shouldShowLabel: this._vis.params.showLabel
+      shouldShowLabel: visParams.showLabel
     });
     this._feedbackMessage.current.setState({
       shouldShowTruncate: this._truncated,
@@ -120,8 +120,8 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucket = this._vis.params.bucket;
-    const metric = this._vis.params.metric;
+    const bucket = this._visParams.bucket;
+    const metric = this._visParams.metric;
     const bucketFormatter = bucket ? getFormat(bucket.format) : null;
     const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
     const metricColumn = data.columns[metric.accessor].id;
@@ -151,8 +151,9 @@ export class TagCloudVisualization {
 
   }
 
-  _updateParams() {
-    this._tagCloud.setOptions(this._vis.params);
+  _updateParams(visParams) {
+    this._visParams = visParams;
+    this._tagCloud.setOptions(visParams);
   }
 
   _resize() {
