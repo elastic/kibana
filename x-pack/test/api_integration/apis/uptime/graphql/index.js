@@ -18,7 +18,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./doc_count'));
     loadTestFile(require.resolve('./error_list'));
     loadTestFile(require.resolve('./filter_bar'));
-    loadTestFile(require.resolve('./monitor_list'));
     loadTestFile(require.resolve('./monitor_select'));
     loadTestFile(require.resolve('./monitor_status_bar'));
     loadTestFile(require.resolve('./ping_list'));
