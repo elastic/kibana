@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
-import { units, colors, px, unit } from '../../../../style/variables';
+import { units, px, unit } from '../../../../style/variables';
 import { rgba } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -18,7 +18,7 @@ const List = styled.ul`
   border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${px(units.quarter)};
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${rgba(colors.black, 0.1)};
+    ${rgba(theme.euiColorFullShade, 0.1)};
   position: absolute;
   background: #fff;
   z-index: 10;
