@@ -14,7 +14,7 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  describe.only('find', () => {
+  describe('find', () => {
     const {
       createExpectEmpty,
       createExpectRbacForbidden,
