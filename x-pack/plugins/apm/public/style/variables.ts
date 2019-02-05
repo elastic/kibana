@@ -32,8 +32,6 @@ export const borderRadius = '5px';
 
 // Colors (from dark to light)
 export const colors = {
-  yellow: '#FCF2E6',
-
   // custom APM palette
   apmLightBlue: '#80bcd2'
 };
