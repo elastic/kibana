@@ -118,6 +118,7 @@ export const AutoFollowPatternList = injectI18n(
                   {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
                   fill
                   iconType="plusInCircle"
+                  data-test-subj="ccrCreateAutoFollowPatternButton"
                 >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
@@ -202,6 +203,7 @@ export const AutoFollowPatternList = injectI18n(
               {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
               fill
               iconType="plusInCircle"
+              data-test-subj="ccrCreateAutoFollowPatternButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
