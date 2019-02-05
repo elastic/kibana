@@ -133,14 +133,15 @@ export const reindexActionsFactory = (
    * @param indexName
    */
   const getNewIndexName = (indexName: string) => {
-    const prevVersionSuffix = `-reindexed-v${PREV_MAJOR_VERSION}`;
-    const currentVersionSuffix = `-reindexed-v${CURRENT_MAJOR_VERSION}`;
+    const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
 
-    if (indexName.endsWith(prevVersionSuffix)) {
-      return indexName.replace(new RegExp(`${prevVersionSuffix}$`), currentVersionSuffix);
-    } else {
-      return `${indexName}${currentVersionSuffix}`;
-    }
+    // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
+    // avoid conflicts with index patterns/templates/etc
+    const reindexedMatcher = new RegExp(`(-reindexed-v5$|^reindexed-v${PREV_MAJOR_VERSION}-)`);
+
+    const cleanIndexName = indexName.replace(reindexedMatcher, '');
+
+    return `${currentVersion}-${cleanIndexName}`;
   };
 
   const isLocked = (reindexOp: ReindexSavedObject) => {
