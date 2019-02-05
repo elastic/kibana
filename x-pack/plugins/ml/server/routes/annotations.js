@@ -41,12 +41,12 @@ export function annotationRoutes(server, commonRouteConfig) {
     method: 'PUT',
     path: '/api/ml/annotations/index',
     async handler(request) {
-      const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(server);
+      const callWithRequest = callWithRequestFactory(server, request);
+      const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(callWithRequest);
       if (annotationsFeatureAvailable === false) {
         return getAnnotationsFeatureUnavailableErrorMessage();
       }
 
-      const callWithRequest = callWithRequestFactory(server, request);
       const { indexAnnotation } = annotationServiceProvider(callWithRequest);
       const username = _.get(request, 'auth.credentials.username', ANNOTATION_USER_UNKNOWN);
       return indexAnnotation(request.payload, username)
@@ -61,12 +61,12 @@ export function annotationRoutes(server, commonRouteConfig) {
     method: 'DELETE',
     path: '/api/ml/annotations/delete/{annotationId}',
     async handler(request) {
-      const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(server);
+      const callWithRequest = callWithRequestFactory(server, request);
+      const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(callWithRequest);
       if (annotationsFeatureAvailable === false) {
         return getAnnotationsFeatureUnavailableErrorMessage();
       }
 
-      const callWithRequest = callWithRequestFactory(server, request);
       const annotationId = request.params.annotationId;
       const { deleteAnnotation } = annotationServiceProvider(callWithRequest);
       return deleteAnnotation(annotationId)
