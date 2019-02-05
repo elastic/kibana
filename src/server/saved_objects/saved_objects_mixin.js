@@ -30,6 +30,7 @@ import {
   createFindRoute,
   createGetRoute,
   createUpdateRoute,
+  createExportRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
@@ -64,6 +65,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
+  server.route(createExportRoute(prereqs));
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
