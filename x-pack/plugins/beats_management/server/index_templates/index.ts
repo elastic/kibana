@@ -5,4 +5,6 @@
  */
 
 import beatsIndexTemplate from './beats_template.json';
-export { beatsIndexTemplate };
+import eventsIndexTemplate from './events_template.json';
+
+export { beatsIndexTemplate, eventsIndexTemplate };

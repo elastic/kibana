@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { ConfigurationBlock } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
-  method: 'GET',
-  path: '/api/beats/agent/{beatId}/configuration',
+export const beatEventsRoute = (libs: CMServerLibs) => ({
+  method: 'POST',
+  path: '/api/beats/{beatId}/events',
   config: {
     validate: {
       headers: Joi.object({
@@ -21,14 +20,13 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   },
   handler: async (request: any, h: any) => {
     const beatId = request.params.beatId;
+    const events = request.payload;
     const accessToken = request.headers['kbn-beats-access-token'];
 
-    let beat;
-    let configurationBlocks: ConfigurationBlock[];
     try {
-      beat = await libs.beats.getById(libs.framework.internalUser, beatId);
+      const beat = await libs.beats.getById(libs.framework.internalUser, beatId);
       if (beat === null) {
-        return h.response({ message: `Beat "${beatId}" not found` }).code(404);
+        return h.response({ message: `Beat "${beatId}" not found` }).code(400);
       }
 
       const isAccessTokenValid = beat.access_token === accessToken;
@@ -36,27 +34,13 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
         return h.response({ message: 'Invalid access token' }).code(401);
       }
 
-      await libs.beats.update(libs.framework.internalUser, beat.id, {
-        last_checkin: new Date(),
-      });
+      const results = await libs.beatEvents.log(libs.framework.internalUser, beat.id, events);
 
-      if (beat.tags) {
-        const result = await libs.configurationBlocks.getForTags(
-          libs.framework.internalUser,
-          beat.tags,
-          -1
-        );
-
-        configurationBlocks = result.blocks;
-      } else {
-        configurationBlocks = [];
-      }
+      return {
+        response: results,
+      };
     } catch (err) {
       return wrapEsError(err);
     }
-
-    return {
-      configuration_blocks: configurationBlocks,
-    };
   },
 });
