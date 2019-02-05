@@ -73,7 +73,7 @@ export class ContextMenuUi extends PureComponent {
 
     const button = (
       <EuiButton
-        data-test-subj="followerIndexContextMenuButton"
+        data-test-subj="ccrFollowerIndexContextMenuButton"
         iconSide={iconSide}
         onClick={this.onButtonClick}
         iconType={iconType}
@@ -112,6 +112,7 @@ export class ContextMenuUi extends PureComponent {
                   <EuiContextMenuItem
                     icon="pause"
                     onClick={() => pauseFollowerIndex(activeFollowerIndices)}
+                    data-test-subj="ccrFollowerIndexContextMenuPauseActionButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
@@ -130,6 +131,7 @@ export class ContextMenuUi extends PureComponent {
                   <EuiContextMenuItem
                     icon="play"
                     onClick={() => resumeFollowerIndex(pausedFollowerIndexNames)}
+                    data-test-subj="ccrFollowerIndexContextMenuResumeActionButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
@@ -149,6 +151,7 @@ export class ContextMenuUi extends PureComponent {
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
+                  data-test-subj="ccrFollowerIndexContextMenuEditActionButton"
                   defaultMessage="Edit follower index"
                 />
               </EuiContextMenuItem>
@@ -160,6 +163,7 @@ export class ContextMenuUi extends PureComponent {
               <EuiContextMenuItem
                 icon="indexFlush"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}
+                data-test-subj="ccrFollowerIndexContextMenuUnfollowActionButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.unfollowLabel"

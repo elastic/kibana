@@ -50,6 +50,7 @@ export class FormEntryRow extends PureComponent {
     ]),
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
+    dataTestSubj: PropTypes.string,
   };
 
   onFieldChange = (value) => {
@@ -66,7 +67,7 @@ export class FormEntryRow extends PureComponent {
   }
 
   renderField = (isInvalid) => {
-    const { value, type, disabled, isLoading } = this.props;
+    const { value, type, disabled, isLoading, dataTestSubj } = this.props;
     switch (type) {
       case 'number':
         return (
@@ -77,6 +78,7 @@ export class FormEntryRow extends PureComponent {
             disabled={disabled === true}
             isLoading={isLoading}
             fullWidth
+            data-test-subj={dataTestSubj}
           />
         );
       default:
@@ -88,6 +90,7 @@ export class FormEntryRow extends PureComponent {
             disabled={disabled === true}
             isLoading={isLoading}
             fullWidth
+            data-test-subj={dataTestSubj}
           />
         );
     }

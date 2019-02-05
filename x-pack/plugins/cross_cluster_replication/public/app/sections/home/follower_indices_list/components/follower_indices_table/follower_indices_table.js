@@ -88,7 +88,10 @@ export const FollowerIndicesTable = injectI18n(
             return isPaused ? (
               <FollowerIndexResumeProvider>
                 {(resumeFollowerIndex) => (
-                  <span onClick={() => resumeFollowerIndex(name)}>
+                  <span
+                    onClick={() => resumeFollowerIndex(name)}
+                    data-test-subj="ccrFollowerIndexListPauseActionButton"
+                  >
                     <EuiIcon
                       aria-label={label}
                       type="play"
@@ -101,7 +104,10 @@ export const FollowerIndicesTable = injectI18n(
             ) : (
               <FollowerIndexPauseProvider>
                 {(pauseFollowerIndex) => (
-                  <span onClick={() => pauseFollowerIndex(followerIndex)}>
+                  <span
+                    onClick={() => pauseFollowerIndex(followerIndex)}
+                    data-test-subj="ccrFollowerIndexListResumeActionButton"
+                  >
                     <EuiIcon
                       aria-label={label}
                       type="pause"
@@ -123,7 +129,10 @@ export const FollowerIndicesTable = injectI18n(
             });
 
             return (
-              <span onClick={() => this.editFollowerIndex(name)}>
+              <span
+                onClick={() => this.editFollowerIndex(name)}
+                data-test-subj="ccrFollowerIndexListEditActionButton"
+              >
                 <EuiIcon
                   aria-label={label}
                   type="pencil"
@@ -145,7 +154,10 @@ export const FollowerIndicesTable = injectI18n(
             return (
               <FollowerIndexUnfollowProvider>
                 {(unfollowLeaderIndex) => (
-                  <span onClick={() => unfollowLeaderIndex(name)}>
+                  <span
+                    onClick={() => unfollowLeaderIndex(name)}
+                    data-test-subj="ccrFollowerIndexListUnfollowActionButton"
+                  >
                     <EuiIcon
                       aria-label={label}
                       type="indexFlush"
@@ -170,7 +182,10 @@ export const FollowerIndicesTable = injectI18n(
         truncateText: false,
         render: (name) => {
           return (
-            <EuiLink onClick={() => selectFollowerIndex(name)}>
+            <EuiLink
+              onClick={() => selectFollowerIndex(name)}
+              data-test-subj="ccrFollowerIndexListFollowerIndexLink"
+            >
               {name}
             </EuiLink>
           );

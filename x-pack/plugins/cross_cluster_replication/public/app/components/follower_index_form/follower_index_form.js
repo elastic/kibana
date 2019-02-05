@@ -374,6 +374,7 @@ export const FollowerIndexForm = injectI18n(
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onIndexNameChange}
+          dataTestSubj="ccrFollowerIndexFormFollowerIndexInput"
         />
       );
 
@@ -507,6 +508,7 @@ export const FollowerIndexForm = injectI18n(
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onFieldsChange}
+          dataTestSubj="ccrFollowerIndexFormLeaderIndexInput"
         />
       );
 
@@ -548,6 +550,7 @@ export const FollowerIndexForm = injectI18n(
                     )}
                     checked={areAdvancedSettingsVisible}
                     onChange={this.toggleAdvancedSettings}
+                    data-test-subj="ccrFollowerIndexFormCustomAdvancedSettingsToggle"
                   />
                 </Fragment>
               )}
@@ -579,6 +582,7 @@ export const FollowerIndexForm = injectI18n(
                       type={type}
                       areErrorsVisible={areErrorsVisible}
                       onValueUpdate={this.onFieldsChange}
+                      dataTestSubj={`ccrFollowerIndexForm${field.charAt(0).toUpperCase() + field.slice(1)}Input`}
                     />
                   );
                 })}
@@ -655,6 +659,7 @@ export const FollowerIndexForm = injectI18n(
                 onClick={this.sendForm}
                 fill
                 disabled={isSaveDisabled}
+                data-test-subj="ccrFollowerIndexFormSubmitButton"
               >
                 {saveButtonLabel}
               </EuiButton>
@@ -664,6 +669,7 @@ export const FollowerIndexForm = injectI18n(
               <EuiButtonEmpty
                 color="primary"
                 onClick={this.cancelForm}
+                data-test-subj="ccrFollowerIndexFormCancelButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"

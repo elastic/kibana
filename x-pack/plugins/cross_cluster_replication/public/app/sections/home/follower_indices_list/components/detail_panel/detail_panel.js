@@ -449,6 +449,7 @@ export class DetailPanelUi extends Component {
               iconType="cross"
               flush="left"
               onClick={closeDetailPanel}
+              data-test-subj="ccrFollowerIndexDetailsFlyoutCloseButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexDetailPanel.closeButtonLabel"
@@ -462,6 +463,7 @@ export class DetailPanelUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={indexManagementUri}
+                  data-test-subj="ccrFollowerIndexDetailsViewIndexManagementButton"
                 >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexDetailPanel.viewIndexLink"
@@ -499,7 +501,7 @@ export class DetailPanelUi extends Component {
     return (
       <EuiFlyout
         className="ccrFollowerIndicesDetailPanel"
-        data-test-subj="followerIndexDetailsFlyout"
+        data-test-subj="ccrFollowerIndexDetailsFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="followerIndexDetailsFlyoutTitle"
         size="m"

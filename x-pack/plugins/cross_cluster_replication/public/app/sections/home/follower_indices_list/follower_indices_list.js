@@ -114,6 +114,7 @@ export const FollowerIndicesList = injectI18n(
                   {...routing.getRouterLinkProps('/follower_indices/add')}
                   fill
                   iconType="plusInCircle"
+                  data-test-subj="ccrCreateFollowerIndexButton"
                 >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
@@ -198,6 +199,7 @@ export const FollowerIndicesList = injectI18n(
               {...routing.getRouterLinkProps('/follower_indices/add')}
               fill
               iconType="plusInCircle"
+              data-test-subj="ccrCreateFollowerIndexButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.addFollowerButtonLabel"

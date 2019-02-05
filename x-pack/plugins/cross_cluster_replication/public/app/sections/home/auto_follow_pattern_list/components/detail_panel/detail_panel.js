@@ -356,7 +356,7 @@ export class DetailPanelUi extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="autoFollowPatternDetailsFlyout"
+        data-test-subj="ccrAutoFollowPatternDetailsFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="autoFollowPatternDetailsFlyoutTitle"
         size="m"
