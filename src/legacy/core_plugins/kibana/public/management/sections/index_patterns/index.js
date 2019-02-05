@@ -22,7 +22,6 @@ import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
-
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
@@ -96,18 +95,13 @@ uiModules.get('apps/management')
       transclude: true,
       template: indexTemplate,
       link: async function ($scope) {
-
         const indexPatternListProvider = Private(IndexPatternListFactory)();
-
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
 
-        //const indexPatternCreationType = indexPatternCreationProvider.getType();
-
-        // TODO - I'm not sure what this does
+        // todo need to work with this
         await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
-
 
         const renderList = () => {
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
@@ -149,7 +143,6 @@ uiModules.get('apps/management')
         $scope.$watch('defaultIndex', () => renderList());
         config.bindToScope($scope, 'defaultIndex');
         $scope.$apply();
-
       }
     };
   });
