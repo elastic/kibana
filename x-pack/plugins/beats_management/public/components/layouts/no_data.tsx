@@ -9,7 +9,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 
 interface LayoutProps {
-  title: string | JSX.Element;
+  title: string | React.ReactNode;
   actionSection?: React.ReactNode;
   modalClosePath?: string;
 }
