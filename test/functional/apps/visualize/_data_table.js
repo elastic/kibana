@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickBucket('Split Rows');
       await PageObjects.visualize.selectAggregation('Range');
       await PageObjects.visualize.selectField('bytes');

@@ -170,6 +170,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data for chart interval Hourly', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Hourly');
 
         const expectedBarChartData = [
