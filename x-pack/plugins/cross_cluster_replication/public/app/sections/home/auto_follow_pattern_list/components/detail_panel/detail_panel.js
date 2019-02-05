@@ -172,6 +172,7 @@ export class DetailPanelUi extends Component {
 
             <EuiLink
               href={indexManagementUri}
+              data-test-subj="ccrAutoFollowPatternDetailsViewIndexManagementButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
@@ -304,6 +305,8 @@ export class DetailPanelUi extends Component {
               iconType="cross"
               flush="left"
               onClick={closeDetailPanel}
+              data-test-subj="ccrAutoFollowPatternDetailsFlyoutCloseButton"
+
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.closeButtonLabel"
@@ -321,6 +324,7 @@ export class DetailPanelUi extends Component {
                       <EuiButtonEmpty
                         color="danger"
                         onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
+                        data-test-subj="ccrAutoFollowPatternDetailsDeleteActionButton"
                       >
                         <FormattedMessage
                           id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
@@ -336,6 +340,7 @@ export class DetailPanelUi extends Component {
                     fill
                     color="primary"
                     href={routing.getAutoFollowPatternPath(autoFollowPattern.name)}
+                    data-test-subj="ccrAutoFollowPatternDetailsEditActionButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"

@@ -73,7 +73,10 @@ export const AutoFollowPatternTable = injectI18n(
         truncateText: false,
         render: (name) => {
           return (
-            <EuiLink onClick={() => selectAutoFollowPattern(name)}>
+            <EuiLink
+              onClick={() => selectAutoFollowPattern(name)}
+              data-test-subj="ccrAutoFollowPatternListPatternLink"
+            >
               {name}
             </EuiLink>
           );
@@ -134,6 +137,7 @@ export const AutoFollowPatternTable = injectI18n(
                         iconType="trash"
                         color="danger"
                         onClick={() => deleteAutoFollowPattern(name)}
+                        data-test-subj="ccrAutoFollowPatternListDeleteActionButton"
                       />
                     )}
                   </AutoFollowPatternDeleteProvider>
@@ -157,6 +161,7 @@ export const AutoFollowPatternTable = injectI18n(
                     iconType="pencil"
                     color="primary"
                     href={routing.getAutoFollowPatternPath(name)}
+                    data-test-subj="ccrAutoFollowPatternListEditActionButton"
                   />
                 </EuiToolTip>
               );
@@ -209,6 +214,7 @@ export const AutoFollowPatternTable = injectI18n(
                 iconType="trash"
                 color="danger"
                 onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
+                data-test-subj="ccrAutoFollowPatternListBulkDeleteActionButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
