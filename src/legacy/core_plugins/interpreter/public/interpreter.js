@@ -22,6 +22,7 @@ import { initializeInterpreter, loadBrowserRegistries } from '@kbn/interpreter/p
 import { kfetch } from 'ui/kfetch';
 import chrome from 'ui/chrome';
 import { functions } from './functions';
+import { typeSpecs } from '@kbn/interpreter/plugin';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
 import { renderFunctionsRegistry } from './render_functions_registry';
@@ -30,16 +31,11 @@ import { visualization } from './renderers/visualization';
 const basePath = chrome.getInjected('serverBasePath');
 
 const types = {
-  browserFunctions: functionsRegistry,
   renderers: renderFunctionsRegistry,
-  types: typesRegistry
 };
 
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
+typeSpecs.forEach(type => typesRegistry.register(type));
+functions.forEach(fnDef => functionsRegistry.register(fnDef));
 renderFunctionsRegistry.register(visualization);
 
 let _resolve;

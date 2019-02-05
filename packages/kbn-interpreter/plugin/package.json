@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "main": "../target/plugin/index.js",
+  "jsnext:main": "../src/plugin/index.js"
+}

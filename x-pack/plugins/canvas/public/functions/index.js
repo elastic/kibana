@@ -4,8 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { functions as commonFunctions } from '../../canvas_plugin_src/functions/common';
+import { browser } from './browser';
+import { location } from './location';
+import { markdown } from './markdown';
+import { urlparam } from './urlparam';
 import { asset } from './asset';
 import { filters } from './filters';
 import { timelion } from './timelion';
 
-export const clientFunctions = [asset, filters, timelion];
+export const clientFunctions = [
+  asset,
+  filters,
+  timelion,
+  browser,
+  location,
+  markdown,
+  urlparam,
+  ...commonFunctions,
+];

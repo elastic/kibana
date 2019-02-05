@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import '../common/register';
+export { typeSpecs } from './types';

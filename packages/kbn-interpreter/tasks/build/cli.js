@@ -26,9 +26,7 @@ const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-uti
 
 const {
   ROOT_DIR,
-  PLUGIN_SOURCE_DIR,
   BUILD_DIR,
-  WEBPACK_CONFIG_PATH
 } = require('./paths');
 
 const unknownFlags = [];
@@ -82,23 +80,11 @@ withProcRunner(log, async (proc) => {
       cmd: 'babel',
       args: [
         'src',
-        '--ignore', `${relative(cwd, PLUGIN_SOURCE_DIR)},*.test.js`,
+        '--ignore', `*.test.js`,
         '--out-dir', relative(cwd, BUILD_DIR),
         '--copy-files',
         ...(flags.dev ? ['--source-maps', 'inline'] : []),
         ...(flags.watch ? ['--watch'] : ['--quiet'])
-      ],
-      wait: true,
-      env,
-      cwd
-    }),
-
-    proc.run('webpack', {
-      cmd: 'webpack',
-      args: [
-        '--config', relative(cwd, WEBPACK_CONFIG_PATH),
-        '--env.sourceMaps', String(Boolean(flags.dev)),
-        ...(flags.watch ? ['--watch'] : []),
       ],
       wait: true,
       env,

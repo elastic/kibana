@@ -18,6 +18,7 @@
  */
 
 import { esaggs } from './esaggs';
+import { clog } from './clog';
 import { kibana } from './kibana';
 import { kibanaContext } from './kibana_context';
 import { vega } from './vega';
@@ -35,6 +36,6 @@ import { vislib } from './vislib';
 import { visualization } from './visualization';
 
 export const functions = [
-  esaggs, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
+  esaggs, clog, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
   metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization
 ];

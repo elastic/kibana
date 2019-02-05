@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Handlebars } from '../../../common/lib/handlebars';
+import { Handlebars } from '../../common/lib/handlebars';
 
 export const markdown = () => ({
   name: 'markdown',
