@@ -24,10 +24,10 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiPanel,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { CreateButton } from '../create_button';
 
 const columns = [
   {
@@ -61,7 +61,8 @@ const search = {
 };
 
 const Table = ({
-  indexPatterns
+  indexPatterns,
+  indexPatternCreationOptions,
 }) => (
   <EuiPanel paddingSize="l">
     <EuiFlexGroup>
@@ -78,9 +79,12 @@ const Table = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem  grow={false}>
-        <EuiButton fill href="#/management/kibana/index_pattern" data-test-subj="createIndexPatternButton">
-          <FormattedMessage id="kbn.management.indexPatternTable.createBtn" defaultMessage="Create index pattern" />
-        </EuiButton>
+        <CreateButton options={indexPatternCreationOptions}>
+          <FormattedMessage
+            id="kbn.management.indexPatternTable.createBtn"
+            defaultMessage="Create index pattern"
+          />
+        </CreateButton>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiInMemoryTable

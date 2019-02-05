@@ -42,6 +42,7 @@ const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 export function updateIndexPatternList(
   indexPatterns,
   kbnUrl,
+  indexPatternCreationOptions,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -50,8 +51,13 @@ export function updateIndexPatternList(
 
   render(
     <I18nContext>
-      {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt />) :
-        (<IndexPatternTable indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />)}
+      {indexPatterns.length === 0 ?
+        (<CreateIndexPatternPrompt />) :
+        (<IndexPatternTable
+          indexPatterns={indexPatterns}
+          navTo={kbnUrl.redirect}
+          indexPatternCreationOptions={indexPatternCreationOptions}
+        />)}
     </I18nContext>,
     node,
   );
@@ -99,7 +105,7 @@ uiModules.get('apps/management')
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
 
         // todo need to work with this
-        await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
+        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
 
@@ -135,7 +141,7 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          updateIndexPatternList($scope.indexPatternList, kbnUrl);
+          updateIndexPatternList($scope.indexPatternList, kbnUrl, indexPatternCreationOptions);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);
