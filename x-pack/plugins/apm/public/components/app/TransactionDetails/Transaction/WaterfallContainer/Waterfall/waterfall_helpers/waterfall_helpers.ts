@@ -40,6 +40,9 @@ export interface IWaterfall {
   items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
+  getErrorCountByTransactionId: (
+    id?: IWaterfallItem['id']
+  ) => number | undefined;
   serviceColors: IServiceColors;
 }
 
@@ -220,31 +223,57 @@ function getDuration(items: IWaterfallItem[]) {
   return timestampEnd - timestampStart;
 }
 
+function getWaterfallItemTransactionById(
+  itemsById: IWaterfallIndex,
+  id?: IWaterfallItem['id']
+): IWaterfallItemTransaction | void {
+  if (!id) {
+    return undefined;
+  }
+
+  const item = itemsById[id];
+  if (item.docType === 'transaction') {
+    return item;
+  }
+}
+
 function createGetTransactionById(itemsById: IWaterfallIndex) {
   return (id?: IWaterfallItem['id']) => {
-    if (!id) {
-      return;
+    const waterfallItemTransaction = getWaterfallItemTransactionById(
+      itemsById,
+      id
+    );
+    if (waterfallItemTransaction) {
+      return waterfallItemTransaction.transaction;
     }
+  };
+}
 
-    const item = itemsById[id];
-    if (item.docType === 'transaction') {
-      return item.transaction;
+function createGetErrorCountByTransactionId(itemsById: IWaterfallIndex) {
+  return (id?: IWaterfallItem['id']) => {
+    const waterfallItemTransaction = getWaterfallItemTransactionById(
+      itemsById,
+      id
+    );
+    if (waterfallItemTransaction) {
+      return waterfallItemTransaction.errorCount;
     }
   };
 }
 
 export function getWaterfall(
   hits: TraceAPIResponse['trace'],
-  entryTransaction: Transaction,
-  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction']
+  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'],
+  entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
-  if (isEmpty(hits)) {
+  if (isEmpty(hits) || !entryTransactionId) {
     return {
       services: [],
       duration: 0,
       items: [],
       itemsById: {},
       getTransactionById: () => undefined,
+      getErrorCountByTransactionId: () => undefined,
       serviceColors: {}
     };
   }
@@ -262,17 +291,23 @@ export function getWaterfall(
   const childrenByParentId = groupBy(waterfallItems, item =>
     item.parentId ? item.parentId : 'root'
   );
-  const entryTransactionItem = getTransactionItem(
-    entryTransaction,
-    errorsPerTransaction
+  const entryTransactionItem = waterfallItems.find(
+    waterfallItem =>
+      waterfallItem.docType === 'transaction' &&
+      waterfallItem.id === entryTransactionId
   );
   const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
-  const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
+  const items = entryTransactionItem
+    ? getWaterfallItems(childrenByParentId, entryTransactionItem)
+    : [];
   const traceRoot = getTraceRoot(childrenByParentId);
   const duration = getDuration(items);
   const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
   const services = getServices(items);
   const getTransactionById = createGetTransactionById(itemsById);
+  const getErrorCountByTransactionId = createGetErrorCountByTransactionId(
+    itemsById
+  );
   const serviceColors = getServiceColors(services);
 
   return {
@@ -283,6 +318,7 @@ export function getWaterfall(
     items,
     itemsById,
     getTransactionById,
+    getErrorCountByTransactionId,
     serviceColors
   };
 }

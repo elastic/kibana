@@ -6,9 +6,7 @@
 
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   getWaterfall,
   IWaterfall
@@ -22,13 +20,12 @@ export const ID = 'waterfall';
 
 interface Props {
   urlParams: IUrlParams;
-  transaction: Transaction;
+  traceId?: string;
   render: RRRRender<IWaterfall>;
 }
 
-export function WaterfallRequest({ urlParams, transaction, render }: Props) {
+export function WaterfallRequest({ urlParams, render, traceId }: Props) {
   const { start, end } = urlParams;
-  const traceId = idx(transaction, _ => _.trace.id);
 
   if (!(traceId && start && end)) {
     return null;
@@ -46,8 +43,8 @@ export function WaterfallRequest({ urlParams, transaction, render }: Props) {
       }) => {
         const waterfall = getWaterfall(
           data.trace,
-          transaction,
-          data.errorsPerTransaction
+          data.errorsPerTransaction,
+          urlParams.transactionId
         );
         return render({ args, data: waterfall, status });
       }}
