@@ -38,6 +38,7 @@ export const loadBrowserRegistries = (registries, basePath) => {
     t !== 'elements'
     && t !== 'renderers'
     && t !== 'transformUIs'
+    && t !== 'modelUIs'
   );
   const populatedTypes = {};
 
