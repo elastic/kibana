@@ -1,11 +1,11 @@
 {
   "groups": ["nginx"],
-  "description": "HTTP Access Logs: Detect unusual status_code rates (ECS)",
+  "description": "HTTP Access Logs: Detect unusual status code rates (ECS)",
   "analysis_config" : {
     "bucket_span": "15m",
     "detectors": [
         {
-        "detector_description": "nginx_access_status_code_rate",
+        "detector_description": "Nginx access status code rate",
         "function": "count",
         "partition_field_name": "http.response.status_code"
       }

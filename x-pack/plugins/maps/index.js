@@ -6,6 +6,8 @@
 
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
+import ecommerceSavedObjects from './server/sample_data/ecommerce_saved_objects.json';
+import fligthsSavedObjects from './server/sample_data/flights_saved_objects.json';
 import webLogsSavedObjects from './server/sample_data/web_logs_saved_objects.json';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
@@ -26,6 +28,13 @@ export function maps(kibana) {
         main: 'plugins/maps/index',
         icon: 'plugins/maps/icon.svg',
         euiIconType: 'gisApp',
+      },
+      injectDefaultVars(server) {
+        const serverConfig = server.config();
+        const mapConfig = serverConfig.get('map');
+        return {
+          isEmsEnabled: mapConfig.includeElasticMapsService
+        };
       },
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',
@@ -60,6 +69,8 @@ export function maps(kibana) {
           .feature(thisPlugin.id)
           .registerLicenseCheckResultsGenerator(checkLicense);
 
+        server.addSavedObjectsToSampleDataset('ecommerce', ecommerceSavedObjects);
+        server.addSavedObjectsToSampleDataset('flights', fligthsSavedObjects);
         server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
         server.injectUiAppVars('maps', async () => {
           return await server.getInjectedUiAppVars('kibana');

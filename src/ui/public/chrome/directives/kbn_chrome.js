@@ -32,7 +32,7 @@ import {
   banners,
 } from '../../notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from '../../i18n';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -86,12 +86,12 @@ export function kbnChromeProvider(chrome, internals) {
 
           // Banners
           ReactDOM.render(
-            <I18nProvider>
+            <I18nContext>
               <GlobalBannerList
                 banners={banners.list}
                 subscribe={banners.onChange}
               />
-            </I18nProvider>,
+            </I18nContext>,
             document.getElementById('globalBannerList')
           );
 

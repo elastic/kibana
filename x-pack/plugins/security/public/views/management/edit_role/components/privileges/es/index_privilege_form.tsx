@@ -15,7 +15,8 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
 // @ts-ignore
@@ -37,7 +38,6 @@ interface Props {
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -45,7 +45,7 @@ interface State {
   documentQuery?: string;
 }
 
-class IndexPrivilegeFormUI extends Component<Props, State> {
+export class IndexPrivilegeForm extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -55,7 +55,6 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
   }
 
   public render() {
-    const { intl } = this.props;
     return (
       <Fragment>
         <EuiHorizontalRule />
@@ -65,11 +64,10 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon
-                  aria-label={intl.formatMessage({
-                    id:
-                      'xpack.security.management.editRoles.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
-                    defaultMessage: 'Delete index privilege',
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.security.management.editRoles.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
+                    { defaultMessage: 'Delete index privilege' }
+                  )}
                   color={'danger'}
                   onClick={this.props.onDelete}
                   iconType={'trash'}
@@ -325,5 +323,3 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
     });
   };
 }
-
-export const IndexPrivilegeForm = injectI18n(IndexPrivilegeFormUI);

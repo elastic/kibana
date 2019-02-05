@@ -17,7 +17,7 @@ import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
@@ -32,7 +32,7 @@ export async function startApp(libs: InfraFrontendLibs) {
   });
 
   libs.framework.render(
-    <I18nProvider>
+    <I18nContext>
       <EuiErrorBoundary>
         <ConstateProvider devtools>
           <ReduxStoreProvider store={store}>
@@ -49,6 +49,6 @@ export async function startApp(libs: InfraFrontendLibs) {
           </ReduxStoreProvider>
         </ConstateProvider>
       </EuiErrorBoundary>
-    </I18nProvider>
+    </I18nContext>
   );
 }
