@@ -250,7 +250,7 @@ export class DetailPanel extends Component {
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.loadingLabel"
-                    defaultMessage="Loading auto-follow pattern..."
+                    defaultMessage="Loading auto-follow pattern…"
                   />
                 </EuiTextColor>
               </EuiText>

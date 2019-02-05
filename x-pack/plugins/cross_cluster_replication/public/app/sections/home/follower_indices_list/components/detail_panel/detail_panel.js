@@ -391,7 +391,7 @@ export class DetailPanel extends Component {
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexDetailPanel.loadingLabel"
-                    defaultMessage="Loading follower index..."
+                    defaultMessage="Loading follower index…"
                   />
                 </EuiTextColor>
               </EuiText>

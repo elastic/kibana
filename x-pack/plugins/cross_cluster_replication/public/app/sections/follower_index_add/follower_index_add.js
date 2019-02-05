@@ -61,8 +61,8 @@ export class FollowerIndexAdd extends PureComponent {
               return (
                 <SectionLoading>
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
-                    defaultMessage="Loading remote clusters..."
+                    id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
+                    defaultMessage="Loading remote clusters…"
                   />
                 </SectionLoading>
               );

@@ -195,14 +195,14 @@ export class FollowerIndicesTable extends PureComponent {
         return isPaused ? (
           <EuiHealth color="subdued">
             <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.table.pausedStatus"
+              id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.pausedLabel"
               defaultMessage="Paused"
             />
           </EuiHealth>
         ) : (
           <EuiHealth color="success">
             <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.table.activeStatus"
+              id="xpack.crossClusterReplication.followerIndexList.table.statusColumn.activeLabel"
               defaultMessage="Active"
             />
           </EuiHealth>

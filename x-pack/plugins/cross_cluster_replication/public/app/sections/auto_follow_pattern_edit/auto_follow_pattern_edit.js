@@ -121,7 +121,7 @@ export class AutoFollowPatternEdit extends PureComponent {
       <SectionLoading>
         <FormattedMessage
           id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingTitle"
-          defaultMessage="Loading auto-follow pattern..."
+          defaultMessage="Loading auto-follow pattern…"
         />
       </SectionLoading>
     );
@@ -156,8 +156,8 @@ export class AutoFollowPatternEdit extends PureComponent {
                 return (
                   <SectionLoading>
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClusters"
-                      defaultMessage="Loading remote clusters..."
+                      id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClustersMessage"
+                      defaultMessage="Loading remote clusters…"
                     />
                   </SectionLoading>
                 );

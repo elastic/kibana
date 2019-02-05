@@ -58,8 +58,8 @@ export class AutoFollowPatternAdd extends PureComponent {
               return (
                 <SectionLoading>
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
-                    defaultMessage="Loading remote clusters..."
+                    id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
+                    defaultMessage="Loading remote clusters…"
                   />
                 </SectionLoading>
               );

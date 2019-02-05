@@ -106,7 +106,7 @@ export class FollowerIndexEdit extends PureComponent {
       <SectionLoading>
         <FormattedMessage
           id="xpack.crossClusterReplication.followerIndexEditForm.loadingFollowerIndexTitle"
-          defaultMessage="Loading follower index..."
+          defaultMessage="Loading follower index…"
         />
       </SectionLoading>
     );
@@ -246,8 +246,8 @@ export class FollowerIndexEdit extends PureComponent {
                 return (
                   <SectionLoading>
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
-                      defaultMessage="Loading remote clusters..."
+                      id="xpack.crossClusterReplication.followerIndexEditForm.loadingRemoteClustersMessage"
+                      defaultMessage="Loading remote clusters…"
                     />
                   </SectionLoading>
                 );
