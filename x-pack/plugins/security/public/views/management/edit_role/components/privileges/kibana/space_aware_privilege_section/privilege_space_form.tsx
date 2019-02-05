@@ -57,6 +57,7 @@ interface State {
   selectedBasePrivilege: string[];
   role: Role;
   mode: 'create' | 'update';
+  isCustomizingFeaturePrivileges: boolean;
 }
 
 export class PrivilegeSpaceForm extends Component<Props, State> {
@@ -86,6 +87,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       selectedSpaceIds: [...role.kibana[editingIndex].spaces],
       selectedBasePrivilege: [...(role.kibana[editingIndex].base || [])],
       mode: props.editingIndex < 0 ? 'create' : 'update',
+      isCustomizingFeaturePrivileges: false,
     };
   }
 
@@ -460,8 +462,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const privilegeName = basePrivilege.split('basePrivilege_')[1];
 
+    let isCustomizingFeaturePrivileges = false;
+
     if (privilegeName === CUSTOM_PRIVILEGE_VALUE) {
       form.base = [];
+      isCustomizingFeaturePrivileges = true;
     } else {
       form.base = [privilegeName];
       form.feature = {};
@@ -470,6 +475,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     this.setState({
       selectedBasePrivilege: privilegeName === CUSTOM_PRIVILEGE_VALUE ? [] : [privilegeName],
       role,
+      isCustomizingFeaturePrivileges,
     });
   };
 
@@ -482,7 +488,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
       if (
         hasAssignedFeaturePrivileges(form) ||
-        explanation.actualPrivilege === NO_PRIVILEGE_VALUE
+        explanation.actualPrivilege === NO_PRIVILEGE_VALUE ||
+        this.state.isCustomizingFeaturePrivileges
       ) {
         return CUSTOM_PRIVILEGE_VALUE;
       }
