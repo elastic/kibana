@@ -47,7 +47,7 @@ export function esIndicesRoute(server) {
 
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
-          indices
+          indices,
         };
       } catch(err) {
         throw handleError(err, req);
