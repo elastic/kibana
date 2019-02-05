@@ -1,0 +1,670 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
+<Component
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <Component>
+    <EuiEmptyPrompt
+      body={
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+              id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+              values={
+                Object {
+                  "configureHeartbeatLink": <EuiLink
+                    color="primary"
+                    href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                    target="_blank"
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Configure Heartbeat"
+                      id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                      values={Object {}}
+                    />
+                  </EuiLink>,
+                }
+              }
+            />
+          </p>
+        </React.Fragment>
+      }
+      iconColor="subdued"
+      title={
+        <EuiTitle
+          size="l"
+          textTransform="none"
+        >
+          <h3>
+            <FormattedMessage
+              defaultMessage="No uptime data available"
+              id="xpack.uptime.emptyState.noDataTitle"
+              values={Object {}}
+            />
+          </h3>
+        </EuiTitle>
+      }
+    >
+      <div
+        className="euiEmptyPrompt"
+      >
+        <EuiTextColor
+          color="subdued"
+          component="span"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            <EuiTitle
+              size="m"
+              textTransform="none"
+            >
+              <EuiTitle
+                className="euiTitle euiTitle--medium"
+                size="l"
+                textTransform="none"
+              >
+                <h3
+                  className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                >
+                  <FormattedMessage
+                    defaultMessage="No uptime data available"
+                    id="xpack.uptime.emptyState.noDataTitle"
+                    values={Object {}}
+                  >
+                    No uptime data available
+                  </FormattedMessage>
+                </h3>
+              </EuiTitle>
+            </EuiTitle>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiText
+              grow={true}
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <p>
+                  <FormattedMessage
+                    defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                    id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                    values={
+                      Object {
+                        "configureHeartbeatLink": <EuiLink
+                          color="primary"
+                          href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                          target="_blank"
+                          type="button"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Configure Heartbeat"
+                            id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                            values={Object {}}
+                          />
+                        </EuiLink>,
+                      }
+                    }
+                  >
+                    <EuiLink
+                      color="primary"
+                      href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                      target="_blank"
+                      type="button"
+                    >
+                      <a
+                        className="euiLink euiLink--primary"
+                        href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Configure Heartbeat"
+                          id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                          values={Object {}}
+                        >
+                          Configure Heartbeat
+                        </FormattedMessage>
+                      </a>
+                    </EuiLink>
+                     to start logging uptime data.
+                  </FormattedMessage>
+                </p>
+              </div>
+            </EuiText>
+          </span>
+        </EuiTextColor>
+      </div>
+    </EuiEmptyPrompt>
+  </Component>
+</Component>
+`;
+
+exports[`EmptyState component renders child components when count is truthy 1`] = `
+<Fragment>
+  <div>
+    Foo
+  </div>
+  <div>
+    Bar
+  </div>
+  <div>
+    Baz
+  </div>
+</Fragment>
+`;
+
+exports[`EmptyState component renders message while loading 1`] = `
+<Component
+  count={1}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  loading={true}
+>
+  <Component>
+    <EuiEmptyPrompt
+      iconColor="subdued"
+      title={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiTitle
+              size="l"
+              textTransform="none"
+            >
+              <h3>
+                Loading…
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiLoadingSpinner
+              size="xl"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <div
+        className="euiEmptyPrompt"
+      >
+        <EuiTextColor
+          color="subdued"
+          component="span"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            <EuiTitle
+              size="m"
+              textTransform="none"
+            >
+              <EuiFlexGroup
+                alignItems="stretch"
+                className="euiTitle euiTitle--medium"
+                component="div"
+                direction="row"
+                gutterSize="l"
+                justifyContent="flexStart"
+                responsive={true}
+                wrap={false}
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiTitle euiTitle--medium"
+                >
+                  <EuiFlexItem
+                    component="div"
+                    grow={true}
+                  >
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiTitle
+                        size="l"
+                        textTransform="none"
+                      >
+                        <h3
+                          className="euiTitle euiTitle--large"
+                        >
+                          Loading…
+                        </h3>
+                      </EuiTitle>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    component="div"
+                    grow={true}
+                  >
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiLoadingSpinner
+                        size="xl"
+                      >
+                        <div
+                          className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                        />
+                      </EuiLoadingSpinner>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </EuiTitle>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+          </span>
+        </EuiTextColor>
+      </div>
+    </EuiEmptyPrompt>
+  </Component>
+</Component>
+`;
+
+exports[`EmptyState component renders the message when an error occurs 1`] = `
+<Component
+  count={1}
+  error="An error occurred"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <Component
+    errorMessage="An error occurred"
+  >
+    <EuiEmptyPrompt
+      body={
+        <p>
+          An error occurred
+        </p>
+      }
+      iconColor="subdued"
+      title={
+        <EuiTitle
+          size="l"
+          textTransform="none"
+        >
+          <h3>
+            Error
+          </h3>
+        </EuiTitle>
+      }
+    >
+      <div
+        className="euiEmptyPrompt"
+      >
+        <EuiTextColor
+          color="subdued"
+          component="span"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            <EuiTitle
+              size="m"
+              textTransform="none"
+            >
+              <EuiTitle
+                className="euiTitle euiTitle--medium"
+                size="l"
+                textTransform="none"
+              >
+                <h3
+                  className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                >
+                  Error
+                </h3>
+              </EuiTitle>
+            </EuiTitle>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiText
+              grow={true}
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <p>
+                  An error occurred
+                </p>
+              </div>
+            </EuiText>
+          </span>
+        </EuiTextColor>
+      </div>
+    </EuiEmptyPrompt>
+  </Component>
+</Component>
+`;

@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    describe.skip('Shard Allocation Per Node', () => {
+    describe('Shard Allocation Per Node', () => {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('Shard Allocation Per Index', () => {
+    describe('Shard Allocation Per Index', () => {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');

@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 import { fromRoot } from '../../utils';
+import { generateCSPNonce, createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -212,7 +213,11 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedVarsOverrides
     });
 
-    return h.view('ui_app', {
+    const nonce = await generateCSPNonce();
+
+    const response = h.view('ui_app', {
+      nonce,
+      strictCsp: config.get('csp.strict'),
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
@@ -226,6 +231,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
+        csp: {
+          warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
+        },
         vars: await replaceInjectedVars(
           request,
           mergeVariables(
@@ -238,6 +246,11 @@ export function uiRenderMixin(kbnServer, server, config) {
         legacyMetadata,
       },
     });
+
+    const csp = createCSPRuleString(config.get('csp.rules'), nonce);
+    response.header('content-security-policy', csp);
+
+    return response;
   }
 
   server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {

@@ -20,7 +20,7 @@
 export { FunctionsRegistry } from './lib/functions_registry';
 export { TypesRegistry } from './lib/types_registry';
 export { createError } from './interpreter/create_error';
-export { interpretProvider } from './interpreter/interpret';
+export { interpreterProvider } from './interpreter/interpret';
 export { serializeProvider } from './lib/serialize';
 export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
 export { Fn } from './lib/fn';

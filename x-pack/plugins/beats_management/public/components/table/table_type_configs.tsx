@@ -52,6 +52,60 @@ export interface TableType {
   controlDefinitions(items: any[]): ControlDefinitions;
 }
 
+const dynamicStatuses = {
+  STARTING: {
+    color: 'success',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.startingStatusLabel', {
+      defaultMessage: 'Starting',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.startingTooltip', {
+      defaultMessage: 'This Beat is starting.',
+    }),
+  },
+  IN_PROGRESS: {
+    color: 'warning',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.updatingStatusLabel', {
+      defaultMessage: 'Updating',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.progressTooltip', {
+      defaultMessage: 'This Beat is currently reloading config from CM.',
+    }),
+  },
+  RUNNING: {
+    color: 'success',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.runningStatusLabel', {
+      defaultMessage: 'Running',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.runningTooltip', {
+      defaultMessage: 'This Beat is running without issues.',
+    }),
+  },
+  CONFIG: {
+    color: 'danger',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.configErrorStatusLabel', {
+      defaultMessage: 'Config error',
+    }),
+  },
+  FAILED: {
+    color: 'danger',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.failedStatusLabel', {
+      defaultMessage: 'Error',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.errorTooltip', {
+      defaultMessage: 'There is an error on this beat, please check the logs for this host.',
+    }),
+  },
+  STOPPED: {
+    color: 'danger',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.stoppedStatusLabel', {
+      defaultMessage: 'stopped',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.errorTooltip', {
+      defaultMessage: 'There is an error on this beat, please check the logs for this host.',
+    }),
+  },
+};
+
 export const BeatsTableType: TableType = {
   itemType: 'Beats',
   columnDefinitions: [
@@ -107,46 +161,48 @@ export const BeatsTableType: TableType = {
           }
         );
 
-        switch (beat.config_status) {
-          case 'UNKNOWN':
-            color = 'subdued';
-            statusText = i18n.translate(
-              'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
-              {
-                defaultMessage: 'Offline',
-              }
-            );
-            if (moment().diff(beat.last_checkin, 'minutes') >= 10) {
-              tooltipText = i18n.translate(
-                'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
-                {
-                  defaultMessage: 'This Beat has not connected to kibana in over 10min',
-                }
-              );
-            } else {
-              tooltipText = i18n.translate(
-                'xpack.beatsManagement.beatsTable.configStatus.notStartedTooltip',
-                {
-                  defaultMessage: 'This Beat has not yet been started.',
-                }
-              );
+        if (beat.status && moment().diff(beat.last_checkin, 'minutes') < 10) {
+          color = dynamicStatuses[beat.status.event.type].color;
+          statusText = dynamicStatuses[beat.status.event.type].status;
+          tooltipText =
+            (dynamicStatuses[beat.status.event.type] as any).details || beat.status.event.message;
+        } else if (!beat.status && moment().diff(beat.last_checkin, 'minutes') >= 10) {
+          color = 'danger';
+          statusText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
+            {
+              defaultMessage: 'Offline',
             }
-            break;
-          case 'ERROR':
-            color = 'danger';
-            statusText = i18n.translate(
-              'xpack.beatsManagement.beatsTable.configStatus.errorLabel',
-              {
-                defaultMessage: 'Error',
-              }
-            );
-            tooltipText = i18n.translate(
-              'xpack.beatsManagement.beatsTable.configStatus.errorTooltip',
-              {
-                defaultMessage: 'Please check the logs of this Beat for error details',
-              }
-            );
-            break;
+          );
+          tooltipText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
+            {
+              defaultMessage: 'This Beat has not connected to kibana in over 10min',
+            }
+          );
+        } else if (beat.status && moment().diff(beat.last_checkin, 'minutes') >= 10) {
+          color = 'subdued';
+
+          tooltipText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.notStartedTooltip',
+            {
+              defaultMessage: 'This Beat has not yet been started.',
+            }
+          );
+          statusText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.notStartedLabel',
+            {
+              defaultMessage: 'Not started',
+            }
+          );
+        } else {
+          color = 'subdued';
+          statusText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
+            {
+              defaultMessage: 'Offline',
+            }
+          );
         }
 
         return (

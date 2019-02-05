@@ -28,6 +28,17 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
   class TimePickerPage {
 
+    formatDateToAbsoluteTimeString(date) {
+      // toISOString returns dates in format 'YYYY-MM-DDTHH:mm:ss.sssZ'
+      // Need to replace T with space and remove timezone
+      const dateString = date.toISOString().replace('T', ' ');
+      return dateString.substring(0, 23);
+    }
+
+    /**
+     * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
+     * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
+     */
     async setAbsoluteRange(fromTime, toTime) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
       await this.showStartEndTimes();
@@ -52,11 +63,9 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
         // click query bar submit button to apply time range
         await testSubjects.click('querySubmitButton');
       }
-      await testSubjects.click('superDatePickerApplyTimeButton');
 
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
-
 
     async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');

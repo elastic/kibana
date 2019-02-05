@@ -74,7 +74,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: resp.body.id,
       type: 'globaltype',
       updated_at: resp.body.updated_at,
-      version: 2,
+      version: resp.body.version,
       attributes: {
         name: 'My second favorite',
       },
@@ -99,7 +99,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: resp.body.id,
       type: 'visualization',
       updated_at: resp.body.updated_at,
-      version: 2,
+      version: resp.body.version,
       attributes: {
         title: 'My second favorite vis',
       },
