@@ -59,9 +59,7 @@ uiRoutes
     k7Breadcrumbs
   });
 
-app.controller('doc', function ($scope, $route, es, config) {
-
-  config.bindToScope($scope, 'k7design');
+app.controller('doc', function ($scope, $route, es) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 

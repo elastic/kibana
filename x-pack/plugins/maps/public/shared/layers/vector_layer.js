@@ -14,7 +14,7 @@ import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
 import { FeatureTooltip } from '../../components/map/feature_tooltip';
-import { store } from '../../store/store';
+import { getStore } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
 
@@ -40,8 +40,7 @@ export class VectorLayer extends AbstractLayer {
     layerDescriptor.type = VectorLayer.type;
 
     if (!options.style) {
-      // TODO pass store in as argument. Accessing store this way is unsafe
-      const mapColors = getMapColors(store.getState());
+      const mapColors = getMapColors(getStore().getState());
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
@@ -69,7 +68,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   isJoinable() {
-    return !this._source.isFilterByMapBounds();
+    return true;
   }
 
   getJoins() {

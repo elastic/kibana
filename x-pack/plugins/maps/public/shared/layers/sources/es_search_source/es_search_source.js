@@ -9,9 +9,6 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { AbstractESSource } from '../es_source';
-import {
-  indexPatternService,
-} from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -59,10 +56,14 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getNumberFields() {
-    const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    return indexPattern.fields.byType.number.map(field => {
-      return { name: field.name, label: field.name };
-    });
+    try {
+      const indexPattern = await this._getIndexPattern();
+      return indexPattern.fields.byType.number.map(field => {
+        return { name: field.name, label: field.name };
+      });
+    } catch (error) {
+      return [];
+    }
   }
 
   getFieldNames() {

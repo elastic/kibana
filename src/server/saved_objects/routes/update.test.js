@@ -67,7 +67,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
 
   it('calls upon savedObjectClient.update', async () => {
     const attributes = { title: 'Testing' };
-    const options = { version: 2, references: [] };
+    const options = { version: 'foo', references: [] };
     const request = {
       method: 'PUT',
       url: '/api/saved_objects/index-pattern/logstash-*',

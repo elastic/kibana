@@ -15,10 +15,8 @@ import { LayerTocActions } from '../../../../../shared/components/layer_toc_acti
 
 export class TOCEntry extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      displayName: null };
+  state = {
+    displayName: null
   }
 
   componentDidMount() {
@@ -29,7 +27,6 @@ export class TOCEntry extends React.Component {
   componentWillUnmount() {
     this._isMounted = false;
   }
-
 
   async _updateDisplayName() {
     const label = await this.props.layer.getDisplayName();
@@ -59,6 +56,7 @@ export class TOCEntry extends React.Component {
         toggleVisible={() => {
           toggleVisible(layer.getId());
         }}
+        displayName={this.state.displayName}
       />
     );
     let tocDetails = layer.getTOCDetails();

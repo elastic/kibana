@@ -13,30 +13,30 @@ import _ from 'lodash';
 
 export class AbstractVectorSource extends AbstractSource {
 
-  static async getGeoJson({ format, meta }, fetchUrl) {
-    let jsonFeatures;
+  static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {
+    let fetchedJson;
     try {
-      format = _.get(format, 'type', format); // Hacky workaround for differing config data structure
-      const vectorFetch = await fetch(fetchUrl);
-      const fetchedJson = await vectorFetch.json();
-
-      if (format === 'geojson') {
-        jsonFeatures = fetchedJson;
-      } else if (format === 'topojson') {
-        const featureCollectionPath = meta && meta.feature_collection_path
-          && `objects.${meta.feature_collection_path}` || 'objects.data';
-        const features = _.get(fetchedJson, featureCollectionPath);
-        jsonFeatures = topojson.feature(fetchedJson, features);
-      } else {
-        //should never happen
-        jsonFeatures = {};
-        throw new Error(`Unrecognized format: ${format}`);
+      // TODO proxy map.regionmap url requests through kibana server and then use kfetch
+      // Can not use kfetch because fetchUrl may point to external URL. (map.regionmap)
+      const response = await fetch(fetchUrl);
+      if (!response.ok) {
+        throw new Error('Request failed');
       }
+      fetchedJson = await response.json();
     } catch (e) {
-      console.error(e);
-      throw e;
+      throw new Error(`Unable to fetch vector shapes from url: ${fetchUrl}`);
     }
-    return jsonFeatures;
+
+    if (format === 'geojson') {
+      return fetchedJson;
+    }
+
+    if (format === 'topojson') {
+      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
+      return topojson.feature(fetchedJson, features);
+    }
+
+    throw new Error(`Unrecognized vector shape format: ${format}`);
   }
 
   _createDefaultLayerDescriptor(options) {

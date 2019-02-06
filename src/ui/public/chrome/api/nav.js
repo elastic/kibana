@@ -44,6 +44,24 @@ export function initChromeNavApi(chrome, internals) {
     );
   };
 
+
+  const forceAppSwitcherNavigation$ = new Rx.BehaviorSubject(false);
+  /**
+   * Enable forced navigation mode, which will trigger a page refresh
+   * when a nav link is clicked and only the hash is updated. This is only
+   * necessary when rendering the status page in place of another app, as
+   * links to that app will set the current URL and change the hash, but
+   * the routes for the correct are not loaded so nothing will happen.
+   * https://github.com/elastic/kibana/pull/29770
+   */
+  chrome.enableForcedAppSwitcherNavigation = () => {
+    forceAppSwitcherNavigation$.next(true);
+    return chrome;
+  };
+  chrome.getForceAppSwitcherNavigation$ = () => {
+    return forceAppSwitcherNavigation$.asObservable();
+  };
+
   chrome.navLinkExists = (id) => {
     return !!internals.nav.find(link => link.id === id);
   };

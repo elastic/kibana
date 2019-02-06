@@ -16,6 +16,8 @@ interface Props {
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
+  isLiveStreaming?: boolean;
+  stopLiveStreaming?: () => void;
 }
 
 export class Section extends React.PureComponent<Props> {
@@ -30,6 +32,8 @@ export class Section extends React.PureComponent<Props> {
         onChangeRangeTime: this.props.onChangeRangeTime,
         crosshairValue: this.props.crosshairValue,
         onCrosshairUpdate: this.props.onCrosshairUpdate,
+        isLiveStreaming: this.props.isLiveStreaming,
+        stopLiveStreaming: this.props.stopLiveStreaming,
       };
     }
     const Component = sections[this.props.section.type];

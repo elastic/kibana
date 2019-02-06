@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import Url from 'url';
+
 import classNames from 'classnames';
 import React, { Component, Fragment } from 'react';
 import * as Rx from 'rxjs';
@@ -71,6 +73,7 @@ interface Props {
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
+  forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<HelpExtension>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
@@ -90,6 +93,28 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
+function extendNavLink(navLink: NavLink) {
+  return {
+    ...navLink,
+    href: navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
+  };
+}
+
+function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
+  let current = element;
+  while (current) {
+    if (current.tagName === 'A') {
+      return current as HTMLAnchorElement;
+    }
+
+    if (!current.parentElement || current.parentElement === document.body) {
+      return undefined;
+    }
+
+    current = current.parentElement;
+  }
+}
+
 interface State {
   isCollapsed: boolean;
   flyoutIsCollapsed: boolean;
@@ -100,13 +125,16 @@ interface State {
   showScrollbar: boolean;
   outsideClickDisabled: boolean;
   isManagingFocus: boolean;
-  navLinks: NavLink[];
+  navLinks: Array<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: Array<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
+  forceNavigation: boolean;
 }
 
 class HeaderUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
   private timeoutID?: ReturnType<typeof setTimeout>;
+  private timeoutExpand?: ReturnType<typeof setTimeout>;
+  private timeoutScrollbar?: ReturnType<typeof setTimeout>;
 
   constructor(props: Props) {
     super(props);
@@ -123,17 +151,20 @@ class HeaderUI extends Component<Props, State> {
       isManagingFocus: false,
       navLinks: [],
       recentlyAccessed: [],
+      forceNavigation: false,
     };
   }
 
   public componentDidMount() {
     this.subscription = Rx.combineLatest(
       this.props.navLinks$,
-      this.props.recentlyAccessed$
+      this.props.recentlyAccessed$,
+      this.props.forceAppSwitcherNavigation$
     ).subscribe({
-      next: ([navLinks, recentlyAccessed]) => {
+      next: ([navLinks, recentlyAccessed, forceNavigation]) => {
         this.setState({
-          navLinks,
+          forceNavigation,
+          navLinks: navLinks.map(navLink => extendNavLink(navLink)),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra)
           ),
@@ -154,6 +185,7 @@ class HeaderUI extends Component<Props, State> {
       <EuiHeaderLogo
         data-test-subj="logo"
         iconType="logoKibana"
+        onClick={this.onNavClick}
         href={homeHref}
         aria-label={intl.formatMessage({
           id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
@@ -214,7 +246,7 @@ class HeaderUI extends Component<Props, State> {
             isCollapsed={this.state.isCollapsed}
             flyoutIsCollapsed={this.state.flyoutIsCollapsed}
             flyoutIsAnimating={this.state.flyoutIsAnimating}
-            onMouseOver={this.expandDrawer}
+            onMouseEnter={this.expandDrawer}
             onFocus={this.expandDrawer}
             onBlur={this.focusOut}
             onMouseLeave={this.collapseDrawer}
@@ -222,10 +254,14 @@ class HeaderUI extends Component<Props, State> {
             showScrollbar={this.state.showScrollbar}
             data-test-subj={classNames(
               'navDrawer',
-              this.state.isCollapsed ? 'collapsed' : 'expanded'
+              this.state.flyoutIsAnimating
+                ? null
+                : this.state.isCollapsed
+                ? 'collapsed'
+                : 'expanded'
             )}
           >
-            <EuiNavDrawerMenu id="navDrawerMenu">
+            <EuiNavDrawerMenu id="navDrawerMenu" onClick={this.onNavClick}>
               <EuiListGroup>
                 <EuiListGroupItem
                   label="Recently viewed"
@@ -252,9 +288,7 @@ class HeaderUI extends Component<Props, State> {
                     <EuiListGroupItem
                       key={navLink.id}
                       label={navLink.title}
-                      href={
-                        navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url
-                      }
+                      href={navLink.href}
                       iconType={navLink.euiIconType}
                       size="s"
                       style={{ color: 'inherit' }}
@@ -287,6 +321,47 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
+  private onNavClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const anchor = findClosestAnchor((event as any).nativeEvent.target);
+    if (!anchor) {
+      return;
+    }
+
+    const navLink = this.state.navLinks.find(item => item.href === anchor.href);
+    if (navLink && navLink.disabled) {
+      event.preventDefault();
+      return;
+    }
+
+    if (
+      !this.state.forceNavigation ||
+      event.isDefaultPrevented() ||
+      event.altKey ||
+      event.metaKey ||
+      event.ctrlKey
+    ) {
+      return;
+    }
+
+    const toParsed = Url.parse(anchor.href);
+    const fromParsed = Url.parse(document.location.href);
+    const sameProto = toParsed.protocol === fromParsed.protocol;
+    const sameHost = toParsed.host === fromParsed.host;
+    const samePath = toParsed.path === fromParsed.path;
+
+    if (sameProto && sameHost && samePath) {
+      if (toParsed.hash) {
+        document.location.reload();
+      }
+
+      // event.preventDefault() keeps the browser from seeing the new url as an update
+      // and even setting window.location does not mimic that behavior, so instead
+      // we use stopPropagation() to prevent angular from seeing the click and
+      // starting a digest cycle/attempting to handle it in the router.
+      event.stopPropagation();
+    }
+  };
+
   private toggleOpen = () => {
     this.setState({
       mobileIsHidden: !this.state.mobileIsHidden,
@@ -300,13 +375,17 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private expandDrawer = () => {
-    this.setState({ isCollapsed: false });
+    this.timeoutExpand = setTimeout(() => {
+      this.setState({
+        isCollapsed: false,
+      });
+    }, this.getTimeoutMs(750));
 
-    setTimeout(() => {
+    this.timeoutScrollbar = setTimeout(() => {
       this.setState({
         showScrollbar: true,
       });
-    }, this.getTimeoutMs(350));
+    }, this.getTimeoutMs(1200));
 
     // This prevents the drawer from collapsing when tabbing through children
     // by clearing the timeout thus cancelling the onBlur event (see focusOut).
@@ -326,32 +405,34 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private collapseDrawer = () => {
+    // Stop the expand animation
+    if (this.timeoutExpand) {
+      clearTimeout(this.timeoutExpand);
+    }
+
+    if (this.timeoutScrollbar) {
+      clearTimeout(this.timeoutScrollbar);
+    }
+
     this.setState({
       flyoutIsAnimating: false,
+      isCollapsed: true,
+      flyoutIsCollapsed: true,
+      mobileIsHidden: true,
+      showScrollbar: false,
+      outsideClickDisabled: true,
     });
 
-    setTimeout(() => {
-      this.setState({
-        isCollapsed: true,
-        flyoutIsCollapsed: true,
-        mobileIsHidden: true,
-        showScrollbar: false,
-        outsideClickDisabled: true,
-      });
-    }, this.getTimeoutMs(350));
-
     // Scrolls the menu and flyout back to top when the nav drawer collapses
-    setTimeout(() => {
-      const menuEl = document.getElementById('navDrawerMenu');
-      if (menuEl) {
-        menuEl.scrollTop = 0;
-      }
+    const menuEl = document.getElementById('navDrawerMenu');
+    if (menuEl) {
+      menuEl.scrollTop = 0;
+    }
 
-      const flyoutEl = document.getElementById('navDrawerFlyout');
-      if (flyoutEl) {
-        flyoutEl.scrollTop = 0;
-      }
-    }, this.getTimeoutMs(300));
+    const flyoutEl = document.getElementById('navDrawerFlyout');
+    if (flyoutEl) {
+      flyoutEl.scrollTop = 0;
+    }
   };
 
   private focusOut = () => {

@@ -11,6 +11,7 @@ import { RESET_LAYER_LOAD } from '../actions/ui_actions';
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
+export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const FLYOUT_STATE = {
   NONE: 'NONE',
   LAYER_PANEL: 'LAYER_PANEL',
@@ -27,7 +28,8 @@ const INITIAL_STATE = {
   layerLoad: {
     status: LAYER_LOAD_STATE.inactive,
     time: Date()
-  }
+  },
+  isFullScreen: false,
 };
 
 // Reducer
@@ -48,6 +50,8 @@ function ui(state = INITIAL_STATE, action) {
       return { ...state, isSetViewOpen: false };
     case OPEN_SET_VIEW:
       return { ...state, isSetViewOpen: true };
+    case SET_FULL_SCREEN:
+      return { ...state, isFullScreen: action.isFullScreen };
     default:
       return state;
   }
@@ -70,10 +74,23 @@ export function openSetView() {
     type: OPEN_SET_VIEW,
   };
 }
+export function exitFullScreen() {
+  return {
+    type: SET_FULL_SCREEN,
+    isFullScreen: false
+  };
+}
+export function enableFullScreen() {
+  return {
+    type: SET_FULL_SCREEN,
+    isFullScreen: true
+  };
+}
 
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
 export const getIsSetViewOpen = ({ ui }) => _.get(ui, 'isSetViewOpen', false);
+export const getIsFullScreen = ({ ui }) => _.get(ui, 'isFullScreen', false);
 
 export default ui;

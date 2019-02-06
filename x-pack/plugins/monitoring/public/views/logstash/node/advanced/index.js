@@ -17,7 +17,7 @@ import { MonitoringViewBaseController } from '../../../base_controller';
 import { DetailStatus } from 'plugins/monitoring/components/logstash/detail_status';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../../components/chart';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -82,7 +82,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
         ];
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
                 <EuiPanel>
@@ -105,7 +105,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

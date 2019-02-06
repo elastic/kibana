@@ -26,7 +26,7 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tagcloud function without buckets 1`] = `"tagcloud visConfig='{\\"metric\\":0}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":0,\\"geohash\\":1,\\"geocentroid\\":3}' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":0,\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles timelion function 1`] = `"timelion_vis expression='foo' interval='bar' "`;
 

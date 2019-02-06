@@ -5,13 +5,13 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from '../../../common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Setup } from '../helpers/setup_request';
 
 export async function getErrorCount(

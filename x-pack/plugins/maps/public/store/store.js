@@ -9,8 +9,7 @@ import thunk from 'redux-thunk';
 import ui from './ui';
 import { map } from './map';
 
-// TODO this should not be exported and all access to the store be via getStore
-export let store;
+let store;
 
 const rootReducer = combineReducers({
   map,
@@ -21,7 +20,7 @@ const enhancers = [ applyMiddleware(thunk) ];
 window.__REDUX_DEVTOOLS_EXTENSION
   && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
-export const getStore = async function () {
+export const getStore = function () {
   if (store) {
     return store;
   }

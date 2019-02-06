@@ -49,20 +49,30 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     ];
   }
 
-  async getGeoJsonWithMeta() {
+  async _getVectorFileMeta() {
     const regionList = await getKibanaRegionList();
-    const fileSource = regionList.find(source => source.name === this._descriptor.name);
-    const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fileSource.url);
+    const meta = regionList.find(source => source.name === this._descriptor.name);
+    if (!meta) {
+      throw new Error(`Unable to find map.regionmap configuration for ${this._descriptor.name}`);
+    }
+    return meta;
+  }
+
+  async getGeoJsonWithMeta() {
+    const vectorFileMeta = await this._getVectorFileMeta();
+    const featureCollection = await AbstractVectorSource.getGeoJson({
+      format: vectorFileMeta.format.type,
+      featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
+      fetchUrl: vectorFileMeta.url
+    });
     return {
       data: featureCollection
     };
   }
 
   async getStringFields() {
-    const regionList = await getKibanaRegionList();
-    const fileSource = regionList.find((source => source.name === this._descriptor.name));
-
-    return fileSource.fields.map(f => {
+    const vectorFileMeta = await this._getVectorFileMeta();
+    return vectorFileMeta.fields.map(f => {
       return { name: f.name, label: f.description };
     });
   }

@@ -17,7 +17,7 @@ import { timefilter } from 'ui/timefilter';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 
 function getPageData($injector) {
@@ -71,7 +71,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
         this.setTitle(`Kibana - ${get(data, 'kibanaSummary.name')}`);
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
                 <EuiPanel>
@@ -126,7 +126,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

@@ -190,7 +190,7 @@
     "source": {
       "type" : "map",
       "map" : {
-        "title" : "geohashgrid heatmap example",
+        "title" : "geo grid heatmap example",
         "mapStateJSON" : "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"3xlvm\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"427aa49d-a552-4e7d-a629-67c47db27128\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{\"alphaValue\":1},\"previousStyle\":null},\"type\":\"HEATMAP\"}]",
         "uiStateJSON" : "{\"isDarkMode\":false}",
@@ -220,7 +220,7 @@
     "source": {
       "type" : "map",
       "map" : {
-        "title" : "geohashgrid vector grid example",
+        "title" : "geo grid vector grid example",
         "description" : "",
         "mapStateJSON" : "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}},\"alphaValue\":1},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
@@ -324,6 +324,51 @@
               [
                 172.235,
                 6.35533
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "map:745c98b0-23e1-11e9-a048-6fef5a3e0d1e",
+    "source": {
+      "type": "map",
+      "map": {
+        "title" : "layer with errors",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":0.71,\"center\":{\"lon\":0.10268,\"lat\":0},\"timeFilters\":{\"from\":\"now-7d\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
+        "layerListJSON" : "[{\"sourceDescriptor\":{\"type\":\"KIBANA_TILEMAP\",\"url\":\"https://a.tile.openstreetmap.org/{z}/{x}/{y}.png\"},\"id\":\"ap0ys\",\"label\":\"Custom TMS\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{},\"previousStyle\":null},\"type\":\"TILE\",\"isInErrorState\":true,\"errorMessage\":\"Tiles from \\\"https://a.tile.openstreetmap.org/{z}/{x}/{y}.png\\\" could not be loaded\"},{\"sourceDescriptor\":{\"type\":\"REGIONMAP_FILE\",\"name\":\"nameThatDoesNotExitForKibanaRegionmapSource\"},\"temporary\":false,\"id\":\"0sabv\",\"label\":\"Custom_vector_shapes\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#3cb44b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"previousStyle\":null},\"type\":\"VECTOR\",\"isInErrorState\":true,\"errorMessage\":\"Cannot read property 'url' of undefined\"},{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"idThatDoesNotExitForEMSTile\"},\"temporary\":false,\"id\":\"plw9l\",\"label\":\"EMS_tiles\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{\"type\":\"TILE\",\"properties\":{},\"previousStyle\":null},\"type\":\"TILE\"},{\"sourceDescriptor\":{\"type\":\"EMS_FILE\",\"id\":\"idThatDoesNotExitForEMSFileSource\"},\"temporary\":false,\"id\":\"2gro0\",\"label\":\"EMS_vector_shapes\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"previousStyle\":null},\"type\":\"VECTOR\"},{\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"id\":\"f67fe707-95dd-46d6-89b8-82617b251b61\",\"indexPatternId\":\"idThatDoesNotExitForESGeoGridSource\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"resolution\":\"COARSE\"},\"temporary\":false,\"id\":\"pl5qd\",\"label\":\"\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"previousStyle\":null},\"type\":\"VECTOR\"},{\"sourceDescriptor\":{\"id\":\"a07072bb-3a92-4320-bd37-250ef6d04db7\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"idThatDoesNotExitForESSearchSource\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[]},\"temporary\":false,\"id\":\"9bw8h\",\"label\":\"\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                -180,
+                85.05113
+              ],
+              [
+                -180,
+                -85.05113
+              ],
+              [
+                180,
+                -85.05113
+              ],
+              [
+                180,
+                85.05113
+              ],
+              [
+                -180,
+                85.05113
               ]
             ]
           ]

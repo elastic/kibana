@@ -101,7 +101,12 @@ export class Join extends Component {
   }
 
   async _loadLeftFields() {
-    const stringFields = await this.props.layer.getStringFields();
+    let stringFields;
+    try {
+      stringFields = await this.props.layer.getStringFields();
+    } catch (error) {
+      stringFields = [];
+    }
     if (!this._isMounted) {
       return;
     }
