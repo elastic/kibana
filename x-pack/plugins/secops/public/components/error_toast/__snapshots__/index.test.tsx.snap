@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Error Toast rendering it renders the default Authentication table 1`] = `
+<EuiGlobalToastList
+  dismissToast={[Function]}
+  toastLifeTimeMs={9999999999}
+  toasts={
+    Array [
+      Object {
+        "color": "danger",
+        "iconType": "alert",
+        "id": "error-123",
+        "text": <p>
+          Message of Error
+        </p>,
+        "title": "Title of Error",
+      },
+    ]
+  }
+/>
+`;

@@ -17,8 +17,15 @@ interface State {
   toasts: Toast[];
 }
 
-let showErrorHandler: (title: string, message: string) => void = noop;
-export const showError = (title: string, message: string) => showErrorHandler(title, message);
+let showErrorHandler = ({ id = uuid.v4(), title, message }: ShowErrorParams): void => noop();
+export const showError = ({ id = uuid.v4(), title, message }: ShowErrorParams) =>
+  showErrorHandler({ id, title, message });
+
+interface ShowErrorParams {
+  id?: string;
+  title: string;
+  message: string;
+}
 
 export class ErrorToast extends React.PureComponent<Props, State> {
   constructor(props: Props) {
@@ -30,13 +37,13 @@ export class ErrorToast extends React.PureComponent<Props, State> {
     showErrorHandler = this.showError;
   }
 
-  public showError = (title: string, errorMessage: string) => {
+  public showError = ({ id = uuid.v4(), title, message }: ShowErrorParams) => {
     const toast: Toast = {
-      id: `error-toast-${uuid.v4()}`,
+      id,
       title,
       color: 'danger',
       iconType: 'alert',
-      text: <p>{errorMessage}</p>,
+      text: <p>{message}</p>,
     };
 
     this.setState({

@@ -11,9 +11,9 @@ import * as i18n from './translations';
 
 export const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors != null) {
-    graphQLErrors.map(({ message }) => showError(i18n.DATA_FETCH_FAILURE, message));
+    graphQLErrors.map(({ message }) => showError({ title: i18n.DATA_FETCH_FAILURE, message }));
   }
   if (networkError != null) {
-    showError(i18n.NETWORK_FAILURE, networkError.message);
+    showError({ title: i18n.NETWORK_FAILURE, message: networkError.message });
   }
 });
