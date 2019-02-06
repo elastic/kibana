@@ -144,6 +144,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
+        await PageObjects.security.logout();
+
         await PageObjects.security.login(
           'no_timelion_privileges_user',
           'no_timelion_privileges_user-password',
