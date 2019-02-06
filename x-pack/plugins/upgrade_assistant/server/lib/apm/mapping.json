@@ -1,5 +1,6 @@
 {
   "_meta": {
+    "beat": "apm",
     "version": "7.0.0"
   },
   "date_detection": false,
@@ -93,6 +94,7 @@
       "type": "date"
     },
     "agent": {
+      "dynamic": false,
       "properties": {
         "ephemeral_id": {
           "ignore_above": 1024,
@@ -121,6 +123,7 @@
       }
     },
     "client": {
+      "dynamic": false,
       "properties": {
         "address": {
           "ignore_above": 1024,
@@ -236,6 +239,7 @@
       }
     },
     "container": {
+      "dynamic": false,
       "properties": {
         "id": {
           "ignore_above": 1024,
@@ -356,8 +360,8 @@
           "type": "keyword"
         },
         "culprit": {
-          "norms": false,
-          "type": "text"
+          "ignore_above": 1024,
+          "type": "keyword"
         },
         "exception": {
           "properties": {
@@ -419,10 +423,6 @@
           "type": "keyword"
         }
       }
-    },
-    "error id icon": {
-      "ignore_above": 1024,
-      "type": "keyword"
     },
     "event": {
       "properties": {
@@ -568,6 +568,7 @@
       }
     },
     "host": {
+      "dynamic": false,
       "properties": {
         "architecture": {
           "ignore_above": 1024,
@@ -662,6 +663,7 @@
       }
     },
     "http": {
+      "dynamic": false,
       "properties": {
         "request": {
           "properties": {
@@ -720,6 +722,7 @@
       }
     },
     "kubernetes": {
+      "dynamic": false,
       "properties": {
         "annotations": {
           "type": "object"
@@ -833,6 +836,7 @@
       }
     },
     "observer": {
+      "dynamic": false,
       "properties": {
         "geo": {
           "properties": {
@@ -927,6 +931,9 @@
         "version": {
           "ignore_above": 1024,
           "type": "keyword"
+        },
+        "version_major": {
+          "type": "byte"
         }
       }
     },
@@ -980,6 +987,7 @@
       }
     },
     "process": {
+      "dynamic": false,
       "properties": {
         "args": {
           "ignore_above": 1024,
@@ -1102,6 +1110,7 @@
       }
     },
     "service": {
+      "dynamic": false,
       "properties": {
         "environment": {
           "ignore_above": 1024,
@@ -1413,13 +1422,13 @@
         },
         "name": {
           "fields": {
-            "keyword": {
-              "ignore_above": 1024,
-              "type": "keyword"
+            "text": {
+              "norms": false,
+              "type": "text"
             }
           },
-          "norms": false,
-          "type": "text"
+          "ignore_above": 1024,
+          "type": "keyword"
         },
         "result": {
           "ignore_above": 1024,
@@ -1442,6 +1451,7 @@
       }
     },
     "url": {
+      "dynamic": false,
       "properties": {
         "domain": {
           "ignore_above": 1024,
@@ -1452,10 +1462,6 @@
           "type": "keyword"
         },
         "full": {
-          "ignore_above": 1024,
-          "type": "keyword"
-        },
-        "hostname": {
           "ignore_above": 1024,
           "type": "keyword"
         },
@@ -1489,6 +1495,7 @@
       }
     },
     "user": {
+      "dynamic": false,
       "properties": {
         "email": {
           "ignore_above": 1024,
@@ -1499,8 +1506,16 @@
           "type": "keyword"
         },
         "group": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
         },
         "hash": {
           "ignore_above": 1024,
@@ -1517,18 +1532,15 @@
       }
     },
     "user_agent": {
+      "dynamic": false,
       "properties": {
         "device": {
-          "ignore_above": 1024,
-          "type": "keyword"
-        },
-        "major": {
-          "ignore_above": 1024,
-          "type": "keyword"
-        },
-        "minor": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
         },
         "name": {
           "ignore_above": 1024,
@@ -1558,12 +1570,6 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "major": {
-              "type": "long"
-            },
-            "minor": {
-              "type": "long"
-            },
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -1578,19 +1584,11 @@
             }
           }
         },
-        "patch": {
-          "ignore_above": 1024,
-          "type": "keyword"
-        },
         "version": {
           "ignore_above": 1024,
           "type": "keyword"
         }
       }
-    },
-    "view errors": {
-      "ignore_above": 1024,
-      "type": "keyword"
     },
     "view spans": {
       "ignore_above": 1024,

@@ -69,6 +69,13 @@ export const apmReindexScript = `
       ctx._source.observer.type = "apm-server";
   }
 
+  if (! ctx._source.containsKey("observer")) {
+      ctx._source.observer = new HashMap();
+  }
+
+  // observer.major_version
+  ctx._source.observer.version_major = 7;
+
   def listening = ctx._source.remove("listening");
   if (listening != null) {
       ctx._source.observer.listening = listening;
@@ -108,9 +115,6 @@ export const apmReindexScript = `
           if (! ctx._source.containsKey("http")) {
               ctx._source.http = new HashMap();
           }
-          if (! ctx._source.http.containsKey("request")) {
-              ctx._source.http.request = new HashMap();
-          }
 
           // context.request.http_version -> http.version
           def http_version = request.remove("http_version");
@@ -118,54 +122,8 @@ export const apmReindexScript = `
             ctx._source.http.version = http_version;
           }
 
-          // context.request.method -> http.request.method
-          def method = request.remove("method");
-          if (method != null) {
-              ctx._source.http.request.method = method.toLowerCase();
-          }
-          // context.request.env -> http.request.env
-          ctx._source.http.request.env = request.remove("env");
-          // context.request.socket -> http.request.socket
-          ctx._source.http.request.socket = request.remove("socket");
+          ctx._source.http.request = new HashMap();
 
-          // context.request.body -> http.request.body.original
-          def body = request.remove("body");
-          if (body != null) {
-            ctx._source.http.request.body = new HashMap()
-            //ctx._source.http.request.body.original = body;
-                // TODO: figure out how to handle body - it can be a string or an object
-                //request.body = bodyContent;
-          }
-
-          def parsed = request.remove("cookies");
-          if (parsed != null) {
-            ctx._source.http.request.headers = new HashMap();
-            ctx._source.http.request.headers.cookies.parsed = parsed;
-          }
-
-          if (request.headers.containsKey("cookies") && request.headers.cookies.containsKey("original")) {
-            if (ctx._source.http.request.headers == null) {
-              ctx._source.http.request.headers = new HashMap();
-            }
-            ctx._source.http.request.headers.cookies = new HashMap();
-            ctx._source.http.request.headers.cookies.original = request.headers.cookies.remove("original");
-          }
-          def ua = request.headers.remove("user-agent");
-          if (ua != null) {
-            if (ctx._source.http.request.headers == null) {
-              ctx._source.http.request.headers = new HashMap();
-            }
-            //TODO: figure out why user-agent throws an exception
-            //ctx._source.http.request.headers.user_agent = parsed;
-          }
-          def ct = request.headers.remove("content-type");
-          if (ct != null) {
-            if (ctx._source.http.request.headers == null) {
-              ctx._source.http.request.headers = new HashMap();
-            }
-            //TODO: figure out why content-type throws an exception
-            ctx._source.http.request.headers.content_type = ct;
-          }
 
           // context.request.url -> url
           HashMap url = request.remove("url");
@@ -209,7 +167,18 @@ export const apmReindexScript = `
           ctx._source.url = url;
 
           // restore what is left of request, under http
+
+          def body = request.remove("body");
+
           ctx._source.http.request = request;
+          ctx._source.http.request.method = ctx._source.http.request.method?.toLowerCase();
+
+          // context.request.body -> http.request.body.original
+          if (body != null) {
+            ctx._source.http.request.body = new HashMap();
+            ctx._source.http.request.body.original = body;
+          }
+
       }
 
       // context.service.agent -> agent
@@ -241,32 +210,65 @@ export const apmReindexScript = `
           if (username != null) {
               user.name = username;
           }
+
           // context.user.ip -> client.ip
           if (user.containsKey("ip")) {
               ctx._source.client = new HashMap();
               ctx._source.client.ip = user.remove("ip");
           }
-          // context.user.user-agent -> user_agent.original.text
-          // XXX: untested
-          //if (user.containsKey("user-agent")) {
-          //  if (ctx._source.user_agent == null) {
-          //    ctx._source.user_agent = new HashMap();
-          //  }
-          //  ctx._source.user_agent.original.text = user.remove("user-agent");
-          //}
 
-          //TODO: what about user_agent pipelines?
+          def ua = user.remove("user-agent");
+          if (ua != null) {
+            ctx._source.user_agent = new HashMap();
+            // setting original and original.text is not possible in painless
+            // as original is a keyword in ES template we cannot set it to a HashMap here, 
+            // so the following is the only possible solution:
+            ctx._source.user_agent.original = ua.substring(0, Integer.min(1024, ua.length()));
+          }
+
+          def pua = user.remove("user_agent");
+          if (pua != null) {
+            if (ctx._source.user_agent == null){
+              ctx._source.user_agent = new HashMap();
+            }
+            def os = pua.remove("os");
+            def osminor = pua.remove("os_minor");
+            def osmajor = pua.remove("os_major");
+            def osname = pua.remove("os_name");
+            if (osminor != null || osmajor != null || osname != null){
+              ctx._source.user_agent.os = new HashMap();
+              ctx._source.user_agent.os.full = os;
+              ctx._source.user_agent.os.version = osmajor + "." + osminor;
+              ctx._source.user_agent.os.name = osname;
+            }
+
+            def device = pua.remove("device");
+            if (device != null){
+              ctx._source.user_agent.device = new HashMap();
+              ctx._source.user_agent.device.name = device;
+            }
+            // not exactly reflecting 7.0, but the closes we can get
+            def patch = pua.remove("patch");
+            def minor = pua.remove("minor");
+            def major = pua.remove("major");
+            if (patch != null || minor != null || major != null){
+              ctx._source.user_agent.version = major + "." + minor + "." + patch;
+            }
+          }
 
           ctx._source.user = user;
       }
 
-      // context.custom -> event.custom
+      // context.custom -> error,transaction,span.custom
       def custom = context.remove("custom");
       if (custom != null) {
-          if (! ctx._source.containsKey("event")) {
-              ctx._source.event = new HashMap();
+          if (ctx._source.processor.event == "span") {
+              ctx._source.span.custom = custom;
+          } else if (ctx._source.processor.event == "transaction") {
+              ctx._source.transaction.custom = custom;
+          } else if (ctx._source.processor.event == "error") {
+              ctx._source.error.custom = custom;
           }
-          ctx._source.event.custom = custom;
       }
 
       // context.db -> span.db
@@ -344,10 +346,17 @@ export const apmReindexScript = `
       }
   }
 
-  // error.exception is now a list (exception chain)
   if (ctx._source.processor.event == "error") {
+      // culprit is now a keyword, so trim it down to 1024 chars
+      def culprit = ctx._source.error.remove("culprit");
+      if (culprit != null) {
+          ctx._source.error.culprit = culprit.substring(0, Integer.min(1024, culprit.length()));
+      }
+
+      // error.exception is now a list (exception chain)
       def exception = ctx._source.error.remove("exception");
       if (exception != null) {
           ctx._source.error.exception = [exception];
       }
-  }`;
+  }
+`;
