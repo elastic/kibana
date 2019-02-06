@@ -90,7 +90,11 @@ export class SavedObjectsRepository {
       references = [],
     } = options;
 
-    this._assertAllowedType(type);
+    try {
+      this._assertAllowedType(type);
+    }catch(e) {
+      throw errors.decorateBadRequestError(e, e.message);
+    }
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
@@ -146,8 +150,16 @@ export class SavedObjectsRepository {
     } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
+    objects = objects.filter(object => {
+      try {
+        this._assertAllowedType(object.type);
+        return true;
+      }catch(e) {
+        return false;
+      }
+    });
+
     const rawObjectsToCreate = objects.map((object) => {
-      this._assertAllowedType(object.type);
       const method = object.id && !overwrite ? 'create' : 'index';
       const migrated = this._migrator.migrateDocument({
         id: object.id,
@@ -236,7 +248,11 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, options = {}) {
-    this._assertAllowedType(type);
+    try {
+      this._assertAllowedType(type);
+    }catch(e) {
+      throw errors.createGenericNotFoundError();
+    }
 
     const {
       namespace
@@ -316,7 +332,6 @@ export class SavedObjectsRepository {
    */
   async find(options = {}) {
     const {
-      type,
       search,
       defaultSearchOperator = 'OR',
       searchFields,
@@ -328,12 +343,28 @@ export class SavedObjectsRepository {
       fields,
       namespace,
     } = options;
+    let { type } = options;
 
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
 
-    this._assertAllowedType(type);
+    if(Array.isArray(type)) {
+      type = type.filter(type => {
+        try{
+          this._assertAllowedType(type);
+          return false;
+        }catch(e) {
+          return true;
+        }
+      });
+    }else{
+      try {
+        this._assertAllowedType(type);
+      }catch(e) {
+        type = '';
+      }
+    }
 
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
@@ -413,7 +444,11 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => {
-          this._assertAllowedType(object.type);
+          try {
+            this._assertAllowedType(object.type);
+          }catch(e) {
+            return undefined;
+          }
           return {
             _id: this._serializer.generateRawId(namespace, object.type, object.id),
             _type: this._type,
@@ -458,7 +493,12 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
-    this._assertAllowedType(type);
+    try {
+      this._assertAllowedType(type);
+    }catch(e) {
+      throw errors.createGenericNotFoundError(type, id);
+    }
+
     const {
       namespace
     } = options;

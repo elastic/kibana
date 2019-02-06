@@ -1707,43 +1707,110 @@ describe('SavedObjectsRepository', () => {
 
   describe('unsupported types', () => {
     it('should error when attempting to \'get\' an unsupported type', async () => {
-      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
+      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Not Found'));
     });
 
     it('should error when attempting to \'bulkGet\' an unsupported type', async () => {
-      callAdminCluster.returns({ docs: [] });
-      await expect(savedObjectsRepository.bulkGet([
+      callAdminCluster.returns({
+        docs: [
+          {
+            id: 'one',
+            type: 'config',
+            _primary_term: 1,
+            _seq_no: 1,
+            found: true,
+            _source: {
+              updated_at: mockTimestamp
+            }
+          },
+        ]
+      });
+      const { saved_objectsL: savedObjects } = await savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' },
         { id: 'three', type: 'globaltype' },
         { id: 'four', type: 'hiddenType' },
-      ])).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
+      ]);
+      expect(savedObjects).toEqual([
+        {
+          id: 'one',
+          type: 'config',
+          updated_at: mockTimestamp,
+          references: [],
+          version: 'WzEsMV0=',
+        },
+      ]);
     });
 
     it('should error when attempting to \'find\' an unsupported type', async () => {
-      const errExpected = new Error('Unsupported saved object type: hiddenType');
-      await expect(savedObjectsRepository.find({ type: 'hiddenType' })).rejects.toEqual(errExpected);
+      callAdminCluster.returns({
+        status: 200,
+        hits: {
+          total: 0,
+          hits: [],
+        }
+      });
+      const results = await savedObjectsRepository.find({ type: 'hiddenType' });
+      expect(results).toEqual({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+      });
     });
 
     it('should error when attempting to \'find\' more than one unsupported types', async () => {
       const findParams = { type: ['hiddenType', 'hiddenType2'] };
-      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
-    });
-
-    it('should error when attempting to \'find\' an array of unsupported types', async () => {
-      const findParams = { type: ['hiddenType'] };
-      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
+      callAdminCluster.returns({
+        status: 200,
+        hits: {
+          total: 0,
+          hits: [],
+        }
+      });
+      const results = await savedObjectsRepository.find(findParams);
+      expect(results).toEqual({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+      });
     });
 
     it('should error when attempting to \'delete\' hidden types', async () => {
-      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
+      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Not Found'));
     });
 
     it('should error when attempting to \'bulkCreate\' an unsupported type', async () => {
-      await expect(savedObjectsRepository.bulkCreate([
+      callAdminCluster.returns({
+        items: [
+          {
+            index: {
+              _id: 'one',
+              _seq_no: 1,
+              _primary_term: 1,
+              _type: 'config',
+              attributes: {
+                title: 'Test One'
+              }
+            }
+          },
+        ]
+      });
+      const results = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } }
-      ])).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
+      ]);
+      expect(results).toEqual({
+        saved_objects: [{
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [],
+          version: 'WzEsMV0=',
+          updated_at: mockTimestamp,
+        }],
+      });
     });
 
     it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
