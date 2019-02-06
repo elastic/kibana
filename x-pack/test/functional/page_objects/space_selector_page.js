@@ -7,9 +7,11 @@
 import expect from '@kbn/expect';
 
 export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
+
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+
   const browser = getService('browser');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security']);
@@ -25,6 +27,48 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
         await testSubjects.click(`space-card-${spaceId}`);
         await PageObjects.common.sleep(1000);
       });
+    }
+
+    async navigateToSpaceGrid() {
+      return await retry.try(async () => {
+        await PageObjects.common.navigateToApp('settings');
+        await testSubjects.click('manage_spaces');
+      });
+    }
+
+    async clickCreateSpace() {
+      return await retry.try(async ()=> {
+        log.debug('create spaces');
+        await testSubjects.click('createSpaceGrid');
+        await PageObjects.common.sleep(1000);
+        log.debug('create space page');
+      });
+    }
+
+
+    async inputSpaceName(spaceName) {
+      return await retry.try(async ()=> {
+        log.debug('Add space name');
+        const nameInput = await retry.try(()=>find.byCssSelector('input[data-test-subj="spaceNameField"]'));
+        await nameInput.type(spaceName);
+        await PageObjects.common.sleep(1000);
+        log.debug('space name is space a');
+      });
+    }
+
+    async inputSpaceDescriptor(spaceDescriptor) {
+      return await retry.try(async ()=> {
+        log.debug('Add space descriptor');
+        const descInput = await retry.try(()=>find.byCssSelector('input[data-test-subj="spaceDescriptionField"]'));
+        await descInput.type(spaceDescriptor);
+        await PageObjects.common.sleep(1000);
+        log.debug('space desc is such a cool space');
+      });
+    }
+
+    async clickSaveSpace() {
+      log.debug('click save space');
+      return await testSubjects.click('save-space-button');
     }
 
     async expectHomePage(spaceId) {

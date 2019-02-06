@@ -45,6 +45,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
           fullWidth
         >
           <EuiFieldText
+            data-test-subj="urlIdentifierField"
             readOnly={!this.state.editing}
             placeholder={
               this.state.editing || !this.props.editable

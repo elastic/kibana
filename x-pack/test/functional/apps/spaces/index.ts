@@ -11,5 +11,6 @@ export default function spacesApp({ loadTestFile }: TestInvoker) {
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./spaces_selection'));
+    loadTestFile(require.resolve('./create_space'));
   });
 }
