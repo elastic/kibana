@@ -40,9 +40,7 @@ export interface IWaterfall {
   items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
-  getErrorCountByTransactionId: (
-    id?: IWaterfallItem['id']
-  ) => number | undefined;
+  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
   serviceColors: IServiceColors;
 }
 
@@ -223,40 +221,15 @@ function getDuration(items: IWaterfallItem[]) {
   return timestampEnd - timestampStart;
 }
 
-function getWaterfallItemTransactionById(
-  itemsById: IWaterfallIndex,
-  id?: IWaterfallItem['id']
-): IWaterfallItemTransaction | void {
-  if (!id) {
-    return undefined;
-  }
-
-  const item = itemsById[id];
-  if (item.docType === 'transaction') {
-    return item;
-  }
-}
-
 function createGetTransactionById(itemsById: IWaterfallIndex) {
   return (id?: IWaterfallItem['id']) => {
-    const waterfallItemTransaction = getWaterfallItemTransactionById(
-      itemsById,
-      id
-    );
-    if (waterfallItemTransaction) {
-      return waterfallItemTransaction.transaction;
+    if (!id) {
+      return undefined;
     }
-  };
-}
 
-function createGetErrorCountByTransactionId(itemsById: IWaterfallIndex) {
-  return (id?: IWaterfallItem['id']) => {
-    const waterfallItemTransaction = getWaterfallItemTransactionById(
-      itemsById,
-      id
-    );
-    if (waterfallItemTransaction) {
-      return waterfallItemTransaction.errorCount;
+    const item = itemsById[id];
+    if (item.docType === 'transaction') {
+      return item.transaction;
     }
   };
 }
@@ -273,7 +246,7 @@ export function getWaterfall(
       items: [],
       itemsById: {},
       getTransactionById: () => undefined,
-      getErrorCountByTransactionId: () => undefined,
+      errorsPerTransaction,
       serviceColors: {}
     };
   }
@@ -305,9 +278,6 @@ export function getWaterfall(
   const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
   const services = getServices(items);
   const getTransactionById = createGetTransactionById(itemsById);
-  const getErrorCountByTransactionId = createGetErrorCountByTransactionId(
-    itemsById
-  );
   const serviceColors = getServiceColors(services);
 
   return {
@@ -318,7 +288,7 @@ export function getWaterfall(
     items,
     itemsById,
     getTransactionById,
-    getErrorCountByTransactionId,
+    errorsPerTransaction,
     serviceColors
   };
 }

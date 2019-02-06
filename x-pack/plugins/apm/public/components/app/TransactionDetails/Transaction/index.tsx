@@ -140,9 +140,7 @@ export const Transaction: React.SFC<Props> = ({
       <EuiSpacer />
 
       <StickyTransactionProperties
-        errorCount={waterfall.getErrorCountByTransactionId(
-          transaction.transaction.id
-        )}
+        errorCount={waterfall.errorsPerTransaction[transaction.transaction.id]}
         transaction={transaction}
         totalDuration={waterfall.traceRootDuration}
       />

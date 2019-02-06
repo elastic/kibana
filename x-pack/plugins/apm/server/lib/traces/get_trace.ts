@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../helpers/setup_request';
 import {
   ErrorsPerTransaction,
   getTraceErrorsPerTransaction
-} from './get_trace_errors_per_transaction';
+} from '../errors/get_trace_errors_per_transaction';
+import { Setup } from '../helpers/setup_request';
 import { getTraceItems, TraceItem } from './get_trace_items';
 
 export interface TraceAPIResponse {

@@ -17,9 +17,7 @@ export interface ErrorsPerTransaction {
 
 interface TraceErrorsAggBucket {
   key: string;
-  errors: {
-    doc_count: number;
-  };
+  doc_count: number;
 }
 
 interface TraceErrorsAggResponse {
@@ -59,15 +57,6 @@ export async function getTraceErrorsPerTransaction(
         transactions: {
           terms: {
             field: 'transaction.id'
-          },
-          aggs: {
-            errors: {
-              filter: {
-                term: {
-                  'processor.event': 'error'
-                }
-              }
-            }
           }
         }
       }
@@ -79,7 +68,7 @@ export async function getTraceErrorsPerTransaction(
   return resp.aggregations.transactions.buckets.reduce(
     (acc, bucket: TraceErrorsAggBucket) => ({
       ...acc,
-      [bucket.key]: bucket.errors.doc_count
+      [bucket.key]: bucket.doc_count
     }),
     {}
   );

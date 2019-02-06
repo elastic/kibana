@@ -3,7 +3,10 @@
 exports[`waterfall_helpers getWaterfall should return full waterfall 1`] = `
 Object {
   "duration": 49660,
-  "getErrorCountByTransactionId": [Function],
+  "errorsPerTransaction": Object {
+    "myTransactionId1": 2,
+    "myTransactionId2": 3,
+  },
   "getTransactionById": [Function],
   "items": Array [
     Object {
@@ -517,7 +520,10 @@ Object {
 exports[`waterfall_helpers getWaterfall should return partial waterfall 1`] = `
 Object {
   "duration": 8634,
-  "getErrorCountByTransactionId": [Function],
+  "errorsPerTransaction": Object {
+    "myTransactionId1": 2,
+    "myTransactionId2": 3,
+  },
   "getTransactionById": [Function],
   "items": Array [
     Object {
