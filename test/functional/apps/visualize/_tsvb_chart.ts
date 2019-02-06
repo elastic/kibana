@@ -18,24 +18,32 @@
  */
 
 import expect from 'expect.js';
+import { TestWrapper } from 'typings';
 
-export default function ({ getService, getPageObjects }) {
+// tslint:disable-next-line:no-default-export
+export default function({ getService, getPageObjects }: TestWrapper) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'header',
+    'settings',
+    'visualBuilder',
+    'timePicker',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
-
-    describe('Time Series', function () {
+    describe('Time Series', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
       });
 
-      it('should show the correct count in the legend', async function () {
+      it('should show the correct count in the legend', async () => {
         await retry.try(async () => {
           await PageObjects.header.waitUntilLoadingHasFinished();
           const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
@@ -43,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show the correct count in the legend with 2h offset', async function () {
+      it('should show the correct count in the legend with 2h offset', async () => {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -51,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         expect(actualCount).to.be('293');
       });
 
-      it('should show the correct count in the legend with -2h offset', async function () {
+      it('should show the correct count in the legend with -2h offset', async () => {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
@@ -62,7 +70,6 @@ export default function ({ getService, getPageObjects }) {
         // set back to no offset for the next test, an empty string didn't seem to work here
         await PageObjects.visualBuilder.enterOffsetSeries('0h');
       });
-
     });
 
     describe('Math Aggregation', () => {
@@ -75,18 +82,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
       });
 
-      it('should not have inspector enabled', async function () {
+      it('should not have inspector enabled', async () => {
         await inspector.expectIsNotEnabled();
       });
 
-      it('should show correct data', async function () {
-        const expectedMetricValue =  '157';
+      it('should show correct data', async () => {
+        const expectedMetricValue = '157';
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${JSON.stringify(value)}`);
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
       });
-
     });
 
     describe('metric', () => {
@@ -95,18 +101,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickMetric();
       });
 
-      it('should not have inspector enabled', async function () {
+      it('should not have inspector enabled', async () => {
         await inspector.expectIsNotEnabled();
       });
 
-      it('should show correct data', async function () {
-        const expectedMetricValue =  '156';
+      it('should show correct data', async () => {
+        const expectedMetricValue = '156';
         await PageObjects.visualize.waitForVisualization();
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
       });
-
     });
 
     // add a gauge test
@@ -117,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verify gauge label and count display', async function () {
+      it('should verify gauge label and count display', async () => {
         await retry.try(async () => {
           await PageObjects.visualize.waitForVisualization();
           const labelString = await PageObjects.visualBuilder.getGaugeLabel();
@@ -136,7 +141,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verify topN label and count display', async function () {
+      it('should verify topN label and count display', async () => {
         await retry.try(async () => {
           await PageObjects.visualize.waitForVisualization();
           const labelString = await PageObjects.visualBuilder.getTopNLabel();
@@ -147,14 +152,14 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
-
     describe('markdown', () => {
-
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMarkdown();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          '2015-09-22 06:00:00.000',
+          '2015-09-22 11:00:00.000'
+        );
       });
 
       it('should allow printing raw timestamp of data', async () => {
@@ -173,7 +178,9 @@ export default function ({ getService, getPageObjects }) {
 
       describe('allow time offsets', () => {
         before(async () => {
-          await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
+          await PageObjects.visualBuilder.enterMarkdown(
+            '{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}'
+          );
           await PageObjects.visualBuilder.clickMarkdownData();
           await PageObjects.visualBuilder.clickSeriesOption();
         });
@@ -196,14 +203,16 @@ export default function ({ getService, getPageObjects }) {
           expect(value).to.be('23');
         });
       });
-
     });
     // add a table sanity timestamp
     describe('table', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTable();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          '2015-09-22 06:00:00.000',
+          '2015-09-22 11:00:00.000'
+        );
         log.debug('clicked on Table');
       });
 
@@ -223,17 +232,20 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe.skip('switch index patterns', () => {
-      before(async function () {
+      before(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.resetPage('2015-09-19 06:31:44.000', '2018-10-31 00:0:00.000');
+        await PageObjects.visualBuilder.resetPage(
+          '2015-09-19 06:31:44.000',
+          '2018-10-31 00:0:00.000'
+        );
         await PageObjects.visualBuilder.clickMetric();
       });
-      after(async function () {
+      after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
       it('should be able to switch between index patterns', async () => {
-        const expectedMetricValue =  '156';
+        const expectedMetricValue = '156';
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
@@ -252,7 +264,7 @@ export default function ({ getService, getPageObjects }) {
     describe.skip('dark mode', () => {
       it('uses dark mode flag', async () => {
         await kibanaServer.uiSettings.update({
-          'theme:darkMode': true
+          'theme:darkMode': true,
         });
 
         await PageObjects.visualBuilder.resetPage();
