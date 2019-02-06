@@ -73,6 +73,19 @@ export const serializePrivileges = (
         },
         {} as Record<string, any>
       ),
+      ...Object.entries(privilegeMap.reserved).reduce(
+        (acc, [privilegeName, privilegeActions]) => {
+          const name = PrivilegeSerializer.serializeReservedPrivilege(privilegeName);
+          acc[name] = {
+            application,
+            name,
+            actions: privilegeActions,
+            metadata: {},
+          };
+          return acc;
+        },
+        {} as Record<string, any>
+      ),
     },
   };
 };

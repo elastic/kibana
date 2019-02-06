@@ -40,6 +40,10 @@ const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
       all: ['*'],
       read: ['something:/read'],
     },
+    reserved: {
+      customApplication1: ['custom-action1'],
+      customApplication2: ['custom-action2'],
+    },
   };
 };
 
@@ -130,6 +134,7 @@ describe('GET privileges', () => {
             feature1: ['all'],
             feature2: ['all'],
           },
+          reserved: ['customApplication1', 'customApplication2'],
         },
       },
     });

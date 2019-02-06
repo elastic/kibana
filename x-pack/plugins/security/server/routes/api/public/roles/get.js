@@ -43,7 +43,10 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
         if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
           const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
-          const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
+          const featurePrivileges = privileges.filter(privilege =>
+            !PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege) &&
+            !PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
+          );
 
           return {
             base: basePrivileges.map(privilege => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)),

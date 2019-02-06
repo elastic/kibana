@@ -79,6 +79,13 @@ describe('#serializeFeaturePrivilege', () => {
   });
 });
 
+describe('#serializeReservedPrivilege', () => {
+  test('returns `reserved_${privilegeName}`', () => {
+    const result = PrivilegeSerializer.serializeReservedPrivilege('foo');
+    expect(result).toBe('reserved_foo');
+  });
+});
+
 describe('#deserializeFeaturePrivilege', () => {
   [
     {
