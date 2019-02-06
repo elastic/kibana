@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiFieldNumber,
   EuiDescribedFormGroup,
-  EuiButton,
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
@@ -66,7 +65,7 @@ class ColdPhaseUi extends PureComponent {
       defaultMessage: 'Freeze index',
     });
     return (
-      <Fragment>
+      <div id="coldPhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
           title={
             <div>
@@ -91,38 +90,26 @@ class ColdPhaseUi extends PureComponent {
                   Because your queries are slower, you can reduce the number of replicas."
                 />
               </p>
-              {phaseData[PHASE_ENABLED] ? (
-                <EuiButton
-                  color="danger"
-                  onClick={async () => {
-                    await setPhaseData(PHASE_ENABLED, false);
-                  }}
-                  aria-controls="coldPhaseContent"
-                >
+              <EuiSwitch
+                data-test-subj="enablePhaseSwitch-cold"
+                label={
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldhase.deactivateColdPhaseButton"
-                    defaultMessage="Deactivate cold phase"
-                  />
-                </EuiButton>
-              ) : (
-                <EuiButton
-                  data-test-subj="activatePhaseButton-cold"
-                  onClick={async () => {
-                    await setPhaseData(PHASE_ENABLED, true);
-                  }}
-                  aria-controls="coldPhaseContent"
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
                     defaultMessage="Activate cold phase"
                   />
-                </EuiButton>
-              )}
+                }
+                id={`${PHASE_COLD}-${PHASE_ENABLED}`}
+                checked={phaseData[PHASE_ENABLED]}
+                onChange={async e => {
+                  await setPhaseData(PHASE_ENABLED, e.target.checked);
+                }}
+                aria-controls="coldPhaseContent"
+              />
             </Fragment>
           }
           fullWidth
         >
-          <div id="coldPhaseContent" aria-live="polite" role="region">
+          <Fragment>
             {phaseData[PHASE_ENABLED] ? (
               <Fragment>
                 <MinAgeInput
@@ -181,7 +168,7 @@ class ColdPhaseUi extends PureComponent {
 
               </Fragment>
             ) : <div />}
-          </div>
+          </Fragment>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
           <Fragment>
@@ -226,7 +213,7 @@ class ColdPhaseUi extends PureComponent {
             />
           </Fragment>
         ) : null }
-      </Fragment>
+      </div>
     );
   }
 }

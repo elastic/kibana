@@ -7,45 +7,17 @@
 import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
-import {
-  getDetailPanelAutoFollowPattern,
-  getDetailPanelAutoFollowPatternName,
-  getApiStatus,
-  isAutoFollowPatternDetailPanelOpen as isDetailPanelOpen,
-} from '../../../../../store/selectors';
-
-import {
-  closeAutoFollowPatternDetailPanel as closeDetailPanel,
-  editAutoFollowPattern,
-} from '../../../../../store/actions';
-
-import {
-  SECTIONS
-} from '../../../../../constants';
+import { getSelectedAutoFollowPattern, getSelectedAutoFollowPatternId, getApiStatus, } from '../../../../../store/selectors';
+import { SECTIONS } from '../../../../../constants';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
-const mapStateToProps = (state) => {
-  return {
-    isDetailPanelOpen: isDetailPanelOpen(state),
-    autoFollowPattern: getDetailPanelAutoFollowPattern(state),
-    autoFollowPatternName: getDetailPanelAutoFollowPatternName(state),
-    apiStatus: getApiStatus(scope)(state),
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    closeDetailPanel: () => {
-      dispatch(closeDetailPanel());
-    },
-    editAutoFollowPattern: (name) => {
-      dispatch(editAutoFollowPattern(name));
-    }
-  };
-};
+const mapStateToProps = (state) => ({
+  autoFollowPatternId: getSelectedAutoFollowPatternId('detail')(state),
+  autoFollowPattern: getSelectedAutoFollowPattern('detail')(state),
+  apiStatus: getApiStatus(scope)(state),
+});
 
 export const DetailPanel = connect(
   mapStateToProps,
-  mapDispatchToProps
 )(DetailPanelView);

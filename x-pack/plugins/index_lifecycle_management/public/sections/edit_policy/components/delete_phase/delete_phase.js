@@ -14,7 +14,7 @@ import { MinAgeInput } from '../min_age_input';
 
 import {
   EuiDescribedFormGroup,
-  EuiButton,
+  EuiSwitch,
 } from '@elastic/eui';
 import {
   PHASE_DELETE,
@@ -49,63 +49,51 @@ export class DeletePhase extends PureComponent {
     } = this.props;
 
     return (
-      <EuiDescribedFormGroup
-        title={
-          <div>
-            <span className="eui-displayInlineBlock eui-alignMiddle">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
-                defaultMessage="Delete phase"
-              />
-            </span>{' '}
-            {phaseData[PHASE_ENABLED] && !isShowingErrors ? (
-              <ActiveBadge />
-            ) : null}
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
-          </div>
-        }
-        titleSize="s"
-        description={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
-                defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
-              />
+      <div id="deletePhaseContent" aria-live="polite" role="region">
+        <EuiDescribedFormGroup
+          title={
+            <div>
+              <span className="eui-displayInlineBlock eui-alignMiddle">
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
+                  defaultMessage="Delete phase"
+                />
+              </span>{' '}
+              {phaseData[PHASE_ENABLED] && !isShowingErrors ? (
+                <ActiveBadge />
+              ) : null}
+              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+            </div>
+          }
+          titleSize="s"
+          description={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
+                  defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
+                />
 
-            </p>
-            {phaseData[PHASE_ENABLED] ? (
-              <EuiButton
-                color="danger"
-                onClick={async () => {
-                  await setPhaseData(PHASE_ENABLED, false);
+              </p>
+              <EuiSwitch
+                data-test-subj="enablePhaseSwitch-delete"
+                label={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateWarmPhaseSwitchLabel"
+                    defaultMessage="Activate delete phase"
+                  />
+                }
+                id={`${PHASE_DELETE}-${PHASE_ENABLED}`}
+                checked={phaseData[PHASE_ENABLED]}
+                onChange={async e => {
+                  await setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="deletePhaseContent"
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deactivateDeletePhaseButton"
-                  defaultMessage="Deactivate delete phase"
-                />
-              </EuiButton>
-            ) : (
-              <EuiButton
-                data-test-subj="activatePhaseButton-delete"
-                onClick={async () => {
-                  await setPhaseData(PHASE_ENABLED, true);
-                }}
-                aria-controls="deletePhaseContent"
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
-                  defaultMessage="Activate delete phase"
-                />
-              </EuiButton>
-            )}
-          </Fragment>
-        }
-        fullWidth
-      >
-        <div id="deletePhaseContent" aria-live="polite" role="region">
+              />
+            </Fragment>
+          }
+          fullWidth
+        >
           {phaseData[PHASE_ENABLED] ? (
             <MinAgeInput
               errors={errors}
@@ -116,8 +104,8 @@ export class DeletePhase extends PureComponent {
               rolloverEnabled={hotPhaseRolloverEnabled}
             />
           ) : <div />}
-        </div>
-      </EuiDescribedFormGroup>
+        </EuiDescribedFormGroup>
+      </div>
     );
   }
 }

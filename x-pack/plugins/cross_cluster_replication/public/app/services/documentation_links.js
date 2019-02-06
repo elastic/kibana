@@ -9,3 +9,6 @@ import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
 
 export const autoFollowPatternUrl = `${esBase}/ccr-put-auto-follow-pattern.html`;
+export const followerIndexUrl = `${esBase}/ccr-put-follow.html`;
+export const byteUnitsUrl = `${esBase}/common-options.html#byte-units`;
+export const timeUnitsUrl = `${esBase}/common-options.html#time-units`;
