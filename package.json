@@ -153,7 +153,7 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^15.2.0",
+    "elasticsearch": "^15.4.0",
     "elasticsearch-browser": "^15.2.0",
     "encode-uri-query": "1.0.0",
     "execa": "^1.0.0",
