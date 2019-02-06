@@ -213,6 +213,7 @@
     "rimraf": "2.4.3",
     "rison-node": "1.0.0",
     "rxjs": "^6.2.1",
+    "sass-loader": "^7.1.0",
     "script-loader": "0.7.2",
     "semver": "^5.5.0",
     "stream-stream": "^1.2.6",
