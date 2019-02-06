@@ -29,7 +29,6 @@ describe('GET /api/saved_objects/_find', () => {
     server = new MockServer();
 
     const prereqs = {
-      types: ['index-pattern', 'visualization', 'foo', 'bar'],
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
@@ -195,19 +194,5 @@ describe('GET /api/saved_objects/_find', () => {
 
     const options = savedObjectsClient.find.getCall(0).args[0];
     expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern', 'visualization'], defaultSearchOperator: 'OR' });
-  });
-
-  it('should return 400 if type is not allowed', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=invalid-type',
-    };
-
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(statusCode).toBe(400);
-    expect(response.message).toMatch(/one of/);
-    expect(response.message).toMatch(/index-pattern/);
   });
 });
