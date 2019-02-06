@@ -7,11 +7,14 @@
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { WithHoverActions } from '../with_hover_actions';
 import * as i18n from './translations';
+
+const Column = pure<{ text: string }>(({ text }) => <span>{text}</span>);
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -55,9 +58,8 @@ export const columns = [
             </EuiToolTip>
           </HoverActionsContainer>
         }
-      >
-        <span>{field}</span>
-      </WithHoverActions>
+        render={() => <Column text={field} />}
+      />
     ),
   },
   {
@@ -74,9 +76,8 @@ export const columns = [
             </EuiToolTip>
           </HoverActionsContainer>
         }
-      >
-        <span>{note}</span>
-      </WithHoverActions>
+        render={() => <Column text={note} />}
+      />
     ),
   },
 ];

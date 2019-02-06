@@ -9,6 +9,7 @@ import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
+import * as i18n from './translations';
 
 export type OnCopy = (
   { content, isSuccess }: { content: string | number; isSuccess: boolean }
@@ -18,30 +19,37 @@ const ToastContainer = styled.div`
   align-items: center;
   display: flex;
   flex-direction: row;
+  user-select: none;
 `;
 
 const CopyClipboardIcon = styled(EuiIcon)`
   margin-right: 5px;
 `;
 
-const getSuccessToast = (content: string | number): Toast => ({
+interface GetSuccessToastParams {
+  content: string | number;
+  titleSummary?: string;
+}
+
+const getSuccessToast = ({ content, titleSummary }: GetSuccessToastParams): Toast => ({
   id: `copy-success-${uuid.v4()}`,
   color: 'success',
   text: (
     <ToastContainer>
       <CopyClipboardIcon type="copyClipboard" size="m" />
       <EuiText>
-        Copied <code>{content}</code> to the clipboard
+        {i18n.COPIED} <code>{content}</code> {i18n.TO_THE_CLIPBOARD}
       </EuiText>
     </ToastContainer>
   ),
-  title: `Copied '${content}'`,
+  title: `${i18n.COPIED} ${titleSummary || content}`,
 });
 
 interface Props {
   children: JSX.Element;
   content: string | number;
   onCopy?: OnCopy;
+  titleSummary?: string;
   toastLifeTimeMs?: number;
 }
 
@@ -76,9 +84,10 @@ export class Clipboard extends React.PureComponent<Props, State> {
   }
 
   private onClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const { content, onCopy } = this.props;
+    const { content, onCopy, titleSummary } = this.props;
 
     event.preventDefault();
+    event.stopPropagation();
 
     const isSuccess = copy(`${content}`, { debug: true });
 
@@ -88,7 +97,7 @@ export class Clipboard extends React.PureComponent<Props, State> {
 
     if (isSuccess) {
       this.setState({
-        toasts: [...this.state.toasts, getSuccessToast(content)],
+        toasts: [...this.state.toasts, getSuccessToast({ content, titleSummary })],
       });
     }
   };

@@ -21,7 +21,7 @@ import { mockGlobalState, mockIndexPattern } from '../../mock';
 import { createStore, State } from '../../store';
 import { flyoutHeaderHeight } from '../flyout';
 import { ColumnHeaderType } from './body/column_headers/column_header';
-import { headers } from './body/column_headers/headers';
+import { defaultHeaders } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
@@ -65,29 +65,35 @@ describe('Timeline', () => {
               <DragDropContext onDragEnd={noop}>
                 <MockedProvider mocks={mocks}>
                   <Timeline
+                    addNoteToEvent={noop}
                     id="foo"
-                    columnHeaders={headers}
+                    columnHeaders={defaultHeaders}
                     columnRenderers={columnRenderers}
                     dataProviders={mockDataProviders}
                     flyoutHeight={testFlyoutHeight}
                     flyoutHeaderHeight={flyoutHeaderHeight}
+                    indexPattern={indexPattern}
                     itemsPerPage={5}
                     itemsPerPageOptions={[5, 10, 20]}
                     kqlQuery=""
+                    notes={{}}
                     onChangeDataProviderKqlQuery={noop}
                     onChangeDroppableAndProvider={noop}
                     onChangeItemsPerPage={noop}
                     onColumnSorted={noop}
                     onDataProviderRemoved={noop}
                     onFilterChange={noop}
+                    onPinEvent={noop}
                     onRangeSelected={noop}
                     onToggleDataProviderEnabled={noop}
                     onToggleDataProviderExcluded={noop}
+                    onUnPinEvent={noop}
+                    pinnedEventIds={{}}
                     range={'1 Day'}
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    indexPattern={indexPattern}
+                    updateNote={noop}
                   />
                 </MockedProvider>
               </DragDropContext>
@@ -107,29 +113,35 @@ describe('Timeline', () => {
               <DragDropContext onDragEnd={noop}>
                 <MockedProvider mocks={mocks}>
                   <Timeline
+                    addNoteToEvent={noop}
                     id="foo"
-                    columnHeaders={headers}
+                    columnHeaders={defaultHeaders}
                     columnRenderers={columnRenderers}
                     dataProviders={mockDataProviders}
                     flyoutHeight={testFlyoutHeight}
                     flyoutHeaderHeight={flyoutHeaderHeight}
+                    indexPattern={indexPattern}
                     itemsPerPage={5}
                     itemsPerPageOptions={[5, 10, 20]}
                     kqlQuery=""
+                    notes={{}}
                     onChangeDataProviderKqlQuery={noop}
                     onChangeDroppableAndProvider={noop}
                     onChangeItemsPerPage={noop}
                     onColumnSorted={noop}
                     onDataProviderRemoved={noop}
                     onFilterChange={noop}
+                    onPinEvent={noop}
                     onRangeSelected={noop}
                     onToggleDataProviderEnabled={noop}
                     onToggleDataProviderExcluded={noop}
+                    onUnPinEvent={noop}
+                    pinnedEventIds={{}}
                     range={'1 Day'}
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    indexPattern={indexPattern}
+                    updateNote={noop}
                   />
                 </MockedProvider>
               </DragDropContext>
@@ -138,7 +150,7 @@ describe('Timeline', () => {
         </I18nProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="scrollableArea"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="horizontal-scroll"]').exists()).toEqual(true);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
@@ -149,29 +161,35 @@ describe('Timeline', () => {
               <DragDropContext onDragEnd={noop}>
                 <MockedProvider mocks={mocks}>
                   <Timeline
+                    addNoteToEvent={noop}
                     id="foo"
-                    columnHeaders={headers}
+                    columnHeaders={defaultHeaders}
                     columnRenderers={columnRenderers}
                     dataProviders={[]}
                     flyoutHeight={testFlyoutHeight}
                     flyoutHeaderHeight={flyoutHeaderHeight}
+                    indexPattern={indexPattern}
                     itemsPerPage={5}
                     itemsPerPageOptions={[5, 10, 20]}
                     kqlQuery=""
+                    notes={{}}
                     onChangeDataProviderKqlQuery={noop}
                     onChangeDroppableAndProvider={noop}
                     onChangeItemsPerPage={noop}
                     onColumnSorted={noop}
                     onDataProviderRemoved={noop}
                     onFilterChange={noop}
+                    onPinEvent={noop}
                     onRangeSelected={noop}
                     onToggleDataProviderEnabled={noop}
                     onToggleDataProviderExcluded={noop}
+                    onUnPinEvent={noop}
+                    pinnedEventIds={{}}
                     range={'1 Day'}
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    indexPattern={indexPattern}
+                    updateNote={noop}
                   />
                 </MockedProvider>
               </DragDropContext>
@@ -196,29 +214,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
-                      columnHeaders={headers}
+                      columnHeaders={defaultHeaders}
                       columnRenderers={columnRenderers}
                       dataProviders={mockDataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onColumnSorted={mockOnColumnSorted}
                       onChangeItemsPerPage={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -233,7 +257,7 @@ describe('Timeline', () => {
           .simulate('click');
 
         expect(mockOnColumnSorted).toBeCalledWith({
-          columnId: headers[0].id,
+          columnId: defaultHeaders[0].id,
           sortDirection: 'ascending',
         });
       });
@@ -250,29 +274,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
-                      columnHeaders={headers}
+                      columnHeaders={defaultHeaders}
                       columnRenderers={columnRenderers}
                       dataProviders={mockDataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={mockOnDataProviderRemoved}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -299,29 +329,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
-                      columnHeaders={headers}
+                      columnHeaders={defaultHeaders}
                       columnRenderers={columnRenderers}
                       dataProviders={mockDataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={mockOnDataProviderRemoved}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -351,7 +387,7 @@ describe('Timeline', () => {
         const mockOnFilterChange = jest.fn();
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -363,29 +399,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={mockDataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={mockOnFilterChange}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -400,7 +442,7 @@ describe('Timeline', () => {
           .simulate('change', { target: { value: newFilter } });
 
         expect(mockOnFilterChange).toBeCalledWith({
-          columnId: headers[0].id,
+          columnId: defaultHeaders[0].id,
           filter: newFilter,
         });
       });
@@ -411,7 +453,7 @@ describe('Timeline', () => {
         const mockOnToggleDataProviderEnabled = jest.fn();
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -423,29 +465,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={mockDataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -478,7 +526,7 @@ describe('Timeline', () => {
         const mockOnToggleDataProviderExcluded = jest.fn();
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -490,29 +538,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={mockDataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -546,7 +600,7 @@ describe('Timeline', () => {
         dataProviders[0].and = mockDataProviders.slice(1, 3);
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -558,29 +612,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={dataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -602,7 +662,7 @@ describe('Timeline', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -614,29 +674,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={dataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={mockOnDataProviderRemoved}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -666,7 +732,7 @@ describe('Timeline', () => {
         const mockOnToggleDataProviderEnabled = jest.fn();
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -678,29 +744,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={dataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                       onToggleDataProviderExcluded={noop}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>
@@ -734,7 +806,7 @@ describe('Timeline', () => {
         const mockOnToggleDataProviderExcluded = jest.fn();
 
         // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = headers.map(header => ({
+        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
           ...header,
           columnHeaderType: 'text-filter' as ColumnHeaderType,
         }));
@@ -746,29 +818,35 @@ describe('Timeline', () => {
                 <DragDropContext onDragEnd={noop}>
                   <MockedProvider mocks={mocks}>
                     <Timeline
+                      addNoteToEvent={noop}
                       id="foo"
                       columnHeaders={allColumnsHaveTextFilters}
                       columnRenderers={columnRenderers}
                       dataProviders={dataProviders}
                       flyoutHeight={testFlyoutHeight}
                       flyoutHeaderHeight={flyoutHeaderHeight}
+                      indexPattern={indexPattern}
                       itemsPerPage={5}
                       itemsPerPageOptions={[5, 10, 20]}
                       kqlQuery=""
+                      notes={{}}
                       onChangeDataProviderKqlQuery={noop}
                       onChangeDroppableAndProvider={noop}
                       onChangeItemsPerPage={noop}
                       onColumnSorted={noop}
                       onDataProviderRemoved={noop}
                       onFilterChange={noop}
+                      onPinEvent={noop}
                       onRangeSelected={noop}
                       onToggleDataProviderEnabled={noop}
                       onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+                      onUnPinEvent={noop}
+                      pinnedEventIds={{}}
                       range={'1 Day'}
                       rowRenderers={rowRenderers}
                       show={true}
                       sort={sort}
-                      indexPattern={indexPattern}
+                      updateNote={noop}
                     />
                   </MockedProvider>
                 </DragDropContext>

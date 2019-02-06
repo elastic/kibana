@@ -7,7 +7,9 @@
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import * as React from 'react';
 
-type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIsOpen'>>;
+type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIsOpen'>> & {
+  forceExpand?: boolean;
+};
 
 interface State {
   expanded: boolean;
@@ -50,6 +52,7 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
       id,
       buttonContentClassName,
       buttonContent,
+      forceExpand,
       extraAction,
       paddingSize,
       children,
@@ -57,7 +60,7 @@ export class LazyAccordion extends React.PureComponent<Props, State> {
 
     return (
       <>
-        {this.state.expanded ? (
+        {forceExpand || this.state.expanded ? (
           <>
             <EuiAccordion
               buttonContent={buttonContent}

@@ -8,14 +8,16 @@ import { ColumnHeader } from './column_header';
 import * as i18n from './translations';
 
 /** The default minimum width of a column */
-export const DEFAULT_COLUMN_MIN_WIDTH = 100;
+export const DEFAULT_COLUMN_MIN_WIDTH = 115;
+
+export const TIMESTAMP_COLUMN_MIN_WIDTH = 185;
 
 /** The default column headers */
-export const headers: ColumnHeader[] = [
+export const defaultHeaders: ColumnHeader[] = [
   {
     columnHeaderType: 'not-filtered',
     id: 'timestamp',
-    minWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    minWidth: TIMESTAMP_COLUMN_MIN_WIDTH,
     text: i18n.TIME,
   },
   {
@@ -59,11 +61,5 @@ export const headers: ColumnHeader[] = [
     id: 'user.name',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: i18n.USER,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    id: 'event.id',
-    minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: i18n.EVENT,
   },
 ];

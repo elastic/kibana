@@ -4,138 +4,258 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../graphql/types';
-import { StatefulEventDetails } from '../../event_details/stateful_event_details';
-import { LazyAccordion } from '../../lazy_accordion';
+import { Note } from '../../../lib/note';
+import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
+import {
+  OnColumnSorted,
+  OnFilterChange,
+  OnPinEvent,
+  OnRangeSelected,
+  OnUnPinEvent,
+} from '../events';
+import { ExpandableEvent } from '../expandable_event';
+import { footerHeight } from '../footer';
+import { Actions } from './actions';
+import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
+import {
+  ACTIONS_COLUMN_WIDTH,
+  eventHasNotes,
+  eventIsPinned,
+  getPinOnClick,
+  stringifyEvent,
+} from './helpers';
 import { ColumnRenderer, getColumnRenderer, getRowRenderer, RowRenderer } from './renderers';
+import { Sort } from './sort';
 
 interface Props {
+  addNoteToEvent: AddNoteToEvent;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: Ecs[];
   height: number;
   id: string;
+  notes: { [eventId: string]: Note[] };
+  onColumnSorted: OnColumnSorted;
+  onFilterChange: OnFilterChange;
+  onPinEvent: OnPinEvent;
+  onRangeSelected: OnRangeSelected;
+  onUnPinEvent: OnUnPinEvent;
+  pinnedEventIds: { [eventId: string]: boolean };
+  range: string;
   rowRenderers: RowRenderer[];
+  sort: Sort;
+  updateNote: UpdateNote;
 }
 
-const ScrollableArea = styled.div<{
+interface State {
+  expanded: { [eventId: string]: boolean };
+  showNotes: { [eventId: string]: boolean };
+}
+
+const HorizontalScroll = styled.div<{
   height: number;
 }>`
   display: block;
   height: ${({ height }) => `${height}px`};
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   min-height: 0px;
 `;
 
-const Row = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 0;
-  min-height: 40px;
-`;
-
-const FlexRow = styled.span`
-  display: flex;
-  flex-direction: row;
-`;
-
-// NOTE: overflow-wrap: break-word is required below to render data that is too
-// long to fit in a cell, but has no breaks because, for example, it's a
-// single large value (e.g. 985205274836907)
-const Cell = styled(EuiText)`
-  overflow: hidden;
-  margin-right: 6px;
-  overflow-wrap: break-word;
-`;
-
-const TimeGutter = styled.span`
-  min-width: 50px;
-  background-color: ${props => props.theme.eui.euiColorLightShade};
-`;
-
-const Pin = styled(EuiIcon)`
-  min-width: 50px;
-  margin-right: 8px;
-  margin-top: 5px;
-  transform: rotate(45deg);
-  color: grey;
-`;
-
-const DataDrivenColumns = styled.div`
-  display: flex;
-  margin-left: 5px;
+const VerticalScrollContainer = styled.div<{
+  height: number;
+  width: number;
+}>`
+  display: block;
+  height: ${({ height }) => `${height - footerHeight - 12}px`};
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-width: ${({ width }) => `${width}px`};
   width: 100%;
 `;
 
-const ColumnRender = styled.div<{
-  minwidth: string;
-  maxwidth: string;
+const DataDrivenColumns = styled(EuiFlexGroup)`
+  margin-left: 5px;
+`;
+
+const Column = styled.div<{
+  minWidth: string;
+  maxWidth: string;
   index: number;
 }>`
-  max-width: ${props => props.minwidth};
-  min-width: ${props => props.maxwidth};
-  background: ${props => (props.index % 2 !== 0 ? props.theme.eui.euiColorLightShade : 'inherit')};
+  background: ${props => (props.index % 2 === 0 ? props.theme.eui.euiColorLightShade : 'inherit')};
+  height: 100%;
+  max-width: ${props => props.maxWidth};
+  min-width: ${props => props.minWidth};
+  overflow: hidden;
+  overflow-wrap: break-word;
   padding: 5px;
 `;
 
 export const defaultWidth = 1090;
 
-const ExpandableDetails = styled.div`
-  width: 100%;
-`;
+const emptyNotes: Note[] = [];
 
 /** Renders the timeline body */
-export const Body = pure<Props>(
-  ({ columnHeaders, columnRenderers, data, height, id, rowRenderers }) => (
-    <ScrollableArea height={height} data-test-subj="scrollableArea">
-      {data.map(ecs => (
-        <Row key={ecs._id!}>
-          <TimeGutter />
-          {getRowRenderer(ecs, rowRenderers).renderRow(
-            ecs,
-            <>
-              <FlexRow>
-                <Pin type="pin" size="l" />
-                <DataDrivenColumns data-test-subj="dataDrivenColumns">
-                  {columnHeaders.map((header, index) => (
-                    <ColumnRender
-                      key={`cell-${header.id}`}
-                      data-test-subj="cellContainer"
-                      maxwidth={`${header.minWidth}px`}
-                      minwidth={`${header.minWidth}px`}
-                      index={index}
-                    >
-                      <Cell size="xs">
-                        {getColumnRenderer(header.id, columnRenderers, ecs).renderColumn(
-                          header.id,
-                          ecs
-                        )}
-                      </Cell>
-                    </ColumnRender>
-                  ))}
-                </DataDrivenColumns>
-              </FlexRow>
-              <FlexRow>
-                <ExpandableDetails data-test-subj="expandableDetails">
-                  <LazyAccordion
-                    id={`timeline-${id}-row-${ecs._id}`}
-                    buttonContent={`${JSON.stringify(ecs.event) || {}}`} // TODO: this should be `event.message` or `event._source`
-                    paddingSize="none"
-                  >
-                    <StatefulEventDetails data={ecs} />
-                  </LazyAccordion>
-                </ExpandableDetails>
-              </FlexRow>
-            </>
-          )}
-        </Row>
-      ))}
-    </ScrollableArea>
-  )
-);
+export class Body extends React.PureComponent<Props, State> {
+  public readonly state: State = {
+    expanded: {},
+    showNotes: {},
+  };
+
+  public render() {
+    const {
+      addNoteToEvent,
+      columnHeaders,
+      columnRenderers,
+      data,
+      height,
+      id,
+      notes,
+      onColumnSorted,
+      onFilterChange,
+      onPinEvent,
+      onUnPinEvent,
+      pinnedEventIds,
+      rowRenderers,
+      sort,
+      updateNote,
+    } = this.props;
+
+    const columnWidths = columnHeaders.reduce(
+      (totalWidth, header) => totalWidth + header.minWidth,
+      ACTIONS_COLUMN_WIDTH
+    );
+
+    return (
+      <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
+        <ColumnHeaders
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          columnHeaders={columnHeaders}
+          onColumnSorted={onColumnSorted}
+          onFilterChange={onFilterChange}
+          sort={sort}
+          timelineId={id}
+        />
+        <EuiHorizontalRule margin="xs" />
+
+        <VerticalScrollContainer
+          data-test-subj="vertical-scroll-container"
+          height={height}
+          width={columnWidths}
+        >
+          <EuiFlexGroup data-test-subj="events" direction="column" gutterSize="none">
+            {data.map(ecs => (
+              <EuiFlexItem data-test-subj="event" grow={true} key={ecs._id!}>
+                {getRowRenderer(ecs, rowRenderers).renderRow(
+                  ecs,
+                  <>
+                    <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
+                      <EuiFlexItem data-test-subj="event-columns" grow={true}>
+                        <EuiFlexGroup data-test-subj="events" direction="row" gutterSize="none">
+                          <EuiFlexItem grow={false}>
+                            <Actions
+                              associateNote={this.associateNote(
+                                ecs._id!,
+                                addNoteToEvent,
+                                onPinEvent
+                              )}
+                              expanded={!!this.state.expanded[ecs._id!]}
+                              data-test-subj="timeline-row-actions"
+                              eventId={ecs._id!}
+                              eventIsPinned={eventIsPinned({
+                                eventId: ecs._id!,
+                                pinnedEventIds,
+                              })}
+                              notes={notes[ecs._id!] || emptyNotes}
+                              onEventToggled={this.onToggleExpanded(ecs._id!)}
+                              onPinClicked={getPinOnClick({
+                                allowUnpinning: !eventHasNotes(notes[ecs._id!]),
+                                eventId: ecs._id!,
+                                onPinEvent,
+                                onUnPinEvent,
+                                pinnedEventIds,
+                              })}
+                              showNotes={!!this.state.showNotes[ecs._id!]}
+                              toggleShowNotes={this.onToggleShowNotes(ecs._id!)}
+                              updateNote={updateNote}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={true}>
+                            <DataDrivenColumns
+                              data-test-subj="data-driven-columns"
+                              gutterSize="none"
+                            >
+                              {columnHeaders.map((header, index) => (
+                                <EuiFlexItem grow={true} key={header.id}>
+                                  <Column
+                                    data-test-subj="column"
+                                    index={index}
+                                    maxWidth="100%"
+                                    minWidth={`${header.minWidth}px`}
+                                  >
+                                    {getColumnRenderer(
+                                      header.id,
+                                      columnRenderers,
+                                      ecs
+                                    ).renderColumn(header.id, ecs)}
+                                  </Column>
+                                </EuiFlexItem>
+                              ))}
+                            </DataDrivenColumns>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem data-test-subj="event-details" grow={true}>
+                        <ExpandableEvent
+                          event={ecs}
+                          forceExpand={!!this.state.expanded[ecs._id!]}
+                          hideExpandButton={true}
+                          stringifiedEvent={stringifyEvent(ecs)}
+                          timelineId={id}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                )}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </VerticalScrollContainer>
+      </HorizontalScroll>
+    );
+  }
+
+  private onToggleShowNotes = (eventId: string): (() => void) => () => {
+    this.setState(state => ({
+      showNotes: {
+        ...state.showNotes,
+        [eventId]: !!!state.showNotes[eventId],
+      },
+    }));
+  };
+
+  private onToggleExpanded = (eventId: string): (() => void) => () => {
+    this.setState(state => ({
+      expanded: {
+        ...state.expanded,
+        [eventId]: !!!state.expanded[eventId],
+      },
+    }));
+  };
+
+  private associateNote = (
+    eventId: string,
+    addNoteToEvent: AddNoteToEvent,
+    onPinEvent: OnPinEvent
+  ): ((noteId: string) => void) => (noteId: string) => {
+    addNoteToEvent({ eventId, noteId });
+    onPinEvent(eventId); // pin the event, because it has notes
+  };
+}

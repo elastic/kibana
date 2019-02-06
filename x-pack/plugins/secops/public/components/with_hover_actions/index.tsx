@@ -10,17 +10,26 @@ import styled from 'styled-components';
 
 interface Props {
   /**
+   * Always show the hover menu contents (default: false)
+   */
+  alwaysShow?: boolean;
+  /**
    * The contents of the hover menu. It is highly recommended you wrap this
    * content in a `div` with `position: absolute` to prevent it from effecting
-   * layout, and to adjust it's position via `top` and `left`
+   * layout, and to adjust it's position via `top` and `left`.
    */
-  hoverContent: JSX.Element;
-  /** The content that will be wrapped with hover actions */
-  children: JSX.Element;
+  hoverContent?: JSX.Element;
+  /**
+   * The content that will be wrapped with hover actions. In addition to
+   * rendering the `hoverContent` when the user hovers, this render prop
+   * passes `showHoverContent` to provide a signal that it is in the hover
+   * state.
+   */
+  render: (showHoverContent: boolean) => JSX.Element;
 }
 
 interface State {
-  showActions: boolean;
+  showHoverContent: boolean;
 }
 
 const HoverActionsPanelContainer = styled.div`
@@ -39,30 +48,41 @@ const WithHoverActionsContainer = styled.div`
   flex-direction: row;
 `;
 
-/** A HOC that decorates it's children with actions that are visible on hover */
+/**
+ * Decorates it's children with actions that are visible on hover.
+ * This component does not enforce an opinion on the styling and
+ * positioning of the hover content, but see the documentation for
+ * the `hoverContent` for tips on (not) effecting layout on-hover.
+ *
+ * In addition to rendering the `hoverContent` prop on hover, this
+ * component also passes `showHoverContent` as a render prop, which
+ * provides a signal to the content that the user is in a hover state.
+ */
 export class WithHoverActions extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { showActions: false };
+    this.state = { showHoverContent: false };
   }
 
   public render() {
-    const { hoverContent, children } = this.props;
+    const { alwaysShow = false, hoverContent, render } = this.props;
 
     return (
       <WithHoverActionsContainer onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
-        <div>{children}</div>
-        <HoverActionsPanel show={this.state.showActions}>{hoverContent}</HoverActionsPanel>
+        <>{render(this.state.showHoverContent)}</>
+        <HoverActionsPanel show={this.state.showHoverContent || alwaysShow}>
+          {hoverContent != null ? hoverContent : <></>}
+        </HoverActionsPanel>
       </WithHoverActionsContainer>
     );
   }
 
   private onMouseEnter = () => {
-    this.setState({ showActions: true });
+    this.setState({ showHoverContent: true });
   };
 
   private onMouseLeave = () => {
-    this.setState({ showActions: false });
+    this.setState({ showHoverContent: false });
   };
 }

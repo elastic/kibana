@@ -12,11 +12,8 @@ import { Ecs } from '../../../../graphql/types';
 
 const PlainRow = styled.div`
   width: 100%;
-  border-color: transparent;
   &:hover {
-    border: 1px solid;
-    border-color: #d9d9d9;
-    box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.3), 0 1px 5px -2px rgba(153, 153, 153, 0.3);
+    border: 1px solid ${props => props.theme.eui.euiColorMediumShade};
   }
 `;
 

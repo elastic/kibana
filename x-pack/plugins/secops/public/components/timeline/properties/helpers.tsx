@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiModal, EuiOverlayMask, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiIcon, EuiModal, EuiOverlayMask, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
@@ -16,37 +16,26 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import {
   ButtonContainer,
   DescriptionField,
-  EmptyStar,
-  Facet,
   HistoryButtonLabel,
   LabelText,
   NameField,
   NotesButtonLabel,
-  StarSvg,
+  NotesIconContainer,
+  PositionedNotesIcon,
+  SmallNotesButtonContainer,
+  StyledStar,
 } from './styles';
 import * as i18n from './translations';
+
+export const historyToolTip = 'The chronological history of actions related to this timeline';
+export const streamLiveToolTip = 'Update the Timeline as new data arrives';
+export const newTimelineToolTip = 'Create a new timeline';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateIsLive = ({ id, isLive }: { id: string; isLive: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
-
-// TODO: replace this svg with the same filled EuiIcon
-const FilledStar = pure<{ starFill: string; starStroke: string }>(({ starFill, starStroke }) => (
-  <StarSvg
-    data-test-subj="timeline-star-svg"
-    viewBox="0 35 120 20"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <polygon
-      fillRule="nonzero"
-      fill={starFill}
-      stroke={starStroke}
-      points="50,0 21,90 98,35 2,35 79,90"
-    />
-  </StarSvg>
-));
 
 export const StarIcon = pure<{
   isFavorite: boolean;
@@ -56,15 +45,11 @@ export const StarIcon = pure<{
   <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
     {isFavorite ? (
       <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
-        <FilledStar
-          data-test-subj="timeline-favorite-filled-star"
-          starStroke="#E6C220"
-          starFill="#E6C220"
-        />
+        <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
       </EuiToolTip>
     ) : (
       <EuiToolTip content={i18n.NOT_A_FAVORITE}>
-        <EmptyStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
+        <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
       </EuiToolTip>
     )}
   </div>
@@ -122,47 +107,134 @@ export const NewTimeline = pure<{
 ));
 
 interface NotesButtonProps {
+  animate?: boolean;
   associateNote: AssociateNote;
   notes: Note[];
+  size: 's' | 'l';
   showNotes: boolean;
   toggleShowNotes: () => void;
+  text?: string;
+  toolTip?: string;
   updateNote: UpdateNote;
 }
 
 const getNewNoteId = (): string => uuid.v4();
 
-export const NotesButton = pure<NotesButtonProps>(
-  ({ associateNote, notes, showNotes, toggleShowNotes, updateNote }) => (
-    <ButtonContainer>
-      <EuiToolTip data-test-subj="timeline-notes-tool-tip" content={i18n.NOTES_TOOL_TIP}>
-        <>
-          <EuiButton
-            data-test-subj="timeline-notes"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={() => toggleShowNotes()}
-          >
-            <NotesButtonLabel>
-              <Facet>{notes.length}</Facet>
-              <LabelText>{i18n.NOTES}</LabelText>
-            </NotesButtonLabel>
-          </EuiButton>
-          {showNotes ? (
-            <EuiOverlayMask>
-              <EuiModal onClose={toggleShowNotes}>
-                <Notes
-                  associateNote={associateNote}
-                  notes={notes}
-                  getNewNoteId={getNewNoteId}
-                  updateNote={updateNote}
-                />
-              </EuiModal>
-            </EuiOverlayMask>
-          ) : null}
-        </>
-      </EuiToolTip>
+const NotesIcon = pure<{ notes: Note[]; size: 's' | 'l' }>(({ notes, size }) => (
+  <>
+    <EuiBadge data-test-subj="timeline-notes-count" color="hollow">
+      {notes.length}
+    </EuiBadge>
+    <NotesIconContainer>
+      <PositionedNotesIcon size={size}>
+        <EuiIcon data-test-subj="timeline-notes-icon" size="m" type="pencil" />
+      </PositionedNotesIcon>
+    </NotesIconContainer>
+  </>
+));
+
+const LargeNotesButton = pure<{ notes: Note[]; text?: string; toggleShowNotes: () => void }>(
+  ({ notes, text, toggleShowNotes }) => (
+    <EuiButton
+      data-test-subj="timeline-notes-button-large"
+      onClick={() => toggleShowNotes()}
+      size="l"
+    >
+      <NotesButtonLabel>
+        <NotesIcon notes={notes} size="l" />
+        {text && text.length ? <LabelText>{text}</LabelText> : null}
+      </NotesButtonLabel>
+    </EuiButton>
+  )
+);
+
+const SmallNotesButton = pure<{ notes: Note[]; toggleShowNotes: () => void }>(
+  ({ notes, toggleShowNotes }) => (
+    <SmallNotesButtonContainer
+      data-test-subj="timeline-notes-button-small"
+      onClick={() => toggleShowNotes()}
+      role="button"
+    >
+      <NotesIcon notes={notes} size="s" />
+    </SmallNotesButtonContainer>
+  )
+);
+
+/**
+ * The internal implementation of the `NotesButton`
+ */
+const NotesButtonComponent = pure<NotesButtonProps>(
+  ({
+    animate = true,
+    associateNote,
+    notes,
+    showNotes,
+    size,
+    toggleShowNotes,
+    text,
+    updateNote,
+  }) => (
+    <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
+      <>
+        {size === 'l' ? (
+          <LargeNotesButton notes={notes} text={text} toggleShowNotes={toggleShowNotes} />
+        ) : (
+          <SmallNotesButton notes={notes} toggleShowNotes={toggleShowNotes} />
+        )}
+        {showNotes ? (
+          <EuiOverlayMask>
+            <EuiModal onClose={toggleShowNotes}>
+              <Notes
+                associateNote={associateNote}
+                notes={notes}
+                getNewNoteId={getNewNoteId}
+                updateNote={updateNote}
+              />
+            </EuiModal>
+          </EuiOverlayMask>
+        ) : null}
+      </>
     </ButtonContainer>
   )
+);
+
+export const NotesButton = pure<NotesButtonProps>(
+  ({
+    animate = true,
+    associateNote,
+    notes,
+    showNotes,
+    size,
+    toggleShowNotes,
+    toolTip,
+    text,
+    updateNote,
+  }) =>
+    showNotes ? (
+      <NotesButtonComponent
+        animate={animate}
+        associateNote={associateNote}
+        notes={notes}
+        showNotes={showNotes}
+        size={size}
+        toggleShowNotes={toggleShowNotes}
+        text={text}
+        updateNote={updateNote}
+      />
+    ) : (
+      <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
+        <NotesButtonComponent
+          animate={animate}
+          associateNote={associateNote}
+          notes={notes}
+          showNotes={showNotes}
+          size={size}
+          toggleShowNotes={toggleShowNotes}
+          text={text}
+          updateNote={updateNote}
+        />
+      </EuiToolTip>
+    )
 );
 
 export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
@@ -173,9 +245,12 @@ export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
       iconSide="right"
       isDisabled={true}
       onClick={() => window.alert('Show history')}
+      size="l"
     >
       <HistoryButtonLabel>
-        <Facet>{history.length}</Facet>
+        <EuiBadge data-test-subj="history-count" color="hollow">
+          {history.length}
+        </EuiBadge>
         <LabelText>{i18n.HISTORY}</LabelText>
       </HistoryButtonLabel>
     </EuiButton>
@@ -185,7 +260,7 @@ export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
 export const StreamLive = pure<{ isLive: boolean; timelineId: string; updateIsLive: UpdateIsLive }>(
   ({ isLive, timelineId, updateIsLive }) => (
     <EuiToolTip data-test-subj="timeline-stream-tool-tip" content={i18n.STREAM_LIVE_TOOL_TIP}>
-      <ButtonContainer>
+      <ButtonContainer animate={true}>
         <EuiButton
           data-test-subj="timeline-stream-live"
           color={isLive ? 'secondary' : 'primary'}
@@ -194,6 +269,7 @@ export const StreamLive = pure<{ isLive: boolean; timelineId: string; updateIsLi
           iconSide="left"
           isDisabled={true}
           onClick={() => updateIsLive({ id: timelineId, isLive: !isLive })}
+          size="l"
         >
           {i18n.STREAM_LIVE}
         </EuiButton>

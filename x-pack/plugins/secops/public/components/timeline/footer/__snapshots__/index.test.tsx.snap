@@ -2,10 +2,6 @@
 
 exports[`Footer Timeline Component rendering it renders the default timeline footer 1`] = `
 <Fragment>
-  <EuiHorizontalRule
-    margin="xs"
-    size="full"
-  />
   <styled.div
     data-test-subj="timeline-footer"
     height={100}
@@ -23,133 +19,70 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
         component="div"
         grow={false}
       >
-        <EuiFlexGroup
-          alignItems="flexStart"
-          component="div"
-          direction="column"
-          gutterSize="none"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
+        <styled.div
+          data-test-subj="timeline-event-count"
         >
-          <EuiFlexItem
-            component="div"
-            grow={true}
-          >
-            <styled.div
-              data-test-subj="timeline-event-count"
-            >
-              <pure(Component)
-                itemsCount={2}
-                serverSideEventCount={15546}
-              />
-            </styled.div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            component="div"
-            grow={true}
-          >
-            <Styled(EuiPopover)
-              button={
-                <EuiButtonEmpty
-                  color="text"
-                  iconSide="right"
-                  iconType="arrowDown"
+          <pure(Component)
+            closePopover={[Function]}
+            isOpen={false}
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="empty"
+                  layoutAlign="center"
                   onClick={[Function]}
-                  size="s"
-                  type="button"
+                  toolTipPosition="right"
                 >
-                  Rows: 
-                  2
-                </EuiButtonEmpty>
-              }
-              className="footer-popover"
-              closePopover={[Function]}
-              data-test-subj="timelineSizeRowPopover"
-              id="customizablePagination"
-              isOpen={false}
-              panelPaddingSize="none"
-            >
-              <EuiContextMenuPanel
-                data-test-subj="timelinePickSizeRow"
-                hasFocus={true}
-                items={
-                  Array [
-                    <EuiContextMenuItem
-                      icon="empty"
-                      layoutAlign="center"
-                      onClick={[Function]}
-                      toolTipPosition="right"
-                    >
-                      1 rows
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      icon="empty"
-                      layoutAlign="center"
-                      onClick={[Function]}
-                      toolTipPosition="right"
-                    >
-                      5 rows
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      icon="empty"
-                      layoutAlign="center"
-                      onClick={[Function]}
-                      toolTipPosition="right"
-                    >
-                      10 rows
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      icon="empty"
-                      layoutAlign="center"
-                      onClick={[Function]}
-                      toolTipPosition="right"
-                    >
-                      20 rows
-                    </EuiContextMenuItem>,
-                  ]
-                }
-              />
-            </Styled(EuiPopover)>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                  1 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  layoutAlign="center"
+                  onClick={[Function]}
+                  toolTipPosition="right"
+                >
+                  5 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  layoutAlign="center"
+                  onClick={[Function]}
+                  toolTipPosition="right"
+                >
+                  10 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  layoutAlign="center"
+                  onClick={[Function]}
+                  toolTipPosition="right"
+                >
+                  20 rows
+                </EuiContextMenuItem>,
+              ]
+            }
+            itemsCount={2}
+            onClick={[Function]}
+            serverSideEventCount={15546}
+          />
+        </styled.div>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={false}
       >
-        <EuiFlexGroup
-          alignItems="flexStart"
-          component="div"
-          direction="row"
-          gutterSize="none"
-          justifyContent="center"
-          responsive={true}
-          wrap={false}
-        >
-          <EuiFlexItem
-            component="div"
-            grow={false}
-          >
-            <EuiButton
-              color="primary"
-              data-test-subj="TimelineMoreButton"
-              fill={false}
-              iconSide="left"
-              isLoading={false}
-              onClick={[Function]}
-              type="button"
-            >
-              Load More
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <pure(Component)
+          hasNextPage={true}
+          isLoading={false}
+          loadMore={[Function]}
+        />
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={false}
       >
         <LastUpdatedAt
+          short={false}
           updatedAt={1546878704036}
         />
       </EuiFlexItem>

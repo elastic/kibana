@@ -22,8 +22,16 @@ export const ROWS = i18n.translate('xpack.secops.footer.rows', {
   defaultMessage: 'rows',
 });
 
+export const LOADING = i18n.translate('xpack.secops.footer.loadingLabel', {
+  defaultMessage: 'Loading',
+});
+
+export const LOAD_MORE = i18n.translate('xpack.secops.footer.loadMoreLabel', {
+  defaultMessage: 'Load More',
+});
+
 export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.secops.footer.totalCountOfEvents', {
-  defaultMessage: 'The total count of events matching the search criteria',
+  defaultMessage: 'events match the search criteria',
 });
 
 export const UPDATED = i18n.translate('xpack.secops.footer.updated', {

@@ -26,6 +26,10 @@ export const DESCRIPTION = i18n.translate('xpack.secops.eventDetails.description
   defaultMessage: 'Description',
 });
 
+export const PLACEHOLDER = i18n.translate('xpack.secops.eventDetails.filter.placeholder', {
+  defaultMessage: 'Filter by Field, Value, or Description...',
+});
+
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.secops.eventDetails.copyToClipboard', {
   defaultMessage: 'Copy to Clipboard',
 });

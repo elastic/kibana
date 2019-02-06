@@ -39,8 +39,7 @@ const DropTargetDataProviders = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin: 5px;
-  padding: 0px;
+  margin: 5px 0 5px 0;
   min-height: 100px;
   overflow-y: auto;
   background-color: ${props => props.theme.eui.euiFormBackgroundColor};

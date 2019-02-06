@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiTextArea, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiTextArea, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -15,7 +15,7 @@ import * as i18n from './translations';
 
 /** Performs IO to update (or add a new) note */
 export type UpdateNote = (note: Note) => void;
-/** Performs IO to associate a note with an (opaque to the caller) thing  */
+/** Performs IO to associate a note with something (e.g. a timeline, an event, etc). (The "something" is opaque to the caller) */
 export type AssociateNote = (noteId: string) => void;
 /** Performs IO to get a new note ID */
 export type GetNewNoteId = () => string;
@@ -23,6 +23,8 @@ export type GetNewNoteId = () => string;
 export type UpdateInternalNewNote = (newNote: string) => void;
 /** Closes the notes popover */
 export type OnClosePopover = () => void;
+/** Performs IO to associate a note with an event */
+export type AddNoteToEvent = ({ eventId, noteId }: { eventId: string; noteId: string }) => void;
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -30,7 +32,7 @@ export type OnClosePopover = () => void;
 export const search = {
   box: {
     incremental: true,
-    placeholder: 'Filter by User or Note...',
+    placeholder: i18n.SEARCH_PLACEHOLDER,
     schema: {
       user: {
         type: 'string',
@@ -50,12 +52,18 @@ const AddNotesContainer = styled.div`
   user-select: none;
 `;
 
+const TitleText = styled.h3`
+  user-select: none;
+`;
+
 /** Displays a count of the existing notes */
 export const NotesCount = pure<{
   notes: Note[];
 }>(({ notes }) => (
   <EuiTitle size="s">
-    <h3>{notes.length} Notes</h3>
+    <TitleText>
+      {notes.length} Note{notes.length === 1 ? '' : 's'}
+    </TitleText>
   </EuiTitle>
 ));
 
@@ -126,24 +134,22 @@ export const AddNote = pure<{
 }>(({ associateNote, getNewNoteId, newNote, updateNewNote, updateNote }) => (
   <AddNotesContainer>
     <NewNote note={newNote} updateNewNote={updateNewNote} />
-    <EuiToolTip data-test-subj="add-tool-tip" content={i18n.ADD_A_NEW_NOTE}>
-      <EuiButton
-        data-test-subj="Add Note"
-        isDisabled={newNote.trim().length < 1}
-        fill={true}
-        onClick={() =>
-          updateAndAssociateNode({
-            getNewNoteId,
-            newNote,
-            updateNote,
-            associateNote,
-            updateNewNote,
-          })
-        }
-      >
-        {i18n.ADD_NOTE}
-      </EuiButton>
-    </EuiToolTip>
+    <EuiButton
+      data-test-subj="add-note"
+      isDisabled={newNote.trim().length < 1}
+      fill={true}
+      onClick={() =>
+        updateAndAssociateNode({
+          associateNote,
+          getNewNoteId,
+          newNote,
+          updateNewNote,
+          updateNote,
+        })
+      }
+    >
+      {i18n.ADD_NOTE}
+    </EuiButton>
   </AddNotesContainer>
 ));
 

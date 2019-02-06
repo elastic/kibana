@@ -5,13 +5,13 @@
  */
 
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
 
 import { ColumnHeaders } from '.';
 import { Direction } from '../../../../graphql/types';
+import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { Sort } from '../sort';
-import { headers } from './headers';
+import { defaultHeaders } from './headers';
 
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
@@ -22,13 +22,18 @@ describe('ColumnHeaders', () => {
 
     test('it renders the other (data-driven) column headers', () => {
       const wrapper = mount(
-        <ColumnHeaders columnHeaders={headers} range="1 Day" sort={sort} onRangeSelected={noop} />
+        <ColumnHeaders
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          columnHeaders={defaultHeaders}
+          sort={sort}
+          timelineId={'test'}
+        />
       );
 
-      headers.forEach(h => {
+      defaultHeaders.forEach(h => {
         expect(
           wrapper
-            .find('[data-test-subj="columnHeaders"]')
+            .find('[data-test-subj="column-headers"]')
             .first()
             .text()
         ).toContain(h.text);

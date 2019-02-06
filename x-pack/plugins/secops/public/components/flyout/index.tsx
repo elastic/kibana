@@ -19,7 +19,7 @@ import { FlyoutButton } from './button';
 import { FlyoutPane } from './pane';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
-export const flyoutHeaderHeight: number = 50;
+export const flyoutHeaderHeight: number = 48;
 
 export const Badge = styled(EuiBadge)`
   position: absolute;

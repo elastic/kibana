@@ -6,14 +6,18 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
+import { noop } from 'lodash/fp';
 import { get } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import moment = require('moment');
 import { Body } from '.';
+import { Direction } from '../../../graphql/types';
 import { mockEcsData } from '../../../mock';
-import { headers } from './column_headers/headers';
+import { createStore } from '../../../store';
+import { defaultHeaders } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
 
 const testBodyHeight = 700;
@@ -21,54 +25,138 @@ const testBodyHeight = 700;
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
     test('it renders each column of data (NOTE: this test omits timestamp, which is a special case tested below)', () => {
-      const headersSansTimestamp = headers.filter(h => h.id !== 'timestamp');
+      const store = createStore();
+      const headersSansTimestamp = defaultHeaders.filter(h => h.id !== 'timestamp');
 
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <Body
-            id={'timeline-test'}
-            columnHeaders={headersSansTimestamp}
-            columnRenderers={columnRenderers}
-            data={mockEcsData}
-            rowRenderers={rowRenderers}
-            height={testBodyHeight}
-          />
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <Body
+                addNoteToEvent={noop}
+                id={'timeline-test'}
+                columnHeaders={headersSansTimestamp}
+                columnRenderers={columnRenderers}
+                data={mockEcsData}
+                height={testBodyHeight}
+                notes={{}}
+                onColumnSorted={noop}
+                onFilterChange={noop}
+                onPinEvent={noop}
+                onRangeSelected={noop}
+                onUnPinEvent={noop}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={{
+                  columnId: 'timestamp',
+                  sortDirection: Direction.descending,
+                }}
+                updateNote={noop}
+              />
+            </DragDropContext>
+          </ReduxStoreProvider>
         </ThemeProvider>
       );
 
       headersSansTimestamp.forEach(h => {
         expect(
           wrapper
-            .find('[data-test-subj="dataDrivenColumns"]')
+            .find('[data-test-subj="data-driven-columns"]')
             .first()
             .text()
         ).toContain(get(h.id, mockEcsData[0]));
       });
     });
 
-    test('it renders a formatted timestamp', () => {
-      const headersJustTimestamp = headers.filter(h => h.id === 'timestamp');
+    test('it renders a non-formatted timestamp', () => {
+      const store = createStore();
+      const headersJustTimestamp = defaultHeaders.filter(h => h.id === 'timestamp');
 
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <Body
-            id={'timeline-test'}
-            columnHeaders={headersJustTimestamp}
-            columnRenderers={columnRenderers}
-            data={mockEcsData}
-            rowRenderers={rowRenderers}
-            height={testBodyHeight}
-          />
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <Body
+                addNoteToEvent={noop}
+                id={'timeline-test'}
+                columnHeaders={headersJustTimestamp}
+                columnRenderers={columnRenderers}
+                data={mockEcsData}
+                height={testBodyHeight}
+                notes={{}}
+                onColumnSorted={noop}
+                onFilterChange={noop}
+                onPinEvent={noop}
+                onRangeSelected={noop}
+                onUnPinEvent={noop}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={{
+                  columnId: 'timestamp',
+                  sortDirection: Direction.descending,
+                }}
+                updateNote={noop}
+              />
+            </DragDropContext>
+          </ReduxStoreProvider>
         </ThemeProvider>
       );
 
       headersJustTimestamp.forEach(h => {
         expect(
           wrapper
-            .find('[data-test-subj="dataDrivenColumns"]')
+            .find('[data-test-subj="data-driven-columns"]')
             .first()
             .text()
-        ).toContain(moment(get(h.id, mockEcsData[0])).format());
+        ).toEqual(get(h.id, mockEcsData[0]));
+      });
+    });
+
+    test('it renders a tooltip for timestamp', () => {
+      const store = createStore();
+      const headersJustTimestamp = defaultHeaders.filter(h => h.id === 'timestamp');
+
+      const wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <Body
+                addNoteToEvent={noop}
+                id={'timeline-test'}
+                columnHeaders={headersJustTimestamp}
+                columnRenderers={columnRenderers}
+                data={mockEcsData}
+                height={testBodyHeight}
+                notes={{}}
+                onColumnSorted={noop}
+                onFilterChange={noop}
+                onPinEvent={noop}
+                onRangeSelected={noop}
+                onUnPinEvent={noop}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={{
+                  columnId: 'timestamp',
+                  sortDirection: Direction.descending,
+                }}
+                updateNote={noop}
+              />
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </ThemeProvider>
+      );
+
+      headersJustTimestamp.forEach(h => {
+        expect(
+          wrapper
+            .find('[data-test-subj="data-driven-columns"]')
+            .first()
+            .find('[data-test-subj="timeline-event-timestamp-tool-tip"]')
+            .exists()
+        ).toEqual(true);
       });
     });
   });

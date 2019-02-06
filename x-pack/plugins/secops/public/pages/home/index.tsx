@@ -30,7 +30,6 @@ import { LinkToPage } from '../../components/link_to';
 import { Navigation } from '../../components/page/navigation';
 import { RangeDatePicker } from '../../components/range_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
-import { headers } from '../../components/timeline/body/column_headers/headers';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { getBreadcrumbs } from '../hosts/host_details';
@@ -44,19 +43,15 @@ const WrappedByAutoSizer = styled.div`
 /** Returns true if we are running with the k7 design */
 const isK7Design = () => chrome.getUiSettingsClient().get('k7design');
 /** the global Kibana navigation at the top of every page */
-const globalHeaderHeightPx = isK7Design ? 65 : 0;
-/** Additional padding applied by EuiFlyout */
-const additionalEuiFlyoutPadding = 45;
+const globalHeaderHeightPx = isK7Design ? 48 : 0;
 
 const calculateFlyoutHeight = ({
-  additionalFlyoutPadding,
   globalHeaderSize,
   windowHeight,
 }: {
-  additionalFlyoutPadding: number;
   globalHeaderSize: number;
   windowHeight: number;
-}): number => Math.max(0, windowHeight - (globalHeaderSize + additionalFlyoutPadding));
+}): number => Math.max(0, windowHeight - globalHeaderSize);
 
 export const HomePage = pure(() => (
   <AutoSizer detectAnyWindowResize={true} content>
@@ -66,7 +61,6 @@ export const HomePage = pure(() => (
           <DragDropContextWrapper>
             <Flyout
               flyoutHeight={calculateFlyoutHeight({
-                additionalFlyoutPadding: additionalEuiFlyoutPadding,
                 globalHeaderSize: globalHeaderHeightPx,
                 windowHeight,
               })}
@@ -76,12 +70,10 @@ export const HomePage = pure(() => (
               <StatefulTimeline
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 flyoutHeight={calculateFlyoutHeight({
-                  additionalFlyoutPadding: additionalEuiFlyoutPadding,
                   globalHeaderSize: globalHeaderHeightPx,
                   windowHeight,
                 })}
                 id="timeline-1"
-                headers={headers}
               />
             </Flyout>
             <EuiPageBody>

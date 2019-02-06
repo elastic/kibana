@@ -5,12 +5,18 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
+import { pure } from 'recompose';
 import styled, { keyframes } from 'styled-components';
 
 import { createLinkWithSignature, RowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../../../lib/ecs';
+import { escapeQueryValue } from '../../../../lib/keury';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { Provider } from '../../data_providers/provider';
 import * as i18n from './translations';
 
 export const dropInEffect = keyframes`
@@ -38,20 +44,11 @@ export const dropInEffect = keyframes`
 
 const SuricataRow = styled.div`
   width: 100%;
-  border-color: transparent;
-  border-top: 1px solid #98a2b3;
-  border-right: 1px solid #98a2b3;
-  border-bottom: 1px solid #98a2b3;
-  border-left: 2px solid #8ecce3;
   overflow: hidden;
   padding-top: 5px;
   padding-bottom: 5px;
-  margin-left: -1px;
   &:hover {
-    border: 1px solid;
-    border-color: #d9d9d9;
-    border-left: 2px solid #8ecce3;
-    box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.3), 0 1px 5px -2px rgba(153, 153, 153, 0.3);
+    border: 1px solid ${props => props.theme.eui.euiColorMediumShade};
   }
 `;
 
@@ -80,18 +77,48 @@ const Label = styled.div`
   font-weight: bold;
 `;
 
-interface LabelValuePairParams {
-  label: string;
-  ariaLabel: string;
-  value: string;
-}
+const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fieldName }) => {
+  const itemDataProvider = {
+    enabled: true,
+    id: escapeDataProviderId(`id-suricata-row-render-value-for-${fieldName}-${data._id!}`),
+    name: `${fieldName}: ${getMappedEcsValue({
+      data,
+      fieldName,
+    })}`,
+    queryMatch: {
+      field: getOr(fieldName, fieldName, mappedEcsSchemaFieldNames),
+      value: escapeQueryValue(
+        getMappedEcsValue({
+          data,
+          fieldName,
+        })
+      ),
+    },
+    excluded: false,
+    kqlQuery: '',
+    and: [],
+  };
 
-const LabelValuePair = ({ label, ariaLabel, value }: LabelValuePairParams) => (
-  <LabelValuePairContainer>
-    <Label>{label}</Label>
-    <div aria-label={ariaLabel}>{value}</div>
-  </LabelValuePairContainer>
-);
+  return (
+    <DraggableWrapper
+      key={`suricata-row-render-value-for-${fieldName}-${data._id!}`}
+      dataProvider={itemDataProvider}
+      render={(dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <>{`${getMappedEcsValue({ data, fieldName })}`}</>
+        )
+      }
+    />
+  );
+});
+
+export const ValuesContainer = styled.div`
+  display: flex;
+`;
 
 export const suricataRowRenderer: RowRenderer = {
   isInstance: (ecs: Ecs) => {
@@ -107,21 +134,32 @@ export const suricataRowRenderer: RowRenderer = {
         {children}
         {signature != null ? (
           <SuricataSignature>
-            <EuiButton fill size="s" href={createLinkWithSignature(signature)} target="_blank">
+            <EuiButton
+              key={data._id!}
+              fill
+              size="s"
+              href={createLinkWithSignature(signature)}
+              target="_blank"
+            >
               {signature}
             </EuiButton>
             <Details>
-              <LabelValuePair label={i18n.PROTOCOL} ariaLabel={i18n.PROTOCOL} value={i18n.TCP} />
-              <LabelValuePair
-                label={i18n.SOURCE}
-                ariaLabel={i18n.SOURCE}
-                value={`${data.source!.ip}:${data.source!.port}`}
-              />
-              <LabelValuePair
-                label={i18n.DESTINATION}
-                ariaLabel={i18n.DESTINATION}
-                value={`${data.destination!.ip}:${data.destination!.port}`}
-              />
+              <LabelValuePairContainer>
+                <Label>{i18n.SOURCE}</Label>
+                <ValuesContainer>
+                  <DraggableValue data={data} fieldName={'source.ip'} />
+                  {':'}
+                  <DraggableValue data={data} fieldName={'source.port'} />
+                </ValuesContainer>
+              </LabelValuePairContainer>
+              <LabelValuePairContainer>
+                <Label>{i18n.DESTINATION}</Label>
+                <ValuesContainer>
+                  <DraggableValue data={data} fieldName={'destination.ip'} />
+                  {':'}
+                  <DraggableValue data={data} fieldName={'destination.port'} />
+                </ValuesContainer>
+              </LabelValuePairContainer>
             </Details>
           </SuricataSignature>
         ) : null}

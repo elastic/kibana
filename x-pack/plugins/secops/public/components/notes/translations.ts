@@ -18,16 +18,16 @@ export const ADD_NOTE = i18n.translate('xpack.secops.notes.addNote', {
   defaultMessage: 'Add note',
 });
 
-export const ADD_A_NEW_NOTE = i18n.translate('xpack.secops.notes.addANewNote', {
-  defaultMessage: 'Add a new note',
-});
-
 export const ADD_A_NOTE = i18n.translate('xpack.secops.notes.addANote', {
   defaultMessage: 'Add a Note',
 });
 
 export const NOTE = i18n.translate('xpack.secops.notes.note', {
   defaultMessage: 'Note',
+});
+
+export const SEARCH_PLACEHOLDER = i18n.translate('xpack.secops.notes.search.placeholder', {
+  defaultMessage: 'Filter by User or Note...',
 });
 
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.secops.notes.copyToClipboard', {

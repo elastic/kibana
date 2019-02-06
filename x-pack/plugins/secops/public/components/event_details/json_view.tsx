@@ -13,6 +13,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ecs } from '../../graphql/types';
+import { omitTypenameAndEmpty } from '../timeline/body/helpers';
 
 interface Props {
   data: Ecs;
@@ -30,7 +31,7 @@ export const JsonView = pure<Props>(({ data }) => (
       setOptions={{ fontSize: '12px' }}
       value={JSON.stringify(
         data,
-        null,
+        omitTypenameAndEmpty,
         2 // indent level
       )}
       width="100%"

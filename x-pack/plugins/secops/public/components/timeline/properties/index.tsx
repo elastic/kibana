@@ -20,7 +20,7 @@ import {
   StarIcon,
   StreamLive,
 } from './helpers';
-import { NotesHistoryActions, TimelineProperties } from './styles';
+import { PropertiesLeft, PropertiesRight, TimelineProperties } from './styles';
 import * as i18n from './translations';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
@@ -117,30 +117,36 @@ export class Properties extends React.PureComponent<Props, State> {
 
     return (
       <TimelineProperties data-test-subj="timeline-properties">
-        <StarIcon
-          isFavorite={isFavorite}
-          timelineId={timelineId}
-          updateIsFavorite={updateIsFavorite}
-        />
-
-        <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
-
-        {width >= showDescriptionThreshold ? (
-          <Description
-            description={description}
+        <PropertiesLeft>
+          <StarIcon
+            isFavorite={isFavorite}
             timelineId={timelineId}
-            updateDescription={updateDescription}
+            updateIsFavorite={updateIsFavorite}
           />
-        ) : null}
 
-        <NotesHistoryActions gutterSize="s" alignItems="center">
+          <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
+
+          {width >= showDescriptionThreshold ? (
+            <Description
+              description={description}
+              timelineId={timelineId}
+              updateDescription={updateDescription}
+            />
+          ) : null}
+        </PropertiesLeft>
+
+        <PropertiesRight gutterSize="s" alignItems="center">
           {width >= showNotesThreshold ? (
             <EuiFlexItem grow={false}>
               <NotesButton
+                animate={true}
                 associateNote={associateNote}
                 notes={notes}
                 showNotes={this.state.showNotes}
+                size="l"
+                text={i18n.NOTES}
                 toggleShowNotes={this.onToggleShowNotes.bind(this)}
+                toolTip={i18n.NOTES_TOOL_TIP}
                 updateNote={updateNote}
               />
             </EuiFlexItem>
@@ -188,10 +194,14 @@ export class Properties extends React.PureComponent<Props, State> {
                 {width < showNotesThreshold ? (
                   <EuiFormRow>
                     <NotesButton
+                      animate={true}
                       associateNote={associateNote}
                       notes={notes}
                       showNotes={this.state.showNotes}
+                      size="l"
+                      text={i18n.NOTES}
                       toggleShowNotes={this.onToggleShowNotes.bind(this)}
+                      toolTip={i18n.NOTES_TOOL_TIP}
                       updateNote={updateNote}
                     />
                   </EuiFormRow>
@@ -215,7 +225,7 @@ export class Properties extends React.PureComponent<Props, State> {
               </EuiForm>
             </EuiPopover>
           </EuiFlexItem>
-        </NotesHistoryActions>
+        </PropertiesRight>
       </TimelineProperties>
     );
   }

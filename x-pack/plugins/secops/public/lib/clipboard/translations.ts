@@ -10,6 +10,10 @@ export const COPY = i18n.translate('xpack.secops.clipboard.copy', {
   defaultMessage: 'Copy',
 });
 
-export const TO_CLIPBOARD = i18n.translate('xpack.secops.clipboard.toClipboard', {
-  defaultMessage: 'to clipboard',
+export const COPIED = i18n.translate('xpack.secops.clipboard.copied', {
+  defaultMessage: 'Copied',
+});
+
+export const TO_THE_CLIPBOARD = i18n.translate('xpack.secops.clipboard.to.the.clipboard', {
+  defaultMessage: 'to the clipboard',
 });

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { AndOrBadge } from '../../and_or_badge';
 import * as i18n from './translations';
 
-const Text = styled.div`
-  color: #999999;
+const Text = styled(EuiText)`
   overflow: hidden;
+  margin: 5px 0 5px 0;
   padding: 3px;
   white-space: nowrap;
 `;
@@ -23,13 +24,6 @@ const BadgeHighlighted = styled(EuiBadge)`
   margin: 0 5px 0 5px;
   max-width: 70px;
   min-width: 70px;
-`;
-
-const BadgeOr = styled(EuiBadge)`
-  height: 20px;
-  margin: 0 5px 0 5px;
-  max-width: 20px;
-  min-width: 20px;
 `;
 
 const EmptyContainer = styled.div`
@@ -60,14 +54,14 @@ const NoWrap = styled.div`
 export const Empty = pure(() => (
   <EmptyContainer className="timeline-drop-area" data-test-subj="empty">
     <NoWrap>
-      <Text>{i18n.DROP_ANYTHING}</Text>
+      <Text color="subdued">{i18n.DROP_ANYTHING}</Text>
       <BadgeHighlighted color="#d9d9d9">{i18n.HIGHLIGHTED}</BadgeHighlighted>
     </NoWrap>
 
     <NoWrap>
-      <Text>{i18n.HERE_TO_BUILD_AN}</Text>
-      <BadgeOr color="#d9d9d9">{i18n.OR.toLocaleUpperCase()}</BadgeOr>
-      <Text>{i18n.QUERY}</Text>
+      <Text color="subdued">{i18n.HERE_TO_BUILD_AN}</Text>
+      <AndOrBadge type="or" />
+      <Text color="subdued">{i18n.QUERY}</Text>
     </NoWrap>
   </EmptyContainer>
 ));

@@ -29,15 +29,17 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   }
   .timeline-flyout-header {
     align-items: center;
+    box-shadow: none;
     display: flex;
     flex-direction: row;
     height: ${({ headerHeight }) => `${headerHeight}px`};
     max-height: ${({ headerHeight }) => `${headerHeight}px`};
     overflow: hidden;
+    padding: 5px 0 0 10px;
   }
   .timeline-flyout-body {
     overflow-y: hidden;
-    padding: 10px 24px 24px 24px;
+    padding: 0 5px 0 8px;
   }
 `;
 
@@ -70,7 +72,7 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
         hideCloseButton={true}
       >
         <ResizeHandle height={flyoutHeight} timelineId={timelineId} />
-        <EuiFlyoutHeader hasBorder className="timeline-flyout-header">
+        <EuiFlyoutHeader hasBorder={false} className="timeline-flyout-header">
           <FlyoutHeaderContainer>
             <WrappedCloseButton>
               <EuiToolTip content={i18n.CLOSE_TIMELINE}>
