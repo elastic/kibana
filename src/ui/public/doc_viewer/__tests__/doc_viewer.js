@@ -81,14 +81,14 @@ describe('docViewer', function () {
       registerExtension();
       registerExtension({ title: 'exampleView2' });
       init();
-      expect($elem.find('.nav-tabs li').length).to.be(2);
+      expect($elem.find('.euiTabs button').length).to.be(2);
     });
 
     it('should activate the first view in order', function () {
       registerExtension({ order: 2 });
       registerExtension({ title: 'exampleView2' });
       init();
-      expect($elem.find('.nav-tabs .active').text().trim()).to.be('exampleView2');
+      expect($elem.find('.euiTabs .euiTab-isSelected').text().trim()).to.be('exampleView2');
     });
   });
 });

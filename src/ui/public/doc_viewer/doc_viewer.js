@@ -39,7 +39,7 @@ uiModules.get('kibana')
       template: function ($el) {
         const $viewer = $('<div class="kbnDocViewer">');
         $el.append($viewer);
-        const $tabs = $('<ul class="euiTabs euiTabs--small" role="tablist">');
+        const $tabs = $('<div class="euiTabs euiTabs--small" role="tablist">');
         const $content = $('<div class="kbnDocViewer__content" role="tabpanel">');
         $viewer.append($tabs);
         $viewer.append($content);
