@@ -24,6 +24,7 @@ const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const geckoDriver = require('geckodriver');
 const chromeDriver = require('chromedriver');
+const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -66,6 +67,16 @@ async function attemptToCreateCommand(log, browserType) {
   };
 
   const session = await buildDriverInstance(browserType);
+
+  if (throttleOption === 'true' && browserType === 'chrome')  { //Only chrome supports this option.
+    log.debug(session);
+    session.setNetworkConditions({
+      offline: false,
+      latency: 100, // Additional latency (ms).
+      download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
+      upload_throughput: 256 * 1024
+    });
+  }
 
   if (attemptId !== attemptCounter) return; // abort
 
