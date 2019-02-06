@@ -12,7 +12,7 @@ management.getSection('elasticsearch').register('watcher', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watcherDisplayName', {
     defaultMessage: 'Watcher' }
   ),
-  order: 4,
+  order: 6,
   url: '#/management/elasticsearch/watcher/'
 });
 

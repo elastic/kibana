@@ -23,9 +23,9 @@ import { RangeControl } from './range_control';
 import { ListControl } from './list_control';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -99,40 +99,40 @@ export class InputControlVis extends Component {
 
   renderStagingButtons() {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormRow>
-            <EuiButton
-              onClick={this.handleClearAll}
-              disabled={!this.props.hasValues()}
-              data-test-subj="inputControlClearBtn"
-            >
-              <FormattedMessage id="inputControl.vis.inputControlVis.clearFormButtonLabel" defaultMessage="Clear form"/>
-            </EuiButton>
-          </EuiFormRow>
+
+          <EuiButton
+            fill
+            onClick={this.handleSubmit}
+            disabled={!this.props.hasChanges()}
+            data-test-subj="inputControlSubmitBtn"
+          >
+            <FormattedMessage id="inputControl.vis.inputControlVis.applyChangesButtonLabel" defaultMessage="Apply changes"/>
+          </EuiButton>
+
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow>
-            <EuiButton
-              onClick={this.handleReset}
-              disabled={!this.props.hasChanges()}
-              data-test-subj="inputControlCancelBtn"
-            >
-              <FormattedMessage id="inputControl.vis.inputControlVis.cancelChangesButtonLabel" defaultMessage="Cancel changes"/>
-            </EuiButton>
-          </EuiFormRow>
+
+          <EuiButtonEmpty
+            onClick={this.handleReset}
+            disabled={!this.props.hasChanges()}
+            data-test-subj="inputControlCancelBtn"
+          >
+            <FormattedMessage id="inputControl.vis.inputControlVis.cancelChangesButtonLabel" defaultMessage="Cancel changes"/>
+          </EuiButtonEmpty>
+
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow>
-            <EuiButton
-              fill
-              onClick={this.handleSubmit}
-              disabled={!this.props.hasChanges()}
-              data-test-subj="inputControlSubmitBtn"
-            >
-              <FormattedMessage id="inputControl.vis.inputControlVis.applyChangesButtonLabel" defaultMessage="Apply changes"/>
-            </EuiButton>
-          </EuiFormRow>
+
+          <EuiButtonEmpty
+            onClick={this.handleClearAll}
+            disabled={!this.props.hasValues()}
+            data-test-subj="inputControlClearBtn"
+          >
+            <FormattedMessage id="inputControl.vis.inputControlVis.clearFormButtonLabel" defaultMessage="Clear form"/>
+          </EuiButtonEmpty>
+
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }) {
 
   describe('layer geo grid aggregation source', () => {
 
-    const EXPECTED_NUMBER_FEATURES = 6;
+    const EXPECTED_NUMBER_FEATURES_ZOOMED_OUT = 4;
+    const EXPECTED_NUMBER_FEATURES_ZOOMED_IN = 6;
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
@@ -36,20 +37,28 @@ export default function ({ getPageObjects, getService }) {
           beforeTimestamp = await getRequestTimestamp();
         });
 
-        it('should not rerequest when zoom changes do not cause geohash precision to change', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+        it('should not rerequest when pan changes do not move map view area outside of buffer', async () => {
+          await PageObjects.maps.setView(DATA_CENTER_LAT + 10, DATA_CENTER_LON + 10, 1);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
         });
 
-        it('should rerequest when zoom changes causes the geohash precision to change', async () => {
+        it('should not rerequest when zoom changes do not cause geotile_grid precision to change', async () => {
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.2);
+          const beforeSameZoom = await getRequestTimestamp();
+          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.8);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).to.equal(beforeSameZoom);
+        });
+
+        it('should rerequest when zoom changes causes the geotile_grid precision to change', async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).not.to.equal(beforeTimestamp);
         });
       });
 
-      describe('geoprecision - data', async ()=> {
+      describe('geotile grid precision - data', async ()=> {
 
         beforeEach(async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
@@ -63,11 +72,11 @@ export default function ({ getPageObjects, getService }) {
 
         it ('should request the data when the map covers the databounds', async () => {
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES_ZOOMED_OUT);
         });
 
         it ('should request only partial data when the map only covers part of the databounds', async () => {
-          //todo this verifies the extent-filtering behavior (not really the correct application of geohash-precision), and should ideally be moved to its own section
+          //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
@@ -77,13 +86,13 @@ export default function ({ getPageObjects, getService }) {
 
     describe('heatmap', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geohashgrid heatmap example');
+        await PageObjects.maps.loadSavedMap('geo grid heatmap example');
       });
 
       const LAYER_ID = '3xlvm';
       const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
 
-      it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+      it('should re-fetch geotile_grid aggregation with refresh timer', async () => {
         const beforeRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp.length).to.be(24);
         await PageObjects.maps.triggerSingleRefresh(1000);
@@ -93,7 +102,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should decorate feature properties with scaled doc_count property', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES_ZOOMED_IN);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(HEATMAP_PROP_NAME)).to.be(true);
@@ -115,7 +124,7 @@ export default function ({ getPageObjects, getService }) {
           await queryBar.submitQuery();
         });
 
-        it('should apply query to geohashgrid aggregation request', async () => {
+        it('should apply query to geotile_grid aggregation request', async () => {
           await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
@@ -129,7 +138,7 @@ export default function ({ getPageObjects, getService }) {
           await inspector.close();
         });
 
-        it('should contain geohashgrid aggregation elasticsearch request', async () => {
+        it('should contain geotile_grid aggregation elasticsearch request', async () => {
           await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
@@ -150,14 +159,14 @@ export default function ({ getPageObjects, getService }) {
 
     describe('vector(grid)', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geohashgrid vector grid example');
+        await PageObjects.maps.loadSavedMap('geo grid vector grid example');
       });
 
       const LAYER_ID = 'g1xkv';
 
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
 
-      it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+      it('should re-fetch geotile_grid aggregation with refresh timer', async () => {
         const beforeRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp.length).to.be(24);
         await PageObjects.maps.triggerSingleRefresh(1000);
@@ -167,7 +176,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should decorate feature properties with metrics properterties', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES_ZOOMED_IN);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(MAX_OF_BYTES_PROP_NAME)).to.be(true);
@@ -190,7 +199,7 @@ export default function ({ getPageObjects, getService }) {
           await queryBar.submitQuery();
         });
 
-        it('should apply query to geohashgrid aggregation request', async () => {
+        it('should apply query to geotile_grid aggregation request', async () => {
           await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
@@ -204,7 +213,7 @@ export default function ({ getPageObjects, getService }) {
           await inspector.close();
         });
 
-        it('should contain geohashgrid aggregation elasticsearch request', async () => {
+        it('should contain geotile_grid aggregation elasticsearch request', async () => {
           await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');

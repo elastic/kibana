@@ -28,7 +28,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(callWithRequest, {} as any, '/', []);
+    await getUpgradeAssistantStatus(callWithRequest, {} as any, false, []);
     expect(callWithRequest).toHaveBeenCalledWith({}, 'transport.request', {
       path: '/_migration/deprecations',
       method: 'GET',
@@ -36,8 +36,21 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/', []);
+    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, false, []);
     expect(resp).toMatchSnapshot();
+  });
+
+  it('returns readyForUpgrade === false when critical issues found', async () => {
+    deprecationsResponse = {
+      cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {},
+    };
+
+    await expect(
+      getUpgradeAssistantStatus(callWithRequest, {} as any, false, [])
+    ).resolves.toHaveProperty('readyForUpgrade', false);
   });
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
@@ -49,7 +62,27 @@ describe('getUpgradeAssistantStatus', () => {
     };
 
     await expect(
-      getUpgradeAssistantStatus(callWithRequest, {} as any, '/', [])
+      getUpgradeAssistantStatus(callWithRequest, {} as any, false, [])
     ).resolves.toHaveProperty('readyForUpgrade', true);
+  });
+
+  it('filters out security realm deprecation on Cloud', async () => {
+    deprecationsResponse = {
+      cluster_settings: [
+        {
+          level: 'critical',
+          message: 'Security realm settings structure changed',
+          url: 'https://...',
+        },
+      ],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {},
+    };
+
+    const result = await getUpgradeAssistantStatus(callWithRequest, {} as any, true, []);
+
+    expect(result).toHaveProperty('readyForUpgrade', true);
+    expect(result).toHaveProperty('cluster', []);
   });
 });

@@ -54,7 +54,7 @@ export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
               <Distribution
                 distribution={data}
                 title={
-                  <EuiTitle size="s">
+                  <EuiTitle size="xs">
                     <span>
                       {i18n.translate(
                         'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',

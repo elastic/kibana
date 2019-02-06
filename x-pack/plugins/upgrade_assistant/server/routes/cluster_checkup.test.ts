@@ -25,7 +25,10 @@ describe('cluster checkup API', () => {
     } as any,
     apm_oss: {
       indexPatterns: ['apm-*'],
-    } as any,
+    },
+    cloud: {
+      isCloudEnabled: false,
+    },
   } as any;
   server.config = () => ({ get: () => '' } as any);
 

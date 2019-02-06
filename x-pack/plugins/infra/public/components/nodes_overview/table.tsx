@@ -159,9 +159,13 @@ export const TableView = injectI18n(
     };
 
     private closePopoverFor = (id: string) => () => {
-      this.setState(prevState => ({
-        isPopoverOpen: prevState.isPopoverOpen.filter(subject => subject !== id),
-      }));
+      if (this.state.isPopoverOpen.includes(id)) {
+        this.setState(prevState => {
+          return {
+            isPopoverOpen: prevState.isPopoverOpen.filter(subject => subject !== id),
+          };
+        });
+      }
     };
   }
 );

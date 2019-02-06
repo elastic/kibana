@@ -198,16 +198,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
-  $scope.getMapTitle = function () {
-    return $scope.map.title;
-  };
-  // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
     { text: 'Maps', href: '#' },
-    { text: $scope.getMapTitle() }
+    { text: $scope.map.title }
   ]);
-  config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
     savedMap.syncWithStore(getStore().getState());
@@ -244,9 +239,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: 'fullScreen',
-    description: 'Full screen',
-    testId: 'fullScreenMode',
+    key: 'full screen',
+    description: 'full screen',
+    testId: 'mapsFullScreenMode',
     run() {
       getStore().dispatch(enableFullScreen());
     }

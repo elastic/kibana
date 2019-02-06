@@ -11,7 +11,7 @@ import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 
 export function registerClusterCheckupRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-  const basePath = server.config().get<string>('server.basePath');
+  const { isCloudEnabled } = server.plugins.cloud;
 
   server.route({
     path: '/api/upgrade_assistant/status',
@@ -23,7 +23,7 @@ export function registerClusterCheckupRoutes(server: Legacy.Server) {
         return await getUpgradeAssistantStatus(
           callWithRequest,
           request,
-          basePath,
+          isCloudEnabled,
           apmIndexPatterns
         );
       } catch (e) {

@@ -14,8 +14,8 @@ import { AutoFollowPatternAdd as AutoFollowPatternAddView } from './auto_follow_
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
 const mapStateToProps = (state) => ({
-  apiStatus: getApiStatus(scope)(state),
-  apiError: getApiError(scope)(state),
+  apiStatus: getApiStatus(`${scope}-save`)(state),
+  apiError: getApiError(`${scope}-save`)(state),
 });
 
 const mapDispatchToProps = dispatch => ({

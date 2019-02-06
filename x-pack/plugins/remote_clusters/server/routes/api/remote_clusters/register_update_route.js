@@ -37,6 +37,12 @@ export function registerUpdateRoute(server) {
       }
 
       try {
+        // Delete existing cluster settings
+        // This is a workaround for: https://github.com/elastic/elasticsearch/issues/37799
+        const deleteClusterPayload = serializeCluster({ name });
+        await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
+
+        // Update cluster as new settings
         const updateClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
         const response = await callWithRequest('cluster.putSettings', { body: updateClusterPayload });
         const acknowledged = get(response, 'acknowledged');

@@ -1,6 +1,7 @@
 .icvContainer {
   width: 100%;
   margin: 0 $euiSizeXS;
+  padding: $euiSizeS;
 
   // Removes the browser's number stepper
   input[type=number]::-webkit-inner-spin-button,

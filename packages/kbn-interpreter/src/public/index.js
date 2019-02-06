@@ -18,6 +18,5 @@
  */
 
 export { loadBrowserRegistries } from './browser_registries';
-export { createSocket } from './socket';
 export { initializeInterpreter } from './interpreter';
 export { RenderFunctionsRegistry } from './render_functions_registry';

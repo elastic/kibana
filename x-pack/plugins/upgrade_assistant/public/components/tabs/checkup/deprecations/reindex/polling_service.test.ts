@@ -98,4 +98,13 @@ describe('ReindexPollingService', () => {
       expect(mockClient.post).toHaveBeenCalledWith('/api/upgrade_assistant/reindex/myIndex');
     });
   });
+
+  describe('cancelReindex', () => {
+    it('posts to cancel endpoint', async () => {
+      const service = new ReindexPollingService('myIndex');
+      await service.cancelReindex();
+
+      expect(mockClient.post).toHaveBeenCalledWith('/api/upgrade_assistant/reindex/myIndex/cancel');
+    });
+  });
 });

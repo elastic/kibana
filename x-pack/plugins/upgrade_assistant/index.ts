@@ -6,21 +6,26 @@
 import Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
+import mappings from './mappings.json';
 import { initServer } from './server';
 
 export function upgradeAssistant(kibana: any) {
   return new kibana.Plugin({
     id: 'upgrade_assistant',
+    configPrefix: 'xpack.upgrade_assistant',
     require: ['elasticsearch'],
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      mappings: require('./mappings.json'),
       savedObjectSchemas: {
         'upgrade-assistant-reindex-operation': {
           isNamespaceAgnostic: true,
         },
+        'upgrade-assistant-telemetry': {
+          isNamespaceAgnostic: true,
+        },
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings,
     },
     publicDir: resolve(__dirname, 'public'),
 

@@ -11,7 +11,6 @@ import {
   CallClusterWithRequest,
   DeprecationAPIResponse,
   DeprecationInfo,
-  IndexSettingsDeprecationInfo,
 } from 'src/legacy/core_plugins/elasticsearch';
 
 import { getDeprecatedApmIndices } from './apm';
@@ -31,7 +30,7 @@ export interface UpgradeAssistantStatus {
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
   req: Request,
-  basePath: string,
+  isCloudEnabled: boolean,
   apmIndices: string[]
 ): Promise<UpgradeAssistantStatus> {
   const [deprecations, apmIndexDeprecations] = await Promise.all([
@@ -42,14 +41,8 @@ export async function getUpgradeAssistantStatus(
     getDeprecatedApmIndices(callWithRequest, req, apmIndices),
   ]);
 
-  const cluster = deprecations.cluster_settings
-    .concat(deprecations.ml_settings)
-    .concat(deprecations.node_settings);
-  const indices = getCombinedIndexInfos(
-    deprecations.index_settings,
-    basePath,
-    apmIndexDeprecations
-  );
+  const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
+  const indices = getCombinedIndexInfos(deprecations, apmIndexDeprecations);
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 
@@ -62,13 +55,12 @@ export async function getUpgradeAssistantStatus(
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = (
-  indexSettings: IndexSettingsDeprecationInfo,
-  basePath: string,
+  deprecations: DeprecationAPIResponse,
   apmIndexDeprecations: EnrichedDeprecationInfo[]
 ) => {
   const apmIndices = apmIndexDeprecations.reduce((acc, dep) => acc.add(dep.index), new Set());
 
-  return Object.keys(indexSettings)
+  return Object.keys(deprecations.index_settings)
     .reduce(
       (indexDeprecations, indexName) => {
         // prevent APM indices from showing up for general re-indexing
@@ -77,14 +69,30 @@ const getCombinedIndexInfos = (
         }
 
         return indexDeprecations.concat(
-          indexSettings[indexName].map(d => ({
-            ...d,
-            index: indexName,
-            reindex: /Index created before/.test(d.message),
-          }))
+          deprecations.index_settings[indexName].map(
+            d =>
+              ({
+                ...d,
+                index: indexName,
+                reindex: /Index created before/.test(d.message),
+              } as EnrichedDeprecationInfo)
+          )
         );
       },
       [] as EnrichedDeprecationInfo[]
     )
     .concat(apmIndexDeprecations);
+};
+
+const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
+  const combined = deprecations.cluster_settings
+    .concat(deprecations.ml_settings)
+    .concat(deprecations.node_settings);
+
+  if (isCloudEnabled) {
+    // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
+    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+  } else {
+    return combined;
+  }
 };
