@@ -5,22 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginProperties, Server } from 'hapi';
+import { Server } from 'hapi';
 import JoiNamespace from 'joi';
-import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
 
-interface KibanaPluginProperties extends PluginProperties {
-  xpack_main: {
-    registerFeature: (feature: Feature) => void;
-  };
-}
-
 export interface KbnServer extends Server {
   usage: any;
-  plugins: KibanaPluginProperties;
 }
 
 export const initServerWithKibana = (kbnServer: KbnServer) => {

@@ -4,30 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { PluginProperties, Server } from 'hapi';
+import { Server } from 'hapi';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
-import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { SpacesClient } from '../spaces_client';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '../spaces_url_parser';
 
-interface XpackMainPlugin {
-  getFeatures: () => Feature[];
-}
-
-interface KbnPluginProperties extends PluginProperties {
-  xpack_main: XpackMainPlugin;
-}
-
 interface KbnServer extends Server {
-  plugins: KbnPluginProperties;
   getHiddenUiAppById: (appId: string) => any;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
   const serverBasePath: string = server.config().get('server.basePath');
-  const xpackMainPlugin: XpackMainPlugin = server.plugins.xpack_main;
+  const xpackMainPlugin = server.plugins.xpack_main;
 
   server.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
     const path = request.path;
