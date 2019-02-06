@@ -111,3 +111,7 @@ export type InfraMetricModelCreator = (
   indexPattern: string | string[],
   interval: string
 ) => InfraMetricModel;
+
+export enum InfraMetricsErrorCodes {
+  invalid_node = 'METRICS_INVALID_NODE',
+}
