@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { BaseOptions, SavedObject } from '../saved_objects_client';
+
 export interface SavedObjectsRepositoryOptions {
   index: string | string[];
   mappings: unknown;
@@ -29,6 +31,14 @@ export interface SavedObjectsRepositoryOptions {
 
 export declare class SavedObjectsRepository {
   // ATTENTION: this interface is incomplete
+
+  public get: (type: string, id: string, options?: BaseOptions) => Promise<SavedObject>;
+  public incrementCounter: (
+    type: string,
+    id: string,
+    counterFieldName: string,
+    options?: BaseOptions
+  ) => Promise<SavedObject>;
 
   constructor(options: SavedObjectsRepositoryOptions);
 }

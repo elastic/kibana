@@ -19,8 +19,11 @@
 
 import * as Url from 'url';
 
+import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { InjectedMetadataStartContract } from '../injected_metadata';
+import { NotificationsStartContract } from '../notifications';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -42,10 +45,24 @@ export interface Breadcrumb {
 
 export type HelpExtension = (element: HTMLDivElement) => (() => void);
 
+interface ConstructorParams {
+  browserSupportsCsp: boolean;
+}
+
+interface StartDeps {
+  injectedMetadata: InjectedMetadataStartContract;
+  notifications: NotificationsStartContract;
+}
+
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly browserSupportsCsp: boolean;
 
-  public start() {
+  public constructor({ browserSupportsCsp }: ConstructorParams) {
+    this.browserSupportsCsp = browserSupportsCsp;
+  }
+
+  public start({ injectedMetadata, notifications }: StartDeps) {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
     const brand$ = new Rx.BehaviorSubject<Brand>({});
@@ -54,6 +71,14 @@ export class ChromeService {
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new Rx.BehaviorSubject<HelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<Breadcrumb[]>([]);
+
+    if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
+      notifications.toasts.addWarning(
+        i18n.translate('core.chrome.legacyBrowserWarning', {
+          defaultMessage: 'Your browser does not meet the security requirements for Kibana.',
+        })
+      );
+    }
 
     return {
       /**

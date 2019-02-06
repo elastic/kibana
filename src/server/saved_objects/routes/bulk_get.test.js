@@ -60,7 +60,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
         id: 'abc123',
         type: 'index-pattern',
         title: 'logstash-*',
-        version: 2,
+        version: 'foo',
         references: [],
       }]
     };

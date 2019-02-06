@@ -455,6 +455,9 @@ export class Listing extends Component {
                 },
               }}
               onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['cluster_name']
+              }}
             />
           </EuiPageContent>
         </EuiPageBody>

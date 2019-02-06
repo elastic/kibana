@@ -12,20 +12,35 @@ import { HistogramSeries } from '../../../common/graphql/types';
 import { formatHistogramData } from '../../lib/adapters/monitors/format_histogram_data';
 
 interface SnapshotHistogramProps {
+  windowWidth: number;
   primaryColor: string;
   dangerColor: string;
   histogram: HistogramSeries[];
 }
 
+/**
+ * These charts are going to be deprecated. Their responsive feature isn't
+ * working with our app, so temporarily we will use this ratio to auto-resize
+ * the histogram. When we upgrade the charts we will delete this.
+ */
+const windowRatio = 0.545238095238095;
+
 export const SnapshotHistogram = ({
   dangerColor,
   histogram,
   primaryColor,
+  windowWidth,
 }: SnapshotHistogramProps) => {
   const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
   return (
-    <EuiSeriesChart width={600} height={107} stackBy="y" xType={EuiSeriesChartUtils.SCALE.TIME}>
+    <EuiSeriesChart
+      width={windowWidth * windowRatio}
+      height={120}
+      stackBy="y"
+      xType={EuiSeriesChartUtils.SCALE.TIME}
+      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+    >
       <EuiHistogramSeries
         data={upSeriesData}
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {

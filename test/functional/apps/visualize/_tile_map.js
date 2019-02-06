@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
 
 
   describe('tile map visualize app', function () {
@@ -44,8 +44,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         //do not configure aggs
       });
 
@@ -70,8 +69,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Geo Coordinates');
         await PageObjects.visualize.clickBucket('Geo Coordinates');
         log.debug('Click aggregation Geohash');
