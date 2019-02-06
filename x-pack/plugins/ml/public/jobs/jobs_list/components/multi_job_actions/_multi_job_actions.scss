@@ -1,6 +1,7 @@
   // SASSTODO: This looks like it needs some rewriting for all the pixel values
 .multi-select-actions {
-  margin-right: $euiSizeS;
+  padding-right: $euiSizeS;
+  padding-bottom: $euiSizeM;
   display: inline-block;
   white-space: nowrap;
 
