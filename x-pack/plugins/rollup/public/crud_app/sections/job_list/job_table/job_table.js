@@ -253,7 +253,6 @@ export class JobTableUi extends Component {
       if (name === 'ID') {
         content = (
           <EuiLink
-            data-test-subj="rollupTableJobLink"
             onClick={() => {
               openDetailPanel(job.id);
             }}
@@ -280,7 +279,7 @@ export class JobTableUi extends Component {
       return (
         <EuiTableRowCell
           key={`${job.id}-${name}`}
-          data-test-subj={`jobTableCell-${name}`}
+          data-test-subj={`jobTableCell-${name.replace(' ', '')}`}
           truncateText={truncateText}
         >
           {wrappedContent}
@@ -298,6 +297,7 @@ export class JobTableUi extends Component {
       return (
         <EuiTableRow
           key={`${id}-row`}
+          data-test-subj="jobTableRow"
         >
           <EuiTableRowCellCheckbox key={`checkbox-${id}`}>
             <EuiCheckbox
