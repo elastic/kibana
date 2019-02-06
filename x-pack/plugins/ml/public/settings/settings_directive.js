@@ -52,8 +52,8 @@ module.directive('mlSettings', function () {
     replace: false,
     scope: {},
     link: function (scope, element) {
-      timefilter.disableTimeRangeSelector(); // remove time picker from top of page
-      timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
 
       ReactDOM.render(
         <I18nContext>
