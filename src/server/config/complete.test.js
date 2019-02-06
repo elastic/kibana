@@ -252,6 +252,41 @@ describe('server/config completeMixin()', function () {
 
       await expect(callCompleteMixin()).resolves.toBe(undefined);
     });
+
+    it('should transform deeply nested deprecated plugin settings', async () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          xpack: {
+            monitoring: {
+              elasticsearch: {
+                url: 'http://localhost:9200'
+              }
+            }
+          }
+        },
+        configValues: {
+          xpack: {
+            monitoring: {
+              elasticsearch: {
+                hosts: 'http://localhost:9200'
+              }
+            }
+          }
+        },
+        plugins: [
+          {
+            spec: {
+              getDeprecationsProvider() {
+                return async ({ rename }) => [rename('elasticsearch.url', 'elasticsearch.hosts')];
+              },
+              getConfigPrefix: () => 'xpack.monitoring'
+            }
+          }
+        ],
+      });
+
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
+    });
   });
 
   describe('disabled plugins', () => {
