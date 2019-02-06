@@ -38,9 +38,8 @@ export function createDateOnServerFormat(FieldFormat) {
          * UTC and converted into the desired timezone. */
         let date;
         if (this._timeZone === 'Browser') {
-          /* FIXME this assumes to use the server timezone since we don't know
-           * what the timezone of the browser. The CSV generation URL does not
-           * yet have a param for browserTimezone. */
+          // Assume a warning has been logged this can be unpredictable. It
+          // would be too verbose to log anything here.
           date = moment.utc(val);
         } else {
           date = moment.utc(val).tz(this._timeZone);

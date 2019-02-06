@@ -15,7 +15,10 @@ function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = createTaggedLogger(server, ['reporting', 'csv', 'debug']);
+  const logger = {
+    debug: createTaggedLogger(server, ['reporting', 'csv', 'debug']),
+    warn: createTaggedLogger(server, ['reporting', 'csv', 'warning']),
+  };
   const generateCsv = createGenerateCsv(logger);
   const serverBasePath = config.get('server.basePath');
 
@@ -74,6 +77,10 @@ function executeJobFn(server) {
           uiConfig.get('csv:quoteValues'),
           uiConfig.get('dateFormat:tz'),
         ]);
+
+        if (timezone === 'Browser') {
+          logger.warn(`Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`);
+        }
 
         return {
           separator,
