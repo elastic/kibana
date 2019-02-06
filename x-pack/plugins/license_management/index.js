@@ -11,6 +11,7 @@ import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute
 export function licenseManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.license_management',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
     uiExports: {

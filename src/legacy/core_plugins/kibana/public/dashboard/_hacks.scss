@@ -1,14 +1,6 @@
 // ANGULAR SELECTOR HACKS
 
 /**
- * Mimics EuiPageBackground
- */
-dashboard-listing {
-  background-color: $euiColorLightestShade;
-  min-height: 100vh;
-}
-
-/**
  * Needs to correspond with the react root nested inside angular.
  */
  dashboard-viewport-provider {

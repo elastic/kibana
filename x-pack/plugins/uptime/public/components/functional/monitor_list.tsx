@@ -121,6 +121,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               return (
                 <EuiSeriesChart
                   showDefaultAxis={false}
+                  width={180}
                   height={70}
                   stackBy="y"
                   // TODO: style hack

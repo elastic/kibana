@@ -125,7 +125,7 @@ app.directive('dashboardApp', function ($injector) {
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
       if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
-        dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
+        dashboardStateManager.syncTimefilterWithDashboard(timefilter);
       }
 
       const updateState = () => {
@@ -206,7 +206,6 @@ app.directive('dashboardApp', function ($injector) {
       };
       updateBreadcrumbs();
       dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardStateManager.saveState();
@@ -308,7 +307,7 @@ app.directive('dashboardApp', function ($injector) {
           // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
           // reload will cause it not to sync.
           if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter);
           }
         }
 
