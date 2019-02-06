@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.0.0",
+  "version": "8.0.0",
   "branch": "master",
   "types": "./kibana.d.ts",
   "build": {
@@ -50,7 +50,7 @@
     "test:coverage": "grunt test:coverage",
     "checkLicenses": "grunt licenses --dev",
     "build": "node scripts/build --all-platforms",
-    "start": "node scripts/kibana --dev",
+    "start": "node --trace-warnings --trace-deprecation scripts/kibana --dev ",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
     "precommit": "node scripts/precommit_hook",
@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.8.0",
+    "@elastic/eui": "6.10.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -137,8 +137,8 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^15.2.0",
-    "elasticsearch-browser": "^15.2.0",
+    "elasticsearch": "^15.4.1",
+    "elasticsearch-browser": "^15.4.1",
     "encode-uri-query": "1.0.0",
     "execa": "^1.0.0",
     "expiry-js": "0.1.7",
@@ -215,12 +215,11 @@
     "rxjs": "^6.2.1",
     "script-loader": "0.7.2",
     "semver": "^5.5.0",
-    "socket.io": "^2.1.1",
     "stream-stream": "^1.2.6",
     "style-loader": "0.23.1",
     "tar": "2.2.0",
     "terser-webpack-plugin": "^1.1.0",
-    "thread-loader": "^1.2.0",
+    "thread-loader": "^2.1.2",
     "tinygradient": "0.3.0",
     "tinymath": "1.1.1",
     "topojson-client": "3.0.0",
@@ -242,7 +241,7 @@
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
     "wreck": "^14.0.2",
-    "x-pack": "7.0.0",
+    "x-pack": "8.0.0",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
@@ -409,7 +408,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.14.1",
+    "node": "10.15.1",
     "yarn": "^1.10.1"
   }
 }

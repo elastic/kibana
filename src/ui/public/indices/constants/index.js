@@ -19,4 +19,9 @@
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 
-export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.concat(',');
+export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [ ...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE ];
+
+// Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
+// these characters are rendered in the UI.
+const insertionIndex = Math.floor(INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.length / 2);
+INDEX_ILLEGAL_CHARACTERS_VISIBLE.splice(insertionIndex, 0, ',');

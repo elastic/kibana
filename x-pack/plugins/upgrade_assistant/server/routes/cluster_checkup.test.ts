@@ -23,6 +23,9 @@ describe('cluster checkup API', () => {
     elasticsearch: {
       getCluster: () => ({ callWithRequest: jest.fn() } as any),
     } as any,
+    apm_oss: {
+      indexPatterns: ['apm-*'],
+    },
     cloud: {
       isCloudEnabled: false,
     },

@@ -25,7 +25,7 @@ if (chrome.getInjected('remoteClustersUiEnabled')) {
   esSection.register('remote_clusters', {
     visible: true,
     display: 'Remote Clusters',
-    order: 4,
+    order: 5,
     url: `#${CRUD_APP_BASE_PATH}/list`,
   });
 

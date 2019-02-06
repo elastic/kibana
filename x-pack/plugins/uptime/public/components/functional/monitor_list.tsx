@@ -121,11 +121,13 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               return (
                 <EuiSeriesChart
                   showDefaultAxis={false}
+                  width={180}
                   height={70}
                   stackBy="y"
                   // TODO: style hack
                   style={{ marginBottom: '-20px' }}
                   xType={EuiSeriesChartUtils.SCALE.TIME}
+                  xCrosshairFormat="YYYY-MM-DD hh:mmZ"
                 >
                   <EuiHistogramSeries
                     data={formatSparklineCounts(downSeries)}

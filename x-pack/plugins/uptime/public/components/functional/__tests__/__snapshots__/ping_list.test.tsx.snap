@@ -93,27 +93,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiFormRow
-          describedByIds={Array []}
-          fullWidth={false}
-          hasEmptyLabelSpace={false}
-          label="Max Search Size"
-        >
-          <EuiFieldNumber
-            compressed={false}
-            defaultValue="200"
-            fullWidth={false}
-            isLoading={false}
-            max={10000}
-            min={0}
-            onBlur={[MockFunction]}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
     </EuiFlexGroup>
     <EuiInMemoryTable
       columns={

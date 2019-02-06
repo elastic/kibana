@@ -15,7 +15,9 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { getReindexWarnings, transformFlatSettings } from './index_settings';
+import { apmReindexScript, isLegacyApmIndex } from '../apm';
+import apmMappings from '../apm/mapping.json';
+import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
@@ -91,7 +93,8 @@ export interface ReindexService {
 export const reindexServiceFactory = (
   callCluster: CallCluster,
   xpackInfo: XPackInfo,
-  actions: ReindexActions
+  actions: ReindexActions,
+  apmIndexPatterns: string[] = []
 ): ReindexService => {
   // ------ Utility functions
 
@@ -279,11 +282,13 @@ export const reindexServiceFactory = (
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
+    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
+
     const createIndex = await callCluster('indices.create', {
       index: newIndexName,
       body: {
         settings,
-        mappings,
+        mappings: legacyApmIndex ? apmMappings : mappings,
       },
     });
 
@@ -302,13 +307,29 @@ export const reindexServiceFactory = (
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
+
+    const reindexBody = {
+      source: { index: indexName },
+      dest: { index: reindexOp.attributes.newIndexName },
+    } as any;
+
+    const flatSettings = await actions.getFlatSettings(indexName);
+    if (!flatSettings) {
+      throw Boom.notFound(`Index ${indexName} does not exist.`);
+    }
+
+    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
+    if (legacyApmIndex) {
+      reindexBody.script = {
+        lang: 'painless',
+        source: apmReindexScript,
+      };
+    }
+
     const startReindex = (await callCluster('reindex', {
       refresh: true,
       waitForCompletion: false,
-      body: {
-        source: { index: indexName },
-        dest: { index: reindexOp.attributes.newIndexName },
-      },
+      body: reindexBody,
     })) as any;
 
     return actions.updateReindexOp(reindexOp, {
@@ -440,12 +461,21 @@ export const reindexServiceFactory = (
         return true;
       }
 
+      const index = parseIndexName(indexName);
+      const names = [indexName, index.newIndexName];
+
+      // if we have re-indexed this in the past, there will be an
+      // underlying alias we will also need to update.
+      if (index.cleanIndexName !== indexName) {
+        names.push(index.cleanIndexName);
+      }
+
       // Otherwise, query for required privileges for this index.
       const body = {
         cluster: ['manage'],
         index: [
           {
-            names: [`${indexName}*`],
+            names,
             privileges: ['all'],
           },
           {
@@ -477,7 +507,7 @@ export const reindexServiceFactory = (
       if (!flatSettings) {
         return null;
       } else {
-        return getReindexWarnings(flatSettings);
+        return getReindexWarnings(flatSettings, apmIndexPatterns);
       }
     },
 

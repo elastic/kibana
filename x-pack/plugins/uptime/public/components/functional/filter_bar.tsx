@@ -98,8 +98,8 @@ export const FilterBar = ({
     {
       type: 'field_value_selection',
       field: 'monitor.type',
-      name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
-        defaultMessage: 'Type',
+      name: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
+        defaultMessage: 'Scheme',
       }),
       multiSelect: false,
       options: schemes

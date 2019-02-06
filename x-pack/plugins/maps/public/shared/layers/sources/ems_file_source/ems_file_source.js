@@ -6,14 +6,14 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import { GIS_API_PATH } from '../../../../../common/constants';
+import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
 import { emsServiceSettings } from '../../../../kibana_services';
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 
 export class EMSFileSource extends AbstractVectorSource {
 
-  static type = 'EMS_FILE';
+  static type = EMS_FILE;
   static title = 'Elastic Maps Service vector shapes';
   static description = 'Vector shapes of administrative boundaries from Elastic Maps Service';
   static icon = 'emsApp';
