@@ -237,7 +237,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
               <div>
                 <div
                   class="euiModal visNewVisDialog"
-                  style="max-width: 100vw;"
+                  style="max-width: 70vw;"
                   tabindex="0"
                 >
                   <button
@@ -447,7 +447,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
         >
           <EuiModal
             className="visNewVisDialog"
-            maxWidth="100vw"
+            maxWidth="70vw"
             onClose={[Function]}
           >
             <FocusTrap
@@ -468,7 +468,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   onKeyDown={[Function]}
                   style={
                     Object {
-                      "maxWidth": "100vw",
+                      "maxWidth": "70vw",
                     }
                   }
                   tabIndex={0}
@@ -1266,7 +1266,7 @@ exports[`NewVisModal should render as expected 1`] = `
               <div>
                 <div
                   class="euiModal visNewVisDialog"
-                  style="max-width: 100vw;"
+                  style="max-width: 70vw;"
                   tabindex="0"
                 >
                   <button
@@ -1473,7 +1473,7 @@ exports[`NewVisModal should render as expected 1`] = `
         >
           <EuiModal
             className="visNewVisDialog"
-            maxWidth="100vw"
+            maxWidth="70vw"
             onClose={[Function]}
           >
             <FocusTrap
@@ -1494,7 +1494,7 @@ exports[`NewVisModal should render as expected 1`] = `
                   onKeyDown={[Function]}
                   style={
                     Object {
-                      "maxWidth": "100vw",
+                      "maxWidth": "70vw",
                     }
                   }
                   tabIndex={0}

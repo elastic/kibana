@@ -23,6 +23,7 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 
 import { VisualizeConstants } from '../visualize_constants';
 
+import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 
 import chrome from 'ui/chrome';
@@ -35,9 +36,16 @@ interface TypeSelectionProps {
   editorParams?: string[];
 }
 
+const baseUrl = `#${VisualizeConstants.CREATE_PATH}?`;
+
 class NewVisModal extends React.Component<TypeSelectionProps> {
   public static defaultProps = {
     editorParams: [],
+  };
+
+  public state = {
+    showSearchVisModal: false,
+    visType: {} as VisType,
   };
 
   private readonly isLabsEnabled: boolean;
@@ -45,6 +53,7 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
   constructor(props: TypeSelectionProps) {
     super(props);
     this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
+    this.onCloseModal = this.onCloseModal.bind(this);
   }
 
   public render() {
@@ -52,25 +61,46 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
       return null;
     }
 
+    const selectionModal = this.state.showSearchVisModal ? (
+      <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
+    ) : (
+      <TypeSelection
+        showExperimental={this.isLabsEnabled}
+        onVisTypeSelected={this.onVisTypeSelected}
+        visTypesRegistry={this.props.visTypesRegistry}
+      />
+    );
+
     return (
       <EuiOverlayMask>
-        <EuiModal onClose={this.props.onClose} maxWidth={'100vw'} className="visNewVisDialog">
-          <TypeSelection
-            showExperimental={this.isLabsEnabled}
-            onVisTypeSelected={this.onVisTypeSelected}
-            visTypesRegistry={this.props.visTypesRegistry}
-          />
+        <EuiModal onClose={this.onCloseModal} maxWidth={'70vw'} className="visNewVisDialog">
+          {selectionModal}
         </EuiModal>
       </EuiOverlayMask>
     );
   }
 
+  private onCloseModal = () => {
+    this.setState({ showSearchVisModal: false });
+    this.props.onClose();
+  };
+
   private onVisTypeSelected = (visType: VisType) => {
-    const baseUrl =
-      visType.requiresSearch && visType.options.showIndexSelection
-        ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
-        : `#${VisualizeConstants.CREATE_PATH}?`;
-    const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
+    if (visType.requiresSearch && visType.options.showIndexSelection) {
+      this.setState({ showSearchVisModal: true, visType });
+    } else {
+      const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
+      this.props.onClose();
+      location.assign(`${baseUrl}${params.join('&')}`);
+    }
+  };
+
+  private onSearchSelected = (searchId: string, searchType: string) => {
+    const params = [
+      `type=${encodeURIComponent(this.state.visType.name)}`,
+      `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
+      ...this.props.editorParams!,
+    ];
     this.props.onClose();
     location.assign(`${baseUrl}${params.join('&')}`);
   };

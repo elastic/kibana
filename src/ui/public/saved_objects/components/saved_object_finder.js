@@ -261,7 +261,7 @@ SavedObjectFinderUI.propTypes = {
   onChoose: PropTypes.func,
   makeUrl: PropTypes.func,
   noItemsMessage: PropTypes.node,
-  savedObjectType: PropTypes.oneOf(['visualization', 'search']).isRequired,
+  savedObjectType: PropTypes.oneOf(['visualization', 'search', 'index-pattern']).isRequired,
   visTypes: PropTypes.object,
 };
 

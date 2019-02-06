@@ -18,7 +18,6 @@
  */
 
 import './editor/editor';
-import './wizard/wizard';
 import 'ui/draggable/draggable_container';
 import 'ui/draggable/draggable_item';
 import 'ui/draggable/draggable_handle';
