@@ -343,13 +343,33 @@ function VisEditor(
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
-    ], function ([index, requiresTimePicker]) {
+      'vis.type.options.showQueryBar',
+    ], function ([index, requiresTimePicker, requiresQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-      } else {
+      if (showTimeFilter && requiresQueryBar) {
         timefilter.disableTimeRangeSelector();
+        timefilter.disableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = true;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
+      }
+      else if (showTimeFilter) {
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
+      }
+      else if (requiresQueryBar) {
+        timefilter.disableTimeRangeSelector();
+        timefilter.disableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = true;
+        $scope.showAutoRefreshOnlyInQueryBar = true;
+      }
+      else {
+        timefilter.disableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
       }
     });
 
@@ -364,8 +384,19 @@ function VisEditor(
       }
     };
 
-    timefilter.enableAutoRefreshSelector();
+    const updateRefreshInterval = () => {
+      $scope.refreshInterval = timefilter.getRefreshInterval();
+      // In case we are running in embedded mode (i.e. we used the visualize loader to embed)
+      // the visualization, we need to update the refreshInterval on the visualize handler.
+      if ($scope._handler) {
+        $scope._handler.update({
+          refreshInterval: $scope.refreshInterval,
+        });
+      }
+    };
+
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -402,9 +433,17 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function ({ query }) {
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   /**

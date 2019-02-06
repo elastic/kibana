@@ -59,6 +59,7 @@ interface Props {
   dateRangeTo?: string;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
+  showAutoRefreshOnly?: boolean;
   onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
@@ -162,6 +163,7 @@ class SearchBarUI extends Component<Props, State> {
             dateRangeTo={this.props.dateRangeTo}
             isRefreshPaused={this.props.isRefreshPaused}
             refreshInterval={this.props.refreshInterval}
+            showAutoRefreshOnly={this.props.showAutoRefreshOnly}
             onRefreshChange={this.props.onRefreshChange}
           />
         ) : (

@@ -527,7 +527,6 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
-        $scope.enableAutoRefreshSelector = true;
         $scope.$watch('opts.timefield', function (timefield) {
           if (!!timefield) {
             $scope.enableTimeRangeSelector = true;
