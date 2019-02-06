@@ -115,6 +115,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                       width={500}
                       height={200}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
+                      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
                       yDomain={durationDomainLimits}
                       crosshairValue={this.state.crosshairLocation}
                       onCrosshairUpdate={this.updateCrosshairLocation}
@@ -158,6 +159,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                       width={500}
                       height={200}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
+                      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
                       stackBy="y"
                       crosshairValue={this.state.crosshairLocation}
                       onCrosshairUpdate={this.updateCrosshairLocation}

@@ -39,6 +39,7 @@ export const SnapshotHistogram = ({
       height={120}
       stackBy="y"
       xType={EuiSeriesChartUtils.SCALE.TIME}
+      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
     >
       <EuiHistogramSeries
         data={upSeriesData}
