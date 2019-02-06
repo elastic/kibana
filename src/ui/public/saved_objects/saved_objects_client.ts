@@ -187,7 +187,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
-   * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
+   * @returns The result of the create operation containing created saved objects.
    */
   public bulkCreate = (objects: BulkCreateOptions[] = [], options: KFetchQuery = {}) => {
     const path = this.getPath(['_bulk_create']);
@@ -232,7 +232,7 @@ export class SavedObjectsClient {
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
    * @property {object} [options.hasReference] - { type, id }
-   * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
+   * @returns A find result with objects matching the specified search.
    */
   public find = <T extends SavedObjectAttributes>(
     options: FindOptions = {}
@@ -256,7 +256,7 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @returns {promise} - SavedObject({ id, type, version, attributes })
+   * @returns The saved object for the given type and id.
    */
   public get = <T extends SavedObjectAttributes>(
     type: string,
@@ -276,7 +276,7 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ] }
+   * @returns The saved objects with the given type and ids requested
    * @example
    *
    * bulkGet([
@@ -308,7 +308,7 @@ export class SavedObjectsClient {
    * @param {object} options
    * @prop {integer} options.version - ensures version matches that of persisted object
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
-   * @returns {promise}
+   * @returns
    */
   public update<T extends SavedObjectAttributes>(
     type: string,
