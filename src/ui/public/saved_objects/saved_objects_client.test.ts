@@ -26,7 +26,7 @@ import { FindOptions } from '../../../server/saved_objects/service';
 import { SavedObject } from './saved_object';
 import { SavedObjectsClient } from './saved_objects_client';
 
-describe.only('SavedObjectsClient', () => {
+describe('SavedObjectsClient', () => {
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
