@@ -77,32 +77,21 @@ withProcRunner(log, async proc => {
         cmd: 'babel',
         args: [
           'src',
+          '--config-file',
+          require.resolve('../babel.config.js'),
           '--out-dir',
           resolve(BUILD_DIR, subTask),
           '--extensions',
-          '.js,.tsx',
+          '.js,.ts,.tsx',
           ...(flags.watch ? ['--watch'] : ['--quiet']),
           ...(flags['source-maps'] ? ['--source-map', 'inline'] : []),
         ],
         wait: true,
         cwd,
-      })
-    ),
-
-    ...['public', 'server'].map(subTask =>
-      proc.run(padRight(12, `tsc:${subTask}`), {
-        cmd: 'tsc',
-        args: [
-          '--project',
-          subTask === 'public'
-            ? 'tsconfig.browser.json'
-            : 'tsconfig.json',
-          ...(flags.watch ? ['--watch', '--preserveWatchOutput', 'true'] : []),
-          ...(flags['source-maps'] ? ['--inlineSourceMap', 'true'] : []),
-        ],
-        wait: true,
-        env,
-        cwd,
+        env: {
+          ...env,
+          BABEL_ENV: subTask,
+        },
       })
     ),
   ]);

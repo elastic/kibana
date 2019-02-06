@@ -351,7 +351,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        _source: ['monitor.id', 'monitor.type', 'url.full', 'url.port'],
+        _source: ['monitor.id', 'monitor.type', 'url.full', 'url.port', 'monitor.name'],
         size: 1000,
         query: {
           range: {
@@ -373,6 +373,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const ids: MonitorKey[] = [];
     const ports = new Set<number>();
     const types = new Set<string>();
+    const names = new Set<string>();
 
     const hits = get(result, 'hits.hits', []);
     hits.forEach((hit: any) => {
@@ -380,6 +381,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       const url: string | null = get(hit, '_source.url.full', null);
       const port: number | undefined = get(hit, '_source.url.port', undefined);
       const type: string | undefined = get(hit, '_source.monitor.type', undefined);
+      const name: string | null = get(hit, '_source.monitor.name', null);
 
       if (key) {
         ids.push({ key, url });
@@ -390,12 +392,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       if (type) {
         types.add(type);
       }
+      if (name) {
+        names.add(name);
+      }
     });
 
     return {
       ids,
       ports: Array.from(ports),
       schemes: Array.from(types),
+      names: Array.from(names),
       statuses: ['up', 'down'],
     };
   }

@@ -24,7 +24,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { Label } from './label';
 import { FeedbackMessage } from './feedback_message';
 
@@ -57,7 +57,7 @@ export class TagCloudVisualization {
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
-    render(<I18nProvider><FeedbackMessage ref={this._feedbackMessage} /></I18nProvider>, this._feedbackNode);
+    render(<I18nContext><FeedbackMessage ref={this._feedbackMessage} /></I18nContext>, this._feedbackNode);
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);

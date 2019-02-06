@@ -27,7 +27,7 @@ const module = uiModules.get('apps/ml');
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
@@ -75,9 +75,9 @@ module.directive('mlTimeseriesChart', function ($timeout) {
       };
 
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(TimeseriesChart, props)}
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }

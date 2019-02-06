@@ -188,6 +188,23 @@ export default function ({ getService, getPageObjects }) {
       expect(data.length).to.be.greaterThan(0);
     });
 
+    it('should show correct data for a data table with range agg', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickBucket('Split Rows');
+      await PageObjects.visualize.selectAggregation('Range');
+      await PageObjects.visualize.selectField('bytes');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '0 to 1000', '1,351',
+        '1000 to 2000', '737',
+      ]);
+    });
+
+
     describe('otherBucket', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewVisualization();

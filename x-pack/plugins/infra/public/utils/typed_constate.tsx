@@ -46,6 +46,8 @@ type InferredActions<State, Actions> = ActionMap<
   { [K in keyof Actions]: InferredAction<State, Actions[K]> }
 >;
 
+export type ActionsFromMap<M> = M extends ActionMap<any, infer A> ? A : never;
+
 export const inferActionMap = <State extends any>() => <
   Actions extends {
     [key: string]: (...args: any[]) => (state: State) => State;
@@ -69,6 +71,8 @@ type InferredEffects<State, Effects> = EffectMap<
   { [K in keyof Effects]: InferredEffect<State, Effects[K]> }
 >;
 
+export type EffectsFromMap<M> = M extends EffectMap<any, infer E> ? E : never;
+
 export const inferEffectMap = <State extends any>() => <
   Effects extends {
     [key: string]: (...args: any[]) => (props: EffectProps<State>) => any;
@@ -91,6 +95,8 @@ type InferredSelectors<State, Selectors> = SelectorMap<
   State,
   { [K in keyof Selectors]: InferredSelector<State, Selectors[K]> }
 >;
+
+export type SelectorsFromMap<M> = M extends SelectorMap<any, infer S> ? S : never;
 
 export const inferSelectorMap = <State extends any>() => <
   Selectors extends {

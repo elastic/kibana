@@ -28,5 +28,5 @@ export interface NavControl {
   name: string;
   order: number;
   side: NavControlSide;
-  render: (targetDomElement: HTMLDivElement) => (() => void) | void;
+  render: (targetDomElement: HTMLDivElement) => (() => void);
 }

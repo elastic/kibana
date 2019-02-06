@@ -123,12 +123,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true } = {}) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
-        hash: appConfig.hash
+        hash: hash || appConfig.hash,
       });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
@@ -267,21 +267,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
       };
-    }
-
-    async getAppNavLinksText() {
-      await retry.try(async () => {
-        if (await testSubjects.exists('appsMenu')) {
-          return;
-        }
-
-        await testSubjects.click('appsMenuButton');
-        await testSubjects.existsOrFail('appsMenu');
-      });
-      const appsMenu = await testSubjects.find('appsMenu');
-      const appLinks = await testSubjects.findAllDescendant('appLink', appsMenu);
-      const linksText = await Promise.all(appLinks.map((appLink) => appLink.getVisibleText()));
-      return linksText;
     }
 
     /**
