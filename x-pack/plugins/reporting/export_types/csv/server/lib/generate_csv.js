@@ -14,19 +14,18 @@ export function createGenerateCsv(logger) {
   const hitIterator = createHitIterator(logger);
 
   return async function generateCsv({
-    callEndpoint,
     searchRequest,
-    settings,
     fields,
+    formatsMap,
     metaFields,
     conflictedTypesFields,
+    callEndpoint,
     cancellationToken,
-    formatsMap,
+    settings
   }) {
     const escapeValue = createEscapeValue(settings.quoteValues);
-    const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
     const builder = new MaxSizeStringBuilder(settings.maxSizeBytes);
-
+    const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
     if (!builder.tryAppend(header)) {
       return {
         content: '',

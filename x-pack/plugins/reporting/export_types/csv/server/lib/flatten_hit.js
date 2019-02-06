@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 
-export function createFlattenHit(fields, metaFields, conflictedTypesFields = []) {
+export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
   const flattenSource = (flat, obj, keyPrefix) => {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
     _.forOwn(obj, (val, key) => {
