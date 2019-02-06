@@ -68,7 +68,6 @@ test(`returns exposed services`, () => {
   actionsFactory.mockReturnValue(mockActions);
   mockConfig.get.mock;
   const mockXpackInfoFeature = Symbol();
-  const mockSavedObjectTypes = Symbol();
   const mockFeatures = Symbol();
   const mockXpackMainPlugin = {
     getFeatures: () => mockFeatures
@@ -79,14 +78,14 @@ test(`returns exposed services`, () => {
   authorizationModeFactory.mockReturnValue(mockAuthorizationMode);
   const mockSpaces = Symbol();
 
-  const authorization = createAuthorizationService(mockServer, mockXpackInfoFeature, mockSavedObjectTypes, mockXpackMainPlugin, mockSpaces);
+  const authorization = createAuthorizationService(mockServer, mockXpackInfoFeature, mockXpackMainPlugin, mockSpaces);
 
   const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
   expect(checkPrivilegesDynamicallyWithRequestFactory).toHaveBeenCalledWith(mockCheckPrivilegesWithRequest, mockSpaces);
-  expect(privilegesFactory).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockXpackMainPlugin);
+  expect(privilegesFactory).toHaveBeenCalledWith(mockActions, mockXpackMainPlugin);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
     mockXpackInfoFeature,
   );
