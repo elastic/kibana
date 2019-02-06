@@ -62,8 +62,8 @@ class Timefilter extends SimpleEmitter {
       };
       timeHistory.add(this._time);
       this.emit('timeUpdate');
+      this.emit('fetch');
     }
-    this.emit('fetch');
   }
 
   getRefreshInterval = () => {
