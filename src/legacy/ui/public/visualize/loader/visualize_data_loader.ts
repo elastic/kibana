@@ -33,11 +33,8 @@ import {
 
 import { VisResponseData } from './types';
 
-// @ts-ignore No typing present
-import { isTermSizeZeroError } from '../../elasticsearch_errors';
-
-import { toastNotifications } from 'ui/notify';
 import { decorateVisObject } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import { handleLoaderError } from './errors';
 
 function getHandler<T extends RequestHandler | ResponseHandler>(
   from: Array<{ name: string; handler: T }>,
@@ -117,28 +114,7 @@ export class VisualizeDataLoader {
         },
       };
     } catch (error) {
-      params.searchSource.cancelQueued();
-
-      this.vis.requestError = error;
-      this.vis.showRequestError =
-        error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
-
-      // tslint:disable-next-line
-      console.error(error);
-
-      if (isTermSizeZeroError(error)) {
-        toastNotifications.addDanger(
-          `Your visualization ('${this.vis.title}') has an error: it has a term ` +
-            `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-            `the error.`
-        );
-        return;
-      }
-
-      toastNotifications.addDanger({
-        title: 'Error in visualization',
-        text: error.message,
-      });
+      return handleLoaderError(params, this.vis, error);
     }
   }
 }

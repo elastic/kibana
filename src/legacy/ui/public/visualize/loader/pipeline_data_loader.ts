@@ -18,6 +18,7 @@
  */
 
 import { RequestHandlerParams, Vis } from '../../vis';
+import { handleLoaderError } from './errors';
 import { buildPipeline, runPipeline } from './pipeline_helpers';
 
 export class PipelineDataLoader {
@@ -28,7 +29,7 @@ export class PipelineDataLoader {
     this.vis.showRequestError = false;
     this.vis.pipelineExpression = buildPipeline(this.vis, params);
 
-    return await runPipeline(
+    const pipelineResponse = await runPipeline(
       this.vis.pipelineExpression,
       {},
       {
@@ -42,5 +43,11 @@ export class PipelineDataLoader {
         inspectorAdapters: params.inspectorAdapters,
       }
     );
+
+    if (pipelineResponse.type === 'error') {
+      return handleLoaderError(params, this.vis, pipelineResponse.error);
+    }
+
+    return pipelineResponse;
   }
 }
