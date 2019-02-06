@@ -387,38 +387,32 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
               }
               tabIndex={0}
             >
-              <EuiButtonIcon
-                aria-label="Closes this modal window"
-                className="euiModal__closeIcon"
-                color="text"
-                iconSize="m"
-                iconType="cross"
-                onClick={[Function]}
-                type="button"
+              <EuiI18n
+                default="Closes this modal window"
+                token="euiModal.closeModal"
               >
-                <button
+                <EuiButtonIcon
                   aria-label="Closes this modal window"
-                  className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                  className="euiModal__closeIcon"
+                  color="text"
+                  iconSize="m"
+                  iconType="cross"
                   onClick={[Function]}
                   type="button"
                 >
-                  <EuiIcon
-                    aria-hidden="true"
-                    className="euiButtonIcon__icon"
-                    size="m"
-                    type="cross"
+                  <button
+                    aria-label="Closes this modal window"
+                    className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                    onClick={[Function]}
+                    type="button"
                   >
-                    <cross
+                    <EuiIcon
                       aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
-                      focusable="false"
-                      height="16"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
+                      className="euiButtonIcon__icon"
+                      size="m"
+                      type="cross"
                     >
-                      <svg
+                      <cross
                         aria-hidden="true"
                         className="euiIcon euiIcon--medium euiButtonIcon__icon"
                         focusable="false"
@@ -428,14 +422,25 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                        />
-                      </svg>
-                    </cross>
-                  </EuiIcon>
-                </button>
-              </EuiButtonIcon>
+                        <svg
+                          aria-hidden="true"
+                          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                          focusable="false"
+                          height="16"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                          />
+                        </svg>
+                      </cross>
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
+              </EuiI18n>
               <div
                 className="euiModal__flex"
               >
@@ -1325,38 +1330,32 @@ exports[`NewVisModal should render as expected 1`] = `
               }
               tabIndex={0}
             >
-              <EuiButtonIcon
-                aria-label="Closes this modal window"
-                className="euiModal__closeIcon"
-                color="text"
-                iconSize="m"
-                iconType="cross"
-                onClick={[Function]}
-                type="button"
+              <EuiI18n
+                default="Closes this modal window"
+                token="euiModal.closeModal"
               >
-                <button
+                <EuiButtonIcon
                   aria-label="Closes this modal window"
-                  className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                  className="euiModal__closeIcon"
+                  color="text"
+                  iconSize="m"
+                  iconType="cross"
                   onClick={[Function]}
                   type="button"
                 >
-                  <EuiIcon
-                    aria-hidden="true"
-                    className="euiButtonIcon__icon"
-                    size="m"
-                    type="cross"
+                  <button
+                    aria-label="Closes this modal window"
+                    className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                    onClick={[Function]}
+                    type="button"
                   >
-                    <cross
+                    <EuiIcon
                       aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
-                      focusable="false"
-                      height="16"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
+                      className="euiButtonIcon__icon"
+                      size="m"
+                      type="cross"
                     >
-                      <svg
+                      <cross
                         aria-hidden="true"
                         className="euiIcon euiIcon--medium euiButtonIcon__icon"
                         focusable="false"
@@ -1366,14 +1365,25 @@ exports[`NewVisModal should render as expected 1`] = `
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                        />
-                      </svg>
-                    </cross>
-                  </EuiIcon>
-                </button>
-              </EuiButtonIcon>
+                        <svg
+                          aria-hidden="true"
+                          className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                          focusable="false"
+                          height="16"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                          />
+                        </svg>
+                      </cross>
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
+              </EuiI18n>
               <div
                 className="euiModal__flex"
               >
