@@ -71,7 +71,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { buildEsQuery, filterMatchesIndex } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
 import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
@@ -602,11 +602,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           }
 
           try {
-            const esQueryConfigs = {
-              allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
-              queryStringOptions: config.get('query:queryString:options'),
-              ignoreFilterIfFieldNotInIndex: config.get('courier:ignoreFilterIfFieldNotInIndex'),
-            };
+            const esQueryConfigs = getEsQueryConfig(config);
             flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
           } catch (e) {
             if (e.message === 'OutdatedKuerySyntaxError') {

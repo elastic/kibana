@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export async function getEsQueryConfig(req) {
-  const uiSettings = req.getUiSettingsService();
+export async function getEsQueryConfig(uiSettings) {
   const allowLeadingWildcards = await uiSettings.get('query:allowLeadingWildcards');
   const queryStringOptions = await uiSettings.get('query:queryString:options');
   const ignoreFilterIfFieldNotInIndex = await uiSettings.get('courier:ignoreFilterIfFieldNotInIndex');
