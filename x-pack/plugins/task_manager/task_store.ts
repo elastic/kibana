@@ -49,8 +49,7 @@ export interface RawTaskDoc {
   _id: string;
   _index: string;
   _type: string;
-  _seq_no: number;
-  _primary_term: number;
+  _version: number;
   _source: {
     type: string;
     kibana: {
@@ -436,8 +435,8 @@ function taskDocToRaw(doc: ConcreteTaskInstance, store: TaskStore): RawTaskDoc {
     _id: doc.id,
     _index: store.index,
     _source: { type, task, kibana },
-    _seq_no: doc.sequenceNumber,
-    _primary_term: doc.primaryTerm,
+    _type: DOC_TYPE,
+    _version: doc.version,
   };
 }
 
