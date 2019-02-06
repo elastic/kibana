@@ -134,6 +134,7 @@ class SpacesGridPageUI extends Component<Props, State> {
   public getPrimaryActionButton() {
     return (
       <EuiButton
+        data-test-subj="createSpaceGrid"
         fill
         onClick={() => {
           window.location.hash = `#/management/spaces/create`;

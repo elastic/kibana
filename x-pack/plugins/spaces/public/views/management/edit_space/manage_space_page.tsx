@@ -163,6 +163,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         >
           <EuiFieldText
             name="name"
+            data-test-subj="spaceNameField"
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
               defaultMessage: 'Awesome space',
@@ -214,6 +215,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         >
           <EuiFieldText
             name="description"
+            data-test-subj="spaceDescriptionField"
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.management.manageSpacePage.hereMagicHappensPlaceholder',
               defaultMessage: 'This is where the magic happens.',
