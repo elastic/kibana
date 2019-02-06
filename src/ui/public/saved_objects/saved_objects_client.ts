@@ -35,7 +35,7 @@ import {
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
-import { SavedObject } from './saved_object';
+import { SimpleSavedObject } from './simple_saved_object';
 
 interface RequestParams {
   method: 'POST' | 'GET' | 'PUT' | 'DELETE';
@@ -63,7 +63,7 @@ interface UpdateOptions {
 }
 
 interface BatchResponse<T extends SavedObjectAttributes = any> {
-  savedObjects: Array<SavedObject<T>>;
+  savedObjects: Array<SimpleSavedObject<T>>;
 }
 
 interface FindResults<T extends SavedObjectAttributes = any> extends BatchResponse<T> {
@@ -75,7 +75,7 @@ interface FindResults<T extends SavedObjectAttributes = any> extends BatchRespon
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends SavedObjectAttributes>(value: SavedObject<T> | PlainSavedObject<T>) => void;
+  resolve: <T extends SavedObjectAttributes>(value: SimpleSavedObject<T> | PlainSavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
 
@@ -147,7 +147,7 @@ export class SavedObjectsClient {
     type: string,
     attributes: T,
     options: CreateOptions = {}
-  ): Promise<SavedObject<T>> => {
+  ): Promise<SimpleSavedObject<T>> => {
     if (!type || !attributes) {
       return Promise.reject(new Error('requires type and attributes'));
     }
@@ -257,7 +257,7 @@ export class SavedObjectsClient {
   public get = <T extends SavedObjectAttributes>(
     type: string,
     id: string
-  ): Promise<SavedObject<T>> => {
+  ): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -311,7 +311,7 @@ export class SavedObjectsClient {
     id: string,
     attributes: T,
     { version, migrationVersion, references }: UpdateOptions = {}
-  ): Promise<SavedObject<T>> {
+  ): Promise<SimpleSavedObject<T>> {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
     }
@@ -336,8 +336,8 @@ export class SavedObjectsClient {
 
   private createSavedObject<T extends SavedObjectAttributes>(
     options: PlainSavedObject<T>
-  ): SavedObject<T> {
-    return new SavedObject(this, options);
+  ): SimpleSavedObject<T> {
+    return new SimpleSavedObject(this, options);
   }
 
   private getPath(path: Array<string | undefined>): string {

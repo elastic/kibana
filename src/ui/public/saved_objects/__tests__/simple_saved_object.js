@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { SavedObject } from '../saved_object';
+import { SavedObject } from '../simple_saved_object';
 
 describe('SavedObject', () => {
   it('persists type and id', () => {

@@ -24,7 +24,7 @@ import {
 } from '../../../server/saved_objects';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export class SavedObject<T extends SavedObjectAttributes> {
+export class SimpleSavedObject<T extends SavedObjectAttributes> {
   public attributes: T;
   // tslint:disable-next-line variable-name We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];
