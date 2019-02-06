@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { debounce, flattenDeep } from 'lodash';
@@ -51,8 +50,6 @@ import {
   getSavedObjectLabel,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
-const apiBase = chrome.addBasePath('/api/saved_objects');
 
 export const INCLUDED_TYPES = [
   'index-pattern',
@@ -281,12 +278,16 @@ class ObjectsTableUI extends Component {
   };
 
   onExport = async () => {
+    const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
-    window.location.href = `${apiBase}/_export?objects=${JSON.stringify(selectedSavedObjects)}`;
+    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
+    await retrieveAndExportDocs(objects.savedObjects, savedObjectsClient);
   };
 
   onExportAll = async () => {
+    const { $http } = this.props;
     const { exportAllSelectedOptions } = this.state;
+
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
         if (selected) {
@@ -296,7 +297,8 @@ class ObjectsTableUI extends Component {
       },
       []
     );
-    window.location.href = `${apiBase}/_export?type=${JSON.stringify(exportTypes)}`;
+    const results = await scanAllTypes($http, exportTypes);
+    saveToFile(JSON.stringify(flattenDeep(results), null, 2));
   };
 
   finishImport = () => {
