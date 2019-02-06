@@ -5,7 +5,7 @@
  */
 
 export const defaultSourceConfiguration = {
-  name: 'Unnamed Source',
+  name: 'Default',
   description: '',
   metricAlias: 'metricbeat-*',
   logAlias: 'filebeat-*',

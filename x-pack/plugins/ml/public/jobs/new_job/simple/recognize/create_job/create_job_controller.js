@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'angular-ui-select';
 import dateMath from '@elastic/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';
 import { getCreateRecognizerJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';

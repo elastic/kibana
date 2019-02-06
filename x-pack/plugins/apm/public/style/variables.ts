@@ -31,39 +31,12 @@ export function pct(value: number): string {
 export const borderRadius = '5px';
 
 // Colors (from dark to light)
-const colorBlue1 = '#006E8A';
-const colorBlue2 = '#0079a5';
 export const colors = {
   black: '#000000',
-  black2: '#2d2d2d',
-  gray1: '#343741',
-  gray2: '#69707D',
-  gray3: '#98A2B3',
-  gray4: '#D3DAE6',
-  gray5: '#F5F7FA',
-  white: '#ffffff',
-  teal: '#017D73',
-  red: '#a30000',
   yellow: '#FCF2E6',
-  blue1: colorBlue1,
-  blue2: colorBlue2,
 
   // custom APM palette
-  apmBrown: '#461a0a',
-  apmPurple: '#490092',
-  apmBlue: '#3185fc',
-  apmRed: '#920000',
-  apmRed2: '#db1374',
-  apmGreen: '#00b3a4',
-  apmPink: '#feb6db',
-  apmOrange: '#f98510',
-  apmTan: '#bfa180',
-  apmYellow: '#ecae23',
-  apmLightBlue: '#80bcd2',
-
-  // Semantic colors
-  link: colorBlue2,
-  linkHover: colorBlue1
+  apmLightBlue: '#80bcd2'
 };
 
 // Fonts

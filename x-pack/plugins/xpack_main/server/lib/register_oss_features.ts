@@ -48,7 +48,7 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         savedObject: {
@@ -119,6 +119,10 @@ const kibanaFeatures: Feature[] = [
         ui: [],
       },
     },
+    privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+      defaultMessage:
+        'User should also be granted the appropriate Elasticsearch cluster and index privileges',
+    }),
   },
   {
     id: 'advancedSettings',
@@ -136,6 +140,13 @@ const kibanaFeatures: Feature[] = [
         savedObject: {
           all: ['config'],
           read: [],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['config'],
         },
         ui: [],
       },
@@ -160,6 +171,13 @@ const kibanaFeatures: Feature[] = [
         },
         ui: [],
       },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['index-pattern', 'config'],
+        },
+        ui: [],
+      },
     },
   },
 ];
@@ -178,7 +196,7 @@ const timelionFeatures: Feature[] = [
           all: ['timelion-sheet'],
           read: ['config', 'index-pattern'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         savedObject: {

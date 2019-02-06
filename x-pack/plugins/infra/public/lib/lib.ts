@@ -165,7 +165,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  fields?: SourceQuery.Fields | null;
+  fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: InfraMetricInput;
@@ -175,7 +175,6 @@ export interface InfraWaffleMapOptions {
 }
 
 export interface InfraOptions {
-  sourceId: string;
   timerange: InfraTimerangeInput;
   wafflemap: InfraWaffleMapOptions;
 }

@@ -28,7 +28,7 @@ import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -138,7 +138,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       // we filter out the features here which don't have any privileges to simplify the login within
       const featuresWithPrivileges = features.filter(feature => Object.keys(feature.privileges).length > 0);
       render(
-        <I18nProvider>
+        <I18nContext>
           <EditRolePage
             runAsUsers={users}
             role={role}
@@ -152,7 +152,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             features={featuresWithPrivileges}
             privileges={privileges}
           />
-        </I18nProvider>, domNode);
+        </I18nContext>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

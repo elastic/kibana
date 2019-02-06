@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
 
   describe('dashboard', () => {
     before(async () => {
@@ -64,7 +65,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql([
           'Dashboard',
           'Management',
@@ -132,7 +133,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql([
           'Dashboard',
           'Management',

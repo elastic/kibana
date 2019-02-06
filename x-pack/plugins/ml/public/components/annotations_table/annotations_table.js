@@ -162,7 +162,6 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     };
 
     const appState = {
-      filters: [],
       query: {
         query_string: {
           analyze_wildcard: true,

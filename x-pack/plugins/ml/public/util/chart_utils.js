@@ -202,7 +202,6 @@ export function getExploreSeriesLink(series) {
       detectorIndex: series.detectorIndex,
       entities: entityCondition,
     },
-    filters: [],
     query: {
       query_string: {
         analyze_wildcard: true,

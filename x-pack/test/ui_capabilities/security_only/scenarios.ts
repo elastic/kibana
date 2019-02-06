@@ -332,19 +332,19 @@ const GraphRead: GraphRead = {
   },
 };
 
-interface GisAll extends User {
-  username: 'gis_all';
+interface MapsAll extends User {
+  username: 'maps_all';
 }
-const GisAll: GisAll = {
-  username: 'gis_all',
-  fullName: 'gis_all',
-  password: 'gis_all-password',
+const MapsAll: MapsAll = {
+  username: 'maps_all',
+  fullName: 'maps_all',
+  password: 'maps_all-password',
   role: {
-    name: 'gis_all_role',
+    name: 'maps_all_role',
     kibana: [
       {
         feature: {
-          gis: ['all'],
+          maps: ['all'],
         },
         spaces: ['*'],
       },
@@ -352,19 +352,19 @@ const GisAll: GisAll = {
   },
 };
 
-interface GisRead extends User {
-  username: 'gis_read';
+interface MapsRead extends User {
+  username: 'maps_read';
 }
-const GisRead: GisRead = {
-  username: 'gis_read',
-  fullName: 'gis_read',
-  password: 'gis_read-password',
+const MapsRead: MapsRead = {
+  username: 'maps_read',
+  fullName: 'maps_read',
+  password: 'maps_read-password',
   role: {
-    name: 'gis_read_role',
+    name: 'maps_read_role',
     kibana: [
       {
         feature: {
-          gis: ['read'],
+          maps: ['read'],
         },
         spaces: ['*'],
       },
@@ -569,8 +569,8 @@ export type UserScenarios =
   | DiscoverRead
   | GraphAll
   | GraphRead
-  | GisAll
-  | GisRead
+  | MapsAll
+  | MapsRead
   | InfrastructureRead
   | LogsRead
   | MonitoringAll
@@ -597,8 +597,8 @@ export const UserScenarios: UserScenarios[] = [
   DiscoverRead,
   GraphAll,
   GraphRead,
-  GisAll,
-  GisRead,
+  MapsAll,
+  MapsRead,
   InfrastructureRead,
   LogsRead,
   MonitoringAll,

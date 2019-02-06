@@ -1,0 +1,46 @@
+<div id="maps-plugin"  ng-class="{mapFullScreen: isFullScreen}">
+  <div id="maps-top-nav">
+    <div>
+      <kbn-top-nav name="map" config="topNavMenu">
+        <div data-transclude-slots>
+          <!-- Title. -->
+          <div data-transclude-slot="topLeftCorner">
+            <div
+              class="kuiLocalBreadcrumbs"
+              data-test-subj="breadcrumbs"
+              role="heading"
+              aria-level="1"
+              ng-if="showPluginBreadcrumbs">
+              <div class="kuiLocalBreadcrumb">
+                <a class="kuiLocalBreadcrumb__link" href="#">Map</a>
+              </div>
+              <div class="kuiLocalBreadcrumb">
+                {{ getMapTitle() }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Search. -->
+          <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
+            <query-bar
+              query="query"
+              app-name="'maps'"
+              on-submit="updateQueryAndDispatch"
+              index-patterns="indexPatterns"
+              show-date-picker="showDatePicker"
+              date-range-from="time.from"
+              date-range-to="time.to"
+              is-refresh-paused="refreshConfig.isPaused"
+              refresh-interval="refreshConfig.interval"
+              on-refresh-change="onRefreshChange"
+            ></query-bar>
+          </div>
+
+        </div>
+      </kbn-top-nav>
+    </div>
+  </div>
+
+  <div id="react-maps-root"></div>
+
+</div>

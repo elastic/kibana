@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontFamilyCode,
-  fontSizes,
-  px,
-  units
-} from '../../../style/variables';
+import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 
@@ -26,7 +21,7 @@ const Table = styled.table`
 `;
 
 const Row = styled.tr`
-  border-bottom: ${px(1)} solid ${colors.gray4};
+  border-bottom: ${px(1)} solid ${theme.euiColorLightShade};
   &:last-child {
     border: 0;
   }
@@ -52,7 +47,7 @@ const Cell = styled.td`
 `;
 
 const EmptyValue = styled.span`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 export function FormattedKey({

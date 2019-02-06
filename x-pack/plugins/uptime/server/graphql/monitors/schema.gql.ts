@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const monitorsSchema = gql`
   type FilterBar {
     ids: [MonitorKey!]
+    names: [String!]
     ports: [Int!]
     schemes: [String!]
     statuses: [String!]

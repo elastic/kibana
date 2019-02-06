@@ -10,7 +10,6 @@ export default function spaceSelectorFunctonalTests({
   getService,
   getPageObjects,
 }: KibanaFunctionalTestDefaultProviders) {
-  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
@@ -53,8 +52,6 @@ export default function spaceSelectorFunctonalTests({
 
     describe('Spaces Data', () => {
       const spaceId = 'another-space';
-      const dashboardPath = config.get(['apps', 'dashboard']).pathname;
-      const homePath = config.get(['apps', 'home']).pathname;
       const sampleDataHash = '/home/tutorial_directory/sampleData';
 
       const expectDashboardRenders = async (dashName: string) => {
@@ -65,42 +62,34 @@ export default function spaceSelectorFunctonalTests({
       };
 
       before(async () => {
-        await esArchiver.load('spaces');
+        await esArchiver.load('spaces/selector');
         await PageObjects.security.login(null, null, {
           expectSpaceSelector: true,
         });
         await PageObjects.spaceSelector.clickSpaceCard('default');
         await PageObjects.common.navigateToApp('home', {
-          appConfig: {
-            hash: sampleDataHash,
-          },
+          hash: sampleDataHash,
         });
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.common.navigateToApp('home', {
-          appConfig: {
-            hash: sampleDataHash,
-            pathname: `/s/${spaceId}${homePath}`,
-          },
+          hash: sampleDataHash,
+          basePath: `/s/${spaceId}`,
         });
         await PageObjects.home.addSampleDataSet('flights');
       });
 
       after(async () => {
         await PageObjects.common.navigateToApp('home', {
-          appConfig: {
-            hash: sampleDataHash,
-          },
+          hash: sampleDataHash,
         });
         await PageObjects.home.removeSampleDataSet('logs');
         await PageObjects.common.navigateToApp('home', {
-          appConfig: {
-            hash: sampleDataHash,
-            pathname: `/s/${spaceId}${homePath}`,
-          },
+          hash: sampleDataHash,
+          basePath: `/s/${spaceId}`,
         });
         await PageObjects.home.removeSampleDataSet('flights');
         await PageObjects.security.logout();
-        await esArchiver.unload('spaces');
+        await esArchiver.unload('spaces/selector');
       });
 
       describe('displays separate data for each space', async () => {
@@ -111,9 +100,7 @@ export default function spaceSelectorFunctonalTests({
 
         it('in a custom space', async () => {
           await PageObjects.common.navigateToApp('dashboard', {
-            appConfig: {
-              pathname: `/s/${spaceId}${dashboardPath}`,
-            },
+            basePath: `/s/${spaceId}`,
           });
           await expectDashboardRenders('[Flights] Global Flight Dashboard');
         });
