@@ -26,9 +26,9 @@
           "job_id": "jobIdMock",
           "type": "annotation",
           "create_time": 1549385157823,
-          "create_username": "<user unknown>",
+          "create_username": "usernameMock",
           "modified_time": 1549448867514,
-          "modified_username": "<user unknown>"
+          "modified_username": "usernameMock"
         }
       },
       {
@@ -43,9 +43,9 @@
           "job_id": "jobIdMock",
           "type": "annotation",
           "create_time": 1549382842522,
-          "create_username": "<user unknown>",
+          "create_username": "usernameMock",
           "modified_time": 1549448876306,
-          "modified_username": "<user unknown>"
+          "modified_username": "usernameMock"
         }
       }
     ]

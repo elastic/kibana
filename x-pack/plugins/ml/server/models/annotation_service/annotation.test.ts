@@ -135,5 +135,44 @@ describe('annotation_service', () => {
       expect(response).toBe(acknowledgedResponseMock);
       done();
     });
+
+    it('should update annotation text and the username for modified_username', async done => {
+      const { getAnnotations, indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
+
+      const jobIdMock = 'jobIdMock';
+
+      const indexAnnotationArgsMock: IndexAnnotationArgs = {
+        jobIds: [jobIdMock],
+        earliestMs: 1454804100000,
+        latestMs: 1455233399999,
+        maxAnnotations: 500,
+      };
+
+      const response: GetResponse = await getAnnotations(indexAnnotationArgsMock);
+
+      const annotation: Annotation = response.annotations[jobIdMock][0];
+
+      const originalUsernameMock = 'usernameMock';
+      expect(annotation.create_username).toBe(originalUsernameMock);
+      expect(annotation.modified_username).toBe(originalUsernameMock);
+
+      const modifiedAnnotationText = 'Modified Annotation 1';
+      annotation.annotation = modifiedAnnotationText;
+
+      const modifiedUsernameMock = 'modifiedUsernameMock';
+
+      await indexAnnotation(annotation, modifiedUsernameMock);
+
+      expect(callWithRequestSpy.mock.calls[1][0]).toBe('index');
+      // test if the annotation has been correctly updated
+      const indexParamsCheck = callWithRequestSpy.mock.calls[1][1];
+      const modifiedAnnotation = indexParamsCheck.body;
+      expect(modifiedAnnotation.annotation).toBe(modifiedAnnotationText);
+      expect(modifiedAnnotation.create_username).toBe(originalUsernameMock);
+      expect(modifiedAnnotation.modified_username).toBe(modifiedUsernameMock);
+      expect(typeof modifiedAnnotation.create_time).toBe('number');
+      expect(typeof modifiedAnnotation.modified_time).toBe('number');
+      done();
+    });
   });
 });
