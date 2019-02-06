@@ -56,7 +56,6 @@ export function compose(
       () => '',
       onKibanaReady,
       null,
-      null,
       '7.0.0'
     )
   );

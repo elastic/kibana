@@ -18,6 +18,7 @@
  */
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import classNames from 'classnames';
 import React from 'react';
 import { Embeddable } from 'ui/embeddable';
 import { PanelId } from '../../selectors';
@@ -43,24 +44,26 @@ function PanelHeaderUi({
   hidePanelTitles,
   intl,
 }: PanelHeaderUiProps) {
+  const classes = classNames('dshPanel__header', {
+    'dshPanel__header--floater': !title || hidePanelTitles,
+  });
+
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
-      <div className="dshPanel__header--floater">
-        <div className="dshPanel__headerButtonGroup">
-          <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
-        </div>
+      <div className={classes}>
+        <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
       </div>
     );
   }
 
   return (
     <div
-      className="dshPanel__header"
+      className={classes}
       data-test-subj={`dashboardPanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <span
+      <div
         data-test-subj="dashboardPanelTitle"
-        className="dshPanel__title"
+        className="dshPanel__title dshPanel__dragger"
         title={title}
         aria-label={intl.formatMessage(
           {
@@ -73,11 +76,9 @@ function PanelHeaderUi({
         )}
       >
         {hidePanelTitles ? '' : title}
-      </span>
-
-      <div className="dshPanel__headerButtonGroup">
-        <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
       </div>
+
+      <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
     </div>
   );
 }

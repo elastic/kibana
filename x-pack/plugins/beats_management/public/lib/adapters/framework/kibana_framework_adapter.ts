@@ -37,7 +37,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private xpackInfo: FrameworkInfo | null = null;
   private adapterService: KibanaAdapterServiceProvider;
   private shieldUser: FrameworkUser | null = null;
-  private settingSubscription: any;
   constructor(
     private readonly PLUGIN_ID: string,
     private readonly management: ManagementAPI,
@@ -45,24 +44,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
-    private readonly uiSettings: any,
     public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
-
-    this.settingSubscription = uiSettings.getUpdate$().subscribe({
-      next: ({ key, newValue }: { key: string; newValue: boolean }) => {
-        if (key === 'k7design' && this.xpackInfo) {
-          this.xpackInfo.k7Design = newValue;
-        }
-      },
-    });
-  }
-
-  // We dont really want to have this, but it's needed to conditionaly render for k7 due to
-  // when that data is needed.
-  public getUISetting(key: 'k7design'): boolean {
-    return this.uiSettings.get(key);
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -86,7 +70,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
-        k7Design: this.uiSettings.get('k7design'),
         license: {
           type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
           expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
@@ -220,7 +203,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         if (elem) {
           ReactDOM.unmountComponentAtNode(elem);
           elem.remove();
-          this.settingSubscription.unsubscribe();
         }
       }
     });
@@ -233,7 +215,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       if (elem) {
         ReactDOM.unmountComponentAtNode(elem);
         elem.remove();
-        this.settingSubscription.unsubscribe();
       }
     });
   }

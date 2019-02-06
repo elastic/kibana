@@ -6,7 +6,7 @@
 
 export const SECTIONS = {
   AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-  INDEX_FOLLOWER: 'indexFollower',
+  FOLLOWER_INDEX: 'followerIndex',
   REMOTE_CLUSTER: 'remoteCluster',
   CCR_STATS: 'ccrStats',
 };

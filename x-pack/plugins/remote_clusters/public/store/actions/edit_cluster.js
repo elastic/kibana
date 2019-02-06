@@ -5,13 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fatalError } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
 import {
-  editCluster as sendEditClusterRequest,
+  editCluster as sendEditClusterRequest, extractQueryParams,
   getRouter,
+  redirect,
 } from '../../services';
 
 import {
@@ -66,12 +67,26 @@ export const editCluster = (cluster) => async (dispatch) => {
     type: EDIT_CLUSTER_SUCCESS,
   });
 
-  // This will open the new job in the detail panel. Note that we're *not* showing a success toast
-  // here, because it would partially obscure the detail panel.
-  getRouter().history.push({
-    pathname: `${CRUD_APP_BASE_PATH}/list`,
-    search: `?cluster=${cluster.name}`,
-  });
+  const { history, route: { location: { search } }  } = getRouter();
+  const { redirect: redirectUrl } = extractQueryParams(search);
+
+  if (redirectUrl) {
+    // A toast is only needed if we're leaving the app.
+    toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.editAction.successTitle', {
+      defaultMessage: `Edited remote cluster '{name}'`,
+      values: { name: cluster.name },
+    }));
+
+    const decodedRedirect = decodeURIComponent(redirectUrl);
+    redirect(`${decodedRedirect}?cluster=${cluster.name}`);
+  } else {
+    // This will open the edited cluster in the detail panel. Note that we're *not* showing a success toast
+    // here, because it would partially obscure the detail panel.
+    history.push({
+      pathname: `${CRUD_APP_BASE_PATH}/list`,
+      search: `?cluster=${cluster.name}`,
+    });
+  }
 };
 
 export const startEditingCluster = ({ clusterName }) => (dispatch) => {
