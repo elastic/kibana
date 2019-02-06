@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SavedObjectProvider } from '../../saved_objects';
+export { SavedObjectProvider } from './saved_object';
