@@ -22,8 +22,8 @@
   }
 
   tr:hover {
-    .kbnDocViewer__buttons {
-      visibility: visible;
+    .kbnDocViewer__actionButton {
+      opacity: 1;
     }
   }
 }
@@ -37,6 +37,10 @@
   white-space: nowrap;
 }
 
-.kbnDocViewer__buttons {
-  visibility: hidden;
+.kbnDocViewer__actionButton {
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
 }
