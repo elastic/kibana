@@ -65,7 +65,7 @@ function checkout_sibling {
     function checkout_clone_target {
       pick_clone_target
       if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
-        export TEST_ES_FROM=snapshot
+        export TEST_ES_FROM=source
       fi
 
       echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
