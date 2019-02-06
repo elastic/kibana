@@ -32,8 +32,8 @@ import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { SavedObject } from '../saved_object';
 
 interface SavedObjectFinderUIState {
-  items: any[];
-  filter: any;
+  items: Array<{ title: string; id: SavedObject<any>['id']; type: SavedObject<any>['type'] }>;
+  filter: string;
   isFetchingItems: boolean;
   page: number;
   perPage: number;
@@ -74,7 +74,7 @@ class SavedObjectFinderUI extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = _.debounce(async (filter: any) => {
+  private debouncedFetch = _.debounce(async (filter: string) => {
     const resp = await chrome.getSavedObjectsClient().find({
       type: this.props.savedObjectType,
       fields: ['title', 'visState'],
