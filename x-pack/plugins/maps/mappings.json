@@ -23,5 +23,53 @@
         "type": "text"
       }
     }
+  },
+  "maps-telemetry": {
+    "properties": {
+      "mapsTotalCount": {
+        "type": "long"
+      },
+      "timeCaptured": {
+        "type": "date"
+      },
+      "attributesPerMap": {
+        "properties": {
+          "dataSourcesCount": {
+            "properties": {
+              "min": {
+                "type": "long"
+              },
+              "max": {
+                "type": "long"
+              },
+              "avg": {
+                "type": "long"
+              }
+            }
+          },
+          "layersCount": {
+            "properties": {
+              "min": {
+                "type": "long"
+              },
+              "max": {
+                "type": "long"
+              },
+              "avg": {
+                "type": "long"
+              }
+            }
+          },
+          "layerTypesCount": {
+            "dynamic": "true",
+            "properties": {}
+          },
+          "emsVectorLayersCount": {
+            "dynamic": "true",
+            "properties": {}
+          }
+        }
+      }
+    }
   }
 }

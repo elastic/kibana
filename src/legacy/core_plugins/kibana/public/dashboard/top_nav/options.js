@@ -41,7 +41,7 @@ class OptionsMenuUi extends Component {
   }
 
   handleHidePanelTitlesChange = (evt) => {
-    const isChecked = evt.target.checked;
+    const isChecked = !evt.target.checked;
     this.props.onHidePanelTitlesChange(isChecked);
     this.setState({ hidePanelTitles: isChecked });
   }
@@ -68,9 +68,9 @@ class OptionsMenuUi extends Component {
           <EuiSwitch
             label={this.props.intl.formatMessage({
               id: 'kbn.dashboard.topNav.options.hideAllPanelTitlesSwitchLabel',
-              defaultMessage: 'Hide all panel titles',
+              defaultMessage: 'Show panel titles',
             })}
-            checked={this.state.hidePanelTitles}
+            checked={!this.state.hidePanelTitles}
             onChange={this.handleHidePanelTitlesChange}
             data-test-subj="dashboardPanelTitlesCheckbox"
           />

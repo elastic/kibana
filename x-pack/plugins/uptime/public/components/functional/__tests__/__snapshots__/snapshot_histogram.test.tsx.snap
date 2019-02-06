@@ -2,9 +2,9 @@
 
 exports[`SnapshotHistogram component renders the component without errors 1`] = `
 <FlexibleEuiSeriesChart
-  height={107}
+  height={120}
   stackBy="y"
-  width={600}
+  width={654.285714285714}
   xType="time"
 >
   <EuiHistogramSeries

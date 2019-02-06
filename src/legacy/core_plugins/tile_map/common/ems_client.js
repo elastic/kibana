@@ -92,7 +92,7 @@ const unescapeTemplateVars = url => {
 //this is not the default locale from Kibana, but the default locale supported by the Elastic Maps Service
 const DEFAULT_LANGUAGE = 'en';
 
-export class EMSClientV66 {
+export class EMSClient {
 
   EMS_LOAD_TIMEOUT = 32000;
 

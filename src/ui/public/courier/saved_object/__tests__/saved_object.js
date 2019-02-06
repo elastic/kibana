@@ -292,13 +292,16 @@ describe('Saved Object', function () {
       });
     });
 
-    describe('with extractReferences', () => {
-      it('calls the function', async () => {
+    describe('to extract references', () => {
+      it('when "extractReferences" function when passed in', async () => {
         const id = '123';
-        stubESResponse(getMockedDocResponse('id'));
-        let extractReferencesCallCount = 0;
+        stubESResponse(getMockedDocResponse(id));
         const extractReferences = ({ attributes, references }) => {
-          extractReferencesCallCount++;
+          references.push({
+            name: 'test',
+            type: 'index-pattern',
+            id: 'my-index',
+          });
           return { attributes, references };
         };
         return createInitializedSavedObject({ type: 'dashboard', extractReferences })
@@ -310,10 +313,95 @@ describe('Saved Object', function () {
                 type: 'dashboard',
               });
             });
-            return savedObject.save();
-          })
-          .then(() => {
-            expect(extractReferencesCallCount).to.be(1);
+            return savedObject
+              .save()
+              .then(() => {
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'test',
+                  type: 'index-pattern',
+                  id: 'my-index',
+                });
+              });
+          });
+      });
+
+      it('when index exists in searchSourceJSON', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setField('index', new IndexPattern('my-index', null, []));
+            return savedObject
+              .save()
+              .then(() => {
+                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: JSON.stringify({
+                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    }),
+                  },
+                });
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                  id: 'my-index',
+                });
+              });
+          });
+      });
+
+      it('when indexes exists in filter of searchSourceJSON', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setField('filter', [{
+              meta: {
+                index: 'my-index',
+              }
+            }]);
+            return savedObject
+              .save()
+              .then(() => {
+                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: JSON.stringify({
+                      filter: [
+                        {
+                          meta: {
+                            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                          }
+                        }
+                      ],
+                    }),
+                  },
+                });
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                  type: 'index-pattern',
+                  id: 'my-index',
+                });
+              });
           });
       });
     });
@@ -502,6 +590,54 @@ describe('Saved Object', function () {
         })
         .then(() => {
           expect(injectReferences).to.have.property('calledOnce', true);
+        });
+    });
+
+    it('injects references from searchSourceJSON', async () => {
+      const savedObject = new SavedObject({ type: 'dashboard', searchSource: true });
+      return savedObject
+        .init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  filter: [
+                    {
+                      meta: {
+                        indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                      },
+                    },
+                  ],
+                }),
+              },
+            },
+            references: [
+              {
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+                id: 'my-index-1',
+              },
+              {
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                type: 'index-pattern',
+                id: 'my-index-2',
+              },
+            ],
+          };
+          savedObject.applyESResp(response);
+          expect(savedObject.searchSource.getFields()).to.eql({
+            index: 'my-index-1',
+            filter: [
+              {
+                meta: {
+                  index: 'my-index-2',
+                },
+              },
+            ],
+          });
         });
     });
   });

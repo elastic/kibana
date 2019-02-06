@@ -159,6 +159,12 @@ export interface TaskInstance {
   taskType: string;
 
   /**
+   * The date and time that this task was originally scheduled. This is used
+   * for convenience to task run functions, and for troubleshooting.
+   */
+  scheduledAt?: Date;
+
+  /**
    * The date and time that this task is scheduled to be run. It is not
    * guaranteed to run at this time, but it is guaranteed not to run earlier
    * than this. Defaults to immediately.
@@ -214,6 +220,12 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The primary term from the Elaticsearch document.
    */
   primaryTerm: number;
+
+  /**
+   * The date and time that this task was originally scheduled. This is used
+   * for convenience to task run functions, and for troubleshooting.
+   */
+  scheduledAt: Date;
 
   /**
    * The number of unsuccessful attempts since the last successful run. This

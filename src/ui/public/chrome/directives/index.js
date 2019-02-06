@@ -17,8 +17,6 @@
  * under the License.
  */
 
-
-import './global_nav';
 import './header_global_nav';
 
 import { kbnChromeProvider } from './kbn_chrome';
