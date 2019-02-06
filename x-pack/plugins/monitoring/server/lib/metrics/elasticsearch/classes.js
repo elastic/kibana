@@ -12,6 +12,7 @@ import {
   SMALL_BYTES
 } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class ElasticsearchMetric extends Metric {
   constructor(opts) {
@@ -31,13 +32,46 @@ export class ElasticsearchMetric extends Metric {
   }
 }
 
+export class DifferenceMetric extends ElasticsearchMetric {
+  constructor({ fieldSource, metric, metric2, ...opts }) {
+    super({
+      ...opts,
+      field: '', // NOTE: this is not used for this
+      format: LARGE_FLOAT,
+      metricAgg: 'sum', // NOTE: this is used for a pointless aggregation
+    });
+
+    this.checkRequiredParams({
+      metric,
+      metric2
+    });
+
+    this.aggs = {
+      metric_max: {
+        max: { field: `${fieldSource}.${metric}` }
+      },
+      metric2_max: {
+        max: { field: `${fieldSource}.${metric2}` }
+      },
+    };
+
+    this.getFields = () => [`${fieldSource}.${metric}`, `${fieldSource}.${metric2}`];
+
+    this.calculation = (bucket) => {
+      return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
+    };
+  }
+}
+
 export class LatencyMetric extends ElasticsearchMetric {
   constructor({ metric, fieldSource, ...opts }) {
     super({
       ...opts,
       format: LARGE_FLOAT,
       metricAgg: 'sum', // NOTE: this is used for a pointless aggregation
-      units: 'ms'
+      units: i18n.translate('xpack.monitoring.metrics.es.msTimeUnitLabel', {
+        defaultMessage: 'ms'
+      })
     });
 
     this.checkRequiredParams({
@@ -52,7 +86,9 @@ export class LatencyMetric extends ElasticsearchMetric {
       metricField = 'search.query';
     } else {
       throw new Error(
-        'Latency metric param must be a string equal to `index` or `query`'
+        i18n.translate('xpack.monitoring.metrics.es.latencyMetricParamErrorMessage', {
+          defaultMessage: 'Latency metric param must be a string equal to `index` or `query`'
+        })
       );
     }
 
@@ -106,7 +142,9 @@ export class RequestRateMetric extends ElasticsearchMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: '/s'
+      units: i18n.translate('xpack.monitoring.metrics.es.perSecondsUnitLabel', {
+        defaultMessage: '/s'
+      })
     });
   }
 }
@@ -288,6 +326,21 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
 
       // ignore the data if none of them exist
       return null;
+    };
+  }
+}
+
+export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      units: i18n.translate('xpack.monitoring.metrics.es.secondsUnitLabel', {
+        defaultMessage: 's'
+      })
+    });
+
+    this.calculation = bucket => {
+      return _.get(bucket, 'metric.value') / 1000;
     };
   }
 }

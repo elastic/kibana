@@ -23,13 +23,20 @@
  */
 
 import _ from 'lodash';
-import { MigrationVersion, ROOT_TYPE } from '../../serialization';
-import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
+import { MigrationVersion } from '../../serialization';
+import {
+  AliasAction,
+  CallCluster,
+  IndexMapping,
+  NotFound,
+  RawDoc,
+  ShardsInfo,
+} from './call_cluster';
 
-// Require rather than import gets us around the lack of TypeScript definitions
-// for "getTypes"
-// tslint:disable-next-line:no-var-requires
-const { getTypes } = require('../../../mappings');
+// @ts-ignore untyped dependency
+import { getTypes } from '../../../mappings';
+
+const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
 
 export interface FullIndexInfo {
   aliases: { [name: string]: object };
@@ -43,14 +50,17 @@ export interface FullIndexInfo {
  * index mappings are somewhat what we expect.
  */
 export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
-  const result = await callCluster('indices.get', { ignore: [404], index });
+  const result = await callCluster('indices.get', {
+    ignore: [404],
+    index,
+  });
 
   if ((result as NotFound).status === 404) {
     return {
       aliases: {},
       exists: false,
       indexName: index,
-      mappings: { doc: { dynamic: 'strict', properties: {} } },
+      mappings: { dynamic: 'strict', properties: {} },
     };
   }
 
@@ -86,6 +96,8 @@ export function reader(
 
   return async function read() {
     const result = await nextBatch();
+    assertResponseIncludeAllShards(result);
+
     const docs = result.hits.hits;
 
     scrollId = result._scroll_id;
@@ -113,7 +125,6 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
         index: {
           _id: doc._id,
           _index: index,
-          _type: ROOT_TYPE,
         },
       });
 
@@ -150,39 +161,52 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
 export async function migrationsUpToDate(
   callCluster: CallCluster,
   index: string,
-  migrationVersion: MigrationVersion
+  migrationVersion: MigrationVersion,
+  retryCount: number = 10
 ): Promise<boolean> {
-  const indexInfo = await fetchInfo(callCluster, index);
+  try {
+    const indexInfo = await fetchInfo(callCluster, index);
 
-  if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
-    return false;
-  }
+    if (!_.get(indexInfo, 'mappings.properties.migrationVersion')) {
+      return false;
+    }
 
-  // If no migrations are actually defined, we're up to date!
-  if (Object.keys(migrationVersion).length <= 0) {
-    return true;
-  }
+    // If no migrations are actually defined, we're up to date!
+    if (Object.keys(migrationVersion).length <= 0) {
+      return true;
+    }
 
-  const { count } = await callCluster('count', {
-    body: {
-      query: {
-        bool: {
-          should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
-            bool: {
-              must: [
-                { exists: { field: type } },
-                { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
-              ],
-            },
-          })),
+    const response = await callCluster('count', {
+      body: {
+        query: {
+          bool: {
+            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+              bool: {
+                must: [
+                  { exists: { field: type } },
+                  { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
+                ],
+              },
+            })),
+          },
         },
       },
-    },
-    index,
-    type: ROOT_TYPE,
-  });
+      index,
+    });
 
-  return count === 0;
+    assertResponseIncludeAllShards(response);
+
+    return response.count === 0;
+  } catch (e) {
+    // retry for Service Unavailable
+    if (e.status !== 503 || retryCount === 0) {
+      throw e;
+    }
+
+    await new Promise(r => setTimeout(r, 1000));
+
+    return await migrationsUpToDate(callCluster, index, migrationVersion, retryCount - 1);
+  }
 }
 
 /**
@@ -193,7 +217,16 @@ export async function migrationsUpToDate(
  * @param {IndexMapping} mappings
  */
 export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
+  return callCluster('indices.putMapping', {
+    index,
+
+    // HACK: This is a temporary workaround for a disconnect between
+    // elasticsearchjs and Elasticsearch 7.0. The JS library requires
+    // type, but Elasticsearch 7.0 has deprecated type...
+    include_type_name: true,
+    type: '_doc',
+    body: mappings,
+  } as any);
 }
 
 export async function createIndex(
@@ -201,7 +234,10 @@ export async function createIndex(
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', { body: { mappings }, index });
+  await callCluster('indices.create', {
+    body: { mappings, settings },
+    index,
+  });
 }
 
 export async function deleteIndex(callCluster: CallCluster, index: string) {
@@ -224,7 +260,7 @@ export async function convertToAlias(
   batchSize: number
 ) {
   await callCluster('indices.create', {
-    body: { mappings: info.mappings },
+    body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
 
@@ -271,16 +307,39 @@ export async function claimAlias(
  *
  * @param {FullIndexInfo} indexInfo
  */
-async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
-  const currentTypes = getTypes(indexInfo.mappings);
-  const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
-  if (isV5Index) {
+function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
+  const mappings = indexInfo.mappings as any;
+  const isV7Index = !!mappings.properties;
+
+  if (!isV7Index) {
     throw new Error(
       `Index ${indexInfo.indexName} belongs to a version of Kibana ` +
         `that cannot be automatically migrated. Reset it or use the X-Pack upgrade assistant.`
     );
   }
+
   return indexInfo;
+}
+
+/**
+ * Provides protection against reading/re-indexing against an index with missing
+ * shards which could result in data loss. This shouldn't be common, as the Saved
+ * Object indices should only ever have a single shard. This is more to handle
+ * instances where customers manually expand the shards of an index.
+ */
+function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
+  if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
+    return;
+  }
+
+  const failed = _shards.total - _shards.successful;
+
+  if (failed > 0) {
+    throw new Error(
+      `Re-index failed :: ${failed} of ${_shards.total} shards failed. ` +
+        `Check Elasticsearch cluster health for more information.`
+    );
+  }
 }
 
 /**
@@ -308,6 +367,13 @@ async function reindex(callCluster: CallCluster, source: string, dest: string, b
 
     completed = await callCluster('tasks.get', {
       taskId: task,
-    }).then(result => result.completed);
+    }).then(result => {
+      if (result.error) {
+        const e = result.error;
+        throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
+      }
+
+      return result.completed;
+    });
   }
 }

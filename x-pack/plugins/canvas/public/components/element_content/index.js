@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
+import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
 import { ElementContent as Component } from './element_content';
 
+const mapStateToProps = state => ({
+  backgroundColor: getPageById(state, getSelectedPage(state)).style.background,
+});
+
 export const ElementContent = compose(
+  connect(mapStateToProps),
   withProps(({ renderable }) => ({
     renderFunction: renderFunctionsRegistry.get(get(renderable, 'as')),
   }))

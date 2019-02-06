@@ -19,6 +19,12 @@ you'll need to update your `kibana.yml` file. You can also enable SSL and set a 
 
 `cpuacct.cgroup.path.override:`:: Override for cgroup cpuacct path when mounted in manner that is inconsistent with `/proc/self/cgroup`
 
+`csp.rules:`:: A template https://w3c.github.io/webappsec-csp/[content-security-policy] that disables certain unnecessary and potentially insecure capabilities in the browser. All instances of `{nonce}` will be replaced with an automatically generated nonce at load time. We strongly recommend that you keep the default CSP rules that ship with Kibana.
+
+`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that does not enforce even rudimentary CSP rules. In practice, this will disable support for older, less safe browsers like Internet Explorer.
+
+`csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after loading Kibana to any browser that does not enforce even rudimentary CSP rules, though Kibana is still accessible. This configuration is effectively ignored when `csp.strict` is enabled.
+
 `elasticsearch.customHeaders:`:: *Default: `{}`* Header names and values to send to Elasticsearch. Any custom headers
 cannot be overwritten by client-side headers, regardless of the `elasticsearch.requestHeadersWhitelist` configuration.
 
@@ -39,6 +45,12 @@ Elasticsearch. This value must be a positive integer.
 
 `elasticsearch.shardTimeout:`:: *Default: 30000* Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 
+`elasticsearch.sniffInterval:`:: *Default: false* Time in milliseconds between requests to check Elasticsearch for an updated list of nodes.
+
+`elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other Elasticsearch nodes on startup.
+
+`elasticsearch.sniffOnConectionFault:`:: *Default: false* Update the list of Elasticsearch nodes immediately following a connection fault.
+
 `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Optional settings that provide the paths to the PEM-format SSL
 certificate and key files. These files are used to verify the identity of Kibana to Elasticsearch and are required when `xpack.ssl.verification_mode` in Elasticsearch is set to either `certificate` or `full`.
 
@@ -49,11 +61,16 @@ certificate and key files. These files are used to verify the identity of Kibana
 `elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values are `none`, `certificate`, and `full`.
 `full` performs hostname verification, and `certificate` does not.
 
+`elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls whether to always present the certificate specified
+by `elasticsearch.ssl.certificate` when requested. This applies to all requests to Elasticsearch, including requests that are
+proxied for end-users. Setting this to `true` when Elasticsearch is using certificates to authenticate users can lead to proxied
+requests for end-users being executed as the identity tied to the configured certificate.
+
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait for Elasticsearch at Kibana startup before
 retrying.
 
-`elasticsearch.url:`:: *Default: "http://localhost:9200"* The URL of the Elasticsearch instance to use for all your
-queries.
+`elasticsearch.hosts:`:: *Default: "http://localhost:9200"* The URLs of the Elasticsearch instances to use for all your
+queries.  All nodes listed here must be on the same cluster.
 
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at
@@ -157,7 +174,10 @@ The minimum value is 100.
 
 `server.ssl.redirectHttpFromPort:`:: Kibana will bind to this port and redirect all http requests to https over the port configured as `server.port`.
 
-`server.ssl.supportedProtocols:`:: *Default: TLSv1, TLSv1.1, TLSv1.2*  An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
+`server.ssl.supportedProtocols:`:: *Default: TLSv1.1, TLSv1.2*  An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
 
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
+`rollup.enabled:`:: *Default: true* Set this value to false to disable the Rollup user interface.
+
+`license_management.enabled`:: *Default: true* Set this value to false to disable the License Management user interface.

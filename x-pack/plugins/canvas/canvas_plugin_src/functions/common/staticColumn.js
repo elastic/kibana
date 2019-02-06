@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getType } from '../../../common/lib/get_type';
+import { getType } from '@kbn/interpreter/common';
 
 export const staticColumn = () => ({
   name: 'staticColumn',
   type: 'datatable',
-  help: 'Add a column with a static value.',
+  help: 'Add a column with a static value',
   context: {
     types: ['datatable'],
   },
@@ -34,8 +34,11 @@ export const staticColumn = () => ({
     const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
     const newColumn = { name: args.name, type };
 
-    if (existingColumnIndex > -1) columns[existingColumnIndex] = newColumn;
-    else columns.push(newColumn);
+    if (existingColumnIndex > -1) {
+      columns[existingColumnIndex] = newColumn;
+    } else {
+      columns.push(newColumn);
+    }
 
     return {
       type: 'datatable',

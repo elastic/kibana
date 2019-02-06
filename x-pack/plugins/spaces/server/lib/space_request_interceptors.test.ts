@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import { Server } from 'hapi';
 import sinon from 'sinon';
-import { SavedObject } from './saved_objects_client/saved_objects_client_types';
+
+import { SavedObject } from 'src/server/saved_objects';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
 
 describe('interceptors', () => {
@@ -28,8 +29,6 @@ describe('interceptors', () => {
       testConfig = {}
     ) => {
       server = new Server();
-
-      server.connection({ port: 0 });
 
       interface Config {
         [key: string]: any;
@@ -89,22 +88,22 @@ describe('interceptors', () => {
         {
           method: 'GET',
           path: '/',
-          handler: (req: any, reply: any) => {
-            return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+          handler: (req: any) => {
+            return { path: req.path, url: req.url, basePath: req.getBasePath() };
           },
         },
         {
           method: 'GET',
           path: '/app/kibana',
-          handler: (req: any, reply: any) => {
-            return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+          handler: (req: any) => {
+            return { path: req.path, url: req.url, basePath: req.getBasePath() };
           },
         },
         {
           method: 'GET',
           path: '/api/foo',
-          handler: (req: any, reply: any) => {
-            return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+          handler: (req: any) => {
+            return { path: req.path, url: req.url, basePath: req.getBasePath() };
           },
         },
       ]);
@@ -133,9 +132,9 @@ describe('interceptors', () => {
 
   describe('onRequest', () => {
     test('handles paths without a space identifier', async () => {
-      const testHandler = jest.fn((req, reply) => {
+      const testHandler = jest.fn((req, h) => {
         expect(req.path).toBe('/');
-        return reply.continue();
+        return h.continue;
       });
 
       await request('/', (hapiServer: any) => {
@@ -146,9 +145,9 @@ describe('interceptors', () => {
     });
 
     test('strips the Space URL Context from the request', async () => {
-      const testHandler = jest.fn((req, reply) => {
+      const testHandler = jest.fn((req, h) => {
         expect(req.path).toBe('/');
-        return reply.continue();
+        return h.continue;
       });
 
       await request('/s/foo', (hapiServer: any) => {
@@ -159,9 +158,9 @@ describe('interceptors', () => {
     });
 
     test('ignores space identifiers in the middle of the path', async () => {
-      const testHandler = jest.fn((req, reply) => {
+      const testHandler = jest.fn((req, h) => {
         expect(req.path).toBe('/some/path/s/foo/bar');
-        return reply.continue();
+        return h.continue;
       });
 
       await request('/some/path/s/foo/bar', (hapiServer: any) => {
@@ -172,12 +171,12 @@ describe('interceptors', () => {
     });
 
     test('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
-      const testHandler = jest.fn((req, reply) => {
+      const testHandler = jest.fn((req, h) => {
         expect(req.path).toBe('/i/love/spaces.html');
         expect(req.query).toEqual({
           queryParam: 'queryValue',
         });
-        return reply.continue();
+        return h.continue;
       });
 
       await request('/s/foo/i/love/spaces.html?queryParam=queryValue', (hapiServer: any) => {
@@ -210,7 +209,7 @@ describe('interceptors', () => {
 
     describe('when accessing an app within a non-existent space', () => {
       it('redirects to the space selector screen', async () => {
-        const testHandler = jest.fn((req, reply) => {
+        const testHandler = jest.fn((req, h) => {
           const { response } = req;
 
           if (response && response.isBoom) {
@@ -220,7 +219,7 @@ describe('interceptors', () => {
           expect(response.statusCode).toEqual(302);
           expect(response.headers.location).toEqual(serverBasePath);
 
-          return reply.continue();
+          return h.continue;
         });
 
         const spaces = [
@@ -230,6 +229,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -247,7 +247,7 @@ describe('interceptors', () => {
 
     describe('when accessing an API endpoint within a non-existent space', () => {
       it('allows the request to continue', async () => {
-        const testHandler = jest.fn((req, reply) => {
+        const testHandler = jest.fn((req, h) => {
           const { response } = req;
 
           if (response && response.isBoom) {
@@ -256,7 +256,7 @@ describe('interceptors', () => {
 
           expect(response.statusCode).toEqual(200);
 
-          return reply.continue();
+          return h.continue;
         });
 
         const spaces = [
@@ -266,6 +266,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -283,7 +284,7 @@ describe('interceptors', () => {
 
     describe('with a single available space', () => {
       test('it redirects to the defaultRoute within the context of the single Space when navigating to Kibana root', async () => {
-        const testHandler = jest.fn((req, reply) => {
+        const testHandler = jest.fn((req, h) => {
           const { response } = req;
 
           if (response && response.isBoom) {
@@ -293,7 +294,7 @@ describe('interceptors', () => {
           expect(response.statusCode).toEqual(302);
           expect(response.headers.location).toEqual(`${serverBasePath}/s/a-space${defaultRoute}`);
 
-          return reply.continue();
+          return h.continue;
         });
 
         const spaces = [
@@ -303,6 +304,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -329,7 +331,7 @@ describe('interceptors', () => {
         // which does not have a URL Context. In this scenario, the end result is the same as the other test, but the final URL the user
         // is redirected to does not contain a space identifier (e.g., /s/foo)
 
-        const testHandler = jest.fn((req, reply) => {
+        const testHandler = jest.fn((req, h) => {
           const { response } = req;
 
           if (response && response.isBoom) {
@@ -339,7 +341,7 @@ describe('interceptors', () => {
           expect(response.statusCode).toEqual(302);
           expect(response.headers.location).toEqual(`${serverBasePath}${defaultRoute}`);
 
-          return reply.continue();
+          return h.continue;
         });
 
         const spaces = [
@@ -349,6 +351,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'Default Space',
             },
+            references: [],
           },
         ];
 
@@ -380,6 +383,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
           {
             id: 'b-space',
@@ -387,12 +391,13 @@ describe('interceptors', () => {
             attributes: {
               name: 'b space',
             },
+            references: [],
           },
         ];
 
         const getHiddenUiAppHandler = jest.fn(() => '<div>space selector</div>');
 
-        const testHandler = jest.fn((req, reply) => {
+        const testHandler = jest.fn((req, h) => {
           const { response } = req;
 
           if (response && response.isBoom) {
@@ -402,14 +407,14 @@ describe('interceptors', () => {
           expect(response.statusCode).toEqual(200);
           expect(response.source).toEqual({ app: '<div>space selector</div>', renderApp: true });
 
-          return reply.continue();
+          return h.continue;
         });
 
         await request(
           '/',
           (hapiServer: any) => {
             server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
-            server.decorate('reply', 'renderApp', function renderAppHandler(app: any) {
+            server.decorate('toolkit', 'renderApp', function renderAppHandler(app: any) {
               // @ts-ignore
               this({ renderApp: true, app });
             });

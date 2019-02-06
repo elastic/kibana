@@ -7,24 +7,26 @@
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
   export const EuiBasicTable: React.SFC<any>;
-  export const EuiTextColor: React.SFC<any>;
 }
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Poller } from '../../../../common/poller';
+import { JobStatuses } from '../constants/job_statuses';
 import { downloadReport } from '../lib/download_report';
 import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
+import { ReportInfoButton } from './report_info_button';
 
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -41,7 +43,10 @@ interface Job {
   started_at?: string;
   completed_at?: string;
   status: string;
+  statusLabel: string;
   max_size_reached: boolean;
+  attempts: number;
+  max_attempts: number;
 }
 
 interface Props {
@@ -49,6 +54,7 @@ interface Props {
   showLinks: boolean;
   enableLinks: boolean;
   redirect: (url: string) => void;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -58,7 +64,40 @@ interface State {
   isLoading: boolean;
 }
 
-export class ReportListing extends Component<Props, State> {
+const jobStatusLabelsMap = new Map<JobStatuses, string>([
+  [
+    JobStatuses.PENDING,
+    i18n.translate('xpack.reporting.jobStatuses.pendingText', {
+      defaultMessage: 'Pending',
+    }),
+  ],
+  [
+    JobStatuses.PROCESSING,
+    i18n.translate('xpack.reporting.jobStatuses.processingText', {
+      defaultMessage: 'Processing',
+    }),
+  ],
+  [
+    JobStatuses.COMPLETED,
+    i18n.translate('xpack.reporting.jobStatuses.completedText', {
+      defaultMessage: 'Completed',
+    }),
+  ],
+  [
+    JobStatuses.FAILED,
+    i18n.translate('xpack.reporting.jobStatuses.failedText', {
+      defaultMessage: 'Failed',
+    }),
+  ],
+  [
+    JobStatuses.CANCELLED,
+    i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
+      defaultMessage: 'Cancelled',
+    }),
+  ],
+]);
+
+class ReportListingUi extends Component<Props, State> {
   private mounted?: boolean;
   private poller?: any;
   private isInitialJobsFetch: boolean;
@@ -78,16 +117,23 @@ export class ReportListing extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage className="repReportListing__page">
-        <EuiPageBody restrictWidth>
-          <EuiPageContent horizontalPosition="center">
-            <EuiTitle>
-              <h1>Reports</h1>
-            </EuiTitle>
-            {this.renderTable()}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+        <EuiTitle>
+          <h1>
+            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
+          </h1>
+        </EuiTitle>
+        <EuiText color="subdued" size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.listing.reports.subtitle"
+              defaultMessage="Find reports generated in Kibana applications here"
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        {this.renderTable()}
+      </EuiPageContent>
     );
   }
 
@@ -112,10 +158,15 @@ export class ReportListing extends Component<Props, State> {
   }
 
   private renderTable() {
+    const { intl } = this.props;
+
     const tableColumns = [
       {
         field: 'object_title',
-        name: 'Report',
+        name: intl.formatMessage({
+          id: 'xpack.reporting.listing.tableColumns.reportTitle',
+          defaultMessage: 'Report',
+        }),
         render: (objectTitle: string, record: Job) => {
           return (
             <div>
@@ -129,7 +180,10 @@ export class ReportListing extends Component<Props, State> {
       },
       {
         field: 'created_at',
-        name: 'Created at',
+        name: intl.formatMessage({
+          id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
+          defaultMessage: 'Created at',
+        }),
         render: (createdAt: string, record: Job) => {
           if (record.created_by) {
             return (
@@ -144,30 +198,80 @@ export class ReportListing extends Component<Props, State> {
       },
       {
         field: 'status',
-        name: 'Status',
+        name: intl.formatMessage({
+          id: 'xpack.reporting.listing.tableColumns.statusTitle',
+          defaultMessage: 'Status',
+        }),
         render: (status: string, record: Job) => {
+          if (status === 'pending') {
+            return (
+              <div>
+                <FormattedMessage
+                  id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
+                  defaultMessage="Pending - waiting for job to be processed"
+                />
+              </div>
+            );
+          }
+
           let maxSizeReached;
           if (record.max_size_reached) {
-            maxSizeReached = <span> - max size reached</span>;
+            maxSizeReached = (
+              <span>
+                <FormattedMessage
+                  id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
+                  defaultMessage=" - Max size reached"
+                />
+              </span>
+            );
           }
+
           let statusTimestamp;
-          if (status === 'processing' && record.started_at) {
+          if (status === JobStatuses.PROCESSING && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
-          } else if (record.completed_at && (status === 'completed' || status === 'failed')) {
+          } else if (
+            record.completed_at &&
+            (status === JobStatuses.COMPLETED || status === JobStatuses.FAILED)
+          ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
+
+          let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
+
+          if (status === JobStatuses.PROCESSING) {
+            statusLabel = statusLabel + ` (attempt ${record.attempts} of ${record.max_attempts})`;
+          }
+
+          if (statusTimestamp) {
+            return (
+              <div>
+                <FormattedMessage
+                  id="xpack.reporting.listing.tableValue.createdAtDetail.statusTimestampText"
+                  defaultMessage="{statusLabel} at {statusTimestamp}"
+                  values={{
+                    statusLabel,
+                    statusTimestamp: <span className="eui-textNoWrap">{statusTimestamp}</span>,
+                  }}
+                />
+                {maxSizeReached}
+              </div>
+            );
+          }
+
+          // unknown status
           return (
             <div>
-              {status}
-              {' at '}
-              <span className="eui-textNoWrap">{statusTimestamp}</span>
+              {statusLabel}
               {maxSizeReached}
             </div>
           );
         },
       },
       {
-        name: 'Actions',
+        name: intl.formatMessage({
+          id: 'xpack.reporting.listing.tableColumns.actionsTitle',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             render: (record: Job) => {
@@ -175,6 +279,7 @@ export class ReportListing extends Component<Props, State> {
                 <div>
                   {this.renderDownloadButton(record)}
                   {this.renderReportErrorButton(record)}
+                  {this.renderInfoButton(record)}
                 </div>
               );
             },
@@ -196,7 +301,17 @@ export class ReportListing extends Component<Props, State> {
         items={this.state.jobs}
         loading={this.state.isLoading}
         columns={tableColumns}
-        noItemsMessage={this.state.isLoading ? 'Loading reports' : 'No reports have been created'}
+        noItemsMessage={
+          this.state.isLoading
+            ? intl.formatMessage({
+                id: 'xpack.reporting.listing.table.loadingReportsDescription',
+                defaultMessage: 'Loading reports',
+              })
+            : intl.formatMessage({
+                id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
+                defaultMessage: 'No reports have been created',
+              })
+        }
         pagination={pagination}
         onChange={this.onTableChange}
       />
@@ -204,21 +319,31 @@ export class ReportListing extends Component<Props, State> {
   }
 
   private renderDownloadButton = (record: Job) => {
-    if (record.status !== 'completed') {
+    if (record.status !== JobStatuses.COMPLETED) {
       return;
     }
 
+    const { intl } = this.props;
     const button = (
       <EuiButtonIcon
         onClick={() => downloadReport(record.id)}
         iconType="importAction"
-        aria-label="Download report"
+        aria-label={intl.formatMessage({
+          id: 'xpack.reporting.listing.table.downloadReportAriaLabel',
+          defaultMessage: 'Download report',
+        })}
       />
     );
 
     if (record.max_size_reached) {
       return (
-        <EuiToolTip position="top" content="Max size reached, contains partial data.">
+        <EuiToolTip
+          position="top"
+          content={intl.formatMessage({
+            id: 'xpack.reporting.listing.table.maxSizeReachedTooltip',
+            defaultMessage: 'Max size reached, contains partial data.',
+          })}
+        >
           {button}
         </EuiToolTip>
       );
@@ -228,11 +353,15 @@ export class ReportListing extends Component<Props, State> {
   };
 
   private renderReportErrorButton = (record: Job) => {
-    if (record.status !== 'failed') {
+    if (record.status !== JobStatuses.FAILED) {
       return;
     }
 
     return <ReportErrorButton jobId={record.id} />;
+  };
+
+  private renderInfoButton = (record: Job) => {
+    return <ReportInfoButton jobId={record.id} />;
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
@@ -266,7 +395,13 @@ export class ReportListing extends Component<Props, State> {
       }
 
       if (kfetchError.res.status !== 401 && kfetchError.res.status !== 403) {
-        toastNotifications.addDanger(kfetchError.res.statusText || 'Request failed');
+        toastNotifications.addDanger(
+          kfetchError.res.statusText ||
+            this.props.intl.formatMessage({
+              id: 'xpack.reporting.listing.table.requestFailedErrorMessage',
+              defaultMessage: 'Request failed',
+            })
+        );
       }
       if (this.mounted) {
         this.setState({ isLoading: false, jobs: [], total: 0 });
@@ -278,8 +413,8 @@ export class ReportListing extends Component<Props, State> {
       this.setState({
         isLoading: false,
         total,
-        jobs: jobs.map((job: JobQueueEntry) => {
-          return {
+        jobs: jobs.map(
+          (job: JobQueueEntry): Job => ({
             id: job._id,
             type: job._source.jobtype,
             object_type: job._source.payload.type,
@@ -289,9 +424,13 @@ export class ReportListing extends Component<Props, State> {
             started_at: job._source.started_at,
             completed_at: job._source.completed_at,
             status: job._source.status,
+            statusLabel:
+              jobStatusLabelsMap.get(job._source.status as JobStatuses) || job._source.status,
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
-          };
-        }),
+            attempts: job._source.attempts,
+            max_attempts: job._source.max_attempts,
+          })
+        ),
       });
     }
   };
@@ -309,3 +448,5 @@ export class ReportListing extends Component<Props, State> {
     }
   }
 }
+
+export const ReportListing = injectI18n(ReportListingUi);

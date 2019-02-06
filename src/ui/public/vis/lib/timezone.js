@@ -17,14 +17,13 @@
  * under the License.
  */
 
-const tzDetect = require('jstimezonedetect').jstz;
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 export function timezoneProvider(config) {
   return function () {
 
     if (config.isDefault('dateFormat:tz')) {
-      const detectedTimezone = tzDetect.determine().name();
+      const detectedTimezone = moment.tz.guess();
       if (detectedTimezone) return detectedTimezone;
       else return moment().format('Z');
     } else {

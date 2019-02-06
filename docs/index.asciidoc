@@ -24,7 +24,7 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::monitoring/monitoring-xkib.asciidoc[]
+include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
@@ -40,7 +40,13 @@ include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
 
+include::canvas.asciidoc[]
+
 include::ml/index.asciidoc[]
+
+include::infrastructure/index.asciidoc[]
+
+include::logs/index.asciidoc[]
 
 include::apm/index.asciidoc[]
 
@@ -77,3 +83,5 @@ include::release-notes/highlights.asciidoc[]
 include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
+
+include::redirects.asciidoc[]

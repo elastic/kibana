@@ -1,0 +1,80 @@
+{
+  "id": "auditbeat_process_hosts",
+  "title": "Auditbeat Host Processes",
+  "description": "Detect unusual processes on hosts",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "auditd.summary"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "exists": {
+            "field": "docker.container.id"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "hosts_high_count_process_events",
+      "file": "hosts_high_count_process_events.json"
+    },
+    {
+      "id": "hosts_rare_process_activity",
+      "file": "hosts_rare_process_activity.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-hosts_high_count_process_events",
+      "file": "datafeed_hosts_high_count_process_events.json",
+      "job_id": "hosts_high_count_process_events"
+    },
+    {
+      "id": "datafeed-hosts_rare_process_activity",
+      "file": "datafeed_hosts_rare_process_activity.json",
+      "job_id": "hosts_rare_process_activity"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ml_auditbeat_hosts_process_event_rate",
+        "file": "ml_auditbeat_hosts_process_event_rate.json"
+      },
+      {
+        "id": "ml_auditbeat_hosts_process_explorer",
+        "file": "ml_auditbeat_hosts_process_explorer.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ml_auditbeat_hosts_process_events",
+        "file": "ml_auditbeat_hosts_process_events.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ml_auditbeat_hosts_process_event_rate_by_process",
+        "file": "ml_auditbeat_hosts_process_event_rate_by_process.json"
+      },
+      {
+        "id": "ml_auditbeat_hosts_process_event_rate_vis",
+        "file": "ml_auditbeat_hosts_process_event_rate_vis.json"
+      },
+      {
+        "id": "ml_auditbeat_hosts_process_occurrence",
+        "file": "ml_auditbeat_hosts_process_occurrence.json"
+      }
+    ]
+  }
+}

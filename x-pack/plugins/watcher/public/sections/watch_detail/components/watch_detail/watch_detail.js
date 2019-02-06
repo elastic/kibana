@@ -14,15 +14,17 @@ import 'ui/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/license';
+import 'plugins/watcher/components/errors_display_modal';
 
 import template from './watch_detail.html';
+import errorsDisplayTemplate from 'plugins/watcher/components/errors_display_modal/errors_display_modal.html';
 import '../watch_history';
 import '../action_status_table';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchDetail', function ($injector) {
+app.directive('watchDetail', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
 
@@ -33,6 +35,7 @@ app.directive('watchDetail', function ($injector) {
 
   const $filter = $injector.get('$filter');
   const orderBy = $filter('orderBy');
+  const $modal = $injector.get('$modal');
 
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
@@ -54,38 +57,39 @@ app.directive('watchDetail', function ($injector) {
 
         this.actionStatusTableSortField = 'id';
         this.actionStatusTableSortReverse = false;
+        this.actionErrors = (this.watch.watchErrors && this.watch.watchErrors.actionErrors) || null;
 
-        this.omitBreadcrumbPages = [
-          'watch',
-          this.watch.id
-        ];
+        this.omitBreadcrumbPages = ['watch', this.watch.id];
         this.breadcrumb = this.watch.displayName;
 
         // Reload watch history periodically
-        const refreshInterval = $interval(() => this.loadWatchHistory(), REFRESH_INTERVALS.WATCH_HISTORY);
+        const refreshInterval = $interval(
+          () => this.loadWatchHistory(),
+          REFRESH_INTERVALS.WATCH_HISTORY
+        );
         $scope.$on('$destroy', () => $interval.cancel(refreshInterval));
 
         // react to data and UI changes
-        $scope.$watchMulti([
-          'watchDetail.actionStatusTableSortField',
-          'watchDetail.actionStatusTableSortReverse',
-        ], this.applySortToActionStatusTable);
+        $scope.$watchMulti(
+          ['watchDetail.actionStatusTableSortField', 'watchDetail.actionStatusTableSortReverse'],
+          this.applySortToActionStatusTable
+        );
       }
 
       loadWatchHistory = () => {
-        return watchService.loadWatchHistory(this.watch.id, this.historyRange)
+        return watchService
+          .loadWatchHistory(this.watch.id, this.historyRange)
           .then(watchHistoryItems => {
             this.isHistoryLoading = false;
             this.watchHistoryItems = watchHistoryItems;
           })
           .catch(err => {
-            return licenseService.checkValidity()
-              .then(() => toastNotifications.addDanger(err));
+            return licenseService.checkValidity().then(() => toastNotifications.addDanger(err));
           });
-      }
+      };
 
       // update the watch history items when the time range changes
-      onHistoryRangeChange = (range) => {
+      onHistoryRangeChange = range => {
         this.historyRange = range;
         this.isHistoryLoading = true;
         return this.loadWatchHistory();
@@ -124,6 +128,33 @@ app.directive('watchDetail', function ($injector) {
           });
       }
 
+      showErrors = (actionId, errors) => {
+        const errorsModal = $modal.open({
+          template: errorsDisplayTemplate,
+          controller: 'WatcherErrorsDisplayController',
+          controllerAs: 'vm',
+          backdrop: 'static',
+          keyboard: true,
+          ariaLabelledBy: 'watcher__error-display-modal-title',
+          resolve: {
+            params: function () {
+              return {
+                title: i18n('xpack.watcher.sections.watchDetail.errorDisplayModalTitleText', {
+                  defaultMessage: 'Errors in the "{actionId}" action',
+                  values: { actionId } }
+                ),
+                errors,
+              };
+            }
+          }
+        });
+
+        errorsModal.result.catch(() => {
+          // We need to add this empty Promise catch to avoid
+          // a console error "Possibly unhandled rejection"
+        });
+      }
+
       /**
        * Event handler methods
        */
@@ -152,17 +183,28 @@ app.directive('watchDetail', function ($injector) {
 
       onWatchDelete = () => {
         const confirmModalOptions = {
-          confirmButtonText: 'Delete Watch',
+          confirmButtonText: i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
+            defaultMessage: 'Delete Watch' }
+          ),
           onConfirm: this.deleteWatch
         };
 
-        return confirmModal('This will permanently delete the watch. Are you sure?', confirmModalOptions);
+        return confirmModal(
+          i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
+            defaultMessage: 'This will permanently delete the watch. Are you sure?' }
+          ),
+          confirmModalOptions);
       }
 
       deleteWatch = () => {
         return watchService.deleteWatch(this.watch.id)
           .then(() => {
-            toastNotifications.addSuccess(`Deleted '${this.watch.displayName}'`);
+            toastNotifications.addSuccess(
+              i18n('xpack.watcher.sections.watchDetail.deleteWatchSuccessNotificationText', {
+                defaultMessage: 'Deleted {watchName}',
+                values: { watchName: this.watch.displayName } }
+              ),
+            );
             this.close();
           })
           .catch(err => {

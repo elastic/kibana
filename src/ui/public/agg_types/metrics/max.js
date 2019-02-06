@@ -18,12 +18,18 @@
  */
 
 import { MetricAggType } from './metric_agg_type';
+import { i18n } from '@kbn/i18n';
 
 export const maxMetricAgg = new MetricAggType({
   name: 'max',
-  title: 'Max',
+  title: i18n.translate('common.ui.aggTypes.metrics.maxTitle', {
+    defaultMessage: 'Max'
+  }),
   makeLabel: function (aggConfig) {
-    return 'Max ' + aggConfig.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.maxLabel', {
+      defaultMessage: 'Max {field}',
+      values: { field: aggConfig.getFieldDisplayName() }
+    });
   },
   params: [
     {

@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('should create shakespeare index pattern', async function () {
       log.debug('Create shakespeare index pattern');
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -87,7 +86,6 @@ export default function ({ getService, getPageObjects }) {
       // then increment the aggIndex for the next one we create
       aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
       const expectedChartValues = [935];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');

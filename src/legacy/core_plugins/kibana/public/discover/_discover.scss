@@ -1,0 +1,208 @@
+discover-app {
+  background-color: $euiColorEmptyShade;
+}
+
+// SASSTODO: replace the margin-top value with a variable
+.dscSidebar__listHeader {
+  margin-top: 5px;
+}
+
+// SASSTODO: replace the padding-top value with a variable
+.dscFieldList--popular {
+  padding-top: 10px;
+}
+
+// SASSTODO: replace the z-index value with a variable
+.dscWrapper {
+  padding-right: 0;
+  padding-left: 21px;
+  z-index: 1
+}
+
+.dscWrapper__content {
+  padding-right: $euiSize;
+  clear: both;
+}
+
+.dscTimechart {
+  display: block;
+  position: relative;
+
+  // SASSTODO: the visualizing component should have an option or a modifier
+  .series > rect {
+    fill-opacity: 0.5;
+    stroke-width: 1;
+  }
+}
+
+.dscTimechart__header {
+  display: flex;
+  justify-content: center;
+  min-height: $euiSizeXXL;
+  padding: $euiSizeXS 0;
+}
+
+.dscOverlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  padding-top: $euiSizeM;
+
+  opacity: 0.75;
+  text-align: center;
+  background-color: transparent;
+}
+
+.dscTable {
+  overflow: auto;
+
+  // SASSTODO: add a monospace modifier to the doc-table component
+  .kbnDocTable__row {
+    font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
+  }
+}
+
+// SASSTODO: replace the padding value with a variable
+.dscTable__footer {
+  background-color: $euiColorLightShade;
+  padding: 5px 10px;
+  text-align: center;
+}
+
+/**
+ * 1. Override sidebar-item-title styles.
+ */
+.dscSidebarItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0 !important; /* 1 */
+  padding-bottom: 0 !important; /* 1 */
+  height: $euiSizeXL;
+
+  &:hover,
+  &:focus {
+    .dscSidebarItem__action {
+      opacity: 1;
+    }
+  }
+}
+
+.dscSidebarItem--active {
+  background: shade($euiColorLightestShade, 5%);
+  color: $euiColorFullShade;
+  font-weight: bold;
+}
+
+/**
+ * 1. Truncate long text so it doesn't push the actions outside of the container.
+ */
+.dscSidebarItem__label {
+  overflow: hidden; /* 1 */
+  text-overflow: ellipsis; /* 1 */
+}
+
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+.dscSidebarItem__action {
+  opacity: 0; /* 1 */
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+}
+
+// SASSTODO: replace the padding value with a variable
+.dscFieldDetails {
+  padding: 10px;
+  background-color: shade($euiColorLightestShade, 5%);
+  color: shade($euiColorEmptyShade, 65%);
+}
+
+// SASSTODO: replace the padding and margin values with variables
+.dscFieldDetails__progress {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 3px;
+  border-radius: $euiBorderRadius;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+// SASSTODO: replace the margin-top value with a variable
+.dscFieldDetailsItem {
+  margin-top: 5px;
+}
+
+.dscFieldDetails__filter {
+  cursor: pointer;
+}
+
+.dscFieldDetailsItem__title {
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/**
+ * 1. If the field name is very long, don't let it squash the buttons.
+ */
+.dscFieldDetailsItem__buttonGroup {
+  flex: 0 0 auto; /* 1 */
+}
+
+.dscFieldDetailsItem__button {
+  appearance: none;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+}
+
+.dscField--noResults {
+  color: $euiColorDarkShade;
+}
+
+// SASSTODO: replace the margin-right value with a variables
+.dscField__icon {
+  margin-right: 5px;
+  text-align: center;
+  display: inline-block;
+  width: $euiSizeM;
+  color: $euiColorDarkShade;
+}
+
+.dscResults {
+
+  h3 {
+    margin: -20px 0 10px 0;
+    text-align: center;
+  }
+}
+
+.dscResults__interval {
+  display: inline-block;
+  width: auto;
+}
+
+.dscSkipButton {
+  position: absolute;
+  left: -10000px;
+  top: $euiSizeXS;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+
+  &:focus {
+    left: initial;
+    right: $euiSize;
+    width: auto;
+    height: auto;
+  }
+}

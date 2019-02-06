@@ -1,0 +1,139 @@
+<div class="job-timepicker-modal">
+  <ml-message-bar ></ml-message-bar>
+  <h1
+    tooltip="{{ ::'xpack.ml.jobTimePickerModal.startDatafeedForJobTooltip' | i18n: {
+      defaultMessage: 'Start datafeed for {jobId}',
+      values: { jobId }
+    } }}"
+    class="euiTitle"
+    i18n-id="xpack.ml.jobTimePickerModal.startDatafeedForJobTitle"
+    i18n-default-message="Start datafeed for {jobId}"
+    i18n-values="{ jobId }"
+  ></h1>
+
+  <div class="euiSpacer euiSpacer--s"></div>
+
+  <div class="ml-timepicker-contents" >
+    <div class="row">
+      <div
+        class="ml-timepicker-section"
+        ng-class="{
+          'ml-timepicker-right-border':
+            (+ui.startRadio <= 1 && ui.endRadio === '0') ||
+            (ui.startRadio === '2' && +ui.endRadio <= 1)
+        }">
+        <label
+          class="kuiFormLabel"
+          i18n-id="xpack.ml.jobTimePickerModal.searchStartTimeLabel"
+          i18n-default-message="Search start time"
+        ></label>
+
+        <div class="ml-timepicker-radios" >
+          <ul class="nav nav-pills nav-stacked">
+            <li ng-class="{ active: ui.startRadio === '1' }">
+              <a ng-click="ui.startRadio = '1'" >{{ ( isNew ? startAtBeginningOfDataLabel : continueFromLastTimeLabel ) }}</a>
+            </li>
+            <li ng-class="{ active: ui.startRadio === '0' }">
+              <a ng-click="ui.startRadio = '0'">{{ ( isNew ? startNowLabel : continueFromNowLabel ) }}</a>
+            </li>
+            <li ng-class="{ active: ui.startRadio === '2' }">
+              <a ng-click="ui.startRadio = '2'" ng-class="{'ml-timepicker-radio-bottom': ui.startRadio === '2'}">{{ ( isNew ? specifyStartTimeLabel : continueFromSpecifiedTimeLabel ) }}</a>
+            </li>
+          </ul>
+        </div>
+        <div class='ml-timepicker' ng-show="ui.startRadio == '2'">
+          <div>
+            <input type="text" class="form-control" input-datetime="YYYY-MM-DD HH:mm:ss" ng-model="ui.timepicker.from" >
+          </div>
+          <div>
+            <datepicker
+              offset-timezone
+              ng-model="ui.timepicker.from"
+              show-weeks="false">
+            </datepicker>
+          </div>
+        </div>
+      </div>
+
+      <div class="ml-timepicker-section"
+        ng-class="{
+          'ml-timepicker-left-border':
+            (+ui.startRadio <= 1 && ui.endRadio === '1')
+        }">
+        <label
+          class="kuiFormLabel"
+          i18n-id="xpack.ml.jobTimePickerModal.searchEndTimeLabel"
+          i18n-default-message="Search end time"
+        ></label>
+        <div class="ml-timepicker-radios" >
+          <ul class="nav nav-pills nav-stacked">
+            <li ng-class="{ active: ui.endRadio === '0' }">
+              <a
+                ng-click="ui.endRadio = '0'"
+                i18n-id="xpack.ml.jobTimePickerModal.noEndTimeLinkText"
+                i18n-default-message="No end time (Real-time search)"
+              ></a>
+            </li>
+            <li ng-class="{ active: ui.endRadio === '1' }">
+              <a
+                ng-click="ui.endRadio = '1'"
+                ng-class="{'ml-timepicker-radio-bottom': ui.endRadio === '1'}"
+                i18n-id="xpack.ml.jobTimePickerModal.specifyEndTimeLinkText"
+                i18n-default-message="Specify end time"
+              ></a>
+            </li>
+          </ul>
+        </div>
+        <div class='ml-timepicker' ng-show="ui.endRadio == '1'">
+          <div>
+            <input type="text" class="form-control" input-datetime="{{format}}" ng-model="ui.timepicker.to">
+          </div>
+          <div>
+            <datepicker
+              offset-timezone
+              ng-model="ui.timepicker.to"
+              show-weeks="false">
+            </datepicker>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div ng-if="ui.endRadio === '0' && watcherEnabled">
+    <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+    <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+      <input ng-model='ui.createWatch' type="checkbox" class='kuiCheckBox'/>
+      <span
+        class="kuiCheckBoxLabel__text"
+        i18n-id="xpack.ml.jobTimePickerModal.createWatchAfterDatafeedHasStartedLabel"
+        i18n-default-message="Create watch after datafeed has started"
+      ></span>
+    </label>
+  </div>
+  <div class="clearfix"></div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+  <button
+    ng-click="save()"
+    ng-disabled="(
+      saveLock === true ||
+      ( ui.startRadio==='2' && ui.timepicker.from==='' ) ||
+      ( ui.endRadio==='1' && ui.timepicker.to==='' )
+    )"
+    class="kuiButton kuiButton--primary"
+    i18n-id="xpack.ml.jobTimePickerModal.startButtonLabel"
+    i18n-default-message="Start"
+  ></button>
+  <button
+    ng-click="cancel()"
+    ng-disabled="(saveLock === true)"
+    class="kuiButton kuiButton--primary"
+    aria-label="{{ ::'xpack.ml.jobTimePickerModal.cancelButtonAriaLabel' | i18n: {defaultMessage: 'Cancel'} }}"
+    i18n-id="xpack.ml.jobTimePickerModal.cancelButtonLabel"
+    i18n-default-message="Cancel"
+  ></button>
+
+</div>

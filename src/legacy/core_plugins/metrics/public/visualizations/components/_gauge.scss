@@ -1,0 +1,74 @@
+/**
+ * 1. Text is scaled using a matrix so all font sizes and related metrics
+ *    are being calcuated from a percentage of the base font size of 100% (14px).
+ */
+
+.tvbVisHalfGauge,
+.tvbVisCircleGauge {
+  font-size: 100%; /* 1 */
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.tvbVisHalfGauge__metrics,
+.tvbVisCircleGauge__metrics {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  padding: $euiSizeS;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tvbVisHalfGauge__metrics {
+  height: 70px;
+  padding: 0px $euiSizeM $euiSizeS;
+  justify-content: flex-end;
+}
+
+.tvbVisGauge__label {
+  color: $tvbTextColor;
+  font-size: 0.5em; /* 1 */
+  line-height: 1em; /* 1 */
+  text-align: center;
+  padding: 0 $euiSizeS $euiSizeXS;
+
+  .tvbVisGauge--reversed & {
+    color: $tvbTextColorReversed;
+  }
+}
+
+.tvbVisGauge__value {
+  color: $tvbValueColor;
+  font-size: .9em; /* 1 */
+  line-height: 1em;  /* 1 */
+  text-align: center;
+
+  .tvbVisGauge--reversed & {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbVisGauge__additionalLabel {
+  @include euiTextTruncate;
+  font-size: 0.4em; /* 1 */
+  line-height: 1.2em; /* 1 */
+  width: 100%;
+  padding: 2px $euiSizeXS;
+  color: $tvbValueColor;
+
+  .tvbVisGauge--reversed & {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbVisGauge__resize {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}

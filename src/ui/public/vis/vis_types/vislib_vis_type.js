@@ -24,33 +24,36 @@ import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import './vislib_vis_legend';
-import { BaseVisType } from './base_vis_type';
-import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
+import { BaseVisTypeProvider } from './base_vis_type';
 import VislibProvider from '../../vislib';
+import { VisFiltersProvider } from '../vis_filters';
 import $ from 'jquery';
+import { defaultsDeep } from 'lodash';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
-  const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
+  const visFilters = Private(VisFiltersProvider);
+  const BaseVisType = Private(BaseVisTypeProvider);
 
   const legendClassName = {
-    top: 'vislib-container--legend-top',
-    bottom: 'vislib-container--legend-bottom',
-    left: 'vislib-container--legend-left',
-    right: 'vislib-container--legend-right',
+    top: 'visLib--legend-top',
+    bottom: 'visLib--legend-bottom',
+    left: 'visLib--legend-left',
+    right: 'visLib--legend-right',
   };
 
   class VislibVisController {
     constructor(el, vis) {
       this.el = el;
       this.vis = vis;
+      this.$scope = null;
 
       this.container = document.createElement('div');
-      this.container.className = 'vislib-container';
+      this.container.className = 'visLib';
       this.el.appendChild(this.container);
 
       this.chartEl = document.createElement('div');
-      this.chartEl.className = 'vislib-chart';
+      this.chartEl.className = 'visLib__chart';
       this.container.appendChild(this.chartEl);
 
     }
@@ -65,20 +68,19 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           return resolve();
         }
 
-        let $scope;
         if (this.vis.params.addLegend) {
           $(this.container).attr('class', (i, cls) => {
-            return cls.replace(/vislib-container--legend-\S+/g, '');
+            return cls.replace(/visLib--legend-\S+/g, '');
           }).addClass(legendClassName[this.vis.params.legendPosition]);
 
-          $scope = $rootScope.$new();
-          $scope.refreshLegend = 0;
-          $scope.vis = this.vis;
-          $scope.visData = esResponse;
-          $scope.uiState = $scope.vis.getUiState();
-          const legendHtml = $compile('<vislib-legend></vislib-legend>')($scope);
+          this.$scope = $rootScope.$new();
+          this.$scope.refreshLegend = 0;
+          this.$scope.vis = this.vis;
+          this.$scope.visData = esResponse;
+          this.$scope.uiState = this.$scope.vis.getUiState();
+          const legendHtml = $compile('<vislib-legend></vislib-legend>')(this.$scope);
           this.container.appendChild(legendHtml[0]);
-          $scope.$digest();
+          this.$scope.$digest();
         }
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
@@ -88,8 +90,8 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
 
         if (this.vis.params.addLegend) {
-          $scope.refreshLegend++;
-          $scope.$digest();
+          this.$scope.refreshLegend++;
+          this.$scope.$digest();
         }
       });
     }
@@ -102,6 +104,10 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         delete this.vis.vislibVis;
       }
       $(this.container).find('vislib-legend').remove();
+      if (this.$scope) {
+        this.$scope.$destroy();
+        this.$scope = null;
+      }
     }
   }
 
@@ -111,9 +117,14 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         opts.responseHandler = 'vislib_series';
         opts.responseHandlerConfig = { asAggConfigResults: true };
       }
-      if (!opts.responseConverter) {
-        opts.responseConverter = pointSeries;
-      }
+      opts.events = defaultsDeep({}, opts.events, {
+        filterBucket: {
+          defaultAction: visFilters.filter,
+        },
+        brush: {
+          defaultAction: visFilters.brush,
+        }
+      });
       opts.visualization = VislibVisController;
       super(opts);
       this.refreshLegend = 0;

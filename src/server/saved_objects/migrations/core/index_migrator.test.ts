@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { SavedObjectsSchema } from '../../schema';
-import { ROOT_TYPE, SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
+import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { CallCluster } from './call_cluster';
 import { IndexMigrator } from './index_migrator';
 
@@ -50,10 +50,19 @@ describe('IndexMigrator', () => {
           namespace: { type: 'keyword' },
           type: { type: 'keyword' },
           updated_at: { type: 'date' },
+          references: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              type: { type: 'keyword' },
+              id: { type: 'keyword' },
+            },
+          },
         },
       },
+      include_type_name: true,
+      type: '_doc',
       index: '.kibana_1',
-      type: ROOT_TYPE,
     });
   });
 
@@ -71,21 +80,28 @@ describe('IndexMigrator', () => {
     sinon.assert.calledWith(callCluster, 'indices.create', {
       body: {
         mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: {
-              config: {
-                dynamic: 'true',
-                properties: { buildNum: { type: 'keyword' } },
+          dynamic: 'strict',
+          properties: {
+            config: {
+              dynamic: 'true',
+              properties: { buildNum: { type: 'keyword' } },
+            },
+            foo: { type: 'long' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
               },
-              foo: { type: 'long' },
-              migrationVersion: { dynamic: 'true', type: 'object' },
-              namespace: { type: 'keyword' },
-              type: { type: 'keyword' },
-              updated_at: { type: 'date' },
             },
           },
         },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_1',
     });
@@ -166,10 +182,8 @@ describe('IndexMigrator', () => {
         '.kibana_1': {
           aliases: {},
           mappings: {
-            doc: {
-              properties: {
-                author: { type: 'text' },
-              },
+            properties: {
+              author: { type: 'text' },
             },
           },
         },
@@ -181,22 +195,29 @@ describe('IndexMigrator', () => {
     sinon.assert.calledWith(callCluster, 'indices.create', {
       body: {
         mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: {
-              author: { type: 'text' },
-              config: {
-                dynamic: 'true',
-                properties: { buildNum: { type: 'keyword' } },
+          dynamic: 'strict',
+          properties: {
+            author: { type: 'text' },
+            config: {
+              dynamic: 'true',
+              properties: { buildNum: { type: 'keyword' } },
+            },
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
               },
-              foo: { type: 'text' },
-              migrationVersion: { dynamic: 'true', type: 'object' },
-              namespace: { type: 'keyword' },
-              type: { type: 'keyword' },
-              updated_at: { type: 'date' },
             },
           },
         },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_2',
     });
@@ -243,7 +264,7 @@ describe('IndexMigrator', () => {
     let count = 0;
     const opts = defaultOpts();
     const callCluster = clusterStub(opts);
-    const migrateDoc = sinon.spy((doc: SavedObjectDoc) => ({
+    const migrateDoc = sinon.spy((doc: RawSavedObjectDoc) => ({
       ...doc,
       attributes: { name: ++count },
     }));
@@ -269,24 +290,26 @@ describe('IndexMigrator', () => {
       type: 'foo',
       attributes: { name: 'Bar' },
       migrationVersion: {},
+      references: [],
     });
     sinon.assert.calledWith(migrateDoc, {
       id: '2',
       type: 'foo',
       attributes: { name: 'Baz' },
       migrationVersion: {},
+      references: [],
     });
     expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
-        { index: { _id: 'foo:1', _index: '.kibana_2', _type: ROOT_TYPE } },
-        { foo: { name: 1 }, type: 'foo', migrationVersion: {} },
+        { index: { _id: 'foo:1', _index: '.kibana_2' } },
+        { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
-        { index: { _id: 'foo:2', _index: '.kibana_2', _type: ROOT_TYPE } },
-        { foo: { name: 2 }, type: 'foo', migrationVersion: {} },
+        { index: { _id: 'foo:2', _index: '.kibana_2' } },
+        { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
   });
@@ -314,11 +337,9 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     '.kibana_1': {
       aliases: { '.kibana': {} },
       mappings: {
-        doc: {
-          dynamic: 'strict',
-          properties: {
-            migrationVersion: { dynamic: 'true', type: 'object' },
-          },
+        dynamic: 'strict',
+        properties: {
+          migrationVersion: { dynamic: 'true', type: 'object' },
         },
       },
     },
@@ -333,13 +354,19 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
   const searchResult = (i: number) =>
     Promise.resolve({
       _scroll_id: i,
+      _shards: {
+        successful: 1,
+        total: 1,
+      },
       hits: {
         hits: docs[i] || [],
       },
     });
   callCluster.withArgs('indices.get').returns(Promise.resolve(index));
   callCluster.withArgs('indices.getAlias').returns(Promise.resolve(alias));
-  callCluster.withArgs('reindex').returns(Promise.resolve({ task: 'zeid' }));
+  callCluster
+    .withArgs('reindex')
+    .returns(Promise.resolve({ task: 'zeid', _shards: { successful: 1, total: 1 } }));
   callCluster.withArgs('tasks.get').returns(Promise.resolve({ completed: true }));
   callCluster.withArgs('search').returns(searchResult(0));
 
@@ -356,7 +383,9 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     .returns(searchResult(docs.length));
 
   callCluster.withArgs('bulk').returns(Promise.resolve({ items: [] }));
-  callCluster.withArgs('count').returns(Promise.resolve({ count: numOutOfDate }));
+  callCluster
+    .withArgs('count')
+    .returns(Promise.resolve({ count: numOutOfDate, _shards: { successful: 1, total: 1 } }));
 }
 
 function clusterStub(opts: { callCluster: CallCluster }) {

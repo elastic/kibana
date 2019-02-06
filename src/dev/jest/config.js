@@ -22,15 +22,17 @@ export default {
   roots: [
     '<rootDir>/src/ui',
     '<rootDir>/src/core',
-    '<rootDir>/src/core_plugins',
+    '<rootDir>/src/legacy/core_plugins',
     '<rootDir>/src/server',
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
+    '<rootDir>/src/functional_test_runner',
     '<rootDir>/src/dev',
     '<rootDir>/src/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
+    '<rootDir>/src/test_utils',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',

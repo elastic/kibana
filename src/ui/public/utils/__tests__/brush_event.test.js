@@ -25,7 +25,7 @@ jest.mock('ui/chrome',
         get: (key) => {
           switch (key) {
             case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
+              return { from: 'now-15m', to: 'now' };
             case 'timepicker:refreshIntervalDefaults':
               return { display: 'Off', pause: false, value: 0 };
             default:
@@ -38,7 +38,6 @@ jest.mock('ui/chrome',
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import moment from 'moment';
 import { onBrushEvent } from '../brush_event';
 import { timefilter } from 'ui/timefilter';
 
@@ -53,8 +52,32 @@ describe('brushEvent', () => {
   };
 
   const baseEvent = {
+    aggConfigs: [{
+      params: {},
+      getIndexPattern: () => ({
+        timeFieldName: 'time',
+      })
+    }],
     data: {
       fieldFormatter: _.constant({}),
+      series: [
+        {
+          values: [
+            {
+              xRaw: {
+                column: 0,
+                table: {
+                  columns: [
+                    {
+                      id: '1',
+                    },
+                  ]
+                }
+              }
+            },
+          ]
+        },
+      ]
     },
   };
 
@@ -87,7 +110,8 @@ describe('brushEvent', () => {
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
+        dateEvent.aggConfigs[0].params.field = dateField;
+        dateEvent.data.ordered = { date: true };
       });
 
       test('by ignoring the event when range spans zero time', () => {
@@ -102,17 +126,11 @@ describe('brushEvent', () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
         onBrushEvent(event, $state);
-        expect(timefilter.getTime().mode).to.be('absolute');
-        expect(moment.isMoment(timefilter.getTime().from))
-          .to.be(true);
+        const { from, to } = timefilter.getTime();
         // Set to a baseline timezone for comparison.
-        expect(timefilter.getTime().from.utcOffset(0).format('YYYY-MM-DD'))
-          .to.equal('2014-01-01');
-        expect(moment.isMoment(timefilter.getTime().to))
-          .to.be(true);
+        expect(from).to.be(new Date(JAN_01_2014).toISOString());
         // Set to a baseline timezone for comparison.
-        expect(timefilter.getTime().to.utcOffset(0).format('YYYY-MM-DD'))
-          .to.equal('2014-01-02');
+        expect(to).to.be(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
       });
     });
 
@@ -125,7 +143,8 @@ describe('brushEvent', () => {
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
+        dateEvent.aggConfigs[0].params.field = dateField;
+        dateEvent.data.ordered = { date: true };
       });
 
       test('creates a new range filter', () => {
@@ -180,7 +199,8 @@ describe('brushEvent', () => {
 
     beforeEach(() => {
       numberEvent = _.cloneDeep(baseEvent);
-      numberEvent.data.xAxisField = numberField;
+      numberEvent.aggConfigs[0].params.field = numberField;
+      numberEvent.data.ordered = { date: false };
     });
 
     test('by ignoring the event when range does not span at least 2 values', () => {

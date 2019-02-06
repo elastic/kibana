@@ -47,6 +47,7 @@ export const plot = () => ({
       types: ['string', 'boolean'],
       help: 'Legend position, nw, sw, ne, se or false',
       default: 'ne',
+      options: ['nw', 'sw', 'ne', 'se', false],
     },
     yaxis: {
       types: ['boolean', 'axisConfig'],
@@ -87,7 +88,9 @@ export const plot = () => ({
             set(flotStyle, 'bubbles.size.min', seriesStyle.points);
           }
 
-          if (point.text != null) attrs.text = point.text;
+          if (point.text != null) {
+            attrs.text = point.text;
+          }
 
           return [x, y, attrs];
         }),

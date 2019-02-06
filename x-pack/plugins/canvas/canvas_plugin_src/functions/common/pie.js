@@ -5,7 +5,7 @@
  */
 
 import keyBy from 'lodash.keyby';
-import { get, map, groupBy, sortBy } from 'lodash';
+import { get, map, groupBy } from 'lodash';
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 
@@ -42,6 +42,7 @@ export const pie = () => ({
       types: ['boolean'],
       default: true,
       help: 'Show pie labels',
+      options: [true, false],
     },
     labelRadius: {
       types: ['number'],
@@ -57,6 +58,7 @@ export const pie = () => ({
       types: ['string', 'boolean'],
       help: 'Legend position, nw, sw, ne, se or false',
       default: false,
+      options: ['nw', 'sw', 'ne', 'se', false],
     },
     tilt: {
       types: ['number'],
@@ -65,10 +67,9 @@ export const pie = () => ({
     },
   },
   fn: (context, args) => {
-    const rows = sortBy(context.rows, ['color', 'size']);
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
 
-    const data = map(groupBy(rows, 'color'), (series, label) => {
+    const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const item = {
         label: label,
         data: series.map(point => point.size || 1),
@@ -77,7 +78,9 @@ export const pie = () => ({
       const seriesStyle = seriesStyles[label];
 
       // append series style, if there is a match
-      if (seriesStyle) item.color = get(seriesStyle, 'color');
+      if (seriesStyle) {
+        item.color = get(seriesStyle, 'color');
+      }
 
       return item;
     });
@@ -87,7 +90,7 @@ export const pie = () => ({
       as: 'pie',
       value: {
         font: args.font,
-        data: sortBy(data, 'label'),
+        data,
         options: {
           canvas: false,
           colors: getColorsFromPalette(args.palette, data.length),

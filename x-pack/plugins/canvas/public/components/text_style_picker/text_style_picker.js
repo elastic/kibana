@@ -64,6 +64,11 @@ export const TextStylePicker = ({
     ['underline']: Boolean(underline),
   };
 
+  if (!isNaN(size) && fontSizes.indexOf(Number(size)) === -1) {
+    fontSizes.push(Number(size));
+    fontSizes.sort((a, b) => a - b);
+  }
+
   const doChange = (propName, value) => {
     onChange({
       family,
@@ -100,7 +105,7 @@ export const TextStylePicker = ({
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
-            defaultValue={size}
+            value={size}
             onChange={e => doChange('size', Number(e.target.value))}
             options={fontSizes.map(size => ({ text: String(size), value: size }))}
           />
@@ -156,4 +161,5 @@ TextStylePicker.propTypes = {
 
 TextStylePicker.defaultProps = {
   align: 'left',
+  size: 14,
 };

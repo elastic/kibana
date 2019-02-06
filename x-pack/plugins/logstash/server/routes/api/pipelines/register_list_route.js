@@ -31,7 +31,7 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/logstash/pipelines',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchPipelines(callWithRequest)
@@ -41,10 +41,9 @@ export function registerListRoute(server) {
             return PipelineListItem.fromUpstreamJSON(pipeline).downstreamJSON;
           });
 
-          reply({ pipelines });
-
+          return { pipelines };
         })
-        .catch(e => reply(wrapEsError(e)));
+        .catch(e => wrapEsError(e));
     },
     config: {
       pre: [ licensePreRouting ]

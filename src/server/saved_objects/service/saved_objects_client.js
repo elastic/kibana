@@ -139,6 +139,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.defaultSearchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
@@ -147,6 +148,7 @@ export class SavedObjectsClient {
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
+   * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {

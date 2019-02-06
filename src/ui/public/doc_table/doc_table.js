@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
-import './doc_table.less';
 import '../directives/truncated';
 import '../directives/infinite_scroll';
 import './components/table_header';
@@ -32,7 +31,7 @@ import { getRequestInspectorStats, getResponseInspectorStats } from '../courier/
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('kibana')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
+  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier, i18n) {
     return {
       restrict: 'E',
       template: html,
@@ -137,9 +136,13 @@ uiModules.get('kibana')
             let inspectorRequest = undefined;
             if (_.has($scope, 'inspectorAdapters.requests')) {
               $scope.inspectorAdapters.requests.reset();
-              inspectorRequest = $scope.inspectorAdapters.requests.start('Data', {
-                description: `This request queries Elasticsearch to fetch the data for the search.`,
+              const title = i18n('common.ui.docTable.inspectorRequestDataTitle', {
+                defaultMessage: 'Data',
               });
+              const description = i18n('common.ui.docTable.inspectorRequestDescription', {
+                defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+              });
+              inspectorRequest = $scope.inspectorAdapters.requests.start(title, { description });
               inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
               $scope.searchSource.getSearchRequestBody().then(body => {
                 inspectorRequest.json(body);

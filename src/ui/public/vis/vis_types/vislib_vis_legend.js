@@ -20,22 +20,20 @@
 import _ from 'lodash';
 import html from './vislib_vis_legend.html';
 import { VislibLibDataProvider } from '../../vislib/lib/data';
-import { FilterBarClickHandlerProvider } from '../../filter_bar/filter_bar_click_handler';
 import { uiModules } from '../../modules';
+import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
-
+import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 
 uiModules.get('kibana')
-  .directive('vislibLegend', function (Private, getAppState, $timeout) {
+  .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
-    const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
+    const visFilters = Private(VisFiltersProvider);
 
     return {
       restrict: 'E',
       template: html,
       link: function ($scope) {
-        const $state = getAppState();
-        const clickHandler = filterBarClickHandler($state);
         $scope.legendId = htmlIdGenerator()('legend');
         $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
@@ -89,26 +87,12 @@ uiModules.get('kibana')
           });
         };
 
-        $scope.getToggleLegendClasses = function () {
-          switch ($scope.vis.params.legendPosition) {
-            case 'top':
-              return $scope.open ? 'fa-chevron-circle-up' : 'fa-chevron-circle-down';
-            case 'bottom':
-              return $scope.open ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up';
-            case 'left':
-              return $scope.open ? 'fa-chevron-circle-left' : 'fa-chevron-circle-right';
-            case 'right':
-            default:
-              return $scope.open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left';
-          }
-        };
-
         $scope.filter = function (legendData, negate) {
-          clickHandler({ point: legendData, negate: negate });
+          $scope.vis.API.events.filter({ data: legendData.values, negate: negate });
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = clickHandler({ point: legendData }, true) || [];
+          const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
           return filters.length;
         };
 
@@ -137,7 +121,7 @@ uiModules.get('kibana')
         function refresh() {
           const vislibVis = $scope.vis.vislibVis;
           if (!vislibVis || !vislibVis.visConfig) {
-            $scope.labels = [{ label: 'loading ...' }];
+            $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading…' }) }];
             return;
           }  // make sure vislib is defined at this point
 
@@ -159,6 +143,8 @@ uiModules.get('kibana')
           if (vislibVis.visConfig) {
             $scope.getColor = vislibVis.visConfig.data.getColorFunc();
           }
+
+          $scope.tableAggs = getTableAggs($scope.vis);
         }
 
         // Most of these functions were moved directly from the old Legend class. Not a fan of this.
@@ -176,7 +162,12 @@ uiModules.get('kibana')
             .reduce(function (a, b) {
               return a.concat(b);
             }, []);
-          return _.compact(_.uniq(values, 'label'));
+          return _.compact(_.uniq(values, 'label')).map(label => {
+            return {
+              ...label,
+              values: [label.values[0].seriesRaw],
+            };
+          });
         }
       }
     };

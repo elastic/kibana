@@ -2,13 +2,6 @@
 
 exports[`Service Overview -> View should render when historical data is found 1`] = `
 <div>
-  <styled.div>
-    <h1>
-      Services
-    </h1>
-    <SetupInstructionsLink />
-  </styled.div>
-  <Connect(KueryBarView) />
   <ServiceListRequest
     render={[Function]}
   />
@@ -20,7 +13,6 @@ Object {
   "items": Array [],
   "noItemsMessage": <EmptyMessage
     heading="No services were found"
-    hideSubheading={false}
     subheading={null}
   />,
 }
@@ -28,13 +20,6 @@ Object {
 
 exports[`Service Overview -> View should render when historical data is not found 1`] = `
 <div>
-  <styled.div>
-    <h1>
-      Services
-    </h1>
-    <SetupInstructionsLink />
-  </styled.div>
-  <Connect(KueryBarView) />
   <ServiceListRequest
     render={[Function]}
   />
@@ -46,7 +31,6 @@ Object {
   "items": Array [],
   "noItemsMessage": <EmptyMessage
     heading="Looks like you don't have any services with APM installed. Let's add some!"
-    hideSubheading={false}
     subheading={
       <SetupInstructionsLink
         buttonFill={true}

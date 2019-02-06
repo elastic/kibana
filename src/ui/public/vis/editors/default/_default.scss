@@ -62,14 +62,6 @@
     flex-basis: $vis-editor-sidebar-basis;
     max-width: calc(100% - #{$vis-editor-resizer-width});
   }
-
-  .kuiSideBarFormRow__label {
-    font-size: $euiFontSizeXS;
-  }
-
-  .form-group {
-    margin-bottom: $vis-editor-agg-editor-spacing;
-  }
 }
 
 /**
@@ -89,6 +81,7 @@
  */
 
 .visEditor__canvas {
+  background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: row;
   overflow: auto;
@@ -101,11 +94,12 @@
   }
 
   .visualize {
-    @include flex-parent();
+    display: flex;
+    flex-direction: column;
     flex: 1 1 100%;
   }
 
-  .visualize-chart {
+  .visChart {
     position: relative;
   }
 }

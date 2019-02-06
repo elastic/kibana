@@ -13,7 +13,7 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { bulkGetTest, createExpectLegacyForbidden, createExpectResults } = bulkGetTestSuiteFactory(
+  const { bulkGetTest, createExpectResults, expectRbacForbidden } = bulkGetTestSuiteFactory(
     esArchiver,
     supertest
   );
@@ -24,7 +24,7 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -43,18 +43,8 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         default: {
-          statusCode: 200,
-          response: createExpectResults(),
-        },
-      },
-    });
-
-    bulkGetTest(`legacy reeadonly user`, {
-      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-      tests: {
-        default: {
-          statusCode: 200,
-          response: createExpectResults(),
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -104,9 +94,7 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
-          ),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -116,9 +104,7 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
-          ),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -128,9 +114,7 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
-          ),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -140,9 +124,7 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
-          ),
+          response: expectRbacForbidden,
         },
       },
     });

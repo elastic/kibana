@@ -13,5 +13,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./elasticsearch_settings'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./logstash'));
+    loadTestFile(require.resolve('./common'));
+    loadTestFile(require.resolve('./standalone_cluster'));
   });
 }

@@ -19,7 +19,6 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
     createExpectResults,
     createExpectNotFoundResult,
     createExpectRbacForbidden,
-    createExpectLegacyForbidden,
     nonExistantSpaceId,
   } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
@@ -37,7 +36,6 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
           allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -54,7 +52,6 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -67,7 +64,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: createExpectRbacForbidden(scenario.spaceId),
           },
         },
       });
@@ -114,8 +111,8 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
+            statusCode: 403,
+            response: createExpectRbacForbidden(scenario.spaceId),
           },
         },
       });
@@ -136,18 +133,6 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         user: scenario.users.dualRead,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`legacy readonly`, {
-        currentSpaceId: scenario.spaceId,
-        spaceId: scenario.spaceId,
-        user: scenario.users.legacyRead,
         tests: {
           default: {
             statusCode: 200,
@@ -196,7 +181,6 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
             readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
             allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
             legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-            legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
             dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
             dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
           },
@@ -232,8 +216,8 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           user: scenario.users.legacyAll,
           tests: {
             default: {
-              statusCode: 404,
-              response: createExpectNotFoundResult(),
+              statusCode: 403,
+              response: createExpectRbacForbidden(scenario.otherSpaceId),
             },
           },
         });
@@ -254,18 +238,6 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           user: scenario.users.dualRead,
-          tests: {
-            default: {
-              statusCode: 404,
-              response: createExpectNotFoundResult(),
-            },
-          },
-        });
-
-        getTest(`legacy readonly user`, {
-          currentSpaceId: scenario.spaceId,
-          spaceId: scenario.otherSpaceId,
-          user: scenario.users.legacyRead,
           tests: {
             default: {
               statusCode: 404,

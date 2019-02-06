@@ -1,7 +1,7 @@
 .canvas.canvasContainer {
   display: flex;
   flex-grow: 1;
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
 }
 
 .canvasContainer--loading {
@@ -19,20 +19,20 @@
     linear-gradient(45deg, transparent 75%, #ddd 75%),
     linear-gradient(-45deg, transparent 75%, #ddd 75%);
   background-size: 8px 8px;
+  position: relative;
 }
 
 .canvasTextArea--code {
   @include euiScrollBar;
   font-size: $euiFontSize;
-  font-family: monospace;
+  font-family: $euiCodeFontFamily;
   width: 100%;
   max-width: 100%;
 }
 
-#canvas-app body {
+#canvas-app {
   overflow-y: hidden;
 
-  // Todo: replace this with EuiToast
   .window-error {
     position: absolute;
     bottom: 10px;

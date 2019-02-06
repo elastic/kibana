@@ -6,102 +6,138 @@
 
 import React from 'react';
 import moment from 'moment';
-import { MonitoringTable } from '../../table';
-import {
-  KuiTableRowCell,
-  KuiTableRow
-} from '@kbn/ui-framework/components';
-import { EuiLink } from '@elastic/eui';
+import { uniq } from 'lodash';
+import { EuiMonitoringTable } from '../../table';
+import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { Status } from './status';
-import { SORT_ASCENDING, SORT_DESCENDING, TABLE_ACTION_UPDATE_FILTER } from '../../../../common/constants';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
+import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 
-
-const filterFields = [ 'name', 'type', 'version', 'output' ];
 const columns = [
-  { title: 'Name', sortKey: 'name', sortOrder: SORT_ASCENDING },
-  { title: 'Output Enabled', sortKey: 'output' },
-  { title: 'Total Events Rate', sortKey: 'total_events_rate', secondarySortOrder: SORT_DESCENDING },
-  { title: 'Bytes Sent Rate', sortKey: 'bytes_sent_rate' },
-  { title: 'Output Errors', sortKey: 'errors' },
-  { title: 'Last Event', sortKey: 'time_of_last_event' },
-  { title: 'Allocated Memory', sortKey: 'memory' },
-  { title: 'Version', sortKey: 'version' },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
+      defaultMessage: 'Name'
+    }),
+    field: 'name',
+    render: (name, instance) => (
+      <EuiLink
+        href={`#/apm/instances/${instance.uuid}`}
+        data-test-subj={`apmLink-${name}`}
+      >
+        {name}
+      </EuiLink>
+    )
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.outputEnabledTitle', {
+      defaultMessage: 'Output Enabled'
+    }),
+    field: 'output'
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.totalEventsRateTitle', {
+      defaultMessage: 'Total Events Rate'
+    }),
+    field: 'total_events_rate',
+    render: value => formatMetric(value, '', '/s')
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.bytesSentRateTitle', {
+      defaultMessage: 'Bytes Sent Rate'
+    }),
+    field: 'bytes_sent_rate',
+    render: value => formatMetric(value, 'byte', '/s')
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.outputErrorsTitle', {
+      defaultMessage: 'Output Errors'
+    }),
+    field: 'errors',
+    render: value => formatMetric(value, '0')
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.lastEventTitle', {
+      defaultMessage: 'Last Event'
+    }),
+    field: 'time_of_last_event',
+    render: value => i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
+      defaultMessage: '{timeOfLastEvent} ago',
+      values: {
+        timeOfLastEvent: formatTimestampToDuration(+moment(value), 'since')
+      }
+    })
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
+      defaultMessage: 'Allocated Memory'
+    }),
+    field: 'memory',
+    render: value => formatMetric(value, 'byte')
+  },
+  {
+    name: i18n.translate('xpack.monitoring.apm.instances.versionTitle', {
+      defaultMessage: 'Version'
+    }),
+    field: 'version'
+  },
 ];
-const instanceRowFactory = () => {
-  return function KibanaRow(props) {
-    const applyFiltering = filterText => () => {
-      props.dispatchTableAction(TABLE_ACTION_UPDATE_FILTER, filterText);
-    };
 
-    return (
-      <KuiTableRow>
-        <KuiTableRowCell>
-          <div className="monTableCell__name">
-            <EuiLink
-              href={`#/apm/instances/${props.uuid}`}
-              data-test-subj={`apmLink-${props.name}`}
-            >
-              {props.name}
-            </EuiLink>
-          </div>
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          {props.output}
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          {formatMetric(props.total_events_rate, '', '/s')}
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          {formatMetric(props.bytes_sent_rate, 'byte', '/s')}
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          {formatMetric(props.errors, '0')}
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          {formatTimestampToDuration(+moment(props.time_of_last_event), 'since') + ' ago'}
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          {formatMetric(props.memory, 'byte')}
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          <EuiLink
-            onClick={applyFiltering(props.version)}
-          >
-            {props.version}
-          </EuiLink>
-        </KuiTableRowCell>
-      </KuiTableRow>
-    );
-  };
-};
-
-export function ApmServerInstances({ apms }) {
+export function ApmServerInstancesUI({ apms, intl }) {
   const {
-    pageIndex,
-    filterText,
-    sortKey,
-    sortOrder,
-    onNewState,
+    pagination,
+    sorting,
+    onTableChange,
+    data
   } = apms;
 
+  const versions = uniq(data.apms.map(item => item.version)).map(version => {
+    return { value: version };
+  });
+
   return (
-    <div>
-      <Status stats={apms.data.stats}/>
-      <MonitoringTable
-        className="apmInstancesTable"
-        rows={apms.data.apms}
-        pageIndex={pageIndex}
-        filterText={filterText}
-        sortKey={sortKey}
-        sortOrder={sortOrder}
-        onNewState={onNewState}
-        placeholder="Filter Instances..."
-        filterFields={filterFields}
-        columns={columns}
-        rowComponent={instanceRowFactory()}
-      />
-    </div>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <Status stats={data.stats} />
+          <EuiSpacer size="m"/>
+          <EuiMonitoringTable
+            className="apmInstancesTable"
+            rows={data.apms}
+            columns={columns}
+            sorting={sorting}
+            pagination={pagination}
+            search={{
+              box: {
+                incremental: true,
+                placeholder: intl.formatMessage({
+                  id: 'xpack.monitoring.apm.instances.filterInstancesPlaceholder',
+                  defaultMessage: 'Filter Instances…'
+                })
+              },
+              filters: [
+                {
+                  type: 'field_value_selection',
+                  field: 'version',
+                  name: intl.formatMessage({
+                    id: 'xpack.monitoring.apm.instances.versionFilter',
+                    defaultMessage: 'Version'
+                  }),
+                  options: versions,
+                  multiSelect: 'or',
+                }
+              ]
+            }}
+            onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
+
+export const ApmServerInstances = injectI18n(ApmServerInstancesUI);

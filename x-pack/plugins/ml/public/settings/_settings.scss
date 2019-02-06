@@ -1,0 +1,14 @@
+.mlSettingsPage {
+
+  .mlSettingsPage__body {
+    background: $euiPageBackgroundColor;
+    min-height: 100vh;
+  }
+
+  .mlSettingsPage__content {
+    width: map-get($euiBreakpoints, 'xl');
+    margin-top: $euiSize;
+    margin-bottom: $euiSize;
+  }
+
+}

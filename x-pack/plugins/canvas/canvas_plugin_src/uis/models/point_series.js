@@ -9,7 +9,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const pointseries = () => ({
   name: 'pointseries',
-  displayName: 'Dimensions & Measures',
+  displayName: 'Dimensions & measures',
   args: [
     {
       name: 'x',
@@ -20,7 +20,7 @@ export const pointseries = () => ({
     {
       name: 'y',
       displayName: 'Y-axis',
-      help: 'Data along the vertical axis. Usually a number.',
+      help: 'Data along the vertical axis. Usually a number',
       argType: 'datacolumn',
     },
     {
@@ -43,7 +43,9 @@ export const pointseries = () => ({
     },
   ],
   resolve({ context }) {
-    if (getState(context) !== 'ready') return { columns: [] };
+    if (getState(context) !== 'ready') {
+      return { columns: [] };
+    }
     return { columns: get(getValue(context), 'columns', []) };
   },
 });

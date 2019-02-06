@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { ROOT_TYPE } from '../../serialization';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
@@ -37,7 +36,7 @@ describe('ElasticIndex', () => {
         aliases: {},
         exists: false,
         indexName: '.kibana-test',
-        mappings: { doc: { dynamic: 'strict', properties: {} } },
+        mappings: { dynamic: 'strict', properties: {} },
       });
     });
 
@@ -79,7 +78,7 @@ describe('ElasticIndex', () => {
         return {
           [index]: {
             aliases: { foo: index },
-            mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+            mappings: { dynamic: 'strict', properties: { a: 'b' } },
           },
         };
       });
@@ -87,7 +86,7 @@ describe('ElasticIndex', () => {
       const info = await Index.fetchInfo(callCluster, '.baz');
       expect(info).toEqual({
         aliases: { foo: '.baz' },
-        mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+        mappings: { dynamic: 'strict', properties: { a: 'b' } },
         exists: true,
         indexName: '.baz',
       });
@@ -98,7 +97,10 @@ describe('ElasticIndex', () => {
     test('calls indices.create', async () => {
       const callCluster = sinon.spy(async (path: string, { body, index }: any) => {
         expect(path).toEqual('indices.create');
-        expect(body).toEqual({ mappings: { foo: 'bar' } });
+        expect(body).toEqual({
+          mappings: { foo: 'bar' },
+          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+        });
         expect(index).toEqual('.abcd');
       });
 
@@ -124,7 +126,6 @@ describe('ElasticIndex', () => {
       const callCluster = sinon.spy(async (path: string, { body, type, index }: any) => {
         expect(path).toEqual('indices.putMapping');
         expect(index).toEqual('.shazm');
-        expect(type).toEqual(ROOT_TYPE);
         expect(body).toEqual({
           dynamic: 'strict',
           properties: {
@@ -134,11 +135,9 @@ describe('ElasticIndex', () => {
       });
 
       await Index.putMappings(callCluster, '.shazm', {
-        doc: {
-          dynamic: 'strict',
-          properties: {
-            foo: 'bar',
-          },
+        dynamic: 'strict',
+        properties: {
+          foo: 'bar',
         },
       });
 
@@ -243,11 +242,10 @@ describe('ElasticIndex', () => {
           case 'indices.create':
             expect(arg.body).toEqual({
               mappings: {
-                doc: {
-                  dynamic: 'strict',
-                  properties: { foo: 'bar' },
-                },
+                dynamic: 'strict',
+                properties: { foo: 'bar' },
               },
+              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
             expect(arg.index).toEqual('.ze-index');
             return true;
@@ -288,10 +286,8 @@ describe('ElasticIndex', () => {
         exists: true,
         indexName: '.ze-index',
         mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: { foo: 'bar' },
-          },
+          dynamic: 'strict',
+          properties: { foo: 'bar' },
         },
       };
       await Index.convertToAlias(callCluster, info, '.muchacha', 10);
@@ -303,6 +299,64 @@ describe('ElasticIndex', () => {
         'indices.getAlias',
         'indices.updateAliases',
         'indices.refresh',
+      ]);
+    });
+
+    test('throws error if re-index task fails', async () => {
+      const callCluster = sinon.spy(async (path: string, arg: any) => {
+        switch (path) {
+          case 'indices.create':
+            expect(arg.body).toEqual({
+              mappings: {
+                dynamic: 'strict',
+                properties: { foo: 'bar' },
+              },
+              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+            });
+            expect(arg.index).toEqual('.ze-index');
+            return true;
+          case 'reindex':
+            expect(arg).toMatchObject({
+              body: {
+                dest: { index: '.ze-index' },
+                source: { index: '.muchacha' },
+              },
+              refresh: true,
+              waitForCompletion: false,
+            });
+            return { task: 'abc' };
+          case 'tasks.get':
+            expect(arg.taskId).toEqual('abc');
+            return {
+              completed: true,
+              error: {
+                type: 'search_phase_execution_exception',
+                reason: 'all shards failed',
+                failed_shards: [],
+              },
+            };
+          default:
+            throw new Error(`Dunnoes what ${path} means.`);
+        }
+      });
+
+      const info = {
+        aliases: {},
+        exists: true,
+        indexName: '.ze-index',
+        mappings: {
+          dynamic: 'strict',
+          properties: { foo: 'bar' },
+        },
+      };
+      await expect(Index.convertToAlias(callCluster, info, '.muchacha', 10)).rejects.toThrow(
+        /Re-index failed \[search_phase_execution_exception\] all shards failed/
+      );
+
+      expect(callCluster.args.map(([path]) => path)).toEqual([
+        'indices.create',
+        'reindex',
+        'tasks.get',
       ]);
     });
   });
@@ -401,11 +455,29 @@ describe('ElasticIndex', () => {
 
       callCluster
         .onCall(0)
-        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch1) } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch1) },
+          })
+        )
         .onCall(1)
-        .returns(Promise.resolve({ _scroll_id: 'y', hits: { hits: _.cloneDeep(batch2) } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'y',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch2) },
+          })
+        )
         .onCall(2)
-        .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: [] },
+          })
+        )
         .onCall(3)
         .returns(Promise.resolve());
 
@@ -441,9 +513,74 @@ describe('ElasticIndex', () => {
 
       callCluster
         .onCall(0)
-        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch) } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch) },
+          })
+        )
         .onCall(1)
-        .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }));
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: [] },
+          })
+        );
+
+      const read = Index.reader(callCluster, index, {
+        batchSize: 100,
+        scrollDuration: '5m',
+      });
+
+      expect(await read()).toEqual(batch);
+    });
+
+    test('fails if not all shards were successful', async () => {
+      const index = '.myalias';
+      const callCluster = sinon.stub();
+
+      callCluster.returns(Promise.resolve({ _shards: { successful: 1, total: 2 } }));
+
+      const read = Index.reader(callCluster, index, {
+        batchSize: 100,
+        scrollDuration: '5m',
+      });
+
+      await expect(read()).rejects.toThrow(/shards failed/);
+    });
+
+    test('handles shards not being returned', async () => {
+      const index = '.myalias';
+      const callCluster = sinon.stub();
+      const batch = [
+        {
+          _id: 'such:1',
+          _source: {
+            acls: '3230a',
+            foos: { is: 'fun' },
+            such: { num: 1 },
+            type: 'such',
+          },
+        },
+      ];
+
+      callCluster
+        .onCall(0)
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            hits: { hits: _.cloneDeep(batch) },
+          })
+        )
+        .onCall(1)
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            hits: { hits: [] },
+          })
+        );
 
       const read = Index.reader(callCluster, index, {
         batchSize: 100,
@@ -469,7 +606,7 @@ describe('ElasticIndex', () => {
           };
         }
         if (path === 'count') {
-          return { count };
+          return { count, _shards: { success: 1, total: 1 } };
         }
         throw new Error(`Unknown command ${path}.`);
       });
@@ -481,10 +618,8 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              dashboard: { type: 'text' },
-            },
+          properties: {
+            dashboard: { type: 'text' },
           },
         },
         count: 0,
@@ -492,21 +627,27 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeFalsy();
-      expect(callCluster.args).toEqual([['indices.get', { ignore: [404], index: '.myalias' }]]);
+      expect(callCluster.args).toEqual([
+        [
+          'indices.get',
+          {
+            ignore: [404],
+            index: '.myalias',
+          },
+        ],
+      ]);
     });
 
     test('is true if there are no migrations defined', async () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 2,
@@ -522,14 +663,12 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 0,
@@ -546,14 +685,12 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 3,
@@ -570,14 +707,12 @@ describe('ElasticIndex', () => {
       const { callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 0,
@@ -618,7 +753,6 @@ describe('ElasticIndex', () => {
             },
           },
           index: '.myalias',
-          type: ROOT_TYPE,
         },
       ]);
     });

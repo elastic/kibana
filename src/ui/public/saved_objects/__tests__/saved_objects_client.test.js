@@ -29,7 +29,7 @@ describe('SavedObjectsClient', () => {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
     attributes: { title: 'Example title' },
-    version: 2
+    version: 'foo'
   };
 
   let kfetchStub;
@@ -128,6 +128,21 @@ describe('SavedObjectsClient', () => {
       await savedObjectsClient.get(doc.type, doc.id);
       sinon.assert.calledOnce(kfetchStub);
     });
+
+    test('handles HTTP call when it fails', async () => {
+      kfetchStub.withArgs({
+        method: 'POST',
+        pathname: `/api/saved_objects/_bulk_get`,
+        query: undefined,
+        body: sinon.match.any
+      }).rejects(new Error('Request failed'));
+      try {
+        await savedObjectsClient.get(doc.type, doc.id);
+        throw new Error('should have error');
+      } catch (e) {
+        expect(e.message).to.be('Request failed');
+      }
+    });
   });
 
   describe('#delete', () => {
@@ -213,8 +228,8 @@ describe('SavedObjectsClient', () => {
 
     test('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
-      const body = { attributes, version: 2 };
-      const options = { version: 2 };
+      const body = { attributes, version: 'foo' };
+      const options = { version: 'foo' };
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
       sinon.assert.calledOnce(kfetchStub);

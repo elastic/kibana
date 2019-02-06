@@ -14,6 +14,7 @@ import { DebounceProvider } from 'ui/debounce';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const module = uiModules.get('xpack_main', []);
 
@@ -21,7 +22,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
   const xpackInfo = Private(XPackInfoProvider);
   const xpackInfoSignature = Private(XPackInfoSignatureProvider);
   const debounce = Private(DebounceProvider);
-  const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
+  const isUnauthenticated = Private(PathProvider).isUnauthenticated();
   let isLicenseExpirationBannerShown = false;
 
   const notifyIfLicenseIsExpired = debounce(() => {
@@ -39,9 +40,26 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
           <EuiCallOut
             iconType="help"
             color="warning"
-            title={`Your ${license.type} license is expired`}
+            title={<FormattedMessage
+              id="xpack.main.welcomeBanner.licenseIsExpiredTitle"
+              defaultMessage="Your {licenseType} license is expired"
+              values={{ licenseType: license.type }}
+            />}
           >
-            Contact your administrator or <a href={uploadLicensePath}>update your license</a> directly.
+            <FormattedMessage
+              id="xpack.main.welcomeBanner.licenseIsExpiredDescription"
+              defaultMessage="Contact your administrator or {updateYourLicenseLinkText} directly."
+              values={{
+                updateYourLicenseLinkText: (
+                  <a href={uploadLicensePath}>
+                    <FormattedMessage
+                      id="xpack.main.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText"
+                      defaultMessage="update your license"
+                    />
+                  </a>
+                )
+              }}
+            />
           </EuiCallOut>
         ),
       });
@@ -59,7 +77,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
    *  @return
    */
   function interceptor(response, handleResponse) {
-    if (isLoginOrLogout) {
+    if (isUnauthenticated) {
       return handleResponse(response);
     }
 

@@ -1,32 +1,45 @@
 <kbn-management-app section="elasticsearch/watcher">
-  <div class="kuiViewContent">
+  <div class="euiPanel euiPanel--paddingLarge euiPageContent" style="flex-grow: 0">
     <forbidden-message ng-if="watchList.forbidden">
-      You do not have permission to manage watches.
+      {{ 'xpack.watcher.sections.watchList.noPermissionToManageWatchesText' | i18n: { defaultMessage: 'You do not have permission to manage watches.' } }}
     </forbidden-message>
 
     <div
       ng-if="!watchList.forbidden"
-      class="kuiViewContentItem kuiVerticalRhythm"
     >
-      <div class="kuiVerticalRhythm">
+      <h1 class="euiTitle euiTitle--medium"
+        i18n-id="xpack.watcher.sections.watchList.header"
+        i18n-default-message="Create threshold alert"
+      >
+        Watcher
+      </h1>
+      <div class="euiText euiTextColor--subdued euiText--small">
+        <p
+          i18n-id="xpack.watcher.sections.watchList.subhead"
+          i18n-default-message="Send out emails, slack messages and log events when specific parameters are hit"></p>
+      </div>
+      <div class="euiSpacer euiSpacer--l"></div>
+      <div>
         <button
           class="kuiButton kuiButton--primary"
           ng-click="watchList.onClickCreateThresholdAlert()"
           data-test-subj="createThresholdAlertButton"
-          tooltip="Send an alert on a specific condition"
-        >
-          Create threshold alert
-        </button>
+          tooltip="{{ 'xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip' | i18n: { defaultMessage: 'Send an alert on a specific condition' } }}"
+          i18n-id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
+          i18n-default-message="Create threshold alert"
+        ></button>
 
         <button
           class="kuiButton kuiButton--primary"
           ng-click="watchList.onClickCreateAdvancedWatch()"
           data-test-subj="createAdvancedWatchButton"
-          tooltip="Set up a custom watch in raw JSON"
-        >
-          Create advanced watch
-        </button>
+          tooltip="{{ 'xpack.watcher.sections.watchList.createAdvancedWatchTooltip' | i18n: { defaultMessage: 'Set up a custom watch in raw JSON' } }}"
+          i18n-id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
+          i18n-default-message="Create advanced watch"
+        ></button>
       </div>
+
+      <div class="euiSpacer euiSpacer--l"></div>
 
       <div class="kuiControlledTable kuiVerticalRhythm">
         <div class="kuiToolBar">
@@ -43,9 +56,9 @@
               ng-disabled="!watchList.hasSelectedWatches"
               ng-click="watchList.onSelectedWatchesDelete()"
               data-test-subj="btnDeleteWatches"
-            >
-              Delete
-            </button>
+              i18n-id="xpack.watcher.sections.watchList.deleteWatchButtonLabel"
+              i18n-default-message="Delete"
+            ></button>
           </div>
 
           <div class="kuiToolBarSection">
@@ -75,15 +88,15 @@
         </watch-table>
 
         <table-info ng-show="!watchList.hasPageOfWatches">
-          No watches found.
+          {{ 'xpack.watcher.sections.watchList.watchesNotFoundText' | i18n: { defaultMessage: 'No watches found.' } }}
         </table-info>
 
         <div class="kuiToolBarFooter">
           <div class="kuiToolBarFooterSection">
             <tool-bar-selected-count
               count="watchList.selectedWatches.length"
-              singular-name="watch"
-              plural-name="watches"
+              singular-name="{{ 'xpack.watcher.sections.watchList.selectedSingleWatchText' | i18n: { defaultMessage: 'watch' } }}"
+              plural-name="{{ 'xpack.watcher.sections.watchList.selectedMultipleWatchText' | i18n: { defaultMessage: 'watches' } }}"
               ng-show="watchList.hasSelectedWatches"
             ></tool-bar-selected-count>
           </div>

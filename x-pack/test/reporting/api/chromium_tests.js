@@ -10,7 +10,9 @@ export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('chromium', () => {
+  describe('chromium', function () {
+    this.tags('ciGroup2');
+
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
@@ -26,6 +28,8 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
     });
 
+    loadTestFile(require.resolve('./bwc_existing_indexes'));
     loadTestFile(require.resolve('./bwc_generation_urls'));
+    loadTestFile(require.resolve('./usage'));
   });
 }

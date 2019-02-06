@@ -11,29 +11,24 @@
  * components in the Explorer dashboard.
  */
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
-
 import { listenerFactoryProvider } from 'plugins/ml/factories/listener_factory';
 
-module.service('mlExplorerDashboardService', function () {
-  this.allowCellRangeSelection = false;
-
-  const listenerFactory = listenerFactoryProvider();
-  const dragSelect = this.dragSelect = listenerFactory();
-  const swimlaneCellClick = this.swimlaneCellClick = listenerFactory();
-  const swimlaneDataChange = this.swimlaneDataChange = listenerFactory();
-  const swimlaneRenderDone = this.swimlaneRenderDone = listenerFactory();
-  const chartsInitDone = this.chartsInitDone = listenerFactory();
-  this.anomalyDataChange = listenerFactory();
-
-  this.init = function () {
-    // Clear out any old listeners.
-    dragSelect.unwatchAll();
-    swimlaneCellClick.unwatchAll();
-    swimlaneDataChange.unwatchAll();
-    swimlaneRenderDone.unwatchAll();
-    chartsInitDone.unwatchAll();
+function mlExplorerDashboardServiceFactory() {
+  const service = {
+    allowCellRangeSelection: false
   };
 
-});
+  const listenerFactory = listenerFactoryProvider();
+  const dragSelect = service.dragSelect = listenerFactory();
+  const explorer = service.explorer = listenerFactory();
+
+  service.init = function () {
+    // Clear out any old listeners.
+    dragSelect.unwatchAll();
+    explorer.unwatchAll();
+  };
+
+  return service;
+}
+
+export const mlExplorerDashboardService = mlExplorerDashboardServiceFactory();

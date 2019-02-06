@@ -22,6 +22,7 @@ export const compare = () => ({
       help:
         'The operator to use in the comparison: ' +
         ' eq (equal), ne (not equal), lt (less than), gt (greater than), lte (less than equal), gte (greater than eq)',
+      options: ['eq', 'ne', 'lt', 'gt', 'lte', 'gte'],
     },
     to: {
       aliases: ['this', 'b'],
@@ -40,19 +41,27 @@ export const compare = () => ({
       case 'ne':
         return a !== b;
       case 'lt':
-        if (typesMatch) return a < b;
+        if (typesMatch) {
+          return a < b;
+        }
         return false;
       case 'lte':
-        if (typesMatch) return a <= b;
+        if (typesMatch) {
+          return a <= b;
+        }
         return false;
       case 'gt':
-        if (typesMatch) return a > b;
+        if (typesMatch) {
+          return a > b;
+        }
         return false;
       case 'gte':
-        if (typesMatch) return a >= b;
+        if (typesMatch) {
+          return a >= b;
+        }
         return false;
       default:
-        throw new Error('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');
+        throw new Error(`Invalid compare operator: '${op}'. Use eq, ne, lt, gt, lte, or gte.`);
     }
 
     return false;

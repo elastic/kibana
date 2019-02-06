@@ -7,6 +7,23 @@
 import inlineStyle from 'inline-style';
 import { openSans } from '../../../common/lib/fonts';
 
+const weights = [
+  'normal',
+  'bold',
+  'bolder',
+  'lighter',
+  '100',
+  '200',
+  '300',
+  '400',
+  '500',
+  '600',
+  '700',
+  '800',
+  '900',
+];
+const alignments = ['center', 'left', 'right', 'justify'];
+
 export const font = () => ({
   name: 'font',
   aliases: [],
@@ -40,43 +57,34 @@ export const font = () => ({
       help:
         'Set the font weight, e.g. normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
       default: 'normal',
+      options: weights,
     },
     underline: {
       types: ['boolean'],
       default: false,
       help: 'Underline the text, true or false',
+      options: [true, false],
     },
     italic: {
       types: ['boolean'],
       default: false,
       help: 'Italicize, true or false',
+      options: [true, false],
     },
     align: {
       types: ['string'],
       help: 'Horizontal text alignment',
       default: 'left',
+      options: alignments,
     },
   },
   fn: (context, args) => {
-    const weights = [
-      'normal',
-      'bold',
-      'bolder',
-      'lighter',
-      '100',
-      '200',
-      '300',
-      '400',
-      '500',
-      '600',
-      '700',
-      '800',
-      '900',
-    ];
-    const alignments = ['center', 'left', 'right', 'justified'];
-
-    if (!weights.includes(args.weight)) throw new Error(`Invalid font weight: ${args.weight}`);
-    if (!alignments.includes(args.align)) throw new Error(`Invalid text alignment: ${args.align}`);
+    if (!weights.includes(args.weight)) {
+      throw new Error(`Invalid font weight: '${args.weight}'`);
+    }
+    if (!alignments.includes(args.align)) {
+      throw new Error(`Invalid text alignment: '${args.align}'`);
+    }
 
     // the line height shouldn't ever be lower than the size
     const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
@@ -92,7 +100,9 @@ export const font = () => ({
     };
 
     // conditionally apply styles based on input
-    if (args.color) spec.color = args.color;
+    if (args.color) {
+      spec.color = args.color;
+    }
 
     return {
       type: 'style',

@@ -1,0 +1,36 @@
+<div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem" data-test-subj="visualizeSelectSearch">
+  <div class="visWizard kuiViewContentItem">
+    <div class="visWizard__column visWizard__column--small">
+      <h2
+        class="kuiTitle kuiVerticalRhythm"
+        i18n-id="kbn.visualize.newVisWizard.createFromNewSearchTitle"
+        i18n-default-message="From a New Search, Select Index"
+      ></h2>
+
+      <paginated-selectable-list
+        per-page="20"
+        list="indexPattern.list"
+        list-property="attributes.title"
+        user-make-url="makeUrl"
+        class="visWizard__row visWizard__list--paginated--selectable kuiVerticalRhythm"
+        disable-auto-focus="true"
+      ></paginated-selectable-list>
+    </div>
+
+    <div class="visWizard__column visWizard__column--large">
+      <h2
+        class="kuiTitle kuiVerticalRhythm"
+        i18n-id="kbn.visualize.newVisWizard.createFromSavedSearchTitle"
+        i18n-default-message="Or, From a Saved Search"
+      ></h2>
+
+      <!-- Saved searches -->
+      <saved-object-finder
+        type="searches"
+        class="visWizard__row visWizard__savedObjectFinder kuiVerticalRhythm"
+        make-url="step2WithSearchUrl"
+        disable-auto-focus="true"
+      ></saved-object-finder>
+    </div>
+  </div>
+</div>

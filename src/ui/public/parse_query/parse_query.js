@@ -18,13 +18,12 @@
  */
 
 import { toUser } from './lib/to_user';
-import { ParseQueryLibFromUserProvider } from './lib/from_user';
+import { fromUser } from './lib/from_user';
 
 import { uiModules } from '../modules';
 uiModules
   .get('kibana')
-  .directive('parseQuery', function (Private) {
-    const fromUser = Private(ParseQueryLibFromUserProvider);
+  .directive('parseQuery', function () {
 
     return {
       restrict: 'A',

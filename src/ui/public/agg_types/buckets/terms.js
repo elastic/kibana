@@ -26,6 +26,7 @@ import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
 import otherBucketTemplate from '../controls/other_bucket.html';
+import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
@@ -40,7 +41,9 @@ const orderAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'orderAgg',
-    title: 'Order Agg',
+    title: i18n.translate('common.ui.aggTypes.buckets.terms.orderAggTitle', {
+      defaultMessage: 'Order Agg',
+    }),
     hideCustomLabel: true,
     aggFilter: aggFilter
   }
@@ -70,7 +73,9 @@ const migrateIncludeExcludeFormat = {
 
 export const termsBucketAgg = new BucketAggType({
   name: 'terms',
-  title: 'Terms',
+  title: i18n.translate('common.ui.aggTypes.buckets.termsTitle', {
+    defaultMessage: 'Terms',
+  }),
   makeLabel: function (agg) {
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.display;
@@ -103,10 +108,15 @@ export const termsBucketAgg = new BucketAggType({
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       nestedSearchSource.setField('aggs', filterAgg);
 
-      const request = inspectorAdapters.requests.start('Other bucket', {
-        description: `This request counts the number of documents that fall
-          outside the criterion of the data buckets.`
-      });
+      const request = inspectorAdapters.requests.start(
+        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', { defaultMessage: 'Other bucket' }),
+        {
+          description: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketDescription', {
+            defaultMessage: 'This request counts the number of documents that fall ' +
+              'outside the criterion of the data buckets.'
+          }),
+        }
+      );
       nestedSearchSource.getSearchRequestBody().then(body => {
         request.json(body);
       });
@@ -156,7 +166,9 @@ export const termsBucketAgg = new BucketAggType({
           try {
             return agg.makeLabel();
           } catch (e) {
-            return '- agg not valid -';
+            return i18n.translate('common.ui.aggTypes.buckets.terms.aggNotValidLabel', {
+              defaultMessage: '- agg not valid -',
+            });
           }
         };
 
@@ -254,8 +266,18 @@ export const termsBucketAgg = new BucketAggType({
       default: 'desc',
       editor: orderAndSizeTemplate,
       options: [
-        { display: 'Descending', val: 'desc' },
-        { display: 'Ascending', val: 'asc' }
+        {
+          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+            defaultMessage: 'Descending',
+          }),
+          val: 'desc'
+        },
+        {
+          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+            defaultMessage: 'Ascending',
+          }),
+          val: 'asc'
+        }
       ],
       write: _.noop // prevent default write, it's handled by orderAgg
     },
@@ -270,7 +292,9 @@ export const termsBucketAgg = new BucketAggType({
       write: _.noop
     }, {
       name: 'otherBucketLabel',
-      default: 'Other',
+      default: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketLabel', {
+        defaultMessage: 'Other',
+      }),
       write: _.noop
     }, {
       name: 'missingBucket',
@@ -278,7 +302,9 @@ export const termsBucketAgg = new BucketAggType({
       write: _.noop
     }, {
       name: 'missingBucketLabel',
-      default: 'Missing',
+      default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
+        defaultMessage: 'Missing',
+      }),
       write: _.noop
     },
     {

@@ -21,7 +21,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
-import './kbn_chrome.less';
 import { uiModules } from '../../modules';
 import {
   getUnhashableStatesProvider,
@@ -33,6 +32,7 @@ import {
   banners,
 } from '../../notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
+import { I18nContext } from '../../i18n';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -57,16 +57,8 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, $location, $http, Private, config) {
-          config.watch('k7design', (val) => $scope.k7design = val);
-
+        controller($scope, $rootScope, Private) {
           const getUnhashableStates = Private(getUnhashableStatesProvider);
-
-          // are we showing the embedded version of the chrome?
-          if (Boolean($location.search().embed)) {
-            internals.permanentlyHideChrome();
-          }
-
           const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
           function updateSubUrls() {
@@ -92,10 +84,12 @@ export function kbnChromeProvider(chrome, internals) {
 
           // Banners
           ReactDOM.render(
-            <GlobalBannerList
-              banners={banners.list}
-              subscribe={banners.onChange}
-            />,
+            <I18nContext>
+              <GlobalBannerList
+                banners={banners.list}
+                subscribe={banners.onChange}
+              />
+            </I18nContext>,
             document.getElementById('globalBannerList')
           );
 

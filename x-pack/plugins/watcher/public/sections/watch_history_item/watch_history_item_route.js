@@ -12,10 +12,12 @@ import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/watch_history';
 import './components/watch_history_item';
 import { updateHistorySection } from 'plugins/watcher/lib/update_management_sections';
+import { getWatchHistoryBreadcrumbs } from '../../lib/breadcrumbs';
 
 routes
   .when('/management/elasticsearch/watcher/watches/watch/:watchId/history-item/:watchHistoryItemId', {
     template: template,
+    k7Breadcrumbs: getWatchHistoryBreadcrumbs,
     resolve: {
       watch: function ($injector) {
         const $route = $injector.get('$route');

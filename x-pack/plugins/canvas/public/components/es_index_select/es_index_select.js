@@ -21,13 +21,15 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       onChange={([index]) => onChange(get(index, 'label', defaultIndex).toLowerCase())}
       onSearchChange={searchValue => {
         // resets input when user starts typing
-        if (searchValue) onChange(defaultIndex);
+        if (searchValue) {
+          onChange(defaultIndex);
+        }
       }}
       onBlur={onBlur}
       onFocus={onFocus}
       disabled={loading}
       options={options}
-      singleSelection
+      singleSelection={{ asPlainText: true }}
       isClearable={false}
       onCreateOption={input => onChange(input || defaultIndex)}
     />

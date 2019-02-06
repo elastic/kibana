@@ -8,12 +8,14 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
 
 export class PageManager extends React.PureComponent {
   static propTypes = {
+    isWriteable: PropTypes.bool.isRequired,
     pages: PropTypes.array.isRequired,
     workpadId: PropTypes.string.isRequired,
     addPage: PropTypes.func.isRequired,
@@ -24,6 +26,7 @@ export class PageManager extends React.PureComponent {
     selectedPage: PropTypes.string,
     deleteId: PropTypes.string,
     setDeleteId: PropTypes.func.isRequired,
+    workpadCSS: PropTypes.string,
   };
 
   state = {
@@ -43,7 +46,9 @@ export class PageManager extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     // scrolls to the active page on the next tick, otherwise new pages don't scroll completely into view
-    if (prevProps.selectedPage !== this.props.selectedPage) setTimeout(this.scrollToActivePage, 0);
+    if (prevProps.selectedPage !== this.props.selectedPage) {
+      setTimeout(this.scrollToActivePage, 0);
+    }
   }
 
   componentWillUnmount() {
@@ -52,6 +57,12 @@ export class PageManager extends React.PureComponent {
 
   scrollToActivePage = () => {
     if (this.activePageRef && this.pageListRef) {
+      // not all target browsers support element.scrollTo
+      // TODO: replace this with something more cross-browser, maybe scrollIntoView
+      if (!this.pageListRef.scrollTo) {
+        return;
+      }
+
       const pageOffset = this.activePageRef.offsetLeft;
       const {
         left: pageLeft,
@@ -88,13 +99,17 @@ export class PageManager extends React.PureComponent {
   doDelete = () => {
     const { previousPage, removePage, deleteId, selectedPage } = this.props;
     this.resetDelete();
-    if (deleteId === selectedPage) previousPage();
+    if (deleteId === selectedPage) {
+      previousPage();
+    }
     removePage(deleteId);
   };
 
   onDragEnd = ({ draggableId: pageId, source, destination }) => {
     // dropped outside the list
-    if (!destination) return;
+    if (!destination) {
+      return;
+    }
 
     const position = destination.index - source.index;
 
@@ -102,11 +117,18 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const {
+      isWriteable,
+      selectedPage,
+      workpadId,
+      movePage,
+      duplicatePage,
+      workpadCSS,
+    } = this.props;
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i}>
+      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isWriteable}>
         {provided => (
           <div
             key={page.id}
@@ -114,7 +136,9 @@ export class PageManager extends React.PureComponent {
               page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
             }`}
             ref={el => {
-              if (page.id === selectedPage) this.activePageRef = el;
+              if (page.id === selectedPage) {
+                this.activePageRef = el;
+              }
               provided.innerRef(el);
             }}
             {...provided.draggableProps}
@@ -132,15 +156,21 @@ export class PageManager extends React.PureComponent {
                   params={{ id: workpadId, page: pageNumber }}
                   aria-label={`Load page number ${pageNumber}`}
                 >
-                  <PagePreview
-                    page={page}
-                    height={100}
-                    pageNumber={pageNumber}
-                    movePage={movePage}
-                    selectedPage={selectedPage}
-                    duplicatePage={duplicatePage}
-                    confirmDelete={this.confirmDelete}
-                  />
+                  {Style.it(
+                    workpadCSS,
+                    <div>
+                      <PagePreview
+                        isWriteable={isWriteable}
+                        page={page}
+                        height={100}
+                        pageNumber={pageNumber}
+                        movePage={movePage}
+                        selectedPage={selectedPage}
+                        duplicatePage={duplicatePage}
+                        confirmDelete={this.confirmDelete}
+                      />
+                    </div>
+                  )}
                 </Link>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -151,7 +181,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId } = this.props;
+    const { pages, addPage, deleteId, isWriteable } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -178,17 +208,19 @@ export class PageManager extends React.PureComponent {
               </Droppable>
             </DragDropContext>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              anchorClassName="canvasPageManager__addPageTip"
-              content="Add a new page to this workpad"
-              position="left"
-            >
-              <button onClick={addPage} className="canvasPageManager__addPage">
-                <EuiIcon color="ghost" type="plusInCircle" size="l" />
-              </button>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {isWriteable && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                anchorClassName="canvasPageManager__addPageTip"
+                content="Add a new page to this workpad"
+                position="left"
+              >
+                <button onClick={addPage} className="canvasPageManager__addPage">
+                  <EuiIcon color="ghost" type="plusInCircle" size="l" />
+                </button>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}

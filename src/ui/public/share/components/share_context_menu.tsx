@@ -18,12 +18,12 @@
  */
 
 import React, { Component } from 'react';
-import './share_panel_content.less';
 
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 
-import { ShareAction, ShareActionProvider } from 'ui/share/share_action';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { ShareAction, ShareActionProvider, ShareContextMenuPanelItem } from 'ui/share/share_action';
 import { UrlPanelContent } from './url_panel_content';
 
 interface Props {
@@ -35,9 +35,10 @@ interface Props {
   sharingData: any;
   isDirty: boolean;
   onClose: () => void;
+  intl: InjectedIntl;
 }
 
-export class ShareContextMenu extends Component<Props> {
+class ShareContextMenuUI extends Component<Props> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
     return (
@@ -51,11 +52,15 @@ export class ShareContextMenu extends Component<Props> {
 
   private getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
-    const menuItems: EuiContextMenuPanelItemDescriptor[] = [];
+    const menuItems: ShareContextMenuPanelItem[] = [];
+    const { intl } = this.props;
 
     const permalinkPanel = {
       id: panels.length + 1,
-      title: 'Permalink',
+      title: intl.formatMessage({
+        id: 'common.ui.share.contextMenu.permalinkPanelTitle',
+        defaultMessage: 'Permalink',
+      }),
       content: (
         <UrlPanelContent
           objectId={this.props.objectId}
@@ -65,16 +70,23 @@ export class ShareContextMenu extends Component<Props> {
       ),
     };
     menuItems.push({
-      name: 'Permalinks',
+      name: intl.formatMessage({
+        id: 'common.ui.share.contextMenu.permalinksLabel',
+        defaultMessage: 'Permalinks',
+      }),
       icon: 'link',
       panel: permalinkPanel.id,
+      sortOrder: 0,
     });
     panels.push(permalinkPanel);
 
     if (this.props.allowEmbed) {
       const embedPanel = {
         id: panels.length + 1,
-        title: 'Embed Code',
+        title: intl.formatMessage({
+          id: 'common.ui.share.contextMenu.embedCodePanelTitle',
+          defaultMessage: 'Embed Code',
+        }),
         content: (
           <UrlPanelContent
             isEmbedded
@@ -86,9 +98,13 @@ export class ShareContextMenu extends Component<Props> {
       };
       panels.push(embedPanel);
       menuItems.push({
-        name: 'Embed code',
+        name: intl.formatMessage({
+          id: 'common.ui.share.contextMenu.embedCodeLabel',
+          defaultMessage: 'Embed code',
+        }),
         icon: 'console',
         panel: embedPanel.id,
+        sortOrder: 0,
       });
     }
 
@@ -128,14 +144,35 @@ export class ShareContextMenu extends Component<Props> {
     if (menuItems.length > 1) {
       const topLevelMenuPanel = {
         id: panels.length + 1,
-        title: `Share this ${this.props.objectType}`,
+        title: intl.formatMessage(
+          {
+            id: 'common.ui.share.contextMenuTitle',
+            defaultMessage: 'Share this {objectType}',
+          },
+          {
+            objectType: this.props.objectType,
+          }
+        ),
         items: menuItems
+          // Sorts ascending on sort order first and then ascending on name
+          .sort((a, b) => {
+            const aSortOrder = a.sortOrder || 0;
+            const bSortOrder = b.sortOrder || 0;
+            if (aSortOrder > bSortOrder) {
+              return 1;
+            }
+            if (aSortOrder < bSortOrder) {
+              return -1;
+            }
+            if (a.name.toLowerCase().localeCompare(b.name.toLowerCase()) > 0) {
+              return 1;
+            }
+            return -1;
+          })
           .map(menuItem => {
             menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+            delete menuItem.sortOrder;
             return menuItem;
-          })
-          .sort((a, b) => {
-            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
           }),
       };
       panels.push(topLevelMenuPanel);
@@ -146,3 +183,5 @@ export class ShareContextMenu extends Component<Props> {
     return { panels, initialPanelId };
   };
 }
+
+export const ShareContextMenu = injectI18n(ShareContextMenuUI);

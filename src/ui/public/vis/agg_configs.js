@@ -52,7 +52,7 @@ class AggConfigs extends IndexedArray {
 
     super({
       index: ['id'],
-      group: ['schema.group', 'type.name', 'schema.name'],
+      group: ['schema.group', 'type.name', 'type.type', 'schema.name'],
     });
 
     this.indexPattern = indexPattern;
@@ -152,7 +152,7 @@ class AggConfigs extends IndexedArray {
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
-      nestedMetrics = _(this.bySchemaGroup.metrics)
+      nestedMetrics = _(this.byTypeType.metrics)
         .filter(function (agg) {
           return agg.type.name !== 'count';
         })

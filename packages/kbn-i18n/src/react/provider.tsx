@@ -22,6 +22,47 @@ import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 
 import * as i18n from '../core';
+import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_locale';
+import { injectI18n } from './inject';
+
+/**
+ * To translate label that includes nested `FormattedMessage` instances React Intl
+ * replaces them with special placeholders (@__uid__@ELEMENT-uid-counter@__uid__@)
+ * and maps them back with nested translations after `formatMessage` processes
+ * original string, so we shouldn't modify these special placeholders with pseudo
+ * translations otherwise React Intl won't be able to properly replace placeholders.
+ * It's implementation detail of the React Intl, but since pseudo localization is dev
+ * only feature we should be fine here.
+ * @param message
+ */
+function translateFormattedMessageUsingPseudoLocale(message: string) {
+  const formattedMessageDelimiter = message.match(/@__.{10}__@/);
+  if (formattedMessageDelimiter !== null) {
+    return message
+      .split(formattedMessageDelimiter[0])
+      .map(part => (part.startsWith('ELEMENT-') ? part : translateUsingPseudoLocale(part)))
+      .join(formattedMessageDelimiter[0]);
+  }
+
+  return translateUsingPseudoLocale(message);
+}
+
+/**
+ * If pseudo locale is detected, default intl.formatMessage should be decorated
+ * with the pseudo localization function.
+ * @param child I18nProvider child component.
+ */
+function wrapIntlFormatMessage(child: React.ReactNode) {
+  return React.createElement(
+    injectI18n(({ intl }) => {
+      const formatMessage = intl.formatMessage;
+      intl.formatMessage = (...args) =>
+        translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
+
+      return React.Children.only(child);
+    })
+  );
+}
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -29,22 +70,20 @@ import * as i18n from '../core';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 export class I18nProvider extends React.PureComponent {
-  public static propTypes = {
-    children: PropTypes.object,
-  };
+  public static propTypes = { children: PropTypes.element.isRequired };
 
   public render() {
-    const { children } = this.props;
-
     return (
       <IntlProvider
         locale={i18n.getLocale()}
-        messages={i18n.getMessages()}
+        messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
         formats={i18n.getFormats()}
-        defaultFormats={i18n.getFormats()}
+        textComponent={React.Fragment}
       >
-        {children}
+        {isPseudoLocale(i18n.getLocale())
+          ? wrapIntlFormatMessage(this.props.children)
+          : this.props.children}
       </IntlProvider>
     );
   }

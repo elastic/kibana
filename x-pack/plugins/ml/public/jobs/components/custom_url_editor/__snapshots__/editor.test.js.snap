@@ -1,12 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomUrlEditor renders the editor for a dashboard type URL with a label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
-      Create new custom URL
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
     </h4>
   </EuiTitle>
   <EuiSpacer
@@ -23,7 +28,13 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Label"
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={true}
@@ -39,7 +50,13 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Link to"
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -68,7 +85,13 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Dashboard name"
+      label={
+        <FormattedMessage
+          defaultMessage="Dashboard name"
+          id="xpack.ml.customUrlsEditor.dashboardNameLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiSelect
         compressed={true}
@@ -95,9 +118,16 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Query entities"
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -132,7 +162,13 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Time range"
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiSelect
             compressed={true}
@@ -158,16 +194,21 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a discover type URL with an entity and empty time range interval 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
-      Create new custom URL
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
     </h4>
   </EuiTitle>
   <EuiSpacer
@@ -184,7 +225,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Label"
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={true}
@@ -200,7 +247,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Link to"
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -229,7 +282,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Index pattern"
+      label={
+        <FormattedMessage
+          defaultMessage="Index pattern"
+          id="xpack.ml.customUrlsEditor.indexPatternLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiSelect
         compressed={true}
@@ -256,9 +315,16 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Query entities"
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -299,7 +365,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Time range"
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiSelect
             compressed={true}
@@ -339,7 +411,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           fullWidth={false}
           hasEmptyLabelSpace={false}
           isInvalid={true}
-          label="Interval"
+          label={
+            <FormattedMessage
+              defaultMessage="Interval"
+              id="xpack.ml.customUrlsEditor.intervalLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={true}
@@ -353,16 +431,21 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a discover type URL with valid time range interval 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
-      Create new custom URL
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
     </h4>
   </EuiTitle>
   <EuiSpacer
@@ -379,7 +462,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Label"
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={true}
@@ -395,7 +484,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Link to"
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -424,7 +519,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Index pattern"
+      label={
+        <FormattedMessage
+          defaultMessage="Index pattern"
+          id="xpack.ml.customUrlsEditor.indexPatternLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiSelect
         compressed={true}
@@ -451,9 +552,16 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Query entities"
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -494,7 +602,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Time range"
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiSelect
             compressed={true}
@@ -530,7 +644,13 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           fullWidth={false}
           hasEmptyLabelSpace={false}
           isInvalid={false}
-          label="Interval"
+          label={
+            <FormattedMessage
+              defaultMessage="Interval"
+              id="xpack.ml.customUrlsEditor.intervalLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={true}
@@ -544,16 +664,21 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
-      Create new custom URL
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
     </h4>
   </EuiTitle>
   <EuiSpacer
@@ -574,7 +699,13 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={true}
-      label="Label"
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={true}
@@ -590,7 +721,13 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Link to"
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -619,7 +756,13 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Dashboard name"
+      label={
+        <FormattedMessage
+          defaultMessage="Dashboard name"
+          id="xpack.ml.customUrlsEditor.dashboardNameLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiSelect
         compressed={true}
@@ -646,9 +789,16 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Query entities"
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -683,7 +833,13 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Time range"
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiSelect
             compressed={true}
@@ -709,16 +865,21 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for other type of URL with duplicate label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
-      Create new custom URL
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
     </h4>
   </EuiTitle>
   <EuiSpacer
@@ -739,7 +900,13 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={true}
-      label="Label"
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={true}
@@ -755,7 +922,13 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Link to"
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -784,7 +957,13 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       describedByIds={Array []}
       fullWidth={true}
       hasEmptyLabelSpace={false}
-      label="URL"
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="xpack.ml.customUrlsEditor.urlLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiTextArea
         compressed={true}
@@ -796,16 +975,21 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       />
     </EuiFormRow>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for other type of URL with unique label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
-      Create new custom URL
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
     </h4>
   </EuiTitle>
   <EuiSpacer
@@ -822,7 +1006,13 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Label"
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={true}
@@ -838,7 +1028,13 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Link to"
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiRadioGroup
         className="url-link-to-radio"
@@ -867,7 +1063,13 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       describedByIds={Array []}
       fullWidth={true}
       hasEmptyLabelSpace={false}
-      label="URL"
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="xpack.ml.customUrlsEditor.urlLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiTextArea
         compressed={true}
@@ -879,5 +1081,5 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       />
     </EuiFormRow>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;

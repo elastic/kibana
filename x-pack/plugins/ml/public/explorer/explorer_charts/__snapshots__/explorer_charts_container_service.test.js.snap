@@ -2,7 +2,7 @@
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
 Object {
-  "layoutCellsPerChart": 12,
+  "chartsPerRow": 1,
   "seriesToPlot": Array [],
   "timeFieldName": "timestamp",
   "tooManyBuckets": false,
@@ -11,7 +11,7 @@ Object {
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 2`] = `
 Object {
-  "layoutCellsPerChart": 12,
+  "chartsPerRow": 1,
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -33,13 +33,13 @@ Object {
         "query_delay": "86658ms",
         "scroll_size": 1000,
         "state": "stopped",
-        "types": Array [],
       },
       "detectorIndex": 0,
       "detectorLabel": "mean(responsetime)",
       "entityFields": Array [
         Object {
           "fieldName": "airline",
+          "fieldType": "partition",
           "fieldValue": "AAL",
         },
       ],
@@ -71,7 +71,7 @@ Object {
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 3`] = `
 Object {
-  "layoutCellsPerChart": 12,
+  "chartsPerRow": 1,
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -575,13 +575,13 @@ Object {
         "query_delay": "86658ms",
         "scroll_size": 1000,
         "state": "stopped",
-        "types": Array [],
       },
       "detectorIndex": 0,
       "detectorLabel": "mean(responsetime)",
       "entityFields": Array [
         Object {
           "fieldName": "airline",
+          "fieldType": "partition",
           "fieldValue": "AAL",
         },
       ],

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -28,19 +29,20 @@ import {
 
 import { InspectorViewChooser } from './inspector_view_chooser';
 
-import './inspector.less';
-
 function hasAdaptersChanged(oldAdapters, newAdapters) {
   return Object.keys(oldAdapters).length !== Object.keys(newAdapters).length
     || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);
 }
+
+const inspectorTitle = i18n.translate('common.ui.inspector.title', {
+  defaultMessage: 'Inspector',
+});
 
 class InspectorPanel extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      isHelpPopoverOpen: false,
       selectedView: props.views[0],
       views: props.views,
       // Clone adapters array so we can validate that this prop never change
@@ -109,7 +111,7 @@ class InspectorPanel extends Component {
 }
 
 InspectorPanel.defaultProps = {
-  title: 'Inspector',
+  title: inspectorTitle,
 };
 
 InspectorPanel.propTypes = {

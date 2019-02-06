@@ -5,12 +5,18 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('apis', () => {
+  describe('apis', function () {
+    this.tags('ciGroup5');
+
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
+    loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./uptime'));
   });
 }

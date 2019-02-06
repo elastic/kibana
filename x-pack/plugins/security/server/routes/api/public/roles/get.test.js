@@ -10,8 +10,7 @@ import { initGetRolesApi } from './get';
 const application = 'kibana-.kibana';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({ debug: false, port: 8080 });
   return mockServer;
 };
 
@@ -19,7 +18,7 @@ describe('GET roles', () => {
   const getRolesTest = (
     description,
     {
-      preCheckLicenseImpl = (request, reply) => reply(),
+      preCheckLicenseImpl = () => null,
       callWithRequestImpl,
       asserts,
     }
@@ -63,8 +62,7 @@ describe('GET roles', () => {
 
   describe('failure', () => {
     getRolesTest(`returns result of routePreCheckLicense`, {
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {
@@ -378,6 +376,127 @@ describe('GET roles', () => {
         ],
       },
     });
+
+    getRolesTest(`returns a sorted list of roles`, {
+      callWithRequestImpl: async () => ({
+        z_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        a_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        b_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application: 'kibana-.another-kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'a_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: {
+              global: [],
+              space: {},
+            },
+            _unrecognized_applications: ['kibana-.another-kibana']
+          },
+          {
+            name: 'b_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: {
+              global: [],
+              space: {},
+            },
+            _unrecognized_applications: ['kibana-.another-kibana']
+          },
+          {
+            name: 'z_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: {
+              global: [],
+              space: {},
+            },
+            _unrecognized_applications: ['kibana-.another-kibana']
+          },
+        ],
+      },
+    });
   });
 });
 
@@ -386,7 +505,7 @@ describe('GET role', () => {
     description,
     {
       name,
-      preCheckLicenseImpl = (request, reply) => reply(),
+      preCheckLicenseImpl = () => null,
       callWithRequestImpl,
       asserts,
     }
@@ -431,8 +550,7 @@ describe('GET role', () => {
 
   describe('failure', () => {
     getRoleTest(`returns result of routePreCheckLicense`, {
-      preCheckLicenseImpl: (request, reply) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       asserts: {
         statusCode: 403,
         result: {

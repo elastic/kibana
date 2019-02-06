@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries', 'timePicker']);
   const pointSeriesVis = PageObjects.pointSeries;
 
   describe('point series', function describeIndexTests() {
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');
@@ -134,6 +133,48 @@ export default function ({ getService, getPageObjects }) {
         gridLines.forEach(gridLine => {
           expect(gridLine.x).to.be(0);
         });
+      });
+    });
+
+    describe('custom labels and axis titles', function () {
+      const visName = 'Visualization Point Series Test';
+      const customLabel = 'myLabel';
+      const axisTitle = 'myTitle';
+      before(async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickLineChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions('ValueAxis-1');
+      });
+
+      it('should render a custom label when one is set', async function () {
+        const title = await PageObjects.visualize.getYAxisTitle();
+        expect(title).to.be(customLabel);
+      });
+
+      it('should render a custom axis title when one is set, overriding the custom label', async function () {
+        await pointSeriesVis.setAxisTitle(axisTitle);
+        await PageObjects.visualize.clickGo();
+        const title = await PageObjects.visualize.getYAxisTitle();
+        expect(title).to.be(axisTitle);
+      });
+
+      it('should preserve saved axis titles after a vis is saved and reopened', async function () {
+        await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.loadSavedVisualization(visName);
+        await PageObjects.visualize.waitForRenderingCount();
+        await PageObjects.visualize.clickData();
+        await PageObjects.visualize.toggleOpenEditor(1);
+        await PageObjects.visualize.setCustomLabel('test', 1);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions('ValueAxis-1');
+        const title = await PageObjects.visualize.getYAxisTitle();
+        expect(title).to.be(axisTitle);
       });
     });
 

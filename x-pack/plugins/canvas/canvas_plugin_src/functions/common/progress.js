@@ -6,7 +6,17 @@
 
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
-import { shapes } from '../../renderers/progress/shapes';
+
+const shapes = [
+  'gauge',
+  'horizontalBar',
+  'horizontalPill',
+  'semicircle',
+  'unicorn',
+  'verticalBar',
+  'verticalPill',
+  'wheel',
+];
 
 export const progress = () => ({
   name: 'progress',
@@ -20,9 +30,8 @@ export const progress = () => ({
     shape: {
       type: ['string'],
       alias: ['_'],
-      help: `Select ${Object.keys(shapes)
-        .map((key, i, src) => (i === src.length - 1 ? `or ${shapes[key].name}` : shapes[key].name))
-        .join(', ')}`,
+      help: `Select ${shapes.slice(0, -1).join(', ')}, or ${shapes.slice(-1)[0]}`,
+      options: shapes,
       default: 'gauge',
     },
     max: {
@@ -62,11 +71,17 @@ export const progress = () => ({
     },
   },
   fn: (value, args) => {
-    if (args.max <= 0) throw new Error(`'max' must be greater than 0`);
-    if (value > args.max || value < 0) throw new Error(`Context must be between 0 and ${args.max}`);
+    if (args.max <= 0) {
+      throw new Error(`Invalid max value: '${args.max}'. 'max' must be greater than 0`);
+    }
+    if (value > args.max || value < 0) {
+      throw new Error(`Invalid value: '${value}'. Value must be between 0 and ${args.max}`);
+    }
 
     let label = '';
-    if (args.label) label = typeof args.label === 'string' ? args.label : `${value}`;
+    if (args.label) {
+      label = typeof args.label === 'string' ? args.label : `${value}`;
+    }
 
     let font = {};
 

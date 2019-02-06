@@ -29,47 +29,7 @@ import {
 import {
   getData
 } from '../path';
-
-const tilemapSchema = Joi.object({
-  url: Joi.string(),
-  options: Joi.object({
-    attribution: Joi.string(),
-    minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
-    maxZoom: Joi.number().default(10),
-    tileSize: Joi.number(),
-    subdomains: Joi.array().items(Joi.string()).single(),
-    errorTileUrl: Joi.string().uri(),
-    tms: Joi.boolean(),
-    reuseTiles: Joi.boolean(),
-    bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2),
-    default: Joi.boolean()
-  }).default({
-    default: true
-  })
-}).default();
-
-const regionmapSchema = Joi.object({
-  includeElasticMapsService: Joi.boolean().default(true),
-  layers: Joi.array().items(Joi.object({
-    url: Joi.string(),
-    format: Joi.object({
-      type: Joi.string().default('geojson')
-    }).default({
-      type: 'geojson'
-    }),
-    meta: Joi.object({
-      feature_collection_path: Joi.string().default('data')
-    }).default({
-      feature_collection_path: 'data'
-    }),
-    attribution: Joi.string(),
-    name: Joi.string(),
-    fields: Joi.array().items(Joi.object({
-      name: Joi.string(),
-      description: Joi.string()
-    }))
-  })).default([])
-}).default();
+import { DEFAULT_CSP_RULES } from '../csp';
 
 export default () => Joi.object({
   pkg: Joi.object({
@@ -92,6 +52,12 @@ export default () => Joi.object({
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
+  }).default(),
+
+  csp: Joi.object({
+    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
+    strict: Joi.boolean().default(false),
+    warnLegacyBrowsers: Joi.boolean().default(true),
   }).default(),
 
   cpu: Joi.object({
@@ -138,7 +104,7 @@ export default () => Joi.object({
       }),
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default(['TLSv1.1', 'TLSv1.2']),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
     cors: Joi.when('$dev', {
@@ -220,17 +186,6 @@ export default () => Joi.object({
     watchPrebuild: Joi.boolean().default(false),
     watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi.when('$prod', {
-      is: true,
-      then: Joi.boolean().valid(false),
-      otherwise: Joi
-        .alternatives()
-        .try(
-          Joi.boolean(),
-          Joi.string().regex(/^\/.+\/$/)
-        )
-        .default(true),
-    }),
     sourceMaps: Joi.when('$prod', {
       is: true,
       then: Joi.boolean().valid(false),
@@ -249,13 +204,48 @@ export default () => Joi.object({
   }).default(),
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
-    tilemap: tilemapSchema,
-    regionmap: regionmapSchema,
-    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
+    tilemap: Joi.object({
+      url: Joi.string(),
+      options: Joi.object({
+        attribution: Joi.string(),
+        minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
+        maxZoom: Joi.number().default(10),
+        tileSize: Joi.number(),
+        subdomains: Joi.array().items(Joi.string()).single(),
+        errorTileUrl: Joi.string().uri(),
+        tms: Joi.boolean(),
+        reuseTiles: Joi.boolean(),
+        bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2),
+        default: Joi.boolean()
+      }).default({
+        default: true
+      })
+    }).default(),
+    regionmap: Joi.object({
+      includeElasticMapsService: Joi.boolean().default(true),
+      layers: Joi.array().items(Joi.object({
+        url: Joi.string(),
+        format: Joi.object({
+          type: Joi.string().default('geojson')
+        }).default({
+          type: 'geojson'
+        }),
+        meta: Joi.object({
+          feature_collection_path: Joi.string().default('data')
+        }).default({
+          feature_collection_path: 'data'
+        }),
+        attribution: Joi.string(),
+        name: Joi.string(),
+        fields: Joi.array().items(Joi.object({
+          name: Joi.string(),
+          description: Joi.string()
+        }))
+      })).default([])
+    }).default(),
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.0/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.0'),
   }).default(),
-  tilemap: tilemapSchema.notes('Deprecated'),
-  regionmap: regionmapSchema.notes('Deprecated'),
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),

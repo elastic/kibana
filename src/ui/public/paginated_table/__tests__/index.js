@@ -37,24 +37,32 @@ describe('paginated table', function () {
 
     if (_.isNumber(colCount)) {
       _.times(colCount, function (i) {
-        columns.push({ title: 'column' + i });
+        columns.push({ id: i, title: 'column' + i, formatter: { convert: _.identity } });
       });
     } else {
-      columns = colCount;
+      columns = colCount.map((col, i) => ({
+        id: i,
+        title: col.title,
+        formatter: col.formatter || { convert: _.identity }
+      }));
     }
 
     if (_.isNumber(rowCount)) {
-      _.times(rowCount, function (col) {
-        const rowItems = [];
+      _.times(rowCount, function (row) {
+        const rowItems = {};
 
-        _.times(columns.length, function (row) {
-          rowItems.push('item' + col + row);
+        _.times(columns.length, function (col) {
+          rowItems[col] = 'item' + col + row;
         });
 
         rows.push(rowItems);
       });
     } else {
-      rows = rowCount;
+      rows = rowCount.map(row => {
+        const newRow = {};
+        row.forEach((v, i) => newRow[i] = v);
+        return newRow;
+      });
     }
 
     return {
@@ -63,7 +71,8 @@ describe('paginated table', function () {
     };
   };
 
-  const renderTable = function (cols, rows, perPage, sort, showBlankRows, linkToTop) {
+  const renderTable = function (table, cols, rows, perPage, sort, showBlankRows, linkToTop) {
+    $scope.table = table || { columns: [], rows: [] };
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
@@ -73,6 +82,7 @@ describe('paginated table', function () {
 
     const template = `
       <paginated-table
+        table="table"
         columns="cols"
         rows="rows"
         per-page="perPage"
@@ -98,7 +108,7 @@ describe('paginated table', function () {
       }];
       const rows = [];
 
-      renderTable(cols, rows);
+      renderTable(null, cols, rows);
       expect($el.children().length).to.be(0);
     });
 
@@ -107,7 +117,7 @@ describe('paginated table', function () {
       const cols = data.columns;
       const rows = data.rows;
 
-      renderTable(cols, rows);
+      renderTable(data, cols, rows);
       expect($el.children().length).to.be(1);
       const tableRows = $el.find('tbody tr');
       // should pad rows
@@ -126,7 +136,7 @@ describe('paginated table', function () {
       const data = makeData(3, rowCount);
       const pageCount = Math.ceil(rowCount / perPageCount);
 
-      renderTable(data.columns, data.rows, perPageCount);
+      renderTable(data, data.columns, data.rows, perPageCount);
       const tableRows = $el.find('tbody tr');
       expect(tableRows.length).to.be(perPageCount);
       // add 2 for the first and last page links
@@ -138,14 +148,14 @@ describe('paginated table', function () {
       const perPageCount = 10;
       const data = makeData(3, rowCount);
 
-      renderTable(data.columns, data.rows, perPageCount, null, false);
+      renderTable(data, data.columns, data.rows, perPageCount, null, false);
       const tableRows = $el.find('tbody tr');
       expect(tableRows.length).to.be(rowCount);
     });
 
     it('should not show link to top when not set', function () {
       const data = makeData(5, 5);
-      renderTable(data.columns, data.rows, 10, null, false);
+      renderTable(data, data.columns, data.rows, 10, null, false);
 
       const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
       expect(linkToTop.length).to.be(0);
@@ -153,7 +163,7 @@ describe('paginated table', function () {
 
     it('should show link to top when set', function () {
       const data = makeData(5, 5);
-      renderTable(data.columns, data.rows, 10, null, false, true);
+      renderTable(data, data.columns, data.rows, 10, null, false, true);
 
       const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
       expect(linkToTop.length).to.be(1);
@@ -175,7 +185,7 @@ describe('paginated table', function () {
       ]);
 
       lastRowIndex = data.rows.length - 1;
-      renderTable(data.columns, data.rows);
+      renderTable(data, data.columns, data.rows);
       paginatedTable = $el.isolateScope().paginatedTable;
     });
 
@@ -301,7 +311,7 @@ describe('paginated table', function () {
       ];
       data = makeData(cols, rows);
 
-      renderTable(data.columns, data.rows);
+      renderTable(data, data.columns, data.rows);
       paginatedTable = $el.isolateScope().paginatedTable;
     });
 
@@ -370,17 +380,18 @@ describe('paginated table', function () {
 
     beforeEach(function () {
       cols = [{
-        title: 'object test'
+        title: 'object test',
+        id: 0,
+        formatter: { convert: val => {
+          return val === 'zzz' ? '<h1>hello</h1>' : val;
+        } }
       }];
       rows = [
         ['aaaa'],
-        [{
-          markup: '<h1>I am HTML in a row</h1>',
-          value: 'zzzz'
-        }],
+        ['zzz'],
         ['bbbb']
       ];
-      renderTable(cols, rows);
+      renderTable({ columns: cols, rows }, cols, rows);
       paginatedTable = $el.isolateScope().paginatedTable;
     });
 

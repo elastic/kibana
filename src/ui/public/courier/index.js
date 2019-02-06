@@ -20,18 +20,12 @@
 import './courier';
 
 export { SavedObjectProvider } from './saved_object';
-
-export {
-  SearchSourceProvider,
-  migrateFilter,
-  decorateQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-} from './search_source';
+export { SearchSourceProvider } from './search_source';
 
 export {
   addSearchStrategy,
   hasSearchStategyForIndexPattern,
   isDefaultTypeIndexPattern,
   SearchError,
+  getSearchErrorType,
 } from './search_strategy';

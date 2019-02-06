@@ -36,15 +36,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     return createExpectNotFound(doesntExistId, spaceId);
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFound = (id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -78,6 +69,15 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       attributes: {
         name: 'My favorite global object',
       },
+      references: [],
+    });
+  };
+
+  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      error: 'Forbidden',
+      message: `Unable to get ${type}, missing action:saved_objects/${type}/get`,
+      statusCode: 403,
     });
   };
 
@@ -85,13 +85,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     return createExpectNotFound(spaceAwareId, spaceId);
   };
 
-  const createExpectSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      error: 'Forbidden',
-      message: `Unable to get visualization, missing action:saved_objects/visualization/get`,
-      statusCode: 403,
-    });
-  };
+  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
+  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
+  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
@@ -99,6 +95,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     expect(resp.body).to.eql({
       id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
       type: 'visualization',
+      migrationVersion: {
+        visualization: '7.0.0',
+      },
       updated_at: '2017-09-21T18:51:23.794Z',
       version: resp.body.version,
       attributes: {
@@ -110,6 +109,13 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         uiStateJSON: resp.body.attributes.uiStateJSON,
         kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
       },
+      references: [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+        },
+      ],
     });
   };
 
@@ -169,13 +175,14 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
 
   return {
     createExpectDoesntExistNotFound,
-    createExpectLegacyForbidden,
     createExpectNotSpaceAwareNotFound,
     createExpectNotSpaceAwareRbacForbidden,
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
-    createExpectSpaceAwareRbacForbidden,
     createExpectSpaceAwareResults,
+    expectSpaceAwareRbacForbidden,
+    expectNotSpaceAwareRbacForbidden,
+    expectDoesntExistRbacForbidden,
     getTest,
   };
 }

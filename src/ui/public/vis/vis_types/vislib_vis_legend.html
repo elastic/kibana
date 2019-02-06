@@ -1,36 +1,39 @@
-<div class="legend-col-wrapper" ng-if="labels.length">
+<div class="visLegend" ng-if="labels.length">
   <button
     type="button"
     ng-click="toggleLegend()"
-    class="kuiCollapseButton legend-collapse-button"
-    aria-label="Toggle legend"
+    class="kuiCollapseButton visLegend__toggle"
+    ng-class="{'visLegend__toggle--isOpen': open}"
+    aria-label="{{::'common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel' | i18n: { defaultMessage: 'Toggle legend' } }}"
     aria-expanded="{{!!open}}"
     aria-controls="{{::legendId}}"
+    data-test-subj="vislibToggleLegend"
+    title="{{::'common.ui.vis.visTypes.legend.toggleLegendButtonTitle' | i18n: { defaultMessage: 'Toggle legend' } }}"
   >
-    <span class="kuiIcon {{getToggleLegendClasses()}}"></span>
+    <icon type="'list'"></icon>
   </button>
-  <ul class="legend-ul" ng-show="open" id="{{::legendId}}">
+  <ul class="visLegend__list" ng-show="open" id="{{::legendId}}">
 
     <li
       ng-repeat="legendData in labels track by legendData.label"
       ng-mouseenter="highlight($event)"
       ng-mouseleave="unhighlight($event)"
       data-label="{{legendData.label}}"
-      class="legend-value color"
+      class="visLegend__value color"
     >
 
-      <div class="legend-value-container" ng-keydown="onLegendEntryKeydown($event, this)">
+      <div ng-keydown="onLegendEntryKeydown($event, this)">
         <div
           kbn-accessible-click
           data-label="{{legendData.label}}"
           ng-focus="highlight($event)"
           ng-blur="unhighlight($event)"
           ng-click="showDetails = !showDetails"
-          ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
-          class="legend-value-title"
+          ng-class="showDetails ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate'"
+          class="visLegend__valueTitle"
           tooltip="{{legendData.label}}"
           tooltip-animation="false"
-          aria-label="{{legendData.label}}, toggle options"
+          aria-label="{{::'common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel' | i18n: { defaultMessage: '{legendDataLabel}, toggle options', values: { legendDataLabel: legendData.label } } }}"
           data-test-subj="legend-{{legendData.label}}"
         >
           <i
@@ -41,7 +44,7 @@
           {{legendData.label}}
         </div>
 
-        <div ng-if="showDetails" class="legend-value-details">
+        <div ng-if="showDetails" class="visLegend__valueDetails">
           <div
             class="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth"
             ng-show="canFilter(legendData)"
@@ -49,7 +52,8 @@
             <button
               class="kuiButton kuiButton--basic kuiButton--small"
               ng-click="filter(legendData, false)"
-              aria-label="Filter for value {{legendData.label}}"
+              aria-label="{{::'common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel' | i18n: { defaultMessage: 'Filter for value {legendDataLabel}', values: { legendDataLabel: legendData.label } } }}"
+              data-test-subj="legend-{{legendData.label}}-filterIn"
             >
               <span class="kuiIcon fa-search-plus"></span>
             </button>
@@ -57,18 +61,21 @@
             <button
               class="kuiButton kuiButton--basic kuiButton--small"
               ng-click="filter(legendData, true)"
-              aria-label="Filter out value {{legendData.label}}"
+              aria-label="{{::'common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel' | i18n: { defaultMessage: 'Filter out value {legendDataLabel}', values: { legendDataLabel: legendData.label } } }}"
+              data-test-subj="legend-{{legendData.label}}-filterOut"
             >
               <span class="kuiIcon fa-search-minus"></span>
             </button>
           </div>
 
-          <div class="legend-value-color-picker" role="listbox">
+          <div class="visLegend__valueColorPicker" role="listbox">
             <span
               id="{{legendId}}ColorPickerDesc"
-              class="kuiScreenReaderOnly"
+              class="euiScreenReaderOnly"
+              i18n-id="common.ui.vis.visTypes.legend.setColorScreenReaderDescription"
+              i18n-default-message="Set color for value {legendDataLabel}"
+              i18n-values="{ legendDataLabel: legendData.label }"
             >
-              Set color for value {{legendData.label}}
             </span>
             <i
               ng-repeat="choice in colors"
@@ -79,7 +86,7 @@
               aria-selected="{{choice === getColor(legendData.label)}}"
               ng-click="setColor(legendData.label, choice)"
               ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
-              ng-style="{color: choice}" class="fa dot"
+              ng-style="{color: choice}" class="fa dot visLegend__valueColorPickerDot"
               data-test-subj="legendSelectColor-{{choice}}"
             >
             </i>

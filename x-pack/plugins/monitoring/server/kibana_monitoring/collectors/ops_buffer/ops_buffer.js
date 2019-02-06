@@ -16,7 +16,10 @@ import { CloudDetector } from '../../../cloud';
 export function opsBuffer(server) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
-  cloudDetector.detectCloudService();
+
+  if(server.config().get('xpack.monitoring.tests.cloud_detector.enabled')) {
+    cloudDetector.detectCloudService();
+  }
 
   const eventRoller = new EventRoller();
 
@@ -26,16 +29,24 @@ export function opsBuffer(server) {
       server.log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
     },
 
-    flush() {
+    async flush() {
       let cloud; // a property that will be left out of the result if the details are undefined
       const cloudDetails = cloudDetector.getCloudDetails();
       if (cloudDetails != null) {
         cloud = { cloud: cloudDetails };
       }
 
+      const eventRollup = eventRoller.flush();
+      if (eventRollup && eventRollup.os) {
+        eventRollup.os = {
+          ...eventRollup.os,
+          ...(await server.getOSInfo())
+        };
+      }
+
       return {
         ...cloud,
-        ...eventRoller.flush()
+        ...eventRollup
       };
     }
   };

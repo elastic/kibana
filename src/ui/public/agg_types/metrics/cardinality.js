@@ -19,12 +19,18 @@
 
 import { MetricAggType } from './metric_agg_type';
 import { fieldFormats } from '../../registry/field_formats';
+import { i18n } from '@kbn/i18n';
 
 export const cardinalityMetricAgg = new MetricAggType({
   name: 'cardinality',
-  title: 'Unique Count',
+  title: i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
+    defaultMessage: 'Unique Count'
+  }),
   makeLabel: function (aggConfig) {
-    return 'Unique count of ' + aggConfig.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.uniqueCountLabel', {
+      defaultMessage: 'Unique count of {field}',
+      values: { field: aggConfig.getFieldDisplayName() }
+    });
   },
   getFormat: function () {
     return fieldFormats.getDefaultInstance('number');

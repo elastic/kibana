@@ -16,6 +16,7 @@ exports[`it renders without crashing 1`] = `
     key="clusterPrivs"
   >
     <EuiComboBox
+      compressed={false}
       fullWidth={false}
       isClearable={true}
       isDisabled={false}
@@ -69,6 +70,38 @@ exports[`it renders without crashing 1`] = `
           Object {
             "isGroupLabelOption": false,
             "label": "monitor_watcher",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "read_ccr",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_ccr",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_ilm",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "read_ilm",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "monitor_rollup",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_rollup",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_token",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_saml",
           },
         ]
       }

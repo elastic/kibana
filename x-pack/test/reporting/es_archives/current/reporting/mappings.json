@@ -10,81 +10,79 @@
       }
     },
     "mappings": {
-      "esqueue": {
-        "properties": {
-          "attempts": {
-            "type": "short"
-          },
-          "completed_at": {
-            "type": "date"
-          },
-          "created_at": {
-            "type": "date"
-          },
-          "created_by": {
-            "type": "keyword"
-          },
-          "jobtype": {
-            "type": "keyword"
-          },
-          "max_attempts": {
-            "type": "short"
-          },
-          "meta": {
-            "properties": {
-              "layout": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
+      "properties": {
+        "attempts": {
+          "type": "short"
+        },
+        "completed_at": {
+          "type": "date"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "jobtype": {
+          "type": "keyword"
+        },
+        "max_attempts": {
+          "type": "short"
+        },
+        "meta": {
+          "properties": {
+            "layout": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
                 }
-              },
-              "objectType": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
+              }
+            },
+            "objectType": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
                 }
               }
             }
-          },
-          "output": {
-            "properties": {
-              "content": {
-                "type": "object",
-                "enabled": false
-              },
-              "content_type": {
-                "type": "keyword"
-              },
-              "max_size_reached": {
-                "type": "boolean"
-              }
-            }
-          },
-          "payload": {
-            "type": "object",
-            "enabled": false
-          },
-          "priority": {
-            "type": "byte"
-          },
-          "process_expiration": {
-            "type": "date"
-          },
-          "started_at": {
-            "type": "date"
-          },
-          "status": {
-            "type": "keyword"
-          },
-          "timeout": {
-            "type": "long"
           }
+        },
+        "output": {
+          "properties": {
+            "content": {
+              "type": "object",
+              "enabled": false
+            },
+            "content_type": {
+              "type": "keyword"
+            },
+            "max_size_reached": {
+              "type": "boolean"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": false
+        },
+        "priority": {
+          "type": "byte"
+        },
+        "process_expiration": {
+          "type": "date"
+        },
+        "started_at": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "timeout": {
+          "type": "long"
         }
       }
     }

@@ -6,8 +6,13 @@
 
 // @ts-ignore
 import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
+
+interface KibanaServer extends Legacy.Server {
+  savedObjects: any;
+}
 
 export interface TestConfig {
   [configKey: string]: any;
@@ -17,7 +22,7 @@ export interface TestOptions {
   setupFn?: (server: any) => void;
   testConfig?: TestConfig;
   payload?: any;
-  preCheckLicenseImpl?: (req: any, reply: any) => any;
+  preCheckLicenseImpl?: (req: any, h: any) => any;
   expectSpacesClientCall?: boolean;
 }
 
@@ -35,7 +40,7 @@ export type RequestRunner = (
   options?: TestOptions
 ) => Promise<RequestRunnerResult>;
 
-export const defaultPreCheckLicenseImpl = (request: any, reply: any) => reply();
+export const defaultPreCheckLicenseImpl = (request: any) => '';
 
 const baseConfig: TestConfig = {
   'server.basePath': '',
@@ -67,14 +72,12 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       pre = pre.mockImplementation(preCheckLicenseImpl);
     }
 
-    const server = new Server();
+    const server = new Server() as KibanaServer;
 
     const config = {
       ...baseConfig,
       ...testConfig,
     };
-
-    server.connection({ port: 0 });
 
     await setupFn(server);
 
@@ -118,6 +121,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       delete: jest.fn((type: string, id: string) => {
         return {};
       }),
+      deleteByNamespace: jest.fn(),
     };
 
     server.savedObjects = {
@@ -134,6 +138,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
         getScopedClient: jest.fn((req: any) => {
           return new SpacesClient(
             null as any,
+            () => null,
             null,
             mockSavedObjectsRepository,
             mockConfig,

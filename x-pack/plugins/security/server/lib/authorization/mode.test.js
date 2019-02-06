@@ -6,18 +6,6 @@
 
 import { authorizationModeFactory } from './mode';
 
-const createMockConfig = (settings) => {
-  const mockConfig = {
-    get: jest.fn()
-  };
-
-  mockConfig.get.mockImplementation(key => {
-    return settings[key];
-  });
-
-  return mockConfig;
-};
-
 const createMockXpackInfoFeature = (allowRbac) => {
   return {
     getLicenseCheckResults() {
@@ -28,39 +16,20 @@ const createMockXpackInfoFeature = (allowRbac) => {
   };
 };
 
-describe(`#initialize`, () => {
-  test(`can't be initialized twice for the same request`, async () => {
-    const mockConfig = createMockConfig();
-    const mockXpackInfoFeature = createMockXpackInfoFeature();
-    const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
-    const request = {};
+describe(`#useRbac`, () => {
+  test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is false`, async () => {
+    const mockXpackInfoFeature = createMockXpackInfoFeature(false);
+    const mode = authorizationModeFactory(mockXpackInfoFeature);
 
-    await mode.initialize(request);
-    expect(mode.initialize(request)).rejects.toThrowErrorMatchingSnapshot();
-  });
-});
-
-describe(`#useRbacForRequest`, () => {
-  test(`return false if not initialized for request`, async () => {
-    const mockConfig = createMockConfig();
-    const mockXpackInfoFeature = createMockXpackInfoFeature();
-    const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
-    const request = {};
-
-    const result = mode.useRbacForRequest(request);
+    const result = mode.useRbac();
     expect(result).toBe(false);
   });
 
-  test(`returns true if legacy fallback is disabled`, async () => {
-    const mockConfig = createMockConfig({
-      'xpack.security.authorization.legacyFallback.enabled': false,
-    });
-    const mockXpackInfoFeature = createMockXpackInfoFeature();
-    const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
-    const request = {};
+  test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is true`, async () => {
+    const mockXpackInfoFeature = createMockXpackInfoFeature(true);
+    const mode = authorizationModeFactory(mockXpackInfoFeature);
 
-    await mode.initialize(request);
-    const result = mode.useRbacForRequest(request);
+    const result = mode.useRbac();
     expect(result).toBe(true);
   });
 });

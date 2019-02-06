@@ -1,9 +1,4 @@
-// EUI global scope
-@import '@elastic/eui/src/themes/k6/k6_globals';
-@import '@elastic/eui/src/themes/k6/k6_colors_light';
-@import '@elastic/eui/src/global_styling/functions/index';
-@import '@elastic/eui/src/global_styling/variables/index';
-@import '@elastic/eui/src/global_styling/mixins/index';
+@import 'ui/public/styles/styling_constants';
 
 // Canvas core
 @import 'hackery';
@@ -20,12 +15,14 @@
 @import '../components/arg_add_popover/arg_add_popover';
 @import '../components/arg_form/arg_form';
 @import '../components/asset_manager/asset_manager';
+@import '../components/asset_picker/asset_picker';
+@import '../components/autocomplete/autocomplete';
 @import '../components/border_connection/border_connection';
 @import '../components/border_resize_handle/border_resize_handle';
+@import '../components/clipboard/clipboard';
 @import '../components/color_dot/color_dot';
 @import '../components/color_palette/color_palette';
 @import '../components/color_picker_mini/color_picker_mini';
-@import '../components/context_menu/context_menu';
 @import '../components/datasource/datasource';
 @import '../components/datasource/datasource_preview/datasource_preview';
 @import '../components/datatable/datatable';
@@ -33,8 +30,6 @@
 @import '../components/dom_preview/dom_preview';
 @import '../components/element_content/element_content';
 @import '../components/element_types/element_types';
-@import '../components/expression_input/suggestion';
-@import '../components/font_picker/font_picker';
 @import '../components/fullscreen/fullscreen';
 @import '../components/function_form/function_form';
 @import '../components/hover_annotation/hover_annotation';
@@ -53,5 +48,7 @@
 @import '../components/toolbar/toolbar';
 @import '../components/toolbar/tray/tray';
 @import '../components/workpad/workpad';
+@import '../components/workpad_export/workpad_export';
+@import '../components/workpad_loader/workpad_loader';
 @import '../components/workpad_loader/workpad_dropzone/workpad_dropzone';
 @import '../components/workpad_page/workpad_page';

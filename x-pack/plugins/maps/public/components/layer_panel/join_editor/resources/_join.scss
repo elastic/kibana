@@ -1,0 +1,27 @@
+.mapJoinItem {
+  background: tintOrShade($euiColorLightShade, 85%, 0);
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeXS;
+  position: relative;
+
+  &:hover,
+  &:focus {
+    .mapJoinItem__delete {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}
+
+.mapJoinItem__delete {
+  @include euiBottomShadowSmall;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  margin-right: -$euiSizeS;
+  margin-top: -$euiSizeM;
+  background: $euiColorEmptyShade;
+  padding: $euiSizeXS;
+  visibility: hidden;
+  opacity: 0;
+}

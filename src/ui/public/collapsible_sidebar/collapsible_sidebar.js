@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './collapsible_sidebar.less';
 import _ from 'lodash';
 import $ from 'jquery';
 import { uiModules } from '../modules';
@@ -39,7 +38,7 @@ uiModules
           type="button"
           aria-expanded="true"
           aria-label="Toggle sidebar"
-          class="kuiCollapseButton sidebar-collapser"
+          class="kuiCollapseButton kbnCollapsibleSidebar__collapseButton"
         ></button>`
         );
         // If the collapsable element has an id, also set aria-controls

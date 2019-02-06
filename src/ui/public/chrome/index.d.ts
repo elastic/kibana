@@ -17,21 +17,37 @@
  * under the License.
  */
 
+import { Brand } from '../../../core/public/chrome';
+import { BreadcrumbsApi } from './api/breadcrumbs';
+import { HelpExtensionApi } from './api/help_extension';
+import { ChromeNavLinks } from './api/nav';
+
 interface IInjector {
   get<T>(injectable: string): T;
 }
 
-declare class Chrome {
-  public addBasePath<T = string>(path: T): T;
-  public dangerouslyGetActiveInjector(): Promise<IInjector>;
-  public getBasePath(): string;
-  public getXsrfToken(): string;
-  public getKibanaVersion(): string;
-  public getUiSettingsClient(): any;
-  public setVisible(visible: boolean): any;
-  public getInjected(key: string, defaultValue?: any): any;
+declare interface Chrome extends ChromeNavLinks {
+  breadcrumbs: BreadcrumbsApi;
+  helpExtension: HelpExtensionApi;
+  addBasePath<T = string>(path: T): T;
+  dangerouslyGetActiveInjector(): Promise<IInjector>;
+  getBasePath(): string;
+  getXsrfToken(): string;
+  getKibanaVersion(): string;
+  getUiSettingsClient(): any;
+  setVisible(visible: boolean): any;
+  getInjected(key: string, defaultValue?: any): any;
+  setRootController(name: string, Controller: any): any;
+  setBrand(brand: Brand): this;
+  getBrand(key: keyof Brand): Brand[keyof Brand];
+  addApplicationClass(classNames: string | string[]): this;
+  removeApplicationClass(classNames: string | string[]): this;
+  getApplicationClasses(): string;
 }
 
 declare const chrome: Chrome;
 
 export default chrome;
+export { Breadcrumb } from './api/breadcrumbs';
+export { NavLink } from './api/nav';
+export { HelpExtension } from './api/help_extension';

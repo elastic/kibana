@@ -21,9 +21,10 @@
  * A configuration object for a top nav component.
  * @typedef {Object} KbnTopNavConfig
  * @type Object
- * @property {string} key - A display string which will be shown in the top nav for this option.
+ * @property {string} key - identifier of menu item.
+ * @property {string} label - A display string which will be shown in the top nav for this option.
  * @property {string} [description] - optional, used for the screen-reader description of this
- *  menu. Defaults to "Toggle ${key} view" for templated menu items and just "${key}" for
+ *  menu. Defaults to "Toggle ${label} view" for templated menu items and just "${label}" for
  *  programmatic menu items
  * @property {string} testId - for testing purposes, can be used to retrieve this item.
  * @property {Object} [template] - an html template that will be shown when this item is clicked.
@@ -37,10 +38,10 @@
 /**
  * kbnTopNav directive
  *
- * The top section that shows the timepicker, load, share and save dialogues.
+ * The top section that optionally shows the timepicker and menu items.
  *
  * ```
- * <kbn-top-nav name="current-app-for-extensions" config="path.to.menuItems"></kbn-top-nav>
+ * <kbn-top-nav name="current-app-for-extensions" config="path.to.menuItems" ></kbn-top-nav>
  * ```
  *
  * Menu items/templates are passed to the kbnTopNav via the config attribute
@@ -60,8 +61,6 @@ import { uiModules } from '../modules';
 import template from './kbn_top_nav.html';
 import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
 import { NavBarExtensionsRegistryProvider } from '../registry/navbar_extensions';
-
-import './bread_crumbs/bread_crumbs';
 
 const module = uiModules.get('kibana');
 
@@ -149,6 +148,10 @@ module.directive('kbnTopNav', function (Private) {
       }
 
       initTopNav(topNavConfig, null);
+
+      if (!_.has($scope, 'showTimepickerInTopNav')) {
+        $scope.showTimepickerInTopNav = true;
+      }
 
       return $scope.kbnTopNav;
     },

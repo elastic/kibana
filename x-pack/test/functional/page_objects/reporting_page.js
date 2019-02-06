@@ -13,9 +13,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
+  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
 
   class ReportingPage {
     async initTests() {
@@ -28,22 +28,22 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
-      await remote.setWindowSize(1600, 850);
+      await browser.setWindowSize(1600, 850);
     }
 
     async getUrlOfTab(tabIndex) {
       return await retry.try(async () => {
         log.debug(`reportingPage.getUrlOfTab(${tabIndex}`);
-        const handles = await remote.getAllWindowHandles();
+        const handles = await browser.getAllWindowHandles();
         log.debug(`Switching to window ${handles[tabIndex]}`);
-        await remote.switchToWindow(handles[tabIndex]);
+        await browser.switchToWindow(handles[tabIndex]);
 
-        const url = await remote.getCurrentUrl();
+        const url = await browser.getCurrentUrl();
         if (!url || url === 'about:blank') {
           throw new Error('url is blank');
         }
 
-        await remote.switchToWindow(handles[0]);
+        await browser.switchToWindow(handles[0]);
         return url;
       });
     }
@@ -51,16 +51,16 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     async closeTab(tabIndex) {
       return await retry.try(async () => {
         log.debug(`reportingPage.closeTab(${tabIndex}`);
-        const handles = await remote.getAllWindowHandles();
+        const handles = await browser.getAllWindowHandles();
         log.debug(`Switching to window ${handles[tabIndex]}`);
-        await remote.switchToWindow(handles[tabIndex]);
-        await remote.closeCurrentWindow();
-        await remote.switchToWindow(handles[0]);
+        await browser.switchToWindow(handles[tabIndex]);
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(handles[0]);
       });
     }
 
     async forceSharedItemsContainerSize({ width }) {
-      await remote.execute(`
+      await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex="none";
         el.style.width="${width}px";
@@ -68,7 +68,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async removeForceSharedItemsContainerSize() {
-      await remote.execute(`
+      await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex = null;
         el.style.width = null;
@@ -116,6 +116,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await PageObjects.share.openShareMenuItem('PDF Reports');
     }
 
+    async openPngReportingPanel() {
+      log.debug('openPngReportingPanel');
+      await PageObjects.share.openShareMenuItem('PNG Reports');
+    }
+
     async clickDownloadReportButton(timeout) {
       await testSubjects.click('downloadCompletedReportButton', timeout);
     }
@@ -134,7 +139,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async checkUsePrintLayout() {
-      await retry.try(() => testSubjects.click('usePrintLayout'));
+      // The print layout checkbox slides in as part of an animation, and tests can
+      // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
+      // the animation to complete before we attempt a click.
+      const menuAnimationDelay = 500;
+      await retry.tryForTime(menuAnimationDelay, () => testSubjects.click('usePrintLayout'));
     }
 
     async clickGenerateReportButton() {
@@ -143,7 +152,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
-      const isToastPresent = await testSubjects.exists('completeReportSuccess', 60000);
+      const isToastPresent = await testSubjects.exists('completeReportSuccess', {
+        timeout: 60000
+      });
       // Close toast so it doesn't obscure the UI.
       await testSubjects.click('completeReportSuccess toastCloseButton');
       return isToastPresent;
@@ -153,14 +164,14 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       log.debug('Reporting:setTimepickerInDataRange');
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
       const fromTime = '1999-09-19 06:31:44.000';
       const toTime = '1999-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }
 

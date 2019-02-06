@@ -40,7 +40,7 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
   class Courier {
     constructor() {
       // Listen for refreshInterval changes
-      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', function () {
+      const updateRefreshInterval = () => {
         const refreshIntervalMs = _.get(timefilter.getRefreshInterval(), 'value');
         const isRefreshPaused = _.get(timefilter.getRefreshInterval(), 'pause');
 
@@ -52,7 +52,9 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         } else {
           searchPoll.resume();
         }
-      });
+      };
+
+      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
       const closeOnFatal = _.once(() => {
         // If there was a fatal error, then stop future searches. We want to use pause instead of
@@ -69,6 +71,7 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
       });
 
       addFatalErrorCallback(closeOnFatal);
+      updateRefreshInterval();
     }
 
     /**

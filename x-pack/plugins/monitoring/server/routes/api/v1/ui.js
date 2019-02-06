@@ -18,7 +18,7 @@ export {
 } from './beats';
 export {
   clusterRoute,
-  clustersRoute
+  clustersRoute,
 } from './cluster';
 export {
   esIndexRoute,
@@ -26,7 +26,9 @@ export {
   esNodeRoute,
   esNodesRoute,
   esOverviewRoute,
-  mlJobRoute
+  mlJobRoute,
+  ccrRoute,
+  ccrShardRoute
 } from './elasticsearch';
 export {
   clusterSettingsCheckRoute,

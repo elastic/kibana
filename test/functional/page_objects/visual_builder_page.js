@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
-
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const log = getService('log');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
 
   class VisualBuilderPage {
 
@@ -34,12 +33,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const toTime = '2015-09-22 18:31:44.000';
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       log.debug('clickVisualBuilderChart');
-      await find.clickByPartialLinkText('Visual Builder');
+      await PageObjects.visualize.clickVisualBuilder();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async clickMetric() {
@@ -55,28 +52,29 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getMetricValue() {
-      const metricValue = await find.byCssSelector('.rhythm_metric__primary-value');
+      const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
       return metricValue.getVisibleText();
     }
 
     async enterMarkdown(markdown) {
-      const input = await find.byCssSelector('.vis_editor__markdown-editor textarea');
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
       if (process.platform === 'darwin') {
-        await input.session.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
+        await input.pressKeys([browser.keys.COMMAND, 'a']); // Select all Mac
       } else {
-        await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
+        await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
       }
-      await input.session.pressKeys(Keys.NULL); // Release modifier keys
-      await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
+      await input.pressKeys(browser.keys.NULL); // Release modifier keys
+      await input.pressKeys(browser.keys.BACKSPACE); // Delete all content
       await input.type(markdown);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     async getMarkdownText() {
-      const el = await find.byCssSelector('.vis_editor__visualization');
+      const el = await find.byCssSelector('.tvbEditorVisualization');
       return await el.getVisibleText();
     }
 
@@ -104,8 +102,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getRhythmChartLegendValue() {
-      const metricValue = await find.byCssSelector('.rhythm_chart__legend_value');
-      await metricValue.session.moveMouseTo(metricValue);
+      const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
+      await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
 
@@ -115,12 +113,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeLabel() {
-      const gaugeLabel = await find.byCssSelector('.thorHalfGauge__label');
+      const gaugeLabel = await find.byCssSelector('.tvbVisGauge__label');
       return await gaugeLabel.getVisibleText();
     }
 
     async getGaugeCount() {
-      const gaugeCount = await find.byCssSelector('.thorHalfGauge__value');
+      const gaugeCount = await find.byCssSelector('.tvbVisGauge__value');
       return await gaugeCount.getVisibleText();
     }
 
@@ -130,12 +128,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getTopNLabel() {
-      const topNLabel = await find.byCssSelector('.rhythm_top_n__label');
+      const topNLabel = await find.byCssSelector('.tvbVisTopN__label');
       return await topNLabel.getVisibleText();
     }
 
     async getTopNCount() {
-      const gaugeCount = await find.byCssSelector('.rhythm_top_n__value');
+      const gaugeCount = await find.byCssSelector('.tvbVisTopN__value');
       return await gaugeCount.getVisibleText();
     }
 
@@ -170,9 +168,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async fillInVariable(name = 'test', metric = 'count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
-      const varNameInput = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
+      const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
       await varNameInput.type(name);
-      const metricSelectWrapper = await elements[nth].findByCssSelector('.vis_editor__calc_vars-var');
+      const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
       await comboBox.setElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -193,8 +191,24 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const tableView = await testSubjects.find('tableView');
       return await tableView.getVisibleText();
     }
-
-
+    async clickMetricPanelOptions() {
+      const button = await testSubjects.find('metricEditorPanelOptionsBtn');
+      await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async setIndexPatternValue(value) {
+      const el = await testSubjects.find('metricsIndexPatternInput');
+      await el.clearValue();
+      await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async selectIndexPatternTimeField(timeField) {
+      const el = await testSubjects.find('comboBoxSearchInput');
+      await el.clearValue();
+      await el.type(timeField);
+      await el.pressKeys(browser.keys.RETURN);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
   }
 
   return new VisualBuilderPage();

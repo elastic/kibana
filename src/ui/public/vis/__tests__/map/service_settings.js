@@ -20,7 +20,11 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import url from 'url';
-import sinon from 'sinon';
+
+import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
+import EMS_FILES from './ems_mocks/sample_files.json';
+import EMS_TILES from './ems_mocks/sample_tiles.json';
+import { ORIGIN } from '../../../../../legacy/core_plugins/tile_map/common/origin';
 
 describe('service_settings (FKA tilemaptest)', function () {
 
@@ -29,63 +33,8 @@ describe('service_settings (FKA tilemaptest)', function () {
   let mapConfig;
   let tilemapsConfig;
 
-  const manifestUrl = 'https://geo.elastic.co/v1/manifest';
-  const tmsManifestUrl = `https://tiles.elastic.co/v2/manifest`;
-  const vectorManifestUrl = `https://layers.geo.elastic.co/v1/manifest`;
-  const manifestUrl2 = 'https://foobar/v1/manifest';
-
-  const manifest = {
-    'services': [{
-      'id': 'tiles_v2',
-      'name': 'Elastic Tile Service',
-      'manifest': tmsManifestUrl,
-      'type': 'tms'
-    },
-    {
-      'id': 'geo_layers',
-      'name': 'Elastic Layer Service',
-      'manifest': vectorManifestUrl,
-      'type': 'file'
-    }
-    ]
-  };
-
-  const tmsManifest = {
-    'services': [{
-      'id': 'road_map',
-      'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
-      'minZoom': 0,
-      'maxZoom': 10,
-      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
-    }]
-  };
-
-  const vectorManifest = {
-    'layers': [{
-      'attribution': '',
-      'name': 'US States',
-      'format': 'geojson',
-      'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVvNGJ0aVNidFNJR2dEQl9rbTBjeXhKMU01WjRBeW1kN3JMXzM2Ry1qc3F6QjF4WE5XdHY2ODlnQkRpZFdCY2g1T2dqUGRHSFhSRTU3amlxTVFwZjNBSFhycEFwV2lYR29vTENjZjh1QTZaZnRpaHBzby5VXzZoNk1paGJYSkNPalpI?elastic_tile_service_tos=agree',
-      'fields': [{ 'name': 'postal', 'description': 'Two letter abbreviation' }, {
-        'name': 'name',
-        'description': 'State name'
-      }],
-      'created_at': '2017-04-26T19:45:22.377820',
-      'id': 5086441721823232
-    }, {
-      'attribution': 'Â© [Elastic Tile Service](https://www.elastic.co/elastic-maps-service)',
-      'name': 'World Countries',
-      'format': 'geojson',
-      'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03?elastic_tile_service_tos=agree',
-      'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
-        'name': 'name',
-        'description': 'Country name'
-      }, { 'name': 'iso3', 'description': 'Three letter abbreviation' }],
-      'created_at': '2017-04-26T17:12:15.978370',
-      'id': 5659313586569216
-    }]
-  };
-
+  const manifestUrl = 'https://foobar/manifest';
+  const manifestUrl2 = 'https://foobar_override/v1/manifest';
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     $provide.decorator('mapConfig', () => {
@@ -99,51 +48,55 @@ describe('service_settings (FKA tilemaptest)', function () {
 
   let manifestServiceUrlOriginal;
   let tilemapsConfigDeprecatedOriginal;
+  let getManifestStub;
   beforeEach(ngMock.inject(function ($injector, $rootScope) {
 
     serviceSettings = $injector.get('serviceSettings');
+    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
+      //simulate network calls
+      if (url.startsWith('https://foobar')) {
+        return EMS_CATALOGUE;
+      } else if (url.startsWith('https://tiles.foobar')) {
+        return EMS_TILES;
+      } else if (url.startsWith('https://files.foobar')) {
+        return EMS_FILES;
+      }
+    });
     mapConfig = $injector.get('mapConfig');
     tilemapsConfig = $injector.get('tilemapsConfig');
 
     manifestServiceUrlOriginal = mapConfig.manifestServiceUrl;
     tilemapsConfigDeprecatedOriginal = tilemapsConfig.deprecated;
-
-    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
-      let contents = null;
-      if (url.startsWith(tmsManifestUrl)) {
-        contents = tmsManifest;
-      } else if (url.startsWith(vectorManifestUrl)) {
-        contents = vectorManifest;
-      } else if (url.startsWith(manifestUrl)) {
-        contents = manifest;
-      } else if (url.startsWith(manifestUrl2)) {
-        contents = manifest;
-      }
-      return {
-        data: contents
-      };
-    });
     $rootScope.$digest();
   }));
 
   afterEach(function () {
-    serviceSettings._getManifest.restore();
+    getManifestStub.removeStub();
     mapConfig.manifestServiceUrl = manifestServiceUrlOriginal;
     tilemapsConfig.deprecated = tilemapsConfigDeprecatedOriginal;
   });
 
   describe('TMS', function () {
 
-    it('should get url', async function () {
+    it('should NOT get url from the config', async function () {
       const tmsServices = await serviceSettings.getTMSServices();
       const tmsService = tmsServices[0];
-      const mapUrl = tmsService.url;
+      expect(typeof tmsService.url === 'undefined').to.equal(true);
+    });
+
+    it('should get url by resolving dynamically', async function () {
+
+      const tmsServices = await serviceSettings.getTMSServices();
+      const tmsService = tmsServices[0];
+      expect(typeof tmsService.url === 'undefined').to.equal(true);
+
+      const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tmsService);
       expect(mapUrl).to.contain('{x}');
       expect(mapUrl).to.contain('{y}');
       expect(mapUrl).to.contain('{z}');
 
       const urlObject = url.parse(mapUrl, true);
-      expect(urlObject.hostname).to.be('tiles.elastic.co');
+      expect(urlObject.hostname).to.be('tiles-stage.elastic.co');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
       expect(urlObject.query).to.have.property('my_app_version');
@@ -161,9 +114,8 @@ describe('service_settings (FKA tilemaptest)', function () {
 
       let tilemapServices;
 
-      function assertQuery(expected) {
-
-        const mapUrl = tilemapServices[0].url;
+      async function assertQuery(expected) {
+        const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
         const urlObject = url.parse(mapUrl, true);
         Object.keys(expected).forEach(key => {
           expect(urlObject.query).to.have.property(key, expected[key]);
@@ -173,7 +125,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       it('accepts an object', async () => {
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'bar' });
+        await assertQuery({ foo: 'bar' });
       });
 
       it('merged additions with previous values', async () => {
@@ -181,7 +133,7 @@ describe('service_settings (FKA tilemaptest)', function () {
         serviceSettings.addQueryParams({ foo: 'bar' });
         serviceSettings.addQueryParams({ bar: 'stool' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'bar', bar: 'stool' });
+        await assertQuery({ foo: 'bar', bar: 'stool' });
       });
 
       it('overwrites conflicting previous values', async () => {
@@ -190,14 +142,14 @@ describe('service_settings (FKA tilemaptest)', function () {
         serviceSettings.addQueryParams({ bar: 'stool' });
         serviceSettings.addQueryParams({ foo: 'tstool' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'tstool', bar: 'stool' });
+        await assertQuery({ foo: 'tstool', bar: 'stool' });
       });
 
       it('when overridden, should continue to work', async () => {
         mapConfig.manifestServiceUrl = manifestUrl2;
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'bar' });
+        await assertQuery({ foo: 'bar' });
       });
 
 
@@ -220,14 +172,24 @@ describe('service_settings (FKA tilemaptest)', function () {
           },
           {
             'id': 'road_map',
-            'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+            'url': 'https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
             'minZoom': 0,
             'maxZoom': 10,
-            'attribution': '<p>&#169; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &#169; <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
+            'attribution': '<p>&#169; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
             'subdomains': []
           }
         ];
-        expect(tilemapServices).to.eql(expected);
+
+
+        const assertions = tilemapServices.map(async (actualService, index) => {
+          const expectedService = expected[index];
+          expect(actualService.id).to.equal(expectedService.id);
+          expect(actualService.attribution).to.equal(expectedService.attribution);
+          const url = await serviceSettings.getUrlTemplateForTMSLayer(actualService);
+          expect(url).to.equal(expectedService.url);
+        });
+
+        return Promise.all(assertions);
 
       });
 
@@ -251,7 +213,11 @@ describe('service_settings (FKA tilemaptest)', function () {
             'id': 'TMS in config/kibana.yml'
           }
         ];
-        expect(tilemapServices).to.eql(expected);
+        expect(tilemapServices.length).to.eql(1);
+        expect(tilemapServices[0].attribution).to.eql(expected[0].attribution);
+        expect(tilemapServices[0].id).to.eql(expected[0].id);
+        const url = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
+        expect(url).to.equal(expected[0].url);
 
       });
 
@@ -270,23 +236,49 @@ describe('service_settings (FKA tilemaptest)', function () {
 
   describe('File layers', function () {
 
-    it('should load manifest', async function () {
+    it('should load manifest (all props)', async function () {
+
       serviceSettings.addQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
-      fileLayers.forEach(function (fileLayer, index) {
-        const expected = vectorManifest.layers[index];
-        expect(expected.attribution).to.eql(fileLayer.attribution);
-        expect(expected.format).to.eql(fileLayer.format);
-        expect(expected.fields).to.eql(fileLayer.fields);
-        expect(expected.name).to.eql(fileLayer.name);
-        expect(expected.created_at).to.eql(fileLayer.created_at);
+      expect(fileLayers.length).to.be(18);
+      const assertions = fileLayers.map(async function (fileLayer) {
 
-        const urlObject = url.parse(fileLayer.url, true);
+        expect(fileLayer.origin).to.be(ORIGIN.EMS);
+        const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
+        const urlObject = url.parse(fileUrl, true);
         Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
-          expect(urlObject.query).to.have.property(key, expected[key]);
+          expect(urlObject.query).to.have.property(key);
         });
-
       });
+
+      return Promise.all(assertions);
+    });
+
+
+    it('should load manifest (individual props)', async () => {
+
+      const expected = {
+        attribution: '<a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
+        format: 'geojson',
+        fields: [
+          { 'type': 'id', 'name': 'iso2', 'description': 'ISO 3166-1 alpha-2 code' },
+          { 'type': 'id', 'name': 'iso3', 'description': 'ISO 3166-1 alpha-3 code' },
+          { 'type': 'property', 'name': 'name', 'description': 'name' }
+        ],
+        created_at: '2017-04-26T17:12:15.978370', //not present in 6.6
+        name: 'World Countries'
+      };
+
+      const fileLayers = await serviceSettings.getFileLayers();
+      const actual = fileLayers[0];
+
+      expect(expected.attribution).to.eql(actual.attribution);
+      expect(expected.format).to.eql(actual.format);
+      expect(expected.fields).to.eql(actual.fields);
+      expect(expected.name).to.eql(actual.name);
+
+      expect(expected.created_at).to.eql(actual.created_at);
+
     });
 
     it('should exclude all when not configured', async () => {
@@ -294,6 +286,13 @@ describe('service_settings (FKA tilemaptest)', function () {
       const fileLayers = await serviceSettings.getFileLayers();
       const expected = [];
       expect(fileLayers).to.eql(expected);
+    });
+
+    it ('should get hotlink', async () => {
+      const fileLayers = await serviceSettings.getFileLayers();
+      const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
+      expect(hotlink).to.eql('?locale=en#file/world_countries');//url host undefined becuase emsLandingPageUrl is set at kibana-load
+
     });
 
   });

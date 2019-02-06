@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { IconType } from '@elastic/eui';
 import { RequestHandler, ResponseHandler, Vis } from '..';
 import { Status } from '../update_status';
 
@@ -28,11 +29,18 @@ export class VisualizationController {
 }
 
 export interface VisType {
+  name: string;
   title: string;
+  description?: string;
   visualization: typeof VisualizationController;
   isAccessible?: boolean;
   requestHandler: string | RequestHandler;
   responseHandler: string | ResponseHandler;
+  icon?: IconType;
+  image?: string;
+  stage: 'experimental' | 'production';
+  requiresSearch: boolean;
+  hidden: boolean;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

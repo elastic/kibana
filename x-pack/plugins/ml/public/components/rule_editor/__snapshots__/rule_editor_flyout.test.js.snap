@@ -5,7 +5,7 @@ exports[`RuleEditorFlyout don't render after closing the flyout 1`] = `""`;
 exports[`RuleEditorFlyout don't render when not opened 1`] = `""`;
 
 exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
@@ -21,11 +21,16 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
         >
-          Create Rule
+          <FormattedMessage
+            defaultMessage="Create Rule"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
+            values={Object {}}
+          />
         </h1>
       </EuiTitle>
     </EuiFlyoutHeader>
@@ -91,17 +96,29 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
-          Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. 
-          <EuiLink
-            color="primary"
-            href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
-            target="_blank"
-            type="button"
-          >
-            Learn more
-          </EuiLink>
+          <FormattedMessage
+            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+            values={
+              Object {
+                "learnMoreLink": <EuiLink
+                  color="primary"
+                  href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
+                  target="_blank"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn more"
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
         </p>
       </EuiText>
       <EuiSpacer
@@ -109,9 +126,14 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
-          Action
+          <FormattedMessage
+            defaultMessage="Action"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+            values={Object {}}
+          />
         </h2>
       </EuiTitle>
       <ActionsSection
@@ -128,9 +150,14 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
-          Conditions
+          <FormattedMessage
+            defaultMessage="Conditions"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+            values={Object {}}
+          />
         </h2>
       </EuiTitle>
       <EuiSpacer
@@ -178,13 +205,27 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
         color="warning"
         iconType="help"
         size="m"
-        title="Rerun job"
+        title={
+          <FormattedMessage
+            defaultMessage="Rerun job"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+            values={Object {}}
+          />
+        }
       >
         <p>
-          Changes to rules take effect for new results only.
+          <FormattedMessage
+            defaultMessage="Changes to rules take effect for new results only."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+            values={Object {}}
+          />
         </p>
         <p>
-          To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job.
+          <FormattedMessage
+            defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+            values={Object {}}
+          />
         </p>
       </EuiCallOut>
     </EuiFlyoutBody>
@@ -210,7 +251,11 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
             onClick={[Function]}
             type="button"
           >
-            Close
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -225,17 +270,21 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
             onClick={[Function]}
             type="button"
           >
-            Save
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   </EuiFlyout>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
@@ -251,11 +300,16 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
         >
-          Edit Rule
+          <FormattedMessage
+            defaultMessage="Edit Rule"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
+            values={Object {}}
+          />
         </h1>
       </EuiTitle>
     </EuiFlyoutHeader>
@@ -335,17 +389,29 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
-          Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. 
-          <EuiLink
-            color="primary"
-            href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
-            target="_blank"
-            type="button"
-          >
-            Learn more
-          </EuiLink>
+          <FormattedMessage
+            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+            values={
+              Object {
+                "learnMoreLink": <EuiLink
+                  color="primary"
+                  href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
+                  target="_blank"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn more"
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
         </p>
       </EuiText>
       <EuiSpacer
@@ -353,9 +419,14 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
-          Action
+          <FormattedMessage
+            defaultMessage="Action"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+            values={Object {}}
+          />
         </h2>
       </EuiTitle>
       <ActionsSection
@@ -372,9 +443,14 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
-          Conditions
+          <FormattedMessage
+            defaultMessage="Conditions"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+            values={Object {}}
+          />
         </h2>
       </EuiTitle>
       <EuiSpacer
@@ -422,13 +498,27 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
         color="warning"
         iconType="help"
         size="m"
-        title="Rerun job"
+        title={
+          <FormattedMessage
+            defaultMessage="Rerun job"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+            values={Object {}}
+          />
+        }
       >
         <p>
-          Changes to rules take effect for new results only.
+          <FormattedMessage
+            defaultMessage="Changes to rules take effect for new results only."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+            values={Object {}}
+          />
         </p>
         <p>
-          To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job.
+          <FormattedMessage
+            defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+            values={Object {}}
+          />
         </p>
       </EuiCallOut>
     </EuiFlyoutBody>
@@ -454,7 +544,11 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
             onClick={[Function]}
             type="button"
           >
-            Close
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -469,17 +563,21 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
             onClick={[Function]}
             type="button"
           >
-            Save
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   </EuiFlyout>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions only 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
@@ -495,11 +593,16 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
         >
-          Create Rule
+          <FormattedMessage
+            defaultMessage="Create Rule"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
+            values={Object {}}
+          />
         </h1>
       </EuiTitle>
     </EuiFlyoutHeader>
@@ -565,17 +668,29 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
-          Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. 
-          <EuiLink
-            color="primary"
-            href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
-            target="_blank"
-            type="button"
-          >
-            Learn more
-          </EuiLink>
+          <FormattedMessage
+            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+            values={
+              Object {
+                "learnMoreLink": <EuiLink
+                  color="primary"
+                  href="https://www.elastic.co/guide/en/elastic-stack-overview/my-metadata-branch/ml-rules.html"
+                  target="_blank"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn more"
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
         </p>
       </EuiText>
       <EuiSpacer
@@ -583,9 +698,14 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
-          Action
+          <FormattedMessage
+            defaultMessage="Action"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+            values={Object {}}
+          />
         </h2>
       </EuiTitle>
       <ActionsSection
@@ -602,9 +722,14 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
-          Conditions
+          <FormattedMessage
+            defaultMessage="Conditions"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+            values={Object {}}
+          />
         </h2>
       </EuiTitle>
       <EuiSpacer
@@ -644,13 +769,27 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
         color="warning"
         iconType="help"
         size="m"
-        title="Rerun job"
+        title={
+          <FormattedMessage
+            defaultMessage="Rerun job"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+            values={Object {}}
+          />
+        }
       >
         <p>
-          Changes to rules take effect for new results only.
+          <FormattedMessage
+            defaultMessage="Changes to rules take effect for new results only."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+            values={Object {}}
+          />
         </p>
         <p>
-          To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job.
+          <FormattedMessage
+            defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+            values={Object {}}
+          />
         </p>
       </EuiCallOut>
     </EuiFlyoutBody>
@@ -676,7 +815,11 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
             onClick={[Function]}
             type="button"
           >
-            Close
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -691,17 +834,21 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
             onClick={[Function]}
             type="button"
           >
-            Save
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   </EuiFlyout>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`RuleEditorFlyout renders the select action component for a detector with a rule 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
@@ -717,11 +864,16 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
     >
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1
           id="flyoutTitle"
         >
-          Edit Rules
+          <FormattedMessage
+            defaultMessage="Edit Rules"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
+            values={Object {}}
+          />
         </h1>
       </EuiTitle>
     </EuiFlyoutHeader>
@@ -801,11 +953,15 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
             onClick={[Function]}
             type="button"
           >
-            Close
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   </EuiFlyout>
-</React.Fragment>
+</Fragment>
 `;

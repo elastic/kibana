@@ -80,6 +80,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
       const resp = await callWithRequest('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
+        rest_total_hits_as_int: true,
         size: SIZE,
         body:
         {
@@ -102,11 +103,16 @@ export function jobAuditMessagesProvider(callWithRequest) {
   }
 
   // search highest, most recent audit messages for all jobs for the last 24hrs.
-  async function getAuditMessagesSummary() {
+  async function getAuditMessagesSummary(jobAggregationSize = 10) {
+    // TODO This is the current default value of the cluster setting `search.max_buckets`.
+    // This should possibly consider the real settings in a future update.
+    const maxBuckets = 10000;
+
     try {
       const resp = await callWithRequest('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
+        rest_total_hits_as_int: true,
         size: 0,
         body: {
           query: {
@@ -124,6 +130,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
             levelsPerJob: {
               terms: {
                 field: 'job_id',
+                size: (Math.min(maxBuckets, jobAggregationSize) || 1), // don't allow a value of 0
               },
               aggs: {
                 levels: {

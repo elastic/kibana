@@ -5,18 +5,27 @@
  */
 
 import { routes } from './server/routes';
-import { functionsRegistry } from './common/lib/functions_registry';
 import { commonFunctions } from './common/functions';
-import { loadServerPlugins } from './server/lib/load_server_plugins';
 import { registerCanvasUsageCollector } from './server/usage';
+import { loadSampleData } from './server/sample_data';
 
-export default function(server /*options*/) {
-  server.injectUiAppVars('canvas', () => {
+export default async function(server /*options*/) {
+  const functionsRegistry = server.plugins.interpreter.serverFunctions;
+
+  server.injectUiAppVars('canvas', async () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
-    const reportingBrowserType = config.get('xpack.reporting.capture.browser.type');
+    const reportingBrowserType = (() => {
+      const configKey = 'xpack.reporting.capture.browser.type';
+      if (!config.has(configKey)) {
+        return null;
+      }
+      return config.get(configKey);
+    })();
+    const kibanaVars = await server.getInjectedUiAppVars('kibana');
 
     return {
+      ...kibanaVars,
       kbnIndex: config.get('kibana.index'),
       esShardTimeout: config.get('elasticsearch.shardTimeout'),
       esApiVersion: config.get('elasticsearch.apiVersion'),
@@ -29,6 +38,7 @@ export default function(server /*options*/) {
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
-  loadServerPlugins().then(() => routes(server));
   registerCanvasUsageCollector(server);
+  loadSampleData(server);
+  routes(server);
 }

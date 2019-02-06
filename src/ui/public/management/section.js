@@ -20,8 +20,9 @@
 import { assign } from 'lodash';
 import { IndexedArray } from '../indexed_array';
 
-export class ManagementSection {
+const listeners = [];
 
+export class ManagementSection {
   /**
    * @param {string} id
    * @param {object} options
@@ -31,6 +32,7 @@ export class ManagementSection {
    * @param {boolean|null} options.visible - defaults to true
    * @param {boolean|null} options.disabled - defaults to false
    * @param {string|null} options.tooltip - defaults to ''
+   * @param {string|null} options.icon - defaults to ''
    * @returns {ManagementSection}
    */
 
@@ -44,6 +46,7 @@ export class ManagementSection {
     this.visible = true;
     this.disabled = false;
     this.tooltip = '';
+    this.icon = '';
     this.url = '';
 
     assign(this, options);
@@ -51,6 +54,16 @@ export class ManagementSection {
 
   get visibleItems() {
     return this.items.inOrder.filter(item => item.visible);
+  }
+
+  /**
+   * Registers a callback that will be executed when management sections are updated
+   * Globally bound to solve for sidebar nav needs
+   *
+   * @param {function} fn
+   */
+  addListener(fn) {
+    listeners.push(fn);
   }
 
   /**
@@ -69,6 +82,7 @@ export class ManagementSection {
     }
 
     this.items.push(item);
+    listeners.forEach(fn => fn());
 
     return item;
   }
@@ -80,6 +94,7 @@ export class ManagementSection {
   */
   deregister(id) {
     this.items.remove(item => item.id === id);
+    listeners.forEach(fn => fn(this.items));
   }
 
   /**

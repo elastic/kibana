@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { I18nContext } from 'ui/i18n';
 
-import 'plugins/spaces/views/management/manage_spaces.less';
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
 // @ts-ignore
@@ -18,12 +18,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
+import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
 import { SpacesGridPage } from './spaces_grid';
 
 const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
+  k7Breadcrumbs: getListBreadcrumbs,
   controller(
     $scope: any,
     $http: any,
@@ -40,11 +42,13 @@ routes.when('/management/spaces/list', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <SpacesGridPage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <I18nContext>
+          <SpacesGridPage
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            userProfile={userProfile}
+          />
+        </I18nContext>,
         domNode
       );
 
@@ -60,6 +64,7 @@ routes.when('/management/spaces/list', {
 
 routes.when('/management/spaces/create', {
   template,
+  k7Breadcrumbs: getCreateBreadcrumbs,
   controller(
     $scope: any,
     $http: any,
@@ -76,11 +81,13 @@ routes.when('/management/spaces/create', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <ManageSpacePage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <I18nContext>
+          <ManageSpacePage
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            userProfile={userProfile}
+          />
+        </I18nContext>,
         domNode
       );
 
@@ -100,6 +107,7 @@ routes.when('/management/spaces/edit', {
 
 routes.when('/management/spaces/edit/:spaceId', {
   template,
+  k7Breadcrumbs: () => getEditBreadcrumbs(),
   controller(
     $scope: any,
     $http: any,
@@ -119,12 +127,17 @@ routes.when('/management/spaces/edit/:spaceId', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <ManageSpacePage
-          spaceId={spaceId}
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <I18nContext>
+          <ManageSpacePage
+            spaceId={spaceId}
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            userProfile={userProfile}
+            setBreadcrumbs={breadcrumbs => {
+              chrome.breadcrumbs.set(breadcrumbs);
+            }}
+          />
+        </I18nContext>,
         domNode
       );
 

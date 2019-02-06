@@ -12,6 +12,7 @@ import { initPublicRolesApi } from './server/routes/api/public/roles';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
+import { initLoggedOutView } from './server/routes/views/logged_out';
 import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
@@ -44,7 +45,7 @@ export const security = (kibana) => new kibana.Plugin({
       }).default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true) // deprecated
         }).default()
       }).default(),
       audit: Joi.object({
@@ -53,9 +54,16 @@ export const security = (kibana) => new kibana.Plugin({
     }).default();
   },
 
+  deprecations: function ({ unused }) {
+    return [
+      unused('authorization.legacyFallback.enabled'),
+    ];
+  },
+
   uiExports: {
     chromeNavControls: ['plugins/security/views/nav_control'],
     managementSections: ['plugins/security/views/management'],
+    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     apps: [{
       id: 'login',
       title: 'Login',
@@ -65,6 +73,11 @@ export const security = (kibana) => new kibana.Plugin({
       id: 'logout',
       title: 'Logout',
       main: 'plugins/security/views/logout',
+      hidden: true
+    }, {
+      id: 'logged_out',
+      title: 'Logged out',
+      main: 'plugins/security/views/logged_out',
       hidden: true
     }],
     hacks: [
@@ -101,9 +114,11 @@ export const security = (kibana) => new kibana.Plugin({
     // Create a Hapi auth scheme that should be applied to each request.
     server.auth.scheme('login', () => ({ authenticate: authenticateFactory(server) }));
 
-    // The `required` means that the `session` strategy that is based on `login` schema defined above will be
+    server.auth.strategy('session', 'login');
+
+    // The default means that the `session` strategy that is based on `login` schema defined above will be
     // automatically assigned to all routes that don't contain an auth config.
-    server.auth.strategy('session', 'login', 'required');
+    server.auth.default('session');
 
     // exposes server.plugins.security.authorization
     const authorization = createAuthorizationService(server, xpackInfoFeature);
@@ -125,7 +140,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      if (authorization.mode.useRbacForRequest(request)) {
+      if (authorization.mode.useRbac()) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
         return new savedObjects.SavedObjectsClient(internalRepository);
       }
@@ -135,7 +150,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
-      if (authorization.mode.useRbacForRequest(request)) {
+      if (authorization.mode.useRbac()) {
         const { spaces } = server.plugins;
 
         return new SecureSavedObjectsClientWrapper({
@@ -155,13 +170,14 @@ export const security = (kibana) => new kibana.Plugin({
 
     getUserProvider(server);
 
-    await initAuthenticator(server, authorization.mode);
+    await initAuthenticator(server);
     initAuthenticateApi(server);
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
+    initLoggedOutView(server);
 
     server.injectUiAppVars('login', () => {
 

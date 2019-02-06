@@ -60,14 +60,6 @@ describe('visualize data loader', () => {
   }));
   setupAndTeardownInjectorStub();
 
-  it('should have a requestHandler', () => {
-    expect(visualizeDataLoader.requestHandler).to.be.a('function');
-  });
-
-  it('should have a responseHandler', () => {
-    expect(visualizeDataLoader.responseHandler).to.be.a('function');
-  });
-
   describe('fetch', () => {
     it('should be a function', () => {
       expect(visualizeDataLoader.fetch).to.be.a('function');

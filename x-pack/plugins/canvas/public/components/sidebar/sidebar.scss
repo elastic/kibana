@@ -6,12 +6,14 @@
   max-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
 }
 
 .canvasSidebar__pop {
   animation: sidebarPop $euiAnimSpeedFast $euiAnimSlightResistance;
 }
-
 
 .canvasSidebarFlyout {
   width: 350px;
@@ -21,6 +23,10 @@
 .canvasSidebar__elementButtons {
   background: darken($euiColorLightestShade, 5%);
   margin-bottom: $euiSizeS;
+}
+
+.canvasSidebar__panel-noMinWidth .euiButton {
+  min-width: 0;
 }
 
 @keyframes sidebarPop {

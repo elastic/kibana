@@ -14,11 +14,14 @@ import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
+import { validateMaxContentLength } from './server/lib/validate_max_content_length';
+import { validateBrowser } from './server/lib/validate_browser';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { PHANTOM, createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
+import { i18n } from '@kbn/i18n';
 
 const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -46,9 +49,13 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          name: 'PDF footer image',
+          name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
+            defaultMessage: 'PDF footer image'
+          }),
           value: null,
-          description: `Custom image to use in the PDF's footer`,
+          description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
+            defaultMessage: `Custom image to use in the PDF's footer`
+          }),
           type: 'image',
           options: {
             maxSize: {
@@ -71,6 +78,7 @@ export const reporting = (kibana) => {
         }).default(),
         queue: Joi.object({
           indexInterval: Joi.string().default('week'),
+          pollEnabled: Joi.boolean().default(true),
           pollInterval: Joi.number().integer().default(3000),
           pollIntervalErrorMultiplier: Joi.number().integer().default(10),
           timeout: Joi.number().integer().default(120000),
@@ -86,7 +94,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: remove support in 7.0
+            type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
@@ -138,15 +146,16 @@ export const reporting = (kibana) => {
 
     init: async function (server) {
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
+      const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      validateConfig(config, message => server.log(['reporting', 'warning'], message));
-      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
+      const logWarning = message => server.log(['reporting', 'warning'], message);
 
-      if (config.get('xpack.reporting.capture.browser.type') === PHANTOM) {
-        server.log(['reporting', 'warning'], 'Phantom browser type for reporting will be deprecated starting in 7.0');
-      }
+      validateConfig(config, logWarning);
+      validateMaxContentLength(server, logWarning);
+      validateBrowser(browserFactory, logWarning);
+      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
 
@@ -161,7 +170,7 @@ export const reporting = (kibana) => {
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getReportingUsageCollector(server));
 
-      server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
+      server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes

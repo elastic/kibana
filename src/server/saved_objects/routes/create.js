@@ -23,7 +23,7 @@ export const createCreateRoute = prereqs => {
   return {
     path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
-    config: {
+    options: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
         query: Joi.object()
@@ -40,16 +40,24 @@ export const createCreateRoute = prereqs => {
         payload: Joi.object({
           attributes: Joi.object().required(),
           migrationVersion: Joi.object().optional(),
+          references: Joi.array().items(
+            Joi.object()
+              .keys({
+                name: Joi.string().required(),
+                type: Joi.string().required(),
+                id: Joi.string().required(),
+              }),
+          ).default([]),
         }).required(),
       },
-      handler(request, reply) {
+      handler(request) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { overwrite } = request.query;
-        const { migrationVersion } = request.payload;
-        const options = { id, overwrite, migrationVersion };
+        const { migrationVersion, references } = request.payload;
+        const options = { id, overwrite, migrationVersion, references };
 
-        reply(savedObjectsClient.create(type, request.payload.attributes, options));
+        return savedObjectsClient.create(type, request.payload.attributes, options);
       },
     },
   };

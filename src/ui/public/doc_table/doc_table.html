@@ -1,10 +1,10 @@
 <div
-  class="doc-table-container"
+  class="kbnDocTable__container"
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }"
 >
   <div ng-if="!infiniteScroll">
-    <div class="kuiBar docTableBar">
+    <div class="kuiBar kbnDocTable__bar">
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"
@@ -26,7 +26,7 @@
         ></tool-bar-pager-buttons>
       </div>
     </div>
-    <table class="kbn-table table" ng-if="indexPattern">
+    <table class="kbnDocTable table" ng-if="indexPattern">
       <thead
         kbn-table-header
         columns="columns"
@@ -44,7 +44,7 @@
           index-pattern="indexPattern"
           filter="filter"
           filters="filters"
-          class="discover-table-row"
+          class="kbnDocTable__row"
           on-add-column="onAddColumn"
           on-change-sort-order="onChangeSortOrder"
           on-remove-column="onRemoveColumn"
@@ -52,7 +52,7 @@
       </tbody>
     </table>
     <!-- ToolBarFooter -->
-    <div class="kuiBar docTableBar">
+    <div class="kuiBar kbnDocTable__bar">
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"
@@ -94,8 +94,8 @@
         index-pattern="indexPattern"
         filter="filter"
         filters="filters"
-        class="discover-table-row"
-        ng-class="{'discover-table-row--highlight': row['$$_isAnchor']}"
+        class="kbnDocTable__row"
+        ng-class="{'kbnDocTable__row--highlight': row['$$_isAnchor']}"
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
         on-add-column="onAddColumn"
         on-change-sort-order="onChangeSortOrder"
@@ -106,7 +106,16 @@
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
 </div>
 
-<div ng-if="hits != null && !hits.length" class="table-vis-error">
-  <h2><i class="fa fa-meh-o"></i></h2>
-  <h4>No results found</h4>
+<div ng-if="hits != null && !hits.length" class="kbnDocTable__error">
+  <div class="euiText euiText--extraSmall euiTextColor euiTextColor--subdued">
+    <icon type="'visualizeApp'" size="'m'" color="'subdued'" aria-hidden="true"></icon>
+
+    <div class="euiSpacer euiSpacer--m"></div>
+
+    <p
+      i18n-id="common.ui.docTable.noResultsTitle"
+      i18n-default-message="No results found"
+    >
+    </p>
+  </div>
 </div>

@@ -14,6 +14,7 @@ import { polledDataCheckerFactory } from './polled_data_checker';
 
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 import { isSecurityDisabled } from '../../lib/security_utils';
+import { isBasicLicense } from '../../lib/check_license';
 
 export function estimateBucketSpanFactory(callWithRequest, server) {
   const callWithInternalUser = callWithInternalUserFactory(server);
@@ -115,8 +116,8 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     run() {
       return new Promise((resolve, reject) => {
         if (this.checkers.length === 0) {
-          console.log('BucketSpanEstimator: run has stopped because no checks where created');
-          reject('BucketSpanEstimator: run has stopped because no checks where created');
+          console.log('BucketSpanEstimator: run has stopped because no checks were created');
+          reject('BucketSpanEstimator: run has stopped because no checks were created');
         }
 
         this.polledDataChecker.run()
@@ -376,7 +377,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
           });
       }
 
-      if (isSecurityDisabled(server)) {
+      if (isBasicLicense(server) || isSecurityDisabled(server)) {
         getBucketSpanEstimation();
       } else {
         // if security is enabled, check that the user has permission to

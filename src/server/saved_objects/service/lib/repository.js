@@ -18,11 +18,12 @@
  */
 
 import { omit } from 'lodash';
-import { getRootType } from '../../../mappings';
+import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
+import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -35,7 +36,7 @@ export class SavedObjectsRepository {
       callCluster,
       schema,
       serializer,
-      migrator = { migrateDocument: (doc) => doc },
+      migrator,
       onBeforeWrite = () => { },
     } = options;
 
@@ -50,9 +51,14 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._type = getRootType(this._mappings);
+
+    // ES7 and up expects the root type to be _doc
+    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
-    this._unwrappedCallCluster = callCluster;
+    this._unwrappedCallCluster = async (...args) => {
+      await migrator.awaitMigration();
+      return callCluster(...args);
+    };
     this._schema = schema;
     this._serializer = serializer;
   }
@@ -67,6 +73,7 @@ export class SavedObjectsRepository {
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
+   * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -75,6 +82,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       overwrite = false,
       namespace,
+      references = [],
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -88,6 +96,7 @@ export class SavedObjectsRepository {
         attributes,
         migrationVersion,
         updated_at: time,
+        references,
       });
 
       const raw = this._serializer.savedObjectToRaw(migrated);
@@ -117,11 +126,11 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
+   * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
-   * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
+   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
     const {
@@ -129,7 +138,8 @@ export class SavedObjectsRepository {
       overwrite = false,
     } = options;
     const time = this._getCurrentTime();
-    const objectToBulkRequest = (object) => {
+    const bulkCreateParams = [];
+    const rawObjectsToCreate = objects.map((object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
       const migrated = this._migrator.migrateDocument({
         id: object.id,
@@ -138,27 +148,25 @@ export class SavedObjectsRepository {
         migrationVersion: object.migrationVersion,
         namespace,
         updated_at: time,
+        references: object.references || [],
       });
       const raw = this._serializer.savedObjectToRaw(migrated);
-
-      return [
+      bulkCreateParams.push(
         {
           [method]: {
             _id: raw._id,
             _type: this._type,
-          }
+          },
         },
         raw._source,
-      ];
-    };
+      );
+      return raw;
+    });
 
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
-        ...acc,
-        ...objectToBulkRequest(object)
-      ]), []),
+      body: bulkCreateParams,
     });
 
     return {
@@ -166,14 +174,20 @@ export class SavedObjectsRepository {
         const {
           error,
           _id: responseId,
-          _version: version,
+          _seq_no: seqNo,
+          _primary_term: primaryTerm,
         } = Object.values(response)[0];
 
         const {
           id = responseId,
-          type,
-          attributes,
         } = objects[i];
+        const {
+          _source: {
+            type,
+            [type]: attributes,
+            references = [],
+          },
+        } = rawObjectsToCreate[i];
 
         if (error) {
           if (error.type === 'version_conflict_engine_exception') {
@@ -196,8 +210,9 @@ export class SavedObjectsRepository {
           id,
           type,
           updated_at: time,
-          version,
-          attributes
+          version: encodeVersion(seqNo, primaryTerm),
+          attributes,
+          references,
         };
       })
     };
@@ -243,9 +258,41 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Deletes all objects from the provided namespace.
+   *
+   * @param {string} namespace
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByNamespace(namespace) {
+    if (!namespace || typeof namespace !== 'string') {
+      throw new TypeError(`namespace is required, and must be a string`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
+
+    const esOptions = {
+      index: this._index,
+      ignore: [404],
+      refresh: 'wait_for',
+      body: {
+        conflicts: 'proceed',
+        ...getSearchDsl(this._mappings, this._schema, {
+          namespace,
+          type: typesToDelete,
+        })
+      }
+    };
+
+    return await this._writeToCluster('deleteByQuery', esOptions);
+  }
+
+  /**
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.defaultSearchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
@@ -254,13 +301,16 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
+   * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
     const {
       type,
       search,
+      defaultSearchOperator = 'OR',
       searchFields,
+      hasReference,
       page = 1,
       perPage = 20,
       sortField,
@@ -278,7 +328,7 @@ export class SavedObjectsRepository {
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw new TypeError('options.fields must be an array');
     }
 
     const esOptions = {
@@ -287,15 +337,18 @@ export class SavedObjectsRepository {
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
       ignore: [404],
+      rest_total_hits_as_int: true,
       body: {
-        version: true,
+        seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._schema, {
           search,
+          defaultSearchOperator,
           searchFields,
           type,
           sortField,
           sortOrder,
           namespace,
+          hasReference,
         })
       }
     };
@@ -371,8 +424,9 @@ export class SavedObjectsRepository {
           id,
           type,
           ...time && { updated_at: time },
-          version: doc._version,
+          version: encodeHitVersion(doc),
           attributes: doc._source[type],
+          references: doc._source.references || [],
           migrationVersion: doc._source.migrationVersion,
         };
       })
@@ -413,8 +467,9 @@ export class SavedObjectsRepository {
       id,
       type,
       ...updatedAt && { updated_at: updatedAt },
-      version: response._version,
+      version: encodeHitVersion(response),
       attributes: response._source[type],
+      references: response._source.references || [],
       migrationVersion: response._source.migrationVersion,
     };
   }
@@ -425,14 +480,16 @@ export class SavedObjectsRepository {
    * @param {string} type
    * @param {string} id
    * @param {object} [options={}]
-   * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
+   * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
     const {
       version,
-      namespace
+      namespace,
+      references = [],
     } = options;
 
     const time = this._getCurrentTime();
@@ -440,13 +497,14 @@ export class SavedObjectsRepository {
       id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
-      version,
+      ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
       ignore: [404],
       body: {
         doc: {
           [type]: attributes,
           updated_at: time,
+          references,
         }
       },
     });
@@ -460,9 +518,87 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      version: response._version,
+      version: encodeHitVersion(response),
+      references,
       attributes
     };
+  }
+
+  /**
+   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {string} counterFieldName
+   * @param {object} [options={}]
+   * @property {object} [options.migrationVersion=undefined]
+   * @returns {promise}
+   */
+  async incrementCounter(type, id, counterFieldName, options = {}) {
+    if (typeof type !== 'string') {
+      throw new Error('"type" argument must be a string');
+    }
+    if (typeof counterFieldName !== 'string') {
+      throw new Error('"counterFieldName" argument must be a string');
+    }
+
+    const {
+      migrationVersion,
+      namespace,
+    } = options;
+
+    const time = this._getCurrentTime();
+
+
+    const migrated = this._migrator.migrateDocument({
+      id,
+      type,
+      attributes: { [counterFieldName]: 1 },
+      migrationVersion,
+      updated_at: time,
+    });
+
+    const raw = this._serializer.savedObjectToRaw(migrated);
+
+    const response = await this._writeToCluster('update', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      type: this._type,
+      index: this._index,
+      refresh: 'wait_for',
+      _source: true,
+      body: {
+        script: {
+          source: `
+              if (ctx._source[params.type][params.counterFieldName] == null) {
+                ctx._source[params.type][params.counterFieldName] = params.count;
+              }
+              else {
+                ctx._source[params.type][params.counterFieldName] += params.count;
+              }
+              ctx._source.updated_at = params.time;
+            `,
+          lang: 'painless',
+          params: {
+            count: 1,
+            time,
+            type,
+            counterFieldName,
+          },
+        },
+        upsert: raw._source,
+      },
+    });
+
+    return {
+      id,
+      type,
+      updated_at: time,
+      references: response.get._source.references,
+      version: encodeHitVersion(response),
+      attributes: response.get._source[type],
+    };
+
+
   }
 
   async _writeToCluster(method, params) {

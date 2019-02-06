@@ -9,18 +9,24 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
-  const find = getService('find');
+  const pieChart = getService('pieChart');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const appsMenu = getService('appsMenu');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'security',
     'common',
+    'discover',
     'dashboard',
     'header',
-    'settings']);
+    'settings',
+  ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
+  const savedSearchName = 'Saved search for dashboard';
 
   describe('Dashboard View Mode', () => {
 
@@ -33,18 +39,23 @@ export default function ({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.discover.saveSearch(savedSearchName);
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
 
     describe('Dashboard viewer', () => {
       before('Create logstash data role', async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickLinkText('Roles');
+        await testSubjects.click('roles');
         await PageObjects.security.clickCreateNewRole();
 
         await testSubjects.setValue('roleFormNameInput', 'logstash-data');
@@ -105,21 +116,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.security.logout();
         await PageObjects.security.login('dashuser', '123456');
 
-        const dashboardAppExists = await find.existsByLinkText('Dashboard');
-        expect(dashboardAppExists).to.be(true);
-        const accountSettingsLinkExists = await find.existsByLinkText('dashuser');
-        expect(accountSettingsLinkExists).to.be(true);
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        expect(logoutLinkExists).to.be(true);
-        const collapseLinkExists = await find.existsByLinkText('Collapse');
-        expect(collapseLinkExists).to.be(true);
-
-        const navLinks = await find.allByCssSelector('.global-nav-link');
-        expect(navLinks.length).to.equal(5);
+        const appLinks = await appsMenu.readLinks();
+        expect(appLinks).to.have.length(1);
+        expect(appLinks[0]).to.have.property('text', 'Dashboard');
       });
 
       it('shows the dashboard landing page by default', async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         console.log('url: ', currentUrl);
         expect(currentUrl).to.contain('dashboards');
       });
@@ -137,9 +140,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('can filter on a visualization', async () => {
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
-        await PageObjects.dashboard.filterOnPieSlice();
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        await pieChart.filterOnPieSlice();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
       });
 
       it('does not show the edit menu item', async () => {
@@ -163,35 +166,40 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the visualization edit icon', async () => {
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        expect(editLinkExists).to.be(false);
+        await dashboardPanelActions.expectMissingEditPanelAction();
       });
 
       it('does not show the visualization delete icon', async () => {
-        const deleteIconExists = await dashboardPanelActions.removePanelActionExists();
-        expect(deleteIconExists).to.be(false);
+        await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
       it('shows the timepicker', async () => {
-        const timePickerExists = await testSubjects.exists('globalTimepickerButton');
+        const timePickerExists = await testSubjects.exists('superDatePickerApplyTimeButton');
         expect(timePickerExists).to.be(true);
+      });
+
+      it('can paginate on a saved search', async () => {
+        await PageObjects.dashboard.expectToolbarPaginationDisplayed({ displayed: true });
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
         await PageObjects.security.logout();
         await PageObjects.security.login('mixeduser', '123456');
 
-        const managementAppExists = await find.existsByLinkText('Management');
-        expect(managementAppExists).to.be(false);
+        if (await appsMenu.linkExists('Management')) {
+          throw new Error('Expected management nav link to not be shown');
+        }
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
         await PageObjects.security.logout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        const managementAppExists = await find.existsByLinkText('Management');
-        expect(managementAppExists).to.be(true);
+        if (!await appsMenu.linkExists('Management')) {
+          throw new Error('Expected management nav link to be shown');
+        }
       });
+
     });
   });
 }

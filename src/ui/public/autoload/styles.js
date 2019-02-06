@@ -17,25 +17,23 @@
  * under the License.
  */
 
-const theme = require('../theme');
-
-// Kibana UI Framework
-require('@kbn/ui-framework/dist/ui_framework.css');
-
-// Elastic UI Framework, light theme
-const euiThemeLight = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_light.css');
-theme.registerTheme('light', euiThemeLight);
-
-// Elastic UI Framework, dark theme
-const euiThemeDark = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_dark.css');
-theme.registerTheme('dark', euiThemeDark);
-
-// Set default theme.
-theme.applyTheme('light');
+import chrome from 'ui/chrome';
+import { filter } from 'rxjs/operators';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 // All Kibana styles inside of the /styles dir
-const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.)[^\/\\]+\.less/);
+const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/);
 context.keys().forEach(key => context(key));
 
 // manually require non-less files
-require('../styles/disable_animations');
+import '../styles/disable_animations';
+
+chrome.getUiSettingsClient()
+  .getSaved$()
+  .pipe(filter(update => update.key === 'theme:darkMode'))
+  .subscribe(() => {
+    toastNotifications.addSuccess(i18n.translate('common.ui.styles.themeAppliedToast', {
+      defaultMessage: 'Theme applied, please refresh your browser to take affect.'
+    }));
+  });

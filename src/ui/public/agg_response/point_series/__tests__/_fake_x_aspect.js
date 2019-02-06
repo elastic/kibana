@@ -18,7 +18,6 @@
  */
 
 import expect from 'expect.js';
-import { AggType } from '../../../agg_types/agg_type';
 import { makeFakeXAspect } from '../_fake_x_aspect';
 
 describe('makeFakeXAspect', function () {
@@ -27,18 +26,10 @@ describe('makeFakeXAspect', function () {
     const aspect = makeFakeXAspect();
 
     expect(aspect)
-      .to.have.property('i', -1)
-      .and.have.property('aggConfig');
-
-    expect(aspect.aggConfig)
-      .to.have.property('fieldFormatter')
-      .and.to.have.property('type');
-
-    expect(aspect.aggConfig.type)
-      .to.be.an(AggType)
-      .and.to.have.property('name', 'all')
-      .and.to.have.property('title', 'All docs')
-      .and.to.have.property('hasNoDsl', true);
+      .to.have.property('accessor', -1)
+      .and.have.property('title', 'All docs')
+      .and.have.property('format')
+      .and.have.property('params');
 
   });
 });

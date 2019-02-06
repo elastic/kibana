@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { BuildHierarchicalDataProvider } from './hierarchical/build_hierarchical_data';
-import { AggResponsePointSeriesProvider } from './point_series/point_series';
+import { buildHierarchicalData } from './hierarchical/build_hierarchical_data';
+import { buildPointSeriesData } from './point_series/point_series';
 import { tabifyAggResponse } from './tabify/tabify';
 
-export function AggResponseIndexProvider(Private) {
-  return {
-    hierarchical: Private(BuildHierarchicalDataProvider),
-    pointSeries: Private(AggResponsePointSeriesProvider),
-    tabify: tabifyAggResponse
-  };
-}
+export const aggResponseIndex = {
+  hierarchical: buildHierarchicalData,
+  pointSeries: buildPointSeriesData,
+  tabify: tabifyAggResponse
+};

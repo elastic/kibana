@@ -24,15 +24,17 @@ import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 
 export const WorkpadHeader = ({
-  editing,
-  toggleEditing,
-  hasAssets,
+  isWriteable,
+  canUserWrite,
+  toggleWriteable,
   addElement,
   setShowElementModal,
   showElementModal,
 }) => {
   const keyHandler = action => {
-    if (action === 'EDITING') toggleEditing();
+    if (action === 'EDITING') {
+      toggleWriteable();
+    }
   };
 
   const elementAdd = (
@@ -41,6 +43,7 @@ export const WorkpadHeader = ({
         onClose={() => setShowElementModal(false)}
         className="canvasModal--fixedSize"
         maxWidth="1000px"
+        initialFocus=".canvasElements__filter"
       >
         <ElementTypes
           onClick={element => {
@@ -56,6 +59,14 @@ export const WorkpadHeader = ({
       </EuiModal>
     </EuiOverlayMask>
   );
+
+  let readOnlyToolTip = '';
+
+  if (!canUserWrite) {
+    readOnlyToolTip = "You don't have permission to edit this workpad";
+  } else {
+    readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
+  }
 
   return (
     <div>
@@ -83,31 +94,29 @@ export const WorkpadHeader = ({
               <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-              <EuiToolTip
-                position="bottom"
-                content={editing ? 'Hide editing controls' : 'Show editing controls'}
-              >
+              {canUserWrite && (
+                <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
+              )}
+              <EuiToolTip position="bottom" content={readOnlyToolTip}>
                 <EuiButtonIcon
-                  iconType={editing ? 'eye' : 'eyeClosed'}
+                  iconType={isWriteable ? 'lockOpen' : 'lock'}
                   onClick={() => {
-                    toggleEditing();
+                    toggleWriteable();
                   }}
                   size="s"
-                  aria-label={editing ? 'Hide editing controls' : 'Show editing controls'}
+                  aria-label={readOnlyToolTip}
+                  isDisabled={!canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {editing ? (
+        {isWriteable ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              {hasAssets && (
-                <EuiFlexItem grow={false}>
-                  <AssetManager />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <AssetManager />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
@@ -127,9 +136,8 @@ export const WorkpadHeader = ({
 };
 
 WorkpadHeader.propTypes = {
-  editing: PropTypes.bool,
-  toggleEditing: PropTypes.func,
-  hasAssets: PropTypes.bool,
+  isWriteable: PropTypes.bool,
+  toggleWriteable: PropTypes.func,
   addElement: PropTypes.func.isRequired,
   showElementModal: PropTypes.bool,
   setShowElementModal: PropTypes.func,

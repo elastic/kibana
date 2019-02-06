@@ -21,7 +21,7 @@ import { serializeToJson5 } from './json5';
 
 describe('dev/i18n/serializers/json5', () => {
   test('should serialize default messages to JSON5', () => {
-    const messages = new Map([
+    const messages = [
       [
         'plugin1.message.id-1',
         {
@@ -32,10 +32,10 @@ describe('dev/i18n/serializers/json5', () => {
         'plugin2.message.id-2',
         {
           message: 'Message text 2',
-          context: 'Message context',
+          description: 'Message description',
         },
       ],
-    ]);
+    ];
 
     expect(serializeToJson5(messages).toString()).toMatchSnapshot();
   });

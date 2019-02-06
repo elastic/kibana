@@ -20,6 +20,8 @@
 import { toastNotifications } from '../../notify';
 import { RequestFailure } from '../../errors';
 import { RequestStatus } from './req_status';
+import { SearchError } from '../search_strategy/search_error';
+import { i18n } from '@kbn/i18n';
 
 export function CallResponseHandlersProvider(Private, Promise) {
   const ABORTED = RequestStatus.ABORTED;
@@ -35,13 +37,18 @@ export function CallResponseHandlersProvider(Private, Promise) {
 
       if (response.timed_out) {
         toastNotifications.addWarning({
-          title: 'Data might be incomplete because your request timed out',
+          title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {
+            defaultMessage: 'Data might be incomplete because your request timed out',
+          })
         });
       }
 
       if (response._shards && response._shards.failed) {
         toastNotifications.addWarning({
-          title: `${response._shards.failed} of ${response._shards.total} shards failed`,
+          title: i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
+            defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
+            values: { shardsFailed: response._shards.failed, shardsTotal: response._shards.total }
+          })
         });
       }
 
@@ -58,7 +65,7 @@ export function CallResponseHandlersProvider(Private, Promise) {
         if (searchRequest.filterError(response)) {
           return progress();
         } else {
-          return searchRequest.handleFailure(new RequestFailure(null, response));
+          return searchRequest.handleFailure(response.error instanceof SearchError ? response.error : new RequestFailure(null, response));
         }
       }
 

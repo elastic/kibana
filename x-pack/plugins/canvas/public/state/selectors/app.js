@@ -7,16 +7,16 @@
 import { get } from 'lodash';
 
 // page getters
-export function getEditing(state) {
-  return get(state, 'transient.editing', false);
+export function canUserWrite(state) {
+  return get(state, 'transient.canUserWrite', true);
 }
 
 export function getFullscreen(state) {
   return get(state, 'transient.fullscreen', false);
 }
 
-export function getFunctionDefinitions(state) {
-  return get(state, 'app.functionDefinitions');
+export function getServerFunctions(state) {
+  return get(state, 'app.serverFunctions');
 }
 
 export function getAppReady(state) {

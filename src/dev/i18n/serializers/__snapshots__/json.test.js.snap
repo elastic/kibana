@@ -56,12 +56,34 @@ exports[`dev/i18n/serializers/json should serialize default messages to JSON 1`]
         \\"second\\": \\"numeric\\",
         \\"timeZoneName\\": \\"short\\"
       }
+    },
+    \\"relative\\": {
+      \\"years\\": {
+        \\"units\\": \\"year\\"
+      },
+      \\"months\\": {
+        \\"units\\": \\"month\\"
+      },
+      \\"days\\": {
+        \\"units\\": \\"day\\"
+      },
+      \\"hours\\": {
+        \\"units\\": \\"hour\\"
+      },
+      \\"minutes\\": {
+        \\"units\\": \\"minute\\"
+      },
+      \\"seconds\\": {
+        \\"units\\": \\"second\\"
+      }
     }
   },
-  \\"plugin1.message.id-1\\": \\"Message text 1 \\",
-  \\"plugin2.message.id-2\\": {
-    \\"text\\": \\"Message text 2\\",
-    \\"comment\\": \\"Message context\\"
+  \\"messages\\": {
+    \\"plugin1.message.id-1\\": \\"Message text 1 \\",
+    \\"plugin2.message.id-2\\": {
+      \\"text\\": \\"Message text 2\\",
+      \\"comment\\": \\"Message description\\"
+    }
   }
 }"
 `;

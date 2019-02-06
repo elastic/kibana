@@ -13,6 +13,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -37,7 +38,7 @@ export function esNodeRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const showSystemIndices = req.payload.showSystemIndices;
@@ -45,7 +46,7 @@ export function esNodeRoute(server) {
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;
@@ -91,13 +92,13 @@ export function esNodeRoute(server) {
           };
         }
 
-        reply({
+        return {
           nodeSummary,
           metrics,
           ...shardAllocation
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

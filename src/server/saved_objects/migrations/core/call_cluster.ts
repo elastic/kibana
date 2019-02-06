@@ -25,7 +25,7 @@
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
-  (path: 'count', opts: CountOpts): Promise<{ count: number }>;
+  (path: 'count', opts: CountOpts): Promise<{ count: number; _shards: ShardsInfo }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
@@ -35,13 +35,15 @@ export interface CallCluster {
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
   (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
-  (path: 'indices.putTemplate', opts: PutTemplateOpts): Promise<any>;
   (path: 'indices.refresh', opts: IndexOpts): Promise<any>;
   (path: 'indices.updateAliases', opts: UpdateAliasesOpts): Promise<any>;
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
-  (path: 'tasks.get', opts: { taskId: string }): Promise<{ completed: boolean }>;
+  (path: 'tasks.get', opts: { taskId: string }): Promise<{
+    completed: boolean;
+    error?: ErrorResponse;
+  }>;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -57,25 +59,11 @@ export interface CountOpts {
     query: object;
   };
   index: string;
-  type: string;
 }
 
 export interface PutMappingOpts {
-  body: DocMapping;
+  body: IndexMapping;
   index: string;
-  type: string;
-}
-
-export interface PutTemplateOpts {
-  name: string;
-  body: {
-    template: string;
-    settings: {
-      number_of_shards: number;
-      auto_expand_replicas: string;
-    };
-    mappings: IndexMapping;
-  };
 }
 
 export interface IndexOpts {
@@ -87,10 +75,8 @@ export interface IndexCreationOpts {
   body?: {
     mappings?: IndexMapping;
     settings?: {
-      index: {
-        number_of_shards: string;
-        number_of_replicas: string;
-      };
+      number_of_shards: number;
+      auto_expand_replicas: string;
     };
   };
 }
@@ -171,10 +157,23 @@ export interface SearchResults {
     hits: RawDoc[];
   };
   _scroll_id?: string;
+  _shards: ShardsInfo;
+}
+
+export interface ShardsInfo {
+  total: number;
+  successful: number;
+  skipped: number;
+  failed: number;
+}
+
+export interface ErrorResponse {
+  type: string;
+  reason: string;
 }
 
 export interface BulkResult {
-  items: Array<{ index: { error?: { type: string; reason: string } } }>;
+  items: Array<{ index: { error?: ErrorResponse } }>;
 }
 
 export interface IndexInfo {
@@ -190,11 +189,7 @@ export interface MappingProperties {
   [type: string]: any;
 }
 
-export interface DocMapping {
+export interface IndexMapping {
   dynamic: string;
   properties: MappingProperties;
-}
-
-export interface IndexMapping {
-  doc: DocMapping;
 }

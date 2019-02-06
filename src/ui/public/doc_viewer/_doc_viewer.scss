@@ -1,0 +1,28 @@
+.kbnDocViewer {
+  pre,
+  .kbnDocViewer__value {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  td,
+  pre {
+    font-family: $euiCodeFontFamily;
+  }
+
+  tr:first-child td {
+    border-top-color: transparent;
+  }
+}
+
+.kbnDocViewer__content {
+  background-color: $euiColorEmptyShade;
+  padding: $euiSizeS 0 0 0;
+}
+
+.kbnDocViewer__buttons,
+.kbnDocViewer__field {
+  white-space: nowrap;
+}

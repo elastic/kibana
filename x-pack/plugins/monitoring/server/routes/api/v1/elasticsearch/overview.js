@@ -13,6 +13,7 @@ import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_overview';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 export function esOverviewRoute(server) {
   server.route({
@@ -32,11 +33,11 @@ export function esOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const [ clusterStats, metrics, shardActivity ] = await Promise.all([
@@ -46,13 +47,13 @@ export function esOverviewRoute(server) {
         ]);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
 
-        reply({
+        return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           metrics,
-          shardActivity
-        });
+          shardActivity,
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

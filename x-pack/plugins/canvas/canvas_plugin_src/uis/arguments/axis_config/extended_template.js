@@ -51,7 +51,9 @@ export class ExtendedTemplate extends React.PureComponent {
   render() {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
-    if (isDisabled) return <EuiText color="subdued">The axis is disabled</EuiText>;
+    if (isDisabled) {
+      return <EuiText color="subdued">The axis is disabled</EuiText>;
+    }
 
     const positions = {
       xaxis: ['bottom', 'top'],
@@ -65,11 +67,7 @@ export class ExtendedTemplate extends React.PureComponent {
     return (
       <Fragment>
         <EuiFormRow label="Position" compressed>
-          <EuiSelect
-            defaultValue={position}
-            options={options}
-            onChange={this.setArgValue('position')}
-          />
+          <EuiSelect value={position} options={options} onChange={this.setArgValue('position')} />
         </EuiFormRow>
       </Fragment>
     );

@@ -46,8 +46,8 @@ export class UiSettingsService {
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
-      // function that accepts log messages in the same format as server.log
-      log = () => {},
+      // function that accepts log messages in the same format as server.logWithMetadata
+      logWithMetadata = () => {},
       overrides = {},
     } = options;
 
@@ -57,7 +57,7 @@ export class UiSettingsService {
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
     this._overrides = overrides;
-    this._log = log;
+    this._logWithMetadata = logWithMetadata;
   }
 
   async getDefaults() {
@@ -157,7 +157,7 @@ export class UiSettingsService {
         savedObjectsClient: this._savedObjectsClient,
         version: this._id,
         buildNum: this._buildNum,
-        log: this._log,
+        logWithMetadata: this._logWithMetadata,
       });
 
       await this._write({
@@ -169,7 +169,8 @@ export class UiSettingsService {
 
   async _read(options = {}) {
     const {
-      ignore401Errors = false
+      ignore401Errors = false,
+      autoCreateOrUpgradeIfMissing = true
     } = options;
 
     const {
@@ -180,7 +181,6 @@ export class UiSettingsService {
     } = this._savedObjectsClient.errors;
 
     const isIgnorableError = error => (
-      isNotFoundError(error) ||
       isForbiddenError(error) ||
       isEsUnavailableError(error) ||
       (ignore401Errors && isNotAuthorizedError(error))
@@ -190,6 +190,31 @@ export class UiSettingsService {
       const resp = await this._savedObjectsClient.get(this._type, this._id);
       return resp.attributes;
     } catch (error) {
+      if (isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
+        const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
+          savedObjectsClient: this._savedObjectsClient,
+          version: this._id,
+          buildNum: this._buildNum,
+          logWithMetadata: this._logWithMetadata,
+          onWriteError(error, attributes) {
+            if (isNotAuthorizedError(error) || isForbiddenError(error)) {
+              return attributes;
+            }
+
+            throw error;
+          }
+        });
+
+        if (!failedUpgradeAttributes) {
+          return await this._read({
+            ...options,
+            autoCreateOrUpgradeIfMissing: false
+          });
+        }
+
+        return failedUpgradeAttributes;
+      }
+
       if (isIgnorableError(error)) {
         return {};
       }

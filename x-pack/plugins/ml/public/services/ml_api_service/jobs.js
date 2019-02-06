@@ -100,9 +100,9 @@ export const jobs = {
     });
   },
 
-  jobAuditSummary() {
+  deletingJobTasks() {
     return http({
-      url: `${basePath}/job_audit_messages/summary`,
+      url: `${basePath}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
   },

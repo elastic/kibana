@@ -9,7 +9,6 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'plugins/security/views/management/edit_role/edit_role.less';
 import 'angular-ui-select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
@@ -23,15 +22,22 @@ import { SpacesManager } from '../../../../../spaces/public/lib';
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
+import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.name
+      ? getEditRoleBreadcrumbs
+      : getCreateRoleBreadcrumbs
+  ),
   resolve: {
     role($route, ShieldRole, kbnUrl, Promise, Notifier) {
       const name = $route.current.params.name;
@@ -127,20 +133,23 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('editRoleReactRoot');
 
-      render(<EditRolePage
-        runAsUsers={users}
-        role={role}
-        kibanaAppPrivileges={KibanaAppPrivileges}
-        indexPatterns={indexPatterns}
-        rbacEnabled={true}
-        rbacApplication={rbacApplication}
-        httpClient={$http}
-        allowDocumentLevelSecurity={allowDocumentLevelSecurity}
-        allowFieldLevelSecurity={allowFieldLevelSecurity}
-        spaces={spaces}
-        spacesEnabled={enableSpaceAwarePrivileges}
-        userProfile={userProfile}
-      />, domNode);
+      render(
+        <I18nContext>
+          <EditRolePage
+            runAsUsers={users}
+            role={role}
+            kibanaAppPrivileges={KibanaAppPrivileges}
+            indexPatterns={indexPatterns}
+            rbacEnabled={true}
+            rbacApplication={rbacApplication}
+            httpClient={$http}
+            allowDocumentLevelSecurity={allowDocumentLevelSecurity}
+            allowFieldLevelSecurity={allowFieldLevelSecurity}
+            spaces={spaces}
+            spacesEnabled={enableSpaceAwarePrivileges}
+            userProfile={userProfile}
+          />
+        </I18nContext>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

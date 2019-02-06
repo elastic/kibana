@@ -1,9 +1,10 @@
 [[production]]
 == Using Kibana in a production environment
 
-* <<configuring-kibana-shield, Using Kibana with {xpack}>>
-* <<enabling-ssl, Enabling SSL>>
-* <<load-balancing, Load balancing across multiple {es} nodes>>
+* <<configuring-kibana-shield>>
+* <<csp-strict-mode>>
+* <<enabling-ssl>>
+* <<load-balancing>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -19,22 +20,41 @@ and an Elasticsearch client node on the same machine. For more information, see
 
 [float]
 [[configuring-kibana-shield]]
-=== Using Kibana with {security}
+=== Using {stack} {security-features}
 
-You can use {stack-ov}/elasticsearch-security.html[{security}] to control what
-Elasticsearch data users can access through Kibana.
+You can use {stack-ov}/elasticsearch-security.html[{stack} {security-features}] 
+to control what {es} data users can access through Kibana.
 
-When {security} is enabled, Kibana users have to log in. They need to
+When {security-features} are enabled, Kibana users have to log in. They need to
 have the `kibana_user` role as well as access to the indices they
 will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
 are not authorized to view, they get an error that indicates the index does
-not exist. {security} does not currently provide a way to control which
-users can load which dashboards.
+not exist. The {security-features} do not currently provide a way to control 
+which users can load which dashboards.
 
 For information about setting up Kibana users, see
 {kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana].
+
+[float]
+[[csp-strict-mode]]
+=== Require Content Security Policy
+
+Kibana uses a Content Security Policy to help prevent the browser from allowing
+unsafe scripting, but older browsers will silently ignore this policy. If your
+organization does not need to support Internet Explorer 11 or much older
+versions of our other supported browsers, we recommend that you enable Kibana's
+`strict` mode for content security policy, which will block access to Kibana
+for any browser that does not enforce even a rudimentary set of CSP
+protections.
+
+To do this, set `csp.strict` to `true` in your `kibana.yml`:
+
+--------
+csp.strict: true
+--------
+
 
 [float]
 [[enabling-ssl]]
@@ -82,10 +102,10 @@ http.port: 9200
 transport.host: <external ip>
 transport.tcp.port: 9300 - 9400
 --------
-. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.url` should be set to
-`localhost:9200`.
+. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.hosts` setting should be set to
+`["localhost:9200"]`.
 +
 --------
 # The Elasticsearch instance to use for all your queries.
-elasticsearch.url: "http://localhost:9200"
+elasticsearch.hosts: ["http://localhost:9200"]
 --------

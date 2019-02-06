@@ -11,19 +11,8 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['manage', 'read', 'index', 'delete'],
-        },
-      ],
-    },
-  });
-
-  await supertest.put('/api/security/role/kibana_legacy_dashboard_only_user').send({
-    elasticsearch: {
-      indices: [
-        {
-          names: ['.kibana'],
-          privileges: ['read', 'view_index_metadata'],
         },
       ],
     },
@@ -33,7 +22,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['manage', 'read', 'index', 'delete'],
         },
       ],
@@ -47,7 +36,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     elasticsearch: {
       indices: [
         {
-          names: ['.kibana'],
+          names: ['.kibana*'],
           privileges: ['read', 'view_index_metadata'],
         },
       ],
@@ -152,16 +141,6 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
       roles: ['kibana_legacy_user'],
       full_name: 'a kibana legacy user',
       email: 'a_kibana_legacy_user@elastic.co',
-    },
-  });
-
-  await es.shield.putUser({
-    username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username,
-    body: {
-      password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.password,
-      roles: ['kibana_legacy_dashboard_only_user'],
-      full_name: 'a kibana legacy dashboard only user',
-      email: 'a_kibana_legacy_dashboard_only_user@elastic.co',
     },
   });
 

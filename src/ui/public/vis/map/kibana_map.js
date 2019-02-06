@@ -18,10 +18,12 @@
  */
 
 import { EventEmitter } from 'events';
+import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
+import { i18n } from '@kbn/i18n';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -36,7 +38,9 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" title="Fit Data Bounds" aria-label="Fit Data Bounds"></a>')
+      const fitDatBoundsLabel = i18n.translate('common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        { defaultMessage: 'Fit Data Bounds' });
+      $(this._fitContainer).html(`<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`)
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
@@ -69,7 +73,7 @@ function makeLegendControl(container, kibanaMap, position) {
 
     updateContents() {
       this._legendContainer.empty();
-      const $div = $('<div>').addClass('tilemap-legend');
+      const $div = $('<div>').addClass('visMapLegend');
       this._legendContainer.append($div);
       const layers = this._kibanaMap.getLayers();
       layers.forEach((layer) =>layer.appendLegendContents($div));
@@ -342,11 +346,11 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  getZoomLevel() {
+  getZoomLevel = () => {
     return this._leafletMap.getZoom();
   }
 
-  getMaxZoomLevel() {
+  getMaxZoomLevel = () => {
     return this._leafletMap.getMaxZoom();
   }
 
@@ -435,7 +439,9 @@ export class KibanaMap extends EventEmitter {
     }
     this._baseLayerIsDesaturated = isDesaturated;
     this._updateDesaturation();
-    this._leafletBaseLayer.redraw();
+    if (this._leafletBaseLayer) {
+      this._leafletBaseLayer.redraw();
+    }
   }
 
   addDrawControl() {
@@ -480,6 +486,18 @@ export class KibanaMap extends EventEmitter {
     this._updateLegend();
   }
 
+  _addMaxZoomMessage = layer => {
+    const zoomWarningMsg = createZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
+
+    this._leafletMap.on('zoomend', zoomWarningMsg);
+    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
+
+    layer.on('remove', () => {
+      this._leafletMap.off('zoomend', zoomWarningMsg);
+      this._containerNode.removeAttribute('data-test-subj');
+    });
+  }
+
   setLegendPosition(position) {
     if (this._legendPosition === position) {
       if (!this._leafletLegendControl) {
@@ -497,7 +515,7 @@ export class KibanaMap extends EventEmitter {
     if (this._leafletLegendControl) {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
-    const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
+    const $wrapper = $('<div>').addClass('visMapLegend__wrapper');
     this._leafletLegendControl = makeLegendControl($wrapper, this, this._legendPosition);
     this._leafletMap.addControl(this._leafletLegendControl);
   }
@@ -559,6 +577,11 @@ export class KibanaMap extends EventEmitter {
       });
 
       this._leafletBaseLayer = baseLayer;
+      if (settings.options.showZoomMessage) {
+        baseLayer.on('add', () => {
+          this._addMaxZoomMessage(baseLayer);
+        });
+      }
       this._leafletBaseLayer.addTo(this._leafletMap);
       this._leafletBaseLayer.bringToBack();
       if (settings.options.minZoom > this._leafletMap.getZoom()) {

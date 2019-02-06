@@ -1,0 +1,78 @@
+{
+  "id": "auditbeat_process_docker",
+  "title": "Auditbeat Docker Processes",
+  "description": "Detect unusual processes in Docker containers",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "auditd.summary"
+          }
+        },
+        {
+          "exists": {
+            "field": "docker.container.id"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "docker_high_count_process_events",
+      "file": "docker_high_count_process_events.json"
+    },
+    {
+      "id": "docker_rare_process_activity",
+      "file": "docker_rare_process_activity.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-docker_high_count_process_events",
+      "file": "datafeed_docker_high_count_process_events.json",
+      "job_id": "docker_high_count_process_events"
+    },
+    {
+      "id": "datafeed-docker_rare_process_activity",
+      "file": "datafeed_docker_rare_process_activity.json",
+      "job_id": "docker_rare_process_activity"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ml_auditbeat_docker_process_event_rate",
+        "file": "ml_auditbeat_docker_process_event_rate.json"
+      },
+      {
+        "id": "ml_auditbeat_docker_process_explorer",
+        "file": "ml_auditbeat_docker_process_explorer.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ml_auditbeat_docker_process_events",
+        "file": "ml_auditbeat_docker_process_events.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ml_auditbeat_docker_process_event_rate_by_process",
+        "file": "ml_auditbeat_docker_process_event_rate_by_process.json"
+      },
+      {
+        "id": "ml_auditbeat_docker_process_event_rate_vis",
+        "file": "ml_auditbeat_docker_process_event_rate_vis.json"
+      },
+      {
+        "id": "ml_auditbeat_docker_process_occurrence",
+        "file": "ml_auditbeat_docker_process_occurrence.json"
+      }
+    ]
+  }
+}

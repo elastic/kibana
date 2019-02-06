@@ -7,9 +7,9 @@
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
-import 'plugins/spaces/views/space_selector/space_selector.less';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 
@@ -26,7 +26,12 @@ module.controller(
 
     const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-    render(<SpaceSelector spaces={spaces} spacesManager={spacesManager} />, domNode);
+    render(
+      <I18nContext>
+        <SpaceSelector spaces={spaces} spacesManager={spacesManager} />
+      </I18nContext>,
+      domNode
+    );
 
     // unmount react on controller destroy
     $scope.$on('$destroy', () => {

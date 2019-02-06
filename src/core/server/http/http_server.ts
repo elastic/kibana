@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server, ServerOptions } from 'hapi-latest';
+import { Server, ServerOptions } from 'hapi';
 
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';

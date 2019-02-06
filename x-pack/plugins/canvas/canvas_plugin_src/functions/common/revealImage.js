@@ -30,10 +30,13 @@ export const revealImage = () => ({
       types: ['string'],
       help: 'Where to start from. Eg, top, left, bottom or right',
       default: 'bottom',
+      options: ['top', 'left', 'bottom', 'right'],
     },
   },
   fn: (percent, args) => {
-    if (percent > 1 || percent < 0) throw new Error('input must be between 0 and 1');
+    if (percent > 1 || percent < 0) {
+      throw new Error(`Invalid value: '${percent}'. Percentage must be between 0 and 1`);
+    }
 
     return {
       type: 'render',

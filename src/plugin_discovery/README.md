@@ -137,7 +137,7 @@ Only exported so that `PluginPack` instances can be created in tests and used in
 
 ### params
 
- - `options.path`: absolute path to where this plugin pack was found, this is normally a direct child of `./src/core_plugins` or `./plugins`
+ - `options.path`: absolute path to where this plugin pack was found, this is normally a direct child of `./src/legacy/core_plugins` or `./plugins`
  - `options.pkg`: the parsed `package.json` for this pack, used for defaults in `PluginSpec` objects defined by this pack
  - `options.provider`: the default export of the pack, a function which is called with the `PluginSpec` class which should return one or more `PluginSpec` objects.
 

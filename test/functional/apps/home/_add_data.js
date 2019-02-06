@@ -33,26 +33,5 @@ export default function ({ getService, getPageObjects }) {
         expect(tutorialExists).to.be(true);
       });
     });
-
-    describe('apm', function describeIndexTests() {
-
-      it('should install saved objects', async ()=> {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          await PageObjects.home.clickSynopsis('apm');
-        });
-
-        await PageObjects.home.loadSavedObjects();
-
-        await PageObjects.common.navigateToApp('dashboard');
-
-        await PageObjects.dashboard.searchForDashboardWithName('APM');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(5);
-      });
-
-    });
-
   });
 }

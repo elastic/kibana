@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+import expect from 'expect.js';
 import Chance from 'chance';
 
 import * as getUpgradeableConfigNS from '../get_upgradeable_config';
@@ -34,22 +35,23 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
   const buildNum = chance.integer({ min: 1000, max: 5000 });
 
   function setup() {
-    const log = sinon.stub();
+    const logWithMetadata = sinon.stub();
     const getUpgradeableConfig = sandbox.stub(getUpgradeableConfigNS, 'getUpgradeableConfig');
     const savedObjectsClient = {
-      create: sinon.spy(async (type, attributes, options = {}) => ({
+      create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
         type,
         id: options.id,
-        version: 1,
+        version: 'foo',
       }))
     };
 
-    async function run() {
+    async function run(options = {}) {
       const resp = await createOrUpgradeSavedConfig({
         savedObjectsClient,
         version,
         buildNum,
-        log,
+        logWithMetadata,
+        ...options
       });
 
       sinon.assert.calledOnce(getUpgradeableConfig);
@@ -60,7 +62,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
     return {
       buildNum,
-      log,
+      logWithMetadata,
       run,
       version,
       savedObjectsClient,
@@ -118,21 +120,125 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     });
 
     it('should log a message for upgrades', async () => {
-      const { getUpgradeableConfig, log, run } = setup();
+      const { getUpgradeableConfig, logWithMetadata, run } = setup();
 
       getUpgradeableConfig
         .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
 
       await run();
-      sinon.assert.calledOnce(log);
-      sinon.assert.calledWithExactly(log,
+      sinon.assert.calledOnce(logWithMetadata);
+      sinon.assert.calledWithExactly(logWithMetadata,
         ['plugin', 'elasticsearch'],
+        sinon.match('Upgrade'),
         sinon.match({
-          tmpl: sinon.match('Upgrade'),
           prevVersion,
           newVersion: version,
         })
       );
+    });
+
+    it('does not log when upgrade fails', async () => {
+      const { getUpgradeableConfig, logWithMetadata, run, savedObjectsClient } = setup();
+
+      getUpgradeableConfig
+        .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run();
+        throw new Error('Expected run() to throw an error');
+      } catch (error) {
+        expect(error.message).to.be('foo');
+      }
+
+      sinon.assert.notCalled(logWithMetadata);
+    });
+  });
+
+  describe('onWriteError()', () => {
+    it('is called with error and attributes when savedObjectsClient.create rejects', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      const error = new Error('foo');
+      savedObjectsClient.create.callsFake(async () => {
+        throw error;
+      });
+
+      const onWriteError = sinon.stub();
+      await run({ onWriteError });
+      sinon.assert.calledOnce(onWriteError);
+      sinon.assert.calledWithExactly(onWriteError, error, {
+        buildNum
+      });
+    });
+
+    it('resolves with the return value of onWriteError()', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      const result = await run({ onWriteError: () => 123 });
+      expect(result).to.be(123);
+    });
+
+    it('rejects with the error from onWriteError() if it rejects', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run({
+          onWriteError: (error) => (
+            Promise.reject(new Error(`${error.message} bar`))
+          )
+        });
+        throw new Error('expected run() to reject');
+      } catch (error) {
+        expect(error.message).to.be('foo bar');
+      }
+    });
+
+    it('rejects with the error from onWriteError() if it throws sync', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run({
+          onWriteError: (error) => {
+            throw new Error(`${error.message} bar`);
+          }
+        });
+        throw new Error('expected run() to reject');
+      } catch (error) {
+        expect(error.message).to.be('foo bar');
+      }
+    });
+
+    it('rejects with the writeError if onWriteError() is undefined', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run({
+          onWriteError: undefined
+        });
+        throw new Error('expected run() to reject');
+      } catch (error) {
+        expect(error.message).to.be('foo');
+      }
     });
   });
 });

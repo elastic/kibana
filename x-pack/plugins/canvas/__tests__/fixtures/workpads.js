@@ -110,3 +110,10 @@ export const workpads = [
     ],
   },
 ];
+
+export const elements = [
+  { expression: 'demodata | pointseries | getCell | repeatImage | render' },
+  { expression: 'filters | demodata | markdown "hello" | render' },
+  { expression: 'filters | demodata | pointseries | pie | render' },
+  { expression: 'image | render' },
+];

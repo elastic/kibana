@@ -35,16 +35,24 @@ export const createBulkCreateRoute = prereqs => ({
           type: Joi.string().required(),
           id: Joi.string(),
           attributes: Joi.object().required(),
-          version: Joi.number(),
+          version: Joi.string(),
           migrationVersion: Joi.object().optional(),
+          references: Joi.array().items(
+            Joi.object()
+              .keys({
+                name: Joi.string().required(),
+                type: Joi.string().required(),
+                id: Joi.string().required(),
+              }),
+          ).default([]),
         }).required()
       ),
     },
-    handler(request, reply) {
+    handler(request) {
       const { overwrite } = request.query;
       const { savedObjectsClient } = request.pre;
 
-      reply(savedObjectsClient.bulkCreate(request.payload, { overwrite }));
+      return savedObjectsClient.bulkCreate(request.payload, { overwrite });
     },
   },
 });

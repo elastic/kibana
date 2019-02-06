@@ -21,7 +21,7 @@ import { AggTypeFilters } from './agg_type_filters';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
-  const indexPattern = {};
+  const indexPattern = { id: '1234', fields: [], title: 'foo' };
   const aggConfig = {};
 
   beforeEach(() => {

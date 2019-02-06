@@ -7,6 +7,7 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, lifecycle } from 'recompose';
+import { getAssets } from '../../state/selectors/assets';
 import { getWorkpadInfo } from '../../state/selectors/workpad';
 import { ArgForm as Component } from './arg_form';
 
@@ -24,7 +25,7 @@ export const ArgForm = compose(
       }
     },
   }),
-  connect(state => ({ workpad: getWorkpadInfo(state) }))
+  connect(state => ({ workpad: getWorkpadInfo(state), assets: getAssets(state) }))
 )(Component);
 
 ArgForm.propTypes = {

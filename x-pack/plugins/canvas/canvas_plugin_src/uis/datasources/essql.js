@@ -13,11 +13,14 @@ import { templateFromReactComponent } from '../../../public/lib/template_from_re
 class EssqlDatasource extends PureComponent {
   componentDidMount() {
     const query = this.getQuery();
-    if (typeof query !== 'string') this.setArg(this.getArgName(), this.defaultQuery);
-    else this.props.setInvalid(!query.trim());
+    if (typeof query !== 'string') {
+      this.setArg(this.getArgName(), this.defaultQuery);
+    } else {
+      this.props.setInvalid(!query.trim());
+    }
   }
 
-  defaultQuery = 'SELECT * FROM logstash*';
+  defaultQuery = 'SELECT * FROM "logstash*"';
 
   getQuery = () => getSimpleArg(this.getArgName(), this.props.args)[0];
 
@@ -25,8 +28,12 @@ class EssqlDatasource extends PureComponent {
   // and set them for the data source UI.
   getArgName = () => {
     const { args } = this.props;
-    if (getSimpleArg('_', args)[0]) return '_';
-    if (getSimpleArg('q', args)[0]) return 'q';
+    if (getSimpleArg('_', args)[0]) {
+      return '_';
+    }
+    if (getSimpleArg('q', args)[0]) {
+      return 'q';
+    }
     return 'query';
   };
 
@@ -71,7 +78,7 @@ EssqlDatasource.propTypes = {
 export const essql = () => ({
   name: 'essql',
   displayName: 'Elasticsearch SQL',
-  help: 'Use Elasticsearch SQL to get a datatable',
+  help: 'Use Elasticsearch SQL to get a data table',
   // Replace this with a SQL logo when we have one in EUI
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EssqlDatasource),

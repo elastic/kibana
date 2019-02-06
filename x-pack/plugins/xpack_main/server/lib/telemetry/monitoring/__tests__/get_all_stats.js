@@ -127,6 +127,10 @@ describe('get_all_stats', () => {
                 kibana_stats: {
                   kibana: {
                     version: '1.2.3-alpha1'
+                  },
+                  os: {
+                    platform: 'win',
+                    platformRelease: 'win-10.0'
                   }
                 }
               }
@@ -159,6 +163,12 @@ describe('get_all_stats', () => {
               versions: [
                 { version: '1.2.3-alpha1', count: 1 }
               ],
+              os: {
+                platforms: [{ platform: 'win', count: 1 }],
+                platformReleases: [{ platformRelease: 'win-10.0', count: 1 }],
+                distros: [],
+                distroReleases: [],
+              },
               cloud: undefined
             },
             logstash: {
@@ -166,6 +176,12 @@ describe('get_all_stats', () => {
               versions: [
                 { version: '2.3.4-beta2', count: 1 }
               ],
+              os: {
+                platforms: [],
+                platformReleases: [],
+                distros: [],
+                distroReleases: [],
+              },
               cloud: undefined
             }
           }

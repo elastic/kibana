@@ -25,7 +25,7 @@ jest.mock('ui/chrome',
         get: (key) => {
           switch (key) {
             case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
+              return { from: 'now-15m', to: 'now' };
             case 'timepicker:refreshIntervalDefaults':
               return { pause: false, value: 0 };
             default:
@@ -48,6 +48,7 @@ jest.mock('ui/timefilter/lib/parse_querystring',
 
 import sinon from 'sinon';
 import expect from 'expect.js';
+import moment from 'moment';
 import { timefilter } from './timefilter';
 
 function stubNowTime(nowTime) {
@@ -68,15 +69,14 @@ describe('setTime', () => {
     timefilter.setTime({
       from: 0,
       to: 1,
-      mode: 'absolute'
     });
     timefilter.on('timeUpdate', update);
     timefilter.on('fetch', fetch);
   });
 
   test('should update time', () => {
-    timefilter.setTime({ from: 5, to: 10, mode: 'absolute' });
-    expect(timefilter.getTime()).to.eql({ from: 5, to: 10, mode: 'absolute' });
+    timefilter.setTime({ from: 5, to: 10 });
+    expect(timefilter.getTime()).to.eql({ from: 5, to: 10 });
   });
 
   test('should not add unexpected object keys to time state', () => {
@@ -87,7 +87,7 @@ describe('setTime', () => {
 
   test('should allow partial updates to time', () => {
     timefilter.setTime({ from: 5, to: 10 });
-    expect(timefilter.getTime()).to.eql({ from: 5, to: 10, mode: 'absolute' });
+    expect(timefilter.getTime()).to.eql({ from: 5, to: 10 });
   });
 
   test('not emit anything if the time has not changed', () => {
@@ -100,6 +100,16 @@ describe('setTime', () => {
     timefilter.setTime({ from: 5, to: 10 });
     expect(update.called).to.be(true);
     expect(fetch.called).to.be(true);
+  });
+
+  test('should return strings and not moment objects', () => {
+    const from = moment().subtract(15, 'minutes');
+    const to = moment();
+    timefilter.setTime({ to, from });
+    expect(timefilter.getTime()).to.eql({
+      from: from.toISOString(),
+      to: to.toISOString(),
+    });
   });
 });
 

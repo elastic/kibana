@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Writable } from 'stream';
+
 import { runTestsCli } from './cli';
 import { checkMockConsoleLogSnapshot } from '../../test_helpers';
 
@@ -36,7 +38,7 @@ describe('run tests CLI', () => {
     const processMock = {
       exit: exitMock,
       argv: argvMock,
-      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn() },
+      stdout: new Writable(),
       cwd: jest.fn(),
     };
 

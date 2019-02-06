@@ -1,0 +1,23 @@
+@import 'src/ui/public/styles/styling_constants';
+
+// Prefix all styles with "tvb" to avoid conflicts.
+// Examples
+//   tvbChart
+//   tvbChart__legend
+//   tvbChart__legend--small
+//   tvbChart__legend-isLoading
+
+@import './variables';
+@import './mixins';
+
+// Hacks (mostly todo's)
+@import './hacks';
+
+// Library overrides
+@import './ui_sortable';
+
+// Components
+@import './components/index';
+
+// Visualizations
+@import './visualizations/components/index';

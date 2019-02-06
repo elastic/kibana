@@ -10,6 +10,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
 import { getApmInfo } from '../../../../lib/apm';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function apmInstanceRoute(server) {
   server.route({
@@ -30,12 +31,12 @@ export function apmInstanceRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const apmUuid = req.params.apmUuid;
       const config = server.config();
       const clusterUuid = req.params.clusterUuid;
       const ccs = req.payload.ccs;
-      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
         const [ metrics, apmSummary ] = await Promise.all([
@@ -43,12 +44,12 @@ export function apmInstanceRoute(server) {
           getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
         ]);
 
-        reply({
+        return {
           metrics,
           apmSummary,
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        return handleError(err, req);
       }
     }
   });

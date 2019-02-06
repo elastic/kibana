@@ -9,12 +9,14 @@ import { ACTION_TYPES } from 'plugins/watcher/../common/constants';
 import { EmailAction } from './email_action';
 import { LoggingAction } from './logging_action';
 import { SlackAction } from './slack_action';
+import { WebhookAction } from './webhook.action';
 import { UnknownAction } from './unknown_action';
 
 const ActionTypes = {};
 set(ActionTypes, ACTION_TYPES.EMAIL, EmailAction);
 set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
 set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
+set(ActionTypes, ACTION_TYPES.WEBHOOK, WebhookAction);
 
 export class Action {
   static getActionTypes = () => {
