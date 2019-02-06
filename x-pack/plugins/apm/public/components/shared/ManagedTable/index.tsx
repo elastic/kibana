@@ -11,7 +11,7 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
-  field: keyof T;
+  field: string;
   name: string;
   dataType?: string;
   align?: string;
