@@ -18,10 +18,11 @@ interface SnapshotProps {
 type Props = SnapshotProps & UptimeCommonProps;
 
 export const SnapshotQuery = ({
-  dateRangeStart,
-  dateRangeEnd,
   autorefreshIsPaused,
   autorefreshInterval,
+  colors: { primary, danger },
+  dateRangeStart,
+  dateRangeEnd,
   filters,
 }: Props) => (
   <Query
@@ -41,7 +42,7 @@ export const SnapshotQuery = ({
       }
       const { snapshot } = data;
 
-      return <Snapshot snapshot={snapshot} />;
+      return <Snapshot danger={danger} primary={primary} snapshot={snapshot} />;
     }}
   </Query>
 );

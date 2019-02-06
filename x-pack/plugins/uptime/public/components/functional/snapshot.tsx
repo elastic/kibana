@@ -29,10 +29,16 @@ import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { SnapshotHistogram } from './snapshot_histogram';
 
 interface SnapshotProps {
+  danger: string;
+  primary: string;
   snapshot: SnapshotType;
 }
 
-export const Snapshot = ({ snapshot: { up, down, total, histogram } }: SnapshotProps) => (
+export const Snapshot = ({
+  danger,
+  snapshot: { up, down, total, histogram },
+  primary,
+}: SnapshotProps) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="xl">
     <EuiFlexItem>
       <EuiTitle size="xs">
@@ -96,7 +102,9 @@ export const Snapshot = ({ snapshot: { up, down, total, histogram } }: SnapshotP
       </EuiTitle>
       {/* TODO: this is a UI hack that should be replaced */}
       <EuiPanel paddingSize="s">
-        {histogram && <SnapshotHistogram histogram={histogram} />}
+        {histogram && (
+          <SnapshotHistogram dangerColor={danger} primaryColor={primary} histogram={histogram} />
+        )}
         {!histogram && (
           <EuiEmptyPrompt
             title={
