@@ -21,7 +21,7 @@ export const configBlockSchemas: ConfigBlockSchema[] = [
           type: 'multi-input',
           helpText: 'filebeatInputConfig.paths.ui.helpText',
           helpTextId: 'filebeatInputConfig.paths.ui.helpText',
-          placeholder: `first/path/to/file.json                   second/path/to/otherfile.json`,
+          placeholder: `path/to/file.json`,
         },
         validation: 'isPaths',
         error: 'filebeatInputConfig.paths.error',

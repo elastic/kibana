@@ -93,7 +93,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
             >
               <FormattedMessage
                 id="xpack.beatsManagement.createTag.saveAndContinueButtonLabel"
-                defaultMessage="Save & Continue"
+                defaultMessage="Save & continue"
               />
             </EuiButton>
           </EuiFlexItem>

@@ -104,19 +104,13 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.beatsManagement.tagConfig.descriptionLabel', {
-              defaultMessage: 'Description',
+              defaultMessage: 'Description (optional)',
             })}
           >
             <EuiFieldText
               value={this.state.configBlock.description}
               disabled={!this.props.onSave}
               onChange={this.onValueChange('description')}
-              placeholder={i18n.translate(
-                'xpack.beatsManagement.tagConfig.descriptionPlaceholder',
-                {
-                  defaultMessage: 'Description (optional)',
-                }
-              )}
             />
           </EuiFormRow>
           <h3>

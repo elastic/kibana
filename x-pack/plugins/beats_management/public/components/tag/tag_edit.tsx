@@ -106,9 +106,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   isInvalid={!!this.getNameError(tag.name)}
                   onChange={this.updateTag('name')}
                   value={tag.name}
-                  placeholder={i18n.translate('xpack.beatsManagement.tag.tagNamePlaceholder', {
-                    defaultMessage: 'Tag name (required)',
-                  })}
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -212,7 +209,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   private getNameError = (name: string) => {
     if (name && name !== '' && name.search(/^[a-zA-Z0-9-]+$/) === -1) {
       return i18n.translate('xpack.beatsManagement.tag.tagName.validationErrorMessage', {
-        defaultMessage: 'Tag name must consist of letters, numbers, and dashes only',
+        defaultMessage: 'Tag name can only contain letters, numbers, and dashes',
       });
     } else {
       return false;

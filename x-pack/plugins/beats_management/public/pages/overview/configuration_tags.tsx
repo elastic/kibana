@@ -96,8 +96,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
           alert(
             intl.formatMessage({
               id: 'xpack.beatsManagement.tags.someTagsMightBeAssignedToBeatsTitle',
-              defaultMessage:
-                'You cannot delete tags that are assigned to Beats. Remove the tags before trying to delete them.',
+              defaultMessage: 'You cannot delete tags that are assigned to Beats.',
             })
           );
         } else {

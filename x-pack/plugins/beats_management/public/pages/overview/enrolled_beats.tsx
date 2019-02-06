@@ -238,7 +238,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       title = intl.formatMessage(
         {
           id: 'xpack.beatsManagement.beats.beatDisenrolledNotificationTitle',
-          defaultMessage: '{firstBeatNameOrId} disenrolled',
+          defaultMessage: '{firstBeatNameOrId} unenrolled',
         },
         {
           firstBeatNameOrId: `"${beats[0].name || beats[0].id}"`,
@@ -247,7 +247,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       text = intl.formatMessage(
         {
           id: 'xpack.beatsManagement.beats.beatDisenrolledNotificationDescription',
-          defaultMessage: 'Beat with ID {firstBeatId} was disenrolled.',
+          defaultMessage: 'Beat with ID {firstBeatId} was unenrolled.',
         },
         {
           firstBeatId: `"${beats[0].id}"`,
@@ -257,7 +257,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       title = intl.formatMessage(
         {
           id: 'xpack.beatsManagement.beats.disenrolledBeatsNotificationTitle',
-          defaultMessage: '{beatsLength} beats disenrolled',
+          defaultMessage: '{beatsLength} Beats unenrolled',
         },
         {
           beatsLength: beats.length,
@@ -287,7 +287,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
             {
               id: 'xpack.beatsManagement.beats.removedNotificationDescription',
               defaultMessage:
-                'Removed tag {tag} from {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.',
+                'Removed tag {tag} from {assignmentsLength, plural, one {Beat {beatName}} other {# Beats}}.',
             },
             {
               tag: `"${tag}"`,
@@ -299,7 +299,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
             {
               id: 'xpack.beatsManagement.beats.addedNotificationDescription',
               defaultMessage:
-                'Added tag {tag} to {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.',
+                'Added tag {tag} to {assignmentsLength, plural, one {Beat {beatName}} other {# Beats}}.',
             },
             {
               tag: `"${tag}"`,
