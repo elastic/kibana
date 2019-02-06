@@ -345,13 +345,6 @@ export default class BaseOptimizer {
             ],
           },
           {
-            test: /\.scss$/,
-            loaders: [
-              ...getStyleLoaderExtractor(),
-              ...getStyleLoaders(['sass-loader'], maybeAddCacheLoader('sass', []))
-            ],
-          },
-          {
             test: /\.css$/,
             use: [
               ...getStyleLoaderExtractor(),
