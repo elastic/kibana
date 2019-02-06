@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('PDF Print Layout', () => {
+      describe('PDF Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           this.timeout(TEN_MINUTES);
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('PNG Preserve Layout', () => {
+      describe('PNG Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
