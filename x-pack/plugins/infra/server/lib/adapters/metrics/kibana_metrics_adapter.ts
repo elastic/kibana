@@ -29,10 +29,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
       [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
     };
-    const indexPattern = [
-      options.sourceConfiguration.metricAlias,
-      options.sourceConfiguration.logAlias,
-    ];
+    const indexPattern = `${options.sourceConfiguration.metricAlias},${
+      options.sourceConfiguration.logAlias
+    }`;
     const timeField = options.sourceConfiguration.fields.timestamp;
     const interval = options.timerange.interval;
     const nodeField = fields[options.nodeType];

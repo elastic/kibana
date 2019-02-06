@@ -23,6 +23,7 @@ import { VislibComponentsZeroInjectionInjectZerosProvider } from '../components/
 import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../components/zero_injection/ordered_x_keys';
 import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
 import { VislibComponentsColorColorProvider } from '../../vis/components/color/color';
+import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export function VislibLibDataProvider(Private) {
 
@@ -59,22 +60,29 @@ export function VislibLibDataProvider(Private) {
             newData[key] = data[key];
           } else {
             newData[key] = data[key].map(seri => {
+              const converter = getFormat(seri.format);
               return {
+                id: seri.id,
                 label: seri.label,
-                aggLabel: seri.aggLabel,
-                aggId: seri.aggId,
                 values: seri.values.map(val => {
                   const newVal = _.clone(val);
-                  newVal.aggConfig = val.aggConfig;
-                  newVal.aggConfigResult = val.aggConfigResult;
                   newVal.extraMetrics = val.extraMetrics;
                   newVal.series = val.series || seri.label;
                   return newVal;
-                })
+                }),
+                yAxisFormatter: val => converter.convert(val)
               };
             });
           }
         });
+
+        const xConverter = getFormat(newData.xAxisFormat);
+        const yConverter = getFormat(newData.yAxisFormat);
+        const zConverter = getFormat(newData.zAxisFormat);
+        newData.xAxisFormatter = val => xConverter.convert(val);
+        newData.yAxisFormatter = val => yConverter.convert(val);
+        newData.zAxisFormatter = val => zConverter.convert(val);
+
         return newData;
       };
 
@@ -304,7 +312,7 @@ export function VislibLibDataProvider(Private) {
       _.forEach(array, function (obj) {
         names.push({
           label: obj.name,
-          values: obj,
+          values: [obj.rawData],
           index: index
         });
 

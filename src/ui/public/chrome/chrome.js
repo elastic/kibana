@@ -30,6 +30,7 @@ import '../storage';
 import '../directives/kbn_src';
 import '../watch_multi';
 import './services';
+import '../i18n';
 
 import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';
@@ -44,6 +45,7 @@ import { initLoadingCountApi } from './api/loading_count';
 import { initSavedObjectClient } from './api/saved_object_client';
 import { initChromeBasePathApi } from './api/base_path';
 import { initChromeInjectedVarsApi } from './api/injected_vars';
+import { initHelpExtensionApi } from './api/help_extension';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -70,6 +72,7 @@ initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
 initBreadcrumbsApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
+initHelpExtensionApi(chrome, internals);
 initAngularApi(chrome, internals);
 initChromeControlsApi(chrome);
 templateApi(chrome, internals);

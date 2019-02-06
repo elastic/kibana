@@ -5,6 +5,6 @@
  */
 
 export interface UMGqlRange {
-  dateRangeStart: number;
-  dateRangeEnd: number;
+  dateRangeStart: string;
+  dateRangeEnd: string;
 }

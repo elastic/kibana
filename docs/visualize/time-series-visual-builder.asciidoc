@@ -1,8 +1,6 @@
 [[time-series-visual-builder]]
 == Time Series Visual Builder
 
-*Experimental Feature*
-
 Time Series Visual Builder is a time series data visualizer with an emphasis
 on allowing you to use the full power of Elasticsearch aggregation framework.
 Time Series Visual Builder allows you to combine an infinite number of

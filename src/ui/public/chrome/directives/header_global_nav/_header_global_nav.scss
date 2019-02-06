@@ -1,3 +1,5 @@
+@import '@elastic/eui/src/components/header/variables';
+
 .header-global-wrapper {
   width: 100%;
   position: fixed;
@@ -5,13 +7,24 @@
   z-index: 10;
 }
 
-.header-global-wrapper + .app-wrapper {
-  top: 65px;
-  left: 0;
+.header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
+  top: $euiHeaderChildSize;
+  left: $euiHeaderChildSize;
 
   // HOTFIX: Temporary fix for flyouts not inside portals
   // SASSTODO: Find an actual solution
   .euiFlyout {
-    top: 65px;
+    top: $euiHeaderChildSize;
   }
+}
+
+// Mobile header is smaller
+@include euiBreakpoint('xs', 's') {
+  .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
+    left: 0;
+  }
+}
+
+.chrHeaderHelpMenu__version {
+  text-transform: none;
 }

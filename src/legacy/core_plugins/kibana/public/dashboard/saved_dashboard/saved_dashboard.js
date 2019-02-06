@@ -22,6 +22,10 @@ import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/courier';
+import {
+  extractReferences,
+  injectReferences,
+} from './saved_dashboard_references';
 
 const module = uiModules.get('app/dashboard');
 
@@ -37,6 +41,8 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
       type: SavedDashboard.type,
       mapping: SavedDashboard.mapping,
       searchSource: SavedDashboard.searchsource,
+      extractReferences: extractReferences,
+      injectReferences: injectReferences,
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
       id: id,
@@ -48,7 +54,6 @@ module.factory('SavedDashboard', function (Private, config, i18n) {
         description: '',
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
-          darkTheme: config.get('dashboard:defaultDarkTheme'),
           // for BWC reasons we can't default dashboards that already exist without this setting to true.
           useMargins: id ? false : true,
           hidePanelTitles: false,

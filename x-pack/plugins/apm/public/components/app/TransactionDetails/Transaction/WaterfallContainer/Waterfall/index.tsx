@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
+import {
+  fromQuery,
+  history,
+  QueryParams,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from '../../../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../../../utils/url';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { AgentMark } from '../get_agent_marks';
@@ -39,7 +45,7 @@ interface Props {
   agentMarks: AgentMark[];
   urlParams: IUrlParams;
   waterfall: IWaterfall;
-  location: any;
+  location: Location;
   serviceColors: IServiceColors;
 }
 
@@ -143,7 +149,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: Partial<IUrlParams>) {
+  private setQueryParams(params: QueryParams) {
     const { location } = this.props;
     history.replace({
       ...location,

@@ -26,6 +26,7 @@ import {
 
 import { FILTER_TYPE } from '../../../common/constants/detector_rule';
 import { filterTypeToText } from './utils';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 // Raise the popovers above GuidePageSideNav
 const POPOVER_STYLE = { zIndex: '200' };
@@ -94,7 +95,12 @@ export class ScopeExpression extends Component {
 
     return (
       <div style={POPOVER_STYLE}>
-        <EuiPopoverTitle>Is</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            defaultMessage="Is"
+          />
+        </EuiPopoverTitle>
         <div className="euiExpression">
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 150 }}>
@@ -142,7 +148,10 @@ export class ScopeExpression extends Component {
         <EuiFlexItem grow={false}>
           <EuiExpression
             className="scope-field-button"
-            description="when"
+            description={<FormattedMessage
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+              defaultMessage="when"
+            />}
             value={fieldName}
             isActive={false}
             onClick={(event) => event.preventDefault()}
@@ -155,7 +164,11 @@ export class ScopeExpression extends Component {
               id="operatorValuePopover"
               button={(
                 <EuiExpression
-                  description={`is ${filterTypeToText(filterType)}`}
+                  description={<FormattedMessage
+                    id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+                    defaultMessage="is {filterType}"
+                    values={{ filterType: filterTypeToText(filterType) }}
+                  />}
                   value={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}

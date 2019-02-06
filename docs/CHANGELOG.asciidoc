@@ -237,6 +237,7 @@ Operations::
 * Creates separate startup scripts for development and production {pull}13806[#13806]
 * Sets default port based on protocol  {pull}21564[#21564]
 * Removes deprecated `/shorten` API {pull}21861[#21861]
+* Plugin installer defers optimization step until server start {pull}26983[#26983]
 
 [float]
 [[deprecation-7.0.0]]

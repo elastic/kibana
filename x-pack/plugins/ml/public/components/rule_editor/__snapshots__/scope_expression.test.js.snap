@@ -31,7 +31,13 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
     <EuiExpression
       className="scope-field-button"
       color="secondary"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
       uppercase={true}
@@ -72,7 +78,13 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     <EuiExpression
       className="scope-field-button"
       color="secondary"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
       uppercase={true}
@@ -88,7 +100,17 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
       button={
         <EuiExpression
           color="secondary"
-          description="is in"
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "in",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -111,7 +133,11 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -233,7 +259,13 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     <EuiExpression
       className="scope-field-button"
       color="secondary"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
       uppercase={true}
@@ -249,7 +281,17 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
       button={
         <EuiExpression
           color="secondary"
-          description="is in"
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "in",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -272,7 +314,11 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -394,7 +440,13 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     <EuiExpression
       className="scope-field-button"
       color="secondary"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
       uppercase={true}
@@ -410,7 +462,17 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
       button={
         <EuiExpression
           color="secondary"
-          description="is "
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -433,7 +495,11 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"

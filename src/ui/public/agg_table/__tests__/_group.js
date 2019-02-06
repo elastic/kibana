@@ -75,12 +75,13 @@ describe('AggTableGroup Directive', function () {
   });
 
   it('renders a simple split response properly', async function () {
-    $scope.group = await tableAggResponse(tabifiedData.metricOnly);
+    $scope.dimensions = { metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }], buckets: [] };
+    $scope.group = await tableAggResponse(tabifiedData.metricOnly, $scope.dimensions);
     $scope.sort = {
       columnIndex: null,
       direction: null
     };
-    const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    const $el = $('<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>');
 
     $compile($el)($scope);
     $scope.$digest();
@@ -90,7 +91,7 @@ describe('AggTableGroup Directive', function () {
   });
 
   it('renders nothing if the table list is empty', function () {
-    const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    const $el = $('<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>');
 
     $scope.group = {
       tables: []
@@ -104,9 +105,13 @@ describe('AggTableGroup Directive', function () {
   });
 
   it('renders a complex response properly', async function () {
-
-    const group = $scope.group = await tableAggResponse(tabifiedData.threeTermBuckets);
-    const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+    $scope.dimensions = {
+      splitRow: [{ accessor: 0, params: {} }],
+      buckets: [{ accessor: 2, params: {} }, { accessor: 4, params: {} }],
+      metrics: [{ accessor: 1, params: {} }, { accessor: 3, params: {} }, { accessor: 5, params: {} }]
+    };
+    const group = $scope.group = await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions);
+    const $el = $('<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();
 

@@ -67,7 +67,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public render() {
     return (
-      <div className="spcGridPage euiPage--restrictWidth-default">
+      <div className="spcGridPage">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
         <SecureSpaceMessage userProfile={this.props.userProfile} />
         {this.getConfirmDeleteModal()}
@@ -93,7 +93,7 @@ class SpacesGridPageUI extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size="s">
               <p>{getSpacesFeatureDescription()}</p>
             </EuiText>
           </EuiFlexItem>

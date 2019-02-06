@@ -17,110 +17,64 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import AggConfigResult from '../../vis/agg_config_result';
-import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
-
-const getSchema = column => {
-  return _.get(column, 'aggConfig.schema.name') || _.get(column, 'aggConfig.schema');
-};
-
-const getType = column => {
-  return _.get(column, 'aggConfig.type.type') || _.get(column, 'aggConfig.type');
-};
+/**
+ * The LegacyResponseHandler is not registered as a response handler and can't be used
+ * as such anymore. Since the function itself is still used as a utility in the table
+ * function and the vislib response handler, we'll keep it for now.
+ * As soon as we have a new table implementation (https://github.com/elastic/kibana/issues/16639)
+ * we should move this over into or close to the vislib response handler as a pure utility
+ * function.
+ */
 
 const LegacyResponseHandlerProvider = function () {
 
   return {
     name: 'legacy',
-    handler: function (table) {
+    handler: function (table, dimensions) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
 
-        // check if there are buckets after the first metric
-        const metricsAtAllLevels = table.columns.findIndex(column => getType(column) === 'metrics') <
-          _.findLastIndex(table.columns, column => getType(column) === 'buckets');
+        const split = (dimensions.splitColumn || dimensions.splitRow);
 
-        const splitColumn = table.columns.find(column => getSchema(column) === 'split');
-        const numberOfMetrics = table.columns.filter(column => getType(column) === 'metrics').length;
-        const numberOfBuckets = table.columns.filter(column => getType(column) === 'buckets').length;
-        const metricsPerBucket = numberOfMetrics / numberOfBuckets;
-
-        if (splitColumn) {
-          const splitAgg = splitColumn.aggConfig;
+        if (split) {
+          converted.direction = dimensions.splitRow ? 'row' : 'column';
+          const splitColumnIndex = split[0].accessor;
+          const splitColumn = table.columns[splitColumnIndex];
           const splitMap = {};
           let splitIndex = 0;
 
           table.rows.forEach((row, rowIndex) => {
             const splitValue = row[splitColumn.id];
-            const splitColumnIndex = table.columns.findIndex(column => column === splitColumn);
 
             if (!splitMap.hasOwnProperty(splitValue)) {
               splitMap[splitValue] = splitIndex++;
               const tableGroup = {
                 $parent: converted,
-                aggConfig: splitAgg,
-                title: `${splitValue}: ${splitAgg.makeLabel()}`,
+                title: `${splitValue}: ${splitColumn.name}`,
+                name: splitColumn.name,
                 key: splitValue,
+                column: splitColumnIndex,
+                row: rowIndex,
+                table: table,
                 tables: []
               };
               tableGroup.tables.push({
                 $parent: tableGroup,
-                columns: table.columns.filter((column, i) => {
-                  const isSplitColumn = i === splitColumnIndex;
-                  const isSplitMetric = metricsAtAllLevels && i > splitColumnIndex && i <= splitColumnIndex + metricsPerBucket;
-                  return !isSplitColumn && !isSplitMetric;
-                }).map(column => ({ title: column.name, ...column })),
+                columns: table.columns,
                 rows: []
               });
 
               converted.tables.push(tableGroup);
             }
 
-            let previousSplitAgg = new AggConfigResult(splitAgg, null, splitValue, splitValue);
-            previousSplitAgg.rawData = {
-              table: table,
-              column: splitColumnIndex,
-              row: rowIndex,
-            };
             const tableIndex = splitMap[splitValue];
-            const newRow = _.map(converted.tables[tableIndex].tables[0].columns, column => {
-              const value = row[column.id];
-              const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
-              aggConfigResult.rawData = {
-                table: table,
-                column: table.columns.findIndex(c => c.id === column.id),
-                row: rowIndex,
-              };
-              if (getType(column) === 'buckets') {
-                previousSplitAgg = aggConfigResult;
-              }
-              return aggConfigResult;
-            });
-
-            converted.tables[tableIndex].tables[0].rows.push(newRow);
+            converted.tables[tableIndex].tables[0].rows.push(row);
           });
         } else {
 
           converted.tables.push({
-            columns: table.columns.map(column => ({ title: column.name, ...column })),
-            rows: table.rows.map((row, rowIndex) => {
-              let previousSplitAgg;
-              return table.columns.map((column, columnIndex) => {
-                const value = row[column.id];
-                const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
-                aggConfigResult.rawData = {
-                  table: table,
-                  column: columnIndex,
-                  row: rowIndex,
-                };
-                if (getType(column) === 'buckets') {
-                  previousSplitAgg = aggConfigResult;
-                }
-                return aggConfigResult;
-              });
-            }),
-            aggConfig: (column) => column.aggConfig
+            columns: table.columns,
+            rows: table.rows
           });
         }
 
@@ -129,7 +83,5 @@ const LegacyResponseHandlerProvider = function () {
     }
   };
 };
-
-VisResponseHandlersRegistryProvider.register(LegacyResponseHandlerProvider);
 
 export { LegacyResponseHandlerProvider };

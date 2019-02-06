@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { ESBucket, ESResponse } from './fetcher';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { anomalySeriesTransform, replaceFirstAndLastBucket } from './transform';
@@ -291,9 +291,11 @@ function getESResponse(buckets: ESBucket[]): ESResponse {
         buckets: buckets.map(bucket => {
           return {
             ...bucket,
-            lower: { value: oc(bucket).lower.value(null) },
-            upper: { value: oc(bucket).upper.value(null) },
-            anomaly_score: { value: oc(bucket).anomaly_score.value(null) }
+            lower: { value: idx(bucket, _ => _.lower.value) || null },
+            upper: { value: idx(bucket, _ => _.upper.value) || null },
+            anomaly_score: {
+              value: idx(bucket, _ => _.anomaly_score.value) || null
+            }
           };
         })
       }

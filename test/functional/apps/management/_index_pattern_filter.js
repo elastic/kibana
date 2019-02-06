@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
 
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.getFieldTypes();
       await PageObjects.settings.setFieldTypeFilter('string');
 

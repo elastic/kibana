@@ -11,13 +11,12 @@
  * which means that the index pattern will be returned without using {@code ccs}.
  *
  * @param  {Object} config The Kibana configuration object.
- * @param  {String} indexPatternName The index pattern name (e.g., 'xpack.monitoring.elasticsearch.index_pattern')
+ * @param  {String} indexPattern The index pattern name
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config, indexPatternName, ccs) {
+export function prefixIndexPattern(config, indexPattern, ccs) {
   const ccsEnabled = config.get('xpack.monitoring.ccs.enabled');
-  const indexPattern = config.get(indexPatternName);
 
   if (!ccsEnabled || !ccs) {
     return indexPattern;

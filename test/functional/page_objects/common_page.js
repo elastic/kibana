@@ -28,6 +28,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -89,9 +90,17 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
 
-    navigateToApp(appName) {
+    /**
+     * @param {string} appName - name of the app
+     * @param {object} [opts] - optional options object
+     * @param {object} [opts.appConfig] - overrides for appConfig, e.g. { pathname, hash }
+     */
+    navigateToApp(appName, opts = { appConfig: {} }) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        ...config.get(['apps', appName]),
+        ...opts.appConfig,
+      });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
@@ -148,7 +157,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
               // Browsers don't show the ':port' if it's 80 or 443 so we have to
               // remove that part so we can get a match in the tests.
-              const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
+              const navSuccessful = new RegExp(appUrl.replace(':80/', '/').replace(':443/', '/')
                 + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
                 .test(currentUrl);
 
@@ -278,16 +287,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async getBreadcrumbPageTitle() {
-      return await testSubjects.getVisibleText('breadcrumbPageTitle');
-    }
-
-    async getTopNavText() {
-      return await testSubjects.getVisibleText('top-nav');
-    }
-
     async isChromeVisible() {
-      const globalNavShown = await testSubjects.exists('globalNav');
+      const globalNavShown = await globalNav.exists();
       const topNavShown = await testSubjects.exists('top-nav');
       return globalNavShown && topNavShown;
     }

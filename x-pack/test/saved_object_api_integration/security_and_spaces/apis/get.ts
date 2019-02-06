@@ -16,7 +16,6 @@ export default function({ getService }: TestInvoker) {
 
   const {
     createExpectDoesntExistNotFound,
-    createExpectLegacyForbidden,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,
@@ -33,7 +32,6 @@ export default function({ getService }: TestInvoker) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -49,7 +47,6 @@ export default function({ getService }: TestInvoker) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -66,15 +63,15 @@ export default function({ getService }: TestInvoker) {
         tests: {
           spaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectSpaceAwareRbacForbidden,
           },
           notSpaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectNotSpaceAwareRbacForbidden,
           },
           doesntExist: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectDoesntExistRbacForbidden,
           },
         },
       });
@@ -103,35 +100,16 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
+            statusCode: 403,
+            response: expectSpaceAwareRbacForbidden,
           },
           notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
+            statusCode: 403,
+            response: expectNotSpaceAwareRbacForbidden,
           },
           doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`legacy readonly user within the ${scenario.spaceId} space`, {
-        user: scenario.users.legacyRead,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
+            statusCode: 403,
+            response: expectDoesntExistRbacForbidden,
           },
         },
       });

@@ -8,10 +8,11 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { RelativeLink } from '../../../../utils/url';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
@@ -30,15 +31,10 @@ function formatNumber(value: number) {
 }
 
 function formatString(value?: string | null) {
-  return (
-    value ||
-    i18n.translate('xpack.apm.servicesTable.notAvailableLabel', {
-      defaultMessage: 'N/A'
-    })
-  );
+  return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(RelativeLink)`
+const AppLink = styled(KibanaLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -53,7 +49,7 @@ export const SERVICE_COLUMNS = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/${serviceName}/transactions`}>
+        <AppLink hash={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

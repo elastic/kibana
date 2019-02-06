@@ -592,9 +592,7 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiPageContent
-        verticalPosition="center"
         horizontalPosition="center"
-        style={{ maxWidth: 1000 }}
       >
         {this.renderFlyout()}
         {this.renderRelationships()}

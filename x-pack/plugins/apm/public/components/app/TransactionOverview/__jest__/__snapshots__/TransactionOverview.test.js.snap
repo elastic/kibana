@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TransactionOverviewView should render with type filter controls 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFormRow
     describedByIds={Array []}
     fullWidth={false}
@@ -50,11 +50,11 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`TransactionOverviewView should render without type filter controls if there is just a single type 1`] = `
-<React.Fragment>
+<Fragment>
   <TransactionOverviewChartsRequest
     render={[Function]}
     urlParams={
@@ -76,5 +76,5 @@ exports[`TransactionOverviewView should render without type filter controls if t
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;

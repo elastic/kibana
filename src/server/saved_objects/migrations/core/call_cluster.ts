@@ -30,7 +30,7 @@ export interface CallCluster {
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
   (path: 'indices.existsAlias', opts: { name: string }): Promise<boolean>;
-  (path: 'indices.get', opts: IndicesGetOptions): Promise<IndicesInfo | NotFound>;
+  (path: 'indices.get', opts: IndexOpts & Ignorable): Promise<IndicesInfo | NotFound>;
   (path: 'indices.getAlias', opts: { name: string } & Ignorable): Promise<AliasResult | NotFound>;
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
@@ -60,26 +60,11 @@ export interface CountOpts {
     query: object;
   };
   index: string;
-  type: string;
 }
 
 export interface PutMappingOpts {
-  body: DocMapping;
+  body: IndexMapping;
   index: string;
-  type: string;
-  include_type_name?: boolean;
-}
-
-export interface PutTemplateOpts {
-  name: string;
-  body: {
-    template: string;
-    settings: {
-      number_of_shards: number;
-      auto_expand_replicas: string;
-    };
-    mappings: IndexMapping;
-  };
 }
 
 export interface IndexOpts {
@@ -88,7 +73,6 @@ export interface IndexOpts {
 
 export interface IndexCreationOpts {
   index: string;
-  include_type_name?: boolean;
   body?: {
     mappings?: IndexMapping;
     settings?: {
@@ -127,10 +111,6 @@ export interface SearchOpts {
 export interface ScrollOpts {
   scroll: string;
   scrollId: string;
-}
-
-export interface IndicesGetOptions extends IndexOpts, Ignorable {
-  include_type_name?: boolean;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -217,12 +197,8 @@ export interface MappingMeta {
   migrationMappingPropertyHashes?: { [k: string]: string };
 }
 
-export interface DocMapping {
+export interface IndexMapping {
   dynamic: string;
   properties: MappingProperties;
   _meta?: MappingMeta;
-}
-
-export interface IndexMapping {
-  doc: DocMapping;
 }

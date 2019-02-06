@@ -18,8 +18,6 @@
  */
 
 import _ from 'lodash';
-import AggConfigResult from '../vis/agg_config_result';
-
 import { uiModules } from '../modules';
 import paginatedTableTemplate from './paginated_table.html';
 uiModules
@@ -32,6 +30,7 @@ uiModules
       template: paginatedTableTemplate,
       transclude: true,
       scope: {
+        table: '=',
         rows: '=',
         columns: '=',
         linkToTop: '=',
@@ -41,7 +40,8 @@ uiModules
         sort: '=?',
         showSelector: '=?',
         showTotal: '=',
-        totalFunc: '='
+        totalFunc: '=',
+        filter: '=',
       },
       controllerAs: 'paginatedTable',
       controller: function ($scope) {
@@ -82,10 +82,9 @@ uiModules
         };
 
         function valueGetter(row) {
-          let value = row[self.sort.columnIndex];
-          if (value && value.value != null) value = value.value;
+          const col = $scope.columns[self.sort.columnIndex];
+          let value = row[col.id];
           if (typeof value === 'boolean') value = value ? 0 : 1;
-          if (value instanceof AggConfigResult && value.valueOf() === null) value = false;
           return value;
         }
 

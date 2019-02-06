@@ -20,8 +20,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
 import {
   getMlPrefix,
   startMLJob
@@ -29,14 +32,13 @@ import {
 import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { KibanaLink, ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
 import { TransactionSelect } from './TransactionSelect';
 
 interface FlyoutProps {
   isOpen: boolean;
   onClose: () => void;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
   serviceTransactionTypes: string[];
 }
 
@@ -140,11 +142,11 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 'The analysis is now running for {serviceName} ({transactionType}). It might take a while before results are added to the response times graph.',
               values: {
                 serviceName,
-                transactionType: transactionType as string
+                transactionType
               }
             }
           )}{' '}
-          <ViewMLJob
+          <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
             location={location}
@@ -155,14 +157,14 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 defaultMessage: 'View job'
               }
             )}
-          </ViewMLJob>
+          </MLJobLink>
         </p>
       )
     });
   };
 
   public render() {
-    const { isOpen, onClose, urlParams } = this.props;
+    const { isOpen, onClose, urlParams, location } = this.props;
     const { serviceName, transactionType } = urlParams;
     const { isLoading, hasIndexPattern, selectedTransactionType } = this.state;
 
@@ -222,11 +224,11 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                               'There is currently a job running for {serviceName} ({transactionType}).',
                             values: {
                               serviceName,
-                              transactionType: transactionType as string
+                              transactionType
                             }
                           }
                         )}{' '}
-                        <ViewMLJob
+                        <MLJobLink
                           serviceName={serviceName}
                           transactionType={transactionType}
                           location={location}
@@ -237,7 +239,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                               defaultMessage: 'View existing job'
                             }
                           )}
-                        </ViewMLJob>
+                        </MLJobLink>
                       </p>
                     </EuiCallOut>
                     <EuiSpacer size="m" />

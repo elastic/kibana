@@ -42,7 +42,7 @@ export async function anomalySeriesFetcher({
   intervalString: string;
   mlBucketSize: number;
   setup: Setup;
-}) {
+}): Promise<ESResponse | undefined> {
   const { client, start, end } = setup;
 
   // move the start back with one bucket size, to ensure to get anomaly data in the beginning

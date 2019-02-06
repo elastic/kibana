@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function addToSiri(series, point, id, label, agg) {
+export function addToSiri(series, point, id, label, format) {
   id = id == null ? '' : id + '';
 
   if (series.has(id)) {
@@ -26,10 +26,10 @@ export function addToSiri(series, point, id, label, agg) {
   }
 
   series.set(id, {
+    id: id.split('-').pop(),
     label: label == null ? id : label,
-    aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
-    aggId: agg.parentId ? agg.parentId : agg.id,
     count: 0,
-    values: [point]
+    values: [point],
+    format: format,
   });
 }

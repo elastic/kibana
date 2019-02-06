@@ -6,12 +6,12 @@
 
 import { BucketAgg } from 'elasticsearch';
 import { ESFilter } from 'elasticsearch';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 
 export interface ServiceAPIResponse {
@@ -76,11 +76,12 @@ export async function getService(
   }
 
   const { aggregations } = await client<void, Aggs>('search', params);
+  const buckets = idx(aggregations, _ => _.types.buckets) || [];
+  const types = buckets.map(bucket => bucket.key);
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
   return {
     serviceName,
-    types: oc(aggregations)
-      .types.buckets([])
-      .map(bucket => bucket.key),
-    agentName: oc(aggregations).agents.buckets[0].key()
+    types,
+    agentName
   };
 }

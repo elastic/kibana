@@ -43,12 +43,10 @@ export function buildActiveMappings({
   properties = validateAndMerge(mapping.doc.properties, properties);
 
   return _.cloneDeep({
-    doc: {
-      ...mapping.doc,
-      properties,
-      _meta: {
-        migrationMappingPropertyHashes: md5Values(properties),
-      },
+    ...mapping,
+    properties: validateAndMerge(mapping.properties, properties),
+    _meta: {
+      migrationMappingPropertyHashes: md5Values(properties),
     },
   });
 }
@@ -130,29 +128,41 @@ function findChangedProp(actual: any, expected: any) {
  */
 function defaultMapping(): IndexMapping {
   return {
-    doc: {
-      dynamic: 'strict',
-      properties: {
-        config: {
-          dynamic: 'true',
-          properties: {
-            buildNum: {
-              type: 'keyword',
-            },
+    dynamic: 'strict',
+    properties: {
+      config: {
+        dynamic: 'true',
+        properties: {
+          buildNum: {
+            type: 'keyword',
           },
         },
-        migrationVersion: {
-          dynamic: 'true',
-          type: 'object',
-        },
-        type: {
-          type: 'keyword',
-        },
-        namespace: {
-          type: 'keyword',
-        },
-        updated_at: {
-          type: 'date',
+      },
+      migrationVersion: {
+        dynamic: 'true',
+        type: 'object',
+      },
+      type: {
+        type: 'keyword',
+      },
+      namespace: {
+        type: 'keyword',
+      },
+      updated_at: {
+        type: 'date',
+      },
+      references: {
+        type: 'nested',
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
         },
       },
     },

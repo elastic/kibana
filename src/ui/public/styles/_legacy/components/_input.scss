@@ -10,12 +10,3 @@ select {
   color: $euiTextColor;
   background-color: $euiColorEmptyShade;
 }
-
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  select {
-    color: $euiTextColor;
-    background-color: $euiColorEmptyShade;
-  }
-}

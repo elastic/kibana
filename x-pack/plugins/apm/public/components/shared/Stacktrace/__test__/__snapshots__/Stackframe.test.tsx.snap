@@ -2,14 +2,14 @@
 
 exports[`Stackframe when stackframe has source lines should render correctly 1`] = `
 .c2 {
-  color: #98A2B3;
+  color: rgb(152,162,179);
   padding: 8px;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
 }
 
 .c3 {
   font-weight: bold;
-  color: #000000;
+  color: rgb(0,0,0);
 }
 
 .c4 {
@@ -31,7 +31,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   top: 0;
   left: 0;
   border-radius: 0 0 0 5px;
-  background: #F5F7FA;
+  background: rgb(245,247,250);
 }
 
 .c7 {
@@ -39,10 +39,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: #98A2B3;
+  color: rgb(152,162,179);
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid #D3DAE6;
+  border-right: 1px solid rgb(211,218,230);
 }
 
 .c7:last-of-type {
@@ -54,10 +54,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   min-width: 42px;
   padding-left: 8px;
   padding-right: 4px;
-  color: #98A2B3;
+  color: rgb(152,162,179);
   line-height: 18px;
   text-align: right;
-  border-right: 1px solid #D3DAE6;
+  border-right: 1px solid rgb(211,218,230);
   background-color: #FCF2E6;
 }
 
@@ -69,7 +69,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   overflow: auto;
   margin: 0 0 0 42px;
   padding: 0;
-  background-color: #ffffff;
+  background-color: rgb(255,255,255);
 }
 
 .c9:last-of-type {
@@ -96,17 +96,16 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c1 {
-  border-bottom: 1px solid #D3DAE6;
+  border-bottom: 1px solid rgb(211,218,230);
   border-radius: 5px 5px 0 0;
 }
 
 .c0 {
-  margin: 0 0 24px 0;
   position: relative;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  border: 1px solid #D3DAE6;
+  border: 1px solid rgb(211,218,230);
   border-radius: 5px;
-  background: #F5F7FA;
+  background: rgb(245,247,250);
 }
 
 <Stackframe

@@ -5,13 +5,20 @@
  */
 
 import boom from 'boom';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
+import {
+  CANVAS_TYPE,
+  API_ROUTE_WORKPAD,
+  API_ROUTE_WORKPAD_ASSETS,
+  API_ROUTE_WORKPAD_STRUCTURES,
+} from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id';
 
 export function workpad(server) {
   //const config = server.config();
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
+  const routePrefixAssets = API_ROUTE_WORKPAD_ASSETS;
+  const routePrefixStructures = API_ROUTE_WORKPAD_STRUCTURES;
 
   function formatResponse(resp) {
     if (resp.isBoom) {
@@ -67,6 +74,48 @@ export function workpad(server) {
       return savedObjectsClient.create(
         CANVAS_TYPE,
         {
+          ...req.payload,
+          '@timestamp': now,
+          '@created': workpad.attributes['@created'],
+        },
+        { overwrite: true, id }
+      );
+    });
+  }
+
+  function updateWorkpadAssets(req) {
+    const savedObjectsClient = req.getSavedObjectsClient();
+    const { id } = req.params;
+
+    const now = new Date().toISOString();
+
+    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
+      // TODO: Using create with force over-write because of version conflict issues with update
+      return savedObjectsClient.create(
+        CANVAS_TYPE,
+        {
+          ...workpad.attributes,
+          assets: req.payload,
+          '@timestamp': now,
+          '@created': workpad.attributes['@created'],
+        },
+        { overwrite: true, id }
+      );
+    });
+  }
+
+  function updateWorkpadStructures(req) {
+    const savedObjectsClient = req.getSavedObjectsClient();
+    const { id } = req.params;
+
+    const now = new Date().toISOString();
+
+    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
+      // TODO: Using create with force over-write because of version conflict issues with update
+      return savedObjectsClient.create(
+        CANVAS_TYPE,
+        {
+          ...workpad.attributes, // retain preexisting assets and prop order (or maybe better to call out the `assets` prop?)
           ...req.payload,
           '@timestamp': now,
           '@created': workpad.attributes['@created'],
@@ -134,6 +183,30 @@ export function workpad(server) {
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
     handler: function(request) {
       return updateWorkpad(request)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
+    },
+  });
+
+  // update workpad assets
+  server.route({
+    method: 'PUT',
+    path: `${routePrefixAssets}/{id}`,
+    config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
+    handler: function(request) {
+      return updateWorkpadAssets(request)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
+    },
+  });
+
+  // update workpad structures
+  server.route({
+    method: 'PUT',
+    path: `${routePrefixStructures}/{id}`,
+    config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
+    handler: function(request) {
+      return updateWorkpadStructures(request)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
     },

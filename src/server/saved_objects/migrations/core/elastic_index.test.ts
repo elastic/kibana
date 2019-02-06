@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { ROOT_TYPE } from '../../serialization';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
@@ -37,7 +36,7 @@ describe('ElasticIndex', () => {
         aliases: {},
         exists: false,
         indexName: '.kibana-test',
-        mappings: { doc: { dynamic: 'strict', properties: {} } },
+        mappings: { dynamic: 'strict', properties: {} },
       });
     });
 
@@ -79,7 +78,7 @@ describe('ElasticIndex', () => {
         return {
           [index]: {
             aliases: { foo: index },
-            mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+            mappings: { dynamic: 'strict', properties: { a: 'b' } },
           },
         };
       });
@@ -87,7 +86,7 @@ describe('ElasticIndex', () => {
       const info = await Index.fetchInfo(callCluster, '.baz');
       expect(info).toEqual({
         aliases: { foo: '.baz' },
-        mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+        mappings: { dynamic: 'strict', properties: { a: 'b' } },
         exists: true,
         indexName: '.baz',
       });
@@ -219,10 +218,8 @@ describe('ElasticIndex', () => {
           case 'indices.create':
             expect(arg.body).toEqual({
               mappings: {
-                doc: {
-                  dynamic: 'strict',
-                  properties: { foo: 'bar' },
-                },
+                dynamic: 'strict',
+                properties: { foo: 'bar' },
               },
               settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
@@ -265,10 +262,8 @@ describe('ElasticIndex', () => {
         exists: true,
         indexName: '.ze-index',
         mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: { foo: 'bar' },
-          },
+          dynamic: 'strict',
+          properties: { foo: 'bar' },
         },
       };
       await Index.convertToAlias(callCluster, info, '.muchacha', 10);
@@ -289,10 +284,8 @@ describe('ElasticIndex', () => {
           case 'indices.create':
             expect(arg.body).toEqual({
               mappings: {
-                doc: {
-                  dynamic: 'strict',
-                  properties: { foo: 'bar' },
-                },
+                dynamic: 'strict',
+                properties: { foo: 'bar' },
               },
               settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
@@ -328,10 +321,8 @@ describe('ElasticIndex', () => {
         exists: true,
         indexName: '.ze-index',
         mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: { foo: 'bar' },
-          },
+          dynamic: 'strict',
+          properties: { foo: 'bar' },
         },
       };
       await expect(Index.convertToAlias(callCluster, info, '.muchacha', 10)).rejects.toThrow(
@@ -603,10 +594,8 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              dashboard: { type: 'text' },
-            },
+          properties: {
+            dashboard: { type: 'text' },
           },
         },
         count: 0,
@@ -620,7 +609,6 @@ describe('ElasticIndex', () => {
           {
             ignore: [404],
             index: '.myalias',
-            include_type_name: true,
           },
         ],
       ]);
@@ -630,14 +618,12 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 2,
@@ -653,14 +639,12 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 0,
@@ -677,14 +661,12 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 3,
@@ -701,14 +683,12 @@ describe('ElasticIndex', () => {
       const { callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
-            properties: {
-              migrationVersion: {
-                dynamic: 'true',
-                type: 'object',
-              },
-              dashboard: { type: 'text' },
+          properties: {
+            migrationVersion: {
+              dynamic: 'true',
+              type: 'object',
             },
+            dashboard: { type: 'text' },
           },
         },
         count: 0,
@@ -749,7 +729,6 @@ describe('ElasticIndex', () => {
             },
           },
           index: '.myalias',
-          type: ROOT_TYPE,
         },
       ]);
     });

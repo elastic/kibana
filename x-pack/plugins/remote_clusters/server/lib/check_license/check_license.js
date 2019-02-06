@@ -26,6 +26,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
+  // Remote Clusters are used in both CCS and CCR, and CCS is available for all licenses.
   const VALID_LICENSE_MODES = [
     'trial',
     'basic',
@@ -66,7 +67,6 @@ export function checkLicense(xpackLicenseInfo) {
           values: { licenseType, pluginName },
         },
       ),
-      message: `.`,
     };
   }
 

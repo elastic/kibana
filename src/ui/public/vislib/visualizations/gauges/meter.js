@@ -282,11 +282,7 @@ export function MeterGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          if (_.has(d, 'aggConfigResult.aggConfig')) {
-            const fieldFormatter = d.aggConfigResult.aggConfig.fieldFormatter('text');
-            return fieldFormatter(d.y);
-          }
-          return d.y;
+          return data.yAxisFormatter(d.y);
         })
         .attr('style', 'dominant-baseline: central;')
         .style('text-anchor', 'middle')

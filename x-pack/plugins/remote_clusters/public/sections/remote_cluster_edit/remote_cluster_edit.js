@@ -12,12 +12,10 @@ import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -25,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { buildListBreadcrumb, editBreadcrumb } from '../../services';
+import { buildListBreadcrumb, editBreadcrumb, extractQueryParams, getRouter, getRouterLinkProps, redirect } from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
 const disabledFields = {
@@ -85,13 +83,25 @@ export const RemoteClusterEdit = injectI18n(
     };
 
     cancel = () => {
-      const { history, openDetailPanel } = this.props;
+      const { openDetailPanel } = this.props;
       const { clusterName } = this.state;
-      history.push(CRUD_APP_BASE_PATH);
-      openDetailPanel(clusterName);
+      const { history, route: { location: { search } } } = getRouter();
+      const { redirect: redirectUrl } = extractQueryParams(search);
+
+      if (redirectUrl) {
+        const decodedRedirect = decodeURIComponent(redirectUrl);
+        redirect(decodedRedirect);
+      } else {
+        history.push(CRUD_APP_BASE_PATH);
+        openDetailPanel(clusterName);
+      }
     };
 
     renderContent() {
+      const {
+        clusterName,
+      } = this.state;
+
       const {
         isLoading,
         cluster,
@@ -126,26 +136,39 @@ export const RemoteClusterEdit = injectI18n(
 
       if (!cluster) {
         return (
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="danger" />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <EuiTextColor color="subdued">
+          <Fragment>
+            <EuiCallOut
+              title={(
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.loadingErrorTitle"
+                  defaultMessage="Error loading remote cluster"
+                />
+              )}
+              color="danger"
+              iconType="alert"
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.edit.loadingErrorMessage"
+                defaultMessage="The remote cluster '{name}' does not exist."
+                values={{ name: clusterName }}
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  {...getRouterLinkProps(CRUD_APP_BASE_PATH)}
+                  iconType="arrowLeft"
+                  flush="left"
+                >
                   <FormattedMessage
-                    id="xpack.remoteClusters.edit.notFoundLabel"
-                    defaultMessage="Remote cluster not found"
+                    id="xpack.remoteClusters.edit.viewRemoteClustersButtonLabel"
+                    defaultMessage="View remote clusters"
                   />
-                </EuiTextColor>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
         );
       }
 
@@ -184,33 +207,22 @@ export const RemoteClusterEdit = injectI18n(
     }
 
     render() {
-      const {
-        clusterName,
-      } = this.state;
-
       return (
-        <Fragment>
-          <EuiPage>
-            <EuiPageBody>
-              <EuiPageContent
-                horizontalPosition="center"
-                className="remoteClusterAddPage"
-              >
-                <RemoteClusterPageTitle
-                  title={(
-                    <FormattedMessage
-                      id="xpack.remoteClusters.editTitle"
-                      defaultMessage="Edit {name}"
-                      values={{ name: clusterName }}
-                    />
-                  )}
-                />
+        <EuiPageContent
+          horizontalPosition="center"
+          className="remoteClusterAddPage"
+        >
+          <RemoteClusterPageTitle
+            title={(
+              <FormattedMessage
+                id="xpack.remoteClusters.editTitle"
+                defaultMessage="Edit remote cluster"
+              />
+            )}
+          />
 
-                {this.renderContent()}
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </Fragment>
+          {this.renderContent()}
+        </EuiPageContent>
       );
     }
   }

@@ -29,6 +29,7 @@ export const SpaceAvatar: SFC<Props> = (props: Props) => {
       {...!announceSpaceName && {
         // provide empty aria-label so EUI doesn't try to provide its own
         'aria-label': '',
+        'aria-hidden': true,
       }}
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}

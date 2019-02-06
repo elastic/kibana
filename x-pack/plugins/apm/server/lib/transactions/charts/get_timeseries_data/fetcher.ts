@@ -6,12 +6,13 @@
 
 import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { Setup } from '../../../helpers/setup_request';
 
@@ -79,6 +80,7 @@ export function timeseriesFetcher({
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
     {
       range: {
@@ -103,52 +105,32 @@ export function timeseriesFetcher({
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter
-        }
-      },
+      query: { bool: { filter } },
       aggs: {
         response_times: {
           date_histogram: {
             field: '@timestamp',
             interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: {
-              min: start,
-              max: end
-            }
+            extended_bounds: { min: start, max: end }
           },
           aggs: {
-            avg: {
-              avg: { field: TRANSACTION_DURATION }
-            },
+            avg: { avg: { field: TRANSACTION_DURATION } },
             pct: {
-              percentiles: {
-                field: TRANSACTION_DURATION,
-                percents: [95, 99]
-              }
+              percentiles: { field: TRANSACTION_DURATION, percents: [95, 99] }
             }
           }
         },
-        overall_avg_duration: {
-          avg: { field: TRANSACTION_DURATION }
-        },
+        overall_avg_duration: { avg: { field: TRANSACTION_DURATION } },
         transaction_results: {
-          terms: {
-            field: TRANSACTION_RESULT,
-            missing: 'transaction_result_missing'
-          },
+          terms: { field: TRANSACTION_RESULT, missing: '' },
           aggs: {
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
                 interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end
-                }
+                extended_bounds: { min: start, max: end }
               }
             }
           }
@@ -159,7 +141,7 @@ export function timeseriesFetcher({
 
   if (transactionName) {
     params.body.query.bool.must = [
-      { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
+      { term: { [TRANSACTION_NAME]: transactionName } }
     ];
   }
 

@@ -88,6 +88,7 @@ export function createIndex(client, indexName,
       if (!exists) {
         return client.indices.create({
           index: indexName,
+          include_type_name: true,
           body: body
         })
           .then(() => true)
@@ -99,7 +100,12 @@ export function createIndex(client, indexName,
              * This catch block is in place to not fail a job if the job runner hits this race condition.
              * Unfortunately we don't have a logger in scope to log a warning.
              */
-            err; // no-op
+            const isIndexExistsError = err && err.body && err.body.error && err.body.error.type === 'resource_already_exists_exception';
+            if (isIndexExistsError) {
+              return true;
+            }
+
+            throw err;
           });
       }
       return exists;

@@ -21,28 +21,29 @@ import _ from 'lodash';
 import { getPoint } from './_get_point';
 import { addToSiri } from './_add_to_siri';
 
-export function getSeries(rows, chart) {
+export function getSeries(table, chart) {
   const aspects = chart.aspects;
-  const multiY = Array.isArray(aspects.y);
+  const multiY = Array.isArray(aspects.y) && aspects.y.length > 1;
   const yScale = chart.yScale;
-  const partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
+  const partGetPoint = _.partial(getPoint, table, aspects.x[0], aspects.series, yScale);
 
-  let series = _(rows)
-    .transform(function (series, row) {
+  let series = _(table.rows)
+    .transform(function (series, row, rowIndex) {
       if (!multiY) {
-        const point = partGetPoint(row, aspects.y, aspects.z);
-        if (point) addToSiri(series, point, point.series, point.series, aspects.y.aggConfig);
+        const point = partGetPoint(row, rowIndex, aspects.y[0], aspects.z);
+        const id = `${point.series}-${aspects.y[0].accessor}`;
+        if (point) addToSiri(series, point, id, point.series, aspects.y[0].format);
         return;
       }
 
       aspects.y.forEach(function (y) {
-        const point = partGetPoint(row, y, aspects.z);
+        const point = partGetPoint(row, rowIndex, y, aspects.z);
         if (!point) return;
 
         // use the point's y-axis as it's series by default,
         // but augment that with series aspect if it's actually
         // available
-        let seriesId = y.aggConfig.id;
+        let seriesId = y.accessor;
         let seriesLabel = y.title;
 
         if (aspects.series) {
@@ -51,7 +52,7 @@ export function getSeries(rows, chart) {
           seriesLabel = prefix + seriesLabel;
         }
 
-        addToSiri(series, point, seriesId, seriesLabel, y.aggConfig);
+        addToSiri(series, point, seriesId, seriesLabel, y.format);
       });
 
     }, new Map())
@@ -64,9 +65,8 @@ export function getSeries(rows, chart) {
       let y;
 
       if (firstVal) {
-        const agg = firstVal.aggConfigResult.aggConfig;
         y = _.find(aspects.y, function (y) {
-          return y.aggConfig === agg;
+          return y.accessor === firstVal.accessor;
         });
       }
 

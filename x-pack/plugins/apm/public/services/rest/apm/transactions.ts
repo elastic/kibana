@@ -5,36 +5,10 @@
  */
 
 import { KFetchError } from 'ui/kfetch/kfetch_error';
-import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
-import { SpanListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/spans/get_spans';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { TransactionWithErrorCountAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
-import { addVersion, getEncodedEsQuery } from './apm';
-
-export async function loadSpans({
-  serviceName,
-  start,
-  end,
-  transactionId
-}: IUrlParams) {
-  const hits = await callApi<SpanListAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
-    query: {
-      start,
-      end
-    }
-  });
-
-  return hits.map(addVersion).map(addSpanId);
-}
-
-function addSpanId(hit: Span, i: number) {
-  if (!hit.span.id) {
-    hit.span.id = i;
-  }
-  return hit;
-}
+import { getEncodedEsQuery } from './apm';
 
 export async function loadTransaction({
   serviceName,
@@ -45,7 +19,7 @@ export async function loadTransaction({
   kuery
 }: IUrlParams) {
   try {
-    const result = await callApi<TransactionAPIResponse>({
+    const result = await callApi<TransactionWithErrorCountAPIResponse>({
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {
         traceId,
@@ -54,7 +28,7 @@ export async function loadTransaction({
         esFilterQuery: await getEncodedEsQuery(kuery)
       }
     });
-    return addVersion(result);
+    return result;
   } catch (e) {
     const err: KFetchError = e;
 

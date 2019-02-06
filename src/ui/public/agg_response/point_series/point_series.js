@@ -22,29 +22,22 @@ import { getAspects } from './_get_aspects';
 import { initYAxis } from './_init_y_axis';
 import { initXAxis } from './_init_x_axis';
 import { orderedDateAxis } from './_ordered_date_axis';
-import { PointSeriesTooltipFormatter } from './_tooltip_formatter';
 
-export function AggResponsePointSeriesProvider(Private) {
-
-  const tooltipFormatter = Private(PointSeriesTooltipFormatter);
-
-  return function pointSeriesChartDataFromTable(table) {
-    const chart = {};
-    const aspects = chart.aspects = getAspects(table);
-
-    chart.tooltipFormatter = tooltipFormatter;
-
-    initXAxis(chart);
-    initYAxis(chart);
-
-    const datedX = aspects.x.aggConfig.type.ordered && aspects.x.aggConfig.type.ordered.date;
-    if (datedX) {
-      orderedDateAxis(chart);
-    }
-
-    chart.series = getSeries(table.rows, chart);
-
-    delete chart.aspects;
-    return chart;
+export const buildPointSeriesData = (table, dimensions) => {
+  const chart = {
+    aspects: getAspects(table, dimensions),
   };
-}
+
+  initXAxis(chart);
+  initYAxis(chart);
+
+
+  if (chart.aspects.x[0].params.date) {
+    orderedDateAxis(chart);
+  }
+
+  chart.series = getSeries(table, chart);
+
+  delete chart.aspects;
+  return chart;
+};

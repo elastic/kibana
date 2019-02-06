@@ -13,11 +13,12 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ViewMLJob } from 'x-pack/plugins/apm/public/utils/url';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 // @ts-ignore
@@ -27,7 +28,7 @@ import { SyncChartGroup } from '../SyncChartGroup';
 interface TransactionChartProps {
   charts: ITransactionChartData;
   chartWrapper?: React.ComponentClass | React.SFC;
-  location: any;
+  location: Location;
   urlParams: IUrlParams;
   mlAvailable: boolean;
   hasMLJob: boolean;
@@ -108,11 +109,13 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
               }
             )}{' '}
           </span>
-          <ViewMLJob
+          <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
             location={this.props.location}
-          />
+          >
+            View Job
+          </MLJobLink>
         </ShiftedEuiText>
       </EuiFlexItem>
     );
@@ -135,7 +138,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
               <ChartWrapper>
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem>
-                    <EuiTitle size="s">
+                    <EuiTitle size="xs">
                       <span>{responseTimeLabel(transactionType)}</span>
                     </EuiTitle>
                   </EuiFlexItem>
@@ -153,7 +156,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <ChartWrapper>
-                <EuiTitle size="s">
+                <EuiTitle size="xs">
                   <span>{tpmLabel(transactionType)}</span>
                 </EuiTitle>
                 <CustomPlot

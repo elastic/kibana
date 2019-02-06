@@ -5,21 +5,17 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontSize,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import { PROPERTY_CONFIG } from './propertyConfig';
 
@@ -31,27 +27,22 @@ const TableInfo = styled.div`
   padding: ${px(unit)} 0 0;
   text-align: center;
   font-size: ${fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   line-height: 1.5;
 `;
 
 const TableInfoHeader = styled(TableInfo)`
   font-size: ${fontSizes.large};
-  color: ${colors.black2};
+  color: ${theme.euiColorDarkestShade};
 `;
 
 const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export interface Tab {
-  key: string;
-  label: string;
-}
-
-export function getPropertyTabNames(selected: string[]): Tab[] {
+export function getPropertyTabNames(obj: Transaction | APMError) {
   return PROPERTY_CONFIG.filter(
-    ({ key, required }) => required || selected.includes(key)
+    ({ key, required }) => required || obj.hasOwnProperty(key)
   ).map(({ key, label }) => ({ key, label }));
 }
 
@@ -100,12 +91,12 @@ export function AgentFeatureTipMessage({
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
+      <EuiLink target="_blank" rel="noopener noreferrer" href={docsUrl}>
         {i18n.translate(
           'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
           { defaultMessage: 'Learn more in the documentation.' }
         )}
-      </ExternalLink>
+      </EuiLink>
     </TableInfo>
   );
 }

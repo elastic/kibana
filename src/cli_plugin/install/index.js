@@ -32,7 +32,7 @@ function processCommand(command, options) {
   } catch (ex) {
     //The logger has not yet been initialized.
     console.error(ex.message);
-    process.exit(64); // eslint-disable-line no-process-exit
+    process.exit(64);
   }
 
   const logger = new Logger(settings);
@@ -47,7 +47,6 @@ export default function pluginInstall(program) {
     .command('install <plugin/url>')
     .option('-q, --quiet', 'disable all process messaging except errors')
     .option('-s, --silent', 'disable all process messaging')
-    .option('--no-optimize', 'disable optimization after plugin extraction')
     .option(
       '-c, --config <path>',
       'path to the config file',

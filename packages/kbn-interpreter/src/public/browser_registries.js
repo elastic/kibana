@@ -18,20 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import $script from 'scriptjs';
 
-let resolvePromise = null;
-let called = false;
+function loadPath(path, callback) {
+  const script = document.createElement('script');
 
-let populatePromise = new Promise(_resolve => {
-  resolvePromise = _resolve;
-});
+  script.setAttribute('async', '');
+  script.setAttribute('nonce', window.__webpack_nonce__);
+  script.addEventListener('error', () => {
+    console.error('Failed to load plugin bundle', path);
+  });
+  script.setAttribute('src', path);
+  script.addEventListener('load', callback);
 
-export const getBrowserRegistries = () => {
-  return populatePromise;
-};
+  document.head.appendChild(script);
+}
 
-const loadBrowserRegistries = (registries, basePath) => {
+export const loadBrowserRegistries = (registries, basePath) => {
   const remainingTypes = Object.keys(registries);
   const populatedTypes = {};
 
@@ -49,7 +51,7 @@ const loadBrowserRegistries = (registries, basePath) => {
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
       const pluginPath = `${basePath}/api/canvas/plugins?type=${type}`;
-      $script(pluginPath, () => {
+      loadPath(pluginPath, () => {
         populatedTypes[type] = registries[type];
         loadType();
       });
@@ -57,28 +59,4 @@ const loadBrowserRegistries = (registries, basePath) => {
 
     loadType();
   });
-};
-
-export const populateBrowserRegistries = (registries, basePath) => {
-  if (called) {
-    const oldPromise = populatePromise;
-    let newResolve;
-    populatePromise = new Promise(_resolve => {
-      newResolve = _resolve;
-    });
-    oldPromise.then(oldTypes => {
-      loadBrowserRegistries(registries, basePath).then(newTypes => {
-        newResolve({
-          ...oldTypes,
-          ...newTypes,
-        });
-      });
-    });
-    return populatePromise;
-  }
-  called = true;
-  loadBrowserRegistries(registries, basePath).then(registries => {
-    resolvePromise(registries);
-  });
-  return populatePromise;
 };

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "_security/user/_privileges"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-user-privileges.html"
   }
 }

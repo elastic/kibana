@@ -103,6 +103,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
     const afterESResp = config.afterESResp || _.noop;
     const customInit = config.init || _.noop;
+    const extractReferences = config.extractReferences;
+    const injectReferences = config.injectReferences;
 
     // optional search source which this object configures
     this.searchSource = config.searchSource ? new SearchSource() : undefined;
@@ -117,7 +119,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     // in favor of a better rename/save flow.
     this.copyOnSave = false;
 
-    const parseSearchSource = (searchSourceJson) => {
+    const parseSearchSource = (searchSourceJson, references) => {
       if (!this.searchSource) return;
 
       // if we have a searchSource, set its values based on the searchSourceJson field
@@ -134,6 +136,30 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       // (This happened in issue #20308)
       if (!searchSourceValues || typeof searchSourceValues !== 'object') {
         throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${this.id}".`);
+      }
+
+      // Inject index id if a reference is saved
+      if (searchSourceValues.indexRefName) {
+        const reference = references.find(reference => reference.name === searchSourceValues.indexRefName);
+        if (!reference) {
+          throw new Error(`Could not find reference for ${searchSourceValues.indexRefName} on ${this.getEsType()} ${this.id}`);
+        }
+        searchSourceValues.index = reference.id;
+        delete searchSourceValues.indexRefName;
+      }
+
+      if (searchSourceValues.filter) {
+        searchSourceValues.filter.forEach((filterRow) => {
+          if (!filterRow.meta || !filterRow.meta.indexRefName) {
+            return;
+          }
+          const reference = references.find(reference => reference.name === filterRow.meta.indexRefName);
+          if (!reference) {
+            throw new Error(`Could not find reference for ${filterRow.meta.indexRefName} on ${this.getEsType()}`);
+          }
+          filterRow.meta.index = reference.id;
+          delete filterRow.meta.indexRefName;
+        });
       }
 
       const searchSourceFields = this.searchSource.getFields();
@@ -208,11 +234,11 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           return savedObjectsClient.get(esType, this.id)
             .then(resp => {
               // temporary compatability for savedObjectsClient
-
               return {
                 _id: resp.id,
                 _type: resp.type,
                 _source: _.cloneDeep(resp.attributes),
+                references: resp.references,
                 found: resp._version ? true : false
               };
             })
@@ -254,8 +280,13 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       this.lastSavedTitle = this.title;
 
       return Promise.try(() => {
-        parseSearchSource(meta.searchSourceJSON);
+        parseSearchSource(meta.searchSourceJSON, resp.references);
         return this.hydrateIndexPattern();
+      }).then(() => {
+        if (injectReferences && resp.references && resp.references.length > 0) {
+          injectReferences(this, resp.references);
+        }
+        return this;
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
       });
@@ -266,25 +297,64 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      *
      * @return {Object}
      */
-    this.serialize = () => {
-      const body = {};
+    this._serialize = () => {
+      const attributes = {};
+      const references = [];
 
       _.forOwn(mapping, (fieldMapping, fieldName) => {
         if (this[fieldName] != null) {
-          body[fieldName] = (fieldMapping._serialize)
+          attributes[fieldName] = (fieldMapping._serialize)
             ? fieldMapping._serialize(this[fieldName])
             : this[fieldName];
         }
       });
 
       if (this.searchSource) {
-        const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
-        body.kibanaSavedObjectMeta = {
+        let searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
+        if (searchSourceFields.index) {
+          const { id: indexId } = searchSourceFields.index;
+          const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+          references.push({
+            name: refName,
+            type: 'index-pattern',
+            id: indexId,
+          });
+          searchSourceFields = {
+            ...searchSourceFields,
+            indexRefName: refName,
+            index: undefined,
+          };
+        }
+        if (searchSourceFields.filter) {
+          searchSourceFields = {
+            ...searchSourceFields,
+            filter: searchSourceFields.filter.map((filterRow, i) => {
+              if (!filterRow.meta || !filterRow.meta.index) {
+                return filterRow;
+              }
+              const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+              references.push({
+                name: refName,
+                type: 'index-pattern',
+                id: filterRow.meta.index,
+              });
+              return {
+                ...filterRow,
+                meta: {
+                  ...filterRow.meta,
+                  indexRefName: refName,
+                  index: undefined,
+                }
+              };
+            }),
+          };
+        }
+        attributes.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceFields)
         };
       }
 
-      return body;
+      return { attributes, references };
     };
 
     /**
@@ -304,16 +374,17 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     /**
      * Attempts to create the current object using the serialized source. If an object already
      * exists, a warning message requests an overwrite confirmation.
-     * @param source - serialized version of this object (return value from this.serialize())
+     * @param source - serialized version of this object (return value from this._serialize())
      * What will be indexed into elasticsearch.
+     * @param options - options to pass to the saved object create method
      * @returns {Promise} - A promise that is resolved with the objects id if the object is
      * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
      * a confirmRejected = true parameter so that case can be handled differently than
      * a create or index error.
      * @resolved {SavedObject}
      */
-    const createSource = (source) => {
-      return savedObjectsClient.create(esType, source, this.creationOpts())
+    const createSource = (source, options = {}) => {
+      return savedObjectsClient.create(esType, source, options)
         .catch(err => {
           // record exists, confirm overwriting
           if (_.get(err, 'res.status') === 409) {
@@ -324,11 +395,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
             return confirmModalPromise(confirmMessage, {
               confirmButtonText: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteButtonLabel', {
-                defaultMessage: 'Overwrite {name}',
+                defaultMessage: 'Overwrite',
+              }),
+              title: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteTitle', {
+                defaultMessage: 'Overwrite {name}?',
                 values: { name: this.getDisplayName() }
-              })
+              }),
             })
-              .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true })))
+              .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true, ...options })))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
@@ -403,16 +477,21 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         this.id = null;
       }
 
-      const source = this.serialize();
+      // Here we want to extract references and set them within "references" attribute
+      let { attributes, references } = this._serialize();
+      if (extractReferences) {
+        ({ attributes, references } = extractReferences({ attributes, references }));
+      }
+      if (!references) throw new Error('References not returned from extractReferences');
 
       this.isSaving = true;
 
       return checkForDuplicateTitle(isTitleDuplicateConfirmed, onTitleDuplicate)
         .then(() => {
           if (confirmOverwrite) {
-            return createSource(source);
+            return createSource(attributes, this.creationOpts({ references }));
           } else {
-            return savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true }));
+            return savedObjectsClient.create(esType, attributes, this.creationOpts({ references, overwrite: true }));
           }
         })
         .then((resp) => {

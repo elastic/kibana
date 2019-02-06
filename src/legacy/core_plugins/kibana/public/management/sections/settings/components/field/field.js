@@ -103,13 +103,15 @@ class FieldUI extends PureComponent {
     }
   }
 
-  getDisplayedDefaultValue(type, defVal) {
+  getDisplayedDefaultValue(type, defVal, optionLabels = {}) {
     if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
     }
     switch (type) {
       case 'array':
         return defVal.join(', ');
+      case 'select':
+        return optionLabels.hasOwnProperty(defVal) ? optionLabels[defVal] : String(defVal);
       default:
         return String(defVal);
     }
@@ -348,7 +350,7 @@ class FieldUI extends PureComponent {
 
   renderField(setting) {
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options, isOverridden, ariaName } = setting;
+    const { name, value, type, options, optionLabels = {}, isOverridden, ariaName } = setting;
 
     switch (type) {
       case 'boolean':
@@ -426,8 +428,11 @@ class FieldUI extends PureComponent {
           <EuiSelect
             aria-label={ariaName}
             value={unsavedValue}
-            options={options.map((text) => {
-              return { text, value: text };
+            options={options.map((option) => {
+              return {
+                text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
+                value: option
+              };
             })}
             onChange={this.onFieldChange}
             isLoading={loading}
@@ -542,7 +547,7 @@ class FieldUI extends PureComponent {
   }
 
   renderDefaultValue(setting) {
-    const { type, defVal } = setting;
+    const { type, defVal, optionLabels } = setting;
     if (isDefaultValue(setting)) {
       return;
     }
@@ -574,7 +579,7 @@ class FieldUI extends PureComponent {
                 id="kbn.management.settings.field.defaultValueText"
                 defaultMessage="Default: {value}"
                 values={{
-                  value: (<EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>),
+                  value: (<EuiCode>{this.getDisplayedDefaultValue(type, defVal, optionLabels)}</EuiCode>),
                 }}
               />
             </Fragment>

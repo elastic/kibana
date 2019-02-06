@@ -17,13 +17,6 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { Field } from 'ui/index_patterns';
 
-interface SavedObject {
-  attributes: {
-    fields: string;
-    title: string;
-  };
-}
-
-export function getFromLegacyIndexPattern(indexPatterns: any[]): StaticIndexPattern[];
+export function isFilterable(field: Field): boolean;

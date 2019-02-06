@@ -19,18 +19,12 @@
 
 
 export function initXAxis(chart) {
-  const x = chart.aspects.x;
-  chart.xAxisFormatter = x.aggConfig ? x.aggConfig.fieldFormatter() : String;
+  const x = chart.aspects.x[0];
+  chart.xAxisFormat = x.format;
   chart.xAxisLabel = x.title;
-
-  if (!x.aggConfig || !x.aggConfig.type.ordered) return;
-
-  chart.indexPattern = x.aggConfig.getIndexPattern();
-  chart.xAxisField = x.aggConfig.params.field;
-
-  chart.ordered = {};
-  const xAggOutput = x.aggConfig.write();
-  if (xAggOutput.params.interval && xAggOutput.params.interval !== '0ms') {
-    chart.ordered.interval = xAggOutput.params.interval;
+  if (x.params.date) {
+    chart.ordered = {
+      interval: x.params.interval
+    };
   }
 }

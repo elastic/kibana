@@ -50,6 +50,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
         },
       ]
     }
+    executeQueryOptions={Object {}}
     items={
       Array [
         Object {
@@ -174,12 +175,6 @@ exports[`ObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
   panelPaddingSize="l"
-  style={
-    Object {
-      "maxWidth": 1000,
-    }
-  }
-  verticalPosition="center"
 >
   <Header
     filteredCount={4}

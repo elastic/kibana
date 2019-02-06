@@ -158,35 +158,4 @@ describe('visualize_legend directive', function () {
       $rootScope.unhighlight({ currentTarget: null });
     }).to.not.throwError();
   });
-
-  it('getToggleLegendClasses returns correct class', () => {
-    const requiresSearch = false;
-    const vis = new CreateVis(null, requiresSearch);
-    init(vis, fixtures.oneRangeBucket);
-
-    $rootScope.vis.params.legendPosition = 'top';
-    $rootScope.open = true;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-up');
-    $rootScope.open = false;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-down');
-
-    $rootScope.vis.params.legendPosition = 'bottom';
-    $rootScope.open = true;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-down');
-    $rootScope.open = false;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-up');
-
-    $rootScope.vis.params.legendPosition = 'left';
-    $rootScope.open = true;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-left');
-    $rootScope.open = false;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-right');
-
-    $rootScope.vis.params.legendPosition = 'right';
-    $rootScope.open = true;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-right');
-    $rootScope.open = false;
-    expect($rootScope.getToggleLegendClasses()).to.equal('fa-chevron-circle-left');
-  });
-
 });

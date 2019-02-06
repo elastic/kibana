@@ -11,6 +11,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_ROLLOVER_ALIAS,
   PHASE_FREEZE_ENABLED,
+  PHASE_INDEX_PRIORITY,
 } from '../constants';
 
 export const defaultColdPhase = {
@@ -20,5 +21,6 @@ export const defaultColdPhase = {
   [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: 'd',
   [PHASE_NODE_ATTRS]: '',
   [PHASE_REPLICA_COUNT]: '',
-  [PHASE_FREEZE_ENABLED]: false
+  [PHASE_FREEZE_ENABLED]: false,
+  [PHASE_INDEX_PRIORITY]: 0
 };

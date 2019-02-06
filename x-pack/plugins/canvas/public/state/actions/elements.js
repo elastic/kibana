@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';

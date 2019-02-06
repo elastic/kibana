@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Embeddable } from 'ui/embeddable';
+import { I18nContext } from 'ui/i18n';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 
 export class DisabledLabEmbeddable extends Embeddable {
@@ -34,9 +34,9 @@ export class DisabledLabEmbeddable extends Embeddable {
     if (this.metadata.title) {
       this.domNode = domNode;
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           <DisabledLabVisualization title={this.metadata.title} />
-        </I18nProvider>,
+        </I18nContext>,
         domNode
       );
     }

@@ -12,6 +12,8 @@
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiHealth,
@@ -22,19 +24,39 @@ import {
 
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
+const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });
+const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' });
+const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' });
+const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' });
 
 const optionsMap = {
-  'warning': 0,
-  'minor': 25,
-  'major': 50,
-  'critical': 75,
+  [warningLabel]: 0,
+  [minorLabel]: 25,
+  [majorLabel]: 50,
+  [criticalLabel]: 75,
 };
 
 export const SEVERITY_OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
+  {
+    val: 0,
+    display: warningLabel,
+    color: getSeverityColor(0)
+  },
+  {
+    val: 25,
+    display: minorLabel,
+    color: getSeverityColor(25)
+  },
+  {
+    val: 50,
+    display: majorLabel,
+    color: getSeverityColor(50)
+  },
+  {
+    val: 75,
+    display: criticalLabel,
+    color: getSeverityColor(75)
+  },
 ];
 
 function optionValueToThreshold(value) {
@@ -112,7 +134,13 @@ class SelectSeverity extends Component {
           </EuiHealth>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            <p className="euiTextColor--subdued">{`score ${val} and above`}</p>
+            <p className="euiTextColor--subdued">
+              <FormattedMessage
+                id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
+                defaultMessage="score {value} and above"
+                values={{ value: val }}
+              />
+            </p>
           </EuiText>
         </Fragment>
       ),

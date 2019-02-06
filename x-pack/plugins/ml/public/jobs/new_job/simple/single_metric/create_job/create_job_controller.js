@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import 'angular-ui-select';
 
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -475,6 +476,7 @@ module
             msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.saveDatafeedFailedErrorMessage', {
               defaultMessage: 'Save datafeed failed: '
             }), resp);
+            $scope.$applyAsync();
           });
       }
     };
