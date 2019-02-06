@@ -22,13 +22,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { getUserDisplayName, User } from '../../../../common/model/user';
 import { ChangePassword } from './change_password';
 import { PersonalInfoPanel } from './personal_info_panel';
 import { SecurityPanel } from './security_panel';
 
 interface Props {
-  user: any;
-  showChangePassword: boolean;
+  user: User;
 }
 
 type AccountPanel = 'info' | 'security';
@@ -51,7 +51,15 @@ export class AccountManagementPage extends Component<Props, State> {
         <EuiPageBody>
           <div className="eui-textCenter">
             <EuiText>
-              <h2>Welcome, {this.props.user.full_name || this.props.user.username}</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.security.account.welcomeMessage"
+                  defaultMessage="Welcome, {displayName}"
+                  values={{
+                    displayName: getUserDisplayName(this.props.user),
+                  }}
+                />
+              </h2>
             </EuiText>
             <EuiText>
               <h3>Manage your account</h3>
@@ -77,13 +85,7 @@ export class AccountManagementPage extends Component<Props, State> {
             id: 'account',
             name: 'Account',
             // @ts-ignore
-            icon: (
-              <EuiAvatar
-                size={'s'}
-                type="user"
-                name={this.props.user.fullName || this.props.user.username}
-              />
-            ),
+            icon: <EuiAvatar size={'s'} type="user" name={getUserDisplayName(this.props.user)} />,
             items: [
               {
                 id: 'info',

@@ -12,17 +12,15 @@ import '../management/change_password_form/change_password_form';
 import '../../services/shield_user';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE } from '../../../common/constants';
 import { AccountManagementPage } from './components/account_management_page';
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 
-const renderReact = (elem, user, showChangePassword) => {
+const renderReact = (elem, user) => {
   render(
     <I18nContext>
       <AccountManagementPage
         user={user}
-        showChangePassword={showChangePassword}
       />
     </I18nContext>,
     elem
@@ -53,22 +51,13 @@ routes.when('/account', {
     });
     $scope.$$postDigest(() => {
       const elem = document.getElementById('userProfileReactRoot');
-      const username = $route.current.params.username;
-      const showChangePassword = REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
-      const changeUrl = (url) => {
-        kbnUrl.change(url);
-        $scope.$apply();
-      };
-      renderReact(elem, $route.current.locals.user, showChangePassword);
+      renderReact(elem, $route.current.locals.user);
     });
 
 
     $scope.user = $route.current.locals.user;
 
     const notifier = new Notifier();
-
-    const { authentication_realm: authenticationRealm } = $scope.user;
-    $scope.showChangePassword = REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
 
     $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
       $scope.user.newPassword = newPassword;

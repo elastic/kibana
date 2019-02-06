@@ -3,57 +3,58 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionList, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { User } from '../../../../../common/model/user';
 
 interface Props {
-  user: any;
+  user: User;
 }
 
 export class PersonalInfoPanel extends Component<Props, {}> {
   public render() {
     return (
-      <EuiForm>
+      <div>
         <h3>Personal Information</h3>
         <EuiSpacer />
-        <EuiFormRow
-          label={
-            <FormattedMessage id="xpack.security.account.usernameLabel" defaultMessage="Username" />
-          }
-        >
-          <EuiFieldText
-            readOnly
-            data-test-subj="usernameField"
-            value={this.props.user.username}
-            onChange={() => null}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <FormattedMessage id="xpack.security.account.fullNameLabel" defaultMessage="Name" />
-          }
-        >
-          <EuiFieldText
-            readOnly
-            data-test-subj="nameField"
-            value={this.props.user.full_name || '<n/a>'}
-            onChange={() => null}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={<FormattedMessage id="xpack.security.account.emailLabel" defaultMessage="Email" />}
-        >
-          <EuiFieldText
-            readOnly
-            data-test-subj="emailIdField"
-            value={this.props.user.email || '<no email address>'}
-            onChange={() => null}
-          />
-        </EuiFormRow>
-      </EuiForm>
+        <EuiDescriptionList
+          textStyle="reverse"
+          listItems={[
+            {
+              title: (
+                <FormattedMessage
+                  id="xpack.security.account.usernameLabel"
+                  defaultMessage="Username"
+                />
+              ),
+              description: this.props.user.username,
+            },
+            {
+              title: (
+                <FormattedMessage
+                  id="xpack.security.account.fullNameLabel"
+                  defaultMessage="Full Name"
+                />
+              ),
+              description: this.props.user.full_name || (
+                <FormattedMessage
+                  id="xpack.security.account.noFullNameText"
+                  defaultMessage="(n/a)"
+                />
+              ),
+            },
+            {
+              title: (
+                <FormattedMessage id="xpack.security.account.emailLabel" defaultMessage="Email" />
+              ),
+              description: this.props.user.email || (
+                <FormattedMessage id="xpack.security.account.noEmailText" defaultMessage="(n/a)" />
+              ),
+            },
+          ]}
+        />
+      </div>
     );
   }
 }
