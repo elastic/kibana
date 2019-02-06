@@ -8,13 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { EuiIcon } from '@elastic/eui';
-import {
-  fontFamilyCode,
-  px,
-  units,
-  fontSizes,
-  unit
-} from '../../../../apm/public/style/variables';
 import { tint } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -40,23 +33,23 @@ const Description = styled.div`
     display: inline;
 
     span {
-      font-family: ${fontFamilyCode};
+      font-family: ${theme.euiFontFamily};
       color: ${theme.euiColorFullShade};
-      padding: 0 ${px(units.quarter)};
+      padding: 0 ${theme.euiSizeXs};
       display: inline-block;
     }
   }
 `;
 
 const ListItem = styled.li`
-  font-size: ${fontSizes.small};
-  height: ${px(units.double)};
+  font-size: ${theme.euiFontSizeXs};
+  height: ${theme.euiSizeXl};
   align-items: center;
   display: flex;
   background: ${props =>
     props.selected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
-  border-radius: ${px(units.quarter)};
+  border-radius: ${theme.euiSizeXs};
 
   ${Description} {
     p span {
@@ -69,19 +62,19 @@ const ListItem = styled.li`
 `;
 
 const Icon = styled.div`
-  flex: 0 0 ${px(units.double)};
+  flex: 0 0 ${theme.euiSizeXl};
   background: ${props => tint(0.1, getIconColor(props.type))};
   color: ${props => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;
-  line-height: ${px(units.double)};
+  line-height: ${theme.euiSizeXl};
 `;
 
 const TextValue = styled.div`
-  flex: 0 0 ${px(unit * 16)};
+  flex: 0 0 ${theme.euiSize * 16}px;
   color: ${theme.euiColorDarkestShade};
-  padding: 0 ${px(units.half)};
+  padding: 0 ${theme.euiSizeS};
 `;
 
 function getEuiIconType(type) {
