@@ -32,7 +32,6 @@ export async function FindProvider({ getService }) {
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
-  const defaultImplicitWait = 0;
 
   const wrap = webElement => (
     new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log)
@@ -44,7 +43,7 @@ export async function FindProvider({ getService }) {
 
   class Find {
 
-    currentWait = defaultImplicitWait;
+    currentWait = defaultFindTimeout;
 
     async _withTimeout(timeout) {
       if (timeout !== this.currentWait) {
@@ -114,7 +113,7 @@ export async function FindProvider({ getService }) {
         if (!elements) elements = [];
         // Force isStale checks for all the retrieved elements.
         await Promise.all(elements.map(async element => await element.isEnabled()));
-        await this._withTimeout(defaultImplicitWait);
+        await this._withTimeout(defaultFindTimeout);
         return elements;
       });
     }
@@ -123,7 +122,7 @@ export async function FindProvider({ getService }) {
       log.debug(`Find.allByLinkText('${selector}') with timeout=${timeout}`);
       await this._withTimeout(timeout);
       const elements = await driver.findElements(By.linkText(selector));
-      await this._withTimeout(defaultImplicitWait);
+      await this._withTimeout(defaultFindTimeout);
       return wrapAll(elements);
     }
 
@@ -131,7 +130,7 @@ export async function FindProvider({ getService }) {
       log.debug(`Find.allByCssSelector('${selector}') with timeout=${timeout}`);
       await this._withTimeout(timeout);
       const elements = await driver.findElements(By.css(selector));
-      await this._withTimeout(defaultImplicitWait);
+      await this._withTimeout(defaultFindTimeout);
       return wrapAll(elements);
     }
 
@@ -188,14 +187,14 @@ export async function FindProvider({ getService }) {
       await this._withTimeout(timeout);
       try {
         const found = await findFunction(driver);
-        await this._withTimeout(defaultImplicitWait);
+        await this._withTimeout(defaultFindTimeout);
         if (Array.isArray(found)) {
           return found.length > 0;
         } else {
           return found instanceof WebElementWrapper;
         }
       } catch (err) {
-        await this._withTimeout(defaultImplicitWait);
+        await this._withTimeout(defaultFindTimeout);
         return false;
       }
     }

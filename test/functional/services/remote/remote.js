@@ -22,6 +22,7 @@ import { initWebDriver } from './webdriver';
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
+  const config = getService('config');
   const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
@@ -45,7 +46,7 @@ export async function RemoteProvider({ getService }) {
   });
 
   lifecycle.on('beforeEachTest', async () => {
-    await driver.manage().setTimeouts({ implicit: 0 });
+    await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.on('afterTestSuite', async () => {
