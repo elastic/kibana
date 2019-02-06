@@ -17,5 +17,22 @@
  * under the License.
  */
 
-export { ElasticsearchError } from './elasticsearch_error';
-export { isTermSizeZeroError } from './is_term_size_zero_error';
+import { RequestHandlerParams, Vis } from '../../vis';
+
+import { toastNotifications } from 'ui/notify';
+
+export function handleLoaderError(params: RequestHandlerParams, vis: Vis, error: any): void {
+  params.searchSource.cancelQueued();
+
+  vis.requestError = error;
+  vis.showRequestError =
+    error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
+
+  // tslint:disable-next-line
+  console.error(error);
+
+  toastNotifications.addDanger({
+    title: 'Error in visualization',
+    text: error.message,
+  });
+}
