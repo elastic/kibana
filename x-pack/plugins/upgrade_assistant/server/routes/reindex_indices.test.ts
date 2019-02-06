@@ -42,6 +42,9 @@ describe('reindex API', () => {
     xpack_main: {
       info: {},
     },
+    apm_oss: {
+      indexPatterns: ['apm-*'],
+    },
   } as any;
   server.config = () => ({ get: () => '' } as any);
   server.decorate('request', 'getSavedObjectsClient', () => jest.fn());

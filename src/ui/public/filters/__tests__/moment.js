@@ -57,11 +57,11 @@ describe('moment formatting filter', function () {
 
   // MMMM Do YYYY, HH:mm:ss.SSS
   it('should format moments', function () {
-    expect(filter(moment())).to.be('January 1st 2014, 06:06:06.666');
+    expect(filter(moment())).to.be('Jan 1, 2014 @ 06:06:06.666');
   });
 
   it('should format dates', function () {
-    expect(filter(new Date())).to.be('January 1st 2014, 06:06:06.666');
+    expect(filter(new Date())).to.be('Jan 1, 2014 @ 06:06:06.666');
   });
 
   it('should return the original value if passed anything other than a moment or Date', function () {

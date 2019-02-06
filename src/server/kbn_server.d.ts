@@ -19,7 +19,9 @@
 
 import { Server } from 'hapi';
 
+import { ApmOssPlugin } from '../legacy/core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
+
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 
@@ -33,6 +35,7 @@ declare module 'hapi' {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;
     spaces: any;
+    apm_oss: ApmOssPlugin;
     // add new plugin types here
   }
 

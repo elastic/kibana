@@ -17,4 +17,6 @@
  * under the License.
  */
 
-import './kbn_timepicker_absolute_panel';
+export interface ApmOssPlugin {
+  indexPatterns: string[];
+}
