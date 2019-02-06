@@ -87,20 +87,6 @@ uiModules.get('kibana')
           });
         };
 
-        $scope.getToggleLegendClasses = function () {
-          switch ($scope.vis.params.legendPosition) {
-            case 'top':
-              return $scope.open ? 'fa-chevron-circle-up' : 'fa-chevron-circle-down';
-            case 'bottom':
-              return $scope.open ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up';
-            case 'left':
-              return $scope.open ? 'fa-chevron-circle-left' : 'fa-chevron-circle-right';
-            case 'right':
-            default:
-              return $scope.open ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left';
-          }
-        };
-
         $scope.filter = function (legendData, negate) {
           $scope.vis.API.events.filter({ data: legendData.values, negate: negate });
         };

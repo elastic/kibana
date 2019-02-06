@@ -6,7 +6,10 @@
 
 import { ESFilter } from 'elasticsearch';
 import chrome from 'ui/chrome';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/constants';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE
+} from '../../../common/elasticsearch_fieldnames';
 import { callApi } from './callApi';
 
 export function getMlPrefix(serviceName: string, transactionType?: string) {

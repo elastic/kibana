@@ -40,7 +40,6 @@ export function HomeApp({
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  const isK7Design = chrome.getUiSettingsClient().get('k7design', false);
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -48,7 +47,6 @@ export function HomeApp({
         addBasePath={chrome.addBasePath}
         openTab={props.match.params.tab}
         isCloudEnabled={isCloudEnabled}
-        isK7Design={isK7Design}
       />
     );
   };
@@ -62,7 +60,6 @@ export function HomeApp({
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
         bulkCreate={savedObjectsClient.bulkCreate}
-        isK7Design={isK7Design}
       />
     );
   };

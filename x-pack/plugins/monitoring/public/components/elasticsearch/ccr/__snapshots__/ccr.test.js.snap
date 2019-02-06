@@ -50,7 +50,14 @@ exports[`Ccr that it renders normally 1`] = `
               },
             ]
           }
-          executeQueryOptions={Object {}}
+          executeQueryOptions={
+            Object {
+              "defaultFields": Array [
+                "index",
+                "follows",
+              ],
+            }
+          }
           itemId="id"
           itemIdToExpandedRowMap={Object {}}
           items={

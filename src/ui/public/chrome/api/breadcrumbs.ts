@@ -86,7 +86,6 @@ function createBreadcrumbsApi(chrome: { [key: string]: any }) {
      * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
      */
     $setupBreadcrumbsAutoClear: ($rootScope: IRootScopeService, $injector: any) => {
-      const uiSettings = chrome.getUiSettingsClient();
       const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
       $rootScope.$on('$routeChangeStart', () => {
@@ -101,7 +100,7 @@ function createBreadcrumbsApi(chrome: { [key: string]: any }) {
         }
 
         const k7BreadcrumbsProvider = current.k7Breadcrumbs;
-        if (!k7BreadcrumbsProvider || !uiSettings.get('k7design')) {
+        if (!k7BreadcrumbsProvider) {
           newPlatformChrome.setBreadcrumbs([]);
           return;
         }

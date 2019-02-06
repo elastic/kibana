@@ -20,7 +20,6 @@
 interface TimeRange {
   from: string;
   to: string;
-  mode?: string;
 }
 
 export interface TimeHistory {

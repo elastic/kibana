@@ -8,7 +8,7 @@ export const defaultSourceConfiguration = {
   name: 'Default',
   description: '',
   metricAlias: 'metricbeat-*',
-  logAlias: 'filebeat-*',
+  logAlias: 'filebeat-*,kibana_sample_data_logs*',
   fields: {
     container: 'docker.container.id',
     host: 'host.name',
