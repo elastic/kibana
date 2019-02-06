@@ -15,7 +15,7 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { getReindexWarnings, transformFlatSettings } from './index_settings';
+import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
@@ -495,12 +495,21 @@ export const reindexServiceFactory = (
         return true;
       }
 
+      const index = parseIndexName(indexName);
+      const names = [indexName, index.newIndexName];
+
+      // if we have re-indexed this in the past, there will be an
+      // underlying alias we will also need to update.
+      if (index.cleanIndexName !== indexName) {
+        names.push(index.cleanIndexName);
+      }
+
       // Otherwise, query for required privileges for this index.
       const body = {
         cluster: ['manage'],
         index: [
           {
-            names: [`${indexName}*`],
+            names,
             privileges: ['all'],
           },
           {

@@ -49,11 +49,11 @@ describe('ReindexActions', () => {
   describe('createReindexOp', () => {
     beforeEach(() => client.create.mockResolvedValue());
 
-    it(`appends -reindexed-v${CURRENT_MAJOR_VERSION} to new name`, async () => {
+    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name`, async () => {
       await actions.createReindexOp('myIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
-        newIndexName: `myIndex-reindexed-v${CURRENT_MAJOR_VERSION}`,
+        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -64,11 +64,43 @@ describe('ReindexActions', () => {
       });
     });
 
-    it(`replaces -reindexed-v${PREV_MAJOR_VERSION} with -reindexed-v${CURRENT_MAJOR_VERSION}`, async () => {
-      await actions.createReindexOp(`myIndex-reindexed-v${PREV_MAJOR_VERSION}`);
+    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name, preserving leading period`, async () => {
+      await actions.createReindexOp('.internalIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `myIndex-reindexed-v${PREV_MAJOR_VERSION}`,
-        newIndexName: `myIndex-reindexed-v${CURRENT_MAJOR_VERSION}`,
+        indexName: '.internalIndex',
+        newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        runningReindexCount: null,
+      });
+    });
+
+    // in v5.6, the upgrade assistant appended to the index name instead of prepending
+    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION}- and removes reindex appended in v5`, async () => {
+      const indexName = 'myIndex-reindexed-v5';
+      await actions.createReindexOp(indexName);
+      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
+        indexName,
+        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        runningReindexCount: null,
+      });
+    });
+
+    it(`replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION}`, async () => {
+      await actions.createReindexOp(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`);
+      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
+        indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
+        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
