@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Chance from 'chance'; // eslint-disable-line
-import { flatten } from 'lodash';
 // @ts-ignore
 import request from 'request';
 import uuidv4 from 'uuid/v4';
@@ -59,25 +58,8 @@ const start = async (
     const libs = compose(kibanaURL);
     // tslint:disable-next-line
     console.error(`Enrolling ${numberOfBeats} fake beats...`);
-    let enrollmentTokens: string[] = [];
 
-    if (numberOfBeats > 100) {
-      const tokenGroups = numberOfBeats / 100;
-      enrollmentTokens = flatten(
-        await Promise.all(
-          [...Array(tokenGroups)].map(async () => {
-            // @ts-ignore
-            process.stdout.clearLine();
-            // @ts-ignore
-            process.stdout.cursorTo(0);
-            process.stdout.write(`Tokens created: ${enrollmentTokens.length}`);
-            return await libs.tokens.createEnrollmentTokens(100);
-          })
-        )
-      );
-    } else {
-      enrollmentTokens = await libs.tokens.createEnrollmentTokens(numberOfBeats);
-    }
+    const enrollmentTokens = await libs.tokens.createEnrollmentTokens(numberOfBeats);
 
     Promise.all(enrollmentTokens.map(token => enroll(kibanaURL, token)));
     await sleep(2000);
