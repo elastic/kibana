@@ -5,6 +5,7 @@ exports[`SnapshotHistogram component renders the component without errors 1`] = 
   height={120}
   stackBy="y"
   width={618.2857142857141}
+  xCrosshairFormat="YYYY-MM-DD hh:mmZ"
   xType="time"
 >
   <EuiHistogramSeries
