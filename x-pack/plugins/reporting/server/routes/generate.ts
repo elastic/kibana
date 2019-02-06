@@ -5,13 +5,21 @@
  */
 
 import boom from 'boom';
+import { Request } from 'hapi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-export function registerGenerate(server, handler, handleError) {
+type HandlerFunction = (exportType: any, jobParams: any, request: Request, h: any) => any;
+type HandlerErrorFunction = (exportType: any, err: Error) => any;
+
+export function registerGenerate(
+  server: any,
+  handler: HandlerFunction,
+  handleError: HandlerErrorFunction
+) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
 
   // generate report
@@ -19,7 +27,7 @@ export function registerGenerate(server, handler, handleError) {
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     config: getRouteConfig(request => request.params.exportType),
-    handler: async (request, h) => {
+    handler: async (request: any, h: HandlerFunction) => {
       const { exportType } = request.params;
       let response;
       try {

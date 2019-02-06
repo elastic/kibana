@@ -4,16 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
+import { KbnServer } from '../../../types';
+// @ts-ignore
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
+// @ts-ignore
 import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
 
 const API_TAG = 'api';
 
-export function getRouteConfigFactoryReportingPre(server) {
-  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
+interface RouteConfigFactory {
+  tags?: string[];
+  pre: any[];
+  response?: {
+    ranges: boolean;
+  };
+}
 
-  return getFeatureId => {
+type GetFeatureFunction = (request: Request) => any;
+type PreRoutingFunction = (getFeatureId?: GetFeatureFunction) => any;
+
+export function getRouteConfigFactoryReportingPre(server: KbnServer) {
+  const authorizedUserPreRouting: PreRoutingFunction = authorizedUserPreRoutingFactory(server);
+  const reportingFeaturePreRouting: PreRoutingFunction = reportingFeaturePreRoutingFactory(server);
+
+  return (getFeatureId?: GetFeatureFunction): RouteConfigFactory => {
     const preRouting = [{ method: authorizedUserPreRouting, assign: 'user' }];
     if (getFeatureId) {
       preRouting.push(reportingFeaturePreRouting(getFeatureId));
@@ -26,12 +41,12 @@ export function getRouteConfigFactoryReportingPre(server) {
   };
 }
 
-export function getRouteConfigFactoryManagementPre(server) {
+export function getRouteConfigFactoryManagementPre(server: KbnServer) {
   const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
   const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
   const managementPreRouting = reportingFeaturePreRouting(() => 'management');
 
-  return () => {
+  return (): RouteConfigFactory => {
     return {
       pre: [
         { method: authorizedUserPreRouting, assign: 'user' },
@@ -46,9 +61,9 @@ export function getRouteConfigFactoryManagementPre(server) {
 // TOC at the end of the PDF, but it's sending multiple cookies and causing our auth to fail with a 401.
 // Additionally, the range-request doesn't alleviate any performance issues on the server as the entire
 // download is loaded into memory.
-export function getRouteConfigFactoryDownloadPre(server) {
+export function getRouteConfigFactoryDownloadPre(server: KbnServer) {
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server);
-  return () => ({
+  return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
     tags: [API_TAG],
     response: {
