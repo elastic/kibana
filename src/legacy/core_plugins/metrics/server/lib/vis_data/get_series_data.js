@@ -21,13 +21,12 @@ import getRequestParams from './series/get_request_params';
 import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
 import getAnnotations from './get_annotations';
-import { getEsQueryConfig } from '@kbn/es-query';
+import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 
 export async function getSeriesData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const uiSettings = await req.getUiSettingsService();
-  const includeFrozen = uiSettings.get('search:includeFrozen');
-  const esQueryConfig = await getEsQueryConfig(uiSettings);
+  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
+  const esQueryConfig = await getEsQueryConfig(req);
 
   try {
     const bodiesPromises = panel.series.map(series => getRequestParams(req, panel, series, esQueryConfig));

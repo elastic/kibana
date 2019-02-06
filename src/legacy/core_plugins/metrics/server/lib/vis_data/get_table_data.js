@@ -21,16 +21,15 @@ import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
 import processBucket from './table/process_bucket';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
-import { getEsQueryConfig } from '@kbn/es-query';
+import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 
 
 export async function getTableData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const uiSettings = await req.getUiSettingsService();
-  const includeFrozen = uiSettings.get('search:includeFrozen');
-  const esQueryConfig = await getEsQueryConfig(uiSettings);
+  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
   const indexPatternString = panel.index_pattern;
 
+  const esQueryConfig = await getEsQueryConfig(req);
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const params = {
     index: indexPatternString,
