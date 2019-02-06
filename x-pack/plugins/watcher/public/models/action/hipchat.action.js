@@ -18,22 +18,23 @@ export class HipchatAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
+    this.fields = {};
     allFields.forEach((field) => {
-      this[field] = get(props, field);
+      this.fields[field] = get(props, field);
     });
   }
 
   get upstreamJson() {
     // Add all required fields to the request body
     let result = requiredFields.reduce((acc, field) => {
-      acc[field] = this[field];
+      acc[field] = this.fields[field];
       return acc;
     }, super.upstreamJson);
 
     // If optional fields have been set, add them to the body
     result = optionalFields.reduce((acc, field) => {
       if (this[field]) {
-        acc[field] = this[field];
+        acc[field] = this.fields[field];
       }
       return acc;
     }, result);
