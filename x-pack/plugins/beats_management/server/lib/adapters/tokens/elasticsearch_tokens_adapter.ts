@@ -35,6 +35,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     };
 
     const response = await this.database.get(user, params);
+
     const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
       expires_on: '0',
       token: null,

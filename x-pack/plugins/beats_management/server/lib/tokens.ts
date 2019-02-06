@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { timingSafeEqual } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
+import { chunk } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 import { FrameworkUser } from './adapters/framework/adapter_types';
@@ -28,7 +29,6 @@ export class CMTokensDomain {
       this.framework.internalUser,
       enrollmentToken
     );
-
     if (!fullToken) {
       return {
         token: null,
@@ -121,19 +121,26 @@ export class CMTokensDomain {
       .toJSON();
 
     while (tokens.length < numTokens) {
-      const hash = this.createRandomHash();
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: hash,
+        token: this.createRandomHash(),
       });
     }
 
-    await this.adapter.upsertTokens(user, tokens);
+    await Promise.all(
+      chunk(tokens, 100).map(tokenChunk => this.adapter.upsertTokens(user, tokenChunk))
+    );
 
     return tokens.map(token => token.token);
   }
 
   private createRandomHash() {
-    return uuid.v4().replace(/-/g, '');
+    return uuid
+      .v4({
+        rng: () => {
+          return [...randomBytes(16)];
+        },
+      })
+      .replace(/-/g, '');
   }
 }

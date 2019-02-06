@@ -83,7 +83,7 @@ export class NodeAxiosAPIAdapter implements RestAPIAdapter {
       },
       error => {
         // Do something with response error
-        return Promise.reject(error);
+        return Promise.reject(JSON.stringify(error.response.data));
       }
     );
 
