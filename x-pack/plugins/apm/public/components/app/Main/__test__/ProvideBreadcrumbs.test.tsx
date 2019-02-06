@@ -7,12 +7,8 @@
 import { Location } from 'history';
 import { BreadcrumbRoute, getBreadcrumbs } from '../ProvideBreadcrumbs';
 
-interface TestParams {
-  letter: string;
-}
-
 describe('getBreadcrumbs', () => {
-  const getTestRoutes = (): Array<BreadcrumbRoute<TestParams>> => [
+  const getTestRoutes = (): BreadcrumbRoute[] => [
     { path: '/a', exact: true, breadcrumb: 'A' },
     { path: '/a/ignored', exact: true, breadcrumb: 'Ignored Route' },
     {
@@ -33,7 +29,7 @@ describe('getBreadcrumbs', () => {
     } as Location);
 
   it('should return a set of matching breadcrumbs for a given path', () => {
-    const breadcrumbs = getBreadcrumbs<TestParams>({
+    const breadcrumbs = getBreadcrumbs({
       location: getLocation(),
       routes: getTestRoutes()
     });
@@ -53,7 +49,7 @@ Array [
 
     routes[2].breadcrumb = null;
 
-    const breadcrumbs = getBreadcrumbs<TestParams>({
+    const breadcrumbs = getBreadcrumbs({
       location,
       routes
     });
@@ -72,7 +68,7 @@ Array [
 
     delete routes[2].breadcrumb;
 
-    const breadcrumbs = getBreadcrumbs<TestParams>({ location, routes });
+    const breadcrumbs = getBreadcrumbs({ location, routes });
 
     expect(breadcrumbs.map(b => b.value)).toMatchInlineSnapshot(`
 Array [
@@ -88,7 +84,7 @@ Array [
 
     location.pathname += '?some=thing';
 
-    const breadcrumbs = getBreadcrumbs<TestParams>({
+    const breadcrumbs = getBreadcrumbs({
       location,
       routes
     });

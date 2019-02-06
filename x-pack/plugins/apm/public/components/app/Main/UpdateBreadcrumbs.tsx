@@ -25,7 +25,8 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
       href: `#${match.url}?_g=${_g}&kuery=${kuery}`
     }));
 
-    document.title = last(breadcrumbs).text;
+    const current = last(breadcrumbs) || { text: '' };
+    document.title = current.text;
     chrome.breadcrumbs.set(breadcrumbs);
   }
 
@@ -42,16 +43,16 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
   }
 }
 
-const UpdateBreadcrumbs = () => (
-  <ProvideBreadcrumbs
-    routes={routes}
-    render={({ breadcrumbs, location }) => (
-      <UpdateBreadcrumbsComponent
-        breadcrumbs={breadcrumbs}
-        location={location}
-      />
-    )}
-  />
-);
-
-export { UpdateBreadcrumbs };
+export function UpdateBreadcrumbs() {
+  return (
+    <ProvideBreadcrumbs
+      routes={routes}
+      render={({ breadcrumbs, location }) => (
+        <UpdateBreadcrumbsComponent
+          breadcrumbs={breadcrumbs}
+          location={location}
+        />
+      )}
+    />
+  );
+}

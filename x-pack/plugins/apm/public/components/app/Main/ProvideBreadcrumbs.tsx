@@ -12,19 +12,20 @@ import {
   RouteProps,
   withRouter
 } from 'react-router-dom';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 
-type LocationMatch<T = any> = Pick<
-  RouteComponentProps<T>,
+type LocationMatch = Pick<
+  RouteComponentProps<StringMap<string>>,
   'location' | 'match'
 >;
 
-export type BreadcrumbFunction<T = any> = (props: LocationMatch<T>) => string;
+export type BreadcrumbFunction = (props: LocationMatch) => string;
 
-export interface BreadcrumbRoute<T = any> extends RouteProps {
-  breadcrumb: string | BreadcrumbFunction<T> | null;
+export interface BreadcrumbRoute extends RouteProps {
+  breadcrumb: string | BreadcrumbFunction | null;
 }
 
-export interface Breadcrumb<T = any> extends LocationMatch<T> {
+export interface Breadcrumb extends LocationMatch {
   value: string;
 }
 
@@ -54,14 +55,14 @@ const parse = (options: ParseOptions) => {
   return { value, match, location };
 };
 
-export function getBreadcrumb<T = any>({
+export function getBreadcrumb({
   location,
   currentPath,
   routes
 }: {
   location: Location;
   currentPath: string;
-  routes: Array<BreadcrumbRoute<T>>;
+  routes: BreadcrumbRoute[];
 }) {
   return routes.reduce<Breadcrumb | null>((found, { breadcrumb, ...route }) => {
     if (found) {
@@ -72,7 +73,7 @@ export function getBreadcrumb<T = any>({
       return null;
     }
 
-    const match = matchPath(currentPath, route);
+    const match = matchPath<StringMap<string>>(currentPath, route);
 
     if (match) {
       return parse({
@@ -86,14 +87,14 @@ export function getBreadcrumb<T = any>({
   }, null);
 }
 
-export function getBreadcrumbs<T = any>({
+export function getBreadcrumbs({
   routes,
   location
 }: {
   routes: BreadcrumbRoute[];
   location: Location;
 }) {
-  const breadcrumbs: Array<Breadcrumb<T>> = [];
+  const breadcrumbs: Breadcrumb[] = [];
   const { pathname } = location;
 
   pathname
@@ -103,7 +104,7 @@ export function getBreadcrumbs<T = any>({
     .reduce((acc, next) => {
       // `/1/2/3` results in match checks for `/1`, `/1/2`, `/1/2/3`.
       const currentPath = !next ? '/' : `${acc}/${next}`;
-      const breadcrumb = getBreadcrumb<T>({
+      const breadcrumb = getBreadcrumb({
         location,
         currentPath,
         routes
