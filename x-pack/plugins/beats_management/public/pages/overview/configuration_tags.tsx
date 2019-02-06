@@ -45,7 +45,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
     >
       <FormattedMessage
         id="xpack.beatsManagement.tags.addTagButtonLabel"
-        defaultMessage="Add Tag"
+        defaultMessage="Create tag"
       />
     </EuiButton>
   );
@@ -97,7 +97,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
             intl.formatMessage({
               id: 'xpack.beatsManagement.tags.someTagsMightBeAssignedToBeatsTitle',
               defaultMessage:
-                'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned',
+                'You cannot delete tags that are assigned to Beats. Remove the tags before trying to delete them.',
             })
           );
         } else {

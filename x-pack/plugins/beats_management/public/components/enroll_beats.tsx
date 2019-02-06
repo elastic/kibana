@@ -109,7 +109,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                       <h3>
                         <FormattedMessage
                           id="xpack.beatsManagement.enrollBeat.beatTypeTitle"
-                          defaultMessage="Beat type:"
+                          defaultMessage="Beat type"
                         />
                       </h3>
                     </EuiTitle>
@@ -143,7 +143,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                       <h3>
                         <FormattedMessage
                           id="xpack.beatsManagement.enrollBeat.platformTitle"
-                          defaultMessage="Platform:"
+                          defaultMessage="Platform"
                         />
                       </h3>
                     </EuiTitle>
@@ -181,7 +181,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                         <h3>
                           <FormattedMessage
                             id="xpack.beatsManagement.enrollBeat.yourBeatTypeHostTitle"
-                            defaultMessage="On the host where your {beatType} is installed, run:"
+                            defaultMessage="On the host where {beatType} is installed, run"
                             values={{
                               beatType: capitalize(this.state.beatType),
                             }}
@@ -240,7 +240,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
           <EuiModalBody>
             <FormattedMessage
               id="xpack.beatsManagement.enrollBeat.beatEnrolledTitle"
-              defaultMessage="The Beat is now enrolled in central management:"
+              defaultMessage="The Beat is now enrolled in central management."
             />
             <br />
             <br />
@@ -253,7 +253,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                   name: (
                     <FormattedMessage
                       id="xpack.beatsManagement.enrollBeat.beatTypeColumnName"
-                      defaultMessage="Beat Type"
+                      defaultMessage="Beat type"
                     />
                   ),
                   sortable: false,

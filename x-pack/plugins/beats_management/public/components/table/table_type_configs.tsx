@@ -147,7 +147,7 @@ export const BeatsTableType: TableType = {
     {
       field: 'config_status',
       name: i18n.translate('xpack.beatsManagement.beatsTable.configStatusTitle', {
-        defaultMessage: 'Config Status',
+        defaultMessage: 'Config status',
       }),
       render: (value: string, beat: CMBeat) => {
         let color: IconColor = 'success';

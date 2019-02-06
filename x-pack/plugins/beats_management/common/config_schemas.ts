@@ -9,7 +9,7 @@ import { ConfigBlockSchema } from './domain_types';
 export const configBlockSchemas: ConfigBlockSchema[] = [
   {
     id: 'filebeat.inputs',
-    name: 'Filebeat Input',
+    name: 'Filebeat input',
     version: 6.7,
     allowOtherConfigs: true,
     configs: [
@@ -121,7 +121,7 @@ export const configBlockSchemas: ConfigBlockSchema[] = [
   },
   {
     id: 'metricbeat.modules',
-    name: 'Metricbeat Modules',
+    name: 'Metricbeat module',
     version: 6.7,
     allowOtherConfigs: true,
     configs: [

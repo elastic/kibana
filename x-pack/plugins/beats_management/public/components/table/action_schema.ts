@@ -31,17 +31,17 @@ export const beatsListActions: ControlSchema[] = [
   {
     grow: false,
     name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.unenrollButtonLabel', {
-      defaultMessage: 'Unenroll selected',
+      defaultMessage: 'Unenroll selected Beats',
     }),
     showWarning: true,
     type: ActionComponentType.Action,
     warningHeading: i18n.translate(
       'xpack.beatsManagement.beatsListAssignmentOptions.unenrollBeatsWarninigTitle',
-      { defaultMessage: 'Unenroll selected beats?' }
+      { defaultMessage: 'Unenroll selected Beats?' }
     ),
     warningMessage: i18n.translate(
       'xpack.beatsManagement.beatsListAssignmentOptions.unenrollBeatsWarninigMessage',
-      { defaultMessage: 'The selected Beats will no longer use central management' }
+      { defaultMessage: 'The selected Beats will no longer use central management.' }
     ),
     action: AssignmentActionType.Delete,
     danger: true,
@@ -62,17 +62,17 @@ export const tagListActions: ControlSchema[] = [
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagListAssignmentOptions.removeTagsButtonLabel', {
-      defaultMessage: 'Remove selected',
+      defaultMessage: 'Delete selected tags',
     }),
     type: ActionComponentType.Action,
     showWarning: true,
     warningHeading: i18n.translate(
       'xpack.beatsManagement.tagListAssignmentOptions.removeTagsWarninigTitle',
-      { defaultMessage: 'Remove tag(s)' }
+      { defaultMessage: 'Delete selected tags?' }
     ),
     warningMessage: i18n.translate(
       'xpack.beatsManagement.tagListAssignmentOptions.removeTagWarninigMessage',
-      { defaultMessage: 'Remove the tag?' }
+      { defaultMessage: 'The tag and all its configuration blocks will be deleted.' }
     ),
     action: AssignmentActionType.Delete,
   },
@@ -83,17 +83,17 @@ export const tagConfigActions: ControlSchema[] = [
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagConfigAssignmentOptions.removeTagsButtonLabel', {
-      defaultMessage: 'Remove tag(s)',
+      defaultMessage: 'Remove tag',
     }),
     type: ActionComponentType.Action,
     showWarning: true,
     warningHeading: i18n.translate(
       'xpack.beatsManagement.tagConfigAssignmentOptions.removeTagsWarninigTitle',
-      { defaultMessage: 'Remove tag(s)' }
+      { defaultMessage: 'Remove tag?' }
     ),
     warningMessage: i18n.translate(
       'xpack.beatsManagement.tagConfigAssignmentOptions.removeTagsWarninigMessage',
-      { defaultMessage: 'Remove the tag from the selected beat(s)?' }
+      { defaultMessage: 'The tag will be removed from the selected Beats.' }
     ),
     action: AssignmentActionType.Delete,
   },

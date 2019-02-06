@@ -86,7 +86,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       >
         <FormattedMessage
           id="xpack.beatsManagement.beats.installBeatsLearningButtonLabel"
-          defaultMessage="Learn how to install beats"
+          defaultMessage="Learn how to install Beats"
         />
       </EuiButtonEmpty>
       <EuiButton

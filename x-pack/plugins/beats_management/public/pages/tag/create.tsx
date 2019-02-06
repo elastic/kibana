@@ -54,7 +54,7 @@ class TagCreatePageComponent extends React.PureComponent<
         hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
         title={intl.formatMessage({
           id: 'xpack.beatsManagement.tag.createTagTitle',
-          defaultMessage: 'Create Tag',
+          defaultMessage: 'Create tag',
         })}
       >
         <div>

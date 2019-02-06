@@ -95,7 +95,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                 label={
                   <FormattedMessage
                     id="xpack.beatsManagement.tag.tagNameLabel"
-                    defaultMessage="Tag Name"
+                    defaultMessage="Tag name"
                   />
                 }
                 isInvalid={!!this.getNameError(tag.name)}
@@ -113,7 +113,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               </EuiFormRow>
               <EuiFormRow
                 label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
-                  defaultMessage: 'Tag Color',
+                  defaultMessage: 'Tag color',
                 })}
               >
                 <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />

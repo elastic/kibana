@@ -17,7 +17,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'filebeatInputConfig.paths.ui.helpText',
     i18n.translate('xpack.beatsManagement.filebeatInputConfig.pathsDescription', {
-      defaultMessage: 'Put each of the paths on a separate line',
+      defaultMessage: 'Put each file path on a separate line.',
     }),
   ],
   [
@@ -96,7 +96,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'metricbeatModuleConfig.hosts.ui.helpText',
     i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.hostsDescription', {
-      defaultMessage: 'Put each of the paths on a seperate line',
+      defaultMessage: 'Put each host on a separate line.',
     }),
   ],
   [
@@ -139,7 +139,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'outputConfig.output.ui.label',
     i18n.translate('xpack.beatsManagement.outputConfig.outputTypeLabel', {
-      defaultMessage: 'Output Type',
+      defaultMessage: 'Output type',
     }),
   ],
   [
@@ -194,7 +194,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'supportedConfigs.filebeat.modules.text',
     i18n.translate('xpack.beatsManagement.tagConfig.filebeatModuleLabel', {
-      defaultMessage: 'Filebeat Module',
+      defaultMessage: 'Filebeat module',
     }),
   ],
   [

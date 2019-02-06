@@ -149,7 +149,7 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
                       {
                         value: '',
                         text: i18n.translate('xpack.beatsManagement.table.selectOptionLabel', {
-                          defaultMessage: 'Please Select An Option',
+                          defaultMessage: 'Select an option',
                         }),
                       },
                     ].concat(schema.options || [])}
@@ -187,10 +187,10 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
               defaultValue={get(this.props, `values.config.other`, '')}
               name={'other'}
               helpText={i18n.translate('xpack.beatsManagement.config.otherConfigDescription', {
-                defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
+                defaultMessage: 'Use YAML format to specify other settings.',
               })}
               label={i18n.translate('xpack.beatsManagement.config.otherConfigLabel', {
-                defaultMessage: 'Other Config',
+                defaultMessage: 'Other configuration settings',
               })}
               validationError={i18n.translate('xpack.beatsManagement.config.other.error', {
                 defaultMessage: 'Use valid YAML format',

@@ -74,7 +74,7 @@ class InitialWalkthroughPageComponent extends Component<
             id: '/walkthrough/initial/tag',
             name: intl.formatMessage({
               id: 'xpack.beatsManagement.enrollBeat.createTagStepLabel',
-              defaultMessage: 'Create tag',
+              defaultMessage: 'Create configuration tag',
             }),
           },
           {
