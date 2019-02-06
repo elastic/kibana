@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 export function showSaveModal(saveModal) {
   const container = document.createElement('div');
@@ -46,5 +46,5 @@ export function showSaveModal(saveModal) {
     }
   );
 
-  ReactDOM.render(<I18nProvider>{element}</I18nProvider>, container);
+  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
 }
