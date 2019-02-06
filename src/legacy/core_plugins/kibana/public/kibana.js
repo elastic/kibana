@@ -76,6 +76,4 @@ uiModules.get('kibana', [
   'ui.select',
   'ngSanitize',
   'elasticsearch',
-]);
-
-uiModules.get('kibana').run(showAppRedirectNotification);
+]).run(showAppRedirectNotification);
