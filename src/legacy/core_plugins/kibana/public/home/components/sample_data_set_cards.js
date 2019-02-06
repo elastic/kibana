@@ -183,7 +183,7 @@ export class SampleDataSetCards extends React.Component {
 
   render() {
     return (
-      <EuiFlexGrid columns={4}>
+      <EuiFlexGrid columns={3} className="homSampleDataSetCards">
         {
           this.state.sampleDataSets.map(sampleDataSet => {
             return (

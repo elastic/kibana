@@ -116,7 +116,7 @@ export class Home extends Component {
       })
       .map(directory => {
         return (
-          <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis
               description={directory.description}
               iconType={directory.icon}
@@ -132,7 +132,7 @@ export class Home extends Component {
     const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage className="homPage">
+      <EuiPage restrictWidth={1200}>
         <EuiPageBody>
 
           <AddData

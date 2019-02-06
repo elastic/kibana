@@ -54,9 +54,9 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
   }
 
   const content = (
-    <EuiFlexGroup>
+    <EuiFlexGroup responsive={false}>
       {optionalImg}
-      <EuiFlexItem className="synopsisContent">
+      <EuiFlexItem>
         <EuiTitle size="xs" className="synopsisTitle">
           <h4>
             {title}
