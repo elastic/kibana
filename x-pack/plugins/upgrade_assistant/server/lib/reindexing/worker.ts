@@ -55,8 +55,6 @@ export class ReindexWorker {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
-    this.apmIndexPatterns = apmIndexPatterns;
-
     this.reindexService = reindexServiceFactory(
       this.callWithInternalUser,
       this.xpackInfo,

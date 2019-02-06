@@ -13,7 +13,7 @@ export function upgradeAssistant(kibana: any) {
   return new kibana.Plugin({
     id: 'upgrade_assistant',
     configPrefix: 'xpack.upgrade_assistant',
-    require: ['elasticsearch'],
+    require: ['elasticsearch', 'xpack_main'],
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
       savedObjectSchemas: {

@@ -35,7 +35,7 @@ declare module 'hapi' {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;
     spaces: any;
-    apm_oss: ApmOssPlugin;
+    apm_oss?: ApmOssPlugin;
     // add new plugin types here
   }
 
