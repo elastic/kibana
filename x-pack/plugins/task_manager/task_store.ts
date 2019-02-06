@@ -15,6 +15,8 @@ import {
 import { Logger } from './lib/logger';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
+const DOC_TYPE = '_doc';
+
 export interface StoreOpts {
   callCluster: ElasticJs;
   getKibanaUuid: () => string;
@@ -167,31 +169,34 @@ export class TaskStore {
 
     const templateResult = await this.callCluster('indices.putTemplate', {
       name: templateName,
+      include_type_name: true,
       body: {
         index_patterns: [this.index],
         mappings: {
-          dynamic: false,
-          properties: {
-            type: { type: 'keyword' },
-            task: {
-              properties: {
-                taskType: { type: 'keyword' },
-                scheduledAt: { type: 'date' },
-                runAt: { type: 'date' },
-                interval: { type: 'text' },
-                attempts: { type: 'integer' },
-                status: { type: 'keyword' },
-                params: { type: 'text' },
-                state: { type: 'text' },
-                user: { type: 'keyword' },
-                scope: { type: 'keyword' },
+          [DOC_TYPE]: {
+            dynamic: false,
+            properties: {
+              type: { type: 'keyword' },
+              task: {
+                properties: {
+                  taskType: { type: 'keyword' },
+                  scheduledAt: { type: 'date' },
+                  runAt: { type: 'date' },
+                  interval: { type: 'text' },
+                  attempts: { type: 'integer' },
+                  status: { type: 'keyword' },
+                  params: { type: 'text' },
+                  state: { type: 'text' },
+                  user: { type: 'keyword' },
+                  scope: { type: 'keyword' },
+                },
               },
-            },
-            kibana: {
-              properties: {
-                apiVersion: { type: 'integer' }, // 1, 2, 3, etc
-                uuid: { type: 'keyword' }, //
-                version: { type: 'integer' }, // 7000099, etc
+              kibana: {
+                properties: {
+                  apiVersion: { type: 'integer' }, // 1, 2, 3, etc
+                  uuid: { type: 'keyword' }, //
+                  version: { type: 'integer' }, // 7000099, etc
+                },
               },
             },
           },
