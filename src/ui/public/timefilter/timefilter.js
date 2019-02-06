@@ -51,7 +51,6 @@ class Timefilter extends SimpleEmitter {
    * @param {Object} time
    * @property {string|moment} time.from
    * @property {string|moment} time.to
-   * @property {string} time.mode (quick | relative | absolute)
    */
   setTime = (time) => {
     // Object.assign used for partially composed updates
@@ -60,7 +59,6 @@ class Timefilter extends SimpleEmitter {
       this._time = {
         from: newTime.from,
         to: newTime.to,
-        mode: newTime.mode
       };
       timeHistory.add(this._time);
       this.emit('timeUpdate');
