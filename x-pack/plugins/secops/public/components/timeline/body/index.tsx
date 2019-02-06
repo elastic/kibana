@@ -38,9 +38,10 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: EcsEdges[];
+  getNotesByIds: (eventIds: string[]) => Note[];
   height: number;
   id: string;
-  notes: { [eventId: string]: Note[] };
+  eventIdToNoteIds: { [eventId: string]: string[] };
   onColumnSorted: OnColumnSorted;
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
@@ -115,9 +116,10 @@ export class Body extends React.PureComponent<Props, State> {
       columnHeaders,
       columnRenderers,
       data,
+      eventIdToNoteIds,
+      getNotesByIds,
       height,
       id,
-      notes,
       onColumnSorted,
       onFilterChange,
       onPinEvent,
@@ -173,10 +175,13 @@ export class Body extends React.PureComponent<Props, State> {
                                 eventId: ecsEdges.node._id!,
                                 pinnedEventIds,
                               })}
-                              notes={notes[ecsEdges.node._id!] || emptyNotes}
+                              getNotesByIds={getNotesByIds}
+                              notes={eventIdToNoteIds[ecsEdges.node._id!] || emptyNotes}
                               onEventToggled={this.onToggleExpanded(ecsEdges.node._id!)}
                               onPinClicked={getPinOnClick({
-                                allowUnpinning: !eventHasNotes(notes[ecsEdges.node._id!]),
+                                allowUnpinning: !eventHasNotes(
+                                  eventIdToNoteIds[ecsEdges.node._id!]
+                                ),
                                 eventId: ecsEdges.node._id!,
                                 onPinEvent,
                                 onUnPinEvent,

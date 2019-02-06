@@ -21,7 +21,8 @@ interface Props {
   expanded: boolean;
   eventId: string;
   eventIsPinned: boolean;
-  notes: Note[];
+  getNotesByIds: (eventIds: string[]) => Note[];
+  notes: string[];
   onEventToggled: () => void;
   onPinClicked: () => void;
   showNotes: boolean;
@@ -67,6 +68,7 @@ export const Actions = pure<Props>(
     expanded,
     eventId,
     eventIsPinned,
+    getNotesByIds,
     notes,
     onEventToggled,
     onPinClicked,
@@ -105,6 +107,7 @@ export const Actions = pure<Props>(
             animate={false}
             associateNote={associateNote}
             data-test-subj="timeline-action-notes-button"
+            getNotesByIds={getNotesByIds}
             notes={notes || emptyNotes}
             showNotes={showNotes}
             size="s"

@@ -51,6 +51,8 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   dataProviders: DataProvider[];
+  eventIdToNoteIds: { [eventId: string]: string[] };
+  getNotesByIds: (eventIds: string[]) => Note[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -58,7 +60,6 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlQuery: string;
-  notes: { [eventId: string]: Note[] };
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -85,6 +86,8 @@ export const Timeline = pure<Props>(
     columnHeaders,
     columnRenderers,
     dataProviders,
+    eventIdToNoteIds,
+    getNotesByIds,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -92,7 +95,6 @@ export const Timeline = pure<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     kqlQuery,
-    notes,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
@@ -149,13 +151,14 @@ export const Timeline = pure<Props>(
                       columnHeaders={columnHeaders}
                       columnRenderers={columnRenderers}
                       data={events}
+                      eventIdToNoteIds={eventIdToNoteIds}
+                      getNotesByIds={getNotesByIds}
                       height={calculateBodyHeight({
                         flyoutHeight,
                         flyoutHeaderHeight,
                         timelineHeaderHeight,
                         timelineFooterHeight: footerHeight,
                       })}
-                      notes={notes}
                       onColumnSorted={onColumnSorted}
                       onFilterChange={onFilterChange}
                       onPinEvent={onPinEvent}

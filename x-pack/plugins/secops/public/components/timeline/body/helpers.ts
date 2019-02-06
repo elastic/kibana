@@ -18,7 +18,7 @@ export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
 
 export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
 
-export const eventHasNotes = (notes: Note[]): boolean => !isEmpty(notes);
+export const eventHasNotes = (notes: Note[] | string[]): boolean => !isEmpty(notes);
 
 export const getPinTooltip = ({
   isPinned,

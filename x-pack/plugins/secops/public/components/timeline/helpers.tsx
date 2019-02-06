@@ -8,9 +8,6 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
-import { Note } from '../../lib/note';
-import { getApplicableNotes } from '../../lib/note/helpers';
-import { NotesById } from '../../store/local/app/model';
 import { DataProvider } from './data_providers/data_provider';
 
 const buildQueryMatch = (dataProvider: DataProvider) =>
@@ -77,21 +74,6 @@ export const combineQueries = (
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
   };
 };
-
-export const getEventNotes = ({
-  eventIdToNoteIds,
-  notesById,
-}: {
-  eventIdToNoteIds: { [eventId: string]: string[] };
-  notesById: NotesById;
-}): { [eventId: string]: Note[] } =>
-  Object.keys(eventIdToNoteIds).reduce(
-    (acc, eventId) => ({
-      ...acc,
-      [eventId]: getApplicableNotes({ noteIds: eventIdToNoteIds[eventId], notesById }),
-    }),
-    {}
-  );
 
 interface CalculateBodyHeightParams {
   /** The the height of the flyout container, which is typically the entire "page", not including the standard Kibana navigation */

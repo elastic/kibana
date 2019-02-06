@@ -109,7 +109,8 @@ export const NewTimeline = pure<{
 interface NotesButtonProps {
   animate?: boolean;
   associateNote: AssociateNote;
-  notes: Note[];
+  getNotesByIds: (eventIds: string[]) => Note[];
+  notes: string[];
   size: 's' | 'l';
   showNotes: boolean;
   toggleShowNotes: () => void;
@@ -120,7 +121,7 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
-const NotesIcon = pure<{ notes: Note[]; size: 's' | 'l' }>(({ notes, size }) => (
+const NotesIcon = pure<{ notes: string[]; size: 's' | 'l' }>(({ notes, size }) => (
   <>
     <EuiBadge data-test-subj="timeline-notes-count" color="hollow">
       {notes.length}
@@ -133,7 +134,7 @@ const NotesIcon = pure<{ notes: Note[]; size: 's' | 'l' }>(({ notes, size }) => 
   </>
 ));
 
-const LargeNotesButton = pure<{ notes: Note[]; text?: string; toggleShowNotes: () => void }>(
+const LargeNotesButton = pure<{ notes: string[]; text?: string; toggleShowNotes: () => void }>(
   ({ notes, text, toggleShowNotes }) => (
     <EuiButton
       data-test-subj="timeline-notes-button-large"
@@ -148,7 +149,7 @@ const LargeNotesButton = pure<{ notes: Note[]; text?: string; toggleShowNotes: (
   )
 );
 
-const SmallNotesButton = pure<{ notes: Note[]; toggleShowNotes: () => void }>(
+const SmallNotesButton = pure<{ notes: string[]; toggleShowNotes: () => void }>(
   ({ notes, toggleShowNotes }) => (
     <SmallNotesButtonContainer
       data-test-subj="timeline-notes-button-small"
@@ -167,6 +168,7 @@ const NotesButtonComponent = pure<NotesButtonProps>(
   ({
     animate = true,
     associateNote,
+    getNotesByIds,
     notes,
     showNotes,
     size,
@@ -186,6 +188,7 @@ const NotesButtonComponent = pure<NotesButtonProps>(
             <EuiModal onClose={toggleShowNotes}>
               <Notes
                 associateNote={associateNote}
+                getNotesByIds={getNotesByIds}
                 notes={notes}
                 getNewNoteId={getNewNoteId}
                 updateNote={updateNote}
@@ -202,6 +205,7 @@ export const NotesButton = pure<NotesButtonProps>(
   ({
     animate = true,
     associateNote,
+    getNotesByIds,
     notes,
     showNotes,
     size,
@@ -214,6 +218,7 @@ export const NotesButton = pure<NotesButtonProps>(
       <NotesButtonComponent
         animate={animate}
         associateNote={associateNote}
+        getNotesByIds={getNotesByIds}
         notes={notes}
         showNotes={showNotes}
         size={size}
@@ -226,6 +231,7 @@ export const NotesButton = pure<NotesButtonProps>(
         <NotesButtonComponent
           animate={animate}
           associateNote={associateNote}
+          getNotesByIds={getNotesByIds}
           notes={notes}
           showNotes={showNotes}
           size={size}

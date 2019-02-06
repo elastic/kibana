@@ -13,7 +13,7 @@ import { TimelineById } from './reducer';
 
 const selectTimelineById = (state: State): TimelineById => state.local.timeline.timelineById;
 
-const selectTimeline = (state: State, timelineId: string): TimelineModel =>
+export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.local.timeline.timelineById[timelineId];
 
 export const timelineByIdSelector = createSelector(
