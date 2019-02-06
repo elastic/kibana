@@ -206,6 +206,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/bulk_create',
                   'saved_object:config/update',
                   'saved_object:config/delete',
+                  'ui:advancedSettings/showWriteControls',
                   'ui:catalogue/advanced_settings',
                   'ui:management/kibana/settings',
                 ],
