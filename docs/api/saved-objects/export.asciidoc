@@ -1,4 +1,3 @@
-
 [[saved-objects-api-export]]
 === Export Objects
 
