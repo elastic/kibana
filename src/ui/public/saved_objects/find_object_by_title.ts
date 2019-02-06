@@ -18,7 +18,7 @@
  */
 
 import { find } from 'lodash';
-import { SavedObjectAttributes } from 'src/server/saved_objects';
+import { SavedObjectAttributes } from '../../../server/saved_objects';
 import { SavedObject } from './saved_object';
 import { SavedObjectsClient } from './saved_objects_client';
 
@@ -42,7 +42,7 @@ export function findObjectByTitle<T extends SavedObjectAttributes>(
   // Elastic search will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
   return savedObjectsClient
-    .find({
+    .find<T>({
       type,
       perPage: 10,
       search: `"${title}"`,

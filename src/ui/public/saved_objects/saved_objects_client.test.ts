@@ -19,14 +19,13 @@
 
 jest.mock('ui/kfetch', () => ({}));
 
-// @ts-ignore
 import expect from 'expect.js';
 import * as sinon from 'sinon';
 import { FindOptions } from '../../../server/saved_objects/service';
 import { SavedObject } from './saved_object';
 import { SavedObjectsClient } from './saved_objects_client';
 
-describe.only('SavedObjectsClient', () => {
+describe('SavedObjectsClient', () => {
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
@@ -342,7 +341,7 @@ describe.only('SavedObjectsClient', () => {
       );
     });
 
-    test.only('accepts pagination params', () => {
+    test('accepts pagination params', () => {
       const options: FindOptions = { perPage: 10, page: 6 };
 
       savedObjectsClient.find(options);

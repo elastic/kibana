@@ -51,7 +51,8 @@ interface CreateOptions {
   references?: SavedObjectReference[];
 }
 
-interface BulkCreateOptions<T extends SavedObjectAttributes = any> extends CreateOptions {
+interface BulkCreateOptions<T extends SavedObjectAttributes = SavedObjectAttributes>
+  extends CreateOptions {
   type: string;
   attributes: T;
 }
@@ -62,11 +63,12 @@ interface UpdateOptions {
   references?: SavedObjectReference[];
 }
 
-interface BatchResponse<T extends SavedObjectAttributes = any> {
+interface BatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
   savedObjects: Array<SavedObject<T>>;
 }
 
-interface FindResults<T extends SavedObjectAttributes = any> extends BatchResponse<T> {
+interface FindResults<T extends SavedObjectAttributes = SavedObjectAttributes>
+  extends BatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -141,7 +143,7 @@ export class SavedObjectsClient {
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion]
-   * @returns {promise} - SavedObject({ id, type, version, attributes })
+   * @returns
    */
   public create = <T extends SavedObjectAttributes>(
     type: string,
@@ -232,7 +234,9 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
-  public find = (options: FindOptions = {}): Promise<FindResults> => {
+  public find = <T extends SavedObjectAttributes>(
+    options: FindOptions = {}
+  ): Promise<FindResults<T>> => {
     const path = this.getPath(['_find']);
     const query = keysToSnakeCaseShallow(options);
 
@@ -243,7 +247,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as FindResults;
+      return keysToCamelCaseShallow(resp) as FindResults<T>;
     });
   };
 
@@ -341,10 +345,6 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    if (!path) {
-      return API_BASE_URL;
-    }
-
     return resolveUrl(API_BASE_URL, join(...path));
   }
 
