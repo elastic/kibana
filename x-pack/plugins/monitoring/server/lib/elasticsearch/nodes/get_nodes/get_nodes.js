@@ -78,7 +78,7 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
       sort: [ { timestamp: { order: 'desc' } } ]
     },
     filterPath: [
-      'hits.hits._source.source_node',
+      'hits.hits._source.node_stats',
       'aggregations.nodes.buckets.key',
       ...LISTING_METRICS_PATHS,
     ]

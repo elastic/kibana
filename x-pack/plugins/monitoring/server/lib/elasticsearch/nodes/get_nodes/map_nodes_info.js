@@ -20,22 +20,22 @@ export function mapNodesInfo(nodeHits, clusterStats, shardStats) {
   const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
 
   return nodeHits.reduce((prev, node) => {
-    const sourceNode = get(node, '_source.source_node');
+    const sourceNode = get(node, '_source.node_stats');
 
     const calculatedNodeType = calculateNodeType(sourceNode, get(clusterState, 'master_node'));
     const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(sourceNode, calculatedNodeType);
-    const isOnline = !isUndefined(get(clusterState, [ 'nodes', sourceNode.uuid ]));
+    const isOnline = !isUndefined(get(clusterState, [ 'nodes', sourceNode.node_id ]));
 
     return {
       ...prev,
-      [sourceNode.uuid]: {
-        name: sourceNode.name,
+      [sourceNode.node_id]: {
+        name: sourceNode.node_id,
         transport_address: sourceNode.transport_address,
         type: nodeType,
         isOnline,
         nodeTypeLabel: nodeTypeLabel,
         nodeTypeClass: nodeTypeClass,
-        shardCount: get(shardStats, `nodes[${sourceNode.uuid}].shardCount`, 0),
+        shardCount: get(shardStats, `nodes[${sourceNode.node_id}].shardCount`, 0),
       }
     };
   }, {});

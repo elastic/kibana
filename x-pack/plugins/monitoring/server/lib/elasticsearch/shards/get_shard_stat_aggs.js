@@ -31,7 +31,7 @@ export function getShardAggs(config, includeNodes) {
     aggs: {
       index_count: { cardinality: { field: 'shard.index' } },
       node_names: {
-        terms: { field: 'source_node.name', size: aggSize }
+        terms: { field: 'node_stats.name', size: aggSize }
       },
       node_ids: {
         terms: { field: 'shard.node', size: 1 } // node can only have 1 id
