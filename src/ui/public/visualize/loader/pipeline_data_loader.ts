@@ -18,18 +18,15 @@
  */
 
 import { RequestHandlerParams, Vis } from '../../vis';
-import { handleLoaderError } from './errors';
 import { buildPipeline, runPipeline } from './pipeline_helpers';
 
 export class PipelineDataLoader {
   constructor(private readonly vis: Vis) {}
 
   public async fetch(params: RequestHandlerParams): Promise<any> {
-    this.vis.requestError = undefined;
-    this.vis.showRequestError = false;
     this.vis.pipelineExpression = buildPipeline(this.vis, params);
 
-    const pipelineResponse = await runPipeline(
+    return await runPipeline(
       this.vis.pipelineExpression,
       {},
       {
@@ -43,11 +40,5 @@ export class PipelineDataLoader {
         inspectorAdapters: params.inspectorAdapters,
       }
     );
-
-    if (pipelineResponse.type === 'error') {
-      return handleLoaderError(params, this.vis, pipelineResponse.error);
-    }
-
-    return pipelineResponse;
   }
 }

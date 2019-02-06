@@ -45,6 +45,9 @@ import {
   VisualizeUpdateParams,
 } from './types';
 
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
+
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
@@ -417,12 +420,47 @@ export class EmbeddedVisualizeHandler {
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
+    this.vis.requestError = undefined;
+    this.vis.showRequestError = false;
 
-    return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      if (data && data.value) {
-        this.dataSubject.next(data.value);
-      }
-      return data;
+    return this.dataLoader
+      .fetch(this.dataLoaderParams)
+      .then(data => {
+        // Pipeline responses never throw errors, so we need to check for
+        // `type: 'error'`, and then throw so it can be caught below.
+        // TODO: We should revisit this after we have fully migrated
+        // to the new expression pipeline infrastructure.
+        if (data && data.type === 'error') {
+          throw data.error;
+        }
+
+        if (data && data.value) {
+          this.dataSubject.next(data.value);
+        }
+        return data;
+      })
+      .catch(this.handleDataLoaderError);
+  };
+
+  /**
+   * When dataLoader returns an error, we need to make sure it surfaces in the UI.
+   *
+   * TODO: Eventually we should add some custom error messages for issues that are
+   * frequently encountered by users.
+   */
+  private handleDataLoaderError = (error: any): void => {
+    // TODO: come up with a general way to cancel execution of pipeline expressions.
+    this.dataLoaderParams.searchSource.cancelQueued();
+
+    this.vis.requestError = error;
+    this.vis.showRequestError =
+      error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
+
+    toastNotifications.addDanger({
+      title: i18n.translate('kbn.visualize.loader.dataLoaderError', {
+        defaultMessage: 'Error in visualization',
+      }),
+      text: error.message,
     });
   };
 

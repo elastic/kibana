@@ -34,7 +34,6 @@ import {
 import { VisResponseData } from './types';
 
 import { decorateVisObject } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
-import { handleLoaderError } from './errors';
 
 function getHandler<T extends RequestHandler | ResponseHandler>(
   from: Array<{ name: string; handler: T }>,
@@ -68,53 +67,43 @@ export class VisualizeDataLoader {
   }
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
-    this.vis.filters = { timeRange: params.timeRange };
-    this.vis.requestError = undefined;
-    this.vis.showRequestError = false;
-
     // add necessary params to vis object (dimensions, bucket, metric, etc)
     decorateVisObject(this.vis, { timeRange: params.timeRange });
 
-    try {
-      // searchSource is only there for courier request handler
-      const requestHandlerResponse = await this.requestHandler({
-        partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
-        isHierarchical: this.vis.isHierarchical(),
-        visParams: this.vis.params,
-        ...params,
-        filters: params.filters
-          ? params.filters.filter(filter => !filter.meta.disabled)
-          : undefined,
-      });
+    // searchSource is only there for courier request handler
+    const requestHandlerResponse = await this.requestHandler({
+      partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
+      isHierarchical: this.vis.isHierarchical(),
+      visParams: this.vis.params,
+      ...params,
+      filters: params.filters ? params.filters.filter(filter => !filter.meta.disabled) : undefined,
+    });
 
-      // No need to call the response handler when there have been no data nor has been there changes
-      // in the vis-state (response handler does not depend on uiStat
-      const canSkipResponseHandler =
-        this.previousRequestHandlerResponse &&
-        this.previousRequestHandlerResponse === requestHandlerResponse &&
-        this.previousVisState &&
-        isEqual(this.previousVisState, this.vis.getState());
+    // No need to call the response handler when there have been no data nor has been there changes
+    // in the vis-state (response handler does not depend on uiStat
+    const canSkipResponseHandler =
+      this.previousRequestHandlerResponse &&
+      this.previousRequestHandlerResponse === requestHandlerResponse &&
+      this.previousVisState &&
+      isEqual(this.previousVisState, this.vis.getState());
 
-      this.previousVisState = this.vis.getState();
-      this.previousRequestHandlerResponse = requestHandlerResponse;
+    this.previousVisState = this.vis.getState();
+    this.previousRequestHandlerResponse = requestHandlerResponse;
 
-      if (!canSkipResponseHandler) {
-        this.visData = await Promise.resolve(
-          this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
-        );
-      }
-
-      return {
-        as: 'visualization',
-        value: {
-          visType: this.vis.type.name,
-          visData: this.visData,
-          visConfig: this.vis.params,
-          params: {},
-        },
-      };
-    } catch (error) {
-      return handleLoaderError(params, this.vis, error);
+    if (!canSkipResponseHandler) {
+      this.visData = await Promise.resolve(
+        this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
+      );
     }
+
+    return {
+      as: 'visualization',
+      value: {
+        visType: this.vis.type.name,
+        visData: this.visData,
+        visConfig: this.vis.params,
+        params: {},
+      },
+    };
   }
 }
