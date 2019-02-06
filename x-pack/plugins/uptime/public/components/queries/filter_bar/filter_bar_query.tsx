@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { FilterBar } from '../../functional';
+import { FilterBar, FilterBarLoading } from '../../functional';
 import { getFilterBarQuery } from './get_filter_bar';
 
 interface FilterBarProps {
@@ -31,9 +31,7 @@ export const FilterBarQuery = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
+        return <FilterBarLoading />;
       }
       if (error) {
         return i18n.translate('xpack.uptime.filterBar.errorMessage', {

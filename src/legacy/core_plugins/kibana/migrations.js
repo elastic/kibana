@@ -31,16 +31,29 @@ function migrateIndexPattern(doc) {
     // Let it go, the data is invalid and we'll leave it as is
     return;
   }
-  if (!searchSource.index) {
-    return;
+  if (searchSource.index) {
+    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    doc.references.push({
+      name: searchSource.indexRefName,
+      type: 'index-pattern',
+      id: searchSource.index,
+    });
+    delete searchSource.index;
   }
-  doc.references.push({
-    name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-    type: 'index-pattern',
-    id: searchSource.index,
-  });
-  searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-  delete searchSource.index;
+  if (searchSource.filter) {
+    searchSource.filter.forEach((filterRow, i) => {
+      if (!filterRow.meta || !filterRow.meta.index) {
+        return;
+      }
+      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      doc.references.push({
+        name: filterRow.meta.indexRefName,
+        type: 'index-pattern',
+        id: filterRow.meta.index,
+      });
+      delete filterRow.meta.index;
+    });
+  }
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 

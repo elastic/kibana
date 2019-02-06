@@ -7,7 +7,6 @@
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
         <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
           <span class="kuiLocalBreadcrumb__emphasis">
-            <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle" ng-hide="k7design"></span>
             <span
               id="reload_saved_search"
               aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload saved search'} }}"
@@ -72,8 +71,6 @@
 
           <discover-no-results
             ng-show="resultState === 'none'"
-            top-nav-toggle="kbnTopNav.toggle"
-            is-time-picker-open="kbnTopNav.isCurrent('filter')"
             shard-failures="failures"
             time-field-name="opts.timefield"
             query-language="state.query.language"

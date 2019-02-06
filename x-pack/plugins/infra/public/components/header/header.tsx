@@ -9,23 +9,15 @@ import React from 'react';
 import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { ExternalHeader } from './external_header';
-import { LegacyHeader } from './legacy_header';
 
 interface HeaderProps {
   breadcrumbs?: Breadcrumb[];
-  appendSections?: React.ReactNode;
 }
 
-export const Header = ({ appendSections, breadcrumbs = [] }: HeaderProps) => {
-  return (
-    <WithKibanaChrome>
-      {({ setBreadcrumbs, uiSettings: { k7Design } }) =>
-        k7Design ? (
-          <ExternalHeader breadcrumbs={breadcrumbs} setBreadcrumbs={setBreadcrumbs} />
-        ) : (
-          <LegacyHeader appendSections={appendSections} breadcrumbs={breadcrumbs} />
-        )
-      }
-    </WithKibanaChrome>
-  );
-};
+export const Header = ({ breadcrumbs = [] }: HeaderProps) => (
+  <WithKibanaChrome>
+    {({ setBreadcrumbs }) => (
+      <ExternalHeader breadcrumbs={breadcrumbs} setBreadcrumbs={setBreadcrumbs} />
+    )}
+  </WithKibanaChrome>
+);

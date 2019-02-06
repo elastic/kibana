@@ -15,19 +15,13 @@ export const EmptyIndex = (props: any) => (
         <h3>
           <FormattedMessage
             id="xpack.uptime.emptyState.noDataTitle"
-            defaultMessage="No Uptime Data"
+            defaultMessage="No uptime data available"
           />
         </h3>
       </EuiTitle>
     }
     body={
       <Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.uptime.emptyState.noDataDescription"
-            defaultMessage="There is no uptime data available."
-          />
-        </p>
         <p>
           <FormattedMessage
             id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
