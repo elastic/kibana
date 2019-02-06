@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { timingSafeEqual } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
 import uuid from 'uuid';
@@ -127,12 +127,20 @@ export class CMTokensDomain {
       });
     }
 
-    await this.adapter.upsertTokens(user, tokens);
+    while (tokens.length > 100) {
+      await this.adapter.upsertTokens(user, tokens.splice(0, 100));
+    }
 
     return tokens.map(token => token.token);
   }
 
   private createRandomHash() {
-    return uuid.v4().replace(/-/g, '');
+    return uuid
+      .v4({
+        rng: () => {
+          return [...randomBytes(16)];
+        },
+      })
+      .replace(/-/g, '');
   }
 }
