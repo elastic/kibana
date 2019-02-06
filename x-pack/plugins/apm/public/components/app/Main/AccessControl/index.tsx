@@ -32,6 +32,7 @@ export const AccessControl: React.SFC = ({ children }) => {
               if (!serverStatus || serverStatus === STATUS.LOADING) {
                 return null;
               }
+
               if (
                 serverStatus === STATUS.SUCCESS &&
                 serverData.latest &&

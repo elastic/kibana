@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from '../../../common/constants';
+import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 
 interface APMServerOnboardingDocument {
