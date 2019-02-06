@@ -72,7 +72,7 @@ class SavedObjectFinderUI extends React.Component<
     visTypes: PropTypes.object,
   };
 
-  private isMounted: boolean = false;
+  private isComponentMounted: boolean = false;
 
   private debouncedFetch = _.debounce(async (filter: any) => {
     const resp = await chrome.getSavedObjectsClient().find({
@@ -98,7 +98,7 @@ class SavedObjectFinderUI extends React.Component<
       });
     }
 
-    if (!this.isMounted) {
+    if (!this.isComponentMounted) {
       return;
     }
 
@@ -131,12 +131,12 @@ class SavedObjectFinderUI extends React.Component<
   }
 
   public componentWillUnmount() {
-    this.isMounted = false;
+    this.isComponentMounted = false;
     this.debouncedFetch.cancel();
   }
 
   public componentDidMount() {
-    this.isMounted = true;
+    this.isComponentMounted = true;
     this.fetchItems();
   }
 
