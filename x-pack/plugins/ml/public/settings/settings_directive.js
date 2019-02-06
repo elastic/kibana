@@ -42,9 +42,6 @@ import { Settings } from './settings.js';
 
 module.directive('mlSettings', function () {
 
-  timefilter.disableTimeRangeSelector(); // remove time picker from top of page
-  timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
-
   const canGetFilters = checkPermission('canGetFilters');
   const canGetCalendars = checkPermission('canGetCalendars');
 
@@ -53,6 +50,9 @@ module.directive('mlSettings', function () {
     replace: false,
     scope: {},
     link: function (scope, element) {
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
+
       ReactDOM.render(
         <I18nContext>
           {React.createElement(
