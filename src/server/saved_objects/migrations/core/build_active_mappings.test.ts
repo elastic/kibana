@@ -54,7 +54,7 @@ describe('buildActiveMappings', () => {
     };
 
     const mappings = buildActiveMappings({ properties });
-    const hashes = mappings.doc._meta!.migrationMappingPropertyHashes!;
+    const hashes = mappings._meta!.migrationMappingPropertyHashes!;
 
     expect(hashes.aaa).toBeDefined();
     expect(hashes.aaa).toEqual(hashes.bbb);
@@ -65,45 +65,37 @@ describe('buildActiveMappings', () => {
 describe('diffMappings', () => {
   test('is different if expected contains extra hashes', () => {
     const actual: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
 
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.properties.baz');
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('properties.baz');
   });
 
   test('does nothing if actual contains extra hashes', () => {
     const actual: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar', baz: 'qux' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
 
     expect(diffMappings(actual, expected)).toBeUndefined();
@@ -111,25 +103,21 @@ describe('diffMappings', () => {
 
   test('does nothing if actual hashes are identical to expected, but properties differ', () => {
     const actual: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {
-          foo: 'bar',
-        },
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
+      },
+      dynamic: 'strict',
+      properties: {
+        foo: 'bar',
       },
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {
-          foo: 'baz',
-        },
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
+      },
+      dynamic: 'strict',
+      properties: {
+        foo: 'baz',
       },
     };
 
@@ -138,88 +126,72 @@ describe('diffMappings', () => {
 
   test('is different if meta hashes change', () => {
     const actual: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'baz' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'baz' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
 
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.properties.foo');
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('properties.foo');
   });
 
   test('is different if dynamic is different', () => {
     const actual: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'abcde',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'abcde',
+      properties: {},
     };
 
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc.dynamic');
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('dynamic');
   });
 
   test('is different if migrationMappingPropertyHashes is missing from actual', () => {
     const actual: IndexMapping = {
-      doc: {
-        _meta: {},
-        dynamic: 'strict',
-        properties: {},
-      },
+      _meta: {},
+      dynamic: 'strict',
+      properties: {},
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
 
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc._meta');
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('_meta');
   });
 
   test('is different if _meta is missing from actual', () => {
     const actual: IndexMapping = {
-      doc: {
-        dynamic: 'strict',
-        properties: {},
-      },
+      dynamic: 'strict',
+      properties: {},
     };
     const expected: IndexMapping = {
-      doc: {
-        _meta: {
-          migrationMappingPropertyHashes: { foo: 'bar' },
-        },
-        dynamic: 'strict',
-        properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      dynamic: 'strict',
+      properties: {},
     };
 
-    expect(diffMappings(actual, expected)!.changedProp).toEqual('doc._meta');
+    expect(diffMappings(actual, expected)!.changedProp).toEqual('_meta');
   });
 });

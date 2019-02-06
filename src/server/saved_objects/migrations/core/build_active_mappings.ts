@@ -40,11 +40,11 @@ export function buildActiveMappings({
 }): IndexMapping {
   const mapping = defaultMapping();
 
-  properties = validateAndMerge(mapping.doc.properties, properties);
+  properties = validateAndMerge(mapping.properties, properties);
 
   return _.cloneDeep({
     ...mapping,
-    properties: validateAndMerge(mapping.properties, properties),
+    properties,
     _meta: {
       migrationMappingPropertyHashes: md5Values(properties),
     },
@@ -53,28 +53,28 @@ export function buildActiveMappings({
 
 /**
  * Diffs the actual vs expected mappings. The properties are compared using md5 hashes stored in _meta, because
- * actual and expected mappings *can* differ, but if the md5 hashes stored in actual.doc._meta.migrationMappingPropertyHashes
+ * actual and expected mappings *can* differ, but if the md5 hashes stored in actual._meta.migrationMappingPropertyHashes
  * match our expectations, we don't require a migration. This allows ES to tack on additional mappings that Kibana
  * doesn't know about or expect, without triggering continual migrations.
  */
 export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
-  if (actual.doc.dynamic !== expected.doc.dynamic) {
-    return { changedProp: 'doc.dynamic' };
+  if (actual.dynamic !== expected.dynamic) {
+    return { changedProp: 'dynamic' };
   }
 
-  if (!actual.doc._meta || !actual.doc._meta.migrationMappingPropertyHashes) {
-    return { changedProp: 'doc._meta' };
+  if (!actual._meta || !actual._meta.migrationMappingPropertyHashes) {
+    return { changedProp: '_meta' };
   }
 
   const changedProp = findChangedProp(
-    actual.doc._meta.migrationMappingPropertyHashes,
-    expected.doc._meta!.migrationMappingPropertyHashes
+    actual._meta.migrationMappingPropertyHashes,
+    expected._meta!.migrationMappingPropertyHashes
   );
 
-  return changedProp ? { changedProp: `doc.properties.${changedProp}` } : undefined;
+  return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
 }
 
-// Convert an object to an md5 hash string, using rison so we get a stable serialization
+// Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
 function md5Object(obj: any) {
   return crypto
     .createHash('md5')
@@ -85,7 +85,9 @@ function md5Object(obj: any) {
 // JSON.stringify is non-canonical, meaning the same object may produce slightly
 // different JSON, depending on compiler optimizations (e.g. object keys
 // are not guaranteed to be sorted). This function consistently produces the same
-// string, if passed an object of the same shape.
+// string, if passed an object of the same shape. If the outpuf of this function
+// changes from one release to another, migrations will run, so it's important
+// that this function remains stable across releases.
 function canonicalStringify(obj: any): string {
   if (Array.isArray(obj)) {
     return `[${obj.map(canonicalStringify)}]`;
