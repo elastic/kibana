@@ -6,8 +6,8 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-
 import * as React from 'react';
+
 import { ErrorToast, showError } from '.';
 
 describe('Error Toast', () => {
