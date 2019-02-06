@@ -7,12 +7,13 @@
 /* global jest */
 
 import { mount } from 'enzyme';
-import moment from 'moment';
-import { createMockStore } from 'redux-test-utils';
-import createHistory from 'history/createHashHistory';
-import PropTypes from 'prop-types';
 import enzymeToJson from 'enzyme-to-json';
+import createHistory from 'history/createHashHistory';
 import 'jest-styled-components';
+import moment from 'moment';
+import PropTypes from 'prop-types';
+// @ts-ignore
+import { createMockStore } from 'redux-test-utils';
 
 export function toJson(wrapper) {
   return enzymeToJson(wrapper, {
@@ -27,7 +28,7 @@ const defaultRoute = {
 };
 
 export function mountWithRouterAndStore(
-  Component,
+  Component: React.ReactElement<any>,
   storeState = {},
   route = defaultRoute
 ) {
@@ -51,7 +52,10 @@ export function mountWithRouterAndStore(
   return mount(Component, options);
 }
 
-export function mountWithStore(Component, storeState = {}) {
+export function mountWithStore(
+  Component: React.ReactElement<any>,
+  storeState = {}
+) {
   const store = createMockStore(storeState);
 
   const options = {
@@ -69,11 +73,13 @@ export function mountWithStore(Component, storeState = {}) {
 export function mockMoment() {
   // avoid timezone issues
   jest.spyOn(moment.prototype, 'format').mockImplementation(function() {
+    // @ts-ignore
     return `1st of January (mocking ${this.unix()})`;
   });
 
   // convert relative time to absolute time to avoid timing issues
   jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function() {
+    // @ts-ignore
     return `1337 minutes ago (mocking ${this.unix()})`;
   });
 }
