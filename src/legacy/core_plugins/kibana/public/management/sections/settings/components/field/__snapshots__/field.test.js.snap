@@ -1454,26 +1454,7 @@ exports[`Field for json setting should render as read only if saving is disabled
         error={null}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        helpText={
-          <span>
-            <span>
-              <EuiLink
-                aria-label="Reset json test setting to default"
-                color="primary"
-                data-test-subj="advancedSetting-resetField-json:test:setting"
-                onClick={[Function]}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>
-                 
-            </span>
-          </span>
-        }
+        helpText={null}
         isInvalid={false}
         label="json:test:setting"
       >
