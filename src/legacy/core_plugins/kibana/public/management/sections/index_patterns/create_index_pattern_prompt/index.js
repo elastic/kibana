@@ -46,8 +46,8 @@ export const CreateIndexPatternPrompt = ({
         <p style={{ padding: '0 24px' }}>
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.subtitle"
-            defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in \
-Kibana."
+            defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
+              Kibana."
           />
         </p>
         <EuiHorizontalRule margin="m" />
@@ -76,8 +76,8 @@ Kibana."
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="kbn.management.indexPatternPrompt.exampleTwo"
-                defaultMessage="Group all incoming data sources starting with log-west* so you can query against all your west coast \
-server logs."
+                defaultMessage="Group all incoming data sources starting with log-west* so you can query against all your west coast server
+                  logs."
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -88,8 +88,8 @@ server logs."
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="kbn.management.indexPatternPrompt.exampleThree"
-                defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so \
-you can aggregate histotical trends to compare."
+                defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so
+                  you can aggregate histotical trends to compare."
               />
             </EuiFlexItem>
           </EuiFlexGroup>

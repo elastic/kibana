@@ -33,6 +33,7 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { EuiBadge } from '@elastic/eui';
+import { getListBreadcrumbs } from './breadcrumbs';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -88,11 +89,10 @@ uiRoutes
     resolve: indexPatternsResolutions
   });
 
-
 uiRoutes
   .when('/management/kibana/index_patterns', {
-    template: indexPatternListTemplate
-    //todo - template aaand breadcrumbs aaaand ?
+    template: indexPatternListTemplate,
+    k7Breadcrumbs: getListBreadcrumbs
   });
 
 // wrapper directive, which sets some global stuff up like the left nav

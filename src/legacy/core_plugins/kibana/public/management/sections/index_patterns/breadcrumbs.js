@@ -20,6 +20,18 @@
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 
+export function getListBreadcrumbs() {
+  return [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('kbn.management.indexPatterns.listBreadcrumb', {
+        defaultMessage: 'Index patterns'
+      }),
+      href: '#/management/kibana/index_patterns'
+    }
+  ];
+}
+
 export function getCreateBreadcrumbs() {
   return [
     MANAGEMENT_BREADCRUMB,
@@ -27,7 +39,7 @@ export function getCreateBreadcrumbs() {
       text: i18n.translate('kbn.management.indexPatterns.createBreadcrumb', {
         defaultMessage: 'Create index pattern'
       }),
-      href: '#/management/kibana/objects'
+      href: '#/management/kibana/index_pattern'
     }
   ];
 }
