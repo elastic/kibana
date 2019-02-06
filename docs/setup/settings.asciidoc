@@ -178,6 +178,7 @@ The minimum value is 100.
 
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
-`rollup.enabled:`:: *Default: true* Set this value to false to disable the Rollup user interface.
 
-`license_management.enabled`:: *Default: true* Set this value to false to disable the License Management user interface.
+`xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the Rollup user interface.
+
+`xpack.license_management.enabled`:: *Default: true* Set this value to false to disable the License Management user interface.
