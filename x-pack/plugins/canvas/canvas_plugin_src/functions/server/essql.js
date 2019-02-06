@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { queryEsSQL } from '../../../../server/lib/query_es_sql';
+import { queryEsSQL } from '../../../server/lib/query_es_sql';
 
 export const essql = () => ({
   name: 'essql',

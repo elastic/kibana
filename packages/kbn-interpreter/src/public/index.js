@@ -19,4 +19,4 @@
 
 export { initializeInterpreter } from './interpreter';
 export { RenderFunctionsRegistry } from './render_functions_registry';
-export { registries, register, addRegistries } from './registries';
+export { registries } from './registries';

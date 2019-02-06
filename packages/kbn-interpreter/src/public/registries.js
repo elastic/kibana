@@ -17,8 +17,7 @@
  * under the License.
  */
 
-
-import { FunctionsRegistry, TypesRegistry } from '../common';
+import { register, FunctionsRegistry, TypesRegistry } from '../common';
 import { RenderFunctionsRegistry } from './render_functions_registry';
 import { browserFunctions } from '../plugin/functions/browser';
 import { typeSpecs } from '../plugin/types';
@@ -29,27 +28,7 @@ export const registries = {
   types: new TypesRegistry(),
 };
 
-export function addRegistries(newRegistries) {
-  Object.keys(newRegistries).forEach(registryName => {
-    if (registries[registryName]) {
-      throw new Error(`There already a registry named ${registryName}.`);
-    }
-    registries[registryName] = newRegistries[registryName];
-  });
-
-  return registries;
-}
-
-export function register(specs) {
-  Object.keys(specs).forEach(registryName => {
-    if (!registries[registryName]) {
-      throw new Error(`There is no registry named ${registryName}.`);
-    }
-    specs[registryName].forEach(f => registries[registryName].register(f));
-  });
-}
-
-register({
+register(registries, {
   browserFunctions,
   types: typeSpecs,
 });

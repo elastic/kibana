@@ -17,13 +17,13 @@
  * under the License.
  */
 
-
-import { initializeInterpreter, registries, register } from '@kbn/interpreter/public';
+import { register } from '@kbn/interpreter/common';
+import { initializeInterpreter, registries } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
 
-register({
+register(registries, {
   browserFunctions: functions,
   renderers: [visualization],
 });

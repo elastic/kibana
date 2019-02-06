@@ -5,7 +5,8 @@
  */
 
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { register, addRegistries } from '@kbn/interpreter/public';
+import { registries } from '@kbn/interpreter/public';
+import { register, addRegistries } from '@kbn/interpreter/common';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
@@ -47,7 +48,7 @@ const mapStateToProps = state => {
   };
 };
 
-addRegistries({
+addRegistries(registries, {
   elements: elementsRegistry,
   transformUIs: transformRegistry,
   datasourceUIs: datasourceRegistry,
@@ -58,7 +59,7 @@ addRegistries({
   tagUIs: tagsRegistry,
 });
 
-register({
+register(registries, {
   elements: elementSpecs,
   renderers: renderFunctions,
   transformUIs: transformSpecs,

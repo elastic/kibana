@@ -17,19 +17,28 @@
  * under the License.
  */
 
-export const pluginPaths = {
-  serverFunctions: ['functions', 'server'],
-  browserFunctions: ['functions', 'browser'],
-  commonFunctions: ['functions', 'common'],
-  types: ['types'],
-  elements: ['elements'],
-  renderers: ['renderers'],
-  interfaces: ['interfaces'],
-  transformUIs: ['uis', 'transforms'],
-  datasourceUIs: ['uis', 'datasources'],
-  modelUIs: ['uis', 'models'],
-  viewUIs: ['uis', 'views'],
-  argumentUIs: ['uis', 'arguments'],
-  templates: ['templates'],
-  tagUIs: ['uis', 'tags'],
-};
+export function addRegistries(registries, newRegistries) {
+  Object.keys(newRegistries).forEach(registryName => {
+    if (registries[registryName]) {
+      throw new Error(`There is already a registry named "${registryName}".`);
+    }
+    registries[registryName] = newRegistries[registryName];
+  });
+
+  return registries;
+}
+
+export function register(registries, specs) {
+  Object.keys(specs).forEach(registryName => {
+    if (!registries[registryName]) {
+      throw new Error(`There is no registry named "${registryName}".`);
+    }
+
+    if (!registries[registryName].register) {
+      throw new Error(`Registry "${registryName}" must have a register function.`);
+    }
+    specs[registryName].forEach(f => registries[registryName].register(f));
+  });
+
+  return registries;
+}

@@ -18,15 +18,14 @@
  */
 
 import { routes } from './server/routes';
-import { FunctionsRegistry, TypesRegistry } from '@kbn/interpreter/common';
-import { populateServerRegistries } from '@kbn/interpreter/server';
+import { registries as coreRegistries } from '@kbn/interpreter/server';
+import { FunctionsRegistry, addRegistries } from '@kbn/interpreter/common';
 
 export default async function (server /*options*/) {
 
-  const registries = {
+  const registries = addRegistries(coreRegistries, {
     serverFunctions: new FunctionsRegistry(),
-    types: new TypesRegistry()
-  };
+  });
 
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
@@ -46,8 +45,6 @@ export default async function (server /*options*/) {
       reportingBrowserType,
     };
   });
-
-  await populateServerRegistries(registries);
 
   server.expose(registries);
   routes(server);

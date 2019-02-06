@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { register } from '@kbn/interpreter/common';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
+import { functions } from './canvas_plugin_src/functions/server';
 import { loadSampleData } from './server/sample_data';
 
 export default async function(server /*options*/) {
-  const functionsRegistry = server.plugins.interpreter.serverFunctions;
+  const { serverFunctions } = register(server.plugins.interpreter, {
+    serverFunctions: commonFunctions.concat(functions),
+  });
 
   server.injectUiAppVars('canvas', async () => {
     const config = server.config();
@@ -29,14 +33,11 @@ export default async function(server /*options*/) {
       kbnIndex: config.get('kibana.index'),
       esShardTimeout: config.get('elasticsearch.shardTimeout'),
       esApiVersion: config.get('elasticsearch.apiVersion'),
-      serverFunctions: functionsRegistry.toArray(),
+      serverFunctions: serverFunctions.toArray(),
       basePath,
       reportingBrowserType,
     };
   });
-
-  // There are some common functions that use private APIs, load them here
-  commonFunctions.forEach(func => functionsRegistry.register(func));
 
   registerCanvasUsageCollector(server);
   loadSampleData(server);
