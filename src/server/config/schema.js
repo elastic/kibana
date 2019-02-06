@@ -57,6 +57,7 @@ export default () => Joi.object({
   csp: Joi.object({
     rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
     strict: Joi.boolean().default(false),
+    warnLegacyBrowsers: Joi.boolean().default(true),
   }).default(),
 
   cpu: Joi.object({
@@ -242,8 +243,8 @@ export default () => Joi.object({
         }))
       })).default([])
     }).default(),
-    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v6.6/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.7'),
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.0/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.0'),
   }).default(),
 
   i18n: Joi.object({

@@ -111,13 +111,6 @@ exports[`EmptyState component doesn't render child components when count is fals
         <React.Fragment>
           <p>
             <FormattedMessage
-              defaultMessage="There is no uptime data available."
-              id="xpack.uptime.emptyState.noDataDescription"
-              values={Object {}}
-            />
-          </p>
-          <p>
-            <FormattedMessage
               defaultMessage="{configureHeartbeatLink} to start logging uptime data."
               id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
               values={
@@ -148,7 +141,7 @@ exports[`EmptyState component doesn't render child components when count is fals
         >
           <h3>
             <FormattedMessage
-              defaultMessage="No Uptime Data"
+              defaultMessage="No uptime data available"
               id="xpack.uptime.emptyState.noDataTitle"
               values={Object {}}
             />
@@ -179,11 +172,11 @@ exports[`EmptyState component doesn't render child components when count is fals
                   className="euiTitle euiTitle--large euiTitle euiTitle--medium"
                 >
                   <FormattedMessage
-                    defaultMessage="No Uptime Data"
+                    defaultMessage="No uptime data available"
                     id="xpack.uptime.emptyState.noDataTitle"
                     values={Object {}}
                   >
-                    No Uptime Data
+                    No uptime data available
                   </FormattedMessage>
                 </h3>
               </EuiTitle>
@@ -202,15 +195,6 @@ exports[`EmptyState component doesn't render child components when count is fals
               <div
                 className="euiText euiText--medium"
               >
-                <p>
-                  <FormattedMessage
-                    defaultMessage="There is no uptime data available."
-                    id="xpack.uptime.emptyState.noDataDescription"
-                    values={Object {}}
-                  >
-                    There is no uptime data available.
-                  </FormattedMessage>
-                </p>
                 <p>
                   <FormattedMessage
                     defaultMessage="{configureHeartbeatLink} to start logging uptime data."

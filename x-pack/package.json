@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -120,7 +120,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.8.0",
+    "@elastic/eui": "6.10.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
@@ -233,7 +233,6 @@
     "react-portal": "^3.2.0",
     "react-redux": "^5.0.7",
     "react-redux-request": "^1.5.6",
-    "react-router-breadcrumbs-hoc": "1.1.2",
     "react-router-dom": "^4.3.1",
     "react-select": "^1.2.1",
     "react-shortcuts": "^2.0.0",

@@ -40,7 +40,8 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
     callWithRequest,
     callWithInternalUser,
     xpackInfo,
-    log
+    log,
+    server.plugins.apm_oss.indexPatterns
   );
 
   // Wait for ES connection before starting the polling loop.
@@ -59,6 +60,7 @@ export function registerReindexIndicesRoutes(
 ) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const xpackInfo = server.plugins.xpack_main.info;
+  const apmIndexPatterns = server.plugins.apm_oss.indexPatterns;
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
@@ -70,7 +72,12 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        xpackInfo,
+        reindexActions,
+        apmIndexPatterns
+      );
 
       try {
         if (!(await reindexService.hasRequiredPrivileges(indexName))) {
@@ -111,7 +118,12 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        xpackInfo,
+        reindexActions,
+        apmIndexPatterns
+      );
 
       try {
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);

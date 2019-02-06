@@ -1,5 +1,5 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
-.globalQueryBar {
+.globalQueryBar:not(:empty) {
   padding-bottom: $euiSizeS;
 }
 

@@ -340,15 +340,6 @@ function VisEditor(
 
     $state.replace();
 
-    $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || i18n('kbn.visualize.topNavMenu.unsavedVisualizationTitle', {
-        defaultMessage: '{visTitle} (unsaved)',
-        values: {
-          visTitle: savedVis.title,
-        },
-      });
-    };
-
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',

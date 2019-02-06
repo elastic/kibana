@@ -157,7 +157,7 @@ exports[`FilterBar component renders the component without errors 1`] = `
           Object {
             "field": "monitor.type",
             "multiSelect": false,
-            "name": "Type",
+            "name": "Scheme",
             "options": Array [
               Object {
                 "value": "tcp",
