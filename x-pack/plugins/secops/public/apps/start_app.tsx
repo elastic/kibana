@@ -15,6 +15,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { I18nProvider } from '@kbn/i18n/react';
 
+import { ErrorToast } from '../components/error_toast';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
@@ -37,6 +38,7 @@ export const startApp = async (libs: AppFrontendLibs) => {
             >
               <PageRouter history={history} />
             </ThemeProvider>
+            <ErrorToast />
           </ApolloProvider>
         </ReduxStoreProvider>
       </I18nProvider>

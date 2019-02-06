@@ -24,6 +24,7 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
+import { errorLink } from '../../containers/errors';
 
 export function compose(): AppFrontendLibs {
   const cache = new InMemoryCache({
@@ -40,6 +41,7 @@ export function compose(): AppFrontendLibs {
   const graphQLOptions = {
     cache,
     link: ApolloLink.from([
+      errorLink,
       withClientState({
         cache,
         resolvers: {},
