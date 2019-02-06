@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { getRouterLinkProps } from '../../../services';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
@@ -287,11 +288,6 @@ export const DetailPanel = injectI18n(
         closeDetailPanel,
       } = this.props;
 
-      // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removed.
-      if (!cluster || cluster.isConfiguredByNode) {
-        return null;
-      }
-
       return (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -308,38 +304,41 @@ export const DetailPanel = injectI18n(
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <RemoveClusterButtonProvider clusterNames={[clusterName]}>
-                    {(removeCluster) => (
-                      <EuiButtonEmpty
-                        color="danger"
-                        onClick={removeCluster}
-                      >
-                        <FormattedMessage
-                          id="xpack.remoteClusters.detailPanel.removeButtonLabel"
-                          defaultMessage="Remove"
-                        />
-                      </EuiButtonEmpty>
-                    )}
-                  </RemoveClusterButtonProvider>
-                </EuiFlexItem>
+            {cluster && !cluster.isConfiguredByNode && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <RemoveClusterButtonProvider clusterNames={[clusterName]}>
+                      {(removeCluster) => (
+                        <EuiButtonEmpty
+                          color="danger"
+                          onClick={removeCluster}
+                          data-test-subj="remoteClusterDetailPanelRemoveButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.remoteClusters.detailPanel.removeButtonLabel"
+                            defaultMessage="Remove"
+                          />
+                        </EuiButtonEmpty>
+                      )}
+                    </RemoveClusterButtonProvider>
+                  </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
-                    fill
-                    color="primary"
-                  >
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.editButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}
+                      fill
+                      color="primary"
+                    >
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.editButtonLabel"
+                        defaultMessage="Edit"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       );
