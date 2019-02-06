@@ -1,12 +1,6 @@
 @import '@elastic/eui/src/components/header/variables';
 
 #monitoring-app {
-  // SASSTODO: We need background colors till more of Kibana is converted
-  monitoring-main {
-    background: $euiColorLightestShade;
-    height: calc(100vh - #{$euiHeaderChildSize});
-  }
-
   // SASSTODO: PUI tooltips can be replaced with EuiToolTip
   .pui-tooltip-inner {
     font-size: $euiFontSizeXS;
