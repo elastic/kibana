@@ -3,48 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { registerRoute } from '../../../../../../server/lib/register_route';
 
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
-
-
-async function updateSettings(callWithRequest, indexName, settings) {
+const handler = async (request, callWithRequest) => {
+  const { indexName } = request.params;
   const params = {
     ignoreUnavailable: true,
     allowNoIndices: false,
     expandWildcards: 'none',
     index: indexName,
-    body: settings
+    body: request.payload
   };
 
   return await callWithRequest('indices.putSettings', params);
-}
-
-export function registerUpdateRoute(server) {
-  const isEsError = isEsErrorFactory(server);
-  const licensePreRouting = licensePreRoutingFactory(server);
-
-  server.route({
+};
+export function registerUpdateRoute(server, pluginId) {
+  registerRoute({
+    server,
+    handler,
+    pluginId,
     path: '/api/index_management/settings/{indexName}',
     method: 'PUT',
-    handler: async (request) => {
-      const callWithRequest = callWithRequestFactory(server, request);
-      const { indexName } = request.params;
-      try {
-        const response = await updateSettings(callWithRequest, indexName, request.payload);
-        return response;
-      } catch (err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-
-        throw wrapUnknownError(err);
-      }
-    },
-    config: {
-      pre: [ licensePreRouting ]
-    }
   });
 }

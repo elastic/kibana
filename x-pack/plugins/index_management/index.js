@@ -9,7 +9,7 @@ import { registerIndicesRoutes } from './server/routes/api/indices';
 import { registerMappingRoute } from './server/routes/api/mapping';
 import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
-import { registerLicenseChecker } from './server/lib/register_license_checker';
+import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 import { addIndexManagementDataEnricher } from "./index_management_data";
 export function indexManagement(kibana)  {
@@ -26,11 +26,11 @@ export function indexManagement(kibana)  {
     },
     init: function (server) {
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
-      registerLicenseChecker(server);
-      registerIndicesRoutes(server);
-      registerSettingsRoutes(server);
-      registerStatsRoute(server);
-      registerMappingRoute(server);
+      registerLicenseChecker(server, PLUGIN.ID);
+      registerIndicesRoutes(server, PLUGIN.ID);
+      registerSettingsRoutes(server, PLUGIN.ID);
+      registerStatsRoute(server, PLUGIN.ID);
+      registerMappingRoute(server, PLUGIN.ID);
     }
   });
 }
