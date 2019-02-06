@@ -10,7 +10,8 @@
 .kbnDocTableDetails__row {
 
   > td {
-    padding-left: $euiSizeXL !important;
+    // Offsets negative margins from an inner flex group
+    padding: $euiSizeL !important;
 
     tr:hover td {
       background: tintOrShade($euiColorLightestShade, 50%, 20%);
