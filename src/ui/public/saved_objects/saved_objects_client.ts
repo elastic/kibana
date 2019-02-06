@@ -32,9 +32,9 @@ import {
   FindOptions,
   UpdateResponse,
 } from '../../../../src/server/saved_objects/service';
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
+import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';
 import { SavedObject } from './saved_object';
 
 interface RequestParams {
