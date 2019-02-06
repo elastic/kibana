@@ -386,13 +386,6 @@ function VisEditor(
 
     const updateRefreshInterval = () => {
       $scope.refreshInterval = timefilter.getRefreshInterval();
-      // In case we are running in embedded mode (i.e. we used the visualize loader to embed)
-      // the visualization, we need to update the refreshInterval on the visualize handler.
-      if ($scope._handler) {
-        $scope._handler.update({
-          refreshInterval: $scope.refreshInterval,
-        });
-      }
     };
 
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
