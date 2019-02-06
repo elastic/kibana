@@ -140,9 +140,6 @@ uiRoutes
 
 //========  Controller for basic UI ==================
 app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n, config) {
-
-  config.bindToScope($scope, 'k7design');
-
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
       .then(() => data);
@@ -751,7 +748,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
 
   const managementUrl = chrome.getNavLinkById('kibana:management').url;
-  const url = `${managementUrl}/kibana/indices`;
+  const url = `${managementUrl}/kibana/index_patterns`;
 
   if ($scope.indices.length === 0) {
     toastNotifications.addWarning({

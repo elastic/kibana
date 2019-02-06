@@ -12,7 +12,7 @@ const esSection = management.getSection('elasticsearch');
 esSection.register('index_management', {
   visible: true,
   display: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-  order: 2,
+  order: 1,
   url: `#${BASE_PATH}indices`
 });
 

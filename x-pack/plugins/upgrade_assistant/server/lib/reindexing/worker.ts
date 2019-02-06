@@ -8,6 +8,7 @@ import { Request, Server } from 'src/server/kbn_server';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 
 import moment = require('moment');
+import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
@@ -46,15 +47,21 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private callWithRequest: CallClusterWithRequest,
     private callWithInternalUser: CallCluster,
-    private readonly log: Server['log']
+    private xpackInfo: XPackInfo,
+    private readonly log: Server['log'],
+    private apmIndexPatterns: string[]
   ) {
     if (ReindexWorker.workerSingleton) {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
+    this.apmIndexPatterns = apmIndexPatterns;
+
     this.reindexService = reindexServiceFactory(
       this.callWithInternalUser,
-      reindexActionsFactory(this.client, this.callWithInternalUser)
+      this.xpackInfo,
+      reindexActionsFactory(this.client, this.callWithInternalUser),
+      apmIndexPatterns
     );
 
     ReindexWorker.workerSingleton = this;
@@ -158,7 +165,12 @@ export class ReindexWorker {
     const fakeRequest = { headers: credential } as Request;
     const callCluster = this.callWithRequest.bind(null, fakeRequest) as CallCluster;
     const actions = reindexActionsFactory(this.client, callCluster);
-    const service = reindexServiceFactory(callCluster, actions);
+    const service = reindexServiceFactory(
+      callCluster,
+      this.xpackInfo,
+      actions,
+      this.apmIndexPatterns
+    );
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

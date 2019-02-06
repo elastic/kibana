@@ -217,6 +217,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
     const response = h.view('ui_app', {
       nonce,
+      strictCsp: config.get('csp.strict'),
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
@@ -229,6 +230,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         basePath,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+        },
+        csp: {
+          warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
         },
         vars: await replaceInjectedVars(
           request,

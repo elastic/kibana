@@ -38,10 +38,10 @@
 /**
  * kbnTopNav directive
  *
- * The top section that shows the timepicker, load, share and save dialogues.
+ * The top section that optionally shows the timepicker and menu items.
  *
  * ```
- * <kbn-top-nav name="current-app-for-extensions" config="path.to.menuItems"></kbn-top-nav>
+ * <kbn-top-nav name="current-app-for-extensions" config="path.to.menuItems" ></kbn-top-nav>
  * ```
  *
  * Menu items/templates are passed to the kbnTopNav via the config attribute
@@ -61,8 +61,6 @@ import { uiModules } from '../modules';
 import template from './kbn_top_nav.html';
 import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
 import { NavBarExtensionsRegistryProvider } from '../registry/navbar_extensions';
-
-import './bread_crumbs/bread_crumbs';
 
 const module = uiModules.get('kibana');
 
@@ -150,6 +148,10 @@ module.directive('kbnTopNav', function (Private) {
       }
 
       initTopNav(topNavConfig, null);
+
+      if (!_.has($scope, 'showTimepickerInTopNav')) {
+        $scope.showTimepickerInTopNav = true;
+      }
 
       return $scope.kbnTopNav;
     },

@@ -13,7 +13,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 import { Index } from '../../../components/elasticsearch/index/index';
@@ -81,23 +81,24 @@ uiRoutes.when('/elasticsearch/indices/:index', {
         }
 
         const shards = data.shards;
-        data.totalCount = shards.length;
-        data.showing = transformer(shards, data.nodes);
+        $scope.totalCount = shards.length;
+        $scope.showing = transformer(shards, data.nodes);
+        $scope.labels = labels.node;
         if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
-          data.labels = labels.indexWithUnassigned;
+          $scope.labels = labels.indexWithUnassigned;
         } else {
-          data.labels = labels.index;
+          $scope.labels = labels.index;
         }
 
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <Index
               scope={$scope}
               kbnUrl={kbnUrl}
               onBrush={this.onBrush}
               {...data}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

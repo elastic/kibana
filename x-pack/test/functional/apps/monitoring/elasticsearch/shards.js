@@ -19,8 +19,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-        from: '2017-10-05 19:34:48',
-        to: '2017-10-05 20:35:12',
+        from: '2017-10-05 19:34:48.000',
+        to: '2017-10-05 20:35:12.000',
       });
     });
 
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    describe.skip('Shard Allocation Per Node', () => {
+    describe('Shard Allocation Per Node', () => {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('Shard Allocation Per Index', () => {
+    describe('Shard Allocation Per Index', () => {
       before(async () => {
         // start on cluster overview
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');

@@ -21,6 +21,10 @@ you'll need to update your `kibana.yml` file. You can also enable SSL and set a 
 
 `csp.rules:`:: A template https://w3c.github.io/webappsec-csp/[content-security-policy] that disables certain unnecessary and potentially insecure capabilities in the browser. All instances of `{nonce}` will be replaced with an automatically generated nonce at load time. We strongly recommend that you keep the default CSP rules that ship with Kibana.
 
+`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that does not enforce even rudimentary CSP rules. In practice, this will disable support for older, less safe browsers like Internet Explorer.
+
+`csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after loading Kibana to any browser that does not enforce even rudimentary CSP rules, though Kibana is still accessible. This configuration is effectively ignored when `csp.strict` is enabled.
+
 `elasticsearch.customHeaders:`:: *Default: `{}`* Header names and values to send to Elasticsearch. Any custom headers
 cannot be overwritten by client-side headers, regardless of the `elasticsearch.requestHeadersWhitelist` configuration.
 

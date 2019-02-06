@@ -47,6 +47,7 @@ import { filterBucketAgg } from './buckets/filter';
 import { filtersBucketAgg } from './buckets/filters';
 import { significantTermsBucketAgg } from './buckets/significant_terms';
 import { geoHashBucketAgg } from './buckets/geo_hash';
+import { geoTileBucketAgg } from './buckets/geo_tile';
 import { bucketSumMetricAgg } from './metrics/bucket_sum';
 import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
@@ -86,7 +87,8 @@ const aggs = {
     filterBucketAgg,
     filtersBucketAgg,
     significantTermsBucketAgg,
-    geoHashBucketAgg
+    geoHashBucketAgg,
+    geoTileBucketAgg,
   ]
 };
 

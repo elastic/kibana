@@ -46,6 +46,14 @@ jest.mock('ui/test_harness', () => {
   };
 });
 
+const mockI18nContextInit = jest.fn();
+jest.mock('ui/i18n', () => {
+  mockLoadOrder.push('ui/i18n');
+  return {
+    __newPlatformInit__: mockI18nContextInit,
+  };
+});
+
 const mockFatalErrorInit = jest.fn();
 jest.mock('ui/notify/fatal_error', () => {
   mockLoadOrder.push('ui/notify/fatal_error');
@@ -159,6 +167,7 @@ const basePathStartContract = {
 
 const uiSettingsStartContract: any = {};
 const chromeStartContract: any = {};
+const i18nStartContract: any = { Context: () => '' };
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -168,6 +177,7 @@ const defaultParams = {
 };
 
 const defaultStartDeps = {
+  i18n: i18nStartContract,
   fatalErrors: fatalErrorsStartContract,
   injectedMetadata: injectedMetadataStartContract,
   notifications: notificationsStartContract,
@@ -198,6 +208,17 @@ describe('#start()', () => {
 
       expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
       expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
+    });
+
+    it('passes i18n.Context to ui/i18n', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockI18nContextInit).toHaveBeenCalledTimes(1);
+      expect(mockI18nContextInit).toHaveBeenCalledWith(i18nStartContract.Context);
     });
 
     it('passes fatalErrors service to ui/notify/fatal_errors', () => {

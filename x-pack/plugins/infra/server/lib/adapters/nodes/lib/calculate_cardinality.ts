@@ -37,8 +37,10 @@ export async function calculateCardinalityOfNodeField(
   };
 
   const resp = await search<CardinalityAggregation>({
+    allow_no_indices: true,
     body,
-    index: [sourceConfiguration.logAlias, sourceConfiguration.metricAlias],
+    ignore_unavailable: true,
+    index: `${sourceConfiguration.logAlias},${sourceConfiguration.metricAlias}`,
   });
 
   if (resp.aggregations) {

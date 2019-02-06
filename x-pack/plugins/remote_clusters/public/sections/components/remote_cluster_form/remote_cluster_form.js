@@ -32,11 +32,10 @@ import {
 } from '@elastic/eui';
 
 import {
-  isSeedNodeValid,
-  isSeedNodePortValid,
-} from '../../../services';
-
-import { skippingDisconnectedClustersUrl } from '../../../services/documentation_links';
+  skippingDisconnectedClustersUrl,
+  transportPortUrl,
+} from '../../../services/documentation_links';
+import { validateName, validateSeeds, validateSeed } from './validators';
 
 const defaultFields = {
   name: '',
@@ -78,39 +77,10 @@ export const RemoteClusterForm = injectI18n(
 
     getFieldsErrors(fields, seedInput = '') {
       const { name, seeds } = fields;
-      const errors = {};
-
-      if (!name || !name.trim()) {
-        errors.name = (
-          <FormattedMessage
-            id="xpack.remoteClusters.form.errors.nameMissing"
-            defaultMessage="Name is required."
-          />
-        );
-      } else if (name.match(/[^a-zA-Z\d\-_]/)) {
-        errors.name = (
-          <FormattedMessage
-            id="xpack.remoteClusters.form.errors.illegalCharacters"
-            defaultMessage="Name contains invalid characters."
-          />
-        );
-      }
-
-      if (!seeds.some(seed => Boolean(seed.trim()))) {
-        // If the user hasn't entered any seeds then we only want to prompt them for some if they
-        // aren't already in the process of entering one in. In this case, we'll just show the
-        // combobox-specific validation.
-        if (!seedInput) {
-          errors.seeds = (
-            <FormattedMessage
-              id="xpack.remoteClusters.form.errors.seedMissing"
-              defaultMessage="At least one seed node is required."
-            />
-          );
-        }
-      }
-
-      return errors;
+      return {
+        name: validateName(name),
+        seeds: validateSeeds(seeds, seedInput),
+      };
     }
 
     onFieldsChange = (changedFields) => {
@@ -156,44 +126,13 @@ export const RemoteClusterForm = injectI18n(
       save(cluster);
     };
 
-    getLocalSeedErrors = (seedNode) => {
-      const { intl } = this.props;
-
-      const errors = [];
-
-      if (!seedNode) {
-        return errors;
-      }
-
-      const isInvalid = !isSeedNodeValid(seedNode);
-
-      if (isInvalid) {
-        errors.push(intl.formatMessage({
-          id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage',
-          defaultMessage: `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400.
-            Hosts can only consist of letters, numbers, and dashes.`,
-        }));
-      }
-
-      const isPortInvalid = !isSeedNodePortValid(seedNode);
-
-      if (isPortInvalid) {
-        errors.push(intl.formatMessage({
-          id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidPortMessage',
-          defaultMessage: 'A port is required.',
-        }));
-      }
-
-      return errors;
-    };
-
     onCreateSeed = (newSeed) => {
       // If the user just hit enter without typing anything, treat it as a no-op.
       if (!newSeed) {
         return;
       }
 
-      const localSeedErrors = this.getLocalSeedErrors(newSeed);
+      const localSeedErrors = validateSeed(newSeed);
 
       if (localSeedErrors.length !== 0) {
         this.setState({
@@ -228,7 +167,7 @@ export const RemoteClusterForm = injectI18n(
         const { seeds } = fields;
 
         // Allow typing to clear the errors, but not to add new ones.
-        const errors = (!seedInput || this.getLocalSeedErrors(seedInput).length === 0) ? [] : localSeedErrors;
+        const errors = (!seedInput || validateSeed(seedInput).length === 0) ? [] : localSeedErrors;
 
         // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
         // input is a duplicate. So we need to surface this error here instead.
@@ -267,7 +206,7 @@ export const RemoteClusterForm = injectI18n(
     hasErrors = () => {
       const { fieldsErrors, localSeedErrors } = this.state;
       const errorValues = Object.values(fieldsErrors);
-      const hasErrors = errorValues.some(error => error !== undefined) || localSeedErrors.length;
+      const hasErrors = errorValues.some(error => error != null) || localSeedErrors.length;
       return hasErrors;
     };
 
@@ -318,6 +257,7 @@ export const RemoteClusterForm = injectI18n(
           fullWidth
         >
           <EuiFormRow
+            data-test-subj="remoteClusterFormSeedNodesFormRow"
             label={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
@@ -327,7 +267,17 @@ export const RemoteClusterForm = injectI18n(
             helpText={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
-                defaultMessage="An IP address or host name, followed by the transport port of the remote cluster."
+                defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster."
+                values={{
+                  transportPort: (
+                    <EuiLink href={transportPortUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText"
+                        defaultMessage="transport port"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             )}
             isInvalid={showErrors}
@@ -404,6 +354,7 @@ export const RemoteClusterForm = injectI18n(
           fullWidth
         >
           <EuiFormRow
+            data-test-subj="remoteClusterFormSkipUnavailableFormRow"
             className="remoteClusterSkipIfUnavailableSwitch"
             hasEmptyLabelSpace
             fullWidth
@@ -477,6 +428,7 @@ export const RemoteClusterForm = injectI18n(
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="remoteClusterFormSaveButton"
               color="secondary"
               iconType="check"
               onClick={this.save}
@@ -559,6 +511,7 @@ export const RemoteClusterForm = injectI18n(
         <Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
+            data-test-subj="remoteClusterFormGlobalError"
             title={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
@@ -614,6 +567,7 @@ export const RemoteClusterForm = injectI18n(
               fullWidth
             >
               <EuiFormRow
+                data-test-subj="remoteClusterFormNameFormRow"
                 label={(
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
