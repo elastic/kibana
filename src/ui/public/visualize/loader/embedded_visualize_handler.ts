@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-ignore untyped dependency
 import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';

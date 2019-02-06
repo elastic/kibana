@@ -17,6 +17,13 @@
  * under the License.
  */
 
+
+/**
+ * Add a new set of registries to an existing set of registries.
+ *
+ * @param {*} registries - The existing set of registries
+ * @param {*} newRegistries - The new set of registries
+ */
 export function addRegistries(registries, newRegistries) {
   Object.keys(newRegistries).forEach(registryName => {
     if (registries[registryName]) {
@@ -28,6 +35,12 @@ export function addRegistries(registries, newRegistries) {
   return registries;
 }
 
+/**
+ * Register a set of interpreter specs (functions, types, renderers, etc)
+ *
+ * @param {*} registries - The set of registries
+ * @param {*} specs - The specs to be regsitered (e.g. { types: [], browserFunctions: [] })
+ */
 export function register(registries, specs) {
   Object.keys(specs).forEach(registryName => {
     if (!registries[registryName]) {

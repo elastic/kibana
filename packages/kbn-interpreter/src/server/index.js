@@ -18,10 +18,11 @@
  */
 
 import { typeSpecs as types } from '../plugin/types';
-import { register, TypesRegistry } from '../common';
+import { register, TypesRegistry, FunctionsRegistry } from '../common';
 
 export const registries = {
   types: new TypesRegistry(),
+  serverFunctions: new FunctionsRegistry(),
 };
 
 register(registries, {

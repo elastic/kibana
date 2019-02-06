@@ -76,7 +76,6 @@ register(registries, {
 });
 
 const mapDispatchToProps = dispatch => ({
-  // TODO: the correct socket path should come from upstream, using the constant here is not ideal
   setAppReady: () => async () => {
     try {
       await getInterpreter();

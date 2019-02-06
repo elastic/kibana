@@ -18,15 +18,9 @@
  */
 
 import { routes } from './server/routes';
-import { registries as coreRegistries } from '@kbn/interpreter/server';
-import { FunctionsRegistry, addRegistries } from '@kbn/interpreter/common';
+import { registries } from '@kbn/interpreter/server';
 
 export default async function (server /*options*/) {
-
-  const registries = addRegistries(coreRegistries, {
-    serverFunctions: new FunctionsRegistry(),
-  });
-
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
