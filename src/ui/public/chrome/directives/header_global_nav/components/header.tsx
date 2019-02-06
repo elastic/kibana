@@ -254,7 +254,11 @@ class HeaderUI extends Component<Props, State> {
             showScrollbar={this.state.showScrollbar}
             data-test-subj={classNames(
               'navDrawer',
-              this.state.isCollapsed ? 'collapsed' : 'expanded'
+              this.state.flyoutIsAnimating
+                ? null
+                : this.state.isCollapsed
+                ? 'collapsed'
+                : 'expanded'
             )}
           >
             <EuiNavDrawerMenu id="navDrawerMenu" onClick={this.onNavClick}>
