@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
+// @ts-ignore
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { VisType } from 'ui/vis';
 
