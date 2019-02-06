@@ -12,7 +12,7 @@
   ],
   "private": true,
   "version": "6.7.0",
-  "branch": "6.x",
+  "branch": "6.7",
   "types": "./kibana.d.ts",
   "build": {
     "number": 8467,
