@@ -75,8 +75,6 @@ function ContextAppController($scope, config, Private) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
-  config.bindToScope($scope, 'k7design');
-
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
     getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),

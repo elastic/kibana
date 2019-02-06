@@ -71,7 +71,7 @@ export class MonitoringMainController {
 }
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config, $injector) => {
+uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
   return {
     restrict: 'E',
     transclude: true,
@@ -80,8 +80,6 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config, $inj
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
-      config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
-
       if (!scope.cluster) {
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');

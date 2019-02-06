@@ -30,7 +30,6 @@ routes.when('/account', {
   controllerAs: 'accountController',
   controller($scope, $route, Notifier, config, i18n) {
     $scope.user = $route.current.locals.user;
-    config.bindToScope($scope, 'k7design');
 
     const notifier = new Notifier();
 

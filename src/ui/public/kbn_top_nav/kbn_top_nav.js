@@ -62,8 +62,6 @@ import template from './kbn_top_nav.html';
 import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
 import { NavBarExtensionsRegistryProvider } from '../registry/navbar_extensions';
 
-import './bread_crumbs/bread_crumbs';
-
 const module = uiModules.get('kibana');
 
 module.directive('kbnTopNav', function (Private) {

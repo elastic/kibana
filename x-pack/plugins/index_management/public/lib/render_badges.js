@@ -18,19 +18,20 @@ export const renderBadges = (index, filterChanged) => {
           && filterExpression
           && filterChanged(EuiSearchBar.Query.parse(filterExpression));
       };
+      const ariaLabel = i18n.translate(
+        'xpack.idxMgmt.badgeAriaLabel',
+        {
+          defaultMessage: '{label}. Select to filter on this.',
+          values: { label },
+        },
+      );
       badgeLabels.push(
         <Fragment key={label}>
           {' '}
           <EuiBadge
             color={color}
             onClick={clickHandler}
-            aria-label={i18n.translate(
-              'xpack.idxMgmt.badgeAriaLabel',
-              {
-                defaultMessage: '{label}. Select to filter on this.',
-                values: { label },
-              },
-            )}
+            onClickAriaLabel={ariaLabel}
           >
             {label}
           </EuiBadge>

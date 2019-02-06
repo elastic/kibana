@@ -47,15 +47,12 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
       // @ts-ignore angular
       controller: ($scope, $route, $http, config) => {
         const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
-        config.bindToScope($scope, 'k7design');
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
           let kibanaBreadcrumbs: UMBreadcrumb[] = [];
-          if ($scope.k7design) {
-            chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
-              kibanaBreadcrumbs = breadcrumbs;
-            });
-          }
+          chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
+            kibanaBreadcrumbs = breadcrumbs;
+          });
           const basePath = chrome.getBasePath();
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
@@ -71,7 +68,6 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           ReactDOM.render(
             renderComponent({
               darkMode,
-              isUsingK7Design: $scope.k7design,
               updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
               routerBasename,

@@ -914,7 +914,7 @@ export namespace SourceFields {
 
     id: string;
 
-    version?: number | null;
+    version?: string | null;
 
     updatedAt?: number | null;
 

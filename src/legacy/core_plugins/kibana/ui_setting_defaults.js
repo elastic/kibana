@@ -71,16 +71,6 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'k7design': {
-      name: i18n.translate('kbn.advancedSettings.k7designTitle', {
-        defaultMessage: 'Use the new K7 UI design',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.k7designText', {
-        defaultMessage:
-          'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
-      }),
-    },
     'search:queryLanguage': {
       name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
         defaultMessage: 'Query language',

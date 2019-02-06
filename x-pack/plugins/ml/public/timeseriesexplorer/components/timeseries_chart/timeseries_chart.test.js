@@ -62,7 +62,7 @@ describe('TimeseriesChart', () => {
   test('Minimal initialization', () => {
     const props = getTimeseriesChartPropsMock();
 
-    const wrapper = mountWithIntl(<TimeseriesChart.WrappedComponent {...props}/>);
+    const wrapper = mountWithIntl(<TimeseriesChart {...props}/>);
 
     expect(wrapper.html()).toBe(
       `<div class="ml-timeseries-chart-react"></div>`
