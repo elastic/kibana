@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { annotationProvider, callWithRequestType } from './annotation';
 
-import { annotationProvider } from './annotation';
-
-export function annotationServiceProvider(callWithRequest) {
+export function annotationServiceProvider(callWithRequest: callWithRequestType) {
   return {
-    ...annotationProvider(callWithRequest)
+    ...annotationProvider(callWithRequest),
   };
 }
