@@ -28,15 +28,17 @@ interface SnapshotProps {
   danger: string;
   primary: string;
   snapshot: SnapshotType;
+  windowWidth: number;
 }
 
 export const Snapshot = ({
   danger,
   snapshot: { up, down, total, histogram },
   primary,
+  windowWidth,
 }: SnapshotProps) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="xl">
-    <EuiFlexItem>
+    <EuiFlexItem grow={4}>
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -87,7 +89,7 @@ export const Snapshot = ({
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
-    <EuiFlexItem style={{ paddingTop: '12px' }}>
+    <EuiFlexItem grow={8} style={{ paddingTop: '12px', paddingRight: '12px' }}>
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -97,9 +99,14 @@ export const Snapshot = ({
         </h5>
       </EuiTitle>
       {/* TODO: this is a UI hack that should be replaced */}
-      <EuiPanel paddingSize="s">
+      <EuiPanel paddingSize="s" style={{ maxHeight: '137px' }}>
         {histogram && (
-          <SnapshotHistogram dangerColor={danger} primaryColor={primary} histogram={histogram} />
+          <SnapshotHistogram
+            dangerColor={danger}
+            histogram={histogram}
+            primaryColor={primary}
+            windowWidth={windowWidth}
+          />
         )}
         {!histogram && (
           <EuiEmptyPrompt
