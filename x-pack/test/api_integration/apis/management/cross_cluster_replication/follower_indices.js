@@ -49,7 +49,8 @@ export default function ({ getService }) {
     ]).then(() => { followerIndicesCreated = []; })
   );
 
-  describe('follower indices', () => {
+  // Flaky tests; possible race condition with ES.
+  describe.skip('follower indices', () => {
     afterEach(() => cleanUp());
 
     describe('list()', () => {

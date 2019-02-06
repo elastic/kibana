@@ -536,6 +536,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 withTitle={true}
               >
                 <EuiOutsideClickDetector
+                  isDisabled={true}
                   onOutsideClick={[Function]}
                 >
                   <div

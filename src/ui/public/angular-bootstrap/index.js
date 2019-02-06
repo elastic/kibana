@@ -21,7 +21,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.buttons',
   'ui.bootstrap.dateparser',
   'ui.bootstrap.position',
-  'ui.bootstrap.datepicker',
   'ui.bootstrap.dropdown',
   'ui.bootstrap.modal',
   'ui.bootstrap.pagination',
@@ -36,11 +35,6 @@ angular.module('ui.bootstrap', [
 
 angular.module('ui.bootstrap.tpls', [
   'template/alert/alert.html',
-  'template/datepicker/datepicker.html',
-  'template/datepicker/day.html',
-  'template/datepicker/month.html',
-  'template/datepicker/popup.html',
-  'template/datepicker/year.html',
   'template/modal/backdrop.html',
   'template/modal/window.html',
   'template/pagination/pager.html',
@@ -65,7 +59,6 @@ import './bindHtml/bindHtml';
 import './buttons/buttons';
 import './collapse/collapse';
 import './dateparser/dateparser';
-import './datepicker/datepicker';
 import './dropdown/dropdown';
 import './modal/modal';
 import './pagination/pagination';
@@ -83,36 +76,6 @@ import alert from './alert/alert.html';
 
 angular.module('template/alert/alert.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/alert/alert.html', alert);
-}]);
-
-import datepicker from './datepicker/datepicker.html';
-
-angular.module('template/datepicker/datepicker.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/datepicker/datepicker.html', datepicker);
-}]);
-
-import day from './datepicker/day.html';
-
-angular.module('template/datepicker/day.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/datepicker/day.html', day);
-}]);
-
-import month from './datepicker/month.html';
-
-angular.module('template/datepicker/month.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/datepicker/month.html', month);
-}]);
-
-import popup from './datepicker/popup.html';
-
-angular.module('template/datepicker/popup.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/datepicker/popup.html', popup);
-}]);
-
-import year from './datepicker/year.html';
-
-angular.module('template/datepicker/year.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/datepicker/year.html', year);
 }]);
 
 import backdrop from './modal/backdrop.html';
