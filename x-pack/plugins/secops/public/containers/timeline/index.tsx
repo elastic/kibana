@@ -11,7 +11,7 @@ import { Query } from 'react-apollo';
 import memoizeOne from 'memoize-one';
 import { Ecs, EcsEdges, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { timelineQuery } from './index.gql_query';
 
@@ -58,7 +58,7 @@ export class TimelineQuery extends QueryTemplate<
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
         query={timelineQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         pollInterval={poll}
         variables={{
