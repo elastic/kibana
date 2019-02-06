@@ -19,6 +19,7 @@
 
 import { routes } from './server/routes';
 import { FunctionsRegistry, TypesRegistry } from '@kbn/interpreter/common';
+import { populateServerRegistries } from '@kbn/interpreter/server';
 
 export default async function (server /*options*/) {
 
@@ -45,6 +46,8 @@ export default async function (server /*options*/) {
       reportingBrowserType,
     };
   });
+
+  await populateServerRegistries(registries);
 
   server.expose(registries);
   routes(server);
