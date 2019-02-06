@@ -48,7 +48,7 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         savedObject: {
@@ -196,7 +196,7 @@ const timelionFeatures: Feature[] = [
           all: ['timelion-sheet'],
           read: ['config', 'index-pattern'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         savedObject: {

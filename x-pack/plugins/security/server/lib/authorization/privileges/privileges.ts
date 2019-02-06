@@ -80,7 +80,13 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
           return acc;
         }, {}),
         global: {
-          all: [actions.login, actions.version, actions.space.manage, ...allActions],
+          all: [
+            actions.login,
+            actions.version,
+            actions.space.manage,
+            actions.ui.get('spaces', 'manage'),
+            ...allActions,
+          ],
           read: [actions.login, actions.version, ...readActions],
         },
         space: {
