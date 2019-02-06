@@ -90,7 +90,7 @@ routes
         return gisMapSavedObjectLoader.get(id)
           .then((savedMap) => {
             recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
-            docTitle.change(`${savedMap.title}`);
+            docTitle.change(savedMap.title);
             return savedMap;
           })
           .catch(redirectWhenMissing({
