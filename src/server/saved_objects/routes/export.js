@@ -29,13 +29,21 @@ export const createExportRoute = (prereqs) => ({
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      query: Joi.object().keys({
-        type: Joi.array().items(Joi.string()).single().optional(),
-        objects: Joi.array().max(EXPORT_SIZE_LIMIT).items({
-          type: Joi.string().required(),
-          id: Joi.string().required(),
-        }).optional(),
-      }).default(),
+      query: Joi.object()
+        .keys({
+          type: Joi.array()
+            .items(Joi.string())
+            .single()
+            .optional(),
+          objects: Joi.array()
+            .max(EXPORT_SIZE_LIMIT)
+            .items({
+              type: Joi.string().required(),
+              id: Joi.string().required(),
+            })
+            .optional(),
+        })
+        .default(),
     },
     async handler(request, h) {
       let docsToExport;
@@ -52,11 +60,7 @@ export const createExportRoute = (prereqs) => ({
       }
       // Send file to response
       return h
-        .response(
-          docsToExport
-            .map(doc => JSON.stringify(doc))
-            .join('\n')
-        )
+        .response(docsToExport.map(doc => JSON.stringify(doc)).join('\n'))
         .header('Content-Disposition', `attachment; filename="export.ndjson"`);
     },
   },

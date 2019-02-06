@@ -20,33 +20,52 @@
 import { getExportDocuments, sortDocs } from './export';
 
 describe('getExportDocuments', () => {
+  const savedObjectsClient = {
+    errors: {} as any,
+    find: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    delete: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+
+  afterEach(() => {
+    savedObjectsClient.find.mockReset();
+    savedObjectsClient.bulkGet.mockReset();
+    savedObjectsClient.create.mockReset();
+    savedObjectsClient.bulkCreate.mockReset();
+    savedObjectsClient.delete.mockReset();
+    savedObjectsClient.get.mockReset();
+    savedObjectsClient.update.mockReset();
+  });
+
   test(`exports no documents when type and objects isn't passed in`, async () => {
-    expect(await getExportDocuments({})).toEqual([]);
+    expect(await getExportDocuments({ savedObjectsClient, exportSizeLimit: 1 })).toEqual([]);
   });
 
   test('exports selected types and sorts them', async () => {
-    const savedObjectsClient = {
-      find: jest.fn().mockResolvedValueOnce({
-        total: 2,
-        saved_objects: [
-          {
-            id: '2',
-            type: 'search',
-            references: [
-              {
-                type: 'index-pattern',
-                id: '1',
-              },
-            ],
-          },
-          {
-            id: '1',
-            type: 'index-pattern',
-            references: [],
-          },
-        ],
-      }),
-    };
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          references: [
+            {
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
     const response = await getExportDocuments({
       savedObjectsClient,
       exportSizeLimit: 500,
@@ -81,28 +100,26 @@ Array [
   });
 
   test('export selected types throws error when exceeding exportSizeLimit', async () => {
-    const savedObjectsClient = {
-      find: jest.fn().mockResolvedValueOnce({
-        total: 2,
-        saved_objects: [
-          {
-            id: '2',
-            type: 'search',
-            references: [
-              {
-                type: 'index-pattern',
-                id: '1',
-              },
-            ],
-          },
-          {
-            id: '1',
-            type: 'index-pattern',
-            references: [],
-          },
-        ],
-      }),
-    };
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          references: [
+            {
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
     await expect(
       getExportDocuments({
         savedObjectsClient,
@@ -113,28 +130,27 @@ Array [
   });
 
   test('exports selected objects and sorts them', async () => {
-    const savedObjectsClient = {
-      bulkGet: jest.fn().mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: '2',
-            type: 'search',
-            references: [
-              {
-                type: 'index-pattern',
-                id: '1',
-              },
-            ],
-          },
-          {
-            id: '1',
-            type: 'index-pattern',
-            references: [],
-          },
-        ],
-      }),
-    };
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          references: [
+            {
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
     const response = await getExportDocuments({
+      exportSizeLimit: 10000,
       savedObjectsClient,
       objects: [
         {
@@ -184,7 +200,7 @@ Array [
   test('export selected objects throws error when exceeding exportSizeLimit', async () => {
     const exportOpts = {
       exportSizeLimit: 1,
-      savedObjectsClient: {},
+      savedObjectsClient,
       objects: [
         {
           type: 'index-pattern',
@@ -212,13 +228,16 @@ describe('sortDocs()', () => {
       {
         id: '1',
         type: 'index-pattern',
+        attributes: {},
         references: [],
       },
       {
         id: '2',
         type: 'search',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'index-pattern',
             id: '1',
           },
@@ -228,15 +247,18 @@ describe('sortDocs()', () => {
     expect(sortDocs(docs)).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "ref1",
         "type": "index-pattern",
       },
     ],
@@ -251,8 +273,10 @@ Array [
       {
         id: '2',
         type: 'search',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'index-pattern',
             id: '1',
           },
@@ -261,21 +285,25 @@ Array [
       {
         id: '1',
         type: 'index-pattern',
+        attributes: {},
         references: [],
       },
     ];
     expect(sortDocs(docs)).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "ref1",
         "type": "index-pattern",
       },
     ],
@@ -286,16 +314,19 @@ Array [
     expect(docs).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "ref1",
         "type": "index-pattern",
       },
     ],
     "type": "search",
   },
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
@@ -309,12 +340,15 @@ Array [
       {
         id: '5',
         type: 'dashboard',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'visualization',
             id: '3',
           },
           {
+            name: 'ref2',
             type: 'visualization',
             id: '4',
           },
@@ -323,8 +357,10 @@ Array [
       {
         id: '4',
         type: 'visualization',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'index-pattern',
             id: '1',
           },
@@ -333,8 +369,10 @@ Array [
       {
         id: '3',
         type: 'visualization',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'search',
             id: '2',
           },
@@ -343,8 +381,10 @@ Array [
       {
         id: '2',
         type: 'search',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'index-pattern',
             id: '1',
           },
@@ -353,55 +393,66 @@ Array [
       {
         id: '1',
         type: 'index-pattern',
+        attributes: {},
         references: [],
       },
     ];
     expect(sortDocs(docs)).toMatchInlineSnapshot(`
 Array [
   Object {
+    "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
   },
   Object {
+    "attributes": Object {},
     "id": "4",
     "references": Array [
       Object {
         "id": "1",
+        "name": "ref1",
         "type": "index-pattern",
       },
     ],
     "type": "visualization",
   },
   Object {
+    "attributes": Object {},
     "id": "2",
     "references": Array [
       Object {
         "id": "1",
+        "name": "ref1",
         "type": "index-pattern",
       },
     ],
     "type": "search",
   },
   Object {
+    "attributes": Object {},
     "id": "3",
     "references": Array [
       Object {
         "id": "2",
+        "name": "ref1",
         "type": "search",
       },
     ],
     "type": "visualization",
   },
   Object {
+    "attributes": Object {},
     "id": "5",
     "references": Array [
       Object {
         "id": "3",
+        "name": "ref1",
         "type": "visualization",
       },
       Object {
         "id": "4",
+        "name": "ref2",
         "type": "visualization",
       },
     ],
@@ -416,8 +467,10 @@ Array [
       {
         id: '1',
         type: 'foo',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'foo',
             id: '2',
           },
@@ -426,8 +479,10 @@ Array [
       {
         id: '2',
         type: 'foo',
+        attributes: {},
         references: [
           {
+            name: 'ref1',
             type: 'foo',
             id: '1',
           },

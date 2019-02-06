@@ -17,8 +17,27 @@
  * under the License.
  */
 
-export async function getExportDocuments({ type, objects, savedObjectsClient, exportSizeLimit }) {
-  let docsToExport = [];
+import { SavedObject, SavedObjectsClient } from '../service/saved_objects_client';
+
+interface ObjectToExport {
+  id: string;
+  type: string;
+}
+
+interface ExportDocumentOptions {
+  type?: string | string[];
+  objects?: ObjectToExport[];
+  savedObjectsClient: SavedObjectsClient;
+  exportSizeLimit: number;
+}
+
+export async function getExportDocuments({
+  type,
+  objects,
+  savedObjectsClient,
+  exportSizeLimit,
+}: ExportDocumentOptions) {
+  let docsToExport: SavedObject[] = [];
   if (objects) {
     if (objects.length > exportSizeLimit) {
       throw new Error(`Can't export more than ${exportSizeLimit} objects`);
@@ -26,7 +45,7 @@ export async function getExportDocuments({ type, objects, savedObjectsClient, ex
     ({ saved_objects: docsToExport } = await savedObjectsClient.bulkGet(objects));
   } else if (type) {
     const findResponse = await savedObjectsClient.find({
-      type: type,
+      type,
       perPage: exportSizeLimit,
     });
     if (findResponse.total > exportSizeLimit) {
@@ -38,7 +57,7 @@ export async function getExportDocuments({ type, objects, savedObjectsClient, ex
   return docsToExport;
 }
 
-export function sortDocs(docs) {
+export function sortDocs(docs: SavedObject[]) {
   const array = [...docs];
   let moveCounts = 0; // Used for detecting infinite loops
   for (let i = 0; i < array.length; i++) {
@@ -46,7 +65,9 @@ export function sortDocs(docs) {
     const references = doc.references || [];
     let hasMovedDocs = false;
     for (const reference of references) {
-      const referenceIndex = array.findIndex(doc => doc.type === reference.type && doc.id === reference.id);
+      const referenceIndex = array.findIndex(
+        item => item.type === reference.type && item.id === reference.id
+      );
       if (referenceIndex > i) {
         const referenceDoc = array[referenceIndex];
         array.splice(referenceIndex, 1);
