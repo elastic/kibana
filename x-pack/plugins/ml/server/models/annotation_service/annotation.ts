@@ -86,6 +86,7 @@ export function annotationProvider(
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
       delete params.body._id;
+      delete params.body.key;
     }
 
     return await callWithRequest('index', params);
