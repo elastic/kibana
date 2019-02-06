@@ -208,17 +208,6 @@ that you set `csp.strict: true` in your kibana.yml to block access to those brow
 users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your kibana.yml.
 
 [float]
-=== Change in API `/api/kibana/management/saved_objects/relationships/{type}/{id}`
-*Details:* The response attribute names have changed to be named by object type instead. The mapping of attributes is as follows:
-
-- `searches` becomes `search`
-- `visualizations` becomes `visualization`
-- `dashboards` becomes `dashboard`
-- `indexPatterns` becomes `index-pattern`
-
-*Impact:* Users will have to reference the new attributes when processing the API response.
-
-[float]
 === Saved object structure change
 *Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
 
