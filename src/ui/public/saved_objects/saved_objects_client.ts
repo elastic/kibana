@@ -75,7 +75,9 @@ interface FindResults<T extends SavedObjectAttributes = any> extends BatchRespon
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends SavedObjectAttributes>(value: SimpleSavedObject<T> | PlainSavedObject<T>) => void;
+  resolve: <T extends SavedObjectAttributes>(
+    value: SimpleSavedObject<T> | PlainSavedObject<T>
+  ) => void;
   reject: (reason?: any) => void;
 }
 
@@ -93,6 +95,14 @@ const BATCH_INTERVAL = 100;
 
 const API_BASE_URL = '/api/saved_objects/';
 
+/**
+ * The SavedObjectsClient class acts as a generic data fetcher
+ * and data saver for saved objects regardless of type.
+ *
+ * If possible, this class should be used to load saved objects
+ * instead of the SavedObjectLoader class which implements some
+ * additional functionality.
+ */
 export class SavedObjectsClient {
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval

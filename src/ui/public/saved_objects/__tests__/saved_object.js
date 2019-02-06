@@ -24,7 +24,7 @@ import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
 import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
-import { SavedObjectsClientProvider } from '..';
+import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
 import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 import { InvalidJSONProperty } from '../../errors';
 

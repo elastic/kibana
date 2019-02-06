@@ -35,7 +35,8 @@ import { InvalidJSONProperty, SavedObjectNotFound } from '../errors';
 import MappingSetupProvider from '../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../courier/search_source';
-import { SavedObjectsClientProvider, findObjectByTitle } from '.';
+import { findObjectByTitle } from './find_object_by_title';
+import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
 import { recentlyAccessed } from '../persisted_log';
 import { i18n } from '@kbn/i18n';
@@ -70,6 +71,15 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);
 
+  /**
+   * The SavedObject class is a base class for saved objects loaded from the server and
+   * provides additional functionality besides loading/saving/deleting/etc.
+   *
+   * It is overloaded and configured to provide type-aware functionality.
+   * To just retrieve the attributes of saved objects, it is recommended to use SavedObjectLoader
+   * which returns instances of SimpleSavedObject which don't introduce additional type-specific complexity.
+   * @param {*} config
+   */
   function SavedObject(config) {
     if (!_.isObject(config)) config = {};
 
