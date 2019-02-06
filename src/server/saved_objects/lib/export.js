@@ -40,7 +40,7 @@ export async function getExportDocuments({ type, objects, savedObjectsClient, ex
 
 export function sortDocs(docs) {
   const array = [...docs];
-  let moveCounts = 0;
+  let moveCounts = 0; // Used for detecting infinite loops
   for (let i = 0; i < array.length; i++) {
     const doc = array[i];
     const references = doc.references || [];
