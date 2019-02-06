@@ -23,10 +23,10 @@ import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import { IndexPatternProvider } from '../../../index_patterns/_index_pattern';
-import { SavedObjectsClientProvider } from '../../../saved_objects';
-import { StubIndexPatternsApiClientModule } from '../../../index_patterns/__tests__/stub_index_patterns_api_client';
-import { InvalidJSONProperty } from '../../../errors';
+import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
+import { SavedObjectsClientProvider } from '..';
+import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
+import { InvalidJSONProperty } from '../../errors';
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();

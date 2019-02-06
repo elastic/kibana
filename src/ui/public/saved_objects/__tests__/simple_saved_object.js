@@ -19,15 +19,15 @@
 
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { SavedObject } from '../simple_saved_object';
+import { SimpleSavedObject } from '../simple_saved_object';
 
-describe('SavedObject', () => {
+describe('SimpleSavedObject', () => {
   it('persists type and id', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
 
     const client = sinon.stub();
-    const savedObject = new SavedObject(client, { id, type });
+    const savedObject = new SimpleSavedObject(client, { id, type });
 
     expect(savedObject.id).to.be(id);
     expect(savedObject.type).to.be(type);
@@ -37,7 +37,7 @@ describe('SavedObject', () => {
     const attributes = { title: 'My title' };
 
     const client = sinon.stub();
-    const savedObject = new SavedObject(client, { attributes });
+    const savedObject = new SimpleSavedObject(client, { attributes });
 
     expect(savedObject.attributes).to.be(attributes);
   });
@@ -46,7 +46,7 @@ describe('SavedObject', () => {
     const version = 2;
 
     const client = sinon.stub();
-    const savedObject = new SavedObject(client, { version });
+    const savedObject = new SimpleSavedObject(client, { version });
     expect(savedObject._version).to.be(version);
   });
 });

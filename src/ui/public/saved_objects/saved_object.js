@@ -31,13 +31,13 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { InvalidJSONProperty, SavedObjectNotFound } from '../../errors';
-import MappingSetupProvider from '../../utils/mapping_setup';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../errors';
+import MappingSetupProvider from '../utils/mapping_setup';
 
-import { SearchSourceProvider } from '../search_source';
-import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
-import { migrateLegacyQuery } from '../../utils/migrate_legacy_query';
-import { recentlyAccessed } from '../../persisted_log';
+import { SearchSourceProvider } from '..//courier/search_source';
+import { SavedObjectsClientProvider, findObjectByTitle } from '.';
+import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
+import { recentlyAccessed } from '../persisted_log';
 import { i18n } from '@kbn/i18n';
 
 /**
