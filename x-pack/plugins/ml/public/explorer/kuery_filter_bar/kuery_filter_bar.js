@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
@@ -13,9 +13,11 @@ import {
   getSuggestions,
 } from '../../../../apm/public/services/kuery';
 import { fromKueryExpression } from '@kbn/es-query'; // toElasticsearchQuery
+import { EuiCallOut } from '@elastic/eui';
 
 export class KueryFilterBar extends Component {
   state = {
+    error: null,
     suggestions: [],
     isLoadingSuggestions: false,
     isLoadingIndexPattern: true,
@@ -24,7 +26,7 @@ export class KueryFilterBar extends Component {
   onChange = async (inputValue, selectionStart) => {
     const { indexPattern } = this.props;
 
-    this.setState({ suggestions: [], isLoadingSuggestions: true });
+    this.setState({ error: null, suggestions: [], isLoadingSuggestions: true });
 
     const currentRequest = uniqueId();
     this.currentRequest = currentRequest;
@@ -47,6 +49,7 @@ export class KueryFilterBar extends Component {
     } catch (e) {
       // TODO: callout or toast for error
       console.error('Error while fetching suggestions', e);
+      this.setState({ isLoadingSuggestions: false, error: (e.message ? e.message : 'Error while fetching suggestions') });
     }
   };
 
@@ -86,12 +89,16 @@ export class KueryFilterBar extends Component {
       onSubmit(query, filteredFields);
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
+      this.setState({ error: (e.message ? e.message : 'Invalid query syntax') });
     }
   };
 
   render() {
+    // TODO: localization for error
+    const { error } = this.state;
+
     return (
-      <div className="mlAnomalyExploer__filterBar">
+      <Fragment>
         <FilterBar
           disabled={false}
           isLoading={this.state.isLoadingSuggestions}
@@ -100,7 +107,11 @@ export class KueryFilterBar extends Component {
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
         />
-      </div>
+        { error &&
+          <EuiCallOut color="danger">
+            {error}
+          </EuiCallOut>}
+      </Fragment>
     );
   }
 }

@@ -971,10 +971,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
           {noInfluencersConfigured === false &&
             influencers !== undefined &&
-            <KueryFilterBar
-              indexPattern={this.indexPattern}
-              onSubmit={this.applyInfluencersFilterQuery}
-            />}
+            <div className="mlAnomalyExplorer__filterBar">
+              <KueryFilterBar
+                indexPattern={this.indexPattern}
+                onSubmit={this.applyInfluencersFilterQuery}
+              />
+            </div>}
 
           {noInfluencersConfigured && (
             <div className="no-influencers-warning">

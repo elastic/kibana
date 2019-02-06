@@ -40,6 +40,12 @@
   .results-container {
     padding: $euiSize 0px $euiSize 0px;
 
+    .mlAnomalyExplorer__filterBar {
+      margin-bottom: $euiSize;
+      padding-right: $euiSize;
+      padding-left: $euiSize;
+    }
+
       // SASSTODO: Overwrite of bootstrap
     .col-xs-12 {
       width: calc(100% - #{$euiSizeXL});
