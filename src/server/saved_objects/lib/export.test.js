@@ -109,7 +109,7 @@ Array [
         exportSizeLimit: 1,
         type: ['index-pattern', 'search'],
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Export size limit of 1 reached"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
   });
 
   test('exports selected objects and sorts them', async () => {
@@ -179,6 +179,26 @@ Array [
         },
       ],
     ]);
+  });
+
+  test('export selected objects throws error when exceeding exportSizeLimit', async () => {
+    const exportOpts = {
+      exportSizeLimit: 1,
+      savedObjectsClient: {},
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+      ],
+    };
+    await expect(getExportDocuments(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Can't export more than 1 objects"`
+    );
   });
 });
 

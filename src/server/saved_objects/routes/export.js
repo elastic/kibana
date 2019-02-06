@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 import { getExportDocuments } from '../lib/export';
 
@@ -37,13 +38,18 @@ export const createExportRoute = (prereqs) => ({
       }).default(),
     },
     async handler(request, h) {
+      let docsToExport;
       const { savedObjectsClient } = request.pre;
-      const docsToExport = await getExportDocuments({
-        type: request.query.type,
-        objects: request.query.objects,
-        savedObjectsClient,
-        exportSizeLimit: EXPORT_SIZE_LIMIT,
-      });
+      try {
+        docsToExport = await getExportDocuments({
+          type: request.query.type,
+          objects: request.query.objects,
+          savedObjectsClient,
+          exportSizeLimit: EXPORT_SIZE_LIMIT,
+        });
+      } catch (err) {
+        throw Boom.boomify(err, { statusCode: 400 });
+      }
       // Send file to response
       return h
         .response(

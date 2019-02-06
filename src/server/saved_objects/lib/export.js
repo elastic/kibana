@@ -20,6 +20,9 @@
 export async function getExportDocuments({ type, objects, savedObjectsClient, exportSizeLimit }) {
   let docsToExport = [];
   if (objects) {
+    if (objects.length > exportSizeLimit) {
+      throw new Error(`Can't export more than ${exportSizeLimit} objects`);
+    }
     ({ saved_objects: docsToExport } = await savedObjectsClient.bulkGet(objects));
   } else if (type) {
     const findResponse = await savedObjectsClient.find({
@@ -27,7 +30,7 @@ export async function getExportDocuments({ type, objects, savedObjectsClient, ex
       perPage: exportSizeLimit,
     });
     if (findResponse.total > exportSizeLimit) {
-      throw new Error(`Export size limit of ${exportSizeLimit} reached`);
+      throw new Error(`Can't export more than ${exportSizeLimit} objects`);
     }
     ({ saved_objects: docsToExport } = findResponse);
   }

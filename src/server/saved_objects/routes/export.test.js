@@ -139,6 +139,25 @@ describe('GET /api/saved_objects/_export', () => {
     ]);
   });
 
+  test('export by type works up to 10000 objects', async () => {
+    const objectsToRequest = Array.from({ length: 10000 }, (val, i) => ({
+      type: 'index-pattern',
+      id: i.toString(),
+    }));
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/_export?type=["search","index-pattern"]',
+    };
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: objectsToRequest.length,
+      saved_objects: objectsToRequest,
+    });
+
+    const { statusCode } = await server.inject(request);
+
+    expect(statusCode).toBe(200);
+  });
+
   test('exports by objects in order', async () => {
     const request = {
       method: 'GET',
@@ -185,6 +204,71 @@ describe('GET /api/saved_objects/_export', () => {
           id: '1',
         },
       ],
+    ]);
+  });
+
+  test('exports by objects works up to 10000 objects', async () => {
+    const objectsToRequest = Array.from({ length: 10000 }, (val, i) => ({
+      type: 'index-pattern',
+      id: i.toString(),
+    }));
+    const request = {
+      method: 'GET',
+      url: `/api/saved_objects/_export?objects=[${objectsToRequest
+        .map(val => JSON.stringify(val))
+        .join()}]`,
+    };
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      total: objectsToRequest.length,
+      saved_objects: objectsToRequest,
+    });
+    const { statusCode } = await server.inject(request);
+    expect(statusCode).toBe(200);
+  });
+
+  test(`errors out when requesting more than 10000 objects`, async () => {
+    const objectsToRequest = Array.from({ length: 10001 }, (val, i) => ({
+      type: 'index-pattern',
+      id: i.toString(),
+    }));
+    const request = {
+      method: 'GET',
+      url: `/api/saved_objects/_export?objects=[${objectsToRequest
+        .map(val => JSON.stringify(val))
+        .join()}]`,
+    };
+    const { payload, statusCode } = await server.inject(request);
+    expect(statusCode).toBe(400);
+    /* eslint-disable max-len */
+    expect(payload).toMatchInlineSnapshot(
+      `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"child \\\\\\"objects\\\\\\" fails because [\\\\\\"objects\\\\\\" must contain less than or equal to 10000 items]\\",\\"validation\\":{\\"source\\":\\"query\\",\\"keys\\":[\\"objects\\"]}}"`
+    );
+    /* eslint-enable max-len */
+  });
+
+  test(`errors out when type has more than 10000 objects`, async () => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/_export?type=search',
+    };
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 10001,
+      saved_objects: [], // Code looks at total first
+    });
+
+    const { payload, statusCode } = await server.inject(request);
+
+    expect(statusCode).toBe(400);
+    expect(payload).toMatchInlineSnapshot(
+      `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"Can't export more than 10000 objects\\"}"`
+    );
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
+    expect(savedObjectsClient.find.mock.calls[0]).toEqual([
+      {
+        type: ['search'],
+        perPage: 10000,
+      },
     ]);
   });
 });
