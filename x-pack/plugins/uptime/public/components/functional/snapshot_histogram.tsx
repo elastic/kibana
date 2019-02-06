@@ -25,7 +25,13 @@ export const SnapshotHistogram = ({
   const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
   return (
-    <EuiSeriesChart width={600} height={107} stackBy="y" xType={EuiSeriesChartUtils.SCALE.TIME}>
+    <EuiSeriesChart
+      width={600}
+      height={107}
+      stackBy="y"
+      xType={EuiSeriesChartUtils.SCALE.TIME}
+      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+    >
       <EuiHistogramSeries
         data={upSeriesData}
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
