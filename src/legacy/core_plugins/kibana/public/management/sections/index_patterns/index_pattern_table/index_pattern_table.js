@@ -72,8 +72,8 @@ export const IndexPatternTable = ({
           <p>
             <FormattedMessage
               id="kbn.management.indexPatternTable.subtitle"
-              defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
-              Kibana."
+              defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in \
+Kibana."
             />
           </p>
         </EuiText>

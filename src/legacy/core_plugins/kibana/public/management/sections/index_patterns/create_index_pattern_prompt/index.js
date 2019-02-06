@@ -46,8 +46,8 @@ export const CreateIndexPatternPrompt = ({
         <p style={{ padding: '0 24px' }}>
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.subtitle"
-            defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
-              Kibana."
+            defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in \
+Kibana."
           />
         </p>
         <EuiHorizontalRule margin="m" />
