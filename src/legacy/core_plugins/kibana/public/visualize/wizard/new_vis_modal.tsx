@@ -53,7 +53,6 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
   constructor(props: TypeSelectionProps) {
     super(props);
     this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
-    this.onCloseModal = this.onCloseModal.bind(this);
   }
 
   public render() {
