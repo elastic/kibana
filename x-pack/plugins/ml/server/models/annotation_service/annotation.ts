@@ -20,47 +20,54 @@ import {
   isAnnotations,
 } from '../../../common/types/annotations';
 
+// TODO All of the following interface/type definitions should
+// eventually be replaced by the proper upstream definitions
 interface EsResult {
   _source: object;
   _id: string;
 }
 
-interface IndexAnnotationArgs {
+export interface IndexAnnotationArgs {
   jobIds: string[];
-  earliestMs: Date;
-  latestMs: Date;
+  earliestMs: number;
+  latestMs: number;
   maxAnnotations: number;
 }
 
-interface GetParams {
+export interface GetParams {
   index: string;
   size: number;
   body: object;
 }
 
-interface GetResponse {
+export interface GetResponse {
   success: true;
   annotations: {
     [key: string]: Annotations;
   };
 }
 
-interface IndexParams {
+export interface IndexParams {
   index: string;
   body: Annotation;
   refresh?: string;
   id?: string;
 }
 
-interface DeleteParams {
+export interface DeleteParams {
   index: string;
   refresh?: string;
   id: string;
 }
 
-export function annotationProvider(
-  callWithRequest: (action: string, params: IndexParams | DeleteParams | GetParams) => Promise<any>
-) {
+type annotationProviderParams = DeleteParams | GetParams | IndexParams;
+
+export type callWithRequestType = (
+  action: string,
+  params: annotationProviderParams
+) => Promise<any>;
+
+export function annotationProvider(callWithRequest: callWithRequestType) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       return Promise.reject(new Error('invalid annotation format'));
