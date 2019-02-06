@@ -170,6 +170,7 @@ export class TaskStore {
 
     const templateResult = await this.callCluster('indices.putTemplate', {
       name: templateName,
+      include_type_name: true,
       body: {
         index_patterns: [this.index],
         mappings: {
