@@ -486,10 +486,11 @@ class FieldUI extends PureComponent {
       );
     }
 
+    const canUpdateSetting = this.props.enableSaving;
     const defaultLink = this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
 
-    if (defaultLink || imageLink) {
+    if (canUpdateSetting && (defaultLink || imageLink)) {
       return (
         <span>
           {defaultLink}
