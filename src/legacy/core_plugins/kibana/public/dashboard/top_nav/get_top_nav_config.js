@@ -81,6 +81,9 @@ function getEditConfig(action) {
       defaultMessage: 'Switch to edit mode',
     }),
     testId: 'dashboardEditMode',
+    // We want to hide the "edit" button on small screens, since those have a responsive
+    // layout, which is not tied to the grid anymore, so we cannot edit the grid on that screens.
+    className: 'eui-hideFor--s eui-hideFor--xs',
     run: action
   };
 }

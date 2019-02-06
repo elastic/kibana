@@ -16,6 +16,8 @@ describe('getUpgradeAssistantStatus', () => {
   const callWithRequest = jest.fn().mockImplementation(async (req, api, { path }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
+    } else if (api === 'indices.getMapping') {
+      return {};
     } else {
       throw new Error(`Unexpected API call: ${path}`);
     }
@@ -26,7 +28,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(callWithRequest, {} as any, false);
+    await getUpgradeAssistantStatus(callWithRequest, {} as any, false, []);
     expect(callWithRequest).toHaveBeenCalledWith({}, 'transport.request', {
       path: '/_migration/deprecations',
       method: 'GET',
@@ -34,7 +36,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, false);
+    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, false, []);
     expect(resp).toMatchSnapshot();
   });
 
@@ -47,7 +49,7 @@ describe('getUpgradeAssistantStatus', () => {
     };
 
     await expect(
-      getUpgradeAssistantStatus(callWithRequest, {} as any, false)
+      getUpgradeAssistantStatus(callWithRequest, {} as any, false, [])
     ).resolves.toHaveProperty('readyForUpgrade', false);
   });
 
@@ -60,7 +62,7 @@ describe('getUpgradeAssistantStatus', () => {
     };
 
     await expect(
-      getUpgradeAssistantStatus(callWithRequest, {} as any, false)
+      getUpgradeAssistantStatus(callWithRequest, {} as any, false, [])
     ).resolves.toHaveProperty('readyForUpgrade', true);
   });
 
@@ -78,7 +80,7 @@ describe('getUpgradeAssistantStatus', () => {
       index_settings: {},
     };
 
-    const result = await getUpgradeAssistantStatus(callWithRequest, {} as any, true);
+    const result = await getUpgradeAssistantStatus(callWithRequest, {} as any, true, []);
 
     expect(result).toHaveProperty('readyForUpgrade', true);
     expect(result).toHaveProperty('cluster', []);

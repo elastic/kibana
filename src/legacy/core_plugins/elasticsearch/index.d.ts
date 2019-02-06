@@ -202,13 +202,15 @@ export interface DeprecationInfo {
   details?: string;
 }
 
+export interface IndexSettingsDeprecationInfo {
+  [indexName: string]: DeprecationInfo[];
+}
+
 export interface DeprecationAPIResponse {
   cluster_settings: DeprecationInfo[];
   ml_settings: DeprecationInfo[];
   node_settings: DeprecationInfo[];
-  index_settings: {
-    [indexName: string]: DeprecationInfo[];
-  };
+  index_settings: IndexSettingsDeprecationInfo;
 }
 
 export interface CallClusterOptions {

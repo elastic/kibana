@@ -192,7 +192,12 @@ describe('Snapshot component', () => {
   it('renders without errors', () => {
     const { snapshot } = data;
     const wrapper = shallowWithIntl(
-      <Snapshot dangerColor="#F050F0" primaryColor="#000000" snapshot={snapshot} />
+      <Snapshot
+        dangerColor="#F050F0"
+        primaryColor="#000000"
+        snapshot={snapshot}
+        windowWidth={1600}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });

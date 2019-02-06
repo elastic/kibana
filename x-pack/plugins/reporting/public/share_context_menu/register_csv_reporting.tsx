@@ -51,6 +51,7 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
           content: (
             <ReportingPanelContent
               reportType="csv"
+              layoutId={undefined}
               objectType={objectType}
               objectId={objectId}
               getJobParams={getJobParams}

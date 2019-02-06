@@ -12,6 +12,7 @@ describe('SnapshotHistogram component', () => {
   const props = {
     primaryColor: '#FEFEFE',
     dangerColor: '#FF00FF',
+    windowWidth: 1200,
     histogram: [
       {
         monitorId: 'auto-tcp-0X81440A68E839814C',

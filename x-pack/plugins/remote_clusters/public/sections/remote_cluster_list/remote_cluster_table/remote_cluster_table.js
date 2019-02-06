@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { getRouterLinkProps } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export const RemoteClusterTable = injectI18n(
@@ -90,7 +91,10 @@ export const RemoteClusterTable = injectI18n(
         truncateText: false,
         render: (name, { isConfiguredByNode }) => {
           const link = (
-            <EuiLink onClick={() => openDetailPanel(name)}>
+            <EuiLink
+              data-test-subj={`remoteClusterTableRowName-${name}`}
+              onClick={() => openDetailPanel(name)}
+            >
               {name}
             </EuiLink>
           );
@@ -168,6 +172,7 @@ export const RemoteClusterTable = injectI18n(
                 <RemoveClusterButtonProvider clusterNames={[name]}>
                   {(removeCluster) => (
                     <EuiButtonIcon
+                      data-test-subj={`remoteClusterTableRowRemoveButton-${name}`}
                       aria-label={label}
                       iconType="trash"
                       color="danger"
@@ -194,11 +199,12 @@ export const RemoteClusterTable = injectI18n(
                 delay="long"
               >
                 <EuiButtonIcon
+                  data-test-subj={`remoteClusterTableRowEditButton-${name}`}
                   aria-label={label}
                   iconType="pencil"
                   color="primary"
                   isDisabled={isConfiguredByNode}
-                  href={`#${CRUD_APP_BASE_PATH}/edit/${name}`}
+                  {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${name}`)}
                   disabled={isConfiguredByNode}
                 />
               </EuiToolTip>

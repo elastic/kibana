@@ -18,7 +18,14 @@ export function registerClusterCheckupRoutes(server: Legacy.Server) {
     method: 'GET',
     async handler(request) {
       try {
-        return await getUpgradeAssistantStatus(callWithRequest, request, isCloudEnabled);
+        const apmIndexPatterns = server.plugins.apm_oss.indexPatterns;
+
+        return await getUpgradeAssistantStatus(
+          callWithRequest,
+          request,
+          isCloudEnabled,
+          apmIndexPatterns
+        );
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);

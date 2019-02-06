@@ -20,16 +20,12 @@
 import { uiModules } from '../modules';
 
 import toggleHtml from './kbn_global_timepicker.html';
-import { timeNavigation } from './time_navigation';
 import { timefilter } from 'ui/timefilter';
-import { prettyDuration } from './pretty_duration';
-import { prettyInterval } from './pretty_interval';
+import { timeHistory } from 'ui/timefilter/time_history';
 
 uiModules
   .get('kibana')
   .directive('kbnGlobalTimepicker', (globalState, config) => {
-    const getConfig = (...args) => config.get(...args);
-
     const listenForUpdates = ($scope) => {
       $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
         setTimefilterValues($scope);
@@ -48,44 +44,51 @@ uiModules
       $scope.timefilterValues = {
         refreshInterval: refreshInterval,
         time: time,
-        display: {
-          time: prettyDuration(time.from, time.to, getConfig),
-          refreshInterval: prettyInterval(refreshInterval.value),
-        },
         isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
         isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
       };
+      $scope.recentlyUsedRanges = timeHistory.get().map(({ from, to }) => {
+        return {
+          start: from,
+          end: to,
+        };
+      });
     }
 
     return {
       template: toggleHtml,
       replace: true,
-      require: '^kbnTopNav',
-      link: ($scope, element, attributes, kbnTopNav) => {
+      link: ($scope) => {
         listenForUpdates($scope);
 
         setTimefilterValues($scope);
 
-        $scope.toggleRefresh = () => {
-          timefilter.toggleRefresh();
+        config.watch('timepicker:quickRanges', (quickRanges) => {
+          // quickRanges is null when timepicker:quickRanges is set to default value
+          const ranges = quickRanges ? quickRanges : config.get('timepicker:quickRanges');
+          $scope.commonlyUsedRanges = ranges.map(({ from, to, display }) => {
+            return {
+              start: from,
+              end: to,
+              label: display,
+            };
+          });
+        });
+
+        config.watch('dateFormat', (dateFormat) => {
+          // dateFormat is null when dateFormat is set to default value
+          $scope.dateFormat = dateFormat ? dateFormat : config.get('dateFormat');
+        });
+
+        $scope.updateFilter = function ({ start, end }) {
+          timefilter.setTime({ from: start, to: end });
         };
 
-        $scope.forward = function () {
-          timefilter.setTime(timeNavigation.stepForward(timefilter.getBounds()));
-        };
-
-        $scope.back = function () {
-          timefilter.setTime(timeNavigation.stepBackward(timefilter.getBounds()));
-        };
-
-        $scope.updateFilter = function (from, to, mode) {
-          timefilter.setTime({ from, to, mode });
-          kbnTopNav.close('filter');
-        };
-
-        $scope.updateInterval = function (interval) {
-          timefilter.setRefreshInterval(interval);
-          kbnTopNav.close('interval');
+        $scope.updateInterval = function ({ isPaused, refreshInterval }) {
+          timefilter.setRefreshInterval({
+            pause: isPaused,
+            value: refreshInterval ? refreshInterval : $scope.timefilterValues.refreshInterval.value
+          });
         };
 
         $scope.getSharedTimeFilterFromDate = function () {
