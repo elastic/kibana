@@ -353,9 +353,9 @@ export class SavedObjectsRepository {
       type = type.filter(type => {
         try{
           this._assertAllowedType(type);
-          return false;
-        }catch(e) {
           return true;
+        }catch(e) {
+          return false;
         }
       });
     }else{

@@ -1725,7 +1725,7 @@ describe('SavedObjectsRepository', () => {
           },
         ]
       });
-      const { saved_objectsL: savedObjects } = await savedObjectsRepository.bulkGet([
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' },
         { id: 'three', type: 'globaltype' },
@@ -1742,9 +1742,36 @@ describe('SavedObjectsRepository', () => {
       ]);
     });
 
-    it('should error when attempting to \'find\' an unsupported type', async () => {
+    it('should not return hidden saved ojects when attempting to \'find\' support and unsupported types', async () => {
       callAdminCluster.returns({
-        status: 200,
+        hits: {
+          total: 1,
+          hits: [{
+            _id: 'one',
+            _source: {
+              updated_at: mockTimestamp,
+              type: 'config',
+            },
+            references: [],
+          }]
+        }
+      });
+      const results = await savedObjectsRepository.find({ type: ['hiddenType', 'config'] });
+      expect(results).toEqual({
+        total: 1,
+        saved_objects: [{
+          id: 'one',
+          references: [],
+          type: 'config',
+          updated_at: mockTimestamp,
+        }],
+        page: 1,
+        per_page: 20,
+      });
+    });
+
+    it('should return empty results when attempting to \'find\' an unsupported type', async () => {
+      callAdminCluster.returns({
         hits: {
           total: 0,
           hits: [],
@@ -1759,7 +1786,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    it('should error when attempting to \'find\' more than one unsupported types', async () => {
+    it('should return empty results when attempting to \'find\' more than one unsupported types', async () => {
       const findParams = { type: ['hiddenType', 'hiddenType2'] };
       callAdminCluster.returns({
         status: 200,

@@ -21,7 +21,6 @@
 import {
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
-  SavedObjectsRepositoryProvider,
 } from './lib';
 import { getRootPropertiesObjects } from '../../mappings';
 import { SavedObjectsClient } from './saved_objects_client';
@@ -30,39 +29,50 @@ import { SavedObjectsClient } from './saved_objects_client';
 // import / export from the Kibana UI. Import / export functionality needs to apply migrations to documents.
 // Eventually, we hope to build a first-class import / export API, at which point, we can
 // remove the migrator from the saved objects client and leave only document validation here.
-export function createSavedObjectsService(server, schema, serializer, migrator, extraTypes) {
+export function createSavedObjectsService(server, schema, serializer, migrator) {
   const mappings = server.getKibanaIndexMappingsDsl();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const allowedTypes = [...new Set((extraTypes || []).concat(allTypes.filter(type => !schema.isHiddenType(type))))];
-  const repositoryProvider = new SavedObjectsRepositoryProvider({
-    index: server.config().get('kibana.index'),
-    migrator,
-    mappings,
-    schema,
-    serializer,
-    allowedTypes,
-  });
+  const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
+  const createRepository = (callCluster, extraTypes = []) => {
+    // throw an exception if an extraType is not defined.
+    extraTypes.forEach(type => {
+      if(!allTypes.includes(type)) {
+        throw new Error(`Missing mappings for saved objects type ${type}`);
+      }
+    });
+    const combinedTypes = visibleTypes.concat(extraTypes);
+    const allowedTypes = [...new Set(combinedTypes)];
+
+    return new SavedObjectsRepository({
+      index: server.config().get('kibana.index'),
+      migrator,
+      mappings,
+      schema,
+      serializer,
+      allowedTypes,
+      callCluster
+    });
+  };
+
+  // filter hidden types from allTypes by default but add any new types from extraTypes if passed any.
   const scopedClientProvider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings,
-    defaultClientFactory({
-      request,
-    }) {
+    defaultClientFactory({ request }) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const callCluster = (...args) => callWithRequest(request, ...args);
-
-      const repository = repositoryProvider.getRepository(callCluster);
+      const repository = createRepository(callCluster);
 
       return new SavedObjectsClient(repository);
     },
   });
 
   return {
-    types: allowedTypes,
+    types: visibleTypes,
     SavedObjectsClient,
     SavedObjectsRepository,
-    getSavedObjectsRepository: (...args) => repositoryProvider.getRepository(...args),
+    getSavedObjectsRepository: createRepository,
     getScopedSavedObjectsClient: (...args) => scopedClientProvider.getClient(...args),
     setScopedSavedObjectsClientFactory: (...args) => scopedClientProvider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
