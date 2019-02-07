@@ -17,6 +17,15 @@ jest.mock('ui/chrome', () => ({
   breadcrumbs: {
     set: () => {},
   },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+  }
 }));
 
 jest.mock('../../services', () => {
