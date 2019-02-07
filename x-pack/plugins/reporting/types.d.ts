@@ -104,7 +104,7 @@ export interface ReportingJob {
 export interface JobDoc {
   _source: {
     output: any;
-    jobtype: any;
+    jobtype: string;
     payload: ReportingJob;
   };
 }
