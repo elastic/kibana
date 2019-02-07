@@ -17,5 +17,20 @@
  * under the License.
  */
 
-export { kfetch, addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+// TODO: This file is copied from src/utils/case_conversion.ts
+// because TS-imports from utils in ui are currently not possible.
+// When the build process is updated, this file can be removed
+
+import _ from 'lodash';
+
+export function keysToSnakeCaseShallow(object: Record<string, any>) {
+  return _.mapKeys(object, (value, key) => {
+    return _.snakeCase(key);
+  });
+}
+
+export function keysToCamelCaseShallow(object: Record<string, any>) {
+  return _.mapKeys(object, (value, key) => {
+    return _.camelCase(key);
+  });
+}
