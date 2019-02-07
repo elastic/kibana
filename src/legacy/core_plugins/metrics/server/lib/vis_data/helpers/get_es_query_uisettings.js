@@ -22,7 +22,6 @@ export async function getEsQueryConfig(req) {
   const allowLeadingWildcards = await uiSettings.get('query:allowLeadingWildcards');
   const queryStringOptions = await uiSettings.get('query:queryString:options');
   const ignoreFilterIfFieldNotInIndex = await uiSettings.get('courier:ignoreFilterIfFieldNotInIndex');
-  console.log(queryStringOptions, typeof queryStringOptions);
   return {
     allowLeadingWildcards,
     queryStringOptions: JSON.parse(queryStringOptions),
