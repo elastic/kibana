@@ -20,7 +20,7 @@
 import { first, map } from 'rxjs/operators';
 
 export default async function getEsShardTimeout(req) {
-  return await req.server.core.elasticsearch.bwc.config$.pipe(
+  return await req.server.core.elasticsearch.legacy.config$.pipe(
     first(),
     map(config => config.shardTimeout.asMilliseconds())
   ).toPromise();

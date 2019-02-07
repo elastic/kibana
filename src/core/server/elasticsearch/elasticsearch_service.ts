@@ -32,8 +32,8 @@ interface CoreClusterClients {
 }
 
 export interface ElasticsearchServiceStartContract {
-  // Required for the BWC only.
-  readonly bwc: {
+  // Required for the BWC with the legacy Kibana only.
+  readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
 
@@ -92,7 +92,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
     this.subscription = clients$.connect();
 
     return {
-      bwc: { config$: clients$.pipe(map(clients => clients.config)) },
+      legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
       adminClient$: clients$.pipe(map(clients => clients.adminClient)),
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),

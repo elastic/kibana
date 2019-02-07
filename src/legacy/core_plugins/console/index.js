@@ -116,7 +116,7 @@ export default function (kibana) {
       }
 
       const config = server.config();
-      const bwcEsConfig = await server.core.elasticsearch.bwc.config$.pipe(first()).toPromise();
+      const bwcEsConfig = await server.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
