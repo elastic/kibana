@@ -6,10 +6,10 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export
-export default function spacesApp({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('Spaces app', function spacesAppTestSuite() {
-    this.tags('ciGroup4');
+export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+  describe('dashboard', function() {
+    this.tags('ciGroup3');
 
-    loadTestFile(require.resolve('./spaces_selection'));
+    loadTestFile(require.resolve('./feature_controls'));
   });
 }

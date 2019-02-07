@@ -46,6 +46,7 @@ export class AdvancedSettings extends Component {
   static propTypes = {
     config: PropTypes.object.isRequired,
     query: PropTypes.string,
+    enableSaving: PropTypes.bool.isRequired,
   }
 
   constructor(props) {
@@ -178,6 +179,7 @@ export class AdvancedSettings extends Component {
           save={this.saveConfig}
           clear={this.clearConfig}
           showNoResultsMessage={!footerQueryMatched}
+          enableSaving={this.props.enableSaving}
         />
         <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
       </div>

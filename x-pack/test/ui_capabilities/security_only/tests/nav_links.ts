@@ -40,6 +40,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('apm', 'management')
             );
             break;
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            break;
           case 'canvas_all':
           case 'canvas_read':
             expect(uiCapabilities.success).to.be(true);
