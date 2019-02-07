@@ -48,7 +48,7 @@ function removeFromStr(str, key, val) {
 async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
   if (['config', 'url'].includes(type)) return;
   const allTypes = Object.keys(getRootPropertiesObjects(savedObjectsRepository._mappings));
-  const { saved_objects: allObjects } = await savedObjectsRepository.find({ type: allTypes });
+  const { saved_objects: allObjects } = await savedObjectsRepository.find({ type: allTypes, perPage: 10000 });
   const objectIds = allObjects.map((obj) => {
     if (obj.id.indexOf(':')) {
       return obj.id.substring(obj.id.lastIndexOf(':') + 1);
