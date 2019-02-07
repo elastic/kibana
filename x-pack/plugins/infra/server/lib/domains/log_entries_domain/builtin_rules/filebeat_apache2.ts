@@ -6,6 +6,59 @@
 
 export const filebeatApache2Rules = [
   {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'apache.access',
+      },
+    },
+    format: [
+      {
+        constant: '[Apache][access] ',
+      },
+      {
+        field: 'source.ip',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'user.name',
+      },
+      {
+        constant: ' "',
+      },
+      {
+        field: 'http.request.method',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'url.original',
+      },
+      {
+        constant: ' HTTP/',
+      },
+      {
+        field: 'http.version',
+      },
+      {
+        constant: '" ',
+      },
+      {
+        field: 'http.response.status_code',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'http.response.body.bytes',
+      },
+    ],
+  },
+  {
+    // pre-ECS
     when: {
       exists: ['apache2.access'],
     },
@@ -55,6 +108,29 @@ export const filebeatApache2Rules = [
     ],
   },
   {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'apache.error',
+      },
+    },
+    format: [
+      {
+        constant: '[Apache][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'message',
+      },
+    ],
+  },
+  {
+    // pre-ECS
     when: {
       exists: ['apache2.error.message'],
     },

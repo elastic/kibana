@@ -22,9 +22,10 @@ import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export default async (req, panel, annotation, esQueryConfig, capabilities) => {
   const bodies = [];
-  const timeout = getEsShardTimeout(req);
+  const esShardTimeout = getEsShardTimeout(req);
   const indexPattern = annotation.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPattern);
+  const request = buildRequestBody(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
@@ -33,10 +34,11 @@ export default async (req, panel, annotation, esQueryConfig, capabilities) => {
     });
   }
 
-  bodies.push({
-    ...buildRequestBody(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities),
-    timeout
-  });
+  if (esShardTimeout > 0) {
+    request.timeout = `${esShardTimeout}ms`;
+  }
+
+  bodies.push(request);
 
   return bodies;
 };

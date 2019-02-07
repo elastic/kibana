@@ -41,7 +41,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
         type,
         id: options.id,
-        version: 1,
+        version: 'foo',
       }))
     };
 

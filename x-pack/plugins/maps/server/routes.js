@@ -8,6 +8,7 @@
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -16,7 +17,8 @@ export function initRoutes(server, licenseUid) {
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
 
-  const emsClient = new server.plugins.tile_map.ems_client.EMSClientV66({
+  const emsClient = new server.plugins.tile_map.ems_client.EMSClient({
+    language: i18n.getLocale(),
     kbnVersion: serverConfig.get('pkg.version'),
     manifestServiceUrl: mapConfig.manifestServiceUrl,
     landingPageUrl: mapConfig.emsLandingPageUrl

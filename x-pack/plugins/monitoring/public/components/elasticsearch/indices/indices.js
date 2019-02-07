@@ -182,6 +182,9 @@ const ElasticsearchIndicesUI = ({
               },
             }}
             onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

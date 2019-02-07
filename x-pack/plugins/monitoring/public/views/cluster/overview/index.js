@@ -9,7 +9,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/overview', {
   template,
@@ -48,13 +48,13 @@ uiRoutes.when('/overview', {
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <Overview
               cluster={data}
               changeUrl={changeUrl}
               showLicenseExpiration={true}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

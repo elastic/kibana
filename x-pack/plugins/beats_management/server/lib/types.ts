@@ -6,6 +6,7 @@
 
 import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
+import { BeatEventsLib } from './beat_events';
 import { CMBeatsDomain } from './beats';
 import { ConfigurationBlocksLib } from './configuration_blocks';
 import { BackendFrameworkLib } from './framework';
@@ -19,6 +20,7 @@ export interface CMServerLibs {
   database?: DatabaseAdapter;
   beats: CMBeatsDomain;
   tags: CMTagsDomain;
+  beatEvents: BeatEventsLib;
   tokens: CMTokensDomain;
   configurationBlocks: ConfigurationBlocksLib;
 }

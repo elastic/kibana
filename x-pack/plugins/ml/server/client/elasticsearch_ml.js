@@ -83,15 +83,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.closeJob = ca({
     urls: [
       {
-        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close',
-        req: {
-          jobId: {
-            type: 'string'
-          }
-        }
-      },
-      {
-        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=true',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
@@ -100,30 +92,41 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'boolean'
           }
         }
+      },
+      {
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
       }
     ],
     method: 'POST'
   });
 
   ml.deleteJob = ca({
-    urls: [{
-      fmt: '/_ml/anomaly_detectors/<%=jobId%>',
-      req: {
-        jobId: {
-          type: 'string'
+    urls: [
+      {
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>?&force=<%=force%>&wait_for_completion=false',
+        req: {
+          jobId: {
+            type: 'string'
+          },
+          force: {
+            type: 'boolean'
+          }
+        }
+      },
+      {
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>?&wait_for_completion=false',
+        req: {
+          jobId: {
+            type: 'string'
+          }
         }
       }
-    }, {
-      fmt: '/_ml/anomaly_detectors/<%=jobId%>?force=true',
-      req: {
-        jobId: {
-          type: 'string'
-        },
-        force: {
-          type: 'boolean'
-        }
-      }
-    }],
+    ],
     method: 'DELETE'
   });
 
@@ -207,24 +210,27 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   });
 
   ml.deleteDatafeed = ca({
-    urls: [{
-      fmt: '/_ml/datafeeds/<%=datafeedId%>',
-      req: {
-        datafeedId: {
-          type: 'string'
+    urls: [
+      {
+        fmt: '/_ml/datafeeds/<%=datafeedId%>?force=<%=force%>',
+        req: {
+          datafeedId: {
+            type: 'string'
+          },
+          force: {
+            type: 'boolean'
+          }
+        }
+      },
+      {
+        fmt: '/_ml/datafeeds/<%=datafeedId%>',
+        req: {
+          datafeedId: {
+            type: 'string'
+          }
         }
       }
-    }, {
-      fmt: '/_ml/datafeeds/<%=datafeedId%>?force=true',
-      req: {
-        datafeedId: {
-          type: 'string'
-        },
-        force: {
-          type: 'boolean'
-        }
-      }
-    }],
+    ],
     method: 'DELETE'
   });
 

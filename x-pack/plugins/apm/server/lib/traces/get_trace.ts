@@ -5,7 +5,7 @@
  */
 
 import { SearchParams } from 'elasticsearch';
-import { TRACE_ID } from '../../../common/constants';
+import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../typings/es_schemas/Span';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';

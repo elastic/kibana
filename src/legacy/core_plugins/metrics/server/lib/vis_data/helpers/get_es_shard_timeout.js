@@ -18,5 +18,5 @@
  */
 
 export default function getEsShardTimeout(req) {
-  return `${req.server.config().get('elasticsearch.shardTimeout')}ms`;
+  return req.server.config().get('elasticsearch.shardTimeout');
 }

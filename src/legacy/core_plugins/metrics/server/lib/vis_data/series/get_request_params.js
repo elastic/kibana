@@ -24,19 +24,20 @@ export default async (req, panel, series, esQueryConfig, capabilities) => {
   const bodies = [];
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPattern);
-  const timeout = getEsShardTimeout(req);
+  const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities);
+  const esShardTimeout = getEsShardTimeout(req);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
       index: indexPattern,
-      ignoreUnavailable: true,
     });
   }
 
-  bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities),
-    timeout,
-  });
+  if (esShardTimeout > 0) {
+    request.timeout = `${esShardTimeout}ms`;
+  }
+
+  bodies.push(request);
 
   return bodies;
 };
