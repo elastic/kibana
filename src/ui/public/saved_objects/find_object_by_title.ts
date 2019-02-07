@@ -18,6 +18,9 @@
  */
 
 import { find } from 'lodash';
+import { SavedObjectAttributes } from '../../../server/saved_objects';
+import { SavedObject } from './saved_object';
+import { SavedObjectsClient } from './saved_objects_client';
 
 /**
  * Returns an object matching a given title
@@ -27,22 +30,30 @@ import { find } from 'lodash';
  * @param title {string}
  * @returns {Promise<SavedObject|undefined>}
  */
-export function findObjectByTitle(savedObjectsClient, type, title) {
-  if (!title) return Promise.resolve();
+export function findObjectByTitle<T extends SavedObjectAttributes>(
+  savedObjectsClient: SavedObjectsClient,
+  type: string,
+  title: string
+): Promise<SavedObject<T> | void> {
+  if (!title) {
+    return Promise.resolve();
+  }
 
   // Elastic search will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
-  return savedObjectsClient.find({
-    type,
-    perPage: 10,
-    search: `"${title}"`,
-    searchFields: ['title'],
-    fields: ['title']
-  }).then(response => {
-    const match = find(response.savedObjects, (obj) => {
-      return obj.get('title').toLowerCase() === title.toLowerCase();
-    });
+  return savedObjectsClient
+    .find<T>({
+      type,
+      perPage: 10,
+      search: `"${title}"`,
+      searchFields: ['title'],
+      fields: ['title'],
+    })
+    .then(response => {
+      const match = find(response.savedObjects, obj => {
+        return obj.get('title').toLowerCase() === title.toLowerCase();
+      });
 
-    return match;
-  });
+      return match;
+    });
 }
