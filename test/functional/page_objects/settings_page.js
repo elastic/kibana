@@ -58,6 +58,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await setting.getProperty('value');
     }
 
+    async expectDisabledAdvancedSetting(propertyName) {
+      const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      expect(setting.getAttribute('disabled')).to.eql('');
+    }
+
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
       return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');

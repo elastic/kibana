@@ -53,6 +53,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users can't do anything with Discover
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
           case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':

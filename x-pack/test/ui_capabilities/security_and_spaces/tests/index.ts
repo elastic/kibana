@@ -54,6 +54,7 @@ export default function uiCapabilitesTests({
       }
     });
 
+    loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./canvas'));
     loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./discover'));

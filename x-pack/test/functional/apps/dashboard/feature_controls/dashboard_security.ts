@@ -4,48 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
+import { SecurityService } from 'x-pack/test/common/services';
 // eslint-disable-next-line max-len
-import { DashboardConstants, createDashboardEditUrl } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+import {
+  createDashboardEditUrl,
+  DashboardConstants,
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-export default function ({ getPageObjects, getService }) {
+// tslint:disable:no-default-export
+export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
+  const security: SecurityService = getService('security');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
-  const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
 
-  describe('dashboard', () => {
+  describe('security', () => {
     before(async () => {
-      await esArchiver.load('security/feature_privileges');
-      await kibanaServer.uiSettings.replace({
-        "accessibility:disableAnimations": true,
-        "telemetry:optIn": false,
-        "defaultIndex": "logstash-*",
-      });
+      await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
+
+      // ensure we're logged out so we can login as the appropriate users
+      await PageObjects.security.logout();
     });
 
     after(async () => {
-      await esArchiver.unload('security/feature_privileges');
+      await esArchiver.unload('dashboard/feature_controls/security');
+
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      await PageObjects.security.logout();
     });
 
     describe('global dashboard all privileges', () => {
       before(async () => {
         await security.role.create('global_dashboard_all_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                dashboard: ['all']
+                dashboard: ['all'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_dashboard_all_user', {
@@ -54,9 +58,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_dashboard_all_user', 'global_dashboard_all_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_dashboard_all_user',
+          'global_dashboard_all_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -65,27 +73,35 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql([
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
           'Dashboard',
           'Management',
         ]);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.LANDING_PAGE_PATH,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
         await testSubjects.existOrFail('newDashboardLink');
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('emptyDashboardAddPanelButton', 10000);
       });
 
@@ -102,18 +118,16 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('global_dashboard_read_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                dashboard: ['read']
+                dashboard: ['read'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_dashboard_read_user', {
@@ -122,9 +136,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_dashboard_read_user', 'global_dashboard_read_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_dashboard_read_user',
+          'global_dashboard_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -133,30 +151,36 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql([
-          'Dashboard',
-          'Management',
-        ]);
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).to.eql(['Dashboard', 'Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.LANDING_PAGE_PATH,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
         await testSubjects.missingOrFail('newDashboardLink');
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('homeApp', 10000);
       });
-
 
       it(`can view existing Dashboard`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
@@ -171,18 +195,16 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                discover: ['all']
+                discover: ['all'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('no_dashboard_privileges_user', {
@@ -191,9 +213,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('no_dashboard_privileges_user', 'no_dashboard_privileges_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'no_dashboard_privileges_user',
+          'no_dashboard_privileges_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -201,27 +227,44 @@ export default function ({ getPageObjects, getService }) {
         await security.user.delete('no_dashboard_privileges_user');
       });
 
+      it(`doesn't show dashboard navLink`, async () => {
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dashboard']);
+      });
+
       it(`landing page redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.LANDING_PAGE_PATH,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-dont-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          createDashboardEditUrl('i-dont-exist'),
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('homeApp', 10000);
       });
 

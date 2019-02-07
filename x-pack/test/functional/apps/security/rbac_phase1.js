@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await esArchiver.load('security/discover');
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
