@@ -102,4 +102,7 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
+  isJoinable() {
+    return true;
+  }
 }
