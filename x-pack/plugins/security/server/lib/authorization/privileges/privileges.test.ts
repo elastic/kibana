@@ -46,7 +46,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
@@ -119,7 +119,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
@@ -176,7 +176,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
@@ -250,7 +250,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {});
@@ -305,7 +305,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(group, {
@@ -389,7 +389,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -532,7 +532,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.read`, [
@@ -612,7 +612,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.read`, [

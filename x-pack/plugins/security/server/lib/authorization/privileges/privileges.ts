@@ -10,15 +10,12 @@ import {
   RawKibanaPrivileges,
 } from 'x-pack/plugins/security/common/model';
 import { Feature } from '../../../../../xpack_main/types';
+import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { Actions } from '../actions';
 import { featurePrivilegeBuildersFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;
-}
-
-interface XPackMainPlugin {
-  getFeatures(): Feature[];
 }
 
 export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPlugin) {
