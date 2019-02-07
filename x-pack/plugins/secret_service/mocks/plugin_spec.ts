@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecretService } from './lib/secret_service';
+export class PluginSpec {
+  constructor(object: any) {
+    return object;
+  }
+}

@@ -5,20 +5,15 @@
  */
 
 import sinon from 'sinon';
-import { secretstore } from './';
+import { secretService } from './';
+import { Keystore, PluginSpec } from './mocks';
 
-class PluginSpec {
-  constructor(object: any) {
-    return object;
-  }
-}
-
-describe('The SecretStore', function TestSecretStore() {
+describe('The SecretService', function TestSecretService() {
   const kbn = {
     Plugin: PluginSpec,
   };
   const mockKbn = sinon.mock(kbn);
-  const subject = secretstore(kbn);
+  const subject = secretService(kbn);
   beforeAll(() => {
     expect(subject).not.toBeNull();
     mockKbn.expects('Plugin').once();
@@ -39,6 +34,12 @@ describe('The SecretStore', function TestSecretStore() {
         addScopedSavedObjectsClientWrapperFactory: sinon.spy(),
         getSavedObjectsRepository: sinon.spy(),
       },
+      config: () => {
+        return {
+          get: sinon.spy(),
+        };
+      },
+      Keystore,
       plugins: {
         elasticsearch: {
           getCluster: () => {
@@ -48,6 +49,6 @@ describe('The SecretStore', function TestSecretStore() {
       },
     };
     subject.init(core);
-    core.expose.calledWith('secretstore', sinon.match.func);
+    core.expose.calledWith('secretservice', sinon.match.func);
   });
 });

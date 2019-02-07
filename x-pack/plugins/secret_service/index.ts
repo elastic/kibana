@@ -7,13 +7,13 @@
 import crypto from 'crypto';
 import { resolve } from 'path';
 import mappings from './mappings.json';
-import { SecretStore } from './server';
+import { SecretService } from './server';
 
-export const secretstore = (kibana: any) => {
+export const secretService = (kibana: any) => {
   return new kibana.Plugin({
-    id: 'secretstore',
+    id: 'SecretService',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    configPrefix: 'xpack.secretstore',
+    configPrefix: 'xpack.secret_service',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       mappings,
@@ -31,20 +31,21 @@ export const secretstore = (kibana: any) => {
       }).default();
     },
 
+    configKey: 'xpack.secret_service.secret',
+
     init(server: any) {
       const keystore: any = new server.Keystore(server.config().get('path.data'));
 
-      const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
+      const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
 
-      // const secret = server.config().get('xpack.secretstore.secret');
       if (!keystore.exists()) {
         keystore.reset();
         keystore.save();
         warn(`Keystore missing, new keystore created ${keystore.path}`);
       }
 
-      if (!keystore.has('xpack.secretstore.secret')) {
-        keystore.add('xpack.secretstore.secret', crypto.randomBytes(128).toString('hex'));
+      if (!keystore.has(this.configKey)) {
+        keystore.add(this.configKey, crypto.randomBytes(128).toString('hex'));
         warn('Missing key - one has been auto-generated for use.');
         keystore.save();
       }
@@ -55,8 +56,8 @@ export const secretstore = (kibana: any) => {
       ]);
 
       server.expose(
-        'secretstore',
-        new SecretStore(so, 'secretType', keystore.get('xpack.secretstore.secret'))
+        'secretService',
+        new SecretService(so, 'secretType', keystore.get(this.configKey))
       );
     },
   });

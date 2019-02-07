@@ -8,7 +8,7 @@ import crypto from 'crypto';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 import { buildCrypt } from './crypt_keeper';
 
-export class SecretStore {
+export class SecretService {
   public readonly hideAttribute: (deets: any, secretKey: string) => any;
   public readonly unhideAttribute: (deets: any) => any;
   private readonly type: string;
@@ -51,7 +51,7 @@ export class SecretStore {
           };
         }
       } catch (e) {
-        throw Error(`SecretStore Decrypt Failed: ${e.message}`);
+        throw Error(`SecretService Decrypt Failed: ${e.message}`);
       }
 
       return undefined;

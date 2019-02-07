@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as sinon from 'sinon';
-import { SecretStore } from './secret_store';
+import { SecretService } from './secret_service';
 
-describe('The Secret Secret Store', function TestSecretStoreObject() {
+describe('The Secret Secret Store', function TestSecretServiceObject() {
   const savedObjectsClient = {
     create: sinon.stub(),
     errors: sinon.stub(),
@@ -18,7 +18,7 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
     update: sinon.stub(),
   };
 
-  const subject = new SecretStore(savedObjectsClient as any, 'testSecretType');
+  const subject = new SecretService(savedObjectsClient as any, 'testSecretType');
 
   it('should not expose the password field', () => {
     const field = 'password';
