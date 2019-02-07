@@ -71,7 +71,7 @@ export default function({ getService }: TestInvoker) {
             response: createExpectRbacForbidden('globaltype'),
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -145,7 +145,7 @@ export default function({ getService }: TestInvoker) {
             response: createExpectRbacForbidden('globaltype'),
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -182,7 +182,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -219,7 +219,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -256,7 +256,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -293,7 +293,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -330,7 +330,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -367,7 +367,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
@@ -404,7 +404,7 @@ export default function({ getService }: TestInvoker) {
             response: createExpectRbacForbidden('globaltype'),
           },
           unknownType: {
-            description: 'forbidden login and find wigwags message',
+            description: 'forbidden find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
