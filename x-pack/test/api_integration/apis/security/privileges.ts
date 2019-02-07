@@ -889,6 +889,37 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             },
           });
       });
+
+      describe('GET /api/security/privileges', () => {
+        it('should return a privilege map with all known privileges, without actions', async () => {
+          await supertest
+            .get('/api/security/privileges')
+            .set('kbn-xsrf', 'xxx')
+            .send()
+            .expect(200, {
+              features: {
+                discover: ['all', 'read'],
+                visualize: ['all', 'read'],
+                dashboard: ['all', 'read'],
+                dev_tools: ['read'],
+                advancedSettings: ['all', 'read'],
+                indexPatterns: ['all', 'read'],
+                timelion: ['all', 'read'],
+                graph: ['all', 'read'],
+                monitoring: ['all'],
+                ml: ['all'],
+                apm: ['all'],
+                maps: ['all', 'read'],
+                canvas: ['all', 'read'],
+                infrastructure: ['read'],
+                logs: ['read'],
+                uptime: ['read'],
+              },
+              global: ['all', 'read'],
+              space: ['all', 'read'],
+            });
+        });
+      });
     });
   });
 }
