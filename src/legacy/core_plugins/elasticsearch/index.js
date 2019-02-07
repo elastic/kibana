@@ -60,7 +60,7 @@ export default function (kibana) {
         startupTimeout: Joi.number().default(5000),
         logQueries: Joi.boolean().default(false),
         ssl: sslSchema,
-        apiVersion: Joi.string().default('6.7'),
+        apiVersion: Joi.string().default('6.x'),
         healthCheck: Joi.object({
           delay: Joi.number().default(2500)
         }).default(),
