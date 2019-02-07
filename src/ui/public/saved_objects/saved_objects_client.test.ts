@@ -19,14 +19,12 @@
 
 jest.mock('ui/kfetch', () => ({}));
 
-// @ts-ignore
-import expect from 'expect.js';
 import * as sinon from 'sinon';
 import { FindOptions } from '../../../server/saved_objects/service';
-import { SimpleSavedObject } from './simple_saved_object';
 import { SavedObjectsClient } from './saved_objects_client';
+import { SimpleSavedObject } from './simple_saved_object';
 
-describe.only('SavedObjectsClient', () => {
+describe('SavedObjectsClient', () => {
   const doc = {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
@@ -57,32 +55,32 @@ describe.only('SavedObjectsClient', () => {
     });
 
     test('returns a promise', () => {
-      expect(savedObjectsClient.get('index-pattern', 'logstash-*')).to.be.a(Promise);
+      expect(savedObjectsClient.get('index-pattern', 'logstash-*')).toBeInstanceOf(Promise);
     });
 
     test('requires type', async () => {
       try {
         await savedObjectsClient.get(undefined as any, undefined as any);
-        expect().fail('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be('requires type and id');
+        expect(e.message).toBe('requires type and id');
       }
     });
 
     test('requires id', async () => {
       try {
         await savedObjectsClient.get('index-pattern', undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be('requires type and id');
+        expect(e.message).toBe('requires type and id');
       }
     });
 
     test('resolves with instantiated SavedObject', async () => {
       const response = await savedObjectsClient.get(doc.type, doc.id);
-      expect(response).to.be.a(SimpleSavedObject);
-      expect(response.type).to.eql('config');
-      expect(response.get('title')).to.eql('Example title');
+      expect(response).toBeInstanceOf(SimpleSavedObject);
+      expect(response.type).toBe('config');
+      expect(response.get('title')).toBe('Example title');
     });
 
     test('makes HTTP call', async () => {
@@ -103,7 +101,7 @@ describe.only('SavedObjectsClient', () => {
         await savedObjectsClient.get(doc.type, doc.id);
         throw new Error('should have error');
       } catch (e) {
-        expect(e.message).to.be('Request failed');
+        expect(e.message).toBe('Request failed');
       }
     });
   });
@@ -121,24 +119,24 @@ describe.only('SavedObjectsClient', () => {
     });
 
     test('returns a promise', () => {
-      expect(savedObjectsClient.delete('index-pattern', 'logstash-*')).to.be.a(Promise);
+      expect(savedObjectsClient.delete('index-pattern', 'logstash-*')).toBeInstanceOf(Promise);
     });
 
     test('requires type', async () => {
       try {
         await savedObjectsClient.delete(undefined as any, undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be('requires type and id');
+        expect(e.message).toBe('requires type and id');
       }
     });
 
     test('requires id', async () => {
       try {
         await savedObjectsClient.delete('index-pattern', undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be('requires type and id');
+        expect(e.message).toBe('requires type and id');
       }
     });
 
@@ -163,33 +161,33 @@ describe.only('SavedObjectsClient', () => {
     });
 
     test('returns a promise', () => {
-      expect(savedObjectsClient.update('index-pattern', 'logstash-*', {})).to.be.a(Promise);
+      expect(savedObjectsClient.update('index-pattern', 'logstash-*', {})).toBeInstanceOf(Promise);
     });
 
     test('requires type', async () => {
       try {
         await savedObjectsClient.update(undefined as any, undefined as any, undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be(requireMessage);
+        expect(e.message).toBe(requireMessage);
       }
     });
 
     test('requires id', async () => {
       try {
         await savedObjectsClient.update('index-pattern', undefined as any, undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be(requireMessage);
+        expect(e.message).toBe(requireMessage);
       }
     });
 
     test('requires attributes', async () => {
       try {
         await savedObjectsClient.update('index-pattern', 'logstash-*', undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be(requireMessage);
+        expect(e.message).toBe(requireMessage);
       }
     });
 
@@ -224,15 +222,15 @@ describe.only('SavedObjectsClient', () => {
     });
 
     test('returns a promise', () => {
-      expect(savedObjectsClient.create('index-pattern', {})).to.be.a(Promise);
+      expect(savedObjectsClient.create('index-pattern', {})).toBeInstanceOf(Promise);
     });
 
     test('requires type', async () => {
       try {
         await savedObjectsClient.create(undefined as any, undefined as any);
-        expect().throw('should have error');
+        fail('should have error');
       } catch (e) {
-        expect(e.message).to.be(requireMessage);
+        expect(e.message).toBe(requireMessage);
       }
     });
 
@@ -287,14 +285,14 @@ describe.only('SavedObjectsClient', () => {
     });
 
     test('returns a promise', () => {
-      expect(savedObjectsClient.bulkCreate([doc], {})).to.be.a(Promise);
+      expect(savedObjectsClient.bulkCreate([doc], {})).toBeInstanceOf(Promise);
     });
 
     test('resolves with instantiated SavedObjects', async () => {
       const response = await savedObjectsClient.bulkCreate([doc], {});
-      expect(response).to.have.property('savedObjects');
-      expect(response.savedObjects.length).to.eql(1);
-      expect(response.savedObjects[0]).to.be.a(SimpleSavedObject);
+      expect(response).toHaveProperty('savedObjects');
+      expect(response.savedObjects.length).toBe(1);
+      expect(response.savedObjects[0]).toBeInstanceOf(SimpleSavedObject);
     });
 
     test('makes HTTP call', async () => {
@@ -311,7 +309,7 @@ describe.only('SavedObjectsClient', () => {
     });
 
     test('returns a promise', () => {
-      expect(savedObjectsClient.find()).to.be.a(Promise);
+      expect(savedObjectsClient.find()).toBeInstanceOf(Promise);
     });
 
     test('accepts type', () => {
@@ -342,7 +340,7 @@ describe.only('SavedObjectsClient', () => {
       );
     });
 
-    test.only('accepts pagination params', () => {
+    test('accepts pagination params', () => {
       const options: FindOptions = { perPage: 10, page: 6 };
 
       savedObjectsClient.find(options);
