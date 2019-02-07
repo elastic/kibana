@@ -51,7 +51,8 @@ interface CreateOptions {
   references?: SavedObjectReference[];
 }
 
-interface BulkCreateOptions<T extends SavedObjectAttributes = any> extends CreateOptions {
+interface BulkCreateOptions<T extends SavedObjectAttributes = SavedObjectAttributes>
+  extends CreateOptions {
   type: string;
   attributes: T;
 }
@@ -62,11 +63,12 @@ interface UpdateOptions {
   references?: SavedObjectReference[];
 }
 
-interface BatchResponse<T extends SavedObjectAttributes = any> {
+interface BatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
   savedObjects: Array<SavedObject<T>>;
 }
 
-interface FindResults<T extends SavedObjectAttributes = any> extends BatchResponse<T> {
+interface FindResults<T extends SavedObjectAttributes = SavedObjectAttributes>
+  extends BatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -141,7 +143,7 @@ export class SavedObjectsClient {
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion]
-   * @returns {promise} - SavedObject({ id, type, version, attributes })
+   * @returns
    */
   public create = <T extends SavedObjectAttributes>(
     type: string,
@@ -185,7 +187,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
-   * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
+   * @returns The result of the create operation containing created saved objects.
    */
   public bulkCreate = (objects: BulkCreateOptions[] = [], options: KFetchQuery = {}) => {
     const path = this.getPath(['_bulk_create']);
@@ -230,9 +232,11 @@ export class SavedObjectsClient {
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
    * @property {object} [options.hasReference] - { type, id }
-   * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
+   * @returns A find result with objects matching the specified search.
    */
-  public find = (options: FindOptions = {}): Promise<FindResults> => {
+  public find = <T extends SavedObjectAttributes>(
+    options: FindOptions = {}
+  ): Promise<FindResults<T>> => {
     const path = this.getPath(['_find']);
     const query = keysToSnakeCaseShallow(options);
 
@@ -243,7 +247,7 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp) as FindResults;
+      return keysToCamelCaseShallow(resp) as FindResults<T>;
     });
   };
 
@@ -252,7 +256,7 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @returns {promise} - SavedObject({ id, type, version, attributes })
+   * @returns The saved object for the given type and id.
    */
   public get = <T extends SavedObjectAttributes>(
     type: string,
@@ -272,7 +276,7 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ] }
+   * @returns The saved objects with the given type and ids requested
    * @example
    *
    * bulkGet([
@@ -304,7 +308,7 @@ export class SavedObjectsClient {
    * @param {object} options
    * @prop {integer} options.version - ensures version matches that of persisted object
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
-   * @returns {promise}
+   * @returns
    */
   public update<T extends SavedObjectAttributes>(
     type: string,
@@ -341,10 +345,6 @@ export class SavedObjectsClient {
   }
 
   private getPath(path: Array<string | undefined>): string {
-    if (!path) {
-      return API_BASE_URL;
-    }
-
     return resolveUrl(API_BASE_URL, join(...path));
   }
 
