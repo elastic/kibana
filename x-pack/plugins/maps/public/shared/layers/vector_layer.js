@@ -67,10 +67,6 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  isJoinable() {
-    return true;
-  }
-
   getJoins() {
     return this._joins.slice();
   }
