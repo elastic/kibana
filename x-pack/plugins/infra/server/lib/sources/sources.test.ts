@@ -14,7 +14,7 @@ describe('the InfraSources lib', () => {
         configuration: createMockStaticConfiguration({}),
         savedObjects: createMockSavedObjectsService({
           id: 'TEST_ID',
-          version: 1,
+          version: 'foo',
           updated_at: '2000-01-01T00:00:00.000Z',
           attributes: {
             metricAlias: 'METRIC_ALIAS',
@@ -34,7 +34,7 @@ describe('the InfraSources lib', () => {
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
-        version: 1,
+        version: 'foo',
         updatedAt: 946684800000,
         configuration: {
           metricAlias: 'METRIC_ALIAS',
@@ -66,7 +66,7 @@ describe('the InfraSources lib', () => {
         }),
         savedObjects: createMockSavedObjectsService({
           id: 'TEST_ID',
-          version: 1,
+          version: 'foo',
           updated_at: '2000-01-01T00:00:00.000Z',
           attributes: {
             fields: {
@@ -80,7 +80,7 @@ describe('the InfraSources lib', () => {
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
-        version: 1,
+        version: 'foo',
         updatedAt: 946684800000,
         configuration: {
           metricAlias: 'METRIC_ALIAS',
@@ -101,7 +101,7 @@ describe('the InfraSources lib', () => {
         configuration: createMockStaticConfiguration({}),
         savedObjects: createMockSavedObjectsService({
           id: 'TEST_ID',
-          version: 1,
+          version: 'foo',
           updated_at: '2000-01-01T00:00:00.000Z',
           attributes: {},
         }),
@@ -111,7 +111,7 @@ describe('the InfraSources lib', () => {
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
-        version: 1,
+        version: 'foo',
         updatedAt: 946684800000,
         configuration: {
           metricAlias: expect.any(String),

@@ -72,4 +72,17 @@ describe('kbnTopNav directive', function () {
     const { $scope } = build({ controller }, { config: 'controller' });
     expect($scope.kbnTopNav).to.be(controller);
   });
+
+  it('should allow setting CSS classes via className', () => {
+    const scope = {
+      config: [
+        { key: 'foo', testId: 'foo', className: 'fooClass' },
+        { key: 'test', testId: 'test', className: 'class1 class2' },
+      ],
+    };
+    const { $el } = build(scope, { config: 'config' });
+    expect($el.find('[data-test-subj="foo"]').hasClass('fooClass')).to.be(true);
+    expect($el.find('[data-test-subj="test"]').hasClass('class1')).to.be(true);
+    expect($el.find('[data-test-subj="test"]').hasClass('class2')).to.be(true);
+  });
 });

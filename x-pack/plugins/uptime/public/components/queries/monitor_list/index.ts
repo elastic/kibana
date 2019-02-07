@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorList } from './monitor_list';
+export { MonitorListQuery } from './monitor_list_query';

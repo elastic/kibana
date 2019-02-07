@@ -89,8 +89,7 @@ const createContainerProps = memoizeLast((sourceId: string, apolloClient: Apollo
       undefined,
     getDerivedIndexPattern: () => getDerivedIndexPattern,
     getVersion: () => state => (state && state.source && state.source.version) || undefined,
-    getExists: () => state =>
-      (state && state.source && typeof state.source.version === 'number') || false,
+    getExists: () => state => (state && state.source && !!state.source.version) || false,
   });
 
   const effects = inferEffectMap<State>()({
@@ -219,7 +218,7 @@ interface WithSourceProps {
     metricIndicesExist?: boolean;
     sourceId: string;
     update: (changes: UpdateSourceInput[]) => Promise<any>;
-    version?: number;
+    version?: string;
   }>;
 }
 

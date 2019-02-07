@@ -57,6 +57,18 @@ export interface VisSavedObject {
   destroy: () => void;
 }
 
+interface VisResponseValue {
+  visType: string;
+  visData: object;
+  visConfig: object;
+  params?: object;
+}
+
+export interface VisResponseData {
+  as: string;
+  value: VisResponseValue;
+}
+
 /**
  * The parameters accepted by the embedVisualize calls.
  */

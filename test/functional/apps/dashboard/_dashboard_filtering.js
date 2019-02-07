@@ -298,7 +298,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
-        await queryBar.setQuery('weightLbs:<40');
+        await queryBar.setQuery('weightLbs<40');
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
