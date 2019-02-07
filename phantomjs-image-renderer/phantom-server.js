@@ -1,23 +1,24 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+  Uses phantomjs for this PoC
+*/
 
 // uses https://www.npmjs.com/package/phantomjs-prebuilt
 // run: phantomjs phantom-server.js
 
-// https://gist.github.com/tompng/6433480
+// eslint-disable-next-line import/no-unresolved
 const server = require('webserver').create();
+// eslint-disable-next-line import/no-unresolved
 const webpage = require('webpage');
 const fs = require('fs');
 
 const port = 8080;
 
-const CSS = fs.read('../../node_modules/@elastic/eui/dist/eui_theme_k6_light.css', 'utf8');
+const CSS = fs.read('../node_modules/@elastic/eui/dist/eui_theme_k6_light.css', 'utf8');
+
+var queue = [];
 
 server.listen(port, function (request, response) {
-  const queryIndex = request.url.indexOf("?");
+  const queryIndex = request.url.indexOf('?');
   var params = {};
   if (queryIndex >= 0) {
     var queries = request.url.substr(queryIndex + 1).split('&');
@@ -25,7 +26,7 @@ server.listen(port, function (request, response) {
       try {
         var match = queries[i].match(/([^=]*)=(.*)/);
         params[match[1]] = decodeURIComponent(match[2]);
-      } catch (e) { }
+      } catch (e) { /* silent fail */ }
     }
   }
   if (true) {
@@ -40,7 +41,6 @@ server.listen(port, function (request, response) {
 
 console.log('running on port: ', port);
 
-var queue = [];
 var NUM_PAGES = 10;
 var pages = NUM_PAGES;
 
@@ -59,7 +59,10 @@ function capture(data) {
   var page = webpage.create();
 
   // https://stackoverflow.com/a/11771464/2266116
-  page.content = '<html><head><style>' + CSS + '</style></head><body style="width: 800px;"><div class="content" style="padding: 20px; display: inline-block">' + data.html + '</div></body></html>';
+  page.content = '<html>'
+    + '<head><style>' + CSS + '</style></head>'
+    + '<body style="width: 800px;"><div class="content" style="padding: 20px; display: inline-block">' + data.html + '</div></body>'
+    + '</html>';
 
   var originalRect = { left: 0, top: 0, width: 500, height: 500 };
 
