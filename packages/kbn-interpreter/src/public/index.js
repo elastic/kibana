@@ -23,6 +23,6 @@ export { registries } from './registries';
 import { registries } from './registries';
 import { registryFactory } from '../common';
 
-// Expose canvas.register(specs) and canvas.registries() globally so that plugins
+// Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
-global.canvas = Object.assign(global.canvas || {}, registryFactory(registries));
+global.kbnInterpreter = Object.assign(global.kbnInterpreter || {}, registryFactory(registries));
