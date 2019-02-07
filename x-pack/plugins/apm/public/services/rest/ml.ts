@@ -7,6 +7,7 @@
 import { ESFilter } from 'elasticsearch';
 import chrome from 'ui/chrome';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
@@ -40,15 +41,16 @@ export async function startMLJob({
   transactionType
 }: {
   serviceName: string;
-  transactionType?: string;
+  transactionType: string;
 }) {
   const indexPatternName = chrome.getInjected('apmIndexPatternTitle');
   const groups = ['apm', serviceName.toLowerCase()];
-  const filter: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
-  if (transactionType) {
-    groups.push(transactionType.toLowerCase());
-    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [TRANSACTION_TYPE]: transactionType } }
+  ];
+  groups.push(transactionType.toLowerCase());
   return callApi<StartedMLJobApiResponse>({
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
