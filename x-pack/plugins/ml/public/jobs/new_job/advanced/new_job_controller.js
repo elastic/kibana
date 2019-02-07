@@ -622,7 +622,7 @@ module.controller('MlNewJob',
                         // open job successful, create a new datafeed
                         mlJobService.saveNewDatafeed(datafeedConfig, jobId)
                           .then((resp) => {
-                            $scope.job.datafeed_config.datafeed_id = resp.datafeed_id;
+                            datafeedConfig.datafeed_id = resp.datafeed_id;
                             $scope.saveLock = false;
                           })
                           .catch((resp) => {
