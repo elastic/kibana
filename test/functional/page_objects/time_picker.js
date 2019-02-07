@@ -35,6 +35,14 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       return dateString.substring(0, 23);
     }
 
+    async getTimePickerPanel() {
+      return await find.byCssSelector('div.euiPopover__panel-isOpen');
+    }
+
+    async waitPanelIsGone(panelElement) {
+      await find.waitForElementStale(panelElement);
+    }
+
     /**
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
@@ -45,11 +53,14 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       // set to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
+      let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.setValue('superDatePickerAbsoluteDateInput', toTime);
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
+      panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
 
@@ -64,6 +75,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('querySubmitButton');
       }
 
+      await this.waitPanelIsGone(panel);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
@@ -141,11 +153,13 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       // get to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
+      const panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       const end = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
 
       // get from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
       await testSubjects.click('superDatePickerAbsoluteTab');
       const start = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
 
