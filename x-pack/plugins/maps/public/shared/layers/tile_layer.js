@@ -51,8 +51,8 @@ export class TileLayer extends AbstractLayer {
     const mbLayerId = this.getId() + '_raster';
 
     if (!source) {
-      const sourceDataRquest = this.getSourceDataRequest();
-      const url = sourceDataRquest.getData();
+      const sourceDataRequest = this.getSourceDataRequest();
+      const url = sourceDataRequest.getData();
       if (!url) {
         return;
       }
@@ -72,7 +72,6 @@ export class TileLayer extends AbstractLayer {
         minzoom: this._descriptor.minZoom,
         maxzoom: this._descriptor.maxZoom,
       });
-      return;
     }
 
     this._setTileLayerProperties(mbMap, mbLayerId);
