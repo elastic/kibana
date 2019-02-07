@@ -15,6 +15,7 @@ import {
   uniq,
   zipObject
 } from 'lodash';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
@@ -214,6 +215,9 @@ function getServiceColors(services: string[]) {
 }
 
 function getDuration(items: IWaterfallItem[]) {
+  if (items.length === 0) {
+    return 0;
+  }
   const timestampStart = items[0].timestamp;
   const timestampEnd = Math.max(
     ...items.map(item => item.timestamp + item.duration + item.skew)
@@ -228,8 +232,8 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
     }
 
     const item = itemsById[id];
-    if (item.docType === 'transaction') {
-      return item.transaction;
+    if (idx(item, _ => _.docType) === 'transaction') {
+      return (item as IWaterfallItemTransaction).transaction;
     }
   };
 }

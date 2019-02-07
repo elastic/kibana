@@ -40,6 +40,32 @@ export function StickyTransactionProperties({
     idx(transaction, _ => _.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
+
+  const errorsOverviewLink = (
+    <KibanaLink
+      pathname={'/app/apm'}
+      hash={`/${idx(transaction, _ => _.service.name)}/errors`}
+      query={{
+        kuery: legacyEncodeURIComponent(
+          `transaction.id : "${transaction.transaction.id}"`
+        )
+      }}
+    >
+      {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
+        values: { errorCount: errorCount || 0 },
+        defaultMessage:
+          '{errorCount, plural, one {View 1 error} other {View # errors}}'
+      })}
+    </KibanaLink>
+  );
+
+  const noErrorsText = i18n.translate(
+    'xpack.apm.transactionDetails.errorsNone',
+    {
+      defaultMessage: 'None'
+    }
+  );
+
   const stickyProperties: IStickyProperty[] = [
     {
       label: i18n.translate('xpack.apm.transactionDetails.timestampLabel', {
@@ -91,46 +117,18 @@ export function StickyTransactionProperties({
       val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '25%'
-    }
-  ];
-
-  if (errorCount !== undefined) {
-    const errorsOverviewLink = (
-      <KibanaLink
-        pathname={'/app/apm'}
-        hash={`/${idx(transaction, _ => _.service.name)}/errors`}
-        query={{
-          kuery: legacyEncodeURIComponent(
-            `transaction.id : "${transaction.transaction.id}"`
-          )
-        }}
-      >
-        {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
-          values: { errorCount },
-          defaultMessage:
-            '{errorCount, plural, one {View 1 error} other {View # errors}}'
-        })}
-      </KibanaLink>
-    );
-
-    const noErrorsText = i18n.translate(
-      'xpack.apm.transactionDetails.errorsNone',
-      {
-        defaultMessage: 'None'
-      }
-    );
-
-    stickyProperties.push({
+    },
+    {
       label: i18n.translate(
         'xpack.apm.transactionDetails.errorsOverviewLabel',
         {
           defaultMessage: 'Errors'
         }
       ),
-      val: errorCount === 0 ? noErrorsText : errorsOverviewLink,
+      val: errorCount ? errorsOverviewLink : noErrorsText,
       width: '25%'
-    });
-  }
+    }
+  ];
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }
