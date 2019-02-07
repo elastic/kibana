@@ -41,10 +41,6 @@ import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
   it('should render index patterns normally', async () => {
-    const oldConsoleError = console.error;
-    console.error = message => {
-      throw new Error(message);
-    };
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
         searches: [
@@ -82,7 +78,6 @@ describe('Relationships', () => {
 
     expect(props.getRelationships).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
-    console.error = oldConsoleError;
   });
 
   it('should render searches normally', async () => {

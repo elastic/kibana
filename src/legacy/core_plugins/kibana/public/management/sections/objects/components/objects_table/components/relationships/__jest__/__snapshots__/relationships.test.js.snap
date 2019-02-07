@@ -72,7 +72,7 @@ exports[`Relationships should render dashboards normally 1`] = `
           Array [
             Object {
               "render": [Function],
-              "width": 24,
+              "width": "24px",
             },
             Object {
               "field": "title",
@@ -197,9 +197,129 @@ exports[`Relationships should render index patterns normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiLoadingKibana
-      size="xl"
-    />
+    <EuiDescriptionList
+      align="left"
+      compressed={false}
+      textStyle="normal"
+      type="row"
+    >
+      <EuiDescriptionListTitle
+        style={
+          Object {
+            "marginBottom": "1rem",
+          }
+        }
+      >
+        <EuiCallOut
+          color="warning"
+          size="m"
+          title={
+            <FormattedMessage
+              defaultMessage="Warning"
+              id="kbn.management.objects.objectsTable.relationships.warningTitle"
+              values={Object {}}
+            />
+          }
+        >
+          <p />
+        </EuiCallOut>
+      </EuiDescriptionListTitle>
+      <EuiInMemoryTable
+        columns={
+          Array [
+            Object {
+              "render": [Function],
+              "width": "24px",
+            },
+            Object {
+              "field": "title",
+              "name": "Title",
+              "render": [Function],
+            },
+            Object {
+              "actions": Array [
+                Object {
+                  "description": "View this saved object within Kibana",
+                  "icon": "eye",
+                  "name": "In app",
+                  "onClick": [Function],
+                },
+              ],
+              "name": "Actions",
+            },
+          ]
+        }
+        executeQueryOptions={Object {}}
+        items={
+          Array [
+            Object {
+              "id": "1",
+            },
+          ]
+        }
+        pagination={true}
+        responsive={true}
+        sorting={false}
+      />
+      <EuiDescriptionListTitle
+        style={
+          Object {
+            "marginBottom": "1rem",
+          }
+        }
+      >
+        <EuiCallOut
+          color="warning"
+          size="m"
+          title={
+            <FormattedMessage
+              defaultMessage="Warning"
+              id="kbn.management.objects.objectsTable.relationships.warningTitle"
+              values={Object {}}
+            />
+          }
+        >
+          <p />
+        </EuiCallOut>
+      </EuiDescriptionListTitle>
+      <EuiInMemoryTable
+        columns={
+          Array [
+            Object {
+              "render": [Function],
+              "width": "24px",
+            },
+            Object {
+              "field": "title",
+              "name": "Title",
+              "render": [Function],
+            },
+            Object {
+              "actions": Array [
+                Object {
+                  "description": "View this saved object within Kibana",
+                  "icon": "eye",
+                  "name": "In app",
+                  "onClick": [Function],
+                },
+              ],
+              "name": "Actions",
+            },
+          ]
+        }
+        executeQueryOptions={Object {}}
+        items={
+          Array [
+            Object {
+              "id": "2",
+            },
+          ]
+        }
+        pagination={true}
+        responsive={true}
+        sorting={false}
+      />
+    </EuiDescriptionList>
   </EuiFlyoutBody>
 </EuiFlyout>
 `;
@@ -276,7 +396,7 @@ exports[`Relationships should render searches normally 1`] = `
           Array [
             Object {
               "render": [Function],
-              "width": 24,
+              "width": "24px",
             },
             Object {
               "field": "title",
@@ -340,7 +460,7 @@ exports[`Relationships should render searches normally 1`] = `
           Array [
             Object {
               "render": [Function],
-              "width": 24,
+              "width": "24px",
             },
             Object {
               "field": "title",
@@ -449,7 +569,7 @@ exports[`Relationships should render visualizations normally 1`] = `
           Array [
             Object {
               "render": [Function],
-              "width": 24,
+              "width": "24px",
             },
             Object {
               "field": "title",
