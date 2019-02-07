@@ -39,11 +39,12 @@ export const tilemap = () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
+    const { geohash, metric, geocentroid } = visConfigParams.dimensions;
 
     const convertedData = convertToGeoJson(context, {
-      geohash: visConfigParams.geohash,
-      metric: visConfigParams.metric,
-      geocentroid: visConfigParams.geocentroid,
+      geohash,
+      metric,
+      geocentroid,
     });
 
     return {

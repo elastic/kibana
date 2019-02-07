@@ -75,6 +75,34 @@ describe('build query', function () {
       expect(result).to.eql(expectedResult);
     });
 
+    it('should accept queries and filters as either single objects or arrays', function () {
+      const queries = { query: 'extension:jpg', language: 'lucene' };
+      const filters = {
+        match_all: {},
+        meta: { type: 'match_all' },
+      };
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+      };
+
+      const expectedResult = {
+        bool: {
+          must: [
+            decorateQuery(luceneStringToDsl('extension:jpg'), config.queryStringOptions),
+            { match_all: {} },
+          ],
+          filter: [],
+          should: [],
+          must_not: [],
+        }
+      };
+
+      const result = buildEsQuery(indexPattern, queries, filters, config);
+
+      expect(result).to.eql(expectedResult);
+    });
+
   });
 
 });

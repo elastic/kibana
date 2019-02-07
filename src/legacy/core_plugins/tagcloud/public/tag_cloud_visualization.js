@@ -35,10 +35,15 @@ export class TagCloudVisualization {
   constructor(node, vis) {
     this._containerNode = node;
 
+    const cloudRelativeContainer = document.createElement('div');
+    cloudRelativeContainer.classList.add('tgcVis');
+    cloudRelativeContainer.setAttribute('style', 'position: relative');
     const cloudContainer = document.createElement('div');
     cloudContainer.classList.add('tgcVis');
     cloudContainer.setAttribute('data-test-subj', 'tagCloudVisualization');
-    this._containerNode.appendChild(cloudContainer);
+    this._containerNode.classList.add('visChart--vertical');
+    cloudRelativeContainer.appendChild(cloudContainer);
+    this._containerNode.appendChild(cloudRelativeContainer);
 
     this._vis = vis;
     this._truncated = false;

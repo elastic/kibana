@@ -131,6 +131,7 @@
 }
 
 .visEditorSidebar__collapsibleTitle {
+  @include euiFontSizeS;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -153,7 +154,6 @@
 }
 
 .visEditorSidebar__collapsibleTitleLabel {
-  @include euiFontSizeS;
   color: $euiColorPrimary;
   display: flex;
   align-items: center;

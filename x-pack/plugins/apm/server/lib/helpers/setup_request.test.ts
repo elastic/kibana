@@ -19,28 +19,36 @@ describe('setupRequest', () => {
         config: () => 'myConfig',
         plugins: {
           elasticsearch: {
-            getCluster: () => ({
-              callWithRequest: callWithRequestSpy
-            })
+            getCluster: () => ({ callWithRequest: callWithRequestSpy })
           }
         }
-      }
+      },
+      getUiSettingsService: jest.fn(() => ({
+        get: jest.fn(() => Promise.resolve(false))
+      }))
     };
-
-    const setup = setupRequest(mockReq);
-    setup.client('myType', { body: 'foo' });
   });
 
-  it('should call callWithRequest with correct args', () => {
+  it('should call callWithRequest with correct args', async () => {
+    const setup = setupRequest(mockReq);
+    await setup.client('myType', { body: 'foo' });
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
       body: 'foo',
+      ignore_throttled: true,
       rest_total_hits_as_int: true
     });
   });
 
-  it('should update params with rest_total_hits_as_int', () => {
-    expect(callWithRequestSpy.mock.calls[0][2]).toEqual({
+  it('should set ignore_throttled to false if includeFrozen is true', async () => {
+    // mock includeFrozen to return true
+    mockReq.getUiSettingsService.mockImplementation(() => ({
+      get: jest.fn(() => Promise.resolve(true))
+    }));
+    const setup = setupRequest(mockReq);
+    await setup.client('myType', { body: 'foo' });
+    expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
       body: 'foo',
+      ignore_throttled: false,
       rest_total_hits_as_int: true
     });
   });
