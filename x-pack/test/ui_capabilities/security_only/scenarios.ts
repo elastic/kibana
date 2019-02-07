@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { User } from '../common/types';
+import { CustomRoleSpecification, User } from '../common/types';
 
 // For all scenarios, we define both an instance in addition
 // to a "type" definition so that we can use the exhaustive switch in
 // typescript to ensure all scenarios are handled.
+
+const allRole: CustomRoleSpecification = {
+  name: 'all_role',
+  kibana: [
+    {
+      base: ['all'],
+      spaces: ['*'],
+    },
+  ],
+};
 
 interface NoKibanaPrivileges extends User {
   username: 'no_kibana_privileges';
@@ -121,15 +131,7 @@ const All: All = {
   username: 'all',
   fullName: 'all',
   password: 'all-password',
-  role: {
-    name: 'all_role',
-    kibana: [
-      {
-        base: ['all'],
-        spaces: ['*'],
-      },
-    ],
-  },
+  role: allRole,
 };
 
 interface ApmUser extends User {
@@ -142,6 +144,21 @@ const ApmUser: ApmUser = {
   role: {
     name: 'apm_user',
   },
+};
+
+interface ApmUserAndAll extends User {
+  username: 'apm_user_and_all';
+}
+const ApmUserAndAll: ApmUserAndAll = {
+  username: 'apm_user_and_all',
+  fullName: 'apm_user_and_all',
+  password: 'apm_user_and_all-password',
+  roles: [
+    {
+      name: 'apm_user',
+    },
+    allRole,
+  ],
 };
 
 interface CanvasAll extends User {
@@ -416,6 +433,21 @@ const MachineLearningAdmin: MachineLearningAdmin = {
   },
 };
 
+interface MachineLearningAdminAndAll extends User {
+  username: 'machine_learning_admin_and_all';
+}
+const MachineLearningAdminAndAll: MachineLearningAdminAndAll = {
+  username: 'machine_learning_admin_and_all',
+  fullName: 'machine_learning_admin_and_all',
+  password: 'machine_learning_admin_and_all-password',
+  roles: [
+    {
+      name: 'machine_learning_admin',
+    },
+    allRole,
+  ],
+};
+
 interface MachineLearningUser extends User {
   username: 'machine_learning_user';
 }
@@ -428,16 +460,46 @@ const MachineLearningUser: MachineLearningUser = {
   },
 };
 
+interface MachineLearningUserAndAll extends User {
+  username: 'machine_learning_user_and_all';
+}
+const MachineLearningUserAndAll: MachineLearningUserAndAll = {
+  username: 'machine_learning_user_and_all',
+  fullName: 'machine_learning_user_and_all',
+  password: 'machine_learning_user_and_all-password',
+  roles: [
+    {
+      name: 'machine_learning_user',
+    },
+    allRole,
+  ],
+};
+
 interface MonitoringUser extends User {
   username: 'monitoring_user';
 }
-const MonitoringAll: MonitoringUser = {
+const MonitoringUser: MonitoringUser = {
   username: 'monitoring_user',
   fullName: 'monitoring_user',
   password: 'monitoring_user-password',
   role: {
     name: 'monitoring_user_role',
   },
+};
+
+interface MonitoringUserAndAll extends User {
+  username: 'monitoring_user_and_all';
+}
+const MonitoringUserAndAll: MonitoringUserAndAll = {
+  username: 'monitoring_user_and_all',
+  fullName: 'monitoring_user_and_all',
+  password: 'monitoring_user_and_all-password',
+  roles: [
+    {
+      name: 'monitoring_user',
+    },
+    allRole,
+  ],
 };
 
 interface TimelionAll extends User {
@@ -548,6 +610,7 @@ export type UserScenarios =
   | DualPrivilegesRead
   | All
   | ApmUser
+  | ApmUserAndAll
   | CanvasAll
   | CanvasRead
   | DashboardAll
@@ -561,9 +624,12 @@ export type UserScenarios =
   | MapsRead
   | InfrastructureRead
   | LogsRead
-  | MonitoringUser
   | MachineLearningAdmin
+  | MachineLearningAdminAndAll
   | MachineLearningUser
+  | MachineLearningUserAndAll
+  | MonitoringUser
+  | MonitoringUserAndAll
   | TimelionAll
   | TimelionRead
   | UptimeRead
@@ -577,6 +643,7 @@ export const UserScenarios: UserScenarios[] = [
   DualPrivilegesRead,
   All,
   ApmUser,
+  ApmUserAndAll,
   CanvasAll,
   CanvasRead,
   DashboardAll,
@@ -590,9 +657,12 @@ export const UserScenarios: UserScenarios[] = [
   MapsRead,
   InfrastructureRead,
   LogsRead,
-  MonitoringAll,
   MachineLearningAdmin,
+  MachineLearningAdminAndAll,
   MachineLearningUser,
+  MachineLearningUserAndAll,
+  MonitoringUser,
+  MonitoringUserAndAll,
   TimelionAll,
   TimelionRead,
   UptimeRead,

@@ -51,7 +51,8 @@ export interface User {
   username: string;
   fullName: string;
   password: string;
-  role: ReservedRoleSpecification | CustomRoleSpecification;
+  role?: ReservedRoleSpecification | CustomRoleSpecification;
+  roles?: Array<ReservedRoleSpecification | CustomRoleSpecification>;
 }
 
 export interface Space {

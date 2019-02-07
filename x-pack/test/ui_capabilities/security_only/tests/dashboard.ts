@@ -27,8 +27,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           // these users have a read/write view of Dashboard
           case 'superuser':
           case 'all':
+          case 'apm_user_and_all':
           case 'dual_privileges_all':
           case 'dashboard_all':
+          case 'machine_learning_admin_and_all':
+          case 'machine_learning_user_and_all':
+          case 'monitoring_user_and_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dashboard');
             expect(uiCapabilities.value!.dashboard).to.eql({
@@ -49,7 +53,6 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             });
             break;
           // these users can't do anything with Dashboard
-          case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':
           case 'dev_tools_read':
@@ -61,8 +64,6 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'maps_read':
           case 'infrastructure_read':
           case 'logs_read':
-          case 'ml_all':
-          case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
           case 'uptime_read':
@@ -76,7 +77,11 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               showWriteControls: false,
             });
             break;
+          case 'apm_user':
           case 'legacy_all':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
           case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);

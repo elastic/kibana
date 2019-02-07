@@ -17,7 +17,7 @@ import { UserScenarios } from '../scenarios';
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe.only('navLinks', () => {
+  describe('navLinks', () => {
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
@@ -39,9 +39,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.except('apm', 'ml', 'monitoring')
             );
             break;
-          case 'apm_user':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+          case 'apm_user_and_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('ml', 'monitoring')
+            );
             break;
           case 'canvas_all':
           case 'canvas_read':
@@ -83,6 +86,14 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('graph', 'management')
             );
             break;
+          case 'machine_learning_admin_and_all':
+          case 'machine_learning_user_and_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('apm', 'monitoring')
+            );
+            break;
           case 'maps_all':
           case 'maps_read':
             expect(uiCapabilities.success).to.be(true);
@@ -90,6 +101,11 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.only('maps', 'management')
             );
+            break;
+          case 'monitoring_user_and_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('apm', 'ml'));
             break;
           case 'infrastructure_read':
             expect(uiCapabilities.success).to.be(true);
@@ -104,18 +120,6 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.only('logs', 'management')
             );
-            break;
-          case 'machine_learning_admin':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
-            break;
-          case 'machine_learning_user':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
-            break;
-          case 'monitoring_user':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           case 'timelion_all':
           case 'timelion_read':
@@ -140,8 +144,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('visualize', 'management')
             );
             break;
-          case 'no_kibana_privileges':
+          case 'apm_user':
           case 'legacy_all':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
+          case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
