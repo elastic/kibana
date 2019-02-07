@@ -167,6 +167,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         const messageText = await getMessageText();
         expect(messageText).to.eql(
