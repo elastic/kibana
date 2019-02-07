@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.1.0",
+  "version": "7.0.0",
   "branch": "master",
   "types": "./kibana.d.ts",
   "build": {
@@ -137,8 +137,8 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^15.2.0",
-    "elasticsearch-browser": "^15.2.0",
+    "elasticsearch": "^15.4.1",
+    "elasticsearch-browser": "^15.4.1",
     "encode-uri-query": "1.0.0",
     "execa": "^1.0.0",
     "expiry-js": "0.1.7",
@@ -241,7 +241,7 @@
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
     "wreck": "^14.0.2",
-    "x-pack": "7.1.0",
+    "x-pack": "7.0.0",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
