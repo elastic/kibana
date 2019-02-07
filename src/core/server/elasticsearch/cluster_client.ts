@@ -72,6 +72,7 @@ async function callAPI(
 
     const boomError = Boom.boomify(err, { statusCode: err.statusCode });
     const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
+
     boomError.output.headers['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';
 
@@ -127,13 +128,16 @@ export class ClusterClient {
    * create a new client instance to be able to interact with Elasticsearch API.
    */
   public close() {
+    if (this.isClosed) {
+      return;
+    }
+
+    this.isClosed = true;
     this.client.close();
 
     if (this.scopedClient !== undefined) {
       this.scopedClient.close();
     }
-
-    this.isClosed = true;
   }
 
   /**
