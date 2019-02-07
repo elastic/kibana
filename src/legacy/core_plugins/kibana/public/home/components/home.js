@@ -155,7 +155,7 @@ export class Home extends Component {
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
+                <EuiFlexGrid columns={2} gutterSize="s">
                   {this.renderDirectories(FeatureCatalogueCategory.DATA)}
                 </EuiFlexGrid>
               </EuiPanel>
