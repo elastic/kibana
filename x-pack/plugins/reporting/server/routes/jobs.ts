@@ -5,17 +5,31 @@
  */
 
 import boom from 'boom';
+import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
+import { KbnServer } from '../../types';
+// @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
+// @ts-ignore
 import { jobResponseHandlerFactory } from './lib/job_response_handler';
 import {
-  getRouteConfigFactoryManagementPre,
   getRouteConfigFactoryDownloadPre,
+  getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server) {
+interface JobDoc {
+  _source: {
+    output: any;
+    jobtype: any;
+    payload: {
+      headers: string;
+    };
+  };
+}
+
+export function registerJobs(server: KbnServer) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -25,9 +39,12 @@ export function registerJobs(server) {
     path: `${MAIN_ENTRY}/list`,
     method: 'GET',
     config: getRouteConfig(),
-    handler: request => {
-      const page = parseInt(request.query.page) || 0;
-      const size = Math.min(100, parseInt(request.query.size) || 10);
+    handler: (request: Request) => {
+      // @ts-ignore
+      const page = parseInt(request.query.page, 10) || 0;
+      // @ts-ignore
+      const size = Math.min(100, parseInt(request.query.size, 10) || 10);
+      // @ts-ignore
       const jobIds = request.query.ids ? request.query.ids.split(',') : null;
 
       const results = jobsQuery.list(
@@ -46,7 +63,7 @@ export function registerJobs(server) {
     path: `${MAIN_ENTRY}/count`,
     method: 'GET',
     config: getRouteConfig(),
-    handler: request => {
+    handler: (request: Request) => {
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
     },
@@ -57,21 +74,25 @@ export function registerJobs(server) {
     path: `${MAIN_ENTRY}/output/{docId}`,
     method: 'GET',
     config: getRouteConfig(),
-    handler: request => {
+    handler: (request: Request) => {
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(doc => {
-        if (!doc) {
-          return boom.notFound();
-        }
+      return jobsQuery
+        .get(request.pre.user, docId, { includeContent: true })
+        .then((doc: JobDoc) => {
+          if (!doc) {
+            return boom.notFound();
+          }
 
-        const { jobtype: jobType } = doc._source;
-        if (!request.pre.management.jobTypes.includes(jobType)) {
-          return boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
-        }
+          const { jobtype: jobType } = doc._source;
+          if (!request.pre.management.jobTypes.includes(jobType)) {
+            return boom.unauthorized(
+              `Sorry, you are not authorized to download ${jobType} reports`
+            );
+          }
 
-        return doc._source.output;
-      });
+          return doc._source.output;
+        });
     },
   });
 
@@ -80,10 +101,10 @@ export function registerJobs(server) {
     path: `${MAIN_ENTRY}/info/{docId}`,
     method: 'GET',
     config: getRouteConfig(),
-    handler: request => {
+    handler: (request: Request) => {
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId).then(doc => {
+      return jobsQuery.get(request.pre.user, docId).then((doc: JobDoc) => {
         if (!doc) {
           return boom.notFound();
         }
@@ -110,7 +131,7 @@ export function registerJobs(server) {
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
     config: getRouteConfigDownload(),
-    handler: async (request, h) => {
+    handler: async (request: Request, h: ResponseToolkit) => {
       const { docId } = request.params;
 
       let response = await jobResponseHandler(

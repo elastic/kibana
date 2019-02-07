@@ -15,6 +15,8 @@ export interface KbnServer {
   info: { protocol: string };
   config: () => ConfigObject;
   plugins: Record<string, any>;
+  route: any;
+  log: any;
   savedObjects: {
     getScopedSavedObjectsClient: (
       fakeRequest: { headers: object; getBasePath: () => string }

@@ -5,19 +5,23 @@
  */
 
 import boom from 'boom';
+import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
+import { KbnServer } from '../../types';
+// @ts-ignore
 import { enqueueJobFactory } from '../lib/enqueue_job';
-import { registerLegacy } from './legacy';
 import { registerGenerate } from './generate';
 import { registerJobs } from './jobs';
+import { registerLegacy } from './legacy';
 
-export function registerRoutes(server) {
+export function registerRoutes(server: KbnServer) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
-  async function handler(exportTypeId, jobParams, request, h) {
+  async function handler(exportTypeId: any, jobParams: any, request: Request, h: ResponseToolkit) {
+    // @ts-ignore
     const user = request.pre.user;
     const headers = request.headers;
 
@@ -34,7 +38,7 @@ export function registerRoutes(server) {
       .type('application/json');
   }
 
-  function handleError(exportType, err) {
+  function handleError(exportType: any, err: Error) {
     if (err instanceof esErrors['401']) {
       return boom.unauthorized(`Sorry, you aren't authenticated`);
     }
@@ -48,6 +52,6 @@ export function registerRoutes(server) {
   }
 
   registerGenerate(server, handler, handleError);
-  registerJobs(server, handler, handleError);
   registerLegacy(server, handler, handleError);
+  registerJobs(server);
 }

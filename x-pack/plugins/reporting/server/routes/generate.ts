@@ -5,18 +5,17 @@
  */
 
 import boom from 'boom';
-import { Request } from 'hapi';
+import { Request, ResponseToolkit } from 'hapi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
+import { KbnServer } from '../../types';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
+import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-type HandlerFunction = (exportType: any, jobParams: any, request: Request, h: any) => any;
-type HandlerErrorFunction = (exportType: any, err: Error) => any;
-
 export function registerGenerate(
-  server: any,
+  server: KbnServer,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
@@ -27,10 +26,11 @@ export function registerGenerate(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     config: getRouteConfig(request => request.params.exportType),
-    handler: async (request: any, h: HandlerFunction) => {
+    handler: async (request: Request, h: ResponseToolkit) => {
       const { exportType } = request.params;
       let response;
       try {
+        // @ts-ignore
         const jobParams = rison.decode(request.query.jobParams);
         response = await handler(exportType, jobParams, request, h);
       } catch (err) {
