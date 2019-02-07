@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     });
 
     // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
-    it.skip('compare TSVB snapshot', async () => {
+    it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
