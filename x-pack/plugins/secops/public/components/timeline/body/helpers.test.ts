@@ -188,7 +188,7 @@ describe('helpers', () => {
       expect(eventHasNotes([])).toEqual(false);
     });
 
-    test('it returns true for when notes is non-empty', () => {
+    test('it returns true when notes is non-empty', () => {
       expect(eventHasNotes(['8af859e2-e4f8-4754-b702-4f227f15aae5'])).toEqual(true);
     });
   });

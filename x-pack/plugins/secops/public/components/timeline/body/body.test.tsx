@@ -15,7 +15,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { Body } from '.';
 import { Direction } from '../../../graphql/types';
-import { mockEcsData, mockEcsEdgeData } from '../../../mock';
+import { mockEcsData } from '../../../mock';
 import { createStore } from '../../../store';
 import { defaultHeaders } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
@@ -38,7 +38,7 @@ describe('ColumnHeaders', () => {
                 id={'timeline-test'}
                 columnHeaders={headersSansTimestamp}
                 columnRenderers={columnRenderers}
-                data={mockEcsEdgeData}
+                data={mockEcsData}
                 eventIdToNoteIds={{}}
                 height={testBodyHeight}
                 getNotesByIds={mockGetNotesByIds}
@@ -84,7 +84,7 @@ describe('ColumnHeaders', () => {
                 id={'timeline-test'}
                 columnHeaders={headersJustTimestamp}
                 columnRenderers={columnRenderers}
-                data={mockEcsEdgeData}
+                data={mockEcsData}
                 eventIdToNoteIds={{}}
                 height={testBodyHeight}
                 getNotesByIds={mockGetNotesByIds}
@@ -130,7 +130,7 @@ describe('ColumnHeaders', () => {
                 id={'timeline-test'}
                 columnHeaders={headersJustTimestamp}
                 columnRenderers={columnRenderers}
-                data={mockEcsEdgeData}
+                data={mockEcsData}
                 eventIdToNoteIds={{}}
                 height={testBodyHeight}
                 getNotesByIds={mockGetNotesByIds}

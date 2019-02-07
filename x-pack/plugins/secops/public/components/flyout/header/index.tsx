@@ -121,7 +121,7 @@ const makeMapStateToProps = () => {
       width = defaultWidth,
     } = timeline;
 
-    const history = emptyHistory; // TODO: get notes from store via selector
+    const history = emptyHistory; // TODO: get history from store via selector
 
     return {
       description,

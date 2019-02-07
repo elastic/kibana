@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import memoizeOne, { EqualityFn } from 'memoize-one';
+import memoizeOne from 'memoize-one';
 import { Ecs, EcsEdges, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
