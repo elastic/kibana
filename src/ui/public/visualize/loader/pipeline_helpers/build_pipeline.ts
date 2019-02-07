@@ -49,8 +49,8 @@ interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
-type buildVisConfigFunction = (visState: Vis, schemas: Schemas, uiState: any) => VisState;
+type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
+type buildVisConfigFunction = (visState: Vis, schemas: Schemas) => VisState;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
