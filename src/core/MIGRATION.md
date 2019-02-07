@@ -119,3 +119,92 @@ The platform does not impose any technical restrictions on how the internals of 
 
 ### Services
 
+The various independent domains that make up `core` are represented by a series of services, and many of those services expose public interfaces that are provided to _all_ plugins via the first argument of their `start` and `stop` functions. The interface varies from service to service, but it is always accessed through this argument.
+
+For example, the core `UiSettings` service exposes a function `get` to all plugin `start` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
+
+```ts
+import { PluginName, PluginStart } from '../../../core/public';
+
+export class Plugin {
+  public start(core: PluginStart, dependencies: Record<PluginName, unknown>) {
+    core.uiSettings.get('courier:maxShardsBeforeCryTime');
+  }
+}
+```
+
+Different service interfaces can and will be passed to `start` and `stop` because certain functionality makes sense in the context of a running plugin while other types of functionality may have restrictions or may only make sense in the context of a plugin that is stopping.
+
+For example, the `stop` function in the browser gets invoked as part of the `window.onbeforeunload` event, which means you can't necessarily execute asynchronous code here in a reliable way. For that reason, `core` likely wouldn't provide any asynchronous functions to plugin `stop` functions in the browser.
+
+### Integrating with other plugins
+
+Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to `start` and/or `stop`.
+
+Anything returned from `start` or `stop` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
+
+**foobar plugin.ts:**
+
+```ts
+export interface FoobarPluginStart {
+  getFoo(): string
+}
+
+export interface FoobarPluginStop {
+  getBar(): string
+}
+
+export class Plugin {
+  public start(): FoobarPluginStart {
+    return {
+      getFoo() {
+        return 'foo';
+      }
+    };
+  }
+
+  public stop(): FoobarPluginStop {
+    getBar() {
+      return 'bar';
+    }
+  }
+}
+```
+
+Unlike core, capabilities exposed by plugins are _not_ automatically injected into all plugins. Instead, if a plugin wishes to use the public interface provided by another plugin, they must first declare that plugin as a dependency in their `kibana.json`.
+
+**demo kibana.json:**
+
+```json
+{
+  "id": "demo",
+  "requiredPlugins": [
+    "foobar"
+  ],
+  "server": true,
+  "ui": true
+}
+```
+
+With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of `start` and/or `stop`:
+
+**demo plugin.ts:**
+
+```ts
+import { PluginName, PluginStart, PluginStop } from '../../../core/server';
+import { FoobarPluginStart, FoobarPluginStop } from '../../foobar/server';
+
+export class Plugin {
+  public start(core: PluginStart, dependencies: Record<PluginName, unknown>) {
+    const { foobar } = dependencies;
+    foobar.getFoo(); // 'foo'
+    foobar.getBar(); // throws because getBar does not exist
+  }
+
+  public stop(core: PluginStop, dependencies: Record<PluginName, unknown>) {
+    const { foobar } = dependencies;
+    foobar.getFoo(); // throws because getFoo does not exist
+    foobar.getBar(); // 'bar'
+  }
+}
+```
