@@ -47,6 +47,8 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             });
             break;
           // these users can't do anything with Visualize
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
           case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':
