@@ -50,7 +50,7 @@ async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
   const allTypes = Object.keys(getRootPropertiesObjects(savedObjectsRepository._mappings));
   const { saved_objects: allObjects } = await savedObjectsRepository.find({ type: allTypes, perPage: 10000 });
   const objectIds = allObjects.map((obj) => {
-    if (obj.id.indexOf(':')) {
+    if (obj.id.indexOf(':') !== -1) {
       return obj.id.substring(obj.id.lastIndexOf(':') + 1);
     }
     return obj.id;
@@ -62,8 +62,8 @@ async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
     searchStr = removeFromStr(searchStr, 'version', id);
     if (searchStr.indexOf(id) !== -1) {
       // throw new Error(`Id ${id} found in type "${type}" for ${searchStr}`);
-      console.log(`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\` +
-        n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nId "${id}" found in type "${type}" for ${searchStr}` +
+      console.log(`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n` +
+        `\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nId "${id}" found in type "${type}" for ${searchStr}` +
         `\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`);
     }
   });
