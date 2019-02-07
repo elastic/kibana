@@ -168,13 +168,13 @@ export class FilterBar extends Component {
               backgroundImage: 'none'
             }}
             placeholder={i18n.translate(
-              'xpack.apm.kueryBar.searchPlaceholder',
+              'xpack.ml.explorer.kueryBar.filterPlaceholder',
               {
                 defaultMessage:
                   'Filter by influencer fields… (E.g. {queryExample})',
                 values: {
                   queryExample:
-                    'tag : engineering OR tag : marketing'
+                    `${this.props.placeholder}`
                 }
               }
             )}
@@ -223,6 +223,7 @@ FilterBar.propTypes = {
   isLoading: PropTypes.bool,
   disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   suggestions: PropTypes.array.isRequired
 };
@@ -230,5 +231,6 @@ FilterBar.propTypes = {
 FilterBar.defaultProps = {
   isLoading: false,
   disabled: false,
+  placeholder: 'tag : engineering OR tag : marketing',
   suggestions: []
 };

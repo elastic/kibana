@@ -8,12 +8,40 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
-import {
-  convertKueryToEsQuery,
-  getSuggestions,
-} from '../../../../apm/public/services/kuery';
-import { fromKueryExpression } from '@kbn/es-query'; // toElasticsearchQuery
 import { EuiCallOut } from '@elastic/eui';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query'; // luceneStringToDsl
+import { getAutocompleteProvider } from 'ui/autocomplete_providers';
+
+function convertKueryToEsQuery(kuery, indexPattern) {
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, indexPattern);
+}
+
+async function getSuggestions(
+  query,
+  selectionStart,
+  apmIndexPattern,
+  boolFilter
+) {
+  const autocompleteProvider = getAutocompleteProvider('kuery');
+  if (!autocompleteProvider) {
+    return [];
+  }
+  const config = {
+    get: () => true
+  };
+
+  const getAutocompleteSuggestions = autocompleteProvider({
+    config,
+    indexPatterns: [apmIndexPattern],
+    boolFilter
+  });
+  return getAutocompleteSuggestions({
+    query,
+    selectionStart,
+    selectionEnd: selectionStart
+  });
+}
 
 export class KueryFilterBar extends Component {
   state = {
@@ -66,10 +94,9 @@ export class KueryFilterBar extends Component {
         return;
       }
       // TODO: do some cleanup on what gets returned in this array (Remove bools, etc) - is there a better way to determine maskAll?
-      // Test that all relevant values get returned
-      // maybe only if arg.type is literal? Need to dig in more
-      // if ast.type == 'function' then
-      // the layout is: ast.arguments = [ { arguments: [ { type: 'literal', value: 'AAL' } ] }, { arguments: [ { type: 'literal', value: 'AAL' } ] } ]
+      // Test that all relevant values get returned ( only if arg.type is literal? dig in more*)
+      // if ast.type == 'function' then layout is:
+      // ast.arguments = [ { arguments: [ { type: 'literal', value: 'AAL' } ] }, { arguments: [ { type: 'literal', value: 'AAL' } ] } ]
       if (ast && Array.isArray(ast.arguments)) {
 
         ast.arguments.forEach((arg) => {
@@ -86,7 +113,7 @@ export class KueryFilterBar extends Component {
 
       }
 
-      onSubmit(query, filteredFields);
+      onSubmit(query, filteredFields, inputValue);
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
       this.setState({ error: (e.message ? e.message : 'Invalid query syntax') });
@@ -96,14 +123,16 @@ export class KueryFilterBar extends Component {
   render() {
     // TODO: localization for error
     const { error } = this.state;
+    const { initialValue, placeholder } = this.props;
 
     return (
       <Fragment>
         <FilterBar
           disabled={false}
           isLoading={this.state.isLoadingSuggestions}
-          initialValue={''}
+          initialValue={initialValue || ''}
           onChange={this.onChange}
+          placeholder={placeholder}
           onSubmit={this.onSubmit}
           suggestions={this.state.suggestions}
         />
@@ -118,6 +147,8 @@ export class KueryFilterBar extends Component {
 
 KueryFilterBar.propTypes = {
   indexPattern: PropTypes.object.isRequired,
-  onSubmit: PropTypes.func.isRequired
+  initialValue: PropTypes.string,
+  onSubmit: PropTypes.func.isRequired,
+  placeholder: PropTypes.string
 };
 

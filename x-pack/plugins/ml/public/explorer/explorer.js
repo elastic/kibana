@@ -93,6 +93,7 @@ function getExplorerDefaultState() {
     chartsData: getDefaultChartsData(),
     filterActive: false,
     filteredFields: [],
+    filterPlaceHolder: undefined,
     influencersFilterQuery: undefined,
     hasResults: false,
     influencers: {},
@@ -100,6 +101,7 @@ function getExplorerDefaultState() {
     noInfluencersConfigured: true,
     noJobsFound: true,
     overallSwimlaneData: [],
+    queryString: undefined,
     selectedCells: null,
     selectedJobs: null,
     swimlaneViewByFieldName: undefined,
@@ -882,26 +884,32 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    applyInfluencersFilterQuery = (influencersFilterQuery, filteredFields) => {
+    applyInfluencersFilterQuery = (influencersFilterQuery, filteredFields, queryString) => {
       const { swimlaneViewByFieldName } = this.state;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
         const stateUpdate = {
           ...{
             filterActive: false,
             filteredFields: [],
             influencersFilterQuery: undefined,
-            maskAll: false
+            maskAll: false,
+            queryString: undefined,
           },
           ...getClearedSelectedAnomaliesState()
         };
 
         this.updateExplorer(stateUpdate, false);
       } else {
+        this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
+          { influencersFilterQuery, filterActive: true, filteredFields, queryString });
+
         this.updateExplorer({
           filterActive: true,
           filteredFields,
           influencersFilterQuery,
+          queryString,
           maskAll: (swimlaneViewByFieldName === VIEW_BY_JOB_LABEL ||
             filteredFields.includes(swimlaneViewByFieldName) === false)
         }, false);
@@ -919,12 +927,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         anomalyChartRecords,
         chartsData,
         filterActive,
+        filterPlaceHolder,
         maskAll,
         influencers,
         hasResults,
         noInfluencersConfigured,
         noJobsFound,
         overallSwimlaneData,
+        queryString,
         selectedCells,
         swimlaneViewByFieldName,
         tableData,
@@ -937,6 +947,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const loading = this.props.loading || this.state.loading;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
+
+      const filterBarInitialValue = queryString;
+      const filterBarPlaceholder = filterPlaceHolder;
 
       if (loading === true) {
         return (
@@ -975,6 +988,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               <KueryFilterBar
                 indexPattern={this.indexPattern}
                 onSubmit={this.applyInfluencersFilterQuery}
+                initialValue={filterBarInitialValue}
+                placeholder={filterBarPlaceholder}
               />
             </div>}
 
