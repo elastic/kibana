@@ -67,7 +67,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
     if (!thisConfigSchema) {
       return i18n.translate('xpack.beatsManagement.tagConfig.invalidSchema', {
         defaultMessage:
-          'Error: This config is invalid, it is not supported by Beats and should be removed',
+          'Error: This config is invalid. It is not supported by Beats and should be removed.',
       });
     }
     return (

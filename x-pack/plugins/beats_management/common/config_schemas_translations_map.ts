@@ -29,13 +29,13 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'filebeatInputConfig.other.ui.label',
     i18n.translate('xpack.beatsManagement.filebeatInputConfig.otherConfigLabel', {
-      defaultMessage: 'Other Config',
+      defaultMessage: 'Other configuration settings',
     }),
   ],
   [
     'filebeatInputConfig.other.ui.helpText',
     i18n.translate('xpack.beatsManagement.filebeatInputConfig.otherConfigDescription', {
-      defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
+      defaultMessage: 'Use YAML format to specify other settings for the Filebeat input.',
     }),
   ],
   [
@@ -53,19 +53,19 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'filebeatModuleConfig.module.error',
     i18n.translate('xpack.beatsManagement.filebeatModuleConfig.moduleErrorMessage', {
-      defaultMessage: 'Please select a module',
+      defaultMessage: 'Select a module',
     }),
   ],
   [
     'filebeatModuleConfig.other.ui.label',
     i18n.translate('xpack.beatsManagement.filebeatModuleConfig.otherConfigLabel', {
-      defaultMessage: 'Other Config',
+      defaultMessage: 'Other configuration settings',
     }),
   ],
   [
     'filebeatModuleConfig.other.ui.helpText',
     i18n.translate('xpack.beatsManagement.filebeatModuleConfig.moduleDescription', {
-      defaultMessage: 'Use YAML format to specify other settings for the Filebeat Module',
+      defaultMessage: 'Use YAML format to specify other settings for the Filebeat module.',
     }),
   ],
   [
@@ -84,7 +84,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'metricbeatModuleConfig.module.error',
     i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.moduleErrorMessage', {
-      defaultMessage: 'Please select a module',
+      defaultMessage: 'Select a module',
     }),
   ],
   [
@@ -114,19 +114,19 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'metricbeatModuleConfig.period.error',
     i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.periodErrorMessage', {
-      defaultMessage: 'Invalid Period, must be formatted as `10s` for 10 seconds',
+      defaultMessage: 'Invalid period. Use `10s` for 10 seconds.',
     }),
   ],
   [
     'metricbeatModuleConfig.other.ui.label',
     i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.otherConfigLabel', {
-      defaultMessage: 'Other Config',
+      defaultMessage: 'Other configuration settings',
     }),
   ],
   [
     'metricbeatModuleConfig.other.ui.helpText',
     i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.otherConfigDescription', {
-      defaultMessage: 'Use YAML format to specify other settings for the Metricbeat Module',
+      defaultMessage: 'Use YAML format to specify other settings for the Metricbeat module.',
     }),
   ],
   [
@@ -145,7 +145,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'outputConfig.output.error',
     i18n.translate('xpack.beatsManagement.outputConfig.outputTypeErrorMessage', {
-      defaultMessage: 'Please select an output type',
+      defaultMessage: 'Select an output type',
     }),
   ],
   [
@@ -188,7 +188,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'supportedConfigs.filebeat.input.text',
     i18n.translate('xpack.beatsManagement.tagConfig.filebeatInputLabel', {
-      defaultMessage: 'Filebeat Input',
+      defaultMessage: 'Filebeat input',
     }),
   ],
   [
@@ -200,7 +200,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'supportedConfigs.metricbeatModule.text',
     i18n.translate('xpack.beatsManagement.tagConfig.metricbeatModuleLabel', {
-      defaultMessage: 'Metricbeat Module',
+      defaultMessage: 'Metricbeat module',
     }),
   ],
   [

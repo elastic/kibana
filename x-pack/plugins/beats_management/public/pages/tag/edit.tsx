@@ -68,7 +68,7 @@ class TagEditPageComponent extends React.PureComponent<
         title={intl.formatMessage(
           {
             id: 'xpack.beatsManagement.tag.updateTagTitle',
-            defaultMessage: 'Update Tag: {tagId}',
+            defaultMessage: 'Update tag: {tagId}',
           },
           {
             tagId: this.state.tag.id,

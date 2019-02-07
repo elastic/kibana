@@ -32,7 +32,7 @@ export const configBlockSchemas: ConfigBlockSchema[] = [
   },
   {
     id: 'filebeat.modules',
-    name: 'Filebeat Modules',
+    name: 'Filebeat module',
     version: 6.7,
     allowOtherConfigs: true,
     configs: [
@@ -310,7 +310,7 @@ export const configBlockSchemas: ConfigBlockSchema[] = [
   },
   {
     id: 'output',
-    name: 'Outputs',
+    name: 'Output',
     allowOtherConfigs: true,
     version: 6.7,
     configs: [

@@ -68,7 +68,7 @@ const dynamicStatuses = {
       defaultMessage: 'Updating',
     }),
     details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.progressTooltip', {
-      defaultMessage: 'This Beat is currently reloading config from CM.',
+      defaultMessage: 'This Beat is reloading the config from central management.',
     }),
   },
   RUNNING: {
@@ -92,7 +92,7 @@ const dynamicStatuses = {
       defaultMessage: 'Error',
     }),
     details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.errorTooltip', {
-      defaultMessage: 'There is an error on this beat, please check the logs for this host.',
+      defaultMessage: 'This Beat has an error. Please check the logs on the host.',
     }),
   },
   STOPPED: {
@@ -101,7 +101,7 @@ const dynamicStatuses = {
       defaultMessage: 'stopped',
     }),
     details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.errorTooltip', {
-      defaultMessage: 'There is an error on this beat, please check the logs for this host.',
+      defaultMessage: 'This Beat has an error. Please check the logs on the host.',
     }),
   },
 };
@@ -177,7 +177,7 @@ export const BeatsTableType: TableType = {
           tooltipText = i18n.translate(
             'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
             {
-              defaultMessage: 'This Beat has not connected to kibana in over 10min',
+              defaultMessage: 'This Beat has not connected to Kibana in over 10 min',
             }
           );
         } else if (beat.status && moment().diff(beat.last_checkin, 'minutes') >= 10) {
@@ -282,7 +282,7 @@ export const TagsTableType: TableType = {
     actions: [
       {
         name: i18n.translate('xpack.beatsManagement.tagsTable.removeSelectedLabel', {
-          defaultMessage: 'Remove Selected',
+          defaultMessage: 'Remove selected',
         }),
         action: 'delete',
         danger: true,
@@ -324,14 +324,14 @@ export const BeatDetailTagsTable: TableType = {
     primaryActions: [
       {
         name: i18n.translate('xpack.beatsManagement.beatTagsTable.addTagLabel', {
-          defaultMessage: 'Add Tag',
+          defaultMessage: 'Add tag',
         }),
         action: 'add',
         danger: false,
       },
       {
         name: i18n.translate('xpack.beatsManagement.beatTagsTable.removeSelectedLabel', {
-          defaultMessage: 'Remove Selected',
+          defaultMessage: 'Remove selected',
         }),
         action: 'remove',
         danger: true,
