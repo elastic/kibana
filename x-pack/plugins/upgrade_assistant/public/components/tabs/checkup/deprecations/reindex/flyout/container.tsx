@@ -22,6 +22,7 @@ interface ReindexFlyoutProps {
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
+  cancelReindex: () => void;
 }
 
 interface ReindexFlyoutState {
@@ -46,7 +47,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
   }
 
   public render() {
-    const { closeFlyout, indexName, reindexState, startReindex } = this.props;
+    const { closeFlyout, indexName, reindexState, startReindex, cancelReindex } = this.props;
     const { currentFlyoutStep } = this.state;
 
     let flyoutContents: React.ReactNode;
@@ -66,6 +67,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
             closeFlyout={closeFlyout}
             reindexState={reindexState}
             startReindex={startReindex}
+            cancelReindex={cancelReindex}
           />
         );
         break;

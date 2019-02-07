@@ -217,7 +217,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {string} type
    * @param {string} id
    * @param {object} [options={}]
-   * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
    * @returns {promise}
    */

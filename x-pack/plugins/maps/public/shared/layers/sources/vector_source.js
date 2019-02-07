@@ -16,8 +16,13 @@ export class AbstractVectorSource extends AbstractSource {
   static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {
     let fetchedJson;
     try {
-      const vectorFetch = await fetch(fetchUrl);
-      fetchedJson = await vectorFetch.json();
+      // TODO proxy map.regionmap url requests through kibana server and then use kfetch
+      // Can not use kfetch because fetchUrl may point to external URL. (map.regionmap)
+      const response = await fetch(fetchUrl);
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+      fetchedJson = await response.json();
     } catch (e) {
       throw new Error(`Unable to fetch vector shapes from url: ${fetchUrl}`);
     }
@@ -27,7 +32,7 @@ export class AbstractVectorSource extends AbstractSource {
     }
 
     if (format === 'topojson') {
-      const features = _.get(fetchedJson, featureCollectionPath);
+      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
       return topojson.feature(fetchedJson, features);
     }
 
@@ -97,4 +102,7 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
+  isJoinable() {
+    return true;
+  }
 }

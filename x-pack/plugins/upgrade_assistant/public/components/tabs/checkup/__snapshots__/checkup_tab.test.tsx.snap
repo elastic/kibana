@@ -365,17 +365,8 @@ exports[`CheckupTab render with error 1`] = `
     panelPaddingSize="l"
   >
     <EuiPageContentBody>
-      <EuiCallOut
-        color="danger"
-        iconType="cross"
-        size="m"
-        title={
-          <FormattedMessage
-            defaultMessage="A network error occurred while retrieving the checkup results."
-            id="xpack.upgradeAssistant.checkupTab.errorCallout.calloutTitle"
-            values={Object {}}
-          />
-        }
+      <Component
+        loadingError={[Error: something bad!]}
       />
     </EuiPageContentBody>
   </EuiPageContent>

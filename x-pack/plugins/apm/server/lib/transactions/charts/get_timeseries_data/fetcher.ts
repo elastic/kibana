@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
+import {
+  AggregationSearchResponse,
+  ESFilter,
+  SearchParams
+} from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -101,7 +105,7 @@ export function timeseriesFetcher({
     filter.push(esFilterQuery);
   }
 
-  const params: any = {
+  const params: SearchParams = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
