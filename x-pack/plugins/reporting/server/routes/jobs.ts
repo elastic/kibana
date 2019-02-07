@@ -67,22 +67,21 @@ export function registerJobs(server: KbnServer) {
     handler: (request: Request) => {
       const { docId } = request.params;
 
-      return jobsQuery
-        .get(request.pre.user, docId, { includeContent: true })
-        .then((doc: JobDoc) => {
-          if (!doc) {
-            return boom.notFound();
+      return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
+        (doc: any): JobDoc => {
+          const job = doc._source;
+          if (!job) {
+            throw boom.notFound();
           }
 
-          const { jobtype: jobType } = doc._source;
+          const { jobtype: jobType } = job;
           if (!request.pre.management.jobTypes.includes(jobType)) {
-            return boom.unauthorized(
-              `Sorry, you are not authorized to download ${jobType} reports`
-            );
+            throw boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
           }
 
-          return doc._source.output;
-        });
+          return job.output;
+        }
+      );
     },
   });
 
@@ -94,21 +93,27 @@ export function registerJobs(server: KbnServer) {
     handler: (request: Request) => {
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId).then((doc: JobDoc) => {
-        if (!doc) {
-          return boom.notFound();
-        }
+      return jobsQuery.get(request.pre.user, docId).then(
+        (doc: any): JobDoc => {
+          const job: JobDoc = doc._source;
+          if (!job) {
+            throw boom.notFound();
+          }
 
-        const { jobtype: jobType } = doc._source;
-        if (!request.pre.management.jobTypes.includes(jobType)) {
-          return boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
-        }
+          const { jobtype: jobType, payload } = job;
+          if (!request.pre.management.jobTypes.includes(jobType)) {
+            throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+          }
 
-        return {
-          ...doc._source,
-          headers: 'not shown',
-        };
-      });
+          return {
+            ...doc._source,
+            payload: {
+              ...payload,
+              headers: undefined,
+            },
+          };
+        }
+      );
     },
   });
 

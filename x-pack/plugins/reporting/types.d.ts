@@ -102,9 +102,7 @@ export interface ReportingJob {
 }
 
 export interface JobDoc {
-  _source: {
-    output: any;
-    jobtype: string;
-    payload: ReportingJob;
-  };
+  output: any;
+  jobtype: string;
+  payload: any;
 }
