@@ -173,14 +173,23 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
-      it('should create a query_string query for wildcard values', function () {
+      it('should create a wildcard + query_string query for wildcard values', function () {
         const expected = {
           bool: {
             should: [
               {
-                query_string: {
-                  fields: ['extension'],
-                  query: 'jpg*'
+                bool: {
+                  should: [{
+                    query_string: {
+                      fields: ['extension'],
+                      query: 'jpg*'
+                    }
+                  }, {
+                    wildcard: {
+                      'extension': 'jpg*'
+                    }
+                  }],
+                  minimum_should_match: 1
                 }
               },
             ],

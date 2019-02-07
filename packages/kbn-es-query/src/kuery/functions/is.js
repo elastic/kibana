@@ -90,41 +90,50 @@ export function toElasticsearchQuery(node, indexPattern) {
     return { match_all: {} };
   }
 
-  const queries = fields.reduce((accumulator, field) => {
+  const queries = fields.map(field => {
     if (field.scripted) {
       // Exists queries don't make sense for scripted fields
       if (!isExistsQuery) {
-        return [...accumulator, {
+        return {
           script: {
             ...getPhraseScript(field, value)
           }
-        }];
+        };
       }
     }
     else if (isExistsQuery) {
-      return [...accumulator, {
+      return {
         exists: {
           field: field.name
         }
-      }];
+      };
     }
     else if (valueArg.type === 'wildcard') {
-      return [...accumulator, {
-        query_string: {
-          fields: [field.name],
-          query: wildcard.toQueryStringQuery(valueArg),
+      return {
+        bool: {
+          should: [{
+            query_string: {
+              fields: [field.name],
+              query: wildcard.toQueryStringQuery(valueArg),
+            }
+          }, {
+            wildcard: {
+              [field.name]: value,
+            }
+          }],
+          minimum_should_match: 1
         }
-      }];
+      };
     }
     else {
       const queryType = type === 'phrase' ? 'match_phrase' : 'match';
-      return [...accumulator, {
+      return {
         [queryType]: {
           [field.name]: value
         }
-      }];
+      };
     }
-  }, []);
+  });
 
   return {
     bool: {
