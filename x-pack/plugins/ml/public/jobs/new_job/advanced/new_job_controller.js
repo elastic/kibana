@@ -78,7 +78,6 @@ module.controller('MlNewJob',
     $location,
     $modal,
     Private,
-    mlDatafeedService,
     mlConfirmModalService,
     i18n) {
 
@@ -1375,7 +1374,7 @@ module.controller('MlNewJob',
             return {
               pscope: $scope,
               openDatafeed: function () {
-                mlDatafeedService.openJobTimepickerWindow($scope.job);
+                mlJobService.currentJob = $scope.job;
               }
             };
           }

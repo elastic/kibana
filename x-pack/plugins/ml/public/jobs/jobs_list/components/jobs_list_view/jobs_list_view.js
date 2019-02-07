@@ -8,7 +8,7 @@
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs } from '../utils';
+import { loadFullJob, filterJobs, checkForAutoOpenStartDatafeed } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -81,6 +81,8 @@ export class JobsListView extends Component {
 
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
+
+    this.openAutoStartDatafeedModal();
   }
 
   componentWillUnmount() {
@@ -130,6 +132,13 @@ export class JobsListView extends Component {
   clearRefreshInterval() {
     this.blockRefresh = true;
     clearInterval(jobsRefreshInterval);
+  }
+
+  async openAutoStartDatafeedModal() {
+    const job = await checkForAutoOpenStartDatafeed();
+    if (job !== undefined) {
+      this.showStartDatafeedModal([job]);
+    }
   }
 
   toggleRow = (jobId) => {

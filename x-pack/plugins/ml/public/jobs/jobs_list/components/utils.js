@@ -251,6 +251,29 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
+export async function checkForAutoOpenStartDatafeed() {
+  if (mlJobService.currentJob !== undefined) {
+    const jobId = mlJobService.currentJob.job_id;
+    mlJobService.currentJob = undefined;
+    try {
+      const fullJob = await loadFullJob(jobId);
+      const hasDatafeed = (typeof fullJob.datafeed_config === 'object' && Object.keys(fullJob.datafeed_config).length > 0);
+      return {
+        id: fullJob.job_id,
+        hasDatafeed,
+        latestTimestampSortValue: 0,
+        datafeedId: hasDatafeed ? fullJob.datafeed_config.datafeed_id : '',
+      };
+    } catch (error) {
+      mlMessageBarService.notify.error(error);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
+        defaultMessage: 'Could not load job to start datafeed {jobId}. Job could not be found',
+        values: { jobId }
+      }));
+    }
+  }
+}
+
 function stringMatch(str, substr) {
   return (
     (typeof str === 'string' && typeof substr === 'string') &&
