@@ -1,6 +1,9 @@
 /*
-  Uses phantomjs for this PoC
+  Uses phantomjs for this PoC to offer a REST endpoint to render HTML to PNG
 */
+
+// This file will be called by phantomjs, not node.
+// Not sure about the state of support for ES6 so this uses e.g. var instead of const/let
 
 // uses https://www.npmjs.com/package/phantomjs-prebuilt
 // run: phantomjs phantom-server.js
