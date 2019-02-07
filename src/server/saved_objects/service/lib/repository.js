@@ -52,8 +52,6 @@ export class SavedObjectsRepository {
     this._mappings = mappings;
     this._schema = schema;
 
-    // ES7 and up expects the root type to be _doc
-    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
@@ -103,7 +101,6 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        type: this._type,
         index: this._index,
         refresh: 'wait_for',
         body: raw._source,
@@ -155,7 +152,6 @@ export class SavedObjectsRepository {
         {
           [method]: {
             _id: raw._id,
-            _type: this._type,
           },
         },
         raw._source,
@@ -234,7 +230,6 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       refresh: 'wait_for',
       ignore: [404],
@@ -401,8 +396,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._serializer.generateRawId(namespace, object.type, object.id),
-          _type: this._type,
+          _id: this._serializer.generateRawId(namespace, object.type, object.id)
         }))
       }
     });
@@ -449,7 +443,6 @@ export class SavedObjectsRepository {
 
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       ignore: [404]
     });
@@ -495,7 +488,6 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
@@ -562,7 +554,6 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       refresh: 'wait_for',
       _source: true,
