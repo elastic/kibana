@@ -72,7 +72,6 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
         <EuiIcon
           type={iconType}
           size="xl"
-          style={{ marginRight: 16 }}
         />
       </EuiFlexItem>
     );
@@ -93,7 +92,7 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
 
       <EuiFlexItem>
 
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="l" alignItems="center">
           {icon}
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
