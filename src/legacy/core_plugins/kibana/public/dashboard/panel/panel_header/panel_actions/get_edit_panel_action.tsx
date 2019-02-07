@@ -43,7 +43,7 @@ export function getEditPanelAction() {
       isDisabled: ({ embeddable }) =>
         !embeddable || !embeddable.metadata || !embeddable.metadata.editUrl,
       isVisible: ({ containerState, uiCapabilities }) => {
-        const canEditVisualizations = uiCapabilities.visualize.showWriteControls;
+        const canEditVisualizations = uiCapabilities.visualize.save;
         const inDashboardEditMode = containerState.viewMode === DashboardViewMode.EDIT;
         return canEditVisualizations && inDashboardEditMode;
       },

@@ -49,7 +49,7 @@ uiRoutes
     },
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
-    requireUICapability: 'visualize.showWriteControls',
+    requireUICapability: 'visualize.save',
     template: visualizeListingTemplate,
     k7Breadcrumbs: getWizardStep1Breadcrumbs,
     controller: VisualizeListingController,

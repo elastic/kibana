@@ -91,7 +91,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:search/get',
                   'saved_object:search/find',
                   'ui:visualize/show',
-                  'ui:visualize/showWriteControls',
+                  'ui:visualize/save',
                   'ui:navLinks/kibana:visualize',
                   'ui:catalogue/visualize',
                 ],

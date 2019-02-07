@@ -300,7 +300,7 @@ function VisEditor(
       testId: 'visualizeRefreshButton',
     };
 
-    if (uiCapabilities.visualize.showWriteControls) {
+    if (uiCapabilities.visualize.save) {
       return [saveAction, shareAction, inspectAction, refreshAction];
     }
     return [shareAction, inspectAction, refreshAction];

@@ -41,7 +41,7 @@ class DashboardAddPanelUi extends React.Component {
   constructor(props) {
     super(props);
 
-    const addNewVisBtn = uiCapabilities.visualize.showWriteControls ? (
+    const addNewVisBtn = uiCapabilities.visualize.save ? (
       <EuiButton
         onClick={this.props.addNewVis}
         data-test-subj="addNewSavedObjectLink"
