@@ -243,6 +243,58 @@ describe('GET roles', () => {
           ],
         },
       });
+
+      getRolesTest(`transforms matching applications with * resource to kibana _reserved privileges`, {
+        callWithRequestImpl: async () => ({
+          first_role: {
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['reserved_customApplication1', 'reserved_customApplication2'],
+                resources: ['*'],
+              }
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        }),
+        asserts: {
+          statusCode: 200,
+          result: [
+            {
+              name: 'first_role',
+              metadata: {
+                _reserved: true,
+              },
+              transient_metadata: {
+                enabled: true,
+              },
+              elasticsearch: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  _reserved: ['customApplication1', 'customApplication2'],
+                  base: [],
+                  feature: {},
+                  spaces: ['*']
+                }
+              ],
+              _transform_error: [],
+              _unrecognized_applications: [],
+            },
+          ],
+        },
+      });
     });
 
     describe('space', () => {
@@ -1010,6 +1062,57 @@ describe('GET role', () => {
                   foo: ['foo-privilege-1', 'foo-privilege-2'],
                   bar: ['bar-privilege-1']
                 },
+                spaces: ['*']
+              }
+            ],
+            _transform_error: [],
+            _unrecognized_applications: [],
+          },
+        },
+      });
+
+      getRoleTest(`transforms matching applications with * resource to kibana _reserved privileges`, {
+        name: 'first_role',
+        callWithRequestImpl: async () => ({
+          first_role: {
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['reserved_customApplication1', 'reserved_customApplication2'],
+                resources: ['*'],
+              }
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        }),
+        asserts: {
+          statusCode: 200,
+          result: {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                _reserved: ['customApplication1', 'customApplication2'],
+                base: [],
+                feature: {},
                 spaces: ['*']
               }
             ],

@@ -42,6 +42,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       value: roleKibanaApplications.map(({ resources, privileges }) => {
       // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
         if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
+          const reservedPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedReservedPrivilege(privilege));
           const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
           const featurePrivileges = privileges.filter(privilege =>
             !PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege) &&
@@ -49,6 +50,9 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
           );
 
           return {
+            ...reservedPrivileges.length ? {
+              _reserved: reservedPrivileges.map(privilege => PrivilegeSerializer.deserializeReservedPrivilege(privilege))
+            } : {},
             base: basePrivileges.map(privilege => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)),
             feature: featurePrivileges.reduce((acc, privilege) => {
               const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);

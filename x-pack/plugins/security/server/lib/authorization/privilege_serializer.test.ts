@@ -165,3 +165,16 @@ describe('#deserializeSpaceBasePrivilege', () => {
     expect(result).toBe('read');
   });
 });
+
+describe('#deserializeReservedPrivilege', () => {
+  test(`throws Error if doesn't start with reserved_`, () => {
+    expect(() =>
+      PrivilegeSerializer.deserializeReservedPrivilege('all')
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test(`returns 'customApplication1' unprefixed if provided 'reserved_customApplication1'`, () => {
+    const result = PrivilegeSerializer.deserializeReservedPrivilege('reserved_customApplication1');
+    expect(result).toBe('customApplication1');
+  });
+});

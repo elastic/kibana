@@ -85,4 +85,12 @@ export class PrivilegeSerializer {
 
     return privilege.slice(spacePrefix.length);
   }
+
+  public static deserializeReservedPrivilege(privilege: string) {
+    if (!PrivilegeSerializer.isSerializedReservedPrivilege(privilege)) {
+      throw new Error('Unrecognized reserved privilege');
+    }
+
+    return privilege.slice(reservedPrefix.length);
+  }
 }
