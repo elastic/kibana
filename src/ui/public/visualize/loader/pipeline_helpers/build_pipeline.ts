@@ -50,9 +50,14 @@ interface Schemas {
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
+type buildVisConfigFunction = (visState: Vis, schemas: Schemas) => VisState;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
+}
+
+interface BuildVisConfigFunction {
+  [key: string]: buildVisConfigFunction;
 }
 
 const vislibCharts: string[] = [
@@ -215,6 +220,33 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
+    const visConfig = buildVisConfig.table(visState, schemas);
+    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
+  },
+  metric: (visState, schemas) => {
+    const visConfig = buildVisConfig.metric(visState, schemas);
+    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
+  },
+  tagcloud: (visState, schemas) => {
+    const visConfig = buildVisConfig.tagcloud(visState, schemas);
+    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
+  },
+  region_map: (visState, schemas) => {
+    const visConfig = buildVisConfig.region_map(visState, schemas);
+    return `regionmap ${prepareJson('visConfig', visConfig)}`;
+  },
+  tile_map: (visState, schemas) => {
+    const visConfig = buildVisConfig.tile_map(visState, schemas);
+    return `tilemap ${prepareJson('visConfig', visConfig)}`;
+  },
+  pie: (visState, schemas) => {
+    const visConfig = buildVisConfig.pie(visState, schemas);
+    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
+  },
+};
+
+const buildVisConfig: BuildVisConfigFunction = {
+  table: (visState, schemas) => {
     const visConfig = visState.params;
     visConfig.dimensions = {
       metrics: schemas.metric,
@@ -222,7 +254,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };
-    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
+    return visConfig;
   },
   metric: (visState, schemas) => {
     const visConfig = visState.params;
@@ -230,7 +262,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (schemas.group) {
       visConfig.metric.bucket = schemas.group[0];
     }
-    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
+    return visConfig;
   },
   tagcloud: (visState, schemas) => {
     const visConfig = visState.params;
@@ -238,7 +270,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
-    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
+    return visConfig;
   },
   region_map: (visState, schemas) => {
     const visConfig = visState.params;
@@ -246,14 +278,16 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
-    return `regionmap ${prepareJson('visConfig', visConfig)}`;
+    return visConfig;
   },
   tile_map: (visState, schemas) => {
     const visConfig = visState.params;
-    visConfig.metric = schemas.metric[0];
-    visConfig.geohash = schemas.segment ? schemas.segment[0] : null;
-    visConfig.geocentroid = schemas.geo_centroid ? schemas.geo_centroid[0] : null;
-    return `tilemap ${prepareJson('visConfig', visConfig)}`;
+    visConfig.dimensions = {
+      metric: schemas.metric[0],
+      geohash: schemas.segment ? schemas.segment[0] : null,
+      geocentroid: schemas.geo_centroid ? schemas.geo_centroid[0] : null,
+    };
+    return visConfig;
   },
   pie: (visState, schemas) => {
     const visConfig = visState.params;
@@ -263,7 +297,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };
-    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
+    return visConfig;
   },
 };
 
@@ -289,6 +323,19 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
   }
 
   return dimensions;
+};
+
+// If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
+// take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
+export const decorateVisObject = (vis: Vis, params: { timeRange?: any }) => {
+  const schemas = getSchemas(vis, params.timeRange);
+  let visConfig = vis.params;
+  if (buildVisConfig[vis.type.name]) {
+    visConfig = buildVisConfig[vis.type.name](vis, schemas);
+    vis.params = visConfig;
+  } else if (vislibCharts.includes(vis.type.name)) {
+    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
+  }
 };
 
 export const buildPipeline = (

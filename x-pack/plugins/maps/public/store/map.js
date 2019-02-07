@@ -22,7 +22,7 @@ import {
   MAP_DESTROYED,
   SET_QUERY,
   UPDATE_LAYER_PROP,
-  UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+  UPDATE_LAYER_STYLE,
   PROMOTE_TEMPORARY_STYLES,
   CLEAR_TEMPORARY_STYLES,
   SET_JOINS,
@@ -247,8 +247,8 @@ export function map(state = INITIAL_STATE, action) {
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
-    case UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER:
-      const styleLayerId = state.selectedLayerId;
+    case UPDATE_LAYER_STYLE:
+      const styleLayerId = action.layerId;
       const styleLayerIdx = getLayerIndex(state.layerList, styleLayerId);
       const layerStyle = state.layerList[styleLayerIdx].style;
       const layerPrevStyle = layerStyle.previousStyle || layerStyle;

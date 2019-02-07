@@ -56,7 +56,7 @@ export class LayerTOC extends React.Component {
   render() {
     const layerEntries = this._renderLayers();
     return (
-      <div ref={node => this._domContainer = node}>
+      <div ref={node => this._domContainer = node} data-test-subj="mapLayerTOC">
         {layerEntries}
       </div>
     );

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import _ from 'lodash';
+
 export default function apmOss(kibana) {
   return new kibana.Plugin({
     id: 'apm_oss',
@@ -30,12 +32,24 @@ export default function apmOss(kibana) {
         indexPattern: Joi.string().default('apm-*'),
 
         // ES Indices
+        sourcemapIndices: Joi.string().default('apm-*'),
         errorIndices: Joi.string().default('apm-*'),
-        onboardingIndices: Joi.string().default('apm-*'),
-        spanIndices: Joi.string().default('apm-*'),
         transactionIndices: Joi.string().default('apm-*'),
+        spanIndices: Joi.string().default('apm-*'),
         metricsIndices: Joi.string().default('apm-*'),
+        onboardingIndices: Joi.string().default('apm-*'),
       }).default();
     },
+
+    init(server) {
+      server.expose('indexPatterns', _.uniq([
+        'sourcemapIndices',
+        'errorIndices',
+        'transactionIndices',
+        'spanIndices',
+        'metricsIndices',
+        'onboardingIndices'
+      ].map(type => server.config().get(`apm_oss.${type}`))));
+    }
   });
 }
