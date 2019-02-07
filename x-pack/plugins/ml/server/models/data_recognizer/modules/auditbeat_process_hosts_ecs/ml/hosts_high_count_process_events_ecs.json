@@ -3,10 +3,10 @@
   "description": "Auditbeat Hosts: Detect unusual increases in process execution rates (ECS)",
   "groups": ["auditd"],
   "analysis_config": {
-    "bucket_span": "10m",
+    "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "high_non_zero_count partition host.name",
+        "detector_description": "High process rate on hosts",
         "function": "high_non_zero_count",
         "partition_field_name": "host.name"
       }
