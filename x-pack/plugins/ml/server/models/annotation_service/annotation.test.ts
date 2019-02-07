@@ -40,6 +40,7 @@ describe('annotation_service', () => {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
         id: annotationMockId,
         refresh: 'wait_for',
+        type: 'doc',
       };
 
       const response = await deleteAnnotation(annotationMockId);
