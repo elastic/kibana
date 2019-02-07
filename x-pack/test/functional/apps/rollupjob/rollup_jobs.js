@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('create and and save a new job', async () => {
       await PageObjects.rollup.createNewRollUpJob();
-      await testSubjects.exists.verifyStepIsActive(1);
+      await PageObjects.rollup.verifyStepIsActive(1);
       const jobName = 'Testjob1';
       await PageObjects.rollup.addRoleNameandIndexPattern(jobName, '.kibana*');
       await PageObjects.rollup.verifyIndexPatternAccepted();
