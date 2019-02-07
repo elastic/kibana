@@ -62,7 +62,9 @@ async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
     searchStr = removeFromStr(searchStr, 'version', id);
     if (searchStr.indexOf(id) !== -1) {
       // throw new Error(`Id ${id} found in type "${type}" for ${searchStr}`);
-      console.log(`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nId "${id}" found in type "${type}" for ${searchStr}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`);
+      console.log(`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\` +
+        n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nId "${id}" found in type "${type}" for ${searchStr}` +
+        `\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`);
     }
   });
 }
