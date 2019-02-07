@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
+  //const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'header']);
 
