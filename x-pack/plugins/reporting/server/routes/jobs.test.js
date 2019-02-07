@@ -8,12 +8,12 @@ import Hapi from 'hapi';
 import { difference, memoize } from 'lodash';
 import { registerJobs } from './jobs';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
-jest.mock('../lib/authorized_user_pre_routing', () => {
+jest.mock('./lib/authorized_user_pre_routing', () => {
   return {
     authorizedUserPreRoutingFactory: () => () => ({})
   };
 });
-jest.mock('../lib/reporting_feature_pre_routing', () => {
+jest.mock('./lib/reporting_feature_pre_routing', () => {
   return {
     reportingFeaturePreRoutingFactory: () => () => () => ({ jobTypes: ['unencodedJobType', 'base64EncodedJobType'] })
   };
