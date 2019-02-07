@@ -45,6 +45,8 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             });
             break;
           // these users can't do anything with Canvas
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
           case 'apm_all':
           case 'dashboard_all':
           case 'dashboard_read':
