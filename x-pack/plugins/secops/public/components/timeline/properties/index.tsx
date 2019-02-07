@@ -48,7 +48,8 @@ interface Props {
   isLive: boolean;
   title: string;
   description: string;
-  notes: Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
+  noteIds: string[];
   history: History[];
   timelineId: string;
   updateDescription: UpdateDescription;
@@ -101,11 +102,12 @@ export class Properties extends React.PureComponent<Props, State> {
       associateNote,
       createTimeline,
       description,
+      getNotesByIds,
       isFavorite,
       isLive,
       history,
       title,
-      notes,
+      noteIds,
       timelineId,
       updateDescription,
       updateIsFavorite,
@@ -141,7 +143,8 @@ export class Properties extends React.PureComponent<Props, State> {
               <NotesButton
                 animate={true}
                 associateNote={associateNote}
-                notes={notes}
+                getNotesByIds={getNotesByIds}
+                noteIds={noteIds}
                 showNotes={this.state.showNotes}
                 size="l"
                 text={i18n.NOTES}
@@ -196,7 +199,8 @@ export class Properties extends React.PureComponent<Props, State> {
                     <NotesButton
                       animate={true}
                       associateNote={associateNote}
-                      notes={notes}
+                      getNotesByIds={getNotesByIds}
+                      noteIds={noteIds}
                       showNotes={this.state.showNotes}
                       size="l"
                       text={i18n.NOTES}

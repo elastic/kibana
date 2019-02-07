@@ -188,18 +188,8 @@ describe('helpers', () => {
       expect(eventHasNotes([])).toEqual(false);
     });
 
-    test('it returns true for when notes is non-empty', () => {
-      expect(
-        eventHasNotes([
-          {
-            created: new Date(),
-            id: 'required to purchase a beverage',
-            lastEdit: new Date(),
-            note: 'mind the gap',
-            user: 'the.fresh.eyeballs',
-          },
-        ])
-      ).toEqual(true);
+    test('it returns true when notes is non-empty', () => {
+      expect(eventHasNotes(['8af859e2-e4f8-4754-b702-4f227f15aae5'])).toEqual(true);
     });
   });
 

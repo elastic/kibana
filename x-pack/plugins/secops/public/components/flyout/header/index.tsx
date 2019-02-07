@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
-import { getApplicableNotes } from '../../../lib/note/helpers';
 import {
   appActions,
   appSelectors,
   State,
   timelineActions,
+  timelineModel,
   timelineSelectors,
 } from '../../../store';
 import { UpdateNote } from '../../notes/helpers';
@@ -29,11 +28,12 @@ interface OwnProps {
 
 interface StateReduxProps {
   description?: string;
+  getNotesByIds: (noteIds: string[]) => Note[];
   history?: History[];
   isFavorite?: boolean;
   isLive?: boolean;
+  noteIds: string[];
   title?: string;
-  notes?: Note[];
   width?: number;
 }
 
@@ -69,12 +69,13 @@ const statefulFlyoutHeader = pure<Props>(
     associateNote,
     createTimeline,
     description,
+    getNotesByIds,
     history,
     isFavorite,
     isLive,
     title,
     width = defaultWidth,
-    notes,
+    noteIds,
     timelineId,
     updateDescription,
     updateIsFavorite,
@@ -86,11 +87,12 @@ const statefulFlyoutHeader = pure<Props>(
       associateNote={associateNote!}
       createTimeline={createTimeline!}
       description={description!}
+      getNotesByIds={getNotesByIds}
       history={history!}
       isFavorite={isFavorite!}
       isLive={isLive!}
       title={title!}
-      notes={notes!}
+      noteIds={noteIds}
       timelineId={timelineId}
       updateDescription={updateDescription!}
       updateIsFavorite={updateIsFavorite!}
@@ -104,20 +106,35 @@ const statefulFlyoutHeader = pure<Props>(
 
 const emptyHistory: History[] = []; // stable reference
 
-const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
+const makeMapStateToProps = () => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getNotesByIds = appSelectors.notesByIdsSelector();
+  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+    const timeline: timelineModel.TimelineModel = getTimeline(state, timelineId);
 
-  const description = getOr('', `${timelineId}.description`, timelineById);
-  const history = emptyHistory; // TODO: get notes from store via selector
-  const isFavorite = getOr(false, `${timelineId}.isFavorite`, timelineById);
-  const isLive = getOr(false, `${timelineId}.isLive`, timelineById);
-  const title = getOr('', `${timelineId}.title`, timelineById);
-  const noteIds = getOr([], `${timelineId}.noteIds`, timelineById);
-  const notesById = appSelectors.notesByIdSelector(state);
-  const notes = getApplicableNotes({ noteIds, notesById });
-  const width = getOr(defaultWidth, `${timelineId}.width`, timelineById);
+    const {
+      description = '',
+      isFavorite = false,
+      isLive = false,
+      title = '',
+      noteIds = [],
+      width = defaultWidth,
+    } = timeline;
 
-  return { description, history, isFavorite, isLive, notes, title, width };
+    const history = emptyHistory; // TODO: get history from store via selector
+
+    return {
+      description,
+      getNotesByIds: getNotesByIds(state),
+      history,
+      isFavorite,
+      isLive,
+      noteIds,
+      title,
+      width,
+    };
+  };
+  return mapStateToProps;
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
@@ -168,6 +185,6 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
 });
 
 export const FlyoutHeader = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   mapDispatchToProps
 )(statefulFlyoutHeader);

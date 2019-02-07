@@ -21,6 +21,7 @@ import { defaultHeaders } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
 
 const testBodyHeight = 700;
+const mockGetNotesByIds = (eventId: string[]) => [];
 
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
@@ -38,8 +39,9 @@ describe('ColumnHeaders', () => {
                 columnHeaders={headersSansTimestamp}
                 columnRenderers={columnRenderers}
                 data={mockEcsData}
+                eventIdToNoteIds={{}}
                 height={testBodyHeight}
-                notes={{}}
+                getNotesByIds={mockGetNotesByIds}
                 onColumnSorted={noop}
                 onFilterChange={noop}
                 onPinEvent={noop}
@@ -83,8 +85,9 @@ describe('ColumnHeaders', () => {
                 columnHeaders={headersJustTimestamp}
                 columnRenderers={columnRenderers}
                 data={mockEcsData}
+                eventIdToNoteIds={{}}
                 height={testBodyHeight}
-                notes={{}}
+                getNotesByIds={mockGetNotesByIds}
                 onColumnSorted={noop}
                 onFilterChange={noop}
                 onPinEvent={noop}
@@ -128,8 +131,9 @@ describe('ColumnHeaders', () => {
                 columnHeaders={headersJustTimestamp}
                 columnRenderers={columnRenderers}
                 data={mockEcsData}
+                eventIdToNoteIds={{}}
                 height={testBodyHeight}
-                notes={{}}
+                getNotesByIds={mockGetNotesByIds}
                 onColumnSorted={noop}
                 onFilterChange={noop}
                 onPinEvent={noop}

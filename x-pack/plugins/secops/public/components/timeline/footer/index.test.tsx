@@ -17,6 +17,7 @@ import { mockData } from './mock';
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const onChangeItemsPerPage = jest.fn();
+  const getUpdatedAt = () => 1546878704036;
   const width = 500;
 
   describe('rendering', () => {
@@ -35,7 +36,7 @@ describe('Footer Timeline Component', () => {
           onLoadMore={loadMore}
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
+          getUpdatedAt={getUpdatedAt}
           width={width}
         />
       );
@@ -58,7 +59,7 @@ describe('Footer Timeline Component', () => {
           onLoadMore={loadMore}
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
+          getUpdatedAt={getUpdatedAt}
           width={width}
         />
       );
@@ -81,7 +82,7 @@ describe('Footer Timeline Component', () => {
           onLoadMore={loadMore}
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
+          getUpdatedAt={getUpdatedAt}
           width={width}
         />
       );
@@ -105,7 +106,7 @@ describe('Footer Timeline Component', () => {
             onLoadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
+            getUpdatedAt={getUpdatedAt}
             width={width}
           />
         </I18nProvider>
@@ -130,7 +131,7 @@ describe('Footer Timeline Component', () => {
             onLoadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
+            getUpdatedAt={getUpdatedAt}
             width={width}
           />
         </I18nProvider>
@@ -164,7 +165,7 @@ describe('Footer Timeline Component', () => {
           onLoadMore={loadMore}
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
+          getUpdatedAt={getUpdatedAt}
           width={width}
         />
       );
@@ -188,7 +189,7 @@ describe('Footer Timeline Component', () => {
             onLoadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
+            getUpdatedAt={getUpdatedAt}
             width={width}
           />
         </I18nProvider>
@@ -219,7 +220,7 @@ describe('Footer Timeline Component', () => {
             onLoadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
+            getUpdatedAt={getUpdatedAt}
             width={width}
           />
         </I18nProvider>
@@ -249,7 +250,7 @@ describe('Footer Timeline Component', () => {
             onLoadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
+            getUpdatedAt={getUpdatedAt}
             width={width}
           />
         </I18nProvider>

@@ -38,9 +38,10 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: Ecs[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
-  notes: { [eventId: string]: Note[] };
+  eventIdToNoteIds: { [eventId: string]: string[] };
   onColumnSorted: OnColumnSorted;
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
@@ -100,7 +101,7 @@ const Column = styled.div<{
 
 export const defaultWidth = 1090;
 
-const emptyNotes: Note[] = [];
+const emptyNotes: string[] = [];
 
 /** Renders the timeline body */
 export class Body extends React.PureComponent<Props, State> {
@@ -115,9 +116,10 @@ export class Body extends React.PureComponent<Props, State> {
       columnHeaders,
       columnRenderers,
       data,
+      eventIdToNoteIds,
+      getNotesByIds,
       height,
       id,
-      notes,
       onColumnSorted,
       onFilterChange,
       onPinEvent,
@@ -173,10 +175,11 @@ export class Body extends React.PureComponent<Props, State> {
                                 eventId: ecs._id!,
                                 pinnedEventIds,
                               })}
-                              notes={notes[ecs._id!] || emptyNotes}
+                              getNotesByIds={getNotesByIds}
+                              noteIds={eventIdToNoteIds[ecs._id!] || emptyNotes}
                               onEventToggled={this.onToggleExpanded(ecs._id!)}
                               onPinClicked={getPinOnClick({
-                                allowUnpinning: !eventHasNotes(notes[ecs._id!]),
+                                allowUnpinning: !eventHasNotes(eventIdToNoteIds[ecs._id!]),
                                 eventId: ecs._id!,
                                 onPinEvent,
                                 onUnPinEvent,

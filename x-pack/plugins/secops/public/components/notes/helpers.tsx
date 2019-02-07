@@ -58,11 +58,11 @@ const TitleText = styled.h3`
 
 /** Displays a count of the existing notes */
 export const NotesCount = pure<{
-  notes: Note[];
-}>(({ notes }) => (
+  noteIds: string[];
+}>(({ noteIds }) => (
   <EuiTitle size="s">
     <TitleText>
-      {notes.length} Note{notes.length === 1 ? '' : 's'}
+      {noteIds.length} Note{noteIds.length === 1 ? '' : 's'}
     </TitleText>
   </EuiTitle>
 ));
@@ -162,8 +162,8 @@ export interface Item {
   note: string;
 }
 
-export const getItems = (notes: Note[]): Item[] =>
-  notes.map(note => ({
+export const getItems = (noteIds: string[], getNotesByIds: (noteIds: string[]) => Note[]): Item[] =>
+  getNotesByIds(noteIds).map(note => ({
     created: note.created,
     user: note.user,
     note: note.note,

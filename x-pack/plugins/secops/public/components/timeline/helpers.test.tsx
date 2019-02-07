@@ -6,9 +6,8 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { mockIndexPattern } from '../../mock';
-import { NotesById } from '../../store/local/app/model';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { buildGlobalQuery, combineQueries, getEventNotes } from './helpers';
+import { buildGlobalQuery, combineQueries } from './helpers';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -75,70 +74,5 @@ describe('Combined Queries', () => {
     expect(filterQuery).toEqual(
       '{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}'
     );
-  });
-
-  describe('getEventNotes', () => {
-    test('it returns the expected notes for all events in eventIdToNoteIds that have notes associated with them', () => {
-      const sameDate = new Date();
-      const eventIdToNoteIds: { [eventId: string]: string[] } = {
-        a: ['123'],
-        b: [],
-        c: ['does-not-exist', '10', '11'],
-        d: ['also-does-not-exist'],
-      };
-      const notesById: NotesById = {
-        '123': {
-          created: sameDate,
-          id: '123',
-          lastEdit: sameDate,
-          note: 'you can count',
-          user: 'sesame.st',
-        },
-        '10': {
-          created: sameDate,
-          id: '10',
-          lastEdit: sameDate,
-          note: 'on two hands',
-          user: 'monkey',
-        },
-        '11': {
-          created: sameDate,
-          id: '11',
-          lastEdit: sameDate,
-          note: 'extra',
-          user: 'finger',
-        },
-      };
-
-      expect(getEventNotes({ eventIdToNoteIds, notesById })).toEqual({
-        a: [
-          {
-            created: sameDate,
-            id: '123',
-            lastEdit: sameDate,
-            note: 'you can count',
-            user: 'sesame.st',
-          },
-        ],
-        b: [],
-        c: [
-          {
-            created: sameDate,
-            id: '10',
-            lastEdit: sameDate,
-            note: 'on two hands',
-            user: 'monkey',
-          },
-          {
-            created: sameDate,
-            id: '11',
-            lastEdit: sameDate,
-            note: 'extra',
-            user: 'finger',
-          },
-        ],
-        d: [],
-      });
-    });
   });
 });

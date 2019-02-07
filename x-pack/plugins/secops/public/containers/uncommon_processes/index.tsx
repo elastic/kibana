@@ -8,12 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
-import { ESQuery } from '../../../common/typed_json';
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { uncommonProcessesQuery } from './index.gql_query';
 
 export interface UncommonProcessesArgs {
@@ -26,15 +25,8 @@ export interface UncommonProcessesArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps {
-  id?: string;
+export interface OwnProps extends QueryTemplateProps {
   children: (args: UncommonProcessesArgs) => React.ReactNode;
-  sourceId: string;
-  startDate: number;
-  endDate: number;
-  filterQuery?: ESQuery | string;
-  cursor: string | null;
-  poll: number;
   type: hostsModel.HostsType;
 }
 
@@ -44,79 +36,86 @@ export interface UncommonProcessesComponentReduxProps {
 
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
 
-const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
-  ({
-    id = 'uncommonProcessesQuery',
-    children,
-    filterQuery,
-    sourceId,
-    startDate,
-    endDate,
-    limit,
-    cursor,
-    poll,
-  }) => (
-    <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
-      query={uncommonProcessesQuery}
-      fetchPolicy="cache-and-network"
-      pollInterval={poll}
-      notifyOnNetworkStatusChange
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        pagination: {
-          limit,
-          cursor,
-          tiebreaker: null,
-        },
-        filterQuery: createFilter(filterQuery),
-      }}
-    >
-      {({ data, loading, fetchMore, refetch }) => {
-        const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
-        return children({
-          id,
-          loading,
-          refetch,
-          totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
-          uncommonProcesses,
-          pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
-          loadMore: (newCursor: string) =>
-            fetchMore({
-              variables: {
-                pagination: {
-                  cursor: newCursor,
-                  limit: limit + parseInt(newCursor, 10),
-                },
+class UncommonProcessesComponentQuery extends QueryTemplate<
+  UncommonProcessesProps,
+  GetUncommonProcessesQuery.Query,
+  GetUncommonProcessesQuery.Variables
+> {
+  public render() {
+    const {
+      id = 'uncommonProcessesQuery',
+      children,
+      filterQuery,
+      sourceId,
+      startDate,
+      endDate,
+      limit,
+      poll,
+    } = this.props;
+    return (
+      <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
+        query={uncommonProcessesQuery}
+        fetchPolicy="cache-and-network"
+        pollInterval={poll}
+        notifyOnNetworkStatusChange
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate!,
+            to: endDate!,
+          },
+          pagination: {
+            limit,
+            cursor: null,
+            tiebreaker: null,
+          },
+          filterQuery: createFilter(filterQuery),
+        }}
+      >
+        {({ data, loading, fetchMore, refetch }) => {
+          const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
+          this.setFetchMore(fetchMore);
+          this.setFetchMoreOptions((newCursor: string) => ({
+            variables: {
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
               },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                return {
-                  ...fetchMoreResult,
-                  source: {
-                    ...fetchMoreResult.source,
-                    UncommonProcesses: {
-                      ...fetchMoreResult.source.UncommonProcesses,
-                      edges: [
-                        ...prev.source.UncommonProcesses.edges,
-                        ...fetchMoreResult.source.UncommonProcesses.edges,
-                      ],
-                    },
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) {
+                return prev;
+              }
+              return {
+                ...fetchMoreResult,
+                source: {
+                  ...fetchMoreResult.source,
+                  UncommonProcesses: {
+                    ...fetchMoreResult.source.UncommonProcesses,
+                    edges: [
+                      ...prev.source.UncommonProcesses.edges,
+                      ...fetchMoreResult.source.UncommonProcesses.edges,
+                    ],
                   },
-                };
-              },
-            }),
-        });
-      }}
-    </Query>
-  )
-);
+                },
+              };
+            },
+          }));
+          return children({
+            id,
+            loading,
+            refetch,
+            totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
+            uncommonProcesses,
+            pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
+            loadMore: this.wrappedLoadMore,
+          });
+        }}
+      </Query>
+    );
+  }
+}
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();

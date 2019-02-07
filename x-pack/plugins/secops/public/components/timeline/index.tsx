@@ -38,7 +38,6 @@ import {
   OnToggleDataProviderExcluded,
   OnUnPinEvent,
 } from './events';
-import { getEventNotes } from './helpers';
 import { Timeline } from './timeline';
 
 export interface OwnProps {
@@ -50,11 +49,12 @@ export interface OwnProps {
 interface StateReduxProps {
   activePage?: number;
   dataProviders?: DataProvider[];
+  eventIdToNoteIds?: { [eventId: string]: string[] };
+  getNotesByIds: (noteIds: string[]) => Note[];
   headers?: ColumnHeader[];
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
   kqlQueryExpression: string;
-  notes?: { [eventId: string]: Note[] };
   pageCount?: number;
   pinnedEventIds?: { [eventId: string]: boolean };
   range?: string;
@@ -141,8 +141,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
   public render() {
     const {
-      addNoteToEvent,
       dataProviders,
+      eventIdToNoteIds,
+      getNotesByIds,
       flyoutHeight,
       flyoutHeaderHeight,
       headers,
@@ -150,75 +151,21 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       itemsPerPage,
       itemsPerPageOptions,
       kqlQueryExpression,
-      notes,
-      pinEvent,
       pinnedEventIds,
       range,
-      removeProvider,
       show,
       sort,
-      updateNote,
-      unPinEvent,
-      updateRange,
-      updateSort,
-      updateDataProviderEnabled,
-      updateDataProviderExcluded,
-      updateDataProviderKqlQuery,
-      updateHighlightedDropAndProviderId,
-      updateItemsPerPage,
     } = this.props;
-
-    const onAddNoteToEvent: AddNoteToEvent = ({
-      eventId,
-      noteId,
-    }: {
-      eventId: string;
-      noteId: string;
-    }) => addNoteToEvent!({ id, eventId, noteId });
-
-    const onColumnSorted: OnColumnSorted = sorted => updateSort!({ id, sort: sorted });
-
-    const onDataProviderRemoved: OnDataProviderRemoved = (
-      providerId: string,
-      andProviderId?: string
-    ) => removeProvider!({ id, providerId, andProviderId });
-
-    const onRangeSelected: OnRangeSelected = selectedRange =>
-      updateRange!({ id, range: selectedRange });
-
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
-      providerId,
-      enabled,
-      andProviderId,
-    }) => updateDataProviderEnabled!({ id, enabled, providerId, andProviderId });
-
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
-      providerId,
-      excluded,
-      andProviderId,
-    }) => updateDataProviderExcluded!({ id, excluded, providerId, andProviderId });
-
-    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
-      updateDataProviderKqlQuery!({ id, kqlQuery, providerId });
-
-    const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
-      updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage });
-
-    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
-      updateHighlightedDropAndProviderId!({ id, providerId });
-    const onPinEvent: OnPinEvent = eventId => pinEvent!({ id, eventId });
-
-    const onUnPinEvent: OnUnPinEvent = eventId => unPinEvent!({ id, eventId });
-
-    const onUpdateNote: UpdateNote = (note: Note) => updateNote!({ note });
 
     return (
       <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
         {({ indexPattern }) => (
           <Timeline
-            addNoteToEvent={onAddNoteToEvent}
+            addNoteToEvent={this.onAddNoteToEvent}
             columnHeaders={headers!}
             columnRenderers={columnRenderers}
+            eventIdToNoteIds={eventIdToNoteIds!}
+            getNotesByIds={getNotesByIds}
             id={id}
             dataProviders={dataProviders!}
             flyoutHeaderHeight={flyoutHeaderHeight}
@@ -227,34 +174,93 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlQuery={kqlQueryExpression}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-            notes={notes!}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onColumnSorted={onColumnSorted}
-            onDataProviderRemoved={onDataProviderRemoved}
+            onChangeDataProviderKqlQuery={this.onChangeDataProviderKqlQuery}
+            onChangeDroppableAndProvider={this.onChangeDroppableAndProvider}
+            onChangeItemsPerPage={this.onChangeItemsPerPage}
+            onColumnSorted={this.onColumnSorted}
+            onDataProviderRemoved={this.onDataProviderRemoved}
             onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
-            onPinEvent={onPinEvent}
-            onUnPinEvent={onUnPinEvent}
-            onRangeSelected={onRangeSelected}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+            onPinEvent={this.onPinEvent}
+            onUnPinEvent={this.onUnPinEvent}
+            onRangeSelected={this.onRangeSelected}
+            onToggleDataProviderEnabled={this.onToggleDataProviderEnabled}
+            onToggleDataProviderExcluded={this.onToggleDataProviderExcluded}
             pinnedEventIds={pinnedEventIds!}
             range={range!}
             rowRenderers={rowRenderers}
             show={show!}
             sort={sort!}
-            updateNote={onUpdateNote}
+            updateNote={this.onUpdateNote}
           />
         )}
       </WithSource>
     );
   }
+
+  private onAddNoteToEvent: AddNoteToEvent = ({
+    eventId,
+    noteId,
+  }: {
+    eventId: string;
+    noteId: string;
+  }) => this.props.addNoteToEvent!({ id: this.props.id, eventId, noteId });
+
+  private onColumnSorted: OnColumnSorted = sorted =>
+    this.props.updateSort!({ id: this.props.id, sort: sorted });
+
+  private onDataProviderRemoved: OnDataProviderRemoved = (
+    providerId: string,
+    andProviderId?: string
+  ) => this.props.removeProvider!({ id: this.props.id, providerId, andProviderId });
+
+  private onRangeSelected: OnRangeSelected = selectedRange =>
+    this.props.updateRange!({ id: this.props.id, range: selectedRange });
+
+  private onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
+    providerId,
+    enabled,
+    andProviderId,
+  }) =>
+    this.props.updateDataProviderEnabled!({
+      id: this.props.id,
+      enabled,
+      providerId,
+      andProviderId,
+    });
+
+  private onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
+    providerId,
+    excluded,
+    andProviderId,
+  }) =>
+    this.props.updateDataProviderExcluded!({
+      id: this.props.id,
+      excluded,
+      providerId,
+      andProviderId,
+    });
+
+  private onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
+    this.props.updateDataProviderKqlQuery!({ id: this.props.id, kqlQuery, providerId });
+
+  private onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
+    this.props.updateItemsPerPage!({ id: this.props.id, itemsPerPage: itemsChangedPerPage });
+
+  private onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
+    this.props.updateHighlightedDropAndProviderId!({ id: this.props.id, providerId });
+
+  private onPinEvent: OnPinEvent = eventId => this.props.pinEvent!({ id: this.props.id, eventId });
+
+  private onUnPinEvent: OnUnPinEvent = eventId =>
+    this.props.unPinEvent!({ id: this.props.id, eventId });
+
+  private onUpdateNote: UpdateNote = (note: Note) => this.props.updateNote!({ note });
 }
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
+  const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: timelineModel.TimelineModel = getTimeline(state, id);
     const {
@@ -267,8 +273,6 @@ const makeMapStateToProps = () => {
       show,
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
-    const notesById = appSelectors.notesByIdSelector(state);
-    const notes = getEventNotes({ eventIdToNoteIds, notesById });
 
     return {
       dataProviders,
@@ -277,7 +281,8 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       kqlQueryExpression,
-      notes,
+      eventIdToNoteIds,
+      getNotesByIds: getNotesByIds(state),
       pinnedEventIds,
       sort,
       show,

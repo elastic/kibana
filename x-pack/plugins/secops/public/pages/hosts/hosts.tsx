@@ -101,7 +101,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       )}
                     </HostsQuery>
                     <UncommonProcessesQuery
-                      cursor={null}
                       endDate={to}
                       filterQuery={filterQuery}
                       poll={poll}

@@ -8,12 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
-import { ESQuery } from '../../../common/typed_json';
 import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { authenticationsQuery } from './index.gql_query';
 
 export interface AuthenticationArgs {
@@ -26,14 +25,8 @@ export interface AuthenticationArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps {
-  id?: string;
+export interface OwnProps extends QueryTemplateProps {
   children: (args: AuthenticationArgs) => React.ReactNode;
-  sourceId: string;
-  startDate: number;
-  endDate: number;
-  filterQuery?: ESQuery | string;
-  poll: number;
   type: hostsModel.HostsType;
 }
 
@@ -43,78 +36,86 @@ export interface AuthenticationsComponentReduxProps {
 
 type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
 
-const AuthenticationsComponentQuery = pure<AuthenticationsProps>(
-  ({
-    id = 'authenticationQuery',
-    children,
-    filterQuery,
-    sourceId,
-    startDate,
-    endDate,
-    limit,
-    poll,
-  }) => (
-    <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
-      query={authenticationsQuery}
-      fetchPolicy="cache-and-network"
-      pollInterval={poll}
-      notifyOnNetworkStatusChange
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        pagination: {
-          limit,
-          cursor: null,
-          tiebreaker: null,
-        },
-        filterQuery: createFilter(filterQuery),
-      }}
-    >
-      {({ data, loading, fetchMore, refetch }) => {
-        const authentications = getOr([], 'source.Authentications.edges', data);
-        return children({
-          id,
-          refetch,
-          loading,
-          totalCount: getOr(0, 'source.Authentications.totalCount', data),
-          authentications,
-          pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
-          loadMore: (newCursor: string) =>
-            fetchMore({
-              variables: {
-                pagination: {
-                  cursor: newCursor,
-                  limit: limit + parseInt(newCursor, 10),
-                },
+class AuthenticationsComponentQuery extends QueryTemplate<
+  AuthenticationsProps,
+  GetAuthenticationsQuery.Query,
+  GetAuthenticationsQuery.Variables
+> {
+  public render() {
+    const {
+      id = 'authenticationQuery',
+      children,
+      filterQuery,
+      sourceId,
+      startDate,
+      endDate,
+      limit,
+      poll,
+    } = this.props;
+    return (
+      <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
+        query={authenticationsQuery}
+        fetchPolicy="cache-and-network"
+        pollInterval={poll}
+        notifyOnNetworkStatusChange
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate!,
+            to: endDate!,
+          },
+          pagination: {
+            limit,
+            cursor: null,
+            tiebreaker: null,
+          },
+          filterQuery: createFilter(filterQuery),
+        }}
+      >
+        {({ data, loading, fetchMore, refetch }) => {
+          const authentications = getOr([], 'source.Authentications.edges', data);
+          this.setFetchMore(fetchMore);
+          this.setFetchMoreOptions((newCursor: string) => ({
+            variables: {
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
               },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                return {
-                  ...fetchMoreResult,
-                  source: {
-                    ...fetchMoreResult.source,
-                    Authentications: {
-                      ...fetchMoreResult.source.Authentications,
-                      edges: [
-                        ...prev.source.Authentications.edges,
-                        ...fetchMoreResult.source.Authentications.edges,
-                      ],
-                    },
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) {
+                return prev;
+              }
+              return {
+                ...fetchMoreResult,
+                source: {
+                  ...fetchMoreResult.source,
+                  Authentications: {
+                    ...fetchMoreResult.source.Authentications,
+                    edges: [
+                      ...prev.source.Authentications.edges,
+                      ...fetchMoreResult.source.Authentications.edges,
+                    ],
                   },
-                };
-              },
-            }),
-        });
-      }}
-    </Query>
-  )
-);
+                },
+              };
+            },
+          }));
+          return children({
+            id,
+            refetch,
+            loading,
+            totalCount: getOr(0, 'source.Authentications.totalCount', data),
+            authentications,
+            pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
+            loadMore: this.wrappedLoadMore,
+          });
+        }}
+      </Query>
+    );
+  }
+}
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
