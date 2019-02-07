@@ -45,6 +45,10 @@ const privilegeMap = {
       'bar-privilege-1': [],
       'bar-privilege-2': [],
     }
+  },
+  reserved: {
+    customApplication1: [],
+    customApplication2: [],
   }
 };
 
@@ -220,6 +224,31 @@ describe('PUT role', () => {
         },
       });
 
+      putRoleTest(`only allows known Kibana reserved privileges`, {
+        name: 'foo-role',
+        payload: {
+          kibana: [
+            {
+              _reserved: ['customApplication3'],
+              spaces: ['*']
+            }
+          ]
+        },
+        asserts: {
+          statusCode: 400,
+          result: {
+            error: 'Bad Request',
+            //eslint-disable-next-line max-len
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"_reserved\" fails because [\"_reserved\" at position 0 fails because [\"0\" must be one of [customApplication1, customApplication2]]]]]`,
+            statusCode: 400,
+            validation: {
+              keys: ['kibana.0._reserved.0'],
+              source: 'payload',
+            },
+          },
+        },
+      });
+
       putRoleTest(`only allows one global entry`, {
         name: 'foo-role',
         payload: {
@@ -361,6 +390,31 @@ describe('PUT role', () => {
           },
         },
       });
+
+      putRoleTest(`can't assign _reserved privilege at a space`, {
+        name: 'foo-role',
+        payload: {
+          kibana: [
+            {
+              _reserved: ['customApplication1'],
+              spaces: ['marketing']
+            },
+          ]
+        },
+        asserts: {
+          statusCode: 400,
+          result: {
+            error: 'Bad Request',
+            //eslint-disable-next-line max-len
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"_reserved\" fails because [\"_reserved\" is not allowed]]]`,
+            statusCode: 400,
+            validation: {
+              keys: ['kibana.0._reserved'],
+              source: 'payload'
+            }
+          },
+        },
+      });
     });
 
     putRoleTest(`returns result of routePreCheckLicense`, {
@@ -410,7 +464,7 @@ describe('PUT role', () => {
       payload: {
         kibana: [
           {
-            base: ['all']
+            base: ['all'],
           }
         ]
       },
@@ -473,7 +527,8 @@ describe('PUT role', () => {
               foo: ['foo-privilege-1', 'foo-privilege-2'],
               bar: ['bar-privilege-1', 'bar-privilege-2']
             },
-            spaces: ['*']
+            spaces: ['*'],
+            _reserved: ['customApplication1', 'customApplication2']
           },
           {
             base: ['all', 'read'],
@@ -511,6 +566,8 @@ describe('PUT role', () => {
                       'feature_foo.foo-privilege-2',
                       'feature_bar.bar-privilege-1',
                       'feature_bar.bar-privilege-2',
+                      'reserved_customApplication1',
+                      'reserved_customApplication2',
                     ],
                     resources: [GLOBAL_RESOURCE],
                   },

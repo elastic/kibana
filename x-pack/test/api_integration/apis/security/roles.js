@@ -100,6 +100,39 @@ export default function ({ getService }) {
           }
         });
       });
+
+      it('should create a role with kibana reserved privileges', async () => {
+        await supertest.put('/api/security/role/role_with_kibana_reserved_privileges')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            kibana: [
+              {
+                _reserved: ['apm', 'ml', 'monitoring']
+              }
+            ]
+          })
+          .expect(204);
+
+        const role = await es.shield.getRole({ name: 'role_with_kibana_reserved_privileges' });
+        expect(role).to.eql({
+          role_with_kibana_reserved_privileges: {
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['reserved_apm', 'reserved_ml', 'reserved_monitoring'],
+                resources: ['*'],
+              }
+            ],
+            run_as: [],
+            metadata: {},
+            transient_metadata: {
+              enabled: true,
+            },
+          }
+        });
+      });
     });
 
     describe('Update Role', () => {
@@ -122,7 +155,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read'],
+                privileges: ['read', 'reserved_ml'],
                 resources: ['*'],
               },
               {
@@ -161,6 +194,7 @@ export default function ({ getService }) {
             },
             kibana: [
               {
+                _reserved: ['apm', 'monitoring'],
                 base: ['read'],
                 feature: {
                   dashboard: ["read"],
@@ -200,7 +234,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_apm', 'reserved_monitoring'],
                 resources: ['*'],
               },
               {
