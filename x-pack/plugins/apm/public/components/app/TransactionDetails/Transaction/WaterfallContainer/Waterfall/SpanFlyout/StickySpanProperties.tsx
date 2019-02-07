@@ -49,9 +49,9 @@ function getSpanTypes(span: Span) {
   const [primaryType, subtypeFromType, actionFromType] = type.split('.'); // This is to support 6.x data
 
   return {
-    type: primaryType,
-    subtype: subtype || subtypeFromType,
-    action: action || actionFromType
+    spanType: formatType(primaryType),
+    spanSubtype: formatSubtype(subtype || subtypeFromType),
+    spanAction: action || actionFromType
   };
 }
 
@@ -67,9 +67,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
 
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
-  const { type, subtype, action } = getSpanTypes(span);
-  const spanType = formatType(type);
-  const spanSubtype = formatSubtype(subtype);
+  const { spanType, spanSubtype, spanAction } = getSpanTypes(span);
   const stickyProperties = [
     {
       label: i18n.translate(
@@ -133,7 +131,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
     });
   }
 
-  if (action) {
+  if (spanAction) {
     stickyProperties.push({
       fieldName: SPAN_ACTION,
       label: i18n.translate(
@@ -142,7 +140,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
           defaultMessage: 'Action'
         }
       ),
-      val: action,
+      val: spanAction,
       truncated: true,
       width: '15%'
     });
