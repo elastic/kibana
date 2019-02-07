@@ -9,7 +9,7 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_SAMPLED
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 import { getTransactionGroups } from '../transaction_groups';
 import { ITransactionGroup } from '../transaction_groups/transform';

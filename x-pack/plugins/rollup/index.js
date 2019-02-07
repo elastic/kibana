@@ -19,6 +19,7 @@ import { registerRollupUsageCollector } from './server/usage';
 export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.rollup',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {

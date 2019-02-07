@@ -24,15 +24,15 @@ function flatKeys(source) {
 
 const disableCollection = {
   'persistent':
-  {
-    xpack: {
-      monitoring: {
-        collection: {
-          enabled: false
+    {
+      xpack: {
+        monitoring: {
+          collection: {
+            enabled: false
+          }
         }
       }
     }
-  }
 };
 
 export default function ({ getService }) {
@@ -174,4 +174,3 @@ export default function ({ getService }) {
 
   });
 }
-

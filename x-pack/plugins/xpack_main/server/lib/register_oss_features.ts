@@ -119,6 +119,10 @@ const kibanaFeatures: Feature[] = [
         ui: [],
       },
     },
+    privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
+      defaultMessage:
+        'User should also be granted the appropriate Elasticsearch cluster and index privileges',
+    }),
   },
   {
     id: 'advancedSettings',
@@ -136,6 +140,13 @@ const kibanaFeatures: Feature[] = [
         savedObject: {
           all: ['config'],
           read: [],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['config'],
         },
         ui: [],
       },
@@ -157,6 +168,13 @@ const kibanaFeatures: Feature[] = [
         savedObject: {
           all: ['index-pattern'],
           read: ['config'],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['index-pattern', 'config'],
         },
         ui: [],
       },

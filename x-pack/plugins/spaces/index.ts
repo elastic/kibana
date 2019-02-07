@@ -29,7 +29,7 @@ import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { initPublicSpacesApi } from './server/routes/api/public';
 import { initPrivateApis } from './server/routes/api/v1';
 
-export const spaces = (kibana: any) =>
+export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
     configPrefix: 'xpack.spaces',

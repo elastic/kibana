@@ -16,7 +16,6 @@ import { Header } from '../../components/header';
 import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
 
-import { InfraHeaderFeedbackLink } from '../../components/header_feedback_link';
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
@@ -43,7 +42,6 @@ export const LogsPage = injectI18n(
       return (
         <ColumnarPage>
           <Header
-            appendSections={<InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/logs" />}
             breadcrumbs={[
               {
                 text: intl.formatMessage({

@@ -34,7 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'timePicker']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -494,19 +494,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setTimepickerInHistoricalDataRange() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInDataRange() {
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInLogstashDataRange() {
       const fromTime = '2018-04-09 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setSaveAsNewCheckBox(checked) {

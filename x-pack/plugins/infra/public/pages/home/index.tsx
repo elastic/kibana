@@ -15,7 +15,6 @@ import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
-import { InfraHeaderFeedbackLink } from '../../components/header_feedback_link';
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
@@ -38,9 +37,15 @@ export const HomePage = injectI18n(
       return (
         <ColumnarPage>
           <Header
-            appendSections={
-              <InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/infrastructure" />
-            }
+            breadcrumbs={[
+              {
+                href: '#/',
+                text: intl.formatMessage({
+                  id: 'xpack.infra.header.infrastructureTitle',
+                  defaultMessage: 'Infrastructure',
+                }),
+              },
+            ]}
           />
           <SourceConfigurationFlyout />
           <WithSource>
