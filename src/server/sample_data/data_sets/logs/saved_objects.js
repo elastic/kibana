@@ -201,10 +201,10 @@ export const getSavedObjects = () => [
     "version": 1,
     "migrationVersion": {},
     "attributes": {
-      "title": i18n.translate('server.sampleData.logsSpec.articleTagsTitle', {
-        defaultMessage: '[Logs] Article Tags',
+      "title": i18n.translate('server.sampleData.logsSpec.visitorOSTitle', {
+        defaultMessage: '[Logs] Visitors by OS',
       }),
-      "visState": "{\"title\":\"[Logs] Article Tags\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"machine.os.keyword\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}]}",
+      "visState": "{\"title\":\"[Logs] Visitors by OS\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"machine.os.keyword\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}]}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,

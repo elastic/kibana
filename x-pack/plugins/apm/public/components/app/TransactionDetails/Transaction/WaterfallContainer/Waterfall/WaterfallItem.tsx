@@ -80,7 +80,7 @@ interface IWaterfallItemProps {
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
-  onClick: () => any;
+  onClick: () => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallItem }) {
