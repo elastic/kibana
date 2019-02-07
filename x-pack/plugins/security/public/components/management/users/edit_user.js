@@ -31,6 +31,7 @@ import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { UserAPIClient } from '../../../lib/api';
 
 const validEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line max-len
 const validUsernameRegex = /[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
@@ -55,12 +56,12 @@ class EditUserUI extends Component {
     };
   }
   async componentDidMount() {
-    const { apiClient, username } = this.props;
+    const { username } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
-        user = await apiClient.getUser(username);
-        currentUser = await apiClient.getCurrentUser();
+        user = await UserAPIClient.getUser(username);
+        currentUser = await UserAPIClient.getCurrentUser();
       } catch (err) {
         toastNotifications.addDanger({
           title: this.props.intl.formatMessage({
@@ -75,7 +76,7 @@ class EditUserUI extends Component {
 
     let roles;
     try {
-      roles = await apiClient.getRoles();
+      roles = await UserAPIClient.getRoles();
     } catch (err) {
       toastNotifications.addDanger({
         title: this.props.intl.formatMessage({
@@ -153,10 +154,9 @@ class EditUserUI extends Component {
     }
   };
   changePassword = async () => {
-    const { apiClient } = this.props;
     const { user, password, currentPassword } = this.state;
     try {
-      await apiClient.changePassword(user.username, password, currentPassword);
+      await UserAPIClient.changePassword(user.username, password, currentPassword);
       toastNotifications.addSuccess(
         this.props.intl.formatMessage({
           id: "xpack.security.management.users.editUser.passwordSuccessfullyChangedNotificationMessage",
@@ -178,7 +178,7 @@ class EditUserUI extends Component {
     this.clearPasswordForm();
   };
   saveUser = async () => {
-    const { apiClient, changeUrl } = this.props;
+    const { changeUrl } = this.props;
     const { user, password, selectedRoles } = this.state;
     const userToSave = { ...user };
     userToSave.roles = selectedRoles.map(selectedRole => {
@@ -188,7 +188,7 @@ class EditUserUI extends Component {
       userToSave.password = password;
     }
     try {
-      await apiClient.saveUser(userToSave);
+      await UserAPIClient.saveUser(userToSave);
       toastNotifications.addSuccess(
         this.props.intl.formatMessage({
           id: "xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage",
@@ -365,7 +365,7 @@ class EditUserUI extends Component {
     this.setState({ showDeleteConfirmation: false });
   };
   render() {
-    const { changeUrl, apiClient, intl } = this.props;
+    const { changeUrl, intl } = this.props;
     const {
       user,
       roles,
@@ -427,7 +427,6 @@ class EditUserUI extends Component {
             {showDeleteConfirmation ? (
               <ConfirmDelete
                 onCancel={this.onCancelDelete}
-                apiClient={apiClient}
                 usersToDelete={[user.username]}
                 callback={this.handleDelete}
               />

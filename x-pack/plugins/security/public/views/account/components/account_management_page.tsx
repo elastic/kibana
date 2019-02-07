@@ -5,25 +5,17 @@
  */
 import {
   EuiAvatar,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
   EuiPanel,
   EuiSideNav,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { getUserDisplayName, User } from '../../../../common/model/user';
-import { ChangePassword } from './change_password';
 import { PersonalInfoPanel } from './personal_info_panel';
 import { SecurityPanel } from './security_panel';
 
@@ -35,6 +27,7 @@ type AccountPanel = 'info' | 'security';
 
 interface State {
   activePanel: AccountPanel;
+  isOpenOnMobile: boolean;
 }
 
 export class AccountManagementPage extends Component<Props, State> {
@@ -42,6 +35,7 @@ export class AccountManagementPage extends Component<Props, State> {
     super(props);
     this.state = {
       activePanel: 'info',
+      isOpenOnMobile: false,
     };
   }
 
@@ -49,27 +43,30 @@ export class AccountManagementPage extends Component<Props, State> {
     return (
       <EuiPage>
         <EuiPageBody>
-          <div className="eui-textCenter">
-            <EuiText>
-              <h2>
-                <FormattedMessage
-                  id="xpack.security.account.welcomeMessage"
-                  defaultMessage="Welcome, {displayName}"
-                  values={{
-                    displayName: getUserDisplayName(this.props.user),
-                  }}
-                />
-              </h2>
-            </EuiText>
-            <EuiText>
-              <h3>Manage your account</h3>
-            </EuiText>
-          </div>
-          <EuiSpacer />
           <EuiFlexGroup direction="row" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>{this.getMenu()}</EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiPanel>{this.getActivePanel()}</EuiPanel>
+            <EuiFlexItem grow={1}>
+              <div style={{ marginTop: '75px' }}>{this.getMenu()}</div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={4}>
+              <div style={{ maxWidth: '1000px' }}>
+                <div className="eui-textCenter" style={{ height: '75px' }}>
+                  <EuiText>
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.security.account.welcomeMessage"
+                        defaultMessage="Welcome, {displayName}"
+                        values={{
+                          displayName: getUserDisplayName(this.props.user),
+                        }}
+                      />
+                    </h2>
+                  </EuiText>
+                  <EuiText>
+                    <h3>Manage your account</h3>
+                  </EuiText>
+                </div>
+                <EuiPanel style={{ margin: '0 auto' }}>{this.getActivePanel()}</EuiPanel>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageBody>
@@ -80,6 +77,9 @@ export class AccountManagementPage extends Component<Props, State> {
   private getMenu() {
     return (
       <EuiSideNav
+        mobileTitle="Account settings"
+        isOpenOnMobile={this.state.isOpenOnMobile}
+        toggleOpenOnMobile={() => this.setState({ isOpenOnMobile: !this.state.isOpenOnMobile })}
         items={[
           {
             id: 'account',

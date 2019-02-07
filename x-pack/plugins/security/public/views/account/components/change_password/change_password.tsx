@@ -7,17 +7,19 @@ import {
   EuiButton,
   // @ts-ignore
   EuiButtonEmpty,
-  EuiCard,
+  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
-  EuiIcon,
-  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import { UserAPIClient } from 'plugins/security/lib/api';
+import React, { ChangeEvent, Component } from 'react';
+import { toastNotifications } from 'ui/notify';
 import { canUserChangePassword, User } from '../../../../../common/model/user';
 
 interface Props {
@@ -25,20 +27,26 @@ interface Props {
 }
 
 interface State {
+  shouldValidate: boolean;
   showForm: boolean;
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+  currentPasswordError: boolean;
+  changeInProgress: boolean;
 }
 
 export class ChangePassword extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      shouldValidate: false,
       showForm: false,
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
+      currentPasswordError: false,
+      changeInProgress: false,
     };
   }
 
@@ -74,51 +82,19 @@ export class ChangePassword extends Component<Props, State> {
     );
   }
 
-  private getLink = () => {
-    const cardTitle = (
-      <h2>
-        <FormattedMessage
-          id="xpack.security.account.changePasswordCardTitle"
-          defaultMessage="Change password"
-        />
-      </h2>
-    );
-    if (!canUserChangePassword(this.props.user)) {
-      return (
-        <EuiCard
-          layout="horizontal"
-          title={cardTitle}
-          description={
-            <FormattedMessage
-              id="xpack.security.account.changePasswordDescription"
-              defaultMessage="this is where you change your password"
-            />
-          }
-          icon={<EuiIcon type="securityApp" size="xl" />}
-          onClick={() => this.setState({ showForm: true })}
-        />
-      );
-    } else {
-      return (
-        <EuiCard
-          layout="horizontal"
-          title={cardTitle}
-          description={
-            <FormattedMessage
-              id="xpack.seurity.account.noChangePasswordDescription"
-              defaultMessage="You cannot change the password for this account"
-            />
-          }
-          icon={<EuiIcon color="subdued" type="securityApp" size="xl" />}
-        />
-      );
-    }
-  };
-
   private getForm = () => {
     return (
-      <Fragment>
+      <EuiForm {...this.state.shouldValidate && this.validateForm()}>
         <EuiFormRow
+          isInvalid={this.state.currentPasswordError}
+          error={
+            this.state.currentPasswordError && (
+              <FormattedMessage
+                id="xpack.security.account.changePasswordForm.invalidPassword"
+                defaultMessage="Password is incorrect"
+              />
+            )
+          }
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.currentPasswordLabel"
@@ -130,6 +106,7 @@ export class ChangePassword extends Component<Props, State> {
             type="password"
             value={this.state.currentPassword}
             onChange={this.onCurrentPasswordChange}
+            disabled={this.state.changeInProgress}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -144,6 +121,7 @@ export class ChangePassword extends Component<Props, State> {
             type="password"
             value={this.state.newPassword}
             onChange={this.onNewPasswordChange}
+            disabled={this.state.changeInProgress}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -158,6 +136,7 @@ export class ChangePassword extends Component<Props, State> {
             type="password"
             value={this.state.confirmPassword}
             onChange={this.onConfirmPasswordChange}
+            disabled={this.state.changeInProgress}
           />
         </EuiFormRow>
         <EuiFormRow>
@@ -167,6 +146,7 @@ export class ChangePassword extends Component<Props, State> {
                 onClick={() => {
                   this.setState({ showForm: false });
                 }}
+                isDisabled={this.state.changeInProgress}
               >
                 <FormattedMessage
                   id="xpack.security.account.changePasswordForm.cancelButtonLabel"
@@ -175,7 +155,11 @@ export class ChangePassword extends Component<Props, State> {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton onClick={this.onChangePasswordClick} fill>
+              <EuiButton
+                onClick={this.onChangePasswordClick}
+                fill
+                isLoading={this.state.changeInProgress}
+              >
                 <FormattedMessage
                   id="xpack.security.account.changePasswordForm.saveChangesButtonLabel"
                   defaultMessage="Save changes"
@@ -184,12 +168,12 @@ export class ChangePassword extends Component<Props, State> {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
-      </Fragment>
+      </EuiForm>
     );
   };
 
   private onCurrentPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ currentPassword: e.target.value });
+    this.setState({ currentPassword: e.target.value, currentPasswordError: false });
   };
 
   private onNewPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -200,7 +184,103 @@ export class ChangePassword extends Component<Props, State> {
     this.setState({ confirmPassword: e.target.value });
   };
 
-  private onChangePasswordClick = () => {
-    return;
+  private onChangePasswordClick = async () => {
+    const { isInvalid } = this.validateForm();
+
+    this.setState({ shouldValidate: true, currentPasswordError: false });
+
+    if (isInvalid) {
+      return;
+    }
+
+    this.setState({ changeInProgress: true }, () => this.performPasswordChange());
+  };
+
+  private validateForm = () => {
+    const { currentPassword, newPassword, confirmPassword } = this.state;
+    if (!currentPassword) {
+      return {
+        isInvalid: true,
+        error: (
+          <FormattedMessage
+            id="xpack.security.account.currentPasswordRequired"
+            defaultMessage="Please enter your current password"
+          />
+        ),
+      };
+    }
+    if (newPassword !== confirmPassword) {
+      return {
+        isInvalid: true,
+        error: (
+          <FormattedMessage
+            id="xpack.security.account.passwordsDoNotMatch"
+            defaultMessage="Passwords to not match"
+          />
+        ),
+      };
+    }
+    const minPasswordLength = 6;
+    if (newPassword.length < minPasswordLength) {
+      return {
+        isInvalid: true,
+        error: (
+          <FormattedMessage
+            id="xpack.security.account.passwordLengthDescription"
+            defaultMessage="Password must be at least {minPasswordLength} characters"
+            values={{
+              minPasswordLength,
+            }}
+          />
+        ),
+      };
+    }
+
+    return {
+      isInvalid: false,
+    };
+  };
+
+  private performPasswordChange = async () => {
+    try {
+      await UserAPIClient.changePassword(
+        this.props.user.username,
+        this.state.newPassword,
+        this.state.currentPassword
+      );
+      this.handleChangePasswordSuccess();
+    } catch (e) {
+      this.handleChangePasswordFailure(e);
+    } finally {
+      this.setState({
+        changeInProgress: false,
+      });
+    }
+  };
+
+  private handleChangePasswordSuccess = () => {
+    toastNotifications.addSuccess(
+      i18n.translate('xpack.security.account.changePasswordSuccess', {
+        defaultMessage: 'Your password has been changed',
+      })
+    );
+    this.setState({
+      currentPasswordError: false,
+      shouldValidate: false,
+      showForm: false,
+    });
+  };
+
+  private handleChangePasswordFailure = (error: Record<string, any>) => {
+    if (error.body && error.body.statusCode === 401) {
+      this.setState({ currentPasswordError: true });
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.security.management.users.editUser.settingPasswordErrorMessage', {
+          defaultMessage: 'Error setting password: {message}',
+          values: { message: _.get(error, 'body.message') },
+        })
+      );
+    }
   };
 }

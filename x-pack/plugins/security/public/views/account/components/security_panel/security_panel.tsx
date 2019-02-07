@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { Component } from 'react';
+import { InjectedIntl } from 'react-intl';
 import { User } from '../../../../../common/model/user';
 import { ManageAPIKeys } from '../api_keys';
 import { ChangePassword } from '../change_password';

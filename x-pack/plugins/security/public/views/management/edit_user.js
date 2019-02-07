@@ -13,7 +13,6 @@ import { EDIT_USERS_PATH } from './management_urls';
 import { EditUser } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { createApiClient } from '../../lib/api';
 import { I18nContext } from 'ui/i18n';
 import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from './breadcrumbs';
 
@@ -22,7 +21,6 @@ const renderReact = (elem, httpClient, changeUrl, username) => {
     <I18nContext>
       <EditUser
         changeUrl={changeUrl}
-        apiClient={createApiClient(httpClient)}
         username={username}
       />
     </I18nContext>,
