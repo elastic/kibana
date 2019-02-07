@@ -13,7 +13,7 @@ export const getInitialState = path => {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: uiCapabilities.canvas.showWriteControls,
+      canUserWrite: uiCapabilities.canvas.save,
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},

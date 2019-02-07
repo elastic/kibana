@@ -424,7 +424,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:index-pattern/bulk_get',
                   'saved_object:index-pattern/get',
                   'saved_object:index-pattern/find',
-                  'ui:canvas/showWriteControls',
+                  'ui:canvas/save',
                   'ui:navLinks/canvas',
                   'ui:catalogue/canvas',
                 ],
