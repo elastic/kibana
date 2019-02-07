@@ -93,7 +93,7 @@ describe('Saved object does not have layer list', () => {
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
       "alpha": 1,
-      dataRequests: [],
+      __dataRequests: [],
       id: layers[0].id,
       label: null,
       maxZoom: 24,
