@@ -47,48 +47,16 @@ const NANMATRIX = [
 
 export const ORIGIN = [0, 0, 0, 1] as vector3d;
 
-export const translate = (x: number, y: number, z: number): transformMatrix3d => [
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  x,
-  y,
-  z,
-  1,
-];
+export const translate = (x: number, y: number, z: number): transformMatrix3d =>
+  [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1] as transformMatrix3d;
 
-export const scale = (x: number, y: number, z: number): transformMatrix3d => [
-  x,
-  0,
-  0,
-  0,
-  0,
-  y,
-  0,
-  0,
-  0,
-  0,
-  z,
-  0,
-  0,
-  0,
-  0,
-  1,
-];
+export const scale = (x: number, y: number, z: number): transformMatrix3d =>
+  [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1] as transformMatrix3d;
 
 export const rotateZ = (a: number): transformMatrix3d => {
   const sinA = Math.sin(a);
   const cosA = Math.cos(a);
-  return [cosA, -sinA, 0, 0, sinA, cosA, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  return [cosA, -sinA, 0, 0, sinA, cosA, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] as transformMatrix3d;
 };
 
 /**
@@ -111,27 +79,28 @@ export const rotateZ = (a: number): transformMatrix3d => {
 const mult = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: transformMatrix3d
-): transformMatrix3d => [
-  a * A + e * B + i * C + m * D,
-  b * A + f * B + j * C + n * D,
-  c * A + g * B + k * C + o * D,
-  d * A + h * B + l * C + p * D,
+): transformMatrix3d =>
+  [
+    a * A + e * B + i * C + m * D,
+    b * A + f * B + j * C + n * D,
+    c * A + g * B + k * C + o * D,
+    d * A + h * B + l * C + p * D,
 
-  a * E + e * F + i * G + m * H,
-  b * E + f * F + j * G + n * H,
-  c * E + g * F + k * G + o * H,
-  d * E + h * F + l * G + p * H,
+    a * E + e * F + i * G + m * H,
+    b * E + f * F + j * G + n * H,
+    c * E + g * F + k * G + o * H,
+    d * E + h * F + l * G + p * H,
 
-  a * I + e * J + i * K + m * L,
-  b * I + f * J + j * K + n * L,
-  c * I + g * J + k * K + o * L,
-  d * I + h * J + l * K + p * L,
+    a * I + e * J + i * K + m * L,
+    b * I + f * J + j * K + n * L,
+    c * I + g * J + k * K + o * L,
+    d * I + h * J + l * K + p * L,
 
-  a * M + e * N + i * O + m * P,
-  b * M + f * N + j * O + n * P,
-  c * M + g * N + k * O + o * P,
-  d * M + h * N + l * O + p * P,
-];
+    a * M + e * N + i * O + m * P,
+    b * M + f * N + j * O + n * P,
+    c * M + g * N + k * O + o * P,
+    d * M + h * N + l * O + p * P,
+  ] as transformMatrix3d;
 
 export const multiply = (
   first: transformMatrix3d,
@@ -158,15 +127,16 @@ export const multiply = (
 export const mvMultiply = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
   [A, B, C, D]: vector3d
-): vector3d => [
-  a * A + e * B + i * C + m * D,
-  b * A + f * B + j * C + n * D,
-  c * A + g * B + k * C + o * D,
-  d * A + h * B + l * C + p * D,
-];
+): vector3d =>
+  [
+    a * A + e * B + i * C + m * D,
+    b * A + f * B + j * C + n * D,
+    c * A + g * B + k * C + o * D,
+    d * A + h * B + l * C + p * D,
+  ] as vector3d;
 
 export const normalize = ([A, B, C, D]: vector3d): vector3d =>
-  D === 1 ? [A, B, C, D] : [A / D, B / D, C / D, 1];
+  D === 1 ? ([A, B, C, D] as vector3d) : ([A / D, B / D, C / D, 1] as vector3d);
 
 /**
  * invert
@@ -230,24 +200,8 @@ export const invert = ([
   }
 };
 
-export const translateComponent = (a: transformMatrix3d): transformMatrix3d => [
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  a[12],
-  a[13],
-  a[14],
-  1,
-];
+export const translateComponent = (a: transformMatrix3d): transformMatrix3d =>
+  [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], 1] as transformMatrix3d;
 
 export const compositeComponent = ([
   a,
@@ -266,51 +220,54 @@ export const compositeComponent = ([
   n,
   o,
   p,
-]: transformMatrix3d): transformMatrix3d => [a, b, c, d, e, f, g, h, i, j, k, l, 0, 0, 0, p];
+]: transformMatrix3d): transformMatrix3d =>
+  [a, b, c, d, e, f, g, h, i, j, k, l, 0, 0, 0, p] as transformMatrix3d;
 
 export const add = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: transformMatrix3d
-): transformMatrix3d => [
-  a + A,
-  b + B,
-  c + C,
-  d + D,
-  e + E,
-  f + F,
-  g + G,
-  h + H,
-  i + I,
-  j + J,
-  k + K,
-  l + L,
-  m + M,
-  n + N,
-  o + O,
-  p + P,
-];
+): transformMatrix3d =>
+  [
+    a + A,
+    b + B,
+    c + C,
+    d + D,
+    e + E,
+    f + F,
+    g + G,
+    h + H,
+    i + I,
+    j + J,
+    k + K,
+    l + L,
+    m + M,
+    n + N,
+    o + O,
+    p + P,
+  ] as transformMatrix3d;
 
 export const subtract = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: transformMatrix3d
-): transformMatrix3d => [
-  a - A,
-  b - B,
-  c - C,
-  d - D,
-  e - E,
-  f - F,
-  g - G,
-  h - H,
-  i - I,
-  j - J,
-  k - K,
-  l - L,
-  m - M,
-  n - N,
-  o - O,
-  p - P,
-];
+): transformMatrix3d =>
+  [
+    a - A,
+    b - B,
+    c - C,
+    d - D,
+    e - E,
+    f - F,
+    g - G,
+    h - H,
+    i - I,
+    j - J,
+    k - K,
+    l - L,
+    m - M,
+    n - N,
+    o - O,
+    p - P,
+  ] as transformMatrix3d;
 
 export const reduceTransforms = (transforms: transformMatrix3d[]): transformMatrix3d =>
   transforms.length === 1

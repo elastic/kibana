@@ -4,39 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type vector2d = [number, number, number] & ReadonlyArray<number> & { length: 3 };
-export type transformMatrix2d = [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number
-] &
-  ReadonlyArray<number> & { length: 9 };
+type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
+type f = f64; // shorthand
 
-export type vector3d = [number, number, number, number] & ReadonlyArray<number> & { length: 4 };
-export type transformMatrix3d = ReadonlyArray<number> & { length: 16 } & [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number
-  ];
+export type vector2d = [f, f, f] & ReadonlyArray<f> & { __nominal: 'vector2d' };
+export type vector3d = [f, f, f, f] & ReadonlyArray<f> & { __nominal: 'vector3d' };
+
+export type transformMatrix2d = [f, f, f, f, f, f, f, f, f] &
+  ReadonlyArray<f> & { __nominal: 'transformMatrix2d' };
+export type transformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] &
+  ReadonlyArray<f> & { __nominal: 'transformMatrix3d' };
 
 export interface Meta {
   silent: boolean;
