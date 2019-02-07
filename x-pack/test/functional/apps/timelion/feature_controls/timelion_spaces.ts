@@ -86,6 +86,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToActualUrl('timelion', 'i-exist', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
 
         const messageText = await getMessageText();
@@ -102,6 +103,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToActualUrl('timelion', 'i-dont-exist', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
 
         const messageText = await getMessageText();
@@ -118,6 +120,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToActualUrl('timelion', 'i-exist', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
 
         const messageText = await getMessageText();
