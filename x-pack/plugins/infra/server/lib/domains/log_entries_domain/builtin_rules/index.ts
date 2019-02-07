@@ -6,6 +6,7 @@
 
 import { filebeatApache2Rules } from './filebeat_apache2';
 import { filebeatAuditdRules } from './filebeat_auditd';
+import { filebeatHaproxyRules } from './filebeat_haproxy';
 import { filebeatIcingaRules } from './filebeat_icinga';
 import { filebeatMySQLRules } from './filebeat_mysql';
 import { filebeatNginxRules } from './filebeat_nginx';
@@ -21,6 +22,7 @@ export const builtinRules = [
   ...filebeatSystemRules,
   ...filebeatMySQLRules,
   ...filebeatAuditdRules,
+  ...filebeatHaproxyRules,
   ...filebeatIcingaRules,
   ...genericRules,
   {
