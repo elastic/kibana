@@ -24,7 +24,6 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   PROMOTE_TEMPORARY_STYLES,
-  CLEAR_TEMPORARY_STYLES,
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
@@ -260,22 +259,14 @@ export function map(state = INITIAL_STATE, action) {
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
       const styleLayerId = action.layerId;
-      const styleLayerIdx = findLayerIndex(state.layerList, styleLayerId);
-      const layerStyle = state.layerList[styleLayerIdx].style;
-      const layerPrevStyle = layerStyle.__previousStyle || layerStyle;
       return updateLayerInList(state, styleLayerId, 'style',
-        { ...action.style, __previousStyle: { ...layerPrevStyle } });
+        { ...action.style });
     case PROMOTE_TEMPORARY_STYLES:
       const stylePromoteIdx = findLayerIndex(state.layerList, state.selectedLayerId);
       const styleToSet = {
-        ...state.layerList[stylePromoteIdx].style,
-        __previousStyle: null
+        ...state.layerList[stylePromoteIdx].style
       };
       return updateLayerInList(state, state.selectedLayerId, 'style', styleToSet);
-    case CLEAR_TEMPORARY_STYLES:
-      const styleClearIdx = findLayerIndex(state.layerList, state.selectedLayerId);
-      const prevStyleToLoad = state.layerList[styleClearIdx].style.__previousStyle || state.layerList[styleClearIdx].style || {};
-      return updateLayerInList(state, state.selectedLayerId, 'style', prevStyleToLoad);
     default:
       return state;
   }

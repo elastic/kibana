@@ -488,8 +488,8 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor({
+  renderStyleEditor(Style, options) {
+    return Style.renderEditor({
       layer: this,
       ...options
     });
