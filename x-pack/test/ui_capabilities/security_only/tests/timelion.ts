@@ -32,7 +32,7 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('timelion');
             expect(uiCapabilities.value!.timelion).to.eql({
-              showWriteControls: true,
+              save: true,
             });
             break;
           // these users have a read-only view of Timelion
@@ -41,7 +41,7 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('timelion');
             expect(uiCapabilities.value!.timelion).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           // these users can't do anything with Timelion
@@ -67,7 +67,7 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('timelion');
             expect(uiCapabilities.value!.timelion).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           case 'legacy_all':
