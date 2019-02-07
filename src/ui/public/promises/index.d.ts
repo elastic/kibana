@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { kfetch, addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+export { PromiseService } from './promises';
