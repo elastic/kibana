@@ -68,7 +68,6 @@ timefilter.setTime({
 });
 
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { chartLimits } from '../../util/chart_utils';
@@ -132,16 +131,14 @@ describe('ExplorerChartsContainer', () => {
   });
 
   test('Image Snapshot', (done) => {
-    const wrapper = mount(<ExplorerChartsContainer
+    const wrapper = mountWithIntl(<ExplorerChartsContainer
       seriesToPlot={[{
         ...seriesConfig,
         chartData,
         chartLimits: chartLimits(chartData)
       }]}
-      layoutCellsPerChart={12}
+      chartsPerRow={1}
       tooManyBuckets={false}
-      mlSelectSeverityService={mlSelectSeverityServiceMock}
-      mlChartTooltipService={mlChartTooltipService}
     />);
 
     testImage(wrapper.html(), (image) => {

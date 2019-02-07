@@ -21,25 +21,8 @@ const CSS = fs.read('../node_modules/@elastic/eui/dist/eui_theme_k6_light.css', 
 var queue = [];
 
 server.listen(port, function (request, response) {
-  const queryIndex = request.url.indexOf('?');
-  var params = {};
-  if (queryIndex >= 0) {
-    var queries = request.url.substr(queryIndex + 1).split('&');
-    for (var i = 0; i < queries.length; i++) {
-      try {
-        var match = queries[i].match(/([^=]*)=(.*)/);
-        params[match[1]] = decodeURIComponent(match[2]);
-      } catch (e) { /* silent fail */ }
-    }
-  }
-  if (true) {
-    queue.push({ response: response, html: request.post });
-    consumeCapture();
-  } else {
-    response.statusCode = 404;
-    response.write('404 not found');
-    response.close();
-  }
+  queue.push({ response: response, html: request.post });
+  consumeCapture();
 });
 
 console.log('running on port: ', port);
