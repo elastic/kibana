@@ -58,7 +58,7 @@ export class ErrorToast extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { toastLifeTimeMs = 5000 } = this.props;
+    const { toastLifeTimeMs = 10000 } = this.props;
     return (
       <EuiGlobalToastList
         toasts={this.state.toasts}

@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const DATA_FETCH_FAILURE = i18n.translate(
-  'xpack.secops.containers.errors.dataFetchFailureDescription',
+  'xpack.secops.containers.errors.dataFetchFailureTitle',
   {
     defaultMessage: 'Data Fetch Failure',
   }
 );
 
 export const NETWORK_FAILURE = i18n.translate(
-  'xpack.secops.containers.errors.networkFailureDescription',
+  'xpack.secops.containers.errors.networkFailureTitle',
   {
     defaultMessage: 'Network Failure',
   }
