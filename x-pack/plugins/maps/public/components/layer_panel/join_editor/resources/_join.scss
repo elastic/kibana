@@ -1,13 +1,12 @@
 .mapJoinItem {
-
   position: relative;
   background: tintOrShade($euiColorLightShade, 85%, 0);
   border-radius: $euiBorderRadius;
   padding: $euiSizeXS;
 
   .mapJoinItem__inner {
-    overflow: auto;
     @include euiScrollBar;
+    overflow: auto;
   }
 
   &:hover,
