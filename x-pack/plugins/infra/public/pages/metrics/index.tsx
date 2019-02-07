@@ -14,6 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
 import styled, { withTheme } from 'styled-components';
 
@@ -130,7 +131,8 @@ export const MetricDetail = withTheme(
                                 if (error) {
                                   if (error.graphQLErrors) {
                                     const invalidNodeError = error.graphQLErrors.find(
-                                      (err: any) => err.code === InfraMetricsErrorCodes.invalid_node
+                                      (err: GraphQLFormattedError) =>
+                                        err.code === InfraMetricsErrorCodes.invalid_node
                                     );
 
                                     if (invalidNodeError) {
