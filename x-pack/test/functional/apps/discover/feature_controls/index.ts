@@ -8,7 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 // tslint:disable:no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('feature controls', () => {
-    loadTestFile(require.resolve('./security'));
-    loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./discover_security'));
+    loadTestFile(require.resolve('./discover_spaces'));
   });
 }
