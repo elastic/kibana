@@ -15,6 +15,7 @@ import {
   uniq,
   zipObject
 } from 'lodash';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 
@@ -191,9 +192,7 @@ function getServices(items: IWaterfallItem[]) {
   return uniq(serviceNames);
 }
 
-export interface IServiceColors {
-  [key: string]: string;
-}
+export type IServiceColors = StringMap<string>;
 
 function getServiceColors(services: string[]) {
   const assignedColors = [
