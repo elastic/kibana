@@ -1,10 +1,14 @@
 /*
-  Uses phantomjs for this PoC
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-// eslint-disable-next-line import/no-unresolved
+// uses https://www.npmjs.com/package/phantomjs-prebuilt
+// run: phantomjs phantom-server.js
+
+// https://gist.github.com/tompng/6433480
 const server = require('webserver').create();
-// eslint-disable-next-line import/no-unresolved
 const webpage = require('webpage');
 const fs = require('fs');
 
@@ -12,29 +16,33 @@ const port = 8080;
 
 const CSS = fs.read('../../node_modules/@elastic/eui/dist/eui_theme_k6_light.css', 'utf8');
 
-const queue = [];
-
 server.listen(port, function (request, response) {
-  const queryIndex = request.url.indexOf('?');
-  const params = {};
+  const queryIndex = request.url.indexOf("?");
+  var params = {};
   if (queryIndex >= 0) {
-    const queries = request.url.substr(queryIndex + 1).split('&');
-    for (let i = 0; i < queries.length; i++) {
+    var queries = request.url.substr(queryIndex + 1).split('&');
+    for (var i = 0; i < queries.length; i++) {
       try {
-        const match = queries[i].match(/([^=]*)=(.*)/);
+        var match = queries[i].match(/([^=]*)=(.*)/);
         params[match[1]] = decodeURIComponent(match[2]);
-      } catch (e) { /* silent fail */ }
+      } catch (e) { }
     }
   }
-
-  queue.push({ response: response, html: request.post });
-  consumeCapture();
+  if (true) {
+    queue.push({ response: response, html: request.post });
+    consumeCapture();
+  } else {
+    response.statusCode = 404;
+    response.write('404 not found');
+    response.close();
+  }
 });
 
 console.log('running on port: ', port);
 
-const NUM_PAGES = 10;
-let pages = NUM_PAGES;
+var queue = [];
+var NUM_PAGES = 10;
+var pages = NUM_PAGES;
 
 function consumeCapture() {
   while (queue.length && pages > 0) {
@@ -48,16 +56,15 @@ function capture(data) {
 
   console.log('start', data.selector);
 
-  const page = webpage.create();
+  var page = webpage.create();
 
-  page.content = '<html><head><style>' + CSS + '</style></head>'
-    + '<body style="width: 800px;"><div class="content" style="padding: 20px; display: inline-block">'
-    + data.html + '</div></body></html>';
+  // https://stackoverflow.com/a/11771464/2266116
+  page.content = '<html><head><style>' + CSS + '</style></head><body style="width: 800px;"><div class="content" style="padding: 20px; display: inline-block">' + data.html + '</div></body></html>';
 
-  const originalRect = { left: 0, top: 0, width: 500, height: 500 };
+  var originalRect = { left: 0, top: 0, width: 500, height: 500 };
 
-  const rect = page.evaluate(function (data) {
-    const element = document.querySelector(data.selector);
+  var rect = page.evaluate(function (data) {
+    var element = document.querySelector(data.selector);
     if (element) return element.getClientRects()[0];
   }, data);
   console.log('rect', JSON.stringify(rect));
