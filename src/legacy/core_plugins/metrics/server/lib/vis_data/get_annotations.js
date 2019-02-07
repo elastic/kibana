@@ -68,7 +68,7 @@ async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
   const indexPatternString = annotation.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
-  const esShardTimeout = getEsShardTimeout(req);
+  const esShardTimeout = await getEsShardTimeout(req);
 
   if (esShardTimeout > 0) {
     request.timeout = `${esShardTimeout}ms`;

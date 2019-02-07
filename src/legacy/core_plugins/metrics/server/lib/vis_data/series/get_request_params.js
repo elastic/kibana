@@ -25,7 +25,7 @@ export default async (req, panel, series, esQueryConfig) => {
   const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject);
-  const esShardTimeout = getEsShardTimeout(req);
+  const esShardTimeout = await getEsShardTimeout(req);
 
   if (esShardTimeout > 0) {
     request.timeout = `${esShardTimeout}ms`;
