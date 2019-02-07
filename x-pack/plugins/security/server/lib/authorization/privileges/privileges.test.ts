@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { Feature } from '../../../../xpack_main/types';
+import { Feature } from '../../../../../xpack_main/types';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
@@ -234,6 +233,27 @@ describe('features', () => {
         actions.ui.get('foo', 'read-ui-2'),
       ],
     });
+  });
+
+  test(`features with no privileges are specified with an empty object`, () => {
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: 'Foo Feature',
+        icon: 'arrowDown',
+        app: [],
+        privileges: {},
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.foo', {});
   });
 });
 
