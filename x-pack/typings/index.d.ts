@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { annotationProvider } from './annotation';
-
-export function annotationServiceProvider(callWithRequest) {
-  return {
-    ...annotationProvider(callWithRequest)
-  };
+declare module '*.html' {
+  const template: string;
+  export default template;
 }
