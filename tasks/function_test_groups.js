@@ -51,7 +51,7 @@ export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = 
           '--include-tag', tag,
           '--config', 'test/functional/config.js',
           '--esFrom', esFrom,
-          //'--bail',
+          '--bail',
           '--debug',
           '--kibana-install-dir', kibanaInstallDir,
           '--',
