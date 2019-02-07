@@ -27,9 +27,9 @@ import {
 
 interface Props {
   associateNote: AssociateNote;
-  getNotesByIds: (eventIds: string[]) => Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   getNewNoteId: GetNewNoteId;
-  notes: string[];
+  noteIds: string[];
   updateNote: UpdateNote;
 }
 
@@ -65,12 +65,12 @@ export class Notes extends React.PureComponent<Props, State> {
   }
 
   public render() {
-    const { associateNote, getNotesByIds, getNewNoteId, notes, updateNote } = this.props;
+    const { associateNote, getNotesByIds, getNewNoteId, noteIds, updateNote } = this.props;
 
     return (
       <NotesPanel>
         <NotesContainer>
-          <NotesCount notes={notes} />
+          <NotesCount noteIds={noteIds} />
           <EuiHorizontalRule margin="m" />
           <AddNote
             associateNote={associateNote}
@@ -81,7 +81,7 @@ export class Notes extends React.PureComponent<Props, State> {
           />
           <InMemoryTable
             data-test-subj="notes-table"
-            items={getItems(notes, getNotesByIds)}
+            items={getItems(noteIds, getNotesByIds)}
             columns={columns}
             pagination={false}
             search={search}

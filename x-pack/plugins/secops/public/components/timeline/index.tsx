@@ -50,7 +50,7 @@ interface StateReduxProps {
   activePage?: number;
   dataProviders?: DataProvider[];
   eventIdToNoteIds?: { [eventId: string]: string[] };
-  getNotesByIds: (eventIds: string[]) => Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   headers?: ColumnHeader[];
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];

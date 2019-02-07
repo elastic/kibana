@@ -48,7 +48,7 @@ interface Props {
   isLive: boolean;
   title: string;
   description: string;
-  getNotesByIds: (eventIds: string[]) => Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   history: History[];
   timelineId: string;
@@ -144,7 +144,7 @@ export class Properties extends React.PureComponent<Props, State> {
                 animate={true}
                 associateNote={associateNote}
                 getNotesByIds={getNotesByIds}
-                notes={noteIds}
+                noteIds={noteIds}
                 showNotes={this.state.showNotes}
                 size="l"
                 text={i18n.NOTES}
@@ -200,7 +200,7 @@ export class Properties extends React.PureComponent<Props, State> {
                       animate={true}
                       associateNote={associateNote}
                       getNotesByIds={getNotesByIds}
-                      notes={noteIds}
+                      noteIds={noteIds}
                       showNotes={this.state.showNotes}
                       size="l"
                       text={i18n.NOTES}

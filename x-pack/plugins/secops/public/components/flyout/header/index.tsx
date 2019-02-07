@@ -28,7 +28,7 @@ interface OwnProps {
 
 interface StateReduxProps {
   description?: string;
-  getNotesByIds: (eventIds: string[]) => Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   history?: History[];
   isFavorite?: boolean;
   isLive?: boolean;

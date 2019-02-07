@@ -52,7 +52,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   dataProviders: DataProvider[];
   eventIdToNoteIds: { [eventId: string]: string[] };
-  getNotesByIds: (eventIds: string[]) => Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;

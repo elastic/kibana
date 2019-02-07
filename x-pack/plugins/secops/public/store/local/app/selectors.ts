@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { keys } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
-
-import { keys, memoize } from 'lodash/fp';
 import { Note } from '../../../lib/note';
 import { State } from '../../reducer';
 import { NotesById } from './model';
 
 const selectNotesById = (state: State): NotesById => state.local.app.notesById;
 
-const getNotes = (notesById: NotesById, eventIds: string[]) =>
+const getNotes = (notesById: NotesById, noteIds: string[]) =>
   keys(notesById).reduce((acc: Note[], noteId: string) => {
-    if (eventIds.includes(noteId)) {
+    if (noteIds.includes(noteId)) {
       const note: Note = notesById[noteId];
       acc = [...acc, note];
     }
@@ -25,5 +25,6 @@ const getNotes = (notesById: NotesById, eventIds: string[]) =>
 export const notesByIdsSelector = () =>
   createSelector(
     selectNotesById,
-    (notesById: NotesById) => memoize((eventIds: string[]): Note[] => getNotes(notesById, eventIds))
+    (notesById: NotesById) =>
+      memoizeOne((noteIds: string[]): Note[] => getNotes(notesById, noteIds))
   );

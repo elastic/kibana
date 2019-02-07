@@ -6,7 +6,6 @@
 import { isEmpty, noop } from 'lodash/fp';
 
 import { Ecs } from '../../../graphql/types';
-import { Note } from '../../../lib/note';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
@@ -18,7 +17,7 @@ export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
 
 export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
 
-export const eventHasNotes = (notes: Note[] | string[]): boolean => !isEmpty(notes);
+export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
   isPinned,

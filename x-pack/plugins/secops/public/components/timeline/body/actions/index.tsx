@@ -21,8 +21,8 @@ interface Props {
   expanded: boolean;
   eventId: string;
   eventIsPinned: boolean;
-  getNotesByIds: (eventIds: string[]) => Note[];
-  notes: string[];
+  getNotesByIds: (noteIds: string[]) => Note[];
+  noteIds: string[];
   onEventToggled: () => void;
   onPinClicked: () => void;
   showNotes: boolean;
@@ -60,7 +60,7 @@ const PinContainer = styled.div`
   margin-right: 7px;
 `;
 
-const emptyNotes: Note[] = [];
+const emptyNotes: string[] = [];
 
 export const Actions = pure<Props>(
   ({
@@ -69,7 +69,7 @@ export const Actions = pure<Props>(
     eventId,
     eventIsPinned,
     getNotesByIds,
-    notes,
+    noteIds,
     onEventToggled,
     onPinClicked,
     showNotes,
@@ -91,12 +91,12 @@ export const Actions = pure<Props>(
             data-test-subj="timeline-action-pin-tool-tip"
             content={getPinTooltip({
               isPinned: eventIsPinned,
-              eventHasNotes: eventHasNotes(notes),
+              eventHasNotes: eventHasNotes(noteIds),
             })}
           >
             <PinContainer>
               <Pin
-                allowUnpinning={!eventHasNotes(notes)}
+                allowUnpinning={!eventHasNotes(noteIds)}
                 pinned={eventIsPinned}
                 data-test-subj="timeline-action-pin"
                 onClick={onPinClicked}
@@ -108,7 +108,7 @@ export const Actions = pure<Props>(
             associateNote={associateNote}
             data-test-subj="timeline-action-notes-button"
             getNotesByIds={getNotesByIds}
-            notes={notes || emptyNotes}
+            noteIds={noteIds || emptyNotes}
             showNotes={showNotes}
             size="s"
             toggleShowNotes={toggleShowNotes}

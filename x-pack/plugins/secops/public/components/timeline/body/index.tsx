@@ -38,7 +38,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: EcsEdges[];
-  getNotesByIds: (eventIds: string[]) => Note[];
+  getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
   eventIdToNoteIds: { [eventId: string]: string[] };
@@ -101,7 +101,7 @@ const Column = styled.div<{
 
 export const defaultWidth = 1090;
 
-const emptyNotes: Note[] = [];
+const emptyNotes: string[] = [];
 
 /** Renders the timeline body */
 export class Body extends React.PureComponent<Props, State> {
@@ -176,7 +176,7 @@ export class Body extends React.PureComponent<Props, State> {
                                 pinnedEventIds,
                               })}
                               getNotesByIds={getNotesByIds}
-                              notes={eventIdToNoteIds[ecsEdges.node._id!] || emptyNotes}
+                              noteIds={eventIdToNoteIds[ecsEdges.node._id!] || emptyNotes}
                               onEventToggled={this.onToggleExpanded(ecsEdges.node._id!)}
                               onPinClicked={getPinOnClick({
                                 allowUnpinning: !eventHasNotes(

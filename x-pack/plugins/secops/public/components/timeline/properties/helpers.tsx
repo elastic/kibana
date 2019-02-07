@@ -109,8 +109,8 @@ export const NewTimeline = pure<{
 interface NotesButtonProps {
   animate?: boolean;
   associateNote: AssociateNote;
-  getNotesByIds: (eventIds: string[]) => Note[];
-  notes: string[];
+  getNotesByIds: (noteIds: string[]) => Note[];
+  noteIds: string[];
   size: 's' | 'l';
   showNotes: boolean;
   toggleShowNotes: () => void;
@@ -121,10 +121,10 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
-const NotesIcon = pure<{ notes: string[]; size: 's' | 'l' }>(({ notes, size }) => (
+const NotesIcon = pure<{ noteIds: string[]; size: 's' | 'l' }>(({ noteIds, size }) => (
   <>
     <EuiBadge data-test-subj="timeline-notes-count" color="hollow">
-      {notes.length}
+      {noteIds.length}
     </EuiBadge>
     <NotesIconContainer>
       <PositionedNotesIcon size={size}>
@@ -134,29 +134,29 @@ const NotesIcon = pure<{ notes: string[]; size: 's' | 'l' }>(({ notes, size }) =
   </>
 ));
 
-const LargeNotesButton = pure<{ notes: string[]; text?: string; toggleShowNotes: () => void }>(
-  ({ notes, text, toggleShowNotes }) => (
+const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
+  ({ noteIds, text, toggleShowNotes }) => (
     <EuiButton
       data-test-subj="timeline-notes-button-large"
       onClick={() => toggleShowNotes()}
       size="l"
     >
       <NotesButtonLabel>
-        <NotesIcon notes={notes} size="l" />
+        <NotesIcon noteIds={noteIds} size="l" />
         {text && text.length ? <LabelText>{text}</LabelText> : null}
       </NotesButtonLabel>
     </EuiButton>
   )
 );
 
-const SmallNotesButton = pure<{ notes: string[]; toggleShowNotes: () => void }>(
-  ({ notes, toggleShowNotes }) => (
+const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
+  ({ noteIds, toggleShowNotes }) => (
     <SmallNotesButtonContainer
       data-test-subj="timeline-notes-button-small"
       onClick={() => toggleShowNotes()}
       role="button"
     >
-      <NotesIcon notes={notes} size="s" />
+      <NotesIcon noteIds={noteIds} size="s" />
     </SmallNotesButtonContainer>
   )
 );
@@ -169,7 +169,7 @@ const NotesButtonComponent = pure<NotesButtonProps>(
     animate = true,
     associateNote,
     getNotesByIds,
-    notes,
+    noteIds,
     showNotes,
     size,
     toggleShowNotes,
@@ -179,9 +179,9 @@ const NotesButtonComponent = pure<NotesButtonProps>(
     <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
       <>
         {size === 'l' ? (
-          <LargeNotesButton notes={notes} text={text} toggleShowNotes={toggleShowNotes} />
+          <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
         ) : (
-          <SmallNotesButton notes={notes} toggleShowNotes={toggleShowNotes} />
+          <SmallNotesButton noteIds={noteIds} toggleShowNotes={toggleShowNotes} />
         )}
         {showNotes ? (
           <EuiOverlayMask>
@@ -189,7 +189,7 @@ const NotesButtonComponent = pure<NotesButtonProps>(
               <Notes
                 associateNote={associateNote}
                 getNotesByIds={getNotesByIds}
-                notes={notes}
+                noteIds={noteIds}
                 getNewNoteId={getNewNoteId}
                 updateNote={updateNote}
               />
@@ -206,7 +206,7 @@ export const NotesButton = pure<NotesButtonProps>(
     animate = true,
     associateNote,
     getNotesByIds,
-    notes,
+    noteIds,
     showNotes,
     size,
     toggleShowNotes,
@@ -219,7 +219,7 @@ export const NotesButton = pure<NotesButtonProps>(
         animate={animate}
         associateNote={associateNote}
         getNotesByIds={getNotesByIds}
-        notes={notes}
+        noteIds={noteIds}
         showNotes={showNotes}
         size={size}
         toggleShowNotes={toggleShowNotes}
@@ -232,7 +232,7 @@ export const NotesButton = pure<NotesButtonProps>(
           animate={animate}
           associateNote={associateNote}
           getNotesByIds={getNotesByIds}
-          notes={notes}
+          noteIds={noteIds}
           showNotes={showNotes}
           size={size}
           toggleShowNotes={toggleShowNotes}
