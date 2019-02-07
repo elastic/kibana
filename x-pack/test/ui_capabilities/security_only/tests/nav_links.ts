@@ -17,7 +17,7 @@ import { UserScenarios } from '../scenarios';
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('navLinks', () => {
+  describe.only('navLinks', () => {
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
@@ -26,19 +26,22 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         });
         switch (scenario.username) {
           case 'superuser':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            break;
           case 'all':
           case 'dual_privileges_all':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
-            break;
-          case 'apm_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('apm', 'management')
+              navLinksBuilder.except('apm', 'ml', 'monitoring')
             );
+            break;
+          case 'apm_user':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           case 'canvas_all':
           case 'canvas_read':
@@ -102,17 +105,17 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('logs', 'management')
             );
             break;
-          case 'ml_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('ml', 'management'));
+          case 'machine_learning_admin':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
-          case 'monitoring_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('monitoring', 'management')
-            );
+          case 'machine_learning_user':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+            break;
+          case 'monitoring_user':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           case 'timelion_all':
           case 'timelion_read':

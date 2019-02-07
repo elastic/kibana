@@ -132,23 +132,15 @@ const All: All = {
   },
 };
 
-interface ApmAll extends User {
-  username: 'apm_all';
+interface ApmUser extends User {
+  username: 'apm_user';
 }
-const ApmAll: ApmAll = {
-  username: 'apm_all',
-  fullName: 'apm_all',
-  password: 'apm_all-password',
+const ApmUser: ApmUser = {
+  username: 'apm_user',
+  fullName: 'apm_user',
+  password: 'apm_user-password',
   role: {
-    name: 'apm_all_role',
-    kibana: [
-      {
-        feature: {
-          apm: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
+    name: 'apm_user',
   },
 };
 
@@ -412,43 +404,39 @@ const LogsRead: LogsRead = {
   },
 };
 
-interface MlAll extends User {
-  username: 'ml_all';
+interface MachineLearningAdmin extends User {
+  username: 'machine_learning_admin';
 }
-const MlAll: MlAll = {
-  username: 'ml_all',
-  fullName: 'ml_all',
-  password: 'ml_all-password',
+const MachineLearningAdmin: MachineLearningAdmin = {
+  username: 'machine_learning_admin',
+  fullName: 'machine_learning_admin',
+  password: 'machine_learning_admin-password',
   role: {
-    name: 'ml_all_role',
-    kibana: [
-      {
-        feature: {
-          ml: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
+    name: 'machine_learning_admin',
   },
 };
 
-interface MonitoringAll extends User {
-  username: 'monitoring_all';
+interface MachineLearningUser extends User {
+  username: 'machine_learning_user';
 }
-const MonitoringAll: MonitoringAll = {
-  username: 'monitoring_all',
-  fullName: 'monitoring_all',
-  password: 'monitoring_all-password',
+const MachineLearningUser: MachineLearningUser = {
+  username: 'machine_learning_user',
+  fullName: 'machine_learning_user',
+  password: 'machine_learning_user-password',
   role: {
-    name: 'monitoring_all_role',
-    kibana: [
-      {
-        feature: {
-          monitoring: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
+    name: 'machine_learning_user',
+  },
+};
+
+interface MonitoringUser extends User {
+  username: 'monitoring_user';
+}
+const MonitoringAll: MonitoringUser = {
+  username: 'monitoring_user',
+  fullName: 'monitoring_user',
+  password: 'monitoring_user-password',
+  role: {
+    name: 'monitoring_user_role',
   },
 };
 
@@ -559,7 +547,7 @@ export type UserScenarios =
   | DualPrivilegesAll
   | DualPrivilegesRead
   | All
-  | ApmAll
+  | ApmUser
   | CanvasAll
   | CanvasRead
   | DashboardAll
@@ -573,8 +561,9 @@ export type UserScenarios =
   | MapsRead
   | InfrastructureRead
   | LogsRead
-  | MonitoringAll
-  | MlAll
+  | MonitoringUser
+  | MachineLearningAdmin
+  | MachineLearningUser
   | TimelionAll
   | TimelionRead
   | UptimeRead
@@ -587,7 +576,7 @@ export const UserScenarios: UserScenarios[] = [
   DualPrivilegesAll,
   DualPrivilegesRead,
   All,
-  ApmAll,
+  ApmUser,
   CanvasAll,
   CanvasRead,
   DashboardAll,
@@ -602,7 +591,8 @@ export const UserScenarios: UserScenarios[] = [
   InfrastructureRead,
   LogsRead,
   MonitoringAll,
-  MlAll,
+  MachineLearningAdmin,
+  MachineLearningUser,
   TimelionAll,
   TimelionRead,
   UptimeRead,
