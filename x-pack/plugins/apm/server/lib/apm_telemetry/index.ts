@@ -5,7 +5,6 @@
  */
 
 export {
-  ApmTelemetry,
   AgentName,
   storeApmTelemetry,
   createApmTelementry,

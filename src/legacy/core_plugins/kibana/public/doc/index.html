@@ -1,27 +1,4 @@
 <div ng-controller="doc" class="app-container">
-  <div class="kbnTopNav" ng-if="!k7design">
-    <div
-      class="kuiLocalTitle"
-      i18n-id="kbn.doc.singleDocumentTitle"
-      i18n-default-message="Single Document"
-    ></div>
-    <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
-      <div class="kuiLocalTabs">
-        <div
-          class="kuiLocalTab kuiLocalTab-isSelected"
-          ng-bind-template="{{ hit._type }}#{{ hit._id | uriescape }}"
-          ng-if="!!hit"
-        ></div>
-        <div
-          class="kuiLocalTab kuiLocalTab-isSelected"
-          ng-if="!hit"
-          i18n-id="kbn.doc.unknownIdTitle"
-          i18n-default-message="Unknown Id"
-        ></div>
-      </div>
-    </div>
-  </div>
-
   <div class="kuiViewContent">
     <!-- no results -->
     <div class="kuiViewContentItem" ng-if="status === 'notFound'">

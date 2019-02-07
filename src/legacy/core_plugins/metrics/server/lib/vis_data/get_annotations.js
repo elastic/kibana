@@ -20,6 +20,7 @@
 import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
+import getEsShardTimeout from './helpers/get_es_shard_timeout';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -67,7 +68,12 @@ async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
   const indexPatternString = annotation.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
-  request.timeout = '90s';
+  const esShardTimeout = getEsShardTimeout(req);
+
+  if (esShardTimeout > 0) {
+    request.timeout = `${esShardTimeout}ms`;
+  }
+
   return [
     {
       index: indexPatternString,

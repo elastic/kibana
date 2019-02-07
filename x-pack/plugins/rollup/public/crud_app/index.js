@@ -25,7 +25,7 @@ const esSection = management.getSection('elasticsearch');
 esSection.register('rollup_jobs', {
   visible: true,
   display: 'Rollup Jobs',
-  order: 2,
+  order: 3,
   url: `#${CRUD_APP_BASE_PATH}/job_list`,
 });
 

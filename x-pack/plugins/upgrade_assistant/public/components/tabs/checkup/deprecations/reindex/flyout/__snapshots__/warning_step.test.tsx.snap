@@ -108,8 +108,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
         <EuiCode>
           1
         </EuiCode>
-        ), reindexing converts these fields to
-         
+        ), reindexing converts these fields to 
         <EuiCode>
           true
         </EuiCode>
@@ -129,6 +128,9 @@ exports[`WarningsFlyoutStep renders 1`] = `
         </EuiLink>
       </p>
     </EuiText>
+    <EuiSpacer
+      size="l"
+    />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup

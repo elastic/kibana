@@ -133,6 +133,8 @@ interface State {
 class HeaderUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
   private timeoutID?: ReturnType<typeof setTimeout>;
+  private timeoutExpand?: ReturnType<typeof setTimeout>;
+  private timeoutScrollbar?: ReturnType<typeof setTimeout>;
 
   constructor(props: Props) {
     super(props);
@@ -244,7 +246,7 @@ class HeaderUI extends Component<Props, State> {
             isCollapsed={this.state.isCollapsed}
             flyoutIsCollapsed={this.state.flyoutIsCollapsed}
             flyoutIsAnimating={this.state.flyoutIsAnimating}
-            onMouseOver={this.expandDrawer}
+            onMouseEnter={this.expandDrawer}
             onFocus={this.expandDrawer}
             onBlur={this.focusOut}
             onMouseLeave={this.collapseDrawer}
@@ -252,7 +254,11 @@ class HeaderUI extends Component<Props, State> {
             showScrollbar={this.state.showScrollbar}
             data-test-subj={classNames(
               'navDrawer',
-              this.state.isCollapsed ? 'collapsed' : 'expanded'
+              this.state.flyoutIsAnimating
+                ? null
+                : this.state.isCollapsed
+                ? 'collapsed'
+                : 'expanded'
             )}
           >
             <EuiNavDrawerMenu id="navDrawerMenu" onClick={this.onNavClick}>
@@ -369,13 +375,17 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private expandDrawer = () => {
-    this.setState({ isCollapsed: false });
+    this.timeoutExpand = setTimeout(() => {
+      this.setState({
+        isCollapsed: false,
+      });
+    }, this.getTimeoutMs(750));
 
-    setTimeout(() => {
+    this.timeoutScrollbar = setTimeout(() => {
       this.setState({
         showScrollbar: true,
       });
-    }, this.getTimeoutMs(350));
+    }, this.getTimeoutMs(1200));
 
     // This prevents the drawer from collapsing when tabbing through children
     // by clearing the timeout thus cancelling the onBlur event (see focusOut).
@@ -395,32 +405,34 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private collapseDrawer = () => {
+    // Stop the expand animation
+    if (this.timeoutExpand) {
+      clearTimeout(this.timeoutExpand);
+    }
+
+    if (this.timeoutScrollbar) {
+      clearTimeout(this.timeoutScrollbar);
+    }
+
     this.setState({
       flyoutIsAnimating: false,
+      isCollapsed: true,
+      flyoutIsCollapsed: true,
+      mobileIsHidden: true,
+      showScrollbar: false,
+      outsideClickDisabled: true,
     });
 
-    setTimeout(() => {
-      this.setState({
-        isCollapsed: true,
-        flyoutIsCollapsed: true,
-        mobileIsHidden: true,
-        showScrollbar: false,
-        outsideClickDisabled: true,
-      });
-    }, this.getTimeoutMs(350));
-
     // Scrolls the menu and flyout back to top when the nav drawer collapses
-    setTimeout(() => {
-      const menuEl = document.getElementById('navDrawerMenu');
-      if (menuEl) {
-        menuEl.scrollTop = 0;
-      }
+    const menuEl = document.getElementById('navDrawerMenu');
+    if (menuEl) {
+      menuEl.scrollTop = 0;
+    }
 
-      const flyoutEl = document.getElementById('navDrawerFlyout');
-      if (flyoutEl) {
-        flyoutEl.scrollTop = 0;
-      }
-    }, this.getTimeoutMs(300));
+    const flyoutEl = document.getElementById('navDrawerFlyout');
+    if (flyoutEl) {
+      flyoutEl.scrollTop = 0;
+    }
   };
 
   private focusOut = () => {
