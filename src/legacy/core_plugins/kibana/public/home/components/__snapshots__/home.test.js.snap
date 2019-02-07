@@ -5,6 +5,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -144,6 +145,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -298,6 +300,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -452,6 +455,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -591,6 +595,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -730,6 +735,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -869,6 +875,7 @@ exports[`home should render home component 1`] = `
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -1008,6 +1015,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -1147,6 +1155,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
@@ -1293,6 +1302,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
   restrictWidth={1200}
 >
   <EuiPageBody
+    className="eui-displayBlock"
     restrictWidth={false}
   >
     <InjectIntl(AddDataUi)
