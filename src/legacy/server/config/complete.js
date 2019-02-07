@@ -58,9 +58,9 @@ async function getUnusedConfigKeys(
   const appliedKeys = getFlattenedKeys(configValues);
 
   if (inputKeys.includes('env')) {
-    // env is a special case key, see https://github.com/elastic/kibana/blob/848bf17b/src/server/config/config.js#L74
+    // env is a special case key, see https://github.com/elastic/kibana/blob/848bf17b/src/legacy/server/config/config.js#L74
     // where it is deleted from the settings before being injected into the schema via context and
-    // then renamed to `env.name` https://github.com/elastic/kibana/blob/848bf17/src/server/config/schema.js#L17
+    // then renamed to `env.name` https://github.com/elastic/kibana/blob/848bf17/src/legacy/server/config/schema.js#L17
     inputKeys[inputKeys.indexOf('env')] = 'env.name';
   }
 

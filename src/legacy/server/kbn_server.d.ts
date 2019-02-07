@@ -19,8 +19,8 @@
 
 import { Server } from 'hapi';
 
-import { ApmOssPlugin } from '../legacy/core_plugins/apm_oss';
-import { CallClusterWithRequest, ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
+import { ApmOssPlugin } from '../core_plugins/apm_oss';
+import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { SavedObjectsClient, SavedObjectsService } from './saved_objects';

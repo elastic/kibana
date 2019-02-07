@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { asPrettyString } from '../../legacy/core_plugins/kibana/common/utils/as_pretty_string';
-import { getHighlightHtml } from '../../legacy/core_plugins/kibana/common/highlight/highlight_html';
+import { asPrettyString } from '../../core_plugins/kibana/common/utils/as_pretty_string';
+import { getHighlightHtml } from '../../core_plugins/kibana/common/highlight/highlight_html';
 
 const types = {
   html: function (format, convert) {

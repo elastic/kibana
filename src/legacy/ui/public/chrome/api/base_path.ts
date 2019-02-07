@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BasePathStartContract } from '../../../../core/public/base_path';
+import { BasePathStartContract } from '../../../../../core/public/base_path';
 let newPlatformBasePath: BasePathStartContract;
 
 export function __newPlatformInit__(instance: BasePathStartContract) {

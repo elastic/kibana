@@ -81,7 +81,7 @@ import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_searc
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../legacy/core_plugins/kibana/common/highlight';
+import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { KbnError, OutdatedKuerySyntaxError } from '../../errors';
 
 const FIELDS = [

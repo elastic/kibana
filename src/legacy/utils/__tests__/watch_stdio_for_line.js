@@ -23,7 +23,7 @@ import sinon from 'sinon';
 
 import { watchStdioForLine } from '../watch_stdio_for_line';
 
-describe('src/utils/watch_stdio_for_line', function () {
+describe('src/legacy/utils/watch_stdio_for_line', function () {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.reset());
 
