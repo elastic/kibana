@@ -28,11 +28,12 @@ export function registerServerFunctions(server) {
     method: 'POST',
     path: `${API_ROUTE}/fns/{functionName}`,
     async handler(req) {
-      const types = server.plugins.interpreter.types.toJS();
+      const registries = server.plugins.interpreter.registries();
+      const types = registries.types.toJS();
       const { deserialize } = serializeProvider(types);
       const { functionName } = req.params;
       const { args, context } = req.payload;
-      const fnDef = server.plugins.interpreter.serverFunctions.toJS()[functionName];
+      const fnDef = registries.serverFunctions.toJS()[functionName];
 
       if (!fnDef) {
         throw Boom.notFound(`Function "${functionName}" could not be found.`);
@@ -50,7 +51,7 @@ export function registerServerFunctions(server) {
     method: 'GET',
     path: `${API_ROUTE}/fns`,
     handler() {
-      return server.plugins.interpreter.serverFunctions.toJS();
+      return server.plugins.interpreter.registries().serverFunctions.toJS();
     },
   });
 }

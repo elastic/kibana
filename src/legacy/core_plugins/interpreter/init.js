@@ -18,6 +18,7 @@
  */
 
 import { routes } from './server/routes';
+import { registryFactory } from '@kbn/interpreter/common';
 import { registries } from '@kbn/interpreter/server';
 
 export default async function (server /*options*/) {
@@ -40,6 +41,9 @@ export default async function (server /*options*/) {
     };
   });
 
-  server.expose(registries);
+  // Expose server.plugins.interpreter.register(specs) and
+  // server.plugins.interpreter.registries() (a getter).
+  server.expose(registryFactory(registries));
+
   routes(server);
 }

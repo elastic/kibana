@@ -55,3 +55,24 @@ export function register(registries, specs) {
 
   return registries;
 }
+
+/**
+ * A convenience function for exposing registries and register in a plugin-friendly way
+ * as a global in the browser, and as server.plugins.interpreter.register | registries
+ * on the server.
+ *
+ * @param {*} registries - The registries to wrap.
+ */
+export function registryFactory(registries) {
+  return {
+    // This is a getter function. We can't make it a property or a proper
+    // getter, because Kibana server will improperly clone it.
+    registries() {
+      return registries;
+    },
+
+    register(specs) {
+      return register(registries, specs);
+    },
+  };
+}

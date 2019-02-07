@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { register } from '@kbn/interpreter/common';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
@@ -12,7 +11,7 @@ import { functions } from './canvas_plugin_src/functions/server';
 import { loadSampleData } from './server/sample_data';
 
 export default async function(server /*options*/) {
-  const { serverFunctions } = register(server.plugins.interpreter, {
+  const { serverFunctions } = server.plugins.interpreter.register({
     serverFunctions: commonFunctions.concat(functions),
   });
 

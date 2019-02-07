@@ -20,3 +20,9 @@
 export { initializeInterpreter } from './interpreter';
 export { RenderFunctionsRegistry } from './render_functions_registry';
 export { registries } from './registries';
+import { registries } from './registries';
+import { registryFactory } from '../common';
+
+// Expose canvas.register(specs) and canvas.registries() globally so that plugins
+// can register without a transpile step.
+global.canvas = Object.assign(global.canvas || {}, registryFactory(registries));
