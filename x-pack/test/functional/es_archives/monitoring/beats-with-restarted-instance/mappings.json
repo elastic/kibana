@@ -1,0 +1,63 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-beats-6-2018.02.09",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "format": "6",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-es-6-2018.02.09",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "format": "6",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-alerts-6",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "format": "6",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-kibana-6-2018.02.09",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "format": "6",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}

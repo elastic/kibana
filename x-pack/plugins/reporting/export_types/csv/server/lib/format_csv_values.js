@@ -8,24 +8,23 @@ import { isObject, isNull, isUndefined } from 'lodash';
 
 export function createFormatCsvValues(escapeValue, separator, fields, formatsMap) {
   return function formatCsvValues(values) {
-    return fields.map((field) => {
-      let value = values[field];
+    return fields
+      .map(field => {
+        const value = values[field];
+        if (isNull(value) || isUndefined(value)) {
+          return '';
+        }
 
-      if (isNull(value) || isUndefined(value)) {
-        return '';
-      }
+        let formattedValue = value;
+        if (formatsMap.has(field)) {
+          const formatter = formatsMap.get(field);
+          formattedValue = formatter.convert(value);
+        }
 
-      if (formatsMap.has(field)) {
-        const formatter = formatsMap.get(field);
-        value = formatter.convert(value);
-      }
-
-      if (isObject(value)) {
-        return JSON.stringify(value);
-      }
-
-      return value.toString();
-    })
+        return formattedValue;
+      })
+      .map(value => (isObject(value) ? JSON.stringify(value) : value))
+      .map(value => value.toString())
       .map(escapeValue)
       .join(separator);
   };

@@ -181,7 +181,7 @@ class FilterItemUI extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={badge}
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         withTitle={true}
         panelPaddingSize="none"
       >

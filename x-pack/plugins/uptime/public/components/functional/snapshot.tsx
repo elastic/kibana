@@ -15,10 +15,6 @@ import {
   // @ts-ignore missing type
   EuiPanel,
   // @ts-ignore missing type
-  EuiSeriesChart,
-  // @ts-ignore missing type
-  EuiSeriesChartUtils,
-  // @ts-ignore missing type
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
