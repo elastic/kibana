@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface StringMap<T = unknown> {
-  [key: string]: T;
+declare module '*.html' {
+  const template: string;
+  export default template;
 }

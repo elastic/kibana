@@ -17,5 +17,30 @@
  * under the License.
  */
 
-export { kfetch, addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+
+import uiRoutes from '../routes';
+
+import template from './error_auto_create_index.html';
+
+uiRoutes.when('/error/action.auto_create_index', {
+  template,
+  k7Breadcrumbs: () => [
+    {
+      text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', {
+        defaultMessage: 'Error',
+      }),
+    },
+  ],
+});
+
+export function isAutoCreateIndexError(error: object) {
+  return (
+    get(error, 'res.status') === 503 && get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
+  );
+}
+
+export function showAutoCreateIndexErrorPage() {
+  window.location.hash = '/error/action.auto_create_index';
+}
