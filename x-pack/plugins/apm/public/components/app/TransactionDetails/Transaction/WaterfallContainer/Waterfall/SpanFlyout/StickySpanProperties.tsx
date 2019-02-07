@@ -18,7 +18,7 @@ import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
-function getSpanLabel(type: string) {
+function formatType(type: string) {
   switch (type) {
     case 'db':
       return 'DB';
@@ -29,24 +29,24 @@ function getSpanLabel(type: string) {
           defaultMessage: 'Navigation timing'
         }
       );
-    case 'mysql':
-      return 'MySQL';
-    case 'query':
-      return i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.spanType.action.query',
-        {
-          defaultMessage: 'Query'
-        }
-      );
     default:
       return type;
+  }
+}
+
+function formatSubtype(subtype: string) {
+  switch (subtype) {
+    case 'mysql':
+      return 'MySQL';
+    default:
+      return subtype;
   }
 }
 
 function getSpanTypes(span: Span) {
   const { type, subtype, action } = span.span;
 
-  const [primaryType, subtypeFromType, actionFromType] = type.split('.');
+  const [primaryType, subtypeFromType, actionFromType] = type.split('.'); // This is to support 6.x data
 
   return {
     type: primaryType,
@@ -68,9 +68,8 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
   const { type, subtype, action } = getSpanTypes(span);
-  const spanTypeLabel = getSpanLabel(type);
-  const spanSubtypeLabel = getSpanLabel(subtype);
-  const spanActionLabel = getSpanLabel(action);
+  const spanType = formatType(type);
+  const spanSubtype = formatSubtype(subtype);
   const stickyProperties = [
     {
       label: i18n.translate(
@@ -113,13 +112,13 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
           defaultMessage: 'Type'
         }
       ),
-      val: spanTypeLabel,
+      val: spanType,
       truncated: true,
       width: '15%'
     }
   ];
 
-  if (spanSubtypeLabel) {
+  if (spanSubtype) {
     stickyProperties.push({
       fieldName: SPAN_SUBTYPE,
       label: i18n.translate(
@@ -128,13 +127,13 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
           defaultMessage: 'Subtype'
         }
       ),
-      val: spanSubtypeLabel,
+      val: spanSubtype,
       truncated: true,
       width: '15%'
     });
   }
 
-  if (spanActionLabel) {
+  if (action) {
     stickyProperties.push({
       fieldName: SPAN_ACTION,
       label: i18n.translate(
@@ -143,7 +142,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
           defaultMessage: 'Action'
         }
       ),
-      val: spanActionLabel,
+      val: action,
       truncated: true,
       width: '15%'
     });
