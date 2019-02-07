@@ -14,14 +14,16 @@ export const getFilterFromMust = (
   dateRangeEnd: string,
   filterString?: string | null
 ) => {
-  const query = {
-    bool: { filter: [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }] },
-  };
+  let filterClauses: any[] = [
+    { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
+  ];
 
   if (filterString) {
     const filters = JSON.parse(filterString);
-    query.bool.filter.push(...filters.must);
+    filterClauses = filterClauses.concat(filters.bool.must);
   }
 
-  return query;
+  return {
+    bool: { filter: filterClauses },
+  };
 };

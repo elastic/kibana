@@ -164,7 +164,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null
-  ): Promise<HistogramDataPoint[] | null> {
+  ): Promise<HistogramDataPoint[]> {
     const query = getFilterFromMust(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

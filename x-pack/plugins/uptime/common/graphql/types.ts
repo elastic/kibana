@@ -337,7 +337,7 @@ export interface Snapshot {
 
   total?: number | null;
 
-  histogram?: HistogramDataPoint[] | null;
+  histogram: HistogramDataPoint[];
 }
 
 export interface HistogramDataPoint {
