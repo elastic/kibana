@@ -18,7 +18,7 @@
  */
 
 import Hapi from 'hapi';
-import { defaultValidationErrorHandler } from '../../../core/server/http/http_tools';
+import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 
 const defaultConfig = {
   'kibana.index': '.kibana'

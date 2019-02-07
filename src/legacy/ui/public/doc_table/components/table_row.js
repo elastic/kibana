@@ -23,7 +23,7 @@ import rison from 'rison-node';
 import '../../doc_viewer';
 import '../../filters/trust_as_html';
 import '../../filters/short_dots';
-import { noWhiteSpace } from '../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
+import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { uiModules } from '../../modules';

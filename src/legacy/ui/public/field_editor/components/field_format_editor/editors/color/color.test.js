@@ -21,7 +21,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ColorFormatEditor, ColorFormatEditorComponent } from './color';
-import { DEFAULT_COLOR } from '../../../../../../../legacy/core_plugins/kibana/common/field_formats/types/color_default';
+import { DEFAULT_COLOR } from '../../../../../../../core_plugins/kibana/common/field_formats/types/color_default';
 
 const fieldType = 'string';
 const format = {

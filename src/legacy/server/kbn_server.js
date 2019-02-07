@@ -32,7 +32,7 @@ import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
-import optimizeMixin from '../optimize';
+import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';

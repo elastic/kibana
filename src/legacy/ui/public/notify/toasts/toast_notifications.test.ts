@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { ToastsStartContract } from '../../../../core/public/notifications';
+import { ToastsStartContract } from '../../../../../core/public/notifications';
 
 import { ToastNotifications } from './toast_notifications';
 

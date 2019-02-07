@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { toJson } from '../../../../../../legacy/core_plugins/kibana/common/utils/aggressive_parse';
+import { toJson } from '../../../../../../core_plugins/kibana/common/utils/aggressive_parse';
 
 function emptySearch() {
   return {

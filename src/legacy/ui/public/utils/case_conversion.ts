@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// TODO: This file is copied from src/utils/case_conversion.ts
+// TODO: This file is copied from src/legacy/utils/case_conversion.ts
 // because TS-imports from utils in ui are currently not possible.
 // When the build process is updated, this file can be removed
 

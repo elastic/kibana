@@ -26,12 +26,8 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClient as SavedObjectsApi,
-} from '../../../../src/server/saved_objects';
-import {
-  CreateResponse,
-  FindOptions,
-  UpdateResponse,
-} from '../../../../src/server/saved_objects/service';
+} from '../../../server/saved_objects';
+import { CreateResponse, FindOptions, UpdateResponse } from '../../../server/saved_objects/service';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { kfetch, KFetchQuery } from '../kfetch';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../utils/case_conversion';

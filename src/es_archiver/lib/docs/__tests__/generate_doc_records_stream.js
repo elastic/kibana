@@ -25,7 +25,7 @@ import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
 import {

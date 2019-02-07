@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 
 import { initChromeXsrfApi } from '../xsrf';
-import { version } from '../../../../../../package.json';
+import { version } from '../../../../../utils/package_json';
 
 const xsrfHeader = 'kbn-version';
 

@@ -21,7 +21,7 @@ import { ObjDefine } from '../utils/obj_define';
 import { FieldFormat } from '../../field_formats/field_format';
 import { fieldFormats } from '../registry/field_formats';
 import { getKbnFieldType } from '../../../utils';
-import { shortenDottedString } from '../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
+import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createRoot } from '../../../../test_utils/kbn_server';
+import { createRoot } from '../../../../../test_utils/kbn_server';
 
 (async function run() {
   const root = createRoot(JSON.parse(process.env.CREATE_SERVER_OPTS));

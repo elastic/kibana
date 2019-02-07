@@ -24,7 +24,7 @@ import {
   createSplitStream,
   createReplaceStream,
   createJsonParseStream,
-} from '../../../utils';
+} from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 
