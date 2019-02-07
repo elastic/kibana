@@ -28,11 +28,16 @@ import { EuiBasicTable, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiLink } fro
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { injectI18n } from '@kbn/i18n/react';
 
+import { SavedObjectAttributes } from '../../../../server/saved_objects';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { SavedObject } from '../saved_object';
 
 interface SavedObjectFinderUIState {
-  items: Array<{ title: string; id: SavedObject<any>['id']; type: SavedObject<any>['type'] }>;
+  items: Array<{
+    title: string | null;
+    id: SavedObject<SavedObjectAttributes>['id'];
+    type: SavedObject<SavedObjectAttributes>['type'];
+  }>;
   filter: string;
   isFetchingItems: boolean;
   page: number;
@@ -43,8 +48,11 @@ interface SavedObjectFinderUIState {
 
 interface SavedObjectFinderUIProps extends InjectedIntlProps {
   callToActionButton?: React.ReactNode;
-  onChoose?: (id: SavedObject<any>['id'], type: SavedObject<any>['type']) => void;
-  makeUrl?: (id: SavedObject<any>['id']) => void;
+  onChoose?: (
+    id: SavedObject<SavedObjectAttributes>['id'],
+    type: SavedObject<SavedObjectAttributes>['type']
+  ) => void;
+  makeUrl?: (id: SavedObject<SavedObjectAttributes>['id']) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectType: 'visualization' | 'search';
   visTypes?: VisTypesRegistryProvider;
@@ -92,7 +100,7 @@ class SavedObjectFinderUI extends React.Component<
       visTypes
     ) {
       resp.savedObjects = resp.savedObjects.filter(savedObject => {
-        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        const typeName = JSON.parse(savedObject.attributes.visState as string).type;
         const visType = visTypes.byName[typeName];
         return visType.stage !== 'experimental';
       });
@@ -109,7 +117,7 @@ class SavedObjectFinderUI extends React.Component<
         isFetchingItems: false,
         items: resp.savedObjects.map(savedObject => {
           return {
-            title: savedObject.attributes.title,
+            title: savedObject.attributes.title as string,
             id: savedObject.id,
             type: savedObject.type,
           };
