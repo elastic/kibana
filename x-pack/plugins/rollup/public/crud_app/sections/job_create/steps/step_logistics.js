@@ -72,14 +72,12 @@ export class StepLogisticsUi extends Component {
     if(!isValidatingIndexPattern && hasMatchingIndices) {
       return (
         <EuiTextColor color="secondary" data-test-subj="fieldIndexPatternSuccessMessage">
-
           <p>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatchesLabel"
               defaultMessage="Success! Index pattern has matching indices."
             />
           </p>
-
         </EuiTextColor>
       );
     }
@@ -360,7 +358,6 @@ export class StepLogisticsUi extends Component {
               isInvalid={Boolean((areStepErrorsVisible && errorIndexPattern)) || Boolean(indexPatternAsyncErrors)}
               helpText={this.renderIndexPatternHelpText()}
               fullWidth
-
             >
               <EuiFieldText
                 value={indexPattern}
@@ -389,7 +386,6 @@ export class StepLogisticsUi extends Component {
                 />
               )}
               fullWidth
-
             >
               <EuiFieldText
                 value={rollupIndex}

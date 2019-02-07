@@ -148,7 +148,6 @@ export default async function ({ readConfigFile }) {
       upgradeAssistant: UpgradeAssistantProvider,
       uptime: UptimePageProvider,
       rollup: RollUpPageProvider
-
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -210,11 +209,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
-
       uptime: {
         pathname: '/app/uptime',
       },
-
       rollupjob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/'
