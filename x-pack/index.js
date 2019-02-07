@@ -36,7 +36,7 @@ import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { translations } from './plugins/translations';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
-import { secretstore } from './plugins/secretstore';
+import { secretstore } from './plugins/secret_service';
 import { ossTelemetry } from './plugins/oss_telemetry';
 
 module.exports = function (kibana) {
