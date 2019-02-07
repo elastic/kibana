@@ -326,6 +326,10 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
+    $scope.showQueryBar = () => {
+      return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
@@ -343,11 +347,11 @@ function VisEditor(
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
-      'vis.type.options.showQueryBar',
-    ], function ([index, requiresTimePicker, requiresQueryBar]) {
+      $scope.showQueryBar,
+    ], function ([index, requiresTimePicker, showQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (requiresQueryBar) {
+      if (showQueryBar) {
         timefilter.disableTimeRangeSelector();
         timefilter.disableAutoRefreshSelector();
         $scope.enableQueryBarTimeRangeSelector = true;
