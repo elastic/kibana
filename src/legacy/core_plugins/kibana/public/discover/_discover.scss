@@ -123,16 +123,14 @@ discover-app {
 .dscFieldDetails {
   padding: 10px;
   background-color: shade($euiColorLightestShade, 5%);
-  color: shade($euiColorEmptyShade, 65%);
+  color: $euiTextColor;
 }
 
 // SASSTODO: replace the padding and margin values with variables
 .dscFieldDetails__progress {
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 3px;
-  border-radius: $euiBorderRadius;
-  margin-left: 3px;
-  margin-right: 3px;
+  background-color: $euiColorEmptyShade;
+  color: $euiColorDarkShade;
+  padding: $euiSizeXS;
 }
 
 // SASSTODO: replace the margin-top value with a variable

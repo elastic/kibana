@@ -46,37 +46,56 @@ function expectBreadcrumbToMatchSnapshot(route) {
 }
 
 describe('Breadcrumbs', () => {
+  let realDoc;
+
   beforeEach(() => {
+    realDoc = global.document;
+    global.document = {
+      title: 'Kibana'
+    };
     chrome.breadcrumbs.set.mockReset();
+  });
+
+  afterEach(() => {
+    global.document = realDoc;
   });
 
   it('Homepage', () => {
     expectBreadcrumbToMatchSnapshot('/');
+    expect(global.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
   it('/:serviceName/errors/:groupId', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node/errors/myGroupId');
+    expect(global.document.title).toMatchInlineSnapshot(`"myGroupId"`);
   });
 
   it('/:serviceName/errors', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node/errors');
+    expect(global.document.title).toMatchInlineSnapshot(`"Errors"`);
   });
 
   it('/:serviceName', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node');
+    expect(global.document.title).toMatchInlineSnapshot(`"opbeans-node"`);
   });
 
   it('/:serviceName/transactions', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node/transactions');
+    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
   });
 
   it('/:serviceName/transactions/:transactionType', () => {
     expectBreadcrumbToMatchSnapshot('/opbeans-node/transactions/request');
+    expect(global.document.title).toMatchInlineSnapshot(`"Transactions"`);
   });
 
   it('/:serviceName/transactions/:transactionType/:transactionName', () => {
     expectBreadcrumbToMatchSnapshot(
-      '/:serviceName/transactions/request/my-transaction-name'
+      '/opbeans-node/transactions/request/my-transaction-name'
+    );
+    expect(global.document.title).toMatchInlineSnapshot(
+      `"my-transaction-name"`
     );
   });
 });
