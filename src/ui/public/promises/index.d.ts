@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export type SavedObjectsClientProvider = any;
+export { PromiseService } from './promises';
