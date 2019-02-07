@@ -45,7 +45,7 @@ function updateAdvancedSettings($scope, config, query) {
         <AdvancedSettings
           config={config}
           query={query}
-          enableSaving={uiCapabilities.advancedSettings.showWriteControls}
+          enableSaving={uiCapabilities.advancedSettings.save}
         />
       </I18nContext>,
       node,

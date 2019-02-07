@@ -179,7 +179,7 @@ export default function (kibana) {
               index_patterns: true,
             },
             advancedSettings: {
-              showWriteControls: true
+              save: true
             },
             management: {
               /*
