@@ -26,7 +26,8 @@ import { fromRoot } from '../../utils';
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
-  const translationsDirs = [fromRoot('src/ui/translations'), fromRoot('src/server/translations'), fromRoot('src/core/translations')];
+  // eslint-disable-next-line max-len
+  const translationsDirs = [fromRoot('src/legacy/ui/translations'), fromRoot('src/legacy/server/translations'), fromRoot('src/core/translations')];
 
   const groupedEntries = await Promise.all([
     ...config.get('plugins.scanDirs').map(async path => {

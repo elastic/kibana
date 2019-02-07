@@ -24,7 +24,7 @@ import url from 'url';
 import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
 import EMS_FILES from './ems_mocks/sample_files.json';
 import EMS_TILES from './ems_mocks/sample_tiles.json';
-import { ORIGIN } from '../../../../../legacy/core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../../../../../core_plugins/tile_map/common/origin';
 
 describe('service_settings (FKA tilemaptest)', function () {
 

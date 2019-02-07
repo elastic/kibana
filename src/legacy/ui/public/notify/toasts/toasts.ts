@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToastsStartContract } from '../../../../core/public/notifications';
+import { ToastsStartContract } from '../../../../../core/public/notifications';
 import { ToastNotifications } from './toast_notifications';
 
 export let toastNotifications: ToastNotifications;

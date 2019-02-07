@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import * as states from './states';
 import Status from './status';
-import { version } from '../../../package.json';
+import { version } from '../../utils/package_json';
 
 export default class ServerStatus {
   constructor(server) {

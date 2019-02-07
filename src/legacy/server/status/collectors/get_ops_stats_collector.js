@@ -42,7 +42,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     fetch: () => {
       return {
         kibana: getKibanaInfoForStats(server, kbnServer),
-        ...kbnServer.metrics // latest metrics captured from the ops event listener in src/server/status/index
+        ...kbnServer.metrics // latest metrics captured from the ops event listener in src/legacy/server/status/index
       };
     },
     ignoreForInternalUploader: true, // Ignore this one from internal uploader. A different stats collector is used there.

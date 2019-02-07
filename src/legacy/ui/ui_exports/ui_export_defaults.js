@@ -18,7 +18,7 @@
  */
 
 import { dirname, resolve } from 'path';
-const ROOT = dirname(require.resolve('../../../package.json'));
+const ROOT = dirname(require.resolve('../../../../package.json'));
 
 export const UI_EXPORT_DEFAULTS = {
   webpackNoParseRules: [
@@ -27,7 +27,7 @@ export const UI_EXPORT_DEFAULTS = {
   ],
 
   webpackAliases: {
-    ui: resolve(ROOT, 'src/ui/public'),
+    ui: resolve(ROOT, 'src/legacy/ui/public'),
     '__kibanaCore__$': resolve(ROOT, 'src/core/public'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),
     querystring: 'querystring-browser',

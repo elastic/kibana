@@ -22,7 +22,7 @@ import React from 'react';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { I18nStartContract } from '../../../core/public/i18n';
+import { I18nStartContract } from '../../../../core/public/i18n';
 
 export let I18nContext: I18nStartContract['Context'] = null!;
 export function __newPlatformInit__(context: typeof I18nContext) {

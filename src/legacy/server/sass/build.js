@@ -27,7 +27,7 @@ import postcssUrl from 'postcss-url';
 import mkdirp from 'mkdirp';
 import chalk from 'chalk';
 import isPathInside from 'is-path-inside';
-import { PUBLIC_PATH_PLACEHOLDER } from '../../optimize/public_path_placeholder';
+import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placeholder';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
@@ -91,8 +91,7 @@ export class Build {
       sourceMap: true,
       sourceMapEmbed: true,
       includePaths: [
-        resolve(__dirname, '../..'),
-        resolve(__dirname, '../../../node_modules'),
+        resolve(__dirname, '../../../../node_modules'),
       ],
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
     });

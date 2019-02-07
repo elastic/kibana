@@ -24,7 +24,7 @@ test('load flight data', async () => {
   const bulkInsertMock = (docs) => {
     myDocsCount += docs.length;
   };
-  const count = await loadData('./src/server/sample_data/data_sets/flights/flights.json.gz', bulkInsertMock);
+  const count = await loadData('./src/legacy/server/sample_data/data_sets/flights/flights.json.gz', bulkInsertMock);
   expect(myDocsCount).toBe(13059);
   expect(count).toBe(13059);
 });
@@ -34,7 +34,7 @@ test('load log data', async () => {
   const bulkInsertMock = (docs) => {
     myDocsCount += docs.length;
   };
-  const count = await loadData('./src/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock);
+  const count = await loadData('./src/legacy/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock);
   expect(myDocsCount).toBe(14005);
   expect(count).toBe(14005);
 });
@@ -44,7 +44,7 @@ test('load ecommerce data', async () => {
   const bulkInsertMock = (docs) => {
     myDocsCount += docs.length;
   };
-  const count = await loadData('./src/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock);
+  const count = await loadData('./src/legacy/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock);
   expect(myDocsCount).toBe(4675);
   expect(count).toBe(4675);
 });

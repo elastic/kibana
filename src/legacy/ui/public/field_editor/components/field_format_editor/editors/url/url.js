@@ -54,7 +54,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
   constructor(props) {
     super(props);
     const bp = chrome.getBasePath();
-    this.iconPattern = `${bp}/bundles/src/ui/public/field_editor/components/field_format_editor/editors/url/icons/{{value}}.png`;
+    this.iconPattern = `${bp}/bundles/src/legacy/ui/public/field_editor/components/field_format_editor/editors/url/icons/{{value}}.png`;
     this.state = {
       ...this.state,
       sampleInputsByType: {

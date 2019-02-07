@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { ChromeStartContract } from '../../../../core/public/chrome';
+import { ChromeStartContract } from '../../../../../core/public/chrome';
 
 let newPlatformChrome: ChromeStartContract;
 

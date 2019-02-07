@@ -26,7 +26,7 @@ import cheerio from 'cheerio';
 import { noop } from 'lodash';
 
 import * as getUiSettingsServiceForRequestNS from '../ui_settings/ui_settings_service_for_request';
-import { createRoot, getKbnServer, request } from '../../test_utils/kbn_server';
+import { createRoot, getKbnServer, request } from '../../../test_utils/kbn_server';
 
 const getInjectedVarsFromResponse = (resp) => {
   expect(resp.statusCode).to.be(200);

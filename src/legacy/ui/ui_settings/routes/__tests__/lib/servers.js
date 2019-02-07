@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { startTestServers } from '../../../../../test_utils/kbn_server';
+import { startTestServers } from '../../../../../../test_utils/kbn_server';
 
 let kbnServer;
 let services;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Toast, ToastInput, ToastsStartContract } from '../../../../core/public/notifications';
+import { Toast, ToastInput, ToastsStartContract } from '../../../../../core/public/notifications';
 
 export { Toast, ToastInput };
 
