@@ -6,7 +6,7 @@
 
   .mapJoinItem__inner {
     @include euiScrollBar;
-    overflow: auto;
+    overflow-x: auto;
   }
 
   &:hover,
