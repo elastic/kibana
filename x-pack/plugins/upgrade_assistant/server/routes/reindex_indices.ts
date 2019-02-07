@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
+import { get } from 'lodash';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
@@ -41,7 +42,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
     callWithInternalUser,
     xpackInfo,
     log,
-    server.plugins.apm_oss.indexPatterns
+    get(server, 'plugins.apm_oss.indexPatterns', [])
   );
 
   // Wait for ES connection before starting the polling loop.
@@ -60,7 +61,7 @@ export function registerReindexIndicesRoutes(
 ) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const xpackInfo = server.plugins.xpack_main.info;
-  const apmIndexPatterns = server.plugins.apm_oss.indexPatterns;
+  const apmIndexPatterns = get(server, 'plugins.apm_oss.indexPatterns', []);
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
