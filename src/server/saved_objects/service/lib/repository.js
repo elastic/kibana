@@ -28,6 +28,44 @@ import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../ver
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
+function removeFromStr(str, key, val) {
+  let result = str;
+  while(result.indexOf(`"${key}":"${val}"`) !== -1) {
+    result = result.replace(`"${key}":"${val}"`, '');
+  }
+  while(result.indexOf(`"${key}": "${val}"`) !== -1) {
+    result = result.replace(`"${key}": "${val}"`, '');
+  }
+  while(result.indexOf(`"${key}\\":\\"${val}\\"`) !== -1) {
+    result = result.replace(`"${key}\\":\\"${val}\\"`, '');
+  }
+  while(result.indexOf(`"${key}\\": \\"${val}\\"`) !== -1) {
+    result = result.replace(`"${key}\\": \\"${val}\\"`, '');
+  }
+  return result;
+}
+
+async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
+  if (['config', 'url'].includes(type)) return;
+  const allTypes = Object.keys(getRootPropertiesObjects(savedObjectsRepository._mappings));
+  const { saved_objects: allObjects } = await savedObjectsRepository.find({ type: allTypes });
+  const objectIds = allObjects.map((obj) => {
+    if (obj.id.indexOf(':')) {
+      return obj.id.substring(obj.id.lastIndexOf(':') + 1);
+    }
+    return obj.id;
+  });
+  const stringifiedData = JSON.stringify(attributes, null, 2);
+  objectIds.forEach((id) => {
+    let searchStr = stringifiedData;
+    searchStr = removeFromStr(searchStr, 'title', id);
+    searchStr = removeFromStr(searchStr, 'version', id);
+    if (searchStr.indexOf(id) !== -1) {
+      throw new Error(`Id ${id} found in type "${type}" for ${searchStr}`);
+    }
+  });
+}
+
 export class SavedObjectsRepository {
   constructor(options) {
     const {
@@ -101,6 +139,8 @@ export class SavedObjectsRepository {
 
       const raw = this._serializer.savedObjectToRaw(migrated);
 
+      await throwIfIdFound({ type, attributes: raw._source[type], savedObjectsRepository: this });
+
       const response = await this._writeToCluster(method, {
         id: raw._id,
         type: this._type,
@@ -162,6 +202,10 @@ export class SavedObjectsRepository {
       );
       return raw;
     });
+
+    for (const obj of rawObjectsToCreate) {
+      await throwIfIdFound({ type: obj._source.type, attributes: obj._source[obj._source.type], savedObjectsRepository: this });
+    }
 
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
@@ -493,6 +537,9 @@ export class SavedObjectsRepository {
     } = options;
 
     const time = this._getCurrentTime();
+
+    await throwIfIdFound({ type, attributes: attributes, savedObjectsRepository: this });
+
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
