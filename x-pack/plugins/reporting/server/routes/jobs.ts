@@ -7,7 +7,7 @@
 import boom from 'boom';
 import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer } from '../../types';
+import { JobDoc, KbnServer } from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -18,16 +18,6 @@ import {
 } from './lib/route_config_factories';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
-
-interface JobDoc {
-  _source: {
-    output: any;
-    jobtype: any;
-    payload: {
-      headers: string;
-    };
-  };
-}
 
 export function registerJobs(server: KbnServer) {
   const jobsQuery = jobsQueryFactory(server);
@@ -114,12 +104,9 @@ export function registerJobs(server: KbnServer) {
           return boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
         }
 
-        const { payload } = doc._source;
-        payload.headers = 'not shown';
-
         return {
           ...doc._source,
-          payload,
+          headers: undefined,
         };
       });
     },

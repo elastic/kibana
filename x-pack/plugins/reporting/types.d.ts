@@ -90,6 +90,7 @@ export interface ConditionalHeadersConditions {
 export interface CryptoFactory {
   decrypt: (headers?: Record<string, string>) => string;
 }
+
 export interface ReportingJob {
   headers?: Record<string, string>;
   basePath?: string;
@@ -98,4 +99,12 @@ export interface ReportingJob {
   forceNow?: string;
   timeRange?: any;
   objects?: [any];
+}
+
+export interface JobDoc {
+  _source: {
+    output: any;
+    jobtype: any;
+    payload: ReportingJob;
+  };
 }
