@@ -90,10 +90,8 @@ export class SavedObjectsRepository {
       references = [],
     } = options;
 
-    try {
-      this._assertAllowedType(type);
-    }catch(e) {
-      throw errors.decorateBadRequestError(e, e.message);
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createUnsupportedTypeError(type);
     }
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -150,14 +148,7 @@ export class SavedObjectsRepository {
     } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
-    objects = objects.filter(object => {
-      try {
-        this._assertAllowedType(object.type);
-        return true;
-      }catch(e) {
-        return false;
-      }
-    });
+    objects = objects.filter(object => this._isTypeAllowed(object.type));
 
     const rawObjectsToCreate = objects.map((object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
@@ -248,9 +239,7 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, options = {}) {
-    try {
-      this._assertAllowedType(type);
-    }catch(e) {
+    if(!this._isTypeAllowed(type)) {
       throw errors.createGenericNotFoundError();
     }
 
@@ -350,19 +339,23 @@ export class SavedObjectsRepository {
     }
 
     if(Array.isArray(type)) {
-      type = type.filter(type => {
-        try{
-          this._assertAllowedType(type);
-          return true;
-        }catch(e) {
-          return false;
-        }
-      });
+      type = type.filter(type => this._isTypeAllowed(type));
+      if(type.length === 0) {
+        return {
+          page,
+          per_page: perPage,
+          total: 0,
+          saved_objects: []
+        };
+      }
     }else{
-      try {
-        this._assertAllowedType(type);
-      }catch(e) {
-        type = '';
+      if(!this._isTypeAllowed(type)) {
+        return {
+          page,
+          per_page: perPage,
+          total: 0,
+          saved_objects: []
+        };
       }
     }
 
@@ -444,9 +437,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => {
-          try {
-            this._assertAllowedType(object.type);
-          }catch(e) {
+          if(!this._isTypeAllowed(object.type)) {
             return undefined;
           }
           return {
@@ -493,9 +484,7 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
-    try {
-      this._assertAllowedType(type);
-    }catch(e) {
+    if(!this._isTypeAllowed(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }
 
@@ -542,7 +531,9 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    this._assertAllowedType(type);
+    if(!this._isTypeAllowed(type)) {
+      throw Error(`Unsupported saved object type: ${type}`);
+    }
 
     const {
       version,
@@ -599,7 +590,9 @@ export class SavedObjectsRepository {
     if (typeof counterFieldName !== 'string') {
       throw new Error('"counterFieldName" argument must be a string');
     }
-    this._assertAllowedType(type);
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createUnsupportedTypeError(type);
+    }
 
     const {
       migrationVersion,
@@ -690,11 +683,13 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
-  _assertAllowedType(types) {
-    [].concat(types).forEach(type => {
+  _isTypeAllowed(types) {
+    const toCheck = [].concat(types);
+    for(const type of toCheck) {
       if(!this._allowedTypes.includes(type)) {
-        throw Error(`Unsupported saved object type: ${type}`);
+        return false;
       }
-    });
+    }
+    return true;
   }
 }

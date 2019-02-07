@@ -46,6 +46,12 @@ const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
 export function decorateBadRequestError(error, reason) {
   return decorate(error, CODE_BAD_REQUEST, 400, reason);
 }
+export function createBadRequestError(reason) {
+  return decorateBadRequestError(new Error('Bad Request'), reason);
+}
+export function createUnsupportedTypeError(type) {
+  return createBadRequestError(`Unsupported saved object type: ${type}`);
+}
 export function isBadRequestError(error) {
   return error && error[code] === CODE_BAD_REQUEST;
 }

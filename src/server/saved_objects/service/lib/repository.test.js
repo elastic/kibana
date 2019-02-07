@@ -1843,7 +1843,7 @@ describe('SavedObjectsRepository', () => {
     it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
       await expect(
         savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error('Unsupported saved object type: hiddenType'));
+      ).rejects.toEqual(new Error('Unsupported saved object type: hiddenType: Bad Request'));
     });
   });
 });
