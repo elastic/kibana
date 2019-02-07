@@ -20,8 +20,7 @@ export let emsServiceSettings;
 export const inspectorAdapters = {
   requests: new RequestAdapter(),
 };
-// Only add map inspector view when running in debug mode
-if (chrome.getInjected('isDebugEnabled', false)) {
+if (chrome.getInjected('showMapsInspectorAdapter', false)) {
   inspectorAdapters.map = new MapAdapter();
 }
 

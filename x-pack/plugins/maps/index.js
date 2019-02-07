@@ -34,7 +34,7 @@ export function maps(kibana) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
         return {
-          isDebugEnabled: serverConfig.get('xpack.maps.isDebugEnabled'),
+          showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
         };
       },
@@ -53,7 +53,7 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        isDebugEnabled: Joi.boolean().default(false),
+        showMapsInspectorAdapter: Joi.boolean().default(false),
       }).default();
     },
 
