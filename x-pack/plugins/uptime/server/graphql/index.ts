@@ -8,11 +8,13 @@ import { createMonitorsResolvers, monitorsSchema } from './monitors';
 import { createPingsResolvers, pingsSchema } from './pings';
 import { CreateUMGraphQLResolvers } from './types';
 import { unsignedIntegerResolverFunctions, unsignedIntegerSchema } from './unsigned_int_scalar';
+import { sortDirectionEnumSchema, sortDirectionResolvers } from './sort_direction_enum'
 
 export { DEFAULT_GRAPHQL_PATH } from './constants';
 export const resolvers: CreateUMGraphQLResolvers[] = [
   createPingsResolvers,
   unsignedIntegerResolverFunctions,
   createMonitorsResolvers,
+  sortDirectionResolvers,
 ];
-export const typeDefs: any[] = [pingsSchema, unsignedIntegerSchema, monitorsSchema];
+export const typeDefs: any[] = [pingsSchema, unsignedIntegerSchema, monitorsSchema, sortDirectionEnumSchema];

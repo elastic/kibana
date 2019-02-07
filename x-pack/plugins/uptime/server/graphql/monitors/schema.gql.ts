@@ -96,11 +96,17 @@ export const monitorsSchema = gql`
     name: String
   }
 
+  input Sort {
+    field: String!
+    direction: SortDirection!
+  }
+
   extend type Query {
     getMonitors(
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
+      sort: Sort
     ): LatestMonitorsResult
 
     getSnapshot(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Snapshot

@@ -14,6 +14,7 @@ import {
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
+  Sort,
 } from '../../../../common/graphql/types';
 import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
@@ -221,7 +222,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    sort?: Sort | null
   ): Promise<LatestMonitor[]> {
     const { statusFilter, query } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
@@ -241,6 +243,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   id: {
                     terms: {
                       field: 'monitor.id',
+                      // Only the ID field is sortable here, so we can ignore
+                      // sort.field. When the state index is present and this query
+                      // is rewritten we can make everything sortable
+                      order: sort ? sort.direction : 'asc',
                     },
                   },
                 },

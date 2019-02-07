@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorPageTitle } from '../../../common/graphql/types';
+import { MonitorPageTitle, Sort } from '../../../common/graphql/types';
 import { UMMonitorsAdapter } from '../adapters/monitors';
 
 export class UMMonitorsDomain {
@@ -25,9 +25,10 @@ export class UMMonitorsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    sort?: Sort | null
   ): Promise<any> {
-    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters);
+    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters, sort);
   }
 
   public async getSnapshotCount(

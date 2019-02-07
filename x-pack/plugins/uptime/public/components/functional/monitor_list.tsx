@@ -5,11 +5,11 @@
  */
 
 import {
+  EuiBasicTable,
   EuiHealth,
   // @ts-ignore missing type definition
   EuiHistogramSeries,
   // @ts-ignore missing type definition
-  EuiInMemoryTable,
   EuiLink,
   EuiPanel,
   // @ts-ignore missing type definition
@@ -31,16 +31,18 @@ interface MonitorListProps {
   dangerColor: string;
   loading: boolean;
   monitors: LatestMonitor[];
+  onChange: (criteria: any) => void;
+  sorting: Sort,
 }
 
-const MONITOR_LIST_DEFAULT_PAGINATION = 10;
-
-const monitorListPagination = {
-  initialPageSize: MONITOR_LIST_DEFAULT_PAGINATION,
-  pageSizeOptions: [5, 10, 20, 50],
-};
-
-export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: MonitorListProps) => (
+export const MonitorList = ({
+  dangerColor,
+  loading,
+  monitors,
+  primaryColor,
+  onChange,
+  sorting,
+}: MonitorListProps) => (
   <Fragment>
     <EuiTitle size="xs">
       <h5>
@@ -51,7 +53,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
       </h5>
     </EuiTitle>
     <EuiPanel paddingSize="l">
-      <EuiInMemoryTable
+      <EuiBasicTable
         columns={[
           {
             field: 'ping.monitor.status',
@@ -69,7 +71,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
                     })}
               </EuiHealth>
             ),
-            sortable: true,
+            sortable: false,
           },
           {
             field: 'ping.timestamp',
@@ -77,10 +79,11 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               defaultMessage: 'Last updated',
             }),
             render: (timestamp: string) => moment(timestamp).fromNow(),
-            sortable: true,
+            sortable: false,
           },
           {
             field: 'ping.monitor.id',
+            sortable: true,
             name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
               defaultMessage: 'ID',
             }),
@@ -94,6 +97,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
           },
           {
             field: 'ping.url.full',
+            sortable: false,
             name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
               defaultMessage: 'URL',
             }),
@@ -108,7 +112,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
             name: i18n.translate('xpack.uptime.monitorList.ipColumnLabel', {
               defaultMessage: 'IP',
             }),
-            sortable: true,
+            sortable: false,
           },
           {
             field: 'upSeries',
@@ -150,8 +154,9 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
         ]}
         loading={loading}
         items={monitors}
-        pagination={monitorListPagination}
-        sorting={true}
+        // pagination={monitorListPagination}
+        onChange={onChange}
+        sorting={sorting}
       />
     </EuiPanel>
   </Fragment>

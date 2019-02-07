@@ -431,6 +431,16 @@ export interface MonitorPageTitle {
 }
 
 // ====================================================
+// InputTypes
+// ====================================================
+
+export interface Sort {
+  field: string;
+
+  direction: SortDirection;
+}
+
+// ====================================================
 // Arguments
 // ====================================================
 
@@ -453,6 +463,8 @@ export interface GetMonitorsQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  sort?: Sort | null;
 }
 export interface GetSnapshotQueryArgs {
   dateRangeStart: string;
@@ -489,6 +501,15 @@ export interface GetErrorsListQueryArgs {
 }
 export interface GetMonitorPageTitleQueryArgs {
   monitorId: string;
+}
+
+// ====================================================
+// Enums
+// ====================================================
+
+export enum SortDirection {
+  DESC = 'DESC',
+  ASC = 'ASC',
 }
 
 // ====================================================

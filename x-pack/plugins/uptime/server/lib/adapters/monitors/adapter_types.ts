@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorPageTitle } from 'x-pack/plugins/uptime/common/graphql/types';
+import { MonitorPageTitle, Sort } from 'x-pack/plugins/uptime/common/graphql/types';
 
 export interface UMMonitorsAdapter {
   getMonitorChartsData(
@@ -17,7 +17,8 @@ export interface UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    sort?: Sort | null
   ): Promise<any>;
   getSnapshotCount(
     request: any,
