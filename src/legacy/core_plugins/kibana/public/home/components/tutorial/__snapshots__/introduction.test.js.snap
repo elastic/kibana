@@ -26,10 +26,6 @@ exports[`props exportedFieldsUrl 1`] = `
       <EuiFlexItem
         component="div"
         grow={false}
-      />
-      <EuiFlexItem
-        component="div"
-        grow={false}
       >
         <EuiTitle
           size="l"
@@ -162,10 +158,6 @@ exports[`props isBeta 1`] = `
       <EuiFlexItem
         component="div"
         grow={false}
-      />
-      <EuiFlexItem
-        component="div"
-        grow={false}
       >
         <EuiTitle
           size="l"
@@ -216,10 +208,6 @@ exports[`props previewUrl 1`] = `
       responsive={true}
       wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
       <EuiFlexItem
         component="div"
         grow={false}
@@ -278,10 +266,6 @@ exports[`render 1`] = `
       responsive={true}
       wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
       <EuiFlexItem
         component="div"
         grow={false}
