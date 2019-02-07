@@ -28,12 +28,12 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'header', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('context link in discover', function contextSize() {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.setAbsoluteRange(TEST_DISCOVER_START_TIME, TEST_DISCOVER_END_TIME);
+      await PageObjects.timePicker.setAbsoluteRange(TEST_DISCOVER_START_TIME, TEST_DISCOVER_END_TIME);
       await Promise.all(TEST_COLUMN_NAMES.map((columnName) => (
         PageObjects.discover.clickFieldListItemAdd(columnName)
       )));

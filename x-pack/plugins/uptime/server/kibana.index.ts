@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginProperties, Request, Server } from 'hapi';
-import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
+import { Request, Server } from 'hapi';
 import { PLUGIN } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
@@ -19,15 +18,8 @@ export interface KibanaRouteOptions {
   options: any;
 }
 
-interface KibanaPluginProperties extends PluginProperties {
-  xpack_main: {
-    registerFeature: (feature: Feature) => void;
-  };
-}
-
 export interface KibanaServer extends Server {
   route: (options: KibanaRouteOptions) => void;
-  plugins: KibanaPluginProperties;
 }
 
 export const initServerWithKibana = (server: KibanaServer) => {

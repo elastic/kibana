@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows the timepicker', async () => {
-        const timePickerExists = await testSubjects.exists('globalTimepickerButton');
+        const timePickerExists = await testSubjects.exists('superDatePickerApplyTimeButton');
         expect(timePickerExists).to.be(true);
       });
 

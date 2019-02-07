@@ -22,7 +22,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'settings', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
   describe('dashboard time zones', () => {
     before(async () => {
@@ -41,8 +41,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Exported dashboard adjusts EST time to UTC', async () => {
-      const timeRange = await PageObjects.header.getPrettyDuration();
-      expect(timeRange).to.be('April 10th 2018, 03:00:00.000 to April 10th 2018, 04:00:00.000');
+      const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+      expect(time.start).to.be('2018-04-10 03:00:00.000');
+      expect(time.end).to.be('2018-04-10 04:00:00.000');
       await pieChart.expectPieSliceCount(4);
     });
 
@@ -52,8 +53,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'EST');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
-      const timeRange = await PageObjects.header.getPrettyDuration();
-      expect(timeRange).to.be('April 9th 2018, 22:00:00.000 to April 9th 2018, 23:00:00.000');
+      const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+      expect(time.start).to.be('2018-04-09 22:00:00.000');
+      expect(time.end).to.be('2018-04-09 23:00:00.000');
       await pieChart.expectPieSliceCount(4);
     });
   });

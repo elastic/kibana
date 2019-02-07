@@ -9,7 +9,7 @@ import expect from 'expect.js';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe.skip('update collection_interval setting', () => {
+  describe('update collection_interval setting', () => {
     it('should set collection.interval to 10s', async () => {
       const { body } = await supertest
         .put('/api/monitoring/v1/elasticsearch_settings/set/collection_interval')

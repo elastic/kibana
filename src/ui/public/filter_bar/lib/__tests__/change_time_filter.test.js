@@ -25,7 +25,7 @@ jest.mock('ui/chrome',
         get: (key) => {
           switch(key) {
             case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
+              return { from: 'now-15m', to: 'now' };
             case 'timepicker:refreshIntervalDefaults':
               return { display: 'Off', pause: false, value: 0 };
             default:
@@ -47,8 +47,7 @@ describe('changeTimeFilter()', function () {
   test('should change the timefilter to match the range gt/lt', function () {
     const filter = { range: { '@timestamp': { gt, lt } } };
     changeTimeFilter(filter);
-    const { mode, to, from } = timefilter.getTime();
-    expect(mode).to.be('absolute');
+    const { to, from } = timefilter.getTime();
     expect(to).to.be(new Date(lt).toISOString());
     expect(from).to.be(new Date(gt).toISOString());
   });
@@ -56,8 +55,7 @@ describe('changeTimeFilter()', function () {
   test('should change the timefilter to match the range gte/lte', function () {
     const filter = { range: { '@timestamp': { gte: gt, lte: lt } } };
     changeTimeFilter(filter);
-    const { mode, to, from } = timefilter.getTime();
-    expect(mode).to.be('absolute');
+    const { to, from } = timefilter.getTime();
     expect(to).to.be(new Date(lt).toISOString());
     expect(from).to.be(new Date(gt).toISOString());
   });

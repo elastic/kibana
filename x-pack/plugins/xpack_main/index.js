@@ -35,15 +35,7 @@ import { registerOssFeatures } from './server/lib/register_oss_features';
  * @param {Object} config Kibana configuration object.
  */
 function isTelemetryEnabled(config) {
-  const enabled = config.get('xpack.xpack_main.telemetry.enabled');
-
-  // Remove deprecated 'report_stats' in 7.0
-  if (enabled) {
-    // if xpack.monitoring.enabled is false, then report_stats cannot be defined
-    return !config.get('xpack.monitoring.enabled') || config.get('xpack.monitoring.report_stats');
-  }
-
-  return enabled;
+  return config.get('xpack.xpack_main.telemetry.enabled');
 }
 
 export const xpackMain = (kibana) => {

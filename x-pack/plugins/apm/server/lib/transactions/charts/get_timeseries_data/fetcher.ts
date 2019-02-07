@@ -12,7 +12,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { Setup } from '../../../helpers/setup_request';
 
@@ -141,7 +141,7 @@ export function timeseriesFetcher({
 
   if (transactionName) {
     params.body.query.bool.must = [
-      { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
+      { term: { [TRANSACTION_NAME]: transactionName } }
     ];
   }
 
