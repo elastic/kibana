@@ -4,7 +4,6 @@ bower_components
 /build
 /.es
 /plugins
-/optimize
 /built_assets
 /src/fixtures/vislib/mock_data
 /src/ui/public/angular-bootstrap
