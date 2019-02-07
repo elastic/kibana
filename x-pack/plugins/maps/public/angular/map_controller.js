@@ -28,6 +28,7 @@ import {
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
+import { DocTitleProvider } from 'ui/doc_title';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -42,7 +43,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get('app/maps', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState, Private) => {
 
   const savedMap = $scope.map = $route.current.locals.map;
   let unsubscribe;
@@ -198,23 +199,20 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
-  $scope.getMapTitle = function () {
-    return $scope.map.title;
-  };
-  // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
     { text: 'Maps', href: '#' },
-    { text: $scope.getMapTitle() }
+    { text: $scope.map.title }
   ]);
-  config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
     savedMap.syncWithStore(getStore().getState());
-
+    const docTitle = Private(DocTitleProvider);
     let id;
+
     try {
       id = await savedMap.save(saveOptions);
+      docTitle.change(savedMap.title);
     } catch(err) {
       toastNotifications.addDanger({
         title: `Error on saving '${savedMap.title}'`,
@@ -244,13 +242,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: 'fullScreen',
-    description: 'Full screen',
-    testId: 'fullScreenMode',
+    key: 'full screen',
+    description: 'full screen',
+    testId: 'mapsFullScreenMode',
     run() {
-      getStore().then(store => {
-        store.dispatch(enableFullScreen());
-      });
+      getStore().dispatch(enableFullScreen());
     }
   }, {
     key: 'inspect',

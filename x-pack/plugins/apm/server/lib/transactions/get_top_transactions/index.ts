@@ -9,7 +9,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
 
 import { getTransactionGroups } from '../../transaction_groups';

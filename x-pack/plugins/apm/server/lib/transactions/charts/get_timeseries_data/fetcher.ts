@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
+import {
+  AggregationSearchResponse,
+  ESFilter,
+  SearchParams
+} from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -12,7 +16,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { Setup } from '../../../helpers/setup_request';
 
@@ -101,7 +105,7 @@ export function timeseriesFetcher({
     filter.push(esFilterQuery);
   }
 
-  const params: any = {
+  const params: SearchParams = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
@@ -141,7 +145,7 @@ export function timeseriesFetcher({
 
   if (transactionName) {
     params.body.query.bool.must = [
-      { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
+      { term: { [TRANSACTION_NAME]: transactionName } }
     ];
   }
 

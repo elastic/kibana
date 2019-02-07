@@ -22,7 +22,7 @@ import {
   MAP_DESTROYED,
   SET_QUERY,
   UPDATE_LAYER_PROP,
-  UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+  UPDATE_LAYER_STYLE,
   PROMOTE_TEMPORARY_STYLES,
   CLEAR_TEMPORARY_STYLES,
   SET_JOINS,
@@ -95,8 +95,6 @@ const INITIAL_STATE = {
 };
 
 export function map(state = INITIAL_STATE, action) {
-  window._state = state;
-  //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case SET_MOUSE_COORDINATES:
       return {
@@ -247,23 +245,23 @@ export function map(state = INITIAL_STATE, action) {
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
-    case UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER:
-      const styleLayerId = state.selectedLayerId;
+    case UPDATE_LAYER_STYLE:
+      const styleLayerId = action.layerId;
       const styleLayerIdx = getLayerIndex(state.layerList, styleLayerId);
       const layerStyle = state.layerList[styleLayerIdx].style;
-      const layerPrevStyle = layerStyle.previousStyle || layerStyle;
+      const layerPrevStyle = layerStyle.__previousStyle || layerStyle;
       return updateLayerInList(state, styleLayerId, 'style',
-        { ...action.style, previousStyle: { ...layerPrevStyle } });
+        { ...action.style, __previousStyle: { ...layerPrevStyle } });
     case PROMOTE_TEMPORARY_STYLES:
       const stylePromoteIdx = getLayerIndex(state.layerList, state.selectedLayerId);
       const styleToSet = {
         ...state.layerList[stylePromoteIdx].style,
-        previousStyle: null
+        __previousStyle: null
       };
       return updateLayerInList(state, state.selectedLayerId, 'style', styleToSet);
     case CLEAR_TEMPORARY_STYLES:
       const styleClearIdx = getLayerIndex(state.layerList, state.selectedLayerId);
-      const prevStyleToLoad = state.layerList[styleClearIdx].style.previousStyle || state.layerList[styleClearIdx].style || {};
+      const prevStyleToLoad = state.layerList[styleClearIdx].style.__previousStyle || state.layerList[styleClearIdx].style || {};
       return updateLayerInList(state, state.selectedLayerId, 'style', prevStyleToLoad);
     default:
       return state;
@@ -274,18 +272,18 @@ function setErrorStatus(state, { layerId, errorMessage }) {
   const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
   return tmsErrorLayer
     ? updateLayerInList(
-      updateLayerInList(state, tmsErrorLayer.id, 'isInErrorState', true),
-      tmsErrorLayer.id, 'errorMessage', errorMessage)
+      updateLayerInList(state, tmsErrorLayer.id, '__isInErrorState', true),
+      tmsErrorLayer.id, '__errorMessage', errorMessage)
     : state;
 }
 
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
-  if (!layerDescriptor.dataRequests) {
+  if (!layerDescriptor.__dataRequests) {
     return;
   }
 
-  return layerDescriptor.dataRequests.find(dataRequest => {
+  return layerDescriptor.__dataRequests.find(dataRequest => {
     return dataRequest.dataId === dataRequestAction.dataId;
   });
 }
@@ -299,9 +297,9 @@ function updateWithDataRequest(state, action) {
     dataRequest = {
       dataId: action.dataId
     };
-    layerRequestingData.dataRequests = [
-      ...(layerRequestingData.dataRequests
-        ? layerRequestingData.dataRequests : []), dataRequest ];
+    layerRequestingData.__dataRequests = [
+      ...(layerRequestingData.__dataRequests
+        ? layerRequestingData.__dataRequests : []), dataRequest ];
   }
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;

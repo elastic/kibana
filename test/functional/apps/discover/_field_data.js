@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
   describe('discover tab', function describeIndexTests() {
     before(async function () {
@@ -40,16 +40,15 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
-        await queryBar.setQuery('php');
-        await queryBar.submitQuery();
-
-        await retry.try(async function tryingForTime() {
+        await retry.try(async function () {
+          await queryBar.setQuery('php');
+          await queryBar.submitQuery();
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
@@ -80,7 +79,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('doc view should sort ascending', async function () {
-        const expectedTimeStamp = 'September 20th 2015, 00:00:00.000';
+        const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
         await PageObjects.discover.clickDocSortDown();
 
         // we don't technically need this sleep here because the tryForTime will retry and the
@@ -95,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Discover: Failed to parse query [xxx(yyy))]';
+        const expectedError = 'Discover: Expected "*", ":", "<", "<=", ">", ">=", "\\", [\\ \\t\\r\\n] or end of input but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
         const toastMessage =  await PageObjects.header.getToastMessage();

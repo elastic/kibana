@@ -15,6 +15,7 @@ import { addIndexManagementDataEnricher } from "./index_management_data";
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.index_management',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {

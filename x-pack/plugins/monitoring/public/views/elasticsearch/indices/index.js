@@ -47,6 +47,8 @@ uiRoutes.when('/elasticsearch/indices', {
         $injector
       });
 
+      this.isCcrEnabled = $scope.cluster.isCcrEnabled;
+
       // for binding
       const toggleShowSystemIndices = isChecked => {
         // flip the boolean
