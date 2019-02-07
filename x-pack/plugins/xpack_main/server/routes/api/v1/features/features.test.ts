@@ -30,6 +30,7 @@ describe('GET /api/features/v1', () => {
     server.plugins.xpack_main = {
       getFeatures: () => featureRegistry.getAll(),
       info: {
+        // @ts-ignore
         license: {
           isOneOf: (candidateLicenses: string[]) => {
             return candidateLicenses.includes(currentLicenseLevel);
