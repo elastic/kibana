@@ -252,25 +252,17 @@ export function filterJobs(jobs, clauses) {
 }
 
 export async function checkForAutoStartDatafeed() {
-  if (mlJobService.currentJob !== undefined) {
-    const jobId = mlJobService.currentJob.job_id;
+  const job = mlJobService.currentJob;
+  if (job !== undefined) {
     mlJobService.currentJob = undefined;
-    try {
-      const fullJob = await loadFullJob(jobId);
-      const hasDatafeed = (typeof fullJob.datafeed_config === 'object' && Object.keys(fullJob.datafeed_config).length > 0);
-      return {
-        id: fullJob.job_id,
-        hasDatafeed,
-        latestTimestampSortValue: 0,
-        datafeedId: hasDatafeed ? fullJob.datafeed_config.datafeed_id : '',
-      };
-    } catch (error) {
-      mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.autoStartDatafeedErrorMessage', {
-        defaultMessage: 'Could not load job to start datafeed {jobId}. Job could not be found',
-        values: { jobId }
-      }));
-    }
+    const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+    const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
+    return {
+      id: job.job_id,
+      hasDatafeed,
+      latestTimestampSortValue: 0,
+      datafeedId,
+    };
   }
 }
 

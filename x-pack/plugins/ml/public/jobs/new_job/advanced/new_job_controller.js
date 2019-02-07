@@ -621,7 +621,8 @@ module.controller('MlNewJob',
                       if (datafeedConfig) {
                         // open job successful, create a new datafeed
                         mlJobService.saveNewDatafeed(datafeedConfig, jobId)
-                          .then(() => {
+                          .then((resp) => {
+                            $scope.job.datafeed_config.datafeed_id = resp.datafeed_id;
                             $scope.saveLock = false;
                           })
                           .catch((resp) => {
