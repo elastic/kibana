@@ -347,23 +347,17 @@ function VisEditor(
     ], function ([index, requiresTimePicker, requiresQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (showTimeFilter && requiresQueryBar) {
+      if (requiresQueryBar) {
         timefilter.disableTimeRangeSelector();
         timefilter.disableAutoRefreshSelector();
         $scope.enableQueryBarTimeRangeSelector = true;
-        $scope.showAutoRefreshOnlyInQueryBar = false;
+        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
       }
       else if (showTimeFilter) {
         timefilter.enableTimeRangeSelector();
         timefilter.enableAutoRefreshSelector();
         $scope.enableQueryBarTimeRangeSelector = false;
         $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-      else if (requiresQueryBar) {
-        timefilter.disableTimeRangeSelector();
-        timefilter.disableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = true;
-        $scope.showAutoRefreshOnlyInQueryBar = true;
       }
       else {
         timefilter.disableTimeRangeSelector();

@@ -528,11 +528,7 @@ function discoverController(
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
-          if (!!timefield) {
-            $scope.enableTimeRangeSelector = true;
-          } else {
-            $scope.enableTimeRangeSelector = false;
-          }
+          $scope.enableTimeRangeSelector = !!timefield;
         });
 
         $scope.$watch('state.interval', function () {
