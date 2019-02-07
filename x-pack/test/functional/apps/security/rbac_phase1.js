@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();

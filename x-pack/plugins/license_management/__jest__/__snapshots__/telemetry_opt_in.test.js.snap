@@ -333,6 +333,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               panelPaddingSize="m"
             >
               <EuiOutsideClickDetector
+                isDisabled={true}
                 onOutsideClick={[Function]}
               >
                 <div

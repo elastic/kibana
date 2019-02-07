@@ -14,7 +14,7 @@ import {
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 
 interface ErrorResponseItems {
@@ -111,10 +111,10 @@ export async function getErrorGroups({
       log?: {
         message: string;
       };
-      exception?: {
+      exception?: Array<{
         handled?: boolean;
         message?: string;
-      };
+      }>;
       culprit: APMError['error']['culprit'];
       grouping_key: APMError['error']['grouping_key'];
     };
@@ -147,7 +147,7 @@ export async function getErrorGroups({
     const source = bucket.sample.hits.hits[0]._source;
     const message =
       idx(source, _ => _.error.log.message) ||
-      idx(source, _ => _.error.exception.message);
+      idx(source, _ => _.error.exception[0].message);
 
     return {
       message,
@@ -155,7 +155,7 @@ export async function getErrorGroups({
       culprit: idx(source, _ => _.error.culprit),
       groupId: idx(source, _ => _.error.grouping_key),
       latestOccurrenceAt: source['@timestamp'],
-      handled: idx(source, _ => _.error.exception.handled)
+      handled: idx(source, _ => _.error.exception[0].handled)
     };
   });
 

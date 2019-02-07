@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
     before(async function () {
@@ -33,8 +33,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
 
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     describe('inspector table', function indexPatternCreation() {

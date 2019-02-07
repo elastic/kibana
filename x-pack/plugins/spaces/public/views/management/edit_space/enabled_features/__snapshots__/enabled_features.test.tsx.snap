@@ -171,7 +171,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="Hiding a feature does not disable the underlying functionality, such as the Saved Object APIs."
+            defaultMessage="The feature is hidden in the UI, but is not disabled."
             id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
             values={Object {}}
           />

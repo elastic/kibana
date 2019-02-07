@@ -55,7 +55,6 @@ export class UpdateSourceEditor extends Component {
   };
 
   _renderMetricsEditor() {
-
     const metricsFilter = (this.props.renderAs === RENDER_AS.HEATMAP) ?  ((metric) => {
       //these are countable metrics, where blending heatmap color blobs make sense
       return ['count', 'sum'].includes(metric.value);

@@ -143,6 +143,13 @@ const kibanaFeatures: Feature[] = [
         },
         ui: [],
       },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: [],
+      },
     },
   },
   {
@@ -161,6 +168,13 @@ const kibanaFeatures: Feature[] = [
         savedObject: {
           all: ['index-pattern'],
           read: ['config'],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['index-pattern', 'config'],
         },
         ui: [],
       },

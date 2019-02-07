@@ -130,7 +130,7 @@ export class Distribution extends Component<Props> {
 
     return (
       <div>
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h5>
             {i18n.translate(
               'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
