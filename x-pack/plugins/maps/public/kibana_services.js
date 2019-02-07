@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
 import { RequestAdapter } from 'ui/inspector/adapters';
@@ -15,10 +16,14 @@ export const timeService = timefilter;
 export let indexPatternService;
 export let SearchSource;
 export let emsServiceSettings;
+
 export const inspectorAdapters = {
   requests: new RequestAdapter(),
-  map: new MapAdapter(),
 };
+// Only add map inspector view when running in debug mode
+if (chrome.getInjected('isDebugEnabled', false)) {
+  inspectorAdapters.map = new MapAdapter();
+}
 
 export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc }) {
   const inspectorRequest = inspectorAdapters.requests.start(
