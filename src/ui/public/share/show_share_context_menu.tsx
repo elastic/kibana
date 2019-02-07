@@ -74,6 +74,7 @@ export function showShareContextMenu({
         closePopover={onClose}
         panelPaddingSize="none"
         withTitle
+        anchorPosition="downLeft"
       >
         <ShareContextMenu
           allowEmbed={allowEmbed}

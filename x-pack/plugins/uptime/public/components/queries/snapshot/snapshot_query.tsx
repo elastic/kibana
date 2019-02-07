@@ -8,43 +8,77 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { Snapshot } from '../../functional';
+import { Snapshot, SnapshotLoading } from '../../functional';
 import { getSnapshotQuery } from './get_snapshot';
 
-interface SnapshotProps {
+interface SnapshotQueryProps {
   filters?: string;
 }
 
-type Props = SnapshotProps & UptimeCommonProps;
+interface SnapshotQueryState {
+  windowWidth: number;
+}
 
-export const SnapshotQuery = ({
-  autorefreshIsPaused,
-  autorefreshInterval,
-  colors: { primary, danger },
-  dateRangeStart,
-  dateRangeEnd,
-  filters,
-}: Props) => (
-  <Query
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={getSnapshotQuery}
-    variables={{ dateRangeStart, dateRangeEnd, filters }}
-  >
-    {({ loading, error, data }) => {
-      if (loading) {
-        return i18n.translate('xpack.uptime.snapshot.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
-      }
-      if (error) {
-        return i18n.translate('xpack.uptime.snapshot.errorMessage', {
-          values: { message: error.message },
-          defaultMessage: 'Error {message}',
-        });
-      }
-      const { snapshot } = data;
+type Props = SnapshotQueryProps & UptimeCommonProps;
 
-      return <Snapshot dangerColor={danger} primaryColor={primary} snapshot={snapshot} />;
-    }}
-  </Query>
-);
+export class SnapshotQuery extends React.Component<Props, SnapshotQueryState> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      windowWidth: window.innerWidth,
+    };
+  }
+
+  public componentDidMount() {
+    window.addEventListener('resize', this.updateWindowSize);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener('resize', this.updateWindowSize);
+  }
+
+  public render() {
+    const {
+      autorefreshIsPaused,
+      autorefreshInterval,
+      colors: { primary, danger },
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+    } = this.props;
+
+    return (
+      <Query
+        pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+        query={getSnapshotQuery}
+        variables={{ dateRangeStart, dateRangeEnd, filters }}
+      >
+        {({ loading, error, data }) => {
+          if (loading) {
+            return <SnapshotLoading />;
+          }
+          if (error) {
+            return i18n.translate('xpack.uptime.snapshot.errorMessage', {
+              values: { message: error.message },
+              defaultMessage: 'Error {message}',
+            });
+          }
+          const { snapshot } = data;
+
+          return (
+            <Snapshot
+              dangerColor={danger}
+              primaryColor={primary}
+              snapshot={snapshot}
+              windowWidth={this.state.windowWidth}
+            />
+          );
+        }}
+      </Query>
+    );
+  }
+
+  private updateWindowSize = () => {
+    this.setState({ windowWidth: window.innerWidth });
+  };
+}

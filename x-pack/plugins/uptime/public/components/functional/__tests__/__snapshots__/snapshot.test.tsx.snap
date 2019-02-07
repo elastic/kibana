@@ -12,7 +12,7 @@ exports[`Snapshot component renders without errors 1`] = `
 >
   <EuiFlexItem
     component="div"
-    grow={true}
+    grow={4}
   >
     <EuiTitle
       size="xs"
@@ -102,9 +102,10 @@ exports[`Snapshot component renders without errors 1`] = `
   </EuiFlexItem>
   <EuiFlexItem
     component="div"
-    grow={true}
+    grow={8}
     style={
       Object {
+        "paddingRight": "12px",
         "paddingTop": "12px",
       }
     }
@@ -125,6 +126,11 @@ exports[`Snapshot component renders without errors 1`] = `
       grow={true}
       hasShadow={false}
       paddingSize="s"
+      style={
+        Object {
+          "maxHeight": "137px",
+        }
+      }
     >
       <Component
         dangerColor="#F050F0"
@@ -1023,6 +1029,7 @@ exports[`Snapshot component renders without errors 1`] = `
           ]
         }
         primaryColor="#000000"
+        windowWidth={1600}
       />
     </EuiPanel>
   </EuiFlexItem>
