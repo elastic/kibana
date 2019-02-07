@@ -12,7 +12,7 @@ export declare class XPackInfoLicense {
   public getUid(): string | undefined;
   public isActive(): boolean;
   public getExpiryDateInMillis(): number | undefined;
-  public isOneOf(candidateLicenses: string): boolean;
+  public isOneOf(candidateLicenses: string[]): boolean;
   public getType(): LicenseType | undefined;
   public getMode(): string | undefined;
   public isActiveLicense(typeChecker: (mode: string) => boolean): boolean;
