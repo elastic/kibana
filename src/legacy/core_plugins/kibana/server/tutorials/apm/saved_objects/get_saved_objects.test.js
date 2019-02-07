@@ -22,7 +22,7 @@ import { getSavedObjects } from './get_saved_objects';
 
 const indexPatternTitle = 'dynamic index pattern title';
 
-test('should dynamically set index title to "apm_oss.indexPattern" yaml config value', () => {
+test('should dynamically set index title to "apm_oss.indexPatternTitle" yaml config value', () => {
   const savedObjects = getSavedObjects(indexPatternTitle);
   const indexPattern = savedObjects[0];
   expect(indexPattern.type).to.be('index-pattern');

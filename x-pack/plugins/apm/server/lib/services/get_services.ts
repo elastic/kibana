@@ -57,7 +57,7 @@ export async function getServices(
 
   const params = {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
+      config.get<string>('apm_oss.metricIndices'),
       config.get<string>('apm_oss.errorIndices'),
       config.get<string>('apm_oss.transactionIndices')
     ],

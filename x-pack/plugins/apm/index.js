@@ -40,7 +40,7 @@ export function apm(kibana) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPatternTitle: config.get('apm_oss.indexPattern') // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
+          apmIndexPatternTitle: config.get('apm_oss.indexPatternTitle')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],

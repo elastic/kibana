@@ -51,7 +51,7 @@ export async function fetch({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.metricsIndices'),
+    index: config.get<string>('apm_oss.metricIndices'),
     body: {
       size: 0,
       query: { bool: { filter: filters } },

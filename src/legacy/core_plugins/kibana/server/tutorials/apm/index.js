@@ -38,7 +38,7 @@ function isEnabled(config) {
 
 export function apmSpecProvider(server) {
   const config = server.config();
-  const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
+  const apmIndexPatternTitle = config.get('apm_oss.indexPatternTitle');
 
   const artifacts = {
     dashboards: [
