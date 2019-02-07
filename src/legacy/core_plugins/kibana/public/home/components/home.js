@@ -133,7 +133,7 @@ export class Home extends Component {
 
     return (
       <EuiPage restrictWidth={1200}>
-        <EuiPageBody>
+        <EuiPageBody className="eui-displayBlock">
 
           <AddData
             apmUiEnabled={apmUiEnabled}
