@@ -17,7 +17,7 @@ const getNotes = (notesById: NotesById, noteIds: string[]) =>
   keys(notesById).reduce((acc: Note[], noteId: string) => {
     if (noteIds.includes(noteId)) {
       const note: Note = notesById[noteId];
-      acc = [...acc, note];
+      return [...acc, note];
     }
     return acc;
   }, []);
