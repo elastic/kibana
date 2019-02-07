@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import moment from 'moment';
+
 export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -132,6 +134,35 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
         start,
         end
       };
+    }
+
+    async getTimeConfigAsAbsoluteTimes() {
+      await this.showStartEndTimes();
+
+      // get to time
+      await testSubjects.click('superDatePickerendDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      const end = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
+
+      // get from time
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      const start = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
+
+      return {
+        start,
+        end
+      };
+    }
+
+    async getTimeDurationInHours() {
+      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const { start, end } = await this.getTimeConfigAsAbsoluteTimes();
+
+      const startMoment = moment(start, DEFAULT_DATE_FORMAT);
+      const endMoment = moment(end, DEFAULT_DATE_FORMAT);
+
+      return moment.duration(moment(endMoment) - moment(startMoment)).asHours();
     }
 
     async pauseAutoRefresh() {

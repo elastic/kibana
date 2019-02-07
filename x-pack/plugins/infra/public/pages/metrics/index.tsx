@@ -18,7 +18,6 @@ import React from 'react';
 import styled, { withTheme } from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { MetricsSideNav } from '../../components/metrics/side_nav';
@@ -113,10 +112,7 @@ export const MetricDetail = withTheme(
                       ];
                       return (
                         <ColumnarPage>
-                          <Header
-                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
-                            breadcrumbs={breadcrumbs}
-                          />
+                          <Header breadcrumbs={breadcrumbs} />
                           <WithMetricsTimeUrlState />
                           <DetailPageContent>
                             <WithMetrics

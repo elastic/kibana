@@ -192,8 +192,6 @@ function discoverController(
     return interval.val !== 'custom';
   };
 
-  config.bindToScope($scope, 'k7design');
-
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', savedSearch.destroy);
