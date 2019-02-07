@@ -35,7 +35,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: true,
+              save: true,
             });
             break;
           // these users have a read only view of Canvas
@@ -45,7 +45,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -60,7 +60,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           // if we don't have access at the space itself, we're

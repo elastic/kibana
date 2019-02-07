@@ -36,7 +36,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: true,
+              save: true,
             });
             break;
           case 'nothing_space':
@@ -44,7 +44,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           default:

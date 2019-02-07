@@ -32,7 +32,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: true,
+              save: true,
             });
             break;
           // these users have a read-only view of Canvas
@@ -41,7 +41,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           // these users can't do anything with Canvas
@@ -67,7 +67,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              showWriteControls: false,
+              save: false,
             });
             break;
           case 'legacy_all':
