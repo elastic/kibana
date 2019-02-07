@@ -69,7 +69,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
                     })}
               </EuiHealth>
             ),
-            sortable: true,
+            sortable: false,
           },
           {
             field: 'ping.timestamp',
@@ -77,7 +77,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               defaultMessage: 'Last updated',
             }),
             render: (timestamp: string) => moment(timestamp).fromNow(),
-            sortable: true,
+            sortable: false,
           },
           {
             field: 'ping.monitor.id',
@@ -108,7 +108,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
             name: i18n.translate('xpack.uptime.monitorList.ipColumnLabel', {
               defaultMessage: 'IP',
             }),
-            sortable: true,
+            sortable: false,
           },
           {
             field: 'upSeries',

@@ -60,14 +60,14 @@ export const PingList = ({
               })}
         </EuiHealth>
       ),
-      sortable: true,
+      sortable: false,
     },
     {
       field: 'timestamp',
       name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
         defaultMessage: 'Timestamp',
       }),
-      sortable: true,
+      sortable: false,
       render: (timestamp: string) => moment(timestamp).fromNow(),
     },
     {
@@ -91,7 +91,7 @@ export const PingList = ({
         description: 'The "ms" in the default message is an abbreviation for milliseconds',
       }),
       render: (duration: number) => duration / 1000,
-      sortable: true,
+      sortable: false,
     },
     {
       field: 'error.type',

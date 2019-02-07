@@ -101,13 +101,13 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "monitor.status",
             "name": "Status",
             "render": [Function],
-            "sortable": true,
+            "sortable": false,
           },
           Object {
             "field": "timestamp",
             "name": "Timestamp",
             "render": [Function],
-            "sortable": true,
+            "sortable": false,
           },
           Object {
             "field": "monitor.ip",
@@ -123,7 +123,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "monitor.duration.us",
             "name": "Duration ms",
             "render": [Function],
-            "sortable": true,
+            "sortable": false,
           },
           Object {
             "field": "error.type",
