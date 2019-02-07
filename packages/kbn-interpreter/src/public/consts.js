@@ -17,7 +17,5 @@
  * under the License.
  */
 
-import { Field, StaticIndexPattern } from 'ui/index_patterns';
-
-export function isFilterable(field: Field): boolean;
-export function getFromSavedObject(savedObject: any): StaticIndexPattern;
+// The server endpoint for retrieiving and running Canvas functions.
+export const FUNCTIONS_URL = '/api/canvas/fns';
