@@ -3,6 +3,7 @@
   background-repeat: no-repeat;
   background-position: calc(100% + 1px) calc(100% + 1px);
   background-size: 37%;
+  min-height: 480px;
 }
 
 .visNewVisDialog__body {
@@ -68,6 +69,10 @@
 
 .visNewVisDialog__typeImage {
   @include size($euiSizeL);
+}
+
+.visNewVisDialog__searchBody {
+  max-width: 810px;
 }
 
 @include euiBreakpoint('xs', 's') {

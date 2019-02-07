@@ -138,7 +138,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
-        <EuiModalBody>
+        <EuiModalBody className="visNewVisDialog__searchBody">
           <EuiTabs size="m">{this.renderTabs()}</EuiTabs>
 
           <EuiSpacer size="m" />
