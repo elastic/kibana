@@ -13,15 +13,12 @@ query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
   ) {
-    minDuration {
+    durationArea {
       x
+      y0
       y
     }
-    maxDuration {
-      x
-      y
-    }
-    avgDuration {
+    durationLine {
       x
       y
     }

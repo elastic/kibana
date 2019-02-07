@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
+import { MonitorChart } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
 
@@ -72,28 +73,19 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
             });
           }
 
-          // TODO: this should not exist in the UI, update the GQL resolver/schema to return
-          // an object that contains these series already shaped in the way required by the visualizations.
-          const { monitorChartsData } = data;
-          const avgDurationSeries: any[] = [];
-          const areaDurationSeries: any[] = [];
-          const downSeries: any[] = [];
-          const upSeries: any[] = [];
-          const checksSeries: any[] = [];
-          monitorChartsData.forEach(({ avgDuration, maxDuration, minDuration, status }: any) => {
-            avgDurationSeries.push(avgDuration);
-            areaDurationSeries.push({ x: minDuration.x, y0: minDuration.y, y: maxDuration.y });
-            downSeries.push({ x: status.x, y: status.down });
-            upSeries.push({ x: status.x, y: status.up });
-            checksSeries.push({ x: status.x, y: status.total });
-          });
+          const {
+            monitorChartsData: {
+              durationArea,
+              durationLine,
+              durationMaxCount,
+              status,
+              statusMaxCount,
+            },
+          }: { monitorChartsData: MonitorChart } = data;
 
-          // As above, we are building a domain size for the chart to use.
-          // Without this code the chart could render data outside of the field.
-          const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
-          const checkDomainLimits = [0, Math.max(...checksDomain)];
-          const durationDomain = avgDurationSeries.concat(areaDurationSeries);
-          const durationDomainLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
+          // These limits provide domain sizes for the charts
+          const checkDomainLimits = [0, statusMaxCount];
+          const durationDomainLimits = [0, durationMaxCount];
 
           return (
             <Fragment>
@@ -128,7 +120,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                             defaultMessage: 'Duration range',
                           }
                         )}
-                        data={areaDurationSeries}
+                        data={durationArea}
                         curve="curveBasis"
                       />
                       <EuiLineSeries
@@ -139,7 +131,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                             defaultMessage: 'Mean duration',
                           }
                         )}
-                        data={avgDurationSeries}
+                        data={durationLine}
                       />
                     </EuiSeriesChart>
                   </EuiPanel>
@@ -172,7 +164,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                             defaultMessage: 'Up count',
                           }
                         )}
-                        data={upSeries}
+                        data={status.map(({ x, up }) => ({ x, y: up }))}
                         curve="curveBasis"
                         color={primary}
                       />
@@ -183,7 +175,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                             defaultMessage: 'Down count',
                           }
                         )}
-                        data={downSeries}
+                        data={status.map(({ x, down }) => ({ x, y: down }))}
                         color={danger}
                       />
                     </EuiSeriesChart>

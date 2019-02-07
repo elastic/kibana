@@ -24,7 +24,7 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
-  getMonitorChartsData?: (MonitorChartEntry | null)[] | null;
+  getMonitorChartsData?: MonitorChart | null;
 
   getLatestMonitors: Ping[];
 
@@ -351,37 +351,38 @@ export interface HistogramDataPoint {
 
   y?: UnsignedInteger | null;
 }
-
-export interface MonitorChartEntry {
-  maxContent?: DataPoint | null;
-
-  maxResponse?: DataPoint | null;
-
-  maxValidate?: DataPoint | null;
-
-  maxTotal?: DataPoint | null;
-
-  maxWriteRequest?: DataPoint | null;
-
-  maxTcpRtt?: DataPoint | null;
-
-  maxDuration?: DataPoint | null;
-
-  minDuration?: DataPoint | null;
-
-  avgDuration?: DataPoint | null;
-
-  status?: StatusData | null;
+/** The data used to populate the monitor charts. */
+export interface MonitorChart {
+  /** The max and min values for the monitor duration. */
+  durationArea: MonitorDurationAreaPoint[];
+  /** The average values for the monitor duration. */
+  durationLine: MonitorDurationAveragePoint[];
+  /** The counts of up/down checks for the monitor. */
+  status: StatusData[];
+  /** The maximum status doc count in this chart. */
+  statusMaxCount: number;
+  /** The maximum duration value in this chart. */
+  durationMaxCount: number;
 }
-
-export interface DataPoint {
-  x?: UnsignedInteger | null;
-
+/** Represents a monitor's duration performance in ms at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point. */
+  x: UnsignedInteger;
+  /** The min duration value at this point. */
+  y0?: number | null;
+  /** The max duration value at this point. */
+  y?: number | null;
+}
+/** Represents the average monitor duration ms at a point in time. */
+export interface MonitorDurationAveragePoint {
+  /** The timeseries value for this point. */
+  x: UnsignedInteger;
+  /** The average duration ms for the monitor. */
   y?: number | null;
 }
 
 export interface StatusData {
-  x?: UnsignedInteger | null;
+  x: UnsignedInteger;
 
   up?: number | null;
 
@@ -422,6 +423,12 @@ export interface MonitorPageTitle {
   url?: string | null;
 
   name?: string | null;
+}
+
+export interface DataPoint {
+  x?: UnsignedInteger | null;
+
+  y?: number | null;
 }
 
 // ====================================================

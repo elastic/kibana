@@ -10,6 +10,7 @@ import {
   ErrorListItem,
   FilterBar,
   LatestMonitor,
+  MonitorChart,
   MonitorKey,
   MonitorPageTitle,
   MonitorSeriesPoint,
@@ -18,12 +19,6 @@ import {
 import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-
-// the values for these charts are stored as μs, but should be displayed as ms
-const formatChartValue = (time: any, chartPoint: any) => ({
-  x: time,
-  y: chartPoint.value === null ? null : chartPoint.value / 1000,
-});
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -79,15 +74,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           timeseries: {
             auto_date_histogram: {
               field: '@timestamp',
-              buckets: 50,
+              buckets: 25,
             },
             aggs: {
-              max_content: { max: { field: 'http.rtt.content.us' } },
-              max_response: { max: { field: 'http.rtt.response_header.us' } },
-              max_validate: { max: { field: 'http.rtt.validate.us' } },
-              max_total: { max: { field: 'http.rtt.total.us' } },
-              max_write_request: { max: { field: 'http.rtt.write_request.us' } },
-              max_tcp_rtt: { max: { field: 'tcp.rtt.connect.us' } },
               status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
               duration: { stats: { field: 'monitor.duration.us' } },
             },
@@ -99,30 +88,39 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const result = await this.database.search(request, params);
     const buckets = get(result, 'aggregations.timeseries.buckets', []);
 
-    return buckets.map(
-      ({
-        key,
-        max_content,
-        duration: { avg, max, min },
-        max_write_request,
-        max_validate,
-        max_tcp_rtt,
-        max_response,
-        max_total,
-        status,
-        doc_count,
-      }: any) => ({
-        maxContent: formatChartValue(key, max_content),
-        maxWriteRequest: formatChartValue(key, max_write_request),
-        maxValidate: formatChartValue(key, max_validate),
-        maxTcpRtt: formatChartValue(key, max_tcp_rtt),
-        maxResponse: formatChartValue(key, max_response),
-        maxTotal: formatChartValue(key, max_total),
-        avgDuration: formatChartValue(key, { value: avg }),
-        maxDuration: formatChartValue(key, { value: max }),
-        minDuration: formatChartValue(key, { value: min }),
-        status: formatStatusBuckets(key, status.buckets, doc_count),
-      })
+    let statusMaxCount = 0;
+    let durationMaxCount = 0;
+    const mappedBuckets = buckets.map(bucket => {
+      const x = get(bucket, 'key');
+      const docCount = get(bucket, 'doc_count', 0);
+      statusMaxCount = Math.max(docCount, statusMaxCount);
+      durationMaxCount = Math.max(durationMaxCount, get(bucket, 'duration.max', 0));
+      return {
+        x,
+        durationMin: get(bucket, 'duration.min', null),
+        durationMax: get(bucket, 'duration.max', null),
+        durationAvg: get(bucket, 'duration.avg', null),
+        status: formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount),
+      };
+    });
+    const counter: MonitorChart = {
+      durationArea: [],
+      durationLine: [],
+      status: [],
+      durationMaxCount,
+      statusMaxCount,
+    };
+    return mappedBuckets.reduce(
+      (
+        accumulator,
+        { x, durationAvg, durationMax, durationMin, status: { up, down, total } }
+      ): MonitorChart => {
+        accumulator.durationArea.push({ x, y0: durationMin, y: durationMax });
+        accumulator.durationLine.push({ x, y: durationAvg });
+        accumulator.status.push({ x, up, down, total });
+        return accumulator;
+      },
+      counter
     );
   }
 
