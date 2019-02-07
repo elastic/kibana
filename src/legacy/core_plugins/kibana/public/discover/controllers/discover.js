@@ -192,8 +192,6 @@ function discoverController(
     return interval.val !== 'custom';
   };
 
-  config.bindToScope($scope, 'k7design');
-
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', savedSearch.destroy);
@@ -787,7 +785,7 @@ function discoverController(
             visualizeHandler.render({
               as: 'visualization',
               value: {
-                visType: 'histogram',
+                visType: $scope.vis.type.name,
                 visData: resp,
                 visConfig: $scope.vis.params,
                 params: {},

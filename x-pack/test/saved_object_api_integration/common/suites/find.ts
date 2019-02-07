@@ -63,26 +63,13 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'globaltype',
           id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             name: 'My favorite global object',
           },
           references: [],
         },
       ],
-    });
-  };
-
-  const expectValidType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.have.keys('statusCode', 'error', 'message', 'validation');
-    expect(resp.body).to.have.property('statusCode', 400);
-    expect(resp.body).to.have.property('error', 'Bad Request');
-    expect(resp.body.message).to.match(
-      /child \"type\" fails because \[single value of \"type\" fails because \[\"type\" must be one of \[.*\]\]\]/
-    );
-    expect(resp.body.validation).to.eql({
-      keys: ['type'],
-      source: 'query',
     });
   };
 
@@ -109,7 +96,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'visualization',
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             title: 'Count of requests',
           },
@@ -205,7 +192,6 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
     expectTypeRequired,
-    expectValidType,
     findTest,
   };
 }

@@ -44,6 +44,7 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
     const coreSystem = new CoreSystem({
       injectedMetadata,
       rootDomElement: document.body,
+      browserSupportsCsp: !window.__kbnCspNotEnforced__,
       requireLegacyFiles: () => {
         ${bundle.getRequires().join('\n  ')}
       }

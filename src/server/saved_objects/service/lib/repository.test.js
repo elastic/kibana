@@ -27,6 +27,7 @@ import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../../mappings/lib/get_root_properties_objects';
+import { encodeHitVersion } from '../../version';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -40,6 +41,8 @@ describe('SavedObjectsRepository', () => {
   let migrator;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
+  const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
+  const mockVersion = encodeHitVersion(mockVersionProps);
   const noNamespaceSearchResults = {
     hits: {
       total: 4,
@@ -48,6 +51,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'index-pattern:logstash-*',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           type: 'index-pattern',
           ...mockTimestampFields,
@@ -62,6 +66,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'config:6.0.0-alpha1',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           type: 'config',
           ...mockTimestampFields,
@@ -75,6 +80,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'index-pattern:stocks-*',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           type: 'index-pattern',
           ...mockTimestampFields,
@@ -89,6 +95,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'globaltype:something',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           type: 'globaltype',
           ...mockTimestampFields,
@@ -108,6 +115,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'foo-namespace:index-pattern:logstash-*',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           namespace: 'foo-namespace',
           type: 'index-pattern',
@@ -123,6 +131,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'foo-namespace:config:6.0.0-alpha1',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           namespace: 'foo-namespace',
           type: 'config',
@@ -137,6 +146,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'foo-namespace:index-pattern:stocks-*',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           namespace: 'foo-namespace',
           type: 'index-pattern',
@@ -152,6 +162,7 @@ describe('SavedObjectsRepository', () => {
         _type: '_doc',
         _id: 'globaltype:something',
         _score: 1,
+        ...mockVersionProps,
         _source: {
           type: 'globaltype',
           ...mockTimestampFields,
@@ -269,7 +280,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
-        _version: 2
+        ...mockVersionProps,
       }));
     });
 
@@ -302,7 +313,7 @@ describe('SavedObjectsRepository', () => {
         type: 'index-pattern',
         id: 'logstash-*',
         ...mockTimestampFields,
-        version: 2,
+        version: mockVersion,
         attributes: {
           title: 'Logstash',
         },
@@ -503,14 +514,16 @@ describe('SavedObjectsRepository', () => {
             create: {
               error: false,
               _id: '1',
-              _version: 1,
+              _seq_no: 1,
+              _primary_term: 1,
             }
           },
           {
             create: {
               error: false,
               _id: '2',
-              _version: 1,
+              _seq_no: 1,
+              _primary_term: 1,
             }
           }
         ],
@@ -554,7 +567,7 @@ describe('SavedObjectsRepository', () => {
           {
             id: 'one',
             type: 'config',
-            version: 1,
+            version: mockVersion,
             updated_at: mockTimestamp,
             attributes: {
               title: 'Test One!!',
@@ -564,7 +577,7 @@ describe('SavedObjectsRepository', () => {
           {
             id: 'two',
             type: 'index-pattern',
-            version: 1,
+            version: mockVersion,
             updated_at: mockTimestamp,
             attributes: {
               title: 'Test Two!!',
@@ -621,7 +634,7 @@ describe('SavedObjectsRepository', () => {
           create: {
             _type: '_doc',
             _id: 'index-pattern:two',
-            _version: 2
+            ...mockVersionProps,
           }
         }]
       }));
@@ -640,7 +653,7 @@ describe('SavedObjectsRepository', () => {
           }, {
             id: 'two',
             type: 'index-pattern',
-            version: 2,
+            version: mockVersion,
             ...mockTimestampFields,
             attributes: { title: 'Test Two' },
             references: [],
@@ -656,13 +669,13 @@ describe('SavedObjectsRepository', () => {
           create: {
             _type: '_doc',
             _id: 'config:one',
-            _version: 2
+            ...mockVersionProps
           }
         }, {
           create: {
             _type: '_doc',
             _id: 'index-pattern:two',
-            _version: 2
+            ...mockVersionProps
           }
         }]
       }));
@@ -679,14 +692,14 @@ describe('SavedObjectsRepository', () => {
           {
             id: 'one',
             type: 'config',
-            version: 2,
+            version: mockVersion,
             ...mockTimestampFields,
             attributes: { title: 'Test One' },
             references: [],
           }, {
             id: 'two',
             type: 'index-pattern',
-            version: 2,
+            version: mockVersion,
             ...mockTimestampFields,
             attributes: { title: 'Test Two' },
             references: [],
@@ -984,7 +997,7 @@ describe('SavedObjectsRepository', () => {
           id: doc._id.replace(/(index-pattern|config|globaltype)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
-          version: doc._version,
+          version: mockVersion,
           attributes: doc._source[doc._source.type],
           references: [],
         });
@@ -1008,7 +1021,7 @@ describe('SavedObjectsRepository', () => {
           id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globaltype)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
-          version: doc._version,
+          version: mockVersion,
           attributes: doc._source[doc._source.type],
           references: [],
         });
@@ -1054,7 +1067,7 @@ describe('SavedObjectsRepository', () => {
     const noNamespaceResult = {
       _id: 'index-pattern:logstash-*',
       _type: '_doc',
-      _version: 2,
+      ...mockVersionProps,
       _source: {
         type: 'index-pattern',
         specialProperty: 'specialValue',
@@ -1067,7 +1080,7 @@ describe('SavedObjectsRepository', () => {
     const namespacedResult = {
       _id: 'foo-namespace:index-pattern:logstash-*',
       _type: '_doc',
-      _version: 2,
+      ...mockVersionProps,
       _source: {
         namespace: 'foo-namespace',
         type: 'index-pattern',
@@ -1096,7 +1109,7 @@ describe('SavedObjectsRepository', () => {
         id: 'logstash-*',
         type: 'index-pattern',
         updated_at: mockTimestamp,
-        version: 2,
+        version: mockVersion,
         attributes: {
           title: 'Testing'
         },
@@ -1112,7 +1125,7 @@ describe('SavedObjectsRepository', () => {
         id: 'logstash-*',
         type: 'index-pattern',
         updated_at: mockTimestamp,
-        version: 2,
+        version: mockVersion,
         attributes: {
           title: 'Testing'
         },
@@ -1241,7 +1254,7 @@ describe('SavedObjectsRepository', () => {
           _type: '_doc',
           _id: 'config:good',
           found: true,
-          _version: 2,
+          ...mockVersionProps,
           _source: { ...mockTimestampFields, config: { title: 'Test' } }
         }, {
           _type: '_doc',
@@ -1262,7 +1275,7 @@ describe('SavedObjectsRepository', () => {
         id: 'good',
         type: 'config',
         ...mockTimestampFields,
-        version: 2,
+        version: mockVersion,
         attributes: { title: 'Test' },
         references: [],
       });
@@ -1277,14 +1290,13 @@ describe('SavedObjectsRepository', () => {
   describe('#update', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
-    const newVersion = 2;
     const attributes = { title: 'Testing' };
 
     beforeEach(() => {
       callAdminCluster.returns(Promise.resolve({
         _id: `${type}:${id}`,
         _type: '_doc',
-        _version: newVersion,
+        ...mockVersionProps,
         result: 'updated'
       }));
     });
@@ -1299,7 +1311,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(migrator.awaitMigration);
     });
 
-    it('returns current ES document version', async () => {
+    it('returns current ES document _seq_no and _primary_term encoded as version', async () => {
       const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, {
         namespace: 'foo-namespace',
         references: [{
@@ -1312,7 +1324,7 @@ describe('SavedObjectsRepository', () => {
         id,
         type,
         ...mockTimestampFields,
-        version: newVersion,
+        version: mockVersion,
         attributes,
         references: [{
           name: 'ref_0',
@@ -1327,12 +1339,18 @@ describe('SavedObjectsRepository', () => {
         type,
         id,
         { title: 'Testing' },
-        { version: newVersion - 1 }
+        {
+          version: encodeHitVersion({
+            _seq_no: 100,
+            _primary_term: 200
+          })
+        }
       );
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
-        version: newVersion - 1
+        if_seq_no: 100,
+        if_primary_term: 200,
       }));
     });
 
@@ -1352,7 +1370,6 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: '_doc',
         id: 'foo-namespace:index-pattern:logstash-*',
-        version: undefined,
         body: {
           doc: {
             updated_at: mockTimestamp,
@@ -1387,7 +1404,6 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: '_doc',
         id: 'index-pattern:logstash-*',
-        version: undefined,
         body: {
           doc: {
             updated_at: mockTimestamp,
@@ -1423,7 +1439,6 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: '_doc',
         id: 'globaltype:foo',
-        version: undefined,
         body: {
           doc: {
             updated_at: mockTimestamp,
@@ -1449,7 +1464,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
-        _version: 2,
+        ...mockVersionProps,
         _index: '.kibana',
         get: {
           found: true,
@@ -1469,7 +1484,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
-        _version: 2,
+        ...mockVersionProps,
         _index: '.kibana',
         get: {
           found: true,
@@ -1498,7 +1513,7 @@ describe('SavedObjectsRepository', () => {
         type: 'config',
         id: '6.0.0-alpha1',
         ...mockTimestampFields,
-        version: 2,
+        version: mockVersion,
         attributes: {
           buildNum: 8468,
           defaultIndex: 'logstash-*'
@@ -1571,7 +1586,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
-        _version: 2,
+        ...mockVersionProps,
         _index: '.kibana',
         get: {
           found: true,
@@ -1690,60 +1705,145 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
-  describe('hidden types', () => {
-    it('should error when attempting to \'get\' hidden types', async () => {
-      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Type not allowed!'));
+  describe('unsupported types', () => {
+    it('should error when attempting to \'get\' an unsupported type', async () => {
+      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Not Found'));
     });
 
-    it('should error when attempting to \'bulkGet\' hidden types', async () => {
-      callAdminCluster.returns({ docs: [] });
-      await savedObjectsRepository.bulkGet([
+    it('should error when attempting to \'bulkGet\' an unsupported type', async () => {
+      callAdminCluster.returns({
+        docs: [
+          {
+            id: 'one',
+            type: 'config',
+            _primary_term: 1,
+            _seq_no: 1,
+            found: true,
+            _source: {
+              updated_at: mockTimestamp
+            }
+          },
+        ]
+      });
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' },
         { id: 'three', type: 'globaltype' },
         { id: 'four', type: 'hiddenType' },
       ]);
-      sinon.assert.calledWithExactly(callAdminCluster, 'mget', {
-        body: {
-          docs: [
-            { _id: 'config:one', _type: '_doc' },
-            { _id: 'index-pattern:two', _type: '_doc' },
-            { _id: 'globaltype:three', _type: '_doc' },
-          ]
+      expect(savedObjects).toEqual([
+        {
+          id: 'one',
+          type: 'config',
+          updated_at: mockTimestamp,
+          references: [],
+          version: 'WzEsMV0=',
         },
-        index: '.kibana-test',
+      ]);
+    });
+
+    it('should not return hidden saved ojects when attempting to \'find\' support and unsupported types', async () => {
+      callAdminCluster.returns({
+        hits: {
+          total: 1,
+          hits: [{
+            _id: 'one',
+            _source: {
+              updated_at: mockTimestamp,
+              type: 'config',
+            },
+            references: [],
+          }]
+        }
+      });
+      const results = await savedObjectsRepository.find({ type: ['hiddenType', 'config'] });
+      expect(results).toEqual({
+        total: 1,
+        saved_objects: [{
+          id: 'one',
+          references: [],
+          type: 'config',
+          updated_at: mockTimestamp,
+        }],
+        page: 1,
+        per_page: 20,
       });
     });
 
-    it('should error when attempting to \'find\' hidden types', async () => {
-      await expect(savedObjectsRepository.find({ type: 'hiddenType' })).rejects.toEqual(new Error('Type not allowed!'));
+    it('should return empty results when attempting to \'find\' an unsupported type', async () => {
+      callAdminCluster.returns({
+        hits: {
+          total: 0,
+          hits: [],
+        }
+      });
+      const results = await savedObjectsRepository.find({ type: 'hiddenType' });
+      expect(results).toEqual({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+      });
     });
 
-    it('should error when attempting to \'find\' more than one hidden types', async () => {
+    it('should return empty results when attempting to \'find\' more than one unsupported types', async () => {
       const findParams = { type: ['hiddenType', 'hiddenType2'] };
-      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Type not allowed!'));
-    });
-
-    it('should error when attempting to \'find\' an array of hidden types', async () => {
-      const findParams = { type: ['hiddenType'] };
-      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Type not allowed!'));
+      callAdminCluster.returns({
+        status: 200,
+        hits: {
+          total: 0,
+          hits: [],
+        }
+      });
+      const results = await savedObjectsRepository.find(findParams);
+      expect(results).toEqual({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+      });
     });
 
     it('should error when attempting to \'delete\' hidden types', async () => {
-      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Type not allowed!'));
+      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Not Found'));
     });
 
-    it('should error when attempting to \'bulkCreate\' hidden types', async () => {
-      await expect(savedObjectsRepository.bulkCreate([
+    it('should error when attempting to \'bulkCreate\' an unsupported type', async () => {
+      callAdminCluster.returns({
+        items: [
+          {
+            index: {
+              _id: 'one',
+              _seq_no: 1,
+              _primary_term: 1,
+              _type: 'config',
+              attributes: {
+                title: 'Test One'
+              }
+            }
+          },
+        ]
+      });
+      const results = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } }
-      ])).rejects.toEqual(new Error('Type not allowed!'));
+      ]);
+      expect(results).toEqual({
+        saved_objects: [{
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [],
+          version: 'WzEsMV0=',
+          updated_at: mockTimestamp,
+        }],
+      });
     });
 
-    it('should error when attempting to \'incrementCounter\' for a hidden type', async () => {
+    it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
       await expect(
         savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error('Type not allowed!'));
+      ).rejects.toEqual(new Error('Unsupported saved object type: hiddenType: Bad Request'));
     });
   });
 });

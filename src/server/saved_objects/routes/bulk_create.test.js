@@ -29,7 +29,6 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     server = new MockServer();
 
     const prereqs = {
-      types: ['index-pattern', 'config'],
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
@@ -105,26 +104,5 @@ describe('POST /api/saved_objects/_bulk_create', () => {
 
     const args = savedObjectsClient.bulkCreate.getCall(0).args;
     expect(args[0]).toEqual(docs);
-  });
-
-  it('should return 400 if type is not allowed', async () => {
-    const request = {
-      method: 'POST',
-      url: '/api/saved_objects/_bulk_create',
-      payload: [{
-        id: 'abc123',
-        type: 'invalid-type'
-      }, {
-        id: 'abc1234',
-        type: 'index-pattern',
-      }]
-    };
-
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(response.message).toMatch(/one of/);
-    expect(response.message).toMatch(/index-pattern/);
-    expect(statusCode).toBe(400);
   });
 });

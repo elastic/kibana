@@ -27,17 +27,17 @@ export const createUpdateRoute = (prereqs) => {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
         params: Joi.object().keys({
-          type: Joi.string().valid(prereqs.types).required(),
+          type: Joi.string().required(),
           id: Joi.string().required(),
         }).required(),
         payload: Joi.object({
           attributes: Joi.object().required(),
-          version: Joi.number().min(1),
+          version: Joi.string(),
           references: Joi.array().items(
             Joi.object()
               .keys({
                 name: Joi.string().required(),
-                type: Joi.string().valid(prereqs.types).required(),
+                type: Joi.string().required(),
                 id: Joi.string().required(),
               }),
           ).default([]),

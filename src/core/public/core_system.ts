@@ -31,6 +31,7 @@ import { UiSettingsService } from './ui_settings';
 
 interface Params {
   rootDomElement: HTMLElement;
+  browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
@@ -58,7 +59,13 @@ export class CoreSystem {
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
-    const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
+    const {
+      rootDomElement,
+      browserSupportsCsp,
+      injectedMetadata,
+      requireLegacyFiles,
+      useLegacyTestHarness,
+    } = params;
 
     this.rootDomElement = rootDomElement;
 
@@ -84,7 +91,7 @@ export class CoreSystem {
     this.loadingCount = new LoadingCountService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
-    this.chrome = new ChromeService();
+    this.chrome = new ChromeService({ browserSupportsCsp });
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -114,7 +121,10 @@ export class CoreSystem {
         injectedMetadata,
         basePath,
       });
-      const chrome = this.chrome.start();
+      const chrome = this.chrome.start({
+        injectedMetadata,
+        notifications,
+      });
 
       this.legacyPlatform.start({
         i18n,

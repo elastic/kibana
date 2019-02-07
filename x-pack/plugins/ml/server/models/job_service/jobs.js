@@ -5,6 +5,7 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -95,8 +96,12 @@ export function jobsProvider(callWithRequest) {
       return p;
     }, {});
 
+    const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
+      defaultMessage: 'deleting',
+    });
+
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
       const {
         earliest: earliestTimestampMs,
         latest: latestTimestampMs } = earliestAndLatestTimestamps(job.data_counts);
@@ -107,7 +112,7 @@ export function jobsProvider(callWithRequest) {
         groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
         processed_record_count: job.data_counts.processed_record_count,
         memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
-        jobState: job.state,
+        jobState: (job.deleting === true) ? deletingStr : job.state,
         hasDatafeed,
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
         datafeedIndices: (hasDatafeed && job.datafeed_config.indices) ? job.datafeed_config.indices : [],
@@ -116,6 +121,7 @@ export function jobsProvider(callWithRequest) {
         earliestTimestampMs,
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
+        deleting: (job.deleting || undefined),
       };
       if (jobIds.find(j => (j === tempJob.id))) {
         tempJob.fullJob = job;
@@ -259,11 +265,33 @@ export function jobsProvider(callWithRequest) {
     return obj;
   }
 
+  async function deletingJobTasks() {
+    const actions = ['cluster:admin/xpack/ml/job/delete'];
+    const detailed = true;
+    const jobIds = [];
+    try {
+      const tasksList =  await callWithRequest('tasks.list', { actions, detailed });
+      Object.keys(tasksList.nodes).forEach((nodeId) => {
+        const tasks = tasksList.nodes[nodeId].tasks;
+        Object.keys(tasks).forEach((taskId) => {
+          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
+        });
+      });
+    } catch (e) {
+      // if the user doesn't have permission to load the task list,
+      // use the jobs list to get the ids of deleting jobs
+      const { jobs } = await callWithRequest('ml.jobs');
+      jobIds.push(...jobs.filter(j => j.deleting === true).map(j => j.job_id));
+    }
+    return { jobIds };
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
     jobsSummary,
     createFullJobsList,
+    deletingJobTasks,
   };
 }

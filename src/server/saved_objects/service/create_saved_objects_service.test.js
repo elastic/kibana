@@ -39,7 +39,7 @@ describe('saved object service creation', () => {
     schema.isHiddenType.returns(false, false, true);
     const serializer = sinon.spy;
     const migrator = sinon.spy;
-    const extraTypes = ['hiddenType'];
+    const extraTypes = ['hiddenType', 'hiddenType', 'hiddenType'];
     const service = createSavedObjectsService(server, schema, serializer, migrator, extraTypes);
     expect(service).toBeDefined();
     expect(service.types.sort()).toEqual(['allowedType1', 'allowedType2', 'hiddenType'].sort());

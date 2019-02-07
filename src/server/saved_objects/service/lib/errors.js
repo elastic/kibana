@@ -46,8 +46,23 @@ const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
 export function decorateBadRequestError(error, reason) {
   return decorate(error, CODE_BAD_REQUEST, 400, reason);
 }
+export function createBadRequestError(reason) {
+  return decorateBadRequestError(new Error('Bad Request'), reason);
+}
+export function createUnsupportedTypeError(type) {
+  return createBadRequestError(`Unsupported saved object type: ${type}`);
+}
 export function isBadRequestError(error) {
   return error && error[code] === CODE_BAD_REQUEST;
+}
+
+// 400 - invalid version
+const CODE_INVALID_VERSION = 'SavedObjectsClient/invalidVersion';
+export function createInvalidVersionError(versionInput) {
+  return decorate(Boom.badRequest(`Invalid version [${versionInput}]`), CODE_INVALID_VERSION, 400);
+}
+export function isInvalidVersionError(error) {
+  return error && error[code] === CODE_INVALID_VERSION;
 }
 
 

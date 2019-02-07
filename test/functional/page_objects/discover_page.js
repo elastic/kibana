@@ -218,15 +218,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('discoverNoResults');
     }
 
-    async getNoResultsTimepicker() {
-      return await testSubjects.find('discoverNoResultsTimefilter');
-    }
-
-    hasNoResultsTimepicker() {
-      return this
-        .getNoResultsTimepicker()
-        .then(() => true)
-        .catch(() => false);
+    async hasNoResultsTimepicker() {
+      return await testSubjects.exists('discoverNoResultsTimefilter');
     }
 
     async clickFieldListItem(field) {

@@ -45,6 +45,8 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
   public async hasIndices(request: InfraFrameworkRequest, indexNames: string) {
     return await this.framework
       .callWithRequest(request, 'search', {
+        ignore_unavailable: true,
+        allow_no_indices: true,
         index: indexNames,
         size: 0,
         terminate_after: 1,

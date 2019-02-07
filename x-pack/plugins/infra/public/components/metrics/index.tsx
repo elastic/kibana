@@ -23,6 +23,8 @@ interface Props {
   nodeId: string;
   label: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  isLiveStreaming?: boolean;
+  stopLiveStreaming?: () => void;
   intl: InjectedIntl;
 }
 
@@ -103,9 +105,11 @@ export const Metrics = injectI18n(
     private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
       let sectionProps = {};
       if (section.type === 'chart') {
-        const { onChangeRangeTime } = this.props;
+        const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
         sectionProps = {
           onChangeRangeTime,
+          isLiveStreaming,
+          stopLiveStreaming,
           crosshairValue: this.state.crosshairValue,
           onCrosshairUpdate: this.onCrosshairUpdate,
         };

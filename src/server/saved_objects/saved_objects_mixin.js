@@ -53,7 +53,6 @@ export function savedObjectsMixin(kbnServer, server) {
   const service = createSavedObjectsService(server, schema, serializer, migrator);
 
   const prereqs = {
-    types: service.types,
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
       method(req) {

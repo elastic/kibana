@@ -26,7 +26,7 @@ export const createGetRoute = prereqs => ({
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       params: Joi.object().keys({
-        type: Joi.string().valid(prereqs.types).required(),
+        type: Joi.string().required(),
         id: Joi.string().required(),
       }).required()
     },

@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }) {
       return hits;
     }
 
-    it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+    it('should re-fetch documents with refresh timer', async () => {
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
       await PageObjects.maps.triggerSingleRefresh(1000);
