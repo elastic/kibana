@@ -113,6 +113,10 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
+  isJoinable() {
+    return false;
+  }
+
   getGridResolution() {
     return this._descriptor.resolution;
   }

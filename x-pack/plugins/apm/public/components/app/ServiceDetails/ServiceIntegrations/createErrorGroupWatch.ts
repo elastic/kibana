@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import chrome from 'ui/chrome';
 import url from 'url';
 import uuid from 'uuid';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -49,8 +50,8 @@ interface Arguments {
 
 interface Actions {
   log_error: { logging: { text: string } };
-  slack_webhook?: { [key: string]: any };
-  email?: { [key: string]: any };
+  slack_webhook?: StringMap;
+  email?: StringMap;
 }
 
 export async function createErrorGroupWatch({
