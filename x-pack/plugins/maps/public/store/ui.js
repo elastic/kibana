@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { PROMOTE_TEMPORARY_LAYERS, LAYER_DATA_LOAD_ERROR }
-  from '../actions/store_actions';
-import { RESET_LAYER_LOAD } from '../actions/ui_actions';
+import { PROMOTE_TEMPORARY_LAYERS, LAYER_DATA_LOAD_ERROR, RESET_LAYER_LOAD } from '../actions/store_actions';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';

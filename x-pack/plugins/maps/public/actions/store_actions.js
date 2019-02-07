@@ -6,13 +6,12 @@
 
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
-
-import { GIS_API_PATH } from '../../common/constants';
 import {
   getLayerList,
   getLayerListRaw,
   getDataFilters,
   getSelectedLayer,
+  getSelectedLayerId,
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
 } from '../selectors/map_selectors';
@@ -47,8 +46,10 @@ export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
 export const CLEAR_MOUSE_COORDINATES = 'CLEAR_MOUSE_COORDINATES';
 export const SET_GOTO = 'SET_GOTO';
 export const CLEAR_GOTO = 'CLEAR_GOTO';
-
-const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
+export const RESET_LAYER_LOAD = 'RESET_LAYER_LOAD';
+export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
+export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
+export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -72,6 +73,23 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
+}
+
+export function trackCurrentLayerState(layerId) {
+  return {
+    type: TRACK_CURRENT_LAYER_STATE,
+    layerId: layerId
+  };
+}
+
+export function rollbackToTrackedLayerState() {
+  return (dispatch, getState) => {
+    const layerId = getSelectedLayerId(getState());
+    dispatch({
+      type: ROLLBACK_TO_TRACKED_LAYER_STATE,
+      layerId: layerId
+    });
+  };
 }
 
 export function replaceLayerList(newLayerList) {
@@ -125,9 +143,14 @@ export function toggleLayerVisible(layerId) {
 }
 
 export function setSelectedLayer(layerId) {
-  return {
-    type: SET_SELECTED_LAYER,
-    selectedLayerId: layerId
+  return  dispatch => {
+    if (layerId) {
+      dispatch(trackCurrentLayerState(layerId));
+    }
+    dispatch({
+      type: SET_SELECTED_LAYER,
+      selectedLayerId: layerId
+    });
   };
 }
 
@@ -147,12 +170,6 @@ export function promoteTemporaryStyles() {
 export function promoteTemporaryLayers() {
   return {
     type: PROMOTE_TEMPORARY_LAYERS
-  };
-}
-
-export function clearTemporaryStyles() {
-  return {
-    type: CLEAR_TEMPORARY_STYLES
   };
 }
 
@@ -519,8 +536,9 @@ export function setJoinsForLayer(layer, joins) {
   };
 }
 
-export async function loadMetaResources(dispatch) {
-  const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
-  const metaJson = await meta.json();
-  await dispatch(setMeta(metaJson));
-}
+export const resetLayerLoad = () => {
+  return {
+    type: RESET_LAYER_LOAD
+  };
+};
+

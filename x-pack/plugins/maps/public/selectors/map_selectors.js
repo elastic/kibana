@@ -63,7 +63,7 @@ export const getMapReady = ({ map }) => map && map.ready;
 
 export const getGoto = ({ map }) => map && map.goto;
 
-const getSelectedLayerId = ({ map }) => {
+export const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 

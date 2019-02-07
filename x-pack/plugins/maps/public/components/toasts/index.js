@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { LAYER_LOAD_STATE } from '../../store/ui';
 import { Toasts } from './view';
-import { resetLayerLoad } from '../../actions/ui_actions';
+import { resetLayerLoad } from '../../actions/store_actions';
 
 const layerLoadStatus = ({ ui }) => {
   const toastStatuses = {

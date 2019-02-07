@@ -7,8 +7,14 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { promoteTemporaryStyles, clearTemporaryStyles, clearTemporaryLayers,
-  setSelectedLayer, removeSelectedLayer, promoteTemporaryLayers } from '../../../actions/store_actions';
+import {
+  promoteTemporaryStyles,
+  clearTemporaryLayers,
+  setSelectedLayer,
+  removeSelectedLayer,
+  promoteTemporaryLayers,
+  rollbackToTrackedLayerState
+} from '../../../actions/store_actions';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 
 const mapStateToProps = state => {
@@ -20,10 +26,10 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    cancelLayerPanel: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(clearTemporaryStyles());
-      dispatch(clearTemporaryLayers());
+    cancelLayerPanel: async () => {
+      await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(clearTemporaryLayers());
+      await dispatch(rollbackToTrackedLayerState());
     },
     saveLayerEdits: isNewLayer => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
