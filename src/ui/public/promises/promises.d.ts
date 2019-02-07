@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { kfetch, addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+export interface PromiseService {
+  resolve: <T>(value: T | PromiseLike<T>) => ng.IPromise<T>;
+
+  // TODO: add additional typing
+  [key: string]: any;
+}
