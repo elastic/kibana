@@ -51,7 +51,7 @@ export class AbstractLayer {
   }
 
   isJoinable() {
-    return false;
+    return this._source.isJoinable();
   }
 
   async getDisplayName() {

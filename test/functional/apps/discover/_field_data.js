@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Discover: Failed to parse query [xxx(yyy))]';
+        const expectedError = 'Discover: Expected "*", ":", "<", "<=", ">", ">=", "\\", [\\ \\t\\r\\n] or end of input but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
         const toastMessage =  await PageObjects.header.getToastMessage();
