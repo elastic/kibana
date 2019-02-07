@@ -9,8 +9,8 @@ import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   getClockSkew,
+  getOrderedWaterfallItems,
   getWaterfall,
-  getWaterfallItems,
   IWaterfallItem
 } from './waterfall_helpers';
 
@@ -105,8 +105,8 @@ describe('waterfall_helpers', () => {
         errorCountsByTransactionId,
         entryTransactionId
       );
-      expect(waterfall.items.length).toBe(6);
-      expect(waterfall.items[0].id).toBe('myTransactionId1');
+      expect(waterfall.orderedItems.length).toBe(6);
+      expect(waterfall.orderedItems[0].id).toBe('myTransactionId1');
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -121,8 +121,8 @@ describe('waterfall_helpers', () => {
         errorCountsByTransactionId,
         entryTransactionId
       );
-      expect(waterfall.items.length).toBe(4);
-      expect(waterfall.items[0].id).toBe('myTransactionId2');
+      expect(waterfall.orderedItems.length).toBe(4);
+      expect(waterfall.orderedItems[0].id).toBe('myTransactionId2');
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -225,7 +225,7 @@ describe('waterfall_helpers', () => {
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        getWaterfallItems(childrenByParentId, entryTransactionItem)
+        getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
 
@@ -239,7 +239,7 @@ describe('waterfall_helpers', () => {
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        getWaterfallItems(childrenByParentId, entryTransactionItem)
+        getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
   });

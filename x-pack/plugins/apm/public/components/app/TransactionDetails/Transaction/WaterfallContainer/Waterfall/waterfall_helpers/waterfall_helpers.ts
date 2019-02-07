@@ -37,10 +37,10 @@ export interface IWaterfall {
    */
   duration: number;
   services: string[];
-  items: IWaterfallItem[];
+  orderedItems: IWaterfallItem[];
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
-  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
+  errorCountByTransactionId: TraceAPIResponse['errorsPerTransaction'];
   serviceColors: IServiceColors;
 }
 
@@ -157,7 +157,7 @@ export function getClockSkew(
   }
 }
 
-export function getWaterfallItems(
+export function getOrderedWaterfallItems(
   childrenByParentId: IWaterfallGroup,
   entryTransactionItem: IWaterfallItem
 ) {
@@ -235,29 +235,32 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
 }
 
 export function getWaterfall(
-  hits: TraceAPIResponse['trace'],
+  trace: TraceAPIResponse['trace'],
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'],
   entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
-  if (isEmpty(hits) || !entryTransactionId) {
+  if (isEmpty(trace) || !entryTransactionId) {
     return {
       services: [],
       duration: 0,
-      items: [],
+      orderedItems: [],
       itemsById: {},
       getTransactionById: () => undefined,
-      errorsPerTransaction,
+      errorCountByTransactionId: errorsPerTransaction,
       serviceColors: {}
     };
   }
 
-  const waterfallItems = hits.map(hit => {
-    const docType = hit.processor.event;
+  const waterfallItems = trace.map(traceItem => {
+    const docType = traceItem.processor.event;
     switch (docType) {
       case 'span':
-        return getSpanItem(hit as Span);
+        return getSpanItem(traceItem as Span);
       case 'transaction':
-        return getTransactionItem(hit as Transaction, errorsPerTransaction);
+        return getTransactionItem(
+          traceItem as Transaction,
+          errorsPerTransaction
+        );
     }
   });
 
@@ -270,13 +273,13 @@ export function getWaterfall(
       waterfallItem.id === entryTransactionId
   );
   const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
-  const items = entryTransactionItem
-    ? getWaterfallItems(childrenByParentId, entryTransactionItem)
+  const orderedItems = entryTransactionItem
+    ? getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
     : [];
   const traceRoot = getTraceRoot(childrenByParentId);
-  const duration = getDuration(items);
+  const duration = getDuration(orderedItems);
   const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
-  const services = getServices(items);
+  const services = getServices(orderedItems);
   const getTransactionById = createGetTransactionById(itemsById);
   const serviceColors = getServiceColors(services);
 
@@ -285,10 +288,10 @@ export function getWaterfall(
     traceRootDuration,
     duration,
     services,
-    items,
+    orderedItems,
     itemsById,
     getTransactionById,
-    errorsPerTransaction,
+    errorCountByTransactionId: errorsPerTransaction,
     serviceColors
   };
 }

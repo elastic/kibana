@@ -64,7 +64,7 @@ export class Waterfall extends Component<Props> {
     });
   };
 
-  public getWaterfallItem = (item: IWaterfallItem) => {
+  public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
 
     return (
@@ -124,7 +124,7 @@ export class Waterfall extends Component<Props> {
   public render() {
     const { waterfall } = this.props;
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
-    const waterfallHeight = itemContainerHeight * waterfall.items.length;
+    const waterfallHeight = itemContainerHeight * waterfall.orderedItems.length;
 
     return (
       <Container>
@@ -141,7 +141,7 @@ export class Waterfall extends Component<Props> {
               paddingTop: TIMELINE_MARGINS.top
             }}
           >
-            {waterfall.items.map(this.getWaterfallItem)}
+            {waterfall.orderedItems.map(this.renderWaterfallItem)}
           </div>
         </StickyContainer>
 
