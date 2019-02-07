@@ -228,5 +228,9 @@ export class AbstractLayer {
     return  [];
   }
 
+  async getOrdinalFields() {
+    return [];
+  }
+
 }
 
