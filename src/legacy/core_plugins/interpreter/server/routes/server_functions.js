@@ -21,31 +21,69 @@ import Boom from 'boom';
 import { serializeProvider } from '@kbn/interpreter/common';
 import { API_ROUTE } from '../../common/constants';
 import { createHandlers } from '../lib/create_handlers';
+import Joi from 'joi';
 
+/**
+ * Register the Canvas function endopints.
+ *
+ * @param {*} server - The Kibana server
+ */
 export function registerServerFunctions(server) {
-  // Execute functions, kind of RPC like.
+  getServerFunctions(server);
+  runServerFunctions(server);
+}
+
+/**
+ * Register the endpoint that executes a batch of functions, and sends the result back as a single response.
+ *
+ * @param {*} server - The Kibana server
+ */
+function runServerFunctions(server) {
   server.route({
     method: 'POST',
-    path: `${API_ROUTE}/fns/{functionName}`,
+    path: `${API_ROUTE}/fns`,
+    options: {
+      validate: {
+        payload: Joi.object({
+          functions: Joi.array().items(
+            Joi.object()
+              .keys({
+                id: Joi.number().required(),
+                functionName: Joi.string().required(),
+                args: Joi.object().default({}),
+                context: Joi.object().default({}),
+              }),
+          ).required(),
+        }).required(),
+      },
+    },
     async handler(req) {
-      const types = server.plugins.interpreter.types.toJS();
-      const { deserialize } = serializeProvider(types);
-      const { functionName } = req.params;
-      const { args, context } = req.payload;
-      const fnDef = server.plugins.interpreter.serverFunctions.toJS()[functionName];
-
-      if (!fnDef) {
-        throw Boom.notFound(`Function "${functionName}" could not be found.`);
-      }
-
       const handlers = await createHandlers(req, server);
-      const result = await fnDef.fn(deserialize(context), args, handlers);
+      const { functions } = req.payload;
 
-      return result;
+      // Process each function individually, and bundle up respones / errors into
+      // the format expected by the front-end batcher.
+      const results = await Promise.all(functions.map(async ({ id, ...fnCall }) => {
+        const result = await runFunction(server, handlers, fnCall)
+          .catch(err => {
+            if (Boom.isBoom(err)) {
+              return { err, statusCode: err.statusCode, message: err.output.payload };
+            }
+            return {  err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
+          });
+        return { id, result };
+      }));
+
+      return { results };
     },
   });
+}
 
-  // Give the client the list of server-functions.
+/**
+ * Register the endpoint that returns the list of server-only functions.
+ * @param {*} server - The Kibana server
+ */
+function getServerFunctions(server) {
   server.route({
     method: 'GET',
     path: `${API_ROUTE}/fns`,
@@ -53,4 +91,24 @@ export function registerServerFunctions(server) {
       return server.plugins.interpreter.serverFunctions.toJS();
     },
   });
+}
+
+/**
+ * Run a single Canvas function.
+ *
+ * @param {*} server - The Kibana server object
+ * @param {*} handlers - The Canvas handlers
+ * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
+ */
+async function runFunction(server, handlers, fnCall) {
+  const { functionName, args, context } = fnCall;
+  const types = server.plugins.interpreter.types.toJS();
+  const { deserialize } = serializeProvider(types);
+  const fnDef = server.plugins.interpreter.serverFunctions.toJS()[functionName];
+
+  if (!fnDef) {
+    throw Boom.notFound(`Function "${functionName}" could not be found.`);
+  }
+
+  return fnDef.fn(deserialize(context), args, handlers);
 }
