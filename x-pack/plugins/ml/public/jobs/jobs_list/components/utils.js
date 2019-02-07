@@ -251,7 +251,7 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
-export async function checkForAutoOpenStartDatafeed() {
+export async function checkForAutoStartDatafeed() {
   if (mlJobService.currentJob !== undefined) {
     const jobId = mlJobService.currentJob.job_id;
     mlJobService.currentJob = undefined;
@@ -266,7 +266,7 @@ export async function checkForAutoOpenStartDatafeed() {
       };
     } catch (error) {
       mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.autoStartDatafeedErrorMessage', {
         defaultMessage: 'Could not load job to start datafeed {jobId}. Job could not be found',
         values: { jobId }
       }));

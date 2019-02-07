@@ -8,7 +8,7 @@
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs, checkForAutoOpenStartDatafeed } from '../utils';
+import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -135,7 +135,7 @@ export class JobsListView extends Component {
   }
 
   async openAutoStartDatafeedModal() {
-    const job = await checkForAutoOpenStartDatafeed();
+    const job = await checkForAutoStartDatafeed();
     if (job !== undefined) {
       this.showStartDatafeedModal([job]);
     }
