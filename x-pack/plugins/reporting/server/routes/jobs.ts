@@ -106,7 +106,7 @@ export function registerJobs(server: KbnServer) {
 
         return {
           ...doc._source,
-          headers: undefined,
+          headers: 'not shown',
         };
       });
     },
