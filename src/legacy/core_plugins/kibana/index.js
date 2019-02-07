@@ -163,7 +163,7 @@ export default function (kibana) {
             },
             visualize: {
               show: true,
-              showWriteControls: true
+              save: true
             },
             dashboard: {
               createNew: true,
@@ -178,6 +178,9 @@ export default function (kibana) {
               advanced_settings: true,
               saved_objects: true,
               index_patterns: true,
+            },
+            advancedSettings: {
+              save: true
             },
             management: {
               /*

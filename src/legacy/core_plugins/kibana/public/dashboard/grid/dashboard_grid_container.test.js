@@ -35,7 +35,7 @@ jest.mock('ui/chrome',
       if (injected === 'uiCapabilities') {
         return {
           dashboard: { show: true, save: true },
-          visualize: { show: true, showWriteControls: true },
+          visualize: { show: true, save: true },
         };
       }
     }

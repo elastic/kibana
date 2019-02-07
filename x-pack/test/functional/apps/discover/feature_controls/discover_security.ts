@@ -4,52 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
+import { SecurityService } from 'x-pack/test/common/services';
+import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
-export default function ({ getPageObjects, getService }) {
+// tslint:disable:no-default-export
+export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'security', 'spaceSelector']);
+  const security: SecurityService = getService('security');
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'security',
+    'spaceSelector',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
   async function setDiscoverTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
-    await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
   }
 
-  describe('discover', () => {
+  describe('security', () => {
     before(async () => {
-      await esArchiver.load('security/feature_privileges');
-      await kibanaServer.uiSettings.replace({
-        "accessibility:disableAnimations": true,
-        "telemetry:optIn": false,
-        "defaultIndex": "logstash-*",
-      });
+      await esArchiver.load('discover/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
+
+      // ensure we're logged out so we can login as the appropriate users
+      await PageObjects.security.logout();
     });
 
     after(async () => {
-      await esArchiver.unload('security/feature_privileges');
+      await esArchiver.unload('discover/feature_controls/security');
+
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      await PageObjects.security.logout();
     });
 
     describe('global discover all privileges', () => {
       before(async () => {
         await security.role.create('global_discover_all_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                discover: ['all']
+                discover: ['all'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_discover_all_user', {
@@ -58,9 +65,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_discover_all_user', 'global_discover_all_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_discover_all_user',
+          'global_discover_all_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -69,8 +80,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql([
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
           'Discover',
           'Management',
         ]);
@@ -86,18 +97,16 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('global_discover_read_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                discover: ['read']
+                discover: ['read'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_discover_read_user', {
@@ -106,9 +115,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_discover_read_user', 'global_discover_read_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_discover_read_user',
+          'global_discover_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -117,11 +130,10 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql([
-          'Discover',
-          'Management',
-        ]);
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).to.eql(['Discover', 'Management']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -142,19 +154,17 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('global_discover_visualize_read_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
                 discover: ['read'],
-                visualize: ['read']
+                visualize: ['read'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_discover_visualize_read_user', {
@@ -163,9 +173,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_discover_visualize_read_user', 'global_discover_visualize_read_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_discover_visualize_read_user',
+          'global_discover_visualize_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -185,17 +199,15 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('no_discover_privileges_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                dashboard: ['all']
+                dashboard: ['all'],
               },
-              spaces: ['*']
-            }
+              spaces: ['*'],
+            },
           ],
         });
 
@@ -205,9 +217,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('no_discover_privileges_user', 'no_discover_privileges_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'no_discover_privileges_user',
+          'no_discover_privileges_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {

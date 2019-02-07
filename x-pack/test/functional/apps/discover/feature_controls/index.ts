@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // tslint:disable:no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('disabled features', () => {
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./discover'));
+  describe('feature controls', () => {
+    loadTestFile(require.resolve('./discover_security'));
+    loadTestFile(require.resolve('./discover_spaces'));
   });
 }

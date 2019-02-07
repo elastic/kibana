@@ -141,7 +141,7 @@ const kibanaFeatures: Feature[] = [
           all: ['config'],
           read: [],
         },
-        ui: [],
+        ui: ['save'],
       },
       read: {
         savedObject: {

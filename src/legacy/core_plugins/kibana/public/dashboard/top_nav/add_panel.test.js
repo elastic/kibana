@@ -30,7 +30,7 @@ jest.mock('ui/chrome',
     getInjected(injected) {
       if (injected === 'uiCapabilities') {
         return {
-          visualize: { show: true, showWriteControls: true },
+          visualize: { show: true, save: true },
         };
       }
     }

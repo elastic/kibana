@@ -92,7 +92,7 @@ new CoreSystem({
           showWriteControls: true
         },
         visualize: {
-          showWriteControls: true
+          save: true
         },
         dashboard: {
           showWriteControls: true
