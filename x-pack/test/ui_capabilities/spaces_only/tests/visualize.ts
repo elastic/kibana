@@ -37,7 +37,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: true,
-              showWriteControls: true,
+              save: true,
             });
             break;
           case 'nothing_space':
@@ -46,7 +46,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: false,
-              showWriteControls: false,
+              save: false,
             });
             break;
           default:

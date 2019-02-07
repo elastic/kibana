@@ -33,7 +33,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: true,
-              showWriteControls: true,
+              save: true,
             });
             break;
           // these users have a read-only view of Visualize
@@ -43,7 +43,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: true,
-              showWriteControls: false,
+              save: false,
             });
             break;
           // these users can't do anything with Visualize
@@ -70,7 +70,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: false,
-              showWriteControls: false,
+              save: false,
             });
             break;
           case 'legacy_all':

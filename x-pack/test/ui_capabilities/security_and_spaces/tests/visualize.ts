@@ -36,7 +36,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: true,
-              showWriteControls: true,
+              save: true,
             });
             break;
           // these users have a read only view of Visualize
@@ -47,7 +47,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: true,
-              showWriteControls: false,
+              save: false,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -63,7 +63,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
             expect(uiCapabilities.value).to.have.property('visualize');
             expect(uiCapabilities.value!.visualize).to.eql({
               show: false,
-              showWriteControls: false,
+              save: false,
             });
             break;
           // if we don't have access at the space itself, we're
