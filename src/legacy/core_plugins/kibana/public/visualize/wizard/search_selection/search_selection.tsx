@@ -56,7 +56,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
     super(props);
 
     const manageSearchesBtn = (
-      <EuiButton onClick={this.manageSearches}>
+      <EuiButton fill onClick={this.manageSearches}>
         <FormattedMessage
           id="kbn.visualize.newVisWizard.savedSearchTab.managedSavedSearchButtonLabel"
           defaultMessage="Manage saved searches"
