@@ -72,10 +72,8 @@ export default ({ getService }) => {
         body: {
           index_patterns: 'migration_test_a',
           mappings: {
-            doc: {
-              dynamic: 'strict',
-              properties: { baz: { type: 'text' } },
-            },
+            dynamic: 'strict',
+            properties: { baz: { type: 'text' } },
           },
         },
       });
@@ -86,10 +84,8 @@ export default ({ getService }) => {
         body: {
           index_patterns: index,
           mappings: {
-            doc: {
-              dynamic: 'strict',
-              properties: { baz: { type: 'text' } },
-            },
+            dynamic: 'strict',
+            properties: { baz: { type: 'text' } },
           },
         },
       });
