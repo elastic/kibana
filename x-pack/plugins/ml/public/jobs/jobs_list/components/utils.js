@@ -254,7 +254,7 @@ export function filterJobs(jobs, clauses) {
 // check to see if a job has been stored in mlJobService.currentJob
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
-export async function checkForAutoStartDatafeed() {
+export function checkForAutoStartDatafeed() {
   const job = mlJobService.currentJob;
   if (job !== undefined) {
     mlJobService.currentJob = undefined;

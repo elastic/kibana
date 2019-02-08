@@ -138,8 +138,8 @@ export class JobsListView extends Component {
     clearInterval(jobsRefreshInterval);
   }
 
-  async openAutoStartDatafeedModal() {
-    const job = await checkForAutoStartDatafeed();
+  openAutoStartDatafeedModal() {
+    const job = checkForAutoStartDatafeed();
     if (job !== undefined) {
       this.showStartDatafeedModal([job]);
     }
