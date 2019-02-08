@@ -16,7 +16,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
   class GisPage {
 
-    async setAbsoluteTime(start, end) {
+    async setAbsoluteRange(start, end) {
       await PageObjects.timePicker.setAbsoluteRange(start, end);
       await this.waitForLayersToLoad();
     }
