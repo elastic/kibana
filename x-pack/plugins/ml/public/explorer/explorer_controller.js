@@ -14,12 +14,11 @@
 import $ from 'jquery';
 import moment from 'moment-timezone';
 
-import '../components/annotations_table';
+import '../components/annotations/annotations_table';
 import '../components/anomalies_table';
 import '../components/controls';
 import '../components/job_select_list';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
@@ -52,7 +51,6 @@ uiRoutes
   });
 
 import { uiModules } from 'ui/modules';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 const module = uiModules.get('apps/ml');
 
@@ -76,8 +74,6 @@ module.controller('MlExplorerController', function (
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
   $scope.jobs = [];
-  $scope.queryFilters = [];
-  $scope.indexPatterns = $route.current ? $route.current.locals.indexPatterns.map(getFromSavedObject) : [];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
@@ -85,7 +81,6 @@ module.controller('MlExplorerController', function (
   const tzConfig = config.get('dateFormat:tz');
   $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   $scope.mlJobSelectService = Private(JobSelectServiceProvider);
   $scope.MlTimeBuckets = Private(IntervalHelperProvider);
 
@@ -98,11 +93,6 @@ module.controller('MlExplorerController', function (
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
     });
-
-    $scope.updateFilters = filters => {
-      // The filters will automatically be set when the queryFilter emits an update event (see below)
-      queryFilter.setFilters(filters);
-    };
 
     const selectedJobs = jobs.filter(job => job.selected);
 
@@ -130,10 +120,9 @@ module.controller('MlExplorerController', function (
       });
   }
 
-  // Initialize the AppState in which to store filters and swimlane settings.
+  // Initialize the AppState in which to store swimlane settings.
   // AppState is used to store state in the URL.
   $scope.appState = new AppState({
-    filters: [],
     mlExplorerSwimlane: {},
   });
 
@@ -246,13 +235,6 @@ module.controller('MlExplorerController', function (
 
     $scope.appState.save();
     $scope.$applyAsync();
-  });
-
-  // Refresh the data when the dashboard filters are updated.
-  $scope.$listen(queryFilter, 'update', () => {
-    // TODO - add in filtering functionality.
-    $scope.queryFilters = queryFilter.getFilters();
-    console.log('explorer_controller queryFilter update, filters:', $scope.queryFilters);
   });
 
   $scope.$on('$destroy', () => {

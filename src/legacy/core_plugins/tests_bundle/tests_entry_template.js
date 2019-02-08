@@ -55,6 +55,9 @@ new CoreSystem({
         user: {}
       }
     },
+    csp: {
+      warnLegacyBrowsers: false,
+    },
     vars: {
       kbnIndex: '.kibana',
       esShardTimeout: 1500,

@@ -34,7 +34,7 @@ describe('MLJobLink', () => {
     );
 
     expect(wrapper.prop('href')).toBe(
-      '/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)),time:(from:now-24h,mode:quick,to:now))'
+      '/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),time:(from:now-24h,mode:quick,to:now))'
     );
   });
 });

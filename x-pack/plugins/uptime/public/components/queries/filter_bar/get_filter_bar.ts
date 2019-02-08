@@ -14,6 +14,7 @@ query FilterBar($dateRangeStart: String!, $dateRangeEnd: String!) {
         key
         url
       }
+      names
       schemes
     }
   }

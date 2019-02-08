@@ -81,6 +81,7 @@
  */
 
 .visEditor__canvas {
+  background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: row;
   overflow: auto;

@@ -1,0 +1,45 @@
+{
+  "index_patterns": [".management-beats-events-*"],
+  "version": 67000,
+  "index": {
+    "lifecycle": {
+      "name": ".beats-management-events-retention"
+    }
+  },
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "auto_expand_replicas": "0-1",
+      "codec": "best_compression"
+    }
+  },
+  "mappings": {
+    "_doc": {
+      "dynamic": "strict",
+      "properties": {
+        "type": {
+          "type": "keyword"
+        },
+        "beat": {
+          "type": "keyword"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "event": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "message": {
+              "type": "text"
+            },
+            "uuid": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -5,8 +5,19 @@
  */
 
 import { flow, omit } from 'lodash';
+import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
 import { FlatSettings } from './types';
+
+export interface ParsedIndexName {
+  cleanIndexName: string;
+  baseName: string;
+  newIndexName: string;
+  cleanBaseName: string;
+}
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -20,12 +31,37 @@ export const transformFlatSettings = (flatSettings: FlatSettings) => {
 };
 
 /**
+ * Parses an index name
+ * @param indexName
+ */
+export const parseIndexName = (indexName: string): ParsedIndexName => {
+  const matches = indexName.match(/^([\.])?(.*)$/) || [];
+  const internal = matches[1] || '';
+  const baseName = matches[2];
+
+  const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
+
+  // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
+  // avoid conflicts with index patterns/templates/etc
+  const reindexedMatcher = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
+
+  const cleanBaseName = baseName.replace(reindexedMatcher, '');
+
+  return {
+    cleanIndexName: `${internal}${cleanBaseName}`,
+    baseName,
+    cleanBaseName,
+    newIndexName: `${internal}${currentVersion}-${cleanBaseName}`,
+  };
+};
+
+/**
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
 export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
   const warnings = [
-    // No warnings yet for 7.0 -> 8.0
+    // No warnings yet for 8.0 -> 9.0
   ] as Array<[ReindexWarning, boolean]>;
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);

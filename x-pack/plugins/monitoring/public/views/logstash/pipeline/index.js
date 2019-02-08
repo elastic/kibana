@@ -21,7 +21,7 @@ import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_v
 import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import {
   EuiPageBody,
   EuiPage,
@@ -113,7 +113,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         }
         this.pipelineState = new PipelineState(data.pipeline);
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
                 <EuiPageContent>
@@ -126,7 +126,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

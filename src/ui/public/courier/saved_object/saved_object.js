@@ -148,6 +148,20 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         delete searchSourceValues.indexRefName;
       }
 
+      if (searchSourceValues.filter) {
+        searchSourceValues.filter.forEach((filterRow) => {
+          if (!filterRow.meta || !filterRow.meta.indexRefName) {
+            return;
+          }
+          const reference = references.find(reference => reference.name === filterRow.meta.indexRefName);
+          if (!reference) {
+            throw new Error(`Could not find reference for ${filterRow.meta.indexRefName} on ${this.getEsType()}`);
+          }
+          filterRow.meta.index = reference.id;
+          delete filterRow.meta.indexRefName;
+        });
+      }
+
       const searchSourceFields = this.searchSource.getFields();
       const fnProps = _.transform(searchSourceFields, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
@@ -220,7 +234,6 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           return savedObjectsClient.get(esType, this.id)
             .then(resp => {
               // temporary compatability for savedObjectsClient
-
               return {
                 _id: resp.id,
                 _type: resp.type,
@@ -297,16 +310,44 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       if (this.searchSource) {
-        const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
+        let searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
-          const indexId = searchSourceFields.index;
-          searchSourceFields.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+          const { id: indexId } = searchSourceFields.index;
+          const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            name: refName,
             type: 'index-pattern',
             id: indexId,
           });
-          delete searchSourceFields.index;
+          searchSourceFields = {
+            ...searchSourceFields,
+            indexRefName: refName,
+            index: undefined,
+          };
+        }
+        if (searchSourceFields.filter) {
+          searchSourceFields = {
+            ...searchSourceFields,
+            filter: searchSourceFields.filter.map((filterRow, i) => {
+              if (!filterRow.meta || !filterRow.meta.index) {
+                return filterRow;
+              }
+              const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+              references.push({
+                name: refName,
+                type: 'index-pattern',
+                id: filterRow.meta.index,
+              });
+              return {
+                ...filterRow,
+                meta: {
+                  ...filterRow.meta,
+                  indexRefName: refName,
+                  index: undefined,
+                }
+              };
+            }),
+          };
         }
         attributes.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceFields)

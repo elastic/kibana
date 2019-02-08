@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_NAME } from '../../../common/constants';
+import { PROCESSOR_NAME } from '../../../common/elasticsearch_fieldnames';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function getAgentStatus({ setup }) {
