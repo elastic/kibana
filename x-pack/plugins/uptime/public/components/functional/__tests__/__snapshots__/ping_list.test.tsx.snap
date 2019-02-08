@@ -357,27 +357,6 @@ exports[`PingList component renders unsorted list of many monitors without error
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiFormRow
-          describedByIds={Array []}
-          fullWidth={false}
-          hasEmptyLabelSpace={false}
-          label="Max Search Size"
-        >
-          <EuiFieldNumber
-            compressed={false}
-            defaultValue="200"
-            fullWidth={false}
-            isLoading={false}
-            max={10000}
-            min={0}
-            onBlur={[MockFunction]}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
     </EuiFlexGroup>
     <EuiInMemoryTable
       columns={
