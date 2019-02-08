@@ -9,6 +9,7 @@ import { filebeatAuditdRules } from './filebeat_auditd';
 import { filebeatHaproxyRules } from './filebeat_haproxy';
 import { filebeatIcingaRules } from './filebeat_icinga';
 import { filebeatIisRules } from './filebeat_iis';
+import { filebeatLogstashRules } from './filebeat_logstash';
 import { filebeatMongodbRules } from './filebeat_mongodb';
 import { filebeatMySQLRules } from './filebeat_mysql';
 import { filebeatNginxRules } from './filebeat_nginx';
@@ -27,6 +28,7 @@ export const builtinRules = [
   ...filebeatHaproxyRules,
   ...filebeatIcingaRules,
   ...filebeatIisRules,
+  ...filebeatLogstashRules,
   ...filebeatMongodbRules,
   ...genericRules,
   {
