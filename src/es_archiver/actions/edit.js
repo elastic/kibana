@@ -21,22 +21,22 @@ import { resolve, relative } from 'path';
 import Fs from 'fs';
 import { createGunzip, createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { promisify } from 'util';
+import globby from 'globby';
 
 import { createPromiseFromStreams } from '../../utils';
-import { readDirectory } from '../lib';
 
 const unlinkAsync = promisify(Fs.unlink);
 
-export async function editAction({ name, dataDir, log, handler }) {
-  const inputDir = resolve(dataDir, name);
-  const archives = (await readDirectory(inputDir))
-    .filter(name => (
-      name.endsWith('.gz')
-    ))
-    .map(name => ({
-      path: resolve(inputDir, name),
-      rawPath: resolve(inputDir, name.slice(0, -3))
-    }));
+export async function editAction({ prefix, dataDir, log, handler }) {
+  const archives = (
+    await globby('**/*.gz', {
+      cwd: prefix ? resolve(dataDir, prefix) : dataDir,
+      absolute: true
+    })
+  ).map(path => ({
+    path,
+    rawPath: path.slice(0, -3)
+  }));
 
   await Promise.all(archives.map(async archive => {
     await createPromiseFromStreams([
