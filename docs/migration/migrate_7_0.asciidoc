@@ -205,6 +205,22 @@ dependent on an unspecified port set to 9200, `:9200` will have to be appended t
 Previously set `elasticsearch.ssl.verify` is equal to `elasticsearch.ssl.verificationMode: full`.
 
 [float]
+=== kibana.yml setting `index_management.<any setting>` is no longer valid
+*Impact:* Users with `index_management.<any setting>` set should use `xpack.index_management.<any setting>` instead.
+
+[float]
+=== kibana.yml setting `license_management.<any setting>` is no longer valid
+*Impact:* Users with `license_management.<any setting>` set should use `xpack.license_management.<any setting>` instead.
+
+[float]
+=== kibana.yml setting `rollup.<any setting>` is no longer valid
+*Impact:* Users with `rollup.<any setting>` set should use `xpack.rollup.<any setting>` instead.
+
+[float]
+=== kibana.yml setting `upgrade_assistant.<any setting>` is no longer valid
+*Impact:* Users with `upgrade_assistant.<any setting>` set should use `xpack.upgrade_assistant.<any setting>` instead.
+
+[float]
 === Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
 *Details:* Kibana now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
 browsers like Internet Explorer 11 do not support CSP, we show them a warning message whenever they load Kibana.
