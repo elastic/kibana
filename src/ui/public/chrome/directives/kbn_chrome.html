@@ -2,14 +2,14 @@
   <kbn-loading-indicator></kbn-loading-indicator>
 
   <header-global-nav
-    class="header-global-wrapper"
+    class="header-global-wrapper hide-for-sharing"
     is-visible="chrome.getVisible()"
     app-title="chrome.getAppTitle()"
     data-test-subj="headerGlobalNav"
   ></header-global-nav>
 
   <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
-    <div class="app-wrapper-panel hide-for-sharing">
+    <div class="app-wrapper-panel">
       <kbn-notifications
         list="notifList"
       ></kbn-notifications>
