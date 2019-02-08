@@ -102,8 +102,7 @@ const TRACKED_LAYER_DESCRIPTOR = '__trackedLayerDescriptor';
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case REMOVE_TRACKED_LAYER_STATE:
-      console.warn('todo', action);
-      removeTrackedLayerState(state, action.layerId);
+      return removeTrackedLayerState(state, action.layerId);
     case TRACK_CURRENT_LAYER_STATE:
       rollbackAnyTrailingTrackedLayerState(state);//do this because users can select different layers while the layer panel is open, which automatically switches the selection
       return trackCurrentLayerState(state, action.layerId);
