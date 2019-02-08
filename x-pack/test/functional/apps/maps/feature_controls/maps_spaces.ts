@@ -46,11 +46,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`allows a map to be created`, async () => {
-        await PageObjects.maps.openNewMap();
+        await PageObjects.common.navigateToActualUrl('maps', '', {
+          basePath: `/s/custom_space`,
+        });
         await PageObjects.maps.saveMap('my test map');
       });
 
       it(`allows a map to be deleted`, async () => {
+        await PageObjects.common.navigateToActualUrl('maps', '', {
+          basePath: `/s/custom_space`,
+        });
         await PageObjects.maps.deleteSavedMaps('my test map');
       });
     });
