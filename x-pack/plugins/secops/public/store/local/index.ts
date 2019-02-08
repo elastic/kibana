@@ -9,4 +9,3 @@ export * from './epic';
 export * from './model';
 export * from './reducer';
 export * from './selectors';
-export * from './errors';

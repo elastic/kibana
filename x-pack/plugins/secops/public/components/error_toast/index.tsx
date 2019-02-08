@@ -10,8 +10,8 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { errorsActions, errorsSelectors, State } from '../../store';
-import { Error } from '../../store/local/errors/model';
+import { appActions, appSelectors, State } from '../../store';
+import { Error } from '../../store/local/app/model';
 
 interface OwnProps {
   toastLifeTimeMs?: number;
@@ -58,13 +58,13 @@ export const errorsToToasts = (errors: Error[]): Toast[] =>
   });
 
 const makeMapStateToProps = () => {
-  const getErrorSelector = errorsSelectors.errorsSelector();
+  const getErrorSelector = appSelectors.errorsSelector();
   return (state: State) => getErrorSelector(state);
 };
 
 export const ErrorToast = connect(
   makeMapStateToProps,
   {
-    removeError: errorsActions.removeError,
+    removeError: appActions.removeError,
   }
 )(ErrorToastComponent);
