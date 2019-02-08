@@ -77,6 +77,7 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/canvas'),
       resolve(__dirname, './apps/graph'),
       resolve(__dirname, './apps/monitoring'),
@@ -212,6 +213,9 @@ export default async function ({ readConfigFile }) {
       },
       uptime: {
         pathname: '/app/uptime',
+      },
+      apm: {
+        pathname: '/app/apm'
       }
     },
 

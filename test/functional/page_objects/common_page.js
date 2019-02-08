@@ -353,6 +353,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         }
       }
     }
+
+    async getBodyText() {
+      const el = await find.byCssSelector('body>pre');
+      return await el.getVisibleText();
+    }
   }
 
   return new CommonPage();
