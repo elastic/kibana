@@ -5,15 +5,21 @@
  */
 
 import { onError } from 'apollo-link-error';
+import uuid from 'uuid';
 
-import { showError } from '../../components/error_toast';
+import { store } from '../../store';
+import { addError } from '../../store/local/errors/actions';
 import * as i18n from './translations';
 
 export const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors != null) {
-    graphQLErrors.map(({ message }) => showError({ title: i18n.DATA_FETCH_FAILURE, message }));
+    graphQLErrors.map(({ message }) => {
+      store.dispatch(addError({ id: uuid.v4(), title: i18n.DATA_FETCH_FAILURE, message }));
+    });
   }
   if (networkError != null) {
-    showError({ title: i18n.NETWORK_FAILURE, message: networkError.message });
+    store.dispatch(
+      addError({ id: uuid.v4(), title: i18n.NETWORK_FAILURE, message: networkError.message })
+    );
   }
 });

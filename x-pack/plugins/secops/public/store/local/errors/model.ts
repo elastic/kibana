@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './actions';
-export * from './reducer';
-export * from './selectors';
-export * from './epic';
-export * from './model';
+export interface Error {
+  id: string;
+  title: string;
+  message: string;
+}
 
-import { createStore } from './store';
-
-const store = createStore();
-
-export { store, createStore };
+export type ErrorModel = Error[];

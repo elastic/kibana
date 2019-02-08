@@ -99,5 +99,6 @@ export const mockGlobalState: State = {
         },
       },
     },
+    errors: [],
   },
 };

@@ -5,39 +5,48 @@
  */
 
 import { EuiGlobalToastList, Toast } from '@elastic/eui';
-import { noop } from 'lodash';
 import React from 'react';
-import uuid from 'uuid';
+import { connect } from 'react-redux';
+import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 
-interface Props {
+import { errorsActions, errorsSelectors, State } from '../../store';
+import { Error } from '../../store/local/errors/model';
+
+interface OwnProps {
   toastLifeTimeMs?: number;
 }
 
-interface State {
-  toasts: Toast[];
+interface ReduxProps {
+  errors?: Error[];
 }
 
-let showErrorHandler = ({ id = uuid.v4(), title, message }: ShowErrorParams): void => noop();
-export const showError = ({ id = uuid.v4(), title, message }: ShowErrorParams) =>
-  showErrorHandler({ id, title, message });
-
-interface ShowErrorParams {
-  id?: string;
-  title: string;
-  message: string;
+interface DispatchProps {
+  addError?: ActionCreator<{ id: string; title: string; message: string }>;
+  removeError?: ActionCreator<{ id: string }>;
 }
 
-export class ErrorToast extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+type Props = OwnProps & ReduxProps & DispatchProps;
 
-    this.state = {
-      toasts: [],
-    };
-    showErrorHandler = this.showError;
-  }
+const ErrorToastComponent = pure<Props>(({ toastLifeTimeMs = 10000, errors = [], removeError }) =>
+  globalListFromToasts(errorsToToasts(errors), removeError!, toastLifeTimeMs)
+);
 
-  public showError = ({ id = uuid.v4(), title, message }: ShowErrorParams) => {
+export const globalListFromToasts = (
+  toasts: Toast[],
+  removeError: ActionCreator<{ id: string }>,
+  toastLifeTimeMs: number
+) =>
+  toasts.length !== 0 ? (
+    <EuiGlobalToastList
+      toasts={toasts}
+      dismissToast={({ id }) => removeError({ id })}
+      toastLifeTimeMs={toastLifeTimeMs}
+    />
+  ) : null;
+
+export const errorsToToasts = (errors: Error[]): Toast[] =>
+  errors.map(({ id, title, message }) => {
     const toast: Toast = {
       id,
       title,
@@ -45,26 +54,17 @@ export class ErrorToast extends React.PureComponent<Props, State> {
       iconType: 'alert',
       text: <p>{message}</p>,
     };
+    return toast;
+  });
 
-    this.setState({
-      toasts: this.state.toasts.concat(toast),
-    });
-  };
+const makeMapStateToProps = () => {
+  const getErrorSelector = errorsSelectors.errorsSelector();
+  return (state: State) => getErrorSelector(state);
+};
 
-  public removeError = (removedToast: Toast): void => {
-    this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
-    }));
-  };
-
-  public render() {
-    const { toastLifeTimeMs = 10000 } = this.props;
-    return (
-      <EuiGlobalToastList
-        toasts={this.state.toasts}
-        dismissToast={this.removeError}
-        toastLifeTimeMs={toastLifeTimeMs}
-      />
-    );
+export const ErrorToast = connect(
+  makeMapStateToProps,
+  {
+    removeError: errorsActions.removeError,
   }
-}
+)(ErrorToastComponent);

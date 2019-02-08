@@ -18,12 +18,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorToast } from '../components/error_toast';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
-import { createStore } from '../store';
+import { store } from '../store';
 
 export const startApp = async (libs: AppFrontendLibs) => {
   const history = createHashHistory();
-
-  const store = createStore();
 
   libs.framework.render(
     <EuiErrorBoundary>

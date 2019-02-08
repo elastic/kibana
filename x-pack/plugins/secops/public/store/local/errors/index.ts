@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './actions';
+import * as errorsActions from './actions';
+import * as errorsModel from './model';
+import * as errorsSelectors from './selectors';
+
+export { errorsActions };
+export { errorsModel };
+export { errorsSelectors };
+
 export * from './reducer';
-export * from './selectors';
-export * from './epic';
-export * from './model';
-
-import { createStore } from './store';
-
-const store = createStore();
-
-export { store, createStore };
