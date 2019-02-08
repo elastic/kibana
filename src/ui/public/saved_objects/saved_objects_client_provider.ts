@@ -18,33 +18,37 @@
  */
 
 import chrome from '../chrome';
+import { PromiseService } from '../promises';
+import { SavedObjectsClient } from './saved_objects_client';
+
+type Args<T extends (...args: any[]) => any> = T extends (...args: infer X) => any ? X : never;
 
 // Provide an angular wrapper around savedObjectClient so all actions get resolved in an Angular Promise
 // If you do not need the promise to execute in an angular digest cycle then you should not use this
 // and get savedObjectClient directly from chrome.
-export function SavedObjectsClientProvider(Promise) {
+export function SavedObjectsClientProvider(Promise: PromiseService) {
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   return {
-    create: (...args) => {
+    create: (...args: Args<SavedObjectsClient['create']>) => {
       return Promise.resolve(savedObjectsClient.create(...args));
     },
-    bulkCreate: (...args) => {
+    bulkCreate: (...args: Args<SavedObjectsClient['bulkCreate']>) => {
       return Promise.resolve(savedObjectsClient.bulkCreate(...args));
     },
-    delete: (...args) => {
+    delete: (...args: Args<SavedObjectsClient['delete']>) => {
       return Promise.resolve(savedObjectsClient.delete(...args));
     },
-    find: (...args) => {
+    find: (...args: Args<SavedObjectsClient['find']>) => {
       return Promise.resolve(savedObjectsClient.find(...args));
     },
-    get: (...args) => {
+    get: (...args: Args<SavedObjectsClient['get']>) => {
       return Promise.resolve(savedObjectsClient.get(...args));
     },
-    bulkGet: (...args) => {
+    bulkGet: (...args: Args<SavedObjectsClient['bulkGet']>) => {
       return Promise.resolve(savedObjectsClient.bulkGet(...args));
     },
-    update: (...args) => {
+    update: (...args: Args<SavedObjectsClient['update']>) => {
       return Promise.resolve(savedObjectsClient.update(...args));
     },
   };

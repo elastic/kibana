@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export type SavedObjectRegistryProvider = any;
+export interface PromiseService {
+  resolve: <T>(value: T | PromiseLike<T>) => ng.IPromise<T>;
+
+  // TODO: add additional typing
+  [key: string]: any;
+}

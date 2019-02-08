@@ -23,17 +23,28 @@ import React from 'react';
 import { InjectedIntlProps } from 'react-intl';
 import chrome from 'ui/chrome';
 
-// @ts-ignore
-import { EuiBasicTable, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiTableCriteria,
+} from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { injectI18n } from '@kbn/i18n/react';
 
+import { SavedObjectAttributes } from '../../../../server/saved_objects';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { SimpleSavedObject } from '../simple_saved_object';
 
 interface SavedObjectFinderUIState {
-  items: any[];
-  filter: any;
+  items: Array<{
+    title: string | null;
+    id: SavedObject<SavedObjectAttributes>['id'];
+    type: SavedObject<SavedObjectAttributes>['type'];
+  }>;
+  filter: string;
   isFetchingItems: boolean;
   page: number;
   perPage: number;
@@ -43,20 +54,14 @@ interface SavedObjectFinderUIState {
 
 interface SavedObjectFinderUIProps extends InjectedIntlProps {
   callToActionButton?: React.ReactNode;
-  onChoose?: (id: SimpleSavedObject<any>['id'], type: SimpleSavedObject<any>['type']) => void;
-  makeUrl?: (id: SimpleSavedObject<any>['id']) => void;
+  onChoose?: (
+    id: SimpleSavedObject<SavedObjectAttributes>['id'],
+    type: SimpleSavedObject<SavedObjectAttributes>['type']
+  ) => void;
+  makeUrl?: (id: SimpleSavedObject<SavedObjectAttributes>['id']) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectType: 'visualization' | 'search';
   visTypes?: VisTypesRegistryProvider;
-}
-
-// TODO there should be a Type in EUI for that, replace if it exists
-interface TableCriteria {
-  page: { index: number; size: number };
-  sort?: {
-    field?: string;
-    direction?: Direction;
-  };
 }
 
 class SavedObjectFinderUI extends React.Component<
@@ -74,7 +79,7 @@ class SavedObjectFinderUI extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = _.debounce(async (filter: any) => {
+  private debouncedFetch = _.debounce(async (filter: string) => {
     const resp = await chrome.getSavedObjectsClient().find({
       type: this.props.savedObjectType,
       fields: ['title', 'visState'],
@@ -92,7 +97,10 @@ class SavedObjectFinderUI extends React.Component<
       visTypes
     ) {
       resp.savedObjects = resp.savedObjects.filter(savedObject => {
-        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        if (typeof savedObject.attributes.visState !== 'string') {
+          return false;
+        }
+        const typeName: string = JSON.parse(savedObject.attributes.visState).type;
         const visType = visTypes.byName[typeName];
         return visType.stage !== 'experimental';
       });
@@ -107,11 +115,11 @@ class SavedObjectFinderUI extends React.Component<
     if (filter === this.state.filter) {
       this.setState({
         isFetchingItems: false,
-        items: resp.savedObjects.map(savedObject => {
+        items: resp.savedObjects.map(({ attributes: { title }, id, type }) => {
           return {
-            title: savedObject.attributes.title,
-            id: savedObject.id,
-            type: savedObject.type,
+            title: typeof title === 'string' ? title : '',
+            id,
+            type,
           };
         }),
       });
@@ -149,7 +157,7 @@ class SavedObjectFinderUI extends React.Component<
     );
   }
 
-  private onTableChange = ({ page, sort = {} }: TableCriteria) => {
+  private onTableChange = ({ page, sort = {} }: EuiTableCriteria) => {
     let sortField: string | undefined = sort.field;
     let sortDirection: Direction | undefined = sort.direction;
 
@@ -248,7 +256,7 @@ class SavedObjectFinderUI extends React.Component<
       pageSizeOptions: [5, 10],
     };
     // TODO there should be a Type in EUI for that, replace if it exists
-    const sorting: { sort?: TableCriteria['sort'] } = {};
+    const sorting: { sort?: EuiTableCriteria['sort'] } = {};
     if (this.state.sortField) {
       sorting.sort = {
         field: this.state.sortField,
@@ -263,7 +271,7 @@ class SavedObjectFinderUI extends React.Component<
           defaultMessage: 'Title',
         }),
         sortable: true,
-        render: (title: string, record: SimpleSavedObject<any>) => {
+        render: (title: string, record: SimpleSavedObject<SavedObjectAttributes>) => {
           const { onChoose, makeUrl } = this.props;
 
           if (!onChoose && !makeUrl) {
