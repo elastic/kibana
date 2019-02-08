@@ -6,7 +6,6 @@
   "license": "Elastic-License",
   "scripts": {
     "kbn": "node ../scripts/kbn",
-    "kbn:bootstrap": "gulp canvas:plugins:build",
     "start": "gulp dev",
     "build": "gulp build",
     "testonly": "gulp testonly",

@@ -19,7 +19,7 @@ const mapStateToProps = state => ({
 export const ElementContent = compose(
   connect(mapStateToProps),
   withProps(({ renderable }) => ({
-    renderFunction: renderFunctionsRegistry.get(get(renderable, 'as')),
+    renderFunction: registries.renderers.get(get(renderable, 'as')),
   }))
 )(Component);
 
