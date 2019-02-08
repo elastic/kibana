@@ -12,7 +12,6 @@ import {
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { getErrorCount } from '../../errors/get_error_count';
 import { Setup } from '../../helpers/setup_request';
 
 export type TransactionAPIResponse = Transaction | undefined;
@@ -62,15 +61,4 @@ export async function getTransaction(
 
   const resp = await client<Transaction>('search', params);
   return idx(resp, _ => _.hits.hits[0]._source);
-}
-
-export async function getTransactionWithErrorCount(
-  transactionId: string,
-  traceId: string,
-  setup: Setup
-): Promise<TransactionWithErrorCountAPIResponse> {
-  return Promise.all([
-    getTransaction(transactionId, traceId, setup),
-    getErrorCount(transactionId, traceId, setup)
-  ]).then(([transaction, errorCount]) => ({ transaction, errorCount }));
 }
