@@ -235,7 +235,7 @@ describe('features', () => {
     });
   });
 
-  test(`features with no privileges are specified with an empty object`, () => {
+  test(`features with no privileges aren't listed`, () => {
     const features: Feature[] = [
       {
         id: 'foo',
@@ -253,7 +253,7 @@ describe('features', () => {
     const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
-    expect(actual).toHaveProperty('features.foo', {});
+    expect(actual).not.toHaveProperty('features.foo');
   });
 });
 
@@ -666,18 +666,21 @@ describe('reserved', () => {
         actions.version,
         actions.app.get('apm'),
         ...actions.savedObject.readOperations('config'),
+        actions.ui.get('catalogue', 'apm'),
         actions.ui.get('navLinks', 'apm'),
       ],
       ml: [
         actions.version,
         actions.app.get('ml'),
         ...actions.savedObject.readOperations('config'),
+        actions.ui.get('catalogue', 'ml'),
         actions.ui.get('navLinks', 'ml'),
       ],
       monitoring: [
         actions.version,
         actions.app.get('monitoring'),
         ...actions.savedObject.readOperations('config'),
+        actions.ui.get('catalogue', 'monitoring'),
         actions.ui.get('navLinks', 'monitoring'),
       ],
     });

@@ -65,15 +65,17 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
 
       return {
         features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: Feature) => {
-          acc[feature.id] = mapValues(feature.privileges, privilege => [
-            actions.login,
-            actions.version,
-            ...flatten(
-              featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
-                featurePrivilegeBuilder.getActions(privilege, feature)
-              )
-            ),
-          ]);
+          if (Object.keys(feature.privileges).length > 0) {
+            acc[feature.id] = mapValues(feature.privileges, privilege => [
+              actions.login,
+              actions.version,
+              ...flatten(
+                featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
+                  featurePrivilegeBuilder.getActions(privilege, feature)
+                )
+              ),
+            ]);
+          }
           return acc;
         }, {}),
         global: {
@@ -95,18 +97,21 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
             actions.version,
             actions.app.get('apm'),
             ...actions.savedObject.readOperations('config'),
+            actions.ui.get('catalogue', 'apm'),
             actions.ui.get('navLinks', 'apm'),
           ],
           ml: [
             actions.version,
             actions.app.get('ml'),
             ...actions.savedObject.readOperations('config'),
+            actions.ui.get('catalogue', 'ml'),
             actions.ui.get('navLinks', 'ml'),
           ],
           monitoring: [
             actions.version,
             actions.app.get('monitoring'),
             ...actions.savedObject.readOperations('config'),
+            actions.ui.get('catalogue', 'monitoring'),
             actions.ui.get('navLinks', 'monitoring'),
           ],
         },
