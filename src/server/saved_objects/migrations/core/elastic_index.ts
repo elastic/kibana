@@ -209,26 +209,6 @@ export async function migrationsUpToDate(
   }
 }
 
-/**
- * Applies the specified mappings to the index.
- *
- * @param {CallCluster} callCluster
- * @param {string} index
- * @param {IndexMapping} mappings
- */
-export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', {
-    index,
-
-    // HACK: This is a temporary workaround for a disconnect between
-    // elasticsearchjs and Elasticsearch 7.0. The JS library requires
-    // type, but Elasticsearch 7.0 has deprecated type...
-    include_type_name: true,
-    type: '_doc',
-    body: mappings,
-  } as any);
-}
-
 export async function createIndex(
   callCluster: CallCluster,
   index: string,
