@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import { map as mapAsync } from 'bluebird';
 
-export function RollUpPageProvider({ getService, getPageObjects }) {
+export function RollupPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -24,8 +24,8 @@ export function RollUpPageProvider({ getService, getPageObjects }) {
 
     async addRoleNameandIndexPattern(name, indexPattern) {
       log.debug(`Adding name ${name} to form`);
-      await testSubjects.setValue('rollUpJobName', name);
-      await testSubjects.setValue('rollUpIndexPattern', indexPattern);
+      await testSubjects.setValue('rollupJobName', name);
+      await testSubjects.setValue('rollupIndexPattern', indexPattern);
     }
 
     async verifyIndexPatternAccepted() {
@@ -36,11 +36,11 @@ export function RollUpPageProvider({ getService, getPageObjects }) {
     }
 
     async setIndexName(name) {
-      await testSubjects.setValue('rollUpIndexName', name);
+      await testSubjects.setValue('rollupIndexName', name);
     }
 
     async moveToNextStep() {
-      await testSubjects.click('rollUpJobNextButton');
+      await testSubjects.click('rollupJobNextButton');
     }
 
     async setJobInterval(time) {
@@ -48,21 +48,21 @@ export function RollUpPageProvider({ getService, getPageObjects }) {
     }
 
     async saveJob() {
-      await testSubjects.click('rollUpJobSaveButton');
+      await testSubjects.click('rollupJobSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getJobList() {
       const jobs = await testSubjects.findAll('jobTableRow');
       return mapAsync(jobs, async job => {
-        const jobNameElement = await job.findByCssSelector('[data-test-subj="jobTableCell-ID"]');
-        const jobStatusElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Status"]');
-        const jobIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Indexpattern"]');
-        const jobRollUpIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Rollupindex"]');
-        const jobDelayElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Delay"]');
-        const jobIntervalElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Interval"]');
-        const jobGroupElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Groups"]');
-        const jobMetricsElement = await job.findByCssSelector('[data-test-subj="jobTableCell-Metrics"]');
+        const jobNameElement = await job.findByCssSelector('[data-test-subj="jobTableCell-id"]');
+        const jobStatusElement = await job.findByCssSelector('[data-test-subj="jobTableCell-status"]');
+        const jobIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-indexPattern"]');
+        const jobRollUpIndexPatternElement = await job.findByCssSelector('[data-test-subj="jobTableCell-rollupIndex"]');
+        const jobDelayElement = await job.findByCssSelector('[data-test-subj="jobTableCell-delay"]');
+        const jobIntervalElement = await job.findByCssSelector('[data-test-subj="jobTableCell-interval"]');
+        const jobGroupElement = await job.findByCssSelector('[data-test-subj="jobTableCell-groups"]');
+        const jobMetricsElement = await job.findByCssSelector('[data-test-subj="jobTableCell-metrics"]');
 
         return {
           jobName: await jobNameElement.getVisibleText(),

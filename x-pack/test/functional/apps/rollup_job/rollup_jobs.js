@@ -6,37 +6,40 @@
 
 import expect from 'expect.js';
 import { indexBy } from 'lodash';
+
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  //const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'header']);
 
-
-  describe('rollup_jobs', async () => {
+  describe('rollup job', async () => {
     before(async () => {
       // init data
       await Promise.all([
         esArchiver.loadIfNeeded('logstash_functional'),
         esArchiver.load('canvas/default'),
       ]);
-      await PageObjects.common.navigateToApp('rollupjob');
+      await PageObjects.common.navigateToApp('rollupJob');
     });
 
     after(async () => await esArchiver.unload('logstash_functional'));
 
-    it('create and and save a new job', async () => {
+    it('create and save a new job', async () => {
+      const jobName = 'Testjob1';
+      const indexPattern = '.kibana*';
+      const indexName = 'rollup_index';
+      const interval = '1000ms';
+
       await PageObjects.rollup.createNewRollUpJob();
       await PageObjects.rollup.verifyStepIsActive(1);
-      const jobName = 'Testjob1';
-      await PageObjects.rollup.addRoleNameandIndexPattern(jobName, '.kibana*');
+      await PageObjects.rollup.addRoleNameandIndexPattern(jobName, indexPattern);
       await PageObjects.rollup.verifyIndexPatternAccepted();
-      await PageObjects.rollup.setIndexName('rollup_index');
+      await PageObjects.rollup.setIndexName(indexName);
       await PageObjects.rollup.moveToNextStep();
 
       //now navigate to histogram
       await PageObjects.rollup.verifyStepIsActive(2);
-      await PageObjects.rollup.setJobInterval('1000ms');
+      await PageObjects.rollup.setJobInterval(interval);
       await PageObjects.rollup.moveToNextStep();
 
       //Terms (optional)
@@ -60,7 +63,6 @@ export default function ({ getService, getPageObjects }) {
       log.debug(JSON.stringify(jobList));
       log.debug(Object.keys(jobList));
       expect(Object.keys(jobList)).to.have.length(1);
-
     });
   });
 }

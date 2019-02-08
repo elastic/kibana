@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
+import _ from 'lodash';
 
 import {
   EuiCheckbox,
@@ -279,7 +280,7 @@ export class JobTableUi extends Component {
       return (
         <EuiTableRowCell
           key={`${job.id}-${name}`}
-          data-test-subj={`jobTableCell-${name.replace(' ', '')}`}
+          data-test-subj={`jobTableCell-${_.camelCase(name)}`}
           truncateText={truncateText}
         >
           {wrappedContent}

@@ -22,7 +22,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
-  RollUpPageProvider,
+  RollupPageProvider,
   UptimePageProvider,
 
 } from './page_objects';
@@ -85,7 +85,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/rollupjob'),
+      resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
@@ -126,7 +126,7 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerProvider,
       userMenu: UserMenuProvider,
       uptime: UptimeProvider,
-      rollup: RollUpPageProvider,
+      rollup: RollupPageProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -147,7 +147,7 @@ export default async function ({ readConfigFile }) {
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
       uptime: UptimePageProvider,
-      rollup: RollUpPageProvider
+      rollup: RollupPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -212,7 +212,7 @@ export default async function ({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
-      rollupjob: {
+      rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/'
       }
