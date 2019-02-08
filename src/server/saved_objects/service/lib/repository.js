@@ -461,11 +461,13 @@ export class SavedObjectsRepository {
     });
 
     for (const doc of response.docs) {
-      await throwIfIdFound({
-        type: doc._source.type,
-        attributes: doc._source[doc._source.type],
-        savedObjectsRepository: this,
-      });
+      if (doc.found) {
+        await throwIfIdFound({
+          type: doc._source.type,
+          attributes: doc._source[doc._source.type],
+          savedObjectsRepository: this,
+        });
+      }
     }
 
     return {
