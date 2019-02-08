@@ -431,6 +431,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:index-pattern/bulk_get',
                   'saved_object:index-pattern/get',
                   'saved_object:index-pattern/find',
+                  'ui:canvas/save',
                 ],
                 read: [
                   'login:',
@@ -605,6 +606,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'saved_object:canvas-workpad/bulk_create',
                 'saved_object:canvas-workpad/update',
                 'saved_object:canvas-workpad/delete',
+                'ui:canvas/save',
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
@@ -807,6 +809,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'saved_object:canvas-workpad/bulk_create',
                 'saved_object:canvas-workpad/update',
                 'saved_object:canvas-workpad/delete',
+                'ui:canvas/save',
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { CanvasPageProvider } from './canvas_page';
 export { SecurityPageProvider } from './security_page';
 export { MonitoringPageProvider } from './monitoring_page';
 export { LogstashPageProvider } from './logstash_page';
