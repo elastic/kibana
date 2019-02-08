@@ -126,13 +126,17 @@ export default function ({ getService }) {
       ));
 
       describe('unknown type', () => {
-        it('should return 400', async () => (
+        it('should return 200 with empty response', async () => (
           await supertest
             .get('/api/saved_objects/_find?type=wigwags')
-            .expect(400)
+            .expect(200)
             .then(resp => {
-              expect(resp.body).to.have.keys('message');
-              expect(resp.body.message).to.match(/one of.*/);
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: []
+              });
             })
         ));
       });
