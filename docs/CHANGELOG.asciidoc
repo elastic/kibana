@@ -13,10 +13,39 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.0.0-beta1>>
 * <<release-notes-7.0.0-alpha2>>
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.0.0-beta1]]
+== {kib} 7.0.0-beta1
+
+coming[7.0.0-beta1]
+
+[float]
+[[breaking-7.0.0-beta1]]
+=== Breaking changes
+
+For more details about breaking changes in this release, see 
+<<breaking-changes-7.0, Breaking changes in 7.0>>.
+
+[float]
+[[highlight-7.0.0-beta1]]
+=== Highlights
+
+
+[float]
+[[enhancement-7.0.0-beta1]]
+=== Enhancements
+
+
+
+
+
+
+
 
 
 [[release-notes-7.0.0-alpha2]]
