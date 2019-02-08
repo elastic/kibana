@@ -261,7 +261,7 @@ app.controller('timelion', function (
       testId: 'timelionDocsButton',
     };
 
-    if (uiCapabilities.timelion.showWriteControls) {
+    if (uiCapabilities.timelion.save) {
       return [newSheetAction, addSheetAction, saveSheetAction, deleteSheetAction, openSheetAction, optionsAction, helpAction];
     }
     return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];

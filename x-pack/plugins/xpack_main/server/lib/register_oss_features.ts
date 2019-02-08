@@ -196,7 +196,7 @@ const timelionFeatures: Feature[] = [
           all: ['timelion-sheet'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['showWriteControls'],
+        ui: ['save'],
       },
       read: {
         savedObject: {
