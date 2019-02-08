@@ -3,9 +3,10 @@
   "description": "Auditbeat Hosts: Detect rare process executions on hosts (ECS)",
   "groups": ["auditd"],
   "analysis_config": {
-    "bucket_span": "10m",
+    "bucket_span": "1h",
     "detectors": [
       {
+        "detector_description": "Rare process execution on hosts",
         "function": "rare",
         "by_field_name": "process.executable",
         "partition_field_name": "host.name"
