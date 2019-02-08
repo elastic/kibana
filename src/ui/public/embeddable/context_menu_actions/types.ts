@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { UICapabilities } from 'ui/capabilities';
 import { ContainerState, Embeddable } from 'ui/embeddable';
 
 /**
@@ -34,9 +33,4 @@ export interface PanelActionAPI {
    * Information about the current state of the panel and dashboard.
    */
   containerState: ContainerState;
-
-  /**
-   * The current UI Capabilities.
-   */
-  uiCapabilities: UICapabilities;
 }
