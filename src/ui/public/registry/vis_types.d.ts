@@ -20,4 +20,6 @@
 import { VisType } from '../vis';
 import { UIRegistry } from './_registry';
 
-declare type VisTypesRegistryProvider = UIRegistry<VisType> & { byName: VisType[] };
+declare type VisTypesRegistryProvider = UIRegistry<VisType> & {
+  byName: { [typeName: string]: VisType };
+};
