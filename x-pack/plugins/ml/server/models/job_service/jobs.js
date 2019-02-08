@@ -128,7 +128,7 @@ export function jobsProvider(callWithRequest) {
         tempJob.fullJob = job;
       }
       const auditMessage = auditMessagesByJob[tempJob.id];
-      if (auditMessage !== undefined) {
+      if (auditMessage !== undefined && job.create_time <= auditMessage.msgTime) {
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,
           text: auditMessage.highestLevelText
