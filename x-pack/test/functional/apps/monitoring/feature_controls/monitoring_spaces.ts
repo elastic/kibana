@@ -15,7 +15,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const appsMenu = getService('appsMenu');
   const find = getService('find');
 
-  describe.only('spaces', () => {
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

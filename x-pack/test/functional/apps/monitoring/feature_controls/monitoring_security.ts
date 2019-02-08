@@ -42,6 +42,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await PageObjects.security.logout();
     });
 
+    describe('monitoring_user', () => {
+      before(async () => {
+        await security.user.create('monitoring_user', {
+          password: 'monitoring_user-password',
+          roles: ['monitoring_user'],
+          full_name: 'monitoring all',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete('monitoring_user');
+      });
+
+      it('gets forbidden after login', async () => {
+        await PageObjects.security.login('monitoring_user', 'monitoring_user-password', {
+          expectForbidden: true,
+        });
+      });
+    });
+
     describe('global all', () => {
       before(async () => {
         await security.user.create('global_all', {
