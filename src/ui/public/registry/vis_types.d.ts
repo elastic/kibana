@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { VisType } from '../vis';
 import { UIRegistry } from './_registry';
 
-declare type VisTypesRegistryProvider = UIRegistry<any> & { byName: any[] };
+declare type VisTypesRegistryProvider = UIRegistry<VisType> & { byName: VisType[] };
