@@ -41,9 +41,7 @@ export async function getExportDocuments({
   let docsToExport: SavedObject[] = [];
   if (objects) {
     if (objects.length > exportSizeLimit) {
-      throw Boom.boomify(new Error(`Can't export more than ${exportSizeLimit} objects`), {
-        statusCode: 400,
-      });
+      throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
     ({ saved_objects: docsToExport } = await savedObjectsClient.bulkGet(objects));
   } else if (type) {
@@ -52,9 +50,7 @@ export async function getExportDocuments({
       perPage: exportSizeLimit,
     });
     if (findResponse.total > exportSizeLimit) {
-      throw Boom.boomify(new Error(`Can't export more than ${exportSizeLimit} objects`), {
-        statusCode: 400,
-      });
+      throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
     ({ saved_objects: docsToExport } = findResponse);
   }
@@ -87,7 +83,7 @@ export function sortDocs(docs: SavedObject[]) {
     }
     if (moveCounts > array.length) {
       // We'll consider it a circular dependencies when all the items had to move up in the array
-      throw Boom.boomify(new Error('Circular dependency'), { statusCode: 400 });
+      throw Boom.badRequest('Circular dependency');
     }
   }
   return array;
