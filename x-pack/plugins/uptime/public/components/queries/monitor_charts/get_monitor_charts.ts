@@ -28,6 +28,8 @@ query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
       down
       total
     }
+    statusMaxCount
+    durationMaxCount
   }
 }
 `;

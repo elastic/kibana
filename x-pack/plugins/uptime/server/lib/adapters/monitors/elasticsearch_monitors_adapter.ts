@@ -57,7 +57,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     monitorId: string,
     dateRangeStart: string,
     dateRangeEnd: string
-  ): Promise<any> {
+  ): Promise<MonitorChart> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
