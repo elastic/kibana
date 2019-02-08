@@ -27,6 +27,7 @@ jest.mock('./plugin_context', () => ({
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { ElasticsearchServiceStartContract } from '../elasticsearch';
 import { logger } from '../logging/__mocks__';
 import { Plugin, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
@@ -59,8 +60,10 @@ let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
+let startDeps: { elasticsearch: ElasticsearchServiceStartContract };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
+  startDeps = { elasticsearch: { legacy: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
@@ -78,7 +81,7 @@ afterEach(() => {
 });
 
 test('can be started even without plugins', async () => {
-  const pluginsContracts = await pluginsSystem.startPlugins();
+  const pluginsContracts = await pluginsSystem.startPlugins(startDeps);
 
   expect(pluginsContracts).toBeInstanceOf(Map);
   expect(pluginsContracts.size).toBe(0);
@@ -87,7 +90,7 @@ test('can be started even without plugins', async () => {
 test('`startPlugins` throws plugin has missing required dependency', async () => {
   pluginsSystem.addPlugin(createPlugin('some-id', { required: ['missing-dep'] }));
 
-  await expect(pluginsSystem.startPlugins()).rejects.toMatchInlineSnapshot(
+  await expect(pluginsSystem.startPlugins(startDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["some-id",{}]]]`
   );
 });
@@ -97,7 +100,7 @@ test('`startPlugins` throws if plugins have circular required dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-1', { required: ['depends-on-2'] }));
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { required: ['depends-on-1'] }));
 
-  await expect(pluginsSystem.startPlugins()).rejects.toMatchInlineSnapshot(
+  await expect(pluginsSystem.startPlugins(startDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
   );
 });
@@ -107,7 +110,7 @@ test('`startPlugins` throws if plugins have circular optional dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-1', { optional: ['depends-on-2'] }));
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { optional: ['depends-on-1'] }));
 
-  await expect(pluginsSystem.startPlugins()).rejects.toMatchInlineSnapshot(
+  await expect(pluginsSystem.startPlugins(startDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
   );
 });
@@ -118,7 +121,7 @@ test('`startPlugins` ignores missing optional dependency', async () => {
 
   pluginsSystem.addPlugin(plugin);
 
-  expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
 Array [
   Array [
     "some-id",
@@ -153,9 +156,11 @@ test('`startPlugins` correctly orders plugins and returns exposed values', async
     pluginsSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginStartContext.mockImplementation((_, plugin) => startContextMap.get(plugin.name));
+  mockCreatePluginStartContext.mockImplementation((context, deps, plugin) =>
+    startContextMap.get(plugin.name)
+  );
 
-  expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
 Array [
   Array [
     "order-0",
@@ -181,7 +186,7 @@ Array [
 `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, plugin);
+    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, startDeps, plugin);
     expect(plugin.start).toHaveBeenCalledTimes(1);
     expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps);
   }
@@ -198,7 +203,7 @@ test('`startPlugins` only starts plugins that have server side', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
+  expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
 Array [
   Array [
     "order-1",
@@ -211,9 +216,17 @@ Array [
 ]
 `);
 
-  expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, firstPluginToRun);
+  expect(mockCreatePluginStartContext).toHaveBeenCalledWith(
+    coreContext,
+    startDeps,
+    firstPluginToRun
+  );
   expect(mockCreatePluginStartContext).not.toHaveBeenCalledWith(coreContext, secondPluginNotToRun);
-  expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, thirdPluginToRun);
+  expect(mockCreatePluginStartContext).toHaveBeenCalledWith(
+    coreContext,
+    startDeps,
+    thirdPluginToRun
+  );
 
   expect(firstPluginToRun.start).toHaveBeenCalledTimes(1);
   expect(secondPluginNotToRun.start).not.toHaveBeenCalled();
