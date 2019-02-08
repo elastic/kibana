@@ -6,7 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { size } from 'lodash';
-import { rgba } from 'polished';
+import { rgba, tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore
@@ -42,7 +42,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   height: ${px(units.eighth * 9)};
   top: ${props => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
-  background-color: ${rgba(theme.euiColorWarning, 0.1)};
+  background-color: ${tint(0.1, theme.euiColorWarning)};
 `;
 
 const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
@@ -66,7 +66,7 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   text-align: right;
   border-right: 1px solid ${theme.euiColorLightShade};
   background-color: ${props =>
-    props.highlight ? rgba(theme.euiColorWarning, 0.1) : null};
+    props.highlight ? tint(0.1, theme.euiColorWarning) : null};
 
   &:last-of-type {
     border-radius: 0 0 0 ${borderRadius};
