@@ -35,7 +35,8 @@ export class WebhookAction extends BaseAction {
       this.fields[field] = get(props, field);
     });
 
-    this.fullPath = this.url ? this.url : this.host + this.port + this.path;
+    const { url, host, port, path } = this.fields;
+    this.fullPath = url ? url : host + port + path;
   }
 
   get upstreamJson() {

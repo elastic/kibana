@@ -58,8 +58,8 @@ export class IndexAction extends BaseAction {
     return i18n.translate('xpack.watcher.models.indexAction.description', {
       defaultMessage: 'The {index} will be indexed as {docType}',
       values: {
-        index: this.index,
-        docType: this.doc_type,
+        index: this.fields.index,
+        docType: this.fields.doc_type,
       }
     });
   }

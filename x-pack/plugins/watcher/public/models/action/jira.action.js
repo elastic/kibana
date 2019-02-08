@@ -46,7 +46,7 @@ export class JiraAction extends BaseAction {
     return i18n.translate('xpack.watcher.models.jiraAction.description', {
       defaultMessage: '{issueName} will be created in Jira',
       values: {
-        issueName: this.fields && this.fields.issuetype && this.fields.issuetype.name || ''
+        issueName: get(this.fields, 'fields.issue.issuetype.name', ''),
       }
     });
   }

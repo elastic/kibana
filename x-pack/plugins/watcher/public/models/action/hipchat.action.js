@@ -46,7 +46,7 @@ export class HipchatAction extends BaseAction {
     return i18n.translate('xpack.watcher.models.hipchatAction.description', {
       defaultMessage: '{body} will be sent through Hipchat',
       values: {
-        body: this.message && this.message.body || ''
+        body: this.fields.message && this.fields.message.body || ''
       }
     });
   }

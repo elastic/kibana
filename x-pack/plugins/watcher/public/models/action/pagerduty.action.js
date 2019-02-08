@@ -56,7 +56,7 @@ export class PagerDutyAction extends BaseAction {
     return i18n.translate('xpack.watcher.models.pagerDutyAction.description', {
       defaultMessage: '{description} will be sent to PagerDuty',
       values: {
-        description: this.description,
+        description: this.fields.description,
       }
     });
   }
