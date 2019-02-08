@@ -13,9 +13,9 @@ import * as i18n from './translations';
 
 export const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors != null) {
-    graphQLErrors.map(({ message }) => {
-      store.dispatch(addError({ id: uuid.v4(), title: i18n.DATA_FETCH_FAILURE, message }));
-    });
+    graphQLErrors.forEach(({ message }) =>
+      store.dispatch(addError({ id: uuid.v4(), title: i18n.DATA_FETCH_FAILURE, message }))
+    );
   }
   if (networkError != null) {
     store.dispatch(
