@@ -17,6 +17,7 @@
  * under the License.
  */
 
+
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
@@ -80,6 +81,31 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async clickMarkdownData() {
       await testSubjects.click('markdownDataBtn');
+    }
+
+    /**
+     *
+     * getting all markdown variables list which located on `table` section
+     *
+     * **Note**: if `table` not have variables, return `No variables available for the selected data metrics.`
+     * @returns {Promise<string[] | string>}
+     * @memberof VisualBuilderPage
+     */
+    async getMarkdownTableVariables() {
+      const noVariablesSelector = '.euiTitle.euiTitle--xxsmall.tvbMarkdownEditor__noVariables';
+      const variablesListSelector = 'div.tvbMarkdownEditor__variables table > tbody';
+
+      const noVariables = await find.descendantExistsByCssSelector(noVariablesSelector);
+
+      if (!noVariables) {
+        const text = await (await find.byCssSelector(noVariablesSelector)).getVisibleText();
+        log.debug(`markdown table variable is: ${text}`);
+        return text;
+      }
+      const variables = await find.allByCssSelector(`${variablesListSelector} td`);
+      const variablesText = Promise.all(variables.map(variable => variable.getVisibleText()));
+      log.debug(`markdown table variables is: ${variablesText}`);
+      return variablesText;
     }
 
     async clickSeriesOption(nth = 0) {
