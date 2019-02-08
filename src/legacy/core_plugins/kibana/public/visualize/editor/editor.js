@@ -326,6 +326,10 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
+    $scope.showQueryBar = () => {
+      return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
@@ -343,13 +347,27 @@ function VisEditor(
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
-    ], function ([index, requiresTimePicker]) {
+      $scope.showQueryBar,
+    ], function ([index, requiresTimePicker, showQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-      } else {
+      if (showQueryBar) {
         timefilter.disableTimeRangeSelector();
+        timefilter.disableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = true;
+        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
+      }
+      else if (showTimeFilter) {
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
+      }
+      else {
+        timefilter.disableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
       }
     });
 
@@ -364,8 +382,12 @@ function VisEditor(
       }
     };
 
-    timefilter.enableAutoRefreshSelector();
+    const updateRefreshInterval = () => {
+      $scope.refreshInterval = timefilter.getRefreshInterval();
+    };
+
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -402,9 +424,17 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function ({ query }) {
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   /**
