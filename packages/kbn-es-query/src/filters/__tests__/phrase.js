@@ -53,7 +53,7 @@ describe('Filter Manager', function () {
       const field = getField(indexPattern, 'script number');
       expected.meta.field = 'script number';
       _.set(expected, 'script.script', {
-        inline: '(' + field.script + ') == value',
+        source: '(' + field.script + ') == value',
         lang: 'expression',
         params: {
           value: 5,
