@@ -103,8 +103,9 @@ export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case REMOVE_TRACKED_LAYER_STATE:
       console.warn('todo', action);
-      return state;
+      removeTrackedLayerState(state, action.layerId);
     case TRACK_CURRENT_LAYER_STATE:
+      rollbackAnyTrailingTrackedLayerState(state);//do this because users can select different layers while the layer panel is open, which automatically switches the selection
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
       return rollbackTrackedLayerState(state, action.layerId);
@@ -357,12 +358,25 @@ function findLayerById(state, id) {
   return state.layerList.find(layer => layer.id === id);
 }
 
+function rollbackAnyTrailingTrackedLayerState(state) {
+  state.layerList.forEach(layer => {
+    if (layer[TRACKED_LAYER_DESCRIPTOR]) {
+      rollbackTrackedLayerState(state, layer.id);
+    }
+  });
+}
+
 function trackCurrentLayerState(state, layerId) {
   const layer = findLayerById(state, layerId);
   const layerCopy = copyPersistentState(layer);
   return updateLayerInList(state, layerId, TRACKED_LAYER_DESCRIPTOR, layerCopy);
 }
 
+function removeTrackedLayerState(state, layerId) {
+  const layer = findLayerById(state,  layerId);
+  delete layer[TRACKED_LAYER_DESCRIPTOR];//just update in place
+  return { ...state };
+}
 
 function rollbackTrackedLayerState(state, layerId) {
   const layer = findLayerById(state, layerId);

@@ -499,7 +499,6 @@ export class VectorLayer extends AbstractLayer {
     return this._source.canFormatFeatureProperties();
   }
 
-
   async _getPropertiesForTooltip(feature) {
     const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
 

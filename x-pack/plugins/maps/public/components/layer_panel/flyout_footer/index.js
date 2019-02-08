@@ -13,7 +13,8 @@ import {
   setSelectedLayer,
   removeSelectedLayer,
   promoteTemporaryLayers,
-  rollbackToTrackedLayerState
+  rollbackToTrackedLayerStateForSelectedLayer,
+  removeTrackedLayerStateForSelectedLayer
 } from '../../../actions/store_actions';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 
@@ -29,7 +30,7 @@ const mapDispatchToProps = dispatch => {
     cancelLayerPanel: async () => {
       await dispatch(updateFlyout(FLYOUT_STATE.NONE));
       await dispatch(clearTemporaryLayers());
-      await dispatch(rollbackToTrackedLayerState());
+      await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
     },
     saveLayerEdits: isNewLayer => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -37,6 +38,7 @@ const mapDispatchToProps = dispatch => {
       if (isNewLayer) {
         dispatch(promoteTemporaryLayers());
       }
+      dispatch(removeTrackedLayerStateForSelectedLayer());
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {

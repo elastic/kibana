@@ -81,11 +81,21 @@ export function trackCurrentLayerState(layerId) {
   };
 }
 
-export function rollbackToTrackedLayerState() {
+export function rollbackToTrackedLayerStateForSelectedLayer() {
   return (dispatch, getState) => {
     const layerId = getSelectedLayerId(getState());
     dispatch({
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
+      layerId: layerId
+    });
+  };
+}
+
+export function removeTrackedLayerStateForSelectedLayer() {
+  return (dispatch, getState) => {
+    const layerId = getSelectedLayerId(getState());
+    dispatch({
+      type: REMOVE_TRACKED_LAYER_STATE,
       layerId: layerId
     });
   };
