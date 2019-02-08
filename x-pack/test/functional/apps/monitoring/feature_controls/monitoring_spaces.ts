@@ -13,9 +13,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
-  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-  describe('spaces', () => {
+  describe.only('spaces', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -37,31 +37,32 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await spacesService.delete('custom_space');
       });
 
-      it('shows apm navlink', async () => {
+      it('shows stack monitoring navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.contain('APM');
+        expect(navLinks).to.contain('Stack Monitoring');
       });
 
       it(`can navigate to app`, async () => {
-        await PageObjects.common.navigateToApp('apm', {
+        await PageObjects.common.navigateToApp('monitoring', {
           basePath: '/s/custom_space',
         });
 
-        await testSubjects.existOrFail('apm-main-container', 10000);
+        const exists = await find.existsByCssSelector('monitoring-main');
+        expect(exists).to.be(true);
       });
     });
 
-    describe('space with APM disabled', () => {
+    describe('space with monitoring disabled', () => {
       before(async () => {
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
-          disabledFeatures: ['apm'],
+          disabledFeatures: ['monitoring'],
         });
       });
 
@@ -69,18 +70,18 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await spacesService.delete('custom_space');
       });
 
-      it(`doesn't show apm navlink`, async () => {
+      it(`doesn't show stack monitoring navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).not.to.contain('APM');
+        expect(navLinks).not.to.contain('Stack Monitoring');
       });
 
       it(`navigating to app returns a 404`, async () => {
-        await PageObjects.common.navigateToUrl('apm', '', {
+        await PageObjects.common.navigateToUrl('monitoring', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
