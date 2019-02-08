@@ -21,10 +21,11 @@ import Boom from 'boom';
 import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
 import url from 'url';
-import { has, isEmpty, head, pick, isPlainObject } from 'lodash';
+import { has, isEmpty, head, pick } from 'lodash';
 
 import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
+import { setHeaders } from './server/set_headers';
 
 import {
   ProxyConfigCollection,
@@ -45,20 +46,6 @@ function filterHeaders(originalHeaders, headersToKeep) {
   const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
 
   return pick(originalHeaders, headersToKeepNormalized);
-}
-
-function setHeaders(originalHeaders, newHeaders) {
-  if (!isPlainObject(originalHeaders)) {
-    throw new Error(`Expected originalHeaders to be an object, but ${typeof originalHeaders} given`);
-  }
-  if (!isPlainObject(newHeaders)) {
-    throw new Error(`Expected newHeaders to be an object, but ${typeof newHeaders} given`);
-  }
-
-  return {
-    ...originalHeaders,
-    ...newHeaders
-  };
 }
 
 export default function (kibana) {
@@ -116,22 +103,22 @@ export default function (kibana) {
       }
 
       const config = server.config();
-      const bwcEsConfig = await server.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
+      const legacyEsConfig = await server.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
       defaultVars = {
         elasticsearchUrl: url.format(
-          Object.assign(url.parse(head(bwcEsConfig.hosts)), { auth: false })
+          Object.assign(url.parse(head(legacyEsConfig.hosts)), { auth: false })
         )
       };
 
       server.route(createProxyRoute({
-        baseUrl: head(bwcEsConfig.hosts),
+        baseUrl: head(legacyEsConfig.hosts),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
-          const filteredHeaders = filterHeaders(req.headers, bwcEsConfig.requestHeadersWhitelist);
-          const headers = setHeaders(filteredHeaders, bwcEsConfig.customHeaders);
+          const filteredHeaders = filterHeaders(req.headers, legacyEsConfig.requestHeadersWhitelist);
+          const headers = setHeaders(filteredHeaders, legacyEsConfig.customHeaders);
 
           if (!isEmpty(config.get('console.proxyConfig'))) {
             return {
@@ -141,7 +128,7 @@ export default function (kibana) {
           }
 
           return {
-            ...getElasticsearchProxyConfig(bwcEsConfig),
+            ...getElasticsearchProxyConfig(legacyEsConfig),
             headers,
           };
         }

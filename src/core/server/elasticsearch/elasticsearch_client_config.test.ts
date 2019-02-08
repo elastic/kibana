@@ -493,21 +493,26 @@ Object {
   });
 
   test('#verificationMode = certificate', () => {
+    const clientConfig = parseElasticsearchClientConfig(
+      {
+        apiVersion: 'v7.0.0',
+        customHeaders: {},
+        logQueries: true,
+        sniffOnStart: true,
+        sniffOnConnectionFault: true,
+        hosts: ['https://es.local'],
+        requestHeadersWhitelist: [],
+        ssl: { verificationMode: 'certificate' },
+      },
+      logger.get()
+    );
+
+    // `checkServerIdentity` shouldn't check hostname when verificationMode is certificate.
     expect(
-      parseElasticsearchClientConfig(
-        {
-          apiVersion: 'v7.0.0',
-          customHeaders: {},
-          logQueries: true,
-          sniffOnStart: true,
-          sniffOnConnectionFault: true,
-          hosts: ['https://es.local'],
-          requestHeadersWhitelist: [],
-          ssl: { verificationMode: 'certificate' },
-        },
-        logger.get()
-      )
-    ).toMatchInlineSnapshot(`
+      clientConfig.ssl!.checkServerIdentity!('right.com', { subject: { CN: 'wrong.com' } } as any)
+    ).toBeUndefined();
+
+    expect(clientConfig).toMatchInlineSnapshot(`
 Object {
   "apiVersion": "v7.0.0",
   "hosts": Array [

@@ -25,13 +25,13 @@ import url from 'url';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
-const createAgent = (bwcConfig) => {
-  const target = url.parse(_.head(bwcConfig.hosts));
+const createAgent = (legacyConfig) => {
+  const target = url.parse(_.head(legacyConfig.hosts));
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
   const agentOptions = {};
 
-  const verificationMode = bwcConfig.ssl && bwcConfig.ssl.verificationMode;
+  const verificationMode = legacyConfig.ssl && legacyConfig.ssl.verificationMode;
   switch (verificationMode) {
     case 'none':
       agentOptions.rejectUnauthorized = false;
@@ -49,27 +49,27 @@ const createAgent = (bwcConfig) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (bwcConfig.ssl && bwcConfig.ssl.certificateAuthorities.length > 0) {
-    agentOptions.ca = bwcConfig.ssl.certificateAuthorities.map(readFile);
+  if (legacyConfig.ssl && legacyConfig.ssl.certificateAuthorities.length > 0) {
+    agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
   }
 
   if (
-    bwcConfig.ssl &&
-    bwcConfig.ssl.alwaysPresentCertificate &&
-    bwcConfig.ssl.certificate &&
-    bwcConfig.ssl.key
+    legacyConfig.ssl &&
+    legacyConfig.ssl.alwaysPresentCertificate &&
+    legacyConfig.ssl.certificate &&
+    legacyConfig.ssl.key
   ) {
-    agentOptions.cert = readFile(bwcConfig.ssl.certificate);
-    agentOptions.key = readFile(bwcConfig.ssl.key);
-    agentOptions.passphrase = bwcConfig.ssl.keyPassphrase;
+    agentOptions.cert = readFile(legacyConfig.ssl.certificate);
+    agentOptions.key = readFile(legacyConfig.ssl.key);
+    agentOptions.passphrase = legacyConfig.ssl.keyPassphrase;
   }
 
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (bwcConfig) => {
+export const getElasticsearchProxyConfig = (legacyConfig) => {
   return {
-    timeout: bwcConfig.requestTimeout.asMilliseconds(),
-    agent: createAgent(bwcConfig)
+    timeout: legacyConfig.requestTimeout.asMilliseconds(),
+    agent: createAgent(legacyConfig)
   };
 };

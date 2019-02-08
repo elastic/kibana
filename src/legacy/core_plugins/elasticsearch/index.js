@@ -86,10 +86,11 @@ export default function (kibana) {
       });
 
       server.events.on('stop', () => {
-        for (const [name, cluster] of clusters) {
+        for (const cluster of clusters.values()) {
           cluster.close();
-          clusters.delete(name);
         }
+
+        clusters.clear();
       });
 
       createProxy(server);

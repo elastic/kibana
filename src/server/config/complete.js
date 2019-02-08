@@ -78,8 +78,6 @@ export default async function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
-  server.decorate('server', 'core', kbnServer.core);
-
   const unusedKeys = await getUnusedConfigKeys(
     kbnServer.core.handledConfigPaths,
     kbnServer.plugins,
