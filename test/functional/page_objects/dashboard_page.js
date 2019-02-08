@@ -34,7 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const renderable = getService('renderable');
+  // const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'timePicker']);
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -549,9 +549,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForRenderComplete() {
-      log.debug('waitForRenderComplete');
-      const count = await this.getSharedItemsCount();
-      await renderable.waitForRender(parseInt(count));
+      log.debug('waitForRenderComplete (just sleep for now)');
+      await PageObjects.common.sleep(4000);
+      // const count = await this.getSharedItemsCount();
+      // await renderable.waitForRender(parseInt(count));
     }
 
     async getSharedContainerData() {
