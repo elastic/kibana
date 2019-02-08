@@ -41,8 +41,8 @@ import { SimpleSavedObject } from '../simple_saved_object';
 interface SavedObjectFinderUIState {
   items: Array<{
     title: string | null;
-    id: SavedObject<SavedObjectAttributes>['id'];
-    type: SavedObject<SavedObjectAttributes>['type'];
+    id: SimpleSavedObject<SavedObjectAttributes>['id'];
+    type: SimpleSavedObject<SavedObjectAttributes>['type'];
   }>;
   filter: string;
   isFetchingItems: boolean;
