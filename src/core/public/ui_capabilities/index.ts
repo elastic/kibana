@@ -17,34 +17,8 @@
  * under the License.
  */
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getInjected: (key: string) => {
-      if (key !== 'uiCapabilities') {
-        throw new Error(`Unexpected key for test: ${key}`);
-      }
-
-      return {
-        navLinks: {},
-        app1: {
-          feature1: true,
-          feature2: false,
-        },
-        app2: {
-          feature1: true,
-          feature3: true,
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
-
-import { uiCapabilities } from './ui_capabilities';
-
-describe('uiCapabilities', () => {
-  it('allows a nested property to be accessed', () => {
-    expect(uiCapabilities.app1.feature2).toEqual(false);
-  });
-});
+export {
+  UICapabilities,
+  UICapabilitiesService,
+  UICapabilitiesStartContract,
+} from './ui_capabilities_service';

@@ -25,6 +25,7 @@ import { I18nStartContract } from '../i18n';
 import { InjectedMetadataStartContract } from '../injected_metadata';
 import { LoadingCountStartContract } from '../loading_count';
 import { NotificationsStartContract } from '../notifications';
+import { UICapabilitiesStartContract } from '../ui_capabilities';
 import { UiSettingsClient } from '../ui_settings';
 
 interface Deps {
@@ -34,6 +35,7 @@ interface Deps {
   notifications: NotificationsStartContract;
   loadingCount: LoadingCountStartContract;
   basePath: BasePathStartContract;
+  uiCapabilities: UICapabilitiesStartContract;
   uiSettings: UiSettingsClient;
   chrome: ChromeStartContract;
 }
@@ -61,6 +63,7 @@ export class LegacyPlatformService {
     notifications,
     loadingCount,
     basePath,
+    uiCapabilities,
     uiSettings,
     chrome,
   }: Deps) {
@@ -70,6 +73,7 @@ export class LegacyPlatformService {
     require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
+    require('ui/capabilities').__newPlatformInit__(uiCapabilities);
     require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);

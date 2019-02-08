@@ -16,8 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from 'ui/chrome';
-import { deepFreeze } from '../../../core/public/utils/deep_freeze';
+import { cloneDeep } from 'lodash';
+import { InjectedMetadataStartContract } from '../injected_metadata';
+
+interface StartDeps {
+  injectedMetadata: InjectedMetadataStartContract;
+}
 
 export interface UICapabilities {
   navLinks: Record<string, boolean>;
@@ -28,4 +32,20 @@ export interface UICapabilities {
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 
-export const uiCapabilities: UICapabilities = deepFreeze(chrome.getInjected('uiCapabilities'));
+/**
+ * Service that is responsible for UI Capabilities.
+ */
+export class UICapabilitiesService {
+  public start({ injectedMetadata }: StartDeps) {
+    return {
+      getUICapabilities: () =>
+        cloneDeep(injectedMetadata.getInjectedVar('uiCapabilities')) as UICapabilities,
+    };
+  }
+
+  public stop() {
+    // nothing to do here currently
+  }
+}
+
+export type UICapabilitiesStartContract = ReturnType<UICapabilitiesService['start']>;

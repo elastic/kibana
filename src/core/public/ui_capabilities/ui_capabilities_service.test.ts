@@ -16,16 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { InjectedMetadataService } from '../injected_metadata';
+import { UICapabilitiesService } from './ui_capabilities_service';
 
-import { UICapabilities, UICapabilitiesStartContract } from '../../../core/public/ui_capabilities';
-
-export { UICapabilities } from '../../../core/public/ui_capabilities';
-export let uiCapabilities: UICapabilities = null!;
-
-export function __newPlatformInit__(uiCapabililitiesService: UICapabilitiesStartContract) {
-  if (uiCapabilities) {
-    throw new Error('ui/capabilities already initialized with new platform apis');
-  }
-
-  uiCapabilities = uiCapabililitiesService.getUICapabilities();
-}
+describe('#start', () => {
+  it('returns a service with getUICapabilities', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          uiCapabilities: {
+            foo: 'bar',
+            bar: 'baz',
+          },
+        },
+      } as any,
+    });
+    const service = new UICapabilitiesService();
+    const startContract = service.start({ injectedMetadata: injectedMetadata.start() });
+    expect(startContract.getUICapabilities()).toEqual({
+      foo: 'bar',
+      bar: 'baz',
+    });
+  });
+});

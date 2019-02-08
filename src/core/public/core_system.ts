@@ -27,6 +27,7 @@ import { InjectedMetadataParams, InjectedMetadataService } from './injected_meta
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
+import { UICapabilitiesService } from './ui_capabilities/ui_capabilities_service';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
@@ -53,6 +54,7 @@ export class CoreSystem {
   private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
+  private readonly uiCapabilities: UICapabilitiesService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
@@ -82,6 +84,8 @@ export class CoreSystem {
         this.stop();
       },
     });
+
+    this.uiCapabilities = new UICapabilitiesService();
 
     this.notificationsTargetDomElement = document.createElement('div');
     this.notifications = new NotificationsService({
@@ -115,6 +119,7 @@ export class CoreSystem {
       const fatalErrors = this.fatalErrors.start({ i18n });
       const loadingCount = this.loadingCount.start({ fatalErrors });
       const basePath = this.basePath.start({ injectedMetadata });
+      const uiCapabilities = this.uiCapabilities.start({ injectedMetadata });
       const uiSettings = this.uiSettings.start({
         notifications,
         loadingCount,
@@ -133,6 +138,7 @@ export class CoreSystem {
         notifications,
         loadingCount,
         basePath,
+        uiCapabilities,
         uiSettings,
         chrome,
       });
