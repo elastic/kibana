@@ -108,7 +108,7 @@ export default function({ getService }: TestInvoker) {
             response: expectNotSpaceAwareResults,
           },
           unknownType: {
-            description: 'emptry result',
+            description: 'empty result',
             statusCode: 200,
             response: createExpectEmpty(1, 20, 0),
           },
