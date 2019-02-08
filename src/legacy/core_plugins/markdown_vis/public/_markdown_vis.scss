@@ -1,7 +1,8 @@
 .mkdVis {
+  @include euiScrollBar;
   padding: $euiSizeS;
   width: 100%;
-
+  overflow: auto;
 }
 
 #markdownVisInput {
