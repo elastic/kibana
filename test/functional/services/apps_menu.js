@@ -56,9 +56,10 @@ export function AppsMenuProvider({ getService }) {
     async _ensureMenuOpen() {
       if (!await testSubjects.exists('navDrawer&expanded')) {
         await testSubjects.moveMouseTo('navDrawer');
-        await retry.waitFor('apps drawer open', async () => (
-          await testSubjects.exists('navDrawer&expanded')
-        ));
+        await retry.waitFor('apps drawer open with visible link text', async () => {
+          const button = await testSubjects.find('appsMenu appLink');
+          return Boolean(await button.getVisibleText());
+        });
       }
     }
 
