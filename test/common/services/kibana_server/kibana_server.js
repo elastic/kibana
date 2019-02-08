@@ -33,11 +33,7 @@ export function KibanaServerProvider({ getService }) {
       const url = formatUrl(config.get('servers.kibana'));
       this.status = new KibanaServerStatus(url);
       this.version = new KibanaServerVersion(this.status);
-      this.uiSettings = new KibanaServerUiSettings(url, log, config.get('uiSettings.defaults'));
-
-      lifecycle.on('beforeTests', async () => {
-        await this.uiSettings.update(config.get('uiSettings.defaults'));
-      });
+      this.uiSettings = new KibanaServerUiSettings(url, log, config.get('uiSettings.defaults'), lifecycle);
     }
   };
 }
