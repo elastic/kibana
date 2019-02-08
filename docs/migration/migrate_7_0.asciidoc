@@ -114,6 +114,12 @@ The port in `xpack.monitoring.elasticsearch.hosts` is protocol dependent: https 
 Previously set `xpack.monitoring.elasticsearch.ssl.verify` is equal to `xpack.monitoring.elasticsearch.ssl.verificationMode: full`.
 
 [float]
+=== kibana.yml setting `xpack.monitoring.report_stats` is no longer valid
+*Details:* This deprecated setting has been removed and `xpack.xpack_main.telemetry.enabled` should be used instead.
+
+*Impact:* Users with `xpack.monitoring.report_stats` set should use `xpack.xpack_main.telemetry.enabled` instead.
+
+[float]
 === Deprecated API `/shorten` has been removed
 *Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
 
