@@ -100,7 +100,7 @@ class SavedObjectFinderUI extends React.Component<
         if (typeof savedObject.attributes.visState !== 'string') {
           return false;
         }
-        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        const typeName: string = JSON.parse(savedObject.attributes.visState).type;
         const visType = visTypes.byName[typeName];
         return visType.stage !== 'experimental';
       });
