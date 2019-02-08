@@ -34,7 +34,7 @@ export function getListBreadcrumbs() {
 
 export function getCreateBreadcrumbs() {
   return [
-    MANAGEMENT_BREADCRUMB,
+    ...getListBreadcrumbs(),
     {
       text: i18n.translate('kbn.management.indexPatterns.createBreadcrumb', {
         defaultMessage: 'Create index pattern'
@@ -48,7 +48,7 @@ export function getEditBreadcrumbs($route) {
   const { indexPattern } = $route.current.locals;
 
   return [
-    MANAGEMENT_BREADCRUMB,
+    ...getListBreadcrumbs(),
     {
       text: indexPattern.title,
       href: `#/management/kibana/index_patterns/${indexPattern.id}`
