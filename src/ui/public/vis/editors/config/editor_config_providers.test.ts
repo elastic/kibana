@@ -22,6 +22,19 @@ import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam 
 
 describe('EditorConfigProvider', () => {
   let registry: EditorConfigProviderRegistry;
+  const indexPattern = {
+    id: '1234',
+    title: 'logstash-*',
+    fields: [
+      {
+        name: 'response',
+        type: 'number',
+        aggregatable: true,
+        filterable: true,
+        searchable: true,
+      },
+    ],
+  };
 
   beforeEach(() => {
     registry = new EditorConfigProviderRegistry();
@@ -32,7 +45,6 @@ describe('EditorConfigProvider', () => {
     registry.register(provider);
     expect(provider).not.toHaveBeenCalled();
     const aggType = {};
-    const indexPattern = {};
     const aggConfig = {};
     registry.getConfigForAgg(aggType, indexPattern, aggConfig);
     expect(provider).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
@@ -46,7 +58,6 @@ describe('EditorConfigProvider', () => {
     expect(provider).not.toHaveBeenCalled();
     expect(provider2).not.toHaveBeenCalled();
     const aggType = {};
-    const indexPattern = {};
     const aggConfig = {};
     registry.getConfigForAgg(aggType, indexPattern, aggConfig);
     expect(provider).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
@@ -59,7 +70,7 @@ describe('EditorConfigProvider', () => {
     }
 
     function getOutputConfig(reg: EditorConfigProviderRegistry) {
-      return reg.getConfigForAgg({}, {}, {}).singleParam;
+      return reg.getConfigForAgg({}, indexPattern, {}).singleParam;
     }
 
     it('should have hidden true if at least one config was hidden true', () => {

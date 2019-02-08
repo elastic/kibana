@@ -1,42 +1,41 @@
 <div>
 
 
-  <div class="kuiSideBarSection">
-    <div class="kuiSideBarSectionTitle">
+  <div class="visEditorSidebar__section">
+    <div class="visEditorSidebar__sectionTitle">
       <div
-        class="kuiSideBarSectionTitle__text"
         i18n-id="tileMap.wmsOptions.baseLayerSettingsTitle"
         i18n-default-message="Base Layer Settings"
       ></div>
     </div>
 
 
-    <div class="kuiSideBarFormRow" ng-show="!options.enabled">
+    <div class="visEditorSidebar__formRow" ng-show="!options.enabled">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="tmsLayers"
         i18n-id="tileMap.wmsOptions.layersLabel"
         i18n-default-message="Layers"
       ></label>
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <select
           id="tmsLayers"
-          class="kuiSelect kuiSideBarSelect"
+          class="kuiSelect visEditorSidebar__select"
           ng-model="options.selectedTmsLayer"
           ng-options="layer.id for layer in collections.tmsLayers track by layer.id"
         ></select>
       </div>
     </div>
 
-    <div class="kuiSideBarFormRow">
+    <div class="visEditorSidebar__formRow">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="wmsCompliantMapServer"
         i18n-id="tileMap.wmsOptions.wmsMapServerLabel"
         i18n-default-message="WMS map server"
       ></label>
 
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <input
           id="wmsCompliantMapServer"
           type="checkbox"

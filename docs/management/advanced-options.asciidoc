@@ -1,5 +1,5 @@
 [[advanced-options]]
-== Setting Advanced Options
+== Setting advanced options
 
 The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application.
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision
@@ -12,18 +12,17 @@ To set advanced options:
 . Enter a new value for the option.
 . Click the *Save* button.
 
-[float]
 [[kibana-settings-reference]]
 
 WARNING: Modifying the following settings can significantly affect Kibana's performance and cause problems that are
 difficult to diagnose. Setting a property's value to a blank field will revert to the default behavior, which may not be
 compatible with other configuration settings. Deleting a custom setting removes it from Kibana permanently.
 
-.Kibana Settings Reference
+.Kibana settings reference
 [horizontal]
 `query:queryString:options`:: Options for the Lucene query string parser.
 `query:allowLeadingWildcards`:: When set, * is allowed as the first character in a query clause. Currently only applies when experimental query features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options.
-`search:queryLanguage`:: Default is `lucene`. Query language used by the query bar. Choose between the lucene query syntax and KQL, an experimental new language built specifically for Kibana.
+`search:queryLanguage`:: Default is `KQL`. Query language used by the query bar. Choose between the lucene query syntax and KQL, a new language built specifically for Kibana.
 `sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
 `dateFormat`:: The format to use for displaying pretty-formatted dates.
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.

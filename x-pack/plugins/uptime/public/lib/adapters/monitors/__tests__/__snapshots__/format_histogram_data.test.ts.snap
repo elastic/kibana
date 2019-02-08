@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formatHistogramData adds to existing down count 1`] = `
+Object {
+  "downSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 2,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 2,
+    },
+    Object {
+      "x": 12,
+      "x0": 13,
+      "y": 1,
+    },
+  ],
+  "upSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 1,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 1,
+    },
+    Object {
+      "x": 12,
+      "x0": 13,
+      "y": 2,
+    },
+  ],
+}
+`;
+
+exports[`formatHistogramData adds to existing up count 1`] = `
+Object {
+  "downSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 1,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 1,
+    },
+  ],
+  "upSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 1,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 1,
+    },
+    Object {
+      "x": 12,
+      "x0": 13,
+      "y": 2,
+    },
+  ],
+}
+`;
+
+exports[`formatHistogramData doesn't add an entry to either count when none exists 1`] = `
+Object {
+  "downSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 2,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 1,
+    },
+    Object {
+      "x": 12,
+      "x0": 13,
+      "y": 1,
+    },
+  ],
+  "upSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 1,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 1,
+    },
+    Object {
+      "x": 12,
+      "x0": 13,
+      "y": 2,
+    },
+  ],
+}
+`;
+
+exports[`formatHistogramData filters out null data sets 1`] = `
+Object {
+  "downSeriesData": Array [
+    Object {
+      "x": 10,
+      "x0": 11,
+      "y": 1,
+    },
+    Object {
+      "x": 11,
+      "x0": 12,
+      "y": 1,
+    },
+  ],
+  "upSeriesData": Array [
+    Object {
+      "x": 12,
+      "x0": 13,
+      "y": 1,
+    },
+  ],
+}
+`;

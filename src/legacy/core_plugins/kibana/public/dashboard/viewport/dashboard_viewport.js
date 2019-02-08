@@ -20,7 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DashboardGrid } from '../grid';
-import { ExitFullScreenButton } from '../components/exit_full_screen_button';
+import { ExitFullScreenButton } from 'ui/exit_full_screen';
 
 export function DashboardViewport({
   maximizedPanelId,

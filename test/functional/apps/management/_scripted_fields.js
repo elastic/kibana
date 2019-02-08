@@ -38,7 +38,8 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
+  const filterBar = getService('filterBar');
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover', 'timePicker']);
 
   describe('scripted fields', () => {
 
@@ -96,9 +97,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
@@ -108,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
         });
       });
 
@@ -128,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
           ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'],
           ['16', '17'], ['5', '16'], ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
         ];
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -159,9 +158,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -171,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ngood');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
 
         });
       });
@@ -185,7 +182,7 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
@@ -221,9 +218,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -233,7 +228,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ntrue');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
 
         });
       });
@@ -247,7 +242,7 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
@@ -284,9 +279,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 19:22:00.000';
         const toTime = '2015-09-18 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -296,7 +289,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 06:52:55.953\n2015-09-18 07:00');
+          expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
         });
       });
 
@@ -309,7 +302,7 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
-        await PageObjects.discover.removeAllFilters();
+        await filterBar.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {

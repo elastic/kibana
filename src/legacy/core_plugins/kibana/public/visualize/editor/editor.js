@@ -23,7 +23,8 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
+import 'ui/search_bar';
+import 'ui/apply_filters';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -287,6 +288,28 @@ function VisEditor(
     return appState;
   }());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.onCancelApplyFilters = () => {
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.onApplyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.onApplyFilters(filters);
+    }
+  });
+
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
@@ -311,18 +334,11 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (query) => {
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
-
-    $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || i18n('kbn.visualize.topNavMenu.unsavedVisualizationTitle', {
-        defaultMessage: '{visTitle} (unsaved)',
-        values: {
-          visTitle: savedVis.title,
-        },
-      });
-    };
 
     $scope.$watchMulti([
       'searchSource.getField("index")',
@@ -353,6 +369,7 @@ function VisEditor(
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
+      $scope.filters = queryFilter.getFilters();
       $scope.fetch();
     });
 
@@ -385,7 +402,7 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };

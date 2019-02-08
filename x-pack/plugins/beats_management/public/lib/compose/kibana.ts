@@ -12,15 +12,18 @@ import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
 import { management } from 'ui/management';
 import routes from 'ui/routes';
+import { translateConfigSchema } from 'x-pack/plugins/beats_management/common/config_schemas_translations_map';
+import { configBlockSchemas } from '../../../common/config_schemas';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
-import { getSupportedConfig } from '../../config_schemas_translations_map';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
+import { RestConfigBlocksAdapter } from '../adapters/configuration_blocks/rest_config_blocks_adapter';
 import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter';
 import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { BeatsLib } from '../beats';
+import { ConfigBlocksLib } from '../configuration_blocks';
 import { ElasticsearchLib } from '../elasticsearch';
 import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
@@ -33,12 +36,14 @@ const onKibanaReady = chrome.dangerouslyGetActiveInjector;
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
-
-  const tags = new TagsLib(new RestTagsAdapter(api), getSupportedConfig());
+  const elasticsearchLib = new ElasticsearchLib(esAdapter);
+  const configBlocks = new ConfigBlocksLib(
+    new RestConfigBlocksAdapter(api),
+    translateConfigSchema(configBlockSchemas)
+  );
+  const tags = new TagsLib(new RestTagsAdapter(api), elasticsearchLib);
   const tokens = new RestTokensAdapter(api);
-  const beats = new BeatsLib(new RestBeatsAdapter(api), {
-    tags,
-  });
+  const beats = new BeatsLib(new RestBeatsAdapter(api), elasticsearchLib);
 
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
@@ -48,16 +53,17 @@ export function compose(): FrontendLibs {
       chrome.getBasePath,
       onKibanaReady,
       XPackInfoProvider,
-      chrome.getUiSettingsClient()
+      chrome.getKibanaVersion()
     )
   );
 
   const libs: FrontendLibs = {
     framework,
-    elasticsearch: new ElasticsearchLib(esAdapter),
+    elasticsearch: elasticsearchLib,
     tags,
     tokens,
     beats,
+    configBlocks,
   };
   return libs;
 }

@@ -23,7 +23,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { AnnotationsTable } from '../components/annotations_table';
+import { annotationsRefresh$ } from '../services/annotations_service';
+import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
+import { AnnotationsTable } from '../components/annotations/annotations_table';
 import {
   ExplorerNoInfluencersFound,
   ExplorerNoJobsFound,
@@ -243,9 +245,11 @@ export const Explorer = injectI18n(
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
       const { selectedCells, selectedJobs } = this.state;
 
+      const bounds = timefilter.getActiveBounds();
       const timerange = getSelectionTimeRange(
         selectedCells,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        bounds,
       );
 
       if (showCharts && selectedCells !== null) {
@@ -263,9 +267,11 @@ export const Explorer = injectI18n(
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
       const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
       if (showCharts && selectedCells !== null) {
+        const bounds = timefilter.getActiveBounds();
         const timerange = getSelectionTimeRange(
           selectedCells,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
         );
         this.updateCharts(
           anomalyChartRecords, timerange.earliestMs, timerange.latestMs
@@ -276,15 +282,16 @@ export const Explorer = injectI18n(
     tableControlsListener = async () => {
       const { dateFormatTz } = this.props;
       const { selectedCells, swimlaneViewByFieldName, selectedJobs } = this.state;
-      this.setState({
-        tableData: await loadAnomaliesTableData(
-          selectedCells,
-          selectedJobs,
-          dateFormatTz,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-          swimlaneViewByFieldName
-        )
-      });
+      const bounds = timefilter.getActiveBounds();
+      const tableData = await loadAnomaliesTableData(
+        selectedCells,
+        selectedJobs,
+        dateFormatTz,
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        bounds,
+        swimlaneViewByFieldName
+      );
+      this.setState({ tableData });
     };
 
     swimlaneLimitListener = () => {
@@ -298,6 +305,8 @@ export const Explorer = injectI18n(
       this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
     };
 
+    annotationsRefreshSub = null;
+
     componentDidMount() {
       this._isMounted = true;
       mlExplorerDashboardService.explorer.watch(this.dashboardListener);
@@ -306,6 +315,12 @@ export const Explorer = injectI18n(
       mlSelectSeverityService.state.watch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.watch(this.tableControlsListener);
       mlSelectSeverityService.state.watch(this.tableControlsListener);
+      this.annotationsRefreshSub = annotationsRefresh$.subscribe(() => {
+        // clear the annotations cache and trigger an update
+        this.annotationsTablePreviousArgs = null;
+        this.annotationsTablePreviousData = null;
+        this.updateExplorer();
+      });
     }
 
     componentWillUnmount() {
@@ -316,6 +331,7 @@ export const Explorer = injectI18n(
       mlSelectSeverityService.state.unwatch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.unwatch(this.tableControlsListener);
       mlSelectSeverityService.state.unwatch(this.tableControlsListener);
+      this.annotationsRefreshSub.unsubscribe();
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
@@ -355,7 +371,7 @@ export const Explorer = injectI18n(
 
     loadOverallDataPreviousArgs = null;
     loadOverallDataPreviousData = null;
-    loadOverallData(selectedJobs, interval, showLoadingIndicator = true) {
+    loadOverallData(selectedJobs, interval, bounds, showLoadingIndicator = true) {
       return new Promise((resolve) => {
         // Loads the overall data components i.e. the overall swimlane and influencers list.
         if (selectedJobs === null) {
@@ -369,7 +385,9 @@ export const Explorer = injectI18n(
         // check if we can just return existing cached data
         const compareArgs = {
           selectedJobs,
-          intervalAsSeconds: interval.asSeconds()
+          intervalAsSeconds: interval.asSeconds(),
+          boundsMin: bounds.min.valueOf(),
+          boundsMax: bounds.max.valueOf(),
         };
 
         if (_.isEqual(compareArgs, this.loadOverallDataPreviousArgs)) {
@@ -391,7 +409,6 @@ export const Explorer = injectI18n(
 
         // Ensure the search bounds align to the bucketing interval used in the swimlane so
         // that the first and last buckets are complete.
-        const bounds = timefilter.getActiveBounds();
         const searchBounds = getBoundsRoundedToInterval(
           bounds,
           interval,
@@ -603,7 +620,7 @@ export const Explorer = injectI18n(
     anomaliesTablePreviousData = null;
     annotationsTablePreviousArgs = null;
     annotationsTablePreviousData = null;
-    async updateExplorer(stateUpdate, showOverallLoadingIndicator = true) {
+    async updateExplorer(stateUpdate = {}, showOverallLoadingIndicator = true) {
       const {
         noInfluencersConfigured,
         noJobsFound,
@@ -636,9 +653,11 @@ export const Explorer = injectI18n(
         ? selectedCells.lanes
         : selectedJobs.map(d => d.id);
 
+      const bounds = timefilter.getActiveBounds();
       const timerange = getSelectionTimeRange(
         selectedCells,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        bounds,
       );
 
       // Load the overall data - if the FieldFormats failed to populate
@@ -648,6 +667,7 @@ export const Explorer = injectI18n(
         await this.loadOverallData(
           selectedJobs,
           this.getSwimlaneBucketInterval(selectedJobs),
+          bounds,
           showOverallLoadingIndicator,
         )
       );
@@ -657,7 +677,9 @@ export const Explorer = injectI18n(
       const annotationsTableCompareArgs = {
         selectedCells,
         selectedJobs,
-        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        boundsMin: bounds.min.valueOf(),
+        boundsMax: bounds.max.valueOf(),
       };
 
       if (_.isEqual(annotationsTableCompareArgs, this.annotationsTablePreviousArgs)) {
@@ -667,7 +689,8 @@ export const Explorer = injectI18n(
         stateUpdate.annotationsData = this.annotationsTablePreviousData = await loadAnnotationsTableData(
           selectedCells,
           selectedJobs,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
         );
       }
 
@@ -770,6 +793,8 @@ export const Explorer = injectI18n(
         selectedJobs,
         dateFormatTz,
         interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        boundsMin: bounds.min.valueOf(),
+        boundsMax: bounds.max.valueOf(),
         swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
       };
 
@@ -782,6 +807,7 @@ export const Explorer = injectI18n(
           selectedJobs,
           dateFormatTz,
           this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
           viewBySwimlaneOptions.swimlaneViewByFieldName
         );
         this.setState({ tableData });
@@ -1052,8 +1078,8 @@ export const Explorer = injectI18n(
                   drillDown={true}
                   numberBadge={false}
                 />
-                <br />
-                <br />
+                <AnnotationFlyout />
+                <EuiSpacer size="l" />
               </React.Fragment>
             )}
 

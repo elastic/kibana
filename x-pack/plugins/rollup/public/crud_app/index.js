@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 
@@ -25,19 +25,19 @@ const esSection = management.getSection('elasticsearch');
 esSection.register('rollup_jobs', {
   visible: true,
   display: 'Rollup Jobs',
-  order: 2,
+  order: 3,
   url: `#${CRUD_APP_BASE_PATH}/job_list`,
 });
 
 const renderReact = async (elem) => {
   render(
-    <I18nProvider>
+    <I18nContext>
       <Provider store={rollupJobsStore}>
         <HashRouter>
           <App />
         </HashRouter>
       </Provider>
-    </I18nProvider>,
+    </I18nContext>,
     elem
   );
 };

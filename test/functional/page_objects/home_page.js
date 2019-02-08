@@ -22,11 +22,6 @@ export function HomePageProvider({ getService }) {
   const retry = getService('retry');
 
   class HomePage {
-
-    async clickKibanaIcon() {
-      await testSubjects.click('kibanaLogo');
-    }
-
     async clickSynopsis(title) {
       await testSubjects.click(`homeSynopsisLink${title}`);
     }

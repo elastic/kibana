@@ -36,7 +36,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         <EuiText
           color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             Organize your dashboards and other saved objects into meaningful categories.

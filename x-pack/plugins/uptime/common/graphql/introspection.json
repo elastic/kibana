@@ -301,7 +301,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "ErrorListItem", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "ErrorListItem", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1553,7 +1557,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "LatestMonitor", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "LatestMonitor", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1699,14 +1707,6 @@
             "deprecationReason": null
           },
           {
-            "name": "trouble",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "total",
             "description": "",
             "args": [],
@@ -1721,7 +1721,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramSeries", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "HistogramSeries", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1752,7 +1756,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "HistogramDataPoint", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -2001,6 +2009,22 @@
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": { "kind": "OBJECT", "name": "MonitorKey", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "names",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
               }
             },
             "isDeprecated": false,

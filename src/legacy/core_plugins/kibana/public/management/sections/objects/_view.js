@@ -125,6 +125,14 @@ uiModules.get('apps/management')
               value: '{}'
             });
           }
+
+          if (!fieldMap.references) {
+            fields.push({
+              name: 'references',
+              type: 'array',
+              value: '[]',
+            });
+          }
         };
 
         $scope.notFound = $routeParams.notFound;
@@ -136,7 +144,10 @@ uiModules.get('apps/management')
             $scope.obj = obj;
             $scope.link = service.urlFor(obj.id);
 
-            const fields =  _.reduce(obj.attributes, createField, []);
+            const fields = _.reduce(obj.attributes, createField, []);
+            // Special handling for references which isn't within "attributes"
+            createField(fields, obj.references, 'references');
+
             if (service.Class) readObjectClass(fields, service.Class);
 
             // sorts twice since we want numerical sort to prioritize over name,
@@ -234,7 +245,9 @@ uiModules.get('apps/management')
             _.set(source, field.name, value);
           });
 
-          savedObjectsClient.update(service.type, $routeParams.id, source)
+          const { references, ...attributes } = source;
+
+          savedObjectsClient.update(service.type, $routeParams.id, attributes, { references })
             .then(function () {
               return redirectHandler('updated');
             })

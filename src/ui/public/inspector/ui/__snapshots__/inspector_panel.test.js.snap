@@ -243,6 +243,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                   repositionOnScroll={true}
                 >
                   <EuiOutsideClickDetector
+                    isDisabled={true}
                     onOutsideClick={[Function]}
                   >
                     <div

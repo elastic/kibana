@@ -8,6 +8,7 @@ import { Request, Server } from 'src/server/kbn_server';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 
 import moment = require('moment');
+import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
@@ -37,6 +38,7 @@ export class ReindexWorker {
   private static workerSingleton?: ReindexWorker;
   private continuePolling: boolean = false;
   private updateOperationLoopRunning: boolean = false;
+  private timeout?: NodeJS.Timeout;
   private inProgressOps: ReindexSavedObject[] = [];
   private readonly reindexService: ReindexService;
 
@@ -45,15 +47,21 @@ export class ReindexWorker {
     private credentialStore: CredentialStore,
     private callWithRequest: CallClusterWithRequest,
     private callWithInternalUser: CallCluster,
-    private readonly log: Server['log']
+    private xpackInfo: XPackInfo,
+    private readonly log: Server['log'],
+    private apmIndexPatterns: string[]
   ) {
     if (ReindexWorker.workerSingleton) {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
+    this.apmIndexPatterns = apmIndexPatterns;
+
     this.reindexService = reindexServiceFactory(
       this.callWithInternalUser,
-      reindexActionsFactory(this.client, this.callWithInternalUser)
+      this.xpackInfo,
+      reindexActionsFactory(this.client, this.callWithInternalUser),
+      apmIndexPatterns
     );
 
     ReindexWorker.workerSingleton = this;
@@ -73,6 +81,10 @@ export class ReindexWorker {
    */
   public stop = () => {
     this.log(['debug', ...LOG_TAGS], `Stopping worker...`);
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
     this.updateOperationLoopRunning = false;
     this.continuePolling = false;
   };
@@ -114,12 +126,17 @@ export class ReindexWorker {
     await this.refresh();
 
     if (this.continuePolling) {
-      setTimeout(this.pollForOperations, POLL_INTERVAL);
+      this.timeout = setTimeout(this.pollForOperations, POLL_INTERVAL);
     }
   };
 
   private refresh = async () => {
-    this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+    try {
+      this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+    } catch (e) {
+      this.log(['debug', ...LOG_TAGS], `Could not fetch riendex operations from Elasticsearch`);
+      this.inProgressOps = [];
+    }
 
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {
@@ -148,7 +165,12 @@ export class ReindexWorker {
     const fakeRequest = { headers: credential } as Request;
     const callCluster = this.callWithRequest.bind(null, fakeRequest) as CallCluster;
     const actions = reindexActionsFactory(this.client, callCluster);
-    const service = reindexServiceFactory(callCluster, actions);
+    const service = reindexServiceFactory(
+      callCluster,
+      this.xpackInfo,
+      actions,
+      this.apmIndexPatterns
+    );
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

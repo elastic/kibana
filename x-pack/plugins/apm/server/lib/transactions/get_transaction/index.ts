@@ -5,20 +5,25 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from '../../../../common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { Setup } from '../../helpers/setup_request';
 
 export type TransactionAPIResponse = Transaction | undefined;
 
+export interface TransactionWithErrorCountAPIResponse {
+  transaction: TransactionAPIResponse;
+  errorCount: number;
+}
+
 export async function getTransaction(
   transactionId: string,
-  traceId: string | undefined,
+  traceId: string,
   setup: Setup
 ): Promise<TransactionAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
@@ -26,6 +31,7 @@ export async function getTransaction(
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [TRANSACTION_ID]: transactionId } },
+    { term: { [TRACE_ID]: traceId } },
     {
       range: {
         '@timestamp': {
@@ -39,10 +45,6 @@ export async function getTransaction(
 
   if (esFilterQuery) {
     filter.push(esFilterQuery);
-  }
-
-  if (traceId) {
-    filter.push({ term: { [TRACE_ID]: traceId } });
   }
 
   const params = {
