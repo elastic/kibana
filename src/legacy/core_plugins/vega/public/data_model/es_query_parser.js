@@ -150,7 +150,12 @@ export class EsQueryParser {
   mapRequest = (request) => {
     const esRequest = request.url;
     if (this._esShardTimeout) {
-      return { timeout: `${this._esShardTimeout}ms`, ...esRequest };
+      const { body = {}, ...rest } = esRequest;
+      body.timeout = `${this._esShardTimeout}ms`;
+      return {
+        body,
+        ...rest,
+      };
     } else {
       return esRequest;
     }
