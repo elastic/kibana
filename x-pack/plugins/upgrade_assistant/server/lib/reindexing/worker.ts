@@ -48,20 +48,16 @@ export class ReindexWorker {
     private callWithRequest: CallClusterWithRequest,
     private callWithInternalUser: CallCluster,
     private xpackInfo: XPackInfo,
-    private readonly log: Server['log'],
-    private apmIndexPatterns: string[]
+    private readonly log: Server['log']
   ) {
     if (ReindexWorker.workerSingleton) {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
-    this.apmIndexPatterns = apmIndexPatterns;
-
     this.reindexService = reindexServiceFactory(
       this.callWithInternalUser,
       this.xpackInfo,
-      reindexActionsFactory(this.client, this.callWithInternalUser),
-      apmIndexPatterns
+      reindexActionsFactory(this.client, this.callWithInternalUser)
     );
 
     ReindexWorker.workerSingleton = this;
@@ -165,12 +161,7 @@ export class ReindexWorker {
     const fakeRequest = { headers: credential } as Request;
     const callCluster = this.callWithRequest.bind(null, fakeRequest) as CallCluster;
     const actions = reindexActionsFactory(this.client, callCluster);
-    const service = reindexServiceFactory(
-      callCluster,
-      this.xpackInfo,
-      actions,
-      this.apmIndexPatterns
-    );
+    const service = reindexServiceFactory(callCluster, this.xpackInfo, actions);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.
