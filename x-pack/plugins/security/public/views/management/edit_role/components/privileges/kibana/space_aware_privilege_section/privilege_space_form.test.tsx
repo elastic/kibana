@@ -33,12 +33,14 @@ const buildProps = (customProps = {}) => {
       features: {},
       global: {},
       space: {},
+      reserved: {},
     }),
     privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(
       new KibanaPrivileges({
         global: {},
         features: {},
         space: {},
+        reserved: {},
       })
     ),
     features: [],

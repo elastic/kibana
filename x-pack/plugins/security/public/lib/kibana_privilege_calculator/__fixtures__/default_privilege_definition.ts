@@ -34,4 +34,5 @@ export const defaultPrivilegeDefinition = new KibanaPrivileges({
       all: ['ui:/feature3/foo', 'ui:/feature3/foo/*'],
     },
   },
+  reserved: {},
 });

@@ -658,7 +658,7 @@ describe('reserved', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved', {

@@ -23,6 +23,7 @@ const buildProps = (customProps: any = {}) => {
     },
     global: {},
     space: {},
+    reserved: {},
   });
 
   const role = {
