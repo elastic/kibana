@@ -134,17 +134,19 @@ export function map(state = INITIAL_STATE, action) {
       if (layerIdx === -1) {
         return state;
       }
-      const updatedLayer = {
-        ...layerList[layerIdx],
-        __isInErrorState: true,
-        __errorMessage: action.errorMessage
+
+      return {
+        ...state,
+        layerList: [
+          ...layerList.slice(0, layerIdx),
+          {
+            ...layerList[layerIdx],
+            __isInErrorState: true,
+            __errorMessage: action.errorMessage
+          },
+          ...layerList.slice(layerIdx + 1)
+        ]
       };
-      const updatedList = [
-        ...layerList.slice(0, layerIdx),
-        updatedLayer,
-        ...layerList.slice(layerIdx + 1)
-      ];
-      return { ...state, layerList: updatedList };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
