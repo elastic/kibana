@@ -23,6 +23,7 @@ import {
   unloadAction,
   rebuildAllAction,
   emptyKibanaIndexAction,
+  editAction,
 } from './actions';
 
 export class EsArchiver {
@@ -103,6 +104,23 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log
+    });
+  }
+
+  /**
+   *  Parse and reformat all of the archives. This is primarily helpful
+   *  for working on the esArchiver.
+   *
+   *  @param {String} name
+   *  @param {() => Promise<any>} handler
+   *  @return Promise<Stats>
+   */
+  async edit(name, handler) {
+    return await editAction({
+      name,
+      log: this.log,
+      dataDir: this.dataDir,
+      handler
     });
   }
 

@@ -26,6 +26,7 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
+import readline from 'readline';
 
 import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
@@ -63,6 +64,24 @@ cmd.command('load <name>')
 cmd.command('unload <name>')
   .description('remove indices created by the archive in --dir with <name>')
   .action(name => execute(archiver => archiver.unload(name)));
+
+cmd.command('edit <name>')
+  .description('extract the named archive, wait for edits to be completed, and then recompress the archive')
+  .action(name => (
+    execute(archiver => archiver.edit(name, async () => {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      await new Promise(resolve => {
+        rl.question(`Press enter when you're done`, () => {
+          rl.close();
+          resolve();
+        });
+      });
+    }))
+  ));
 
 cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
