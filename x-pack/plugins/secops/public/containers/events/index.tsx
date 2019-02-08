@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { eventsQuery } from './index.gql_query';
 
@@ -55,7 +55,7 @@ class EventsComponentQuery extends QueryTemplate<
     return (
       <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
         query={eventsQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         pollInterval={poll}
         variables={{

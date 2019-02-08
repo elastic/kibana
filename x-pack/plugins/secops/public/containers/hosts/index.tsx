@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 
 import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { HostSummaryQuery } from './host_summary.gql_query';
 import { HostsTableQuery } from './hosts_table.gql_query';
@@ -64,7 +64,7 @@ class HostsComponentQuery extends QueryTemplate<
         GetHostsTableQuery.Variables | GetHostSummaryQuery.Variables
       >
         query={type === hostsModel.HostsType.page ? HostsTableQuery : HostSummaryQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{

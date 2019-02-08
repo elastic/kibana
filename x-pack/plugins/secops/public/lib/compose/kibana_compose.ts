@@ -28,6 +28,7 @@ import { errorLink } from '../../containers/errors';
 
 export function compose(): AppFrontendLibs {
   const cache = new InMemoryCache({
+    dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({
       introspectionQueryResultData,
     }),
@@ -39,6 +40,7 @@ export function compose(): AppFrontendLibs {
   });
 
   const graphQLOptions = {
+    connectToDevTools: process.env.NODE_ENV !== 'production',
     cache,
     link: ApolloLink.from([
       errorLink,

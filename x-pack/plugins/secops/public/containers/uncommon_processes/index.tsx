@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { uncommonProcessesQuery } from './index.gql_query';
 
@@ -55,7 +55,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
         query={uncommonProcessesQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{

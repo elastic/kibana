@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { ESQuery } from '../../../common/typed_json';
 import { Direction, GetKpiEventsQuery, KpiItem } from '../../graphql/types';
 import { inputsModel } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { kpiEventsQuery } from './index.gql_query';
 
 export interface KpiEventsArgs {
@@ -36,7 +36,7 @@ export const KpiEventsQuery = pure<OwnProps>(
   ({ children, filterQuery, id = 'kpiEventsQuery', poll, sourceId, startDate, endDate }) => (
     <Query<GetKpiEventsQuery.Query, GetKpiEventsQuery.Variables>
       query={kpiEventsQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       pollInterval={poll}
       variables={{
