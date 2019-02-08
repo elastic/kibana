@@ -48,7 +48,7 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         savedObject: {
