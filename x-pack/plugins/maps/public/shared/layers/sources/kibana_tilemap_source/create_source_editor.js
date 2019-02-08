@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -54,17 +54,15 @@ export class CreateSourceEditor extends Component {
       return null;
     }
 
-    const previewer = this.state.url ? (<EuiFieldText
-      readOnly
-      value={this.state.url}
-    />) : (<Fragment />);
-
     return (
       <EuiFormRow
         label="Tilemap url"
         helpText={this.state.url ? null : NO_TILEMAP_LAYER_MSG}
       >
-        {previewer}
+        <EuiFieldText
+          readOnly
+          value={this.state.url}
+        />
       </EuiFormRow>
     );
   }
