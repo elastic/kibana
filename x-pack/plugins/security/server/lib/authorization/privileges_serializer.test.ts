@@ -160,6 +160,7 @@ describe('features', () => {
         },
         bar: {},
       },
+      reserved: {},
     });
     expect(result[application]).toEqual({
       'feature_foo.quz': {
