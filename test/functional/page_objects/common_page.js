@@ -116,7 +116,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
-                    'dateFormat:tz': 'UTC',
                     'defaultIndex': 'logstash-*',
                     'telemetry:optIn': false
                   });
