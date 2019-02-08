@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -27,7 +27,7 @@ export class CreateSourceEditor extends Component {
 
   _loadUrl = async () => {
     const tilemap = await getKibanaTileMap();
-    if (this._isMounted) {
+    if (this._isMounted && tilemap.url) {
       this.setState(
         { url: tilemap.url },
         () => this.props.previewTilemap(this.state.url)
@@ -46,19 +46,17 @@ export class CreateSourceEditor extends Component {
 
   render() {
 
-    if (this.state.url === null) {
-      return null;
-    }
+    const previewer = this.state.url ? (<EuiFieldText
+      readOnly
+      value={this.state.url}
+    />) : (<Fragment />);
 
     return (
       <EuiFormRow
         label="Tilemap url"
         helpText={this.state.url ? null : NO_TILEMAP_LAYER_MSG}
       >
-        <EuiFieldText
-          readOnly
-          value={this.state.url}
-        />
+        {previewer}
       </EuiFormRow>
     );
   }
