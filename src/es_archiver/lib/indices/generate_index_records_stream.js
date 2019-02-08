@@ -23,10 +23,10 @@ export function createGenerateIndexRecordsStream(client, stats) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
-    async transform(index, enc, callback) {
+    async transform(indexOrAlias, enc, callback) {
       try {
         const resp = await client.indices.get({
-          index,
+          index: indexOrAlias,
           filterPath: [
             '*.settings',
             '*.mappings',
@@ -38,19 +38,22 @@ export function createGenerateIndexRecordsStream(client, stats) {
           ]
         });
 
-        const { [index]: { aliases } } = await client.indices.getAlias({ index });
-        const { settings, mappings } = resp[index];
+        for (const [index, { settings, mappings }] of Object.entries(resp)) {
+          const { [index]: { aliases } } = await client.indices.getAlias({ index });
 
-        stats.archivedIndex(index, { settings, mappings });
-        callback(null, {
-          type: 'index',
-          value: {
-            index,
-            settings,
-            mappings,
-            aliases,
-          }
-        });
+          stats.archivedIndex(index, { settings, mappings });
+          this.push({
+            type: 'index',
+            value: {
+              index: index.startsWith('.kibana') ? '.kibana_1' : index,
+              settings,
+              mappings,
+              aliases
+            }
+          });
+        }
+
+        callback();
       } catch (err) {
         callback(err);
       }

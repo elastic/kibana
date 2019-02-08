@@ -54,7 +54,7 @@ export function createGenerateDocRecordsStream(client, stats) {
             this.push({
               type: 'doc',
               value: {
-                index: hit._index,
+                index: hit._index.startsWith('.kibana') ? '.kibana_1' : hit._index,
                 type: hit._type,
                 id: hit._id,
                 source: hit._source,
