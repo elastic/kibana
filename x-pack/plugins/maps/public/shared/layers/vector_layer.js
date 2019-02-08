@@ -30,7 +30,6 @@ export class VectorLayer extends AbstractLayer {
   static popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false,
-    className: 'euiPanel euiPanel--shadow',
   });
 
   static tooltipContainer = document.createElement('div');
