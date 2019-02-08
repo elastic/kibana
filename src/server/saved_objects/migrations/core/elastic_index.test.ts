@@ -121,30 +121,6 @@ describe('ElasticIndex', () => {
     });
   });
 
-  describe('putMappings', () => {
-    test('it calls indices.putMapping', async () => {
-      const callCluster = sinon.spy(async (path: string, { body, type, index }: any) => {
-        expect(path).toEqual('indices.putMapping');
-        expect(index).toEqual('.shazm');
-        expect(body).toEqual({
-          dynamic: 'strict',
-          properties: {
-            foo: 'bar',
-          },
-        });
-      });
-
-      await Index.putMappings(callCluster, '.shazm', {
-        dynamic: 'strict',
-        properties: {
-          foo: 'bar',
-        },
-      });
-
-      sinon.assert.called(callCluster);
-    });
-  });
-
   describe('claimAlias', () => {
     function assertCalled(callCluster: sinon.SinonSpy) {
       expect(callCluster.args.map(([path]) => path)).toEqual([

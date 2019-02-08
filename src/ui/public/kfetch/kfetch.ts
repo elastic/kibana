@@ -24,7 +24,7 @@ import url from 'url';
 import chrome from '../chrome';
 import { KFetchError } from './kfetch_error';
 
-interface KFetchQuery {
+export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
 
