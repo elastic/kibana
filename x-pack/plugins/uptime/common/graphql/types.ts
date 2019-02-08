@@ -362,7 +362,7 @@ export interface MonitorChart {
   /** The maximum status doc count in this chart. */
   statusMaxCount: number;
   /** The maximum duration value in this chart. */
-  durationMaxCount: number;
+  durationMaxValue: number;
 }
 /** Represents a monitor's duration performance in ms at a point in time. */
 export interface MonitorDurationAreaPoint {

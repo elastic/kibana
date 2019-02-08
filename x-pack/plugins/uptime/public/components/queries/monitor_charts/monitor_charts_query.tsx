@@ -77,7 +77,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
             monitorChartsData: {
               durationArea,
               durationLine,
-              durationMaxCount,
+              durationMaxValue,
               status,
               statusMaxCount,
             },
@@ -85,7 +85,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
 
           // These limits provide domain sizes for the charts
           const checkDomainLimits = [0, statusMaxCount];
-          const durationDomainLimits = [0, durationMaxCount];
+          const durationDomainLimits = [0, durationMaxValue];
 
           return (
             <Fragment>

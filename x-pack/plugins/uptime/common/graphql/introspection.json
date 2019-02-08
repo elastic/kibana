@@ -1869,7 +1869,7 @@
             "deprecationReason": null
           },
           {
-            "name": "durationMaxCount",
+            "name": "durationMaxValue",
             "description": "The maximum duration value in this chart.",
             "args": [],
             "type": {

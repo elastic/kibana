@@ -16,7 +16,12 @@ import {
   MonitorSeriesPoint,
   Ping,
 } from '../../../../common/graphql/types';
-import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
+import {
+  convertMicrosecondsToMilliseconds,
+  dropLatestBucket,
+  getFilteredQuery,
+  getFilteredQueryAndStatusFilter,
+} from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -86,20 +91,22 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets = get(result, 'aggregations.timeseries.buckets', []);
+    const buckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
 
     let statusMaxCount = 0;
-    let durationMaxCount = 0;
+    let durationMaxValue = 0;
     const mappedBuckets = buckets.map(bucket => {
       const x = get(bucket, 'key');
       const docCount = get(bucket, 'doc_count', 0);
       statusMaxCount = Math.max(docCount, statusMaxCount);
-      durationMaxCount = Math.max(durationMaxCount, get(bucket, 'duration.max', 0));
+      const convertWrapper = (property: string) =>
+        convertMicrosecondsToMilliseconds(get(bucket, property, null));
+      durationMaxValue = Math.max(durationMaxValue, convertWrapper('duration.max') || 0);
       return {
         x,
-        durationMin: get(bucket, 'duration.min', null),
-        durationMax: get(bucket, 'duration.max', null),
-        durationAvg: get(bucket, 'duration.avg', null),
+        durationMin: convertWrapper('duration.min'),
+        durationMax: convertWrapper('duration.max'),
+        durationAvg: convertWrapper('duration.avg'),
         status: formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount),
       };
     });
@@ -107,7 +114,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       durationArea: [],
       durationLine: [],
       status: [],
-      durationMaxCount,
+      durationMaxValue,
       statusMaxCount,
     };
     return mappedBuckets.reduce(

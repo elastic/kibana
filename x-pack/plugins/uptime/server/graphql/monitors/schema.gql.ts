@@ -53,7 +53,7 @@ export const monitorsSchema = gql`
     "The maximum status doc count in this chart."
     statusMaxCount: Int!
     "The maximum duration value in this chart."
-    durationMaxCount: Int!
+    durationMaxValue: Int!
   }
 
   type MonitorKey {
