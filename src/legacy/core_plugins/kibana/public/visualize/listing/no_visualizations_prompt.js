@@ -27,47 +27,29 @@ import {
   KuiButtonIcon,
 } from '@kbn/ui-framework/components';
 
-function NoVisualizationsPromptUi({ canCreateVis, onCreateVis, intl }) {
+function NoVisualizationsPromptUi({ onCreateVis, intl }) {
   return (
     <KuiEmptyTablePromptPanel>
       <KuiEmptyTablePrompt
-        actions={getActions(canCreateVis, onCreateVis)}
-        message={getPromptMessage(canCreateVis, intl)}
+        actions={
+          <KuiButton
+            onClick={onCreateVis}
+            buttonType="primary"
+            icon={<KuiButtonIcon type="create"/>}
+          >
+            <FormattedMessage
+              id="kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel"
+              defaultMessage="Create a visualization"
+            />
+          </KuiButton>
+        }
+        message={intl.formatMessage({
+          id: 'kbn.visualize.listing.noVisualizationsText',
+          defaultMessage: `Looks like you don't have any visualizations. Let's create some!`,
+        })}
       />
     </KuiEmptyTablePromptPanel>
   );
-}
-
-function getActions(canCreateVis, onCreateVis) {
-  if (!canCreateVis) {
-    return null;
-  }
-  return (
-    <KuiButton
-      onClick={onCreateVis}
-      buttonType="primary"
-      icon={<KuiButtonIcon type="create" />}
-    >
-      <FormattedMessage
-        id="kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel"
-        defaultMessage="Create a visualization"
-      />
-    </KuiButton>
-  );
-}
-
-function getPromptMessage(canCreateVis, intl) {
-  if (!canCreateVis) {
-    return intl.formatMessage({
-      id: 'kbn.visualize.listing.noVisualizationsText',
-      defaultMessage: `Looks like you don't have any visualizations.`,
-    });
-  }
-
-  return intl.formatMessage({
-    id: 'kbn.visualize.listing.noVisualizationsTextAddSome',
-    defaultMessage: `Looks like you don't have any visualizations. Let's create some!`,
-  });
 }
 
 export const NoVisualizationsPrompt = injectI18n(NoVisualizationsPromptUi);
