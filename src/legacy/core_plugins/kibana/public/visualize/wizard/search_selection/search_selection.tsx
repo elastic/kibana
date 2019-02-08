@@ -67,8 +67,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
     this.tabs = [
       {
         id: 'index-pattern',
-        name: i18n.translate('kbn.visualize.newVisWizard.indexPatternSearchTabLabel', {
-          defaultMessage: 'New search',
+        name: i18n.translate('kbn.visualize.newVisWizard.indexPatternTabLabel', {
+          defaultMessage: 'Index pattern',
         }),
         savedObjectFinder: (
           <SavedObjectFinder
@@ -76,8 +76,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
             onChoose={this.props.onSearchSelected}
             visTypes={this.props.visType}
             noItemsMessage={i18n.translate(
-              'kbn.visualize.newVisWizard.indexPatternSearchTab.notFoundLabel',
-              { defaultMessage: 'No matches found.' }
+              'kbn.visualize.newVisWizard.indexPatternTab.notFoundLabel',
+              { defaultMessage: 'No matching index patterns found.' }
             )}
             savedObjectType="index-pattern"
           />
@@ -96,7 +96,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
             visTypes={this.props.visType}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.savedSearchTab.notFoundLabel',
-              { defaultMessage: 'No matching saved searches found' }
+              { defaultMessage: 'No matching saved searches found.' }
             )}
             savedObjectType="search"
           />
@@ -133,12 +133,12 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="kbn.visualize.newVisWizard.choooseSearchSourceTitle"
-              defaultMessage="Choose search source"
+              id="kbn.visualize.newVisWizard.chooseSourceTitle"
+              defaultMessage="Choose source"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
-        <EuiModalBody className="visNewVisDialog__searchBody">
+        <EuiModalBody>
           <EuiTabs size="m">{this.renderTabs()}</EuiTabs>
 
           <EuiSpacer size="m" />
