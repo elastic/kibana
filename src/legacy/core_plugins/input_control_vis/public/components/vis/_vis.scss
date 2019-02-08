@@ -1,6 +1,7 @@
 .icvContainer {
+  @include euiScrollBar;
   width: 100%;
-  margin: 0 $euiSizeXS;
+  overflow: auto;
   padding: $euiSizeS;
 
   // Removes the browser's number stepper
@@ -19,6 +20,11 @@
   .input-range__label-container {
     left: 0% !important;
   }
+}
+
+.icvContent {
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .icvInputRange__container {
