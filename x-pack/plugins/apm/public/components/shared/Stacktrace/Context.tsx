@@ -6,7 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { size } from 'lodash';
-import { rgba, tint } from 'polished';
+import { tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore

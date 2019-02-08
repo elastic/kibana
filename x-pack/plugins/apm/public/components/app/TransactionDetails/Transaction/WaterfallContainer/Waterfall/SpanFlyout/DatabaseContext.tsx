@@ -7,7 +7,7 @@
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { rgba, tint } from 'polished';
+import { tint } from 'polished';
 import React, { Fragment } from 'react';
 // @ts-ignore
 import sql from 'react-syntax-highlighter/dist/languages/sql';
