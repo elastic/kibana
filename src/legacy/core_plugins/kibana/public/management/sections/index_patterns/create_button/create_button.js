@@ -88,8 +88,8 @@ export class CreateButton extends Component {
         <EuiButton
           data-test-subj="createIndexPatternButton"
           fill={true}
-          size={'s'}
           onClick={options[0].onClick}
+          iconType="plusInCircle"
         >
           {children}
         </EuiButton>

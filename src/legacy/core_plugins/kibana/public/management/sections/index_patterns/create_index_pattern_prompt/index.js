@@ -20,11 +20,12 @@
 import React, { Fragment } from 'react';
 import {
   EuiEmptyPrompt,
-  EuiIcon,
   EuiText,
   EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiPageContent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateButton } from '../create_button';
@@ -32,76 +33,76 @@ import { CreateButton } from '../create_button';
 export const CreateIndexPatternPrompt = ({
   indexPatternCreationOptions
 }) => (
-  <EuiEmptyPrompt
-    className="euiPanel"
-    iconType="indexPatternApp"
-    title={
-      <EuiText grow={false}>
-        <h2>
-          <FormattedMessage id="kbn.management.indexPatternPrompt.title" defaultMessage="Create your first index pattern" />
-        </h2>
-      </EuiText>}
-    body={
-      <Fragment>
-        <p style={{ padding: '0 24px' }}>
-          <FormattedMessage
-            id="kbn.management.indexPatternPrompt.subtitle"
-            defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
-              Kibana."
-          />
-        </p>
-        <EuiHorizontalRule margin="m" />
-        <p style={{ textAlign: 'left' }}>
-          <FormattedMessage
-            id="kbn.management.indexPatternPrompt.examplesTitle"
-            defaultMessage="Examples of index patterns"
-          />
-        </p>
-        <div style={{ textAlign: 'left' }}>
-          <EuiFlexGroup>
-            <EuiFlexItem className="indexPatternPromptListItem">
-              <EuiIcon type="document"/>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+  <EuiPageContent horizontalPosition="center">
+    <EuiEmptyPrompt
+      iconType="indexPatternApp"
+      title={
+        <EuiText grow={false}>
+          <h2>
+            <FormattedMessage id="kbn.management.indexPatternPrompt.title" defaultMessage="Create your first index pattern" />
+          </h2>
+        </EuiText>}
+      body={
+        <Fragment>
+          <p>
+            <FormattedMessage
+              id="kbn.management.indexPatternPrompt.subtitle"
+              defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
+                Kibana."
+            />
+          </p>
+          <EuiHorizontalRule margin="l" />
+          <EuiText textAlign="left">
+            <p>
+              <FormattedMessage
+                id="kbn.management.indexPatternPrompt.examplesTitle"
+                defaultMessage="Examples of index patterns"
+              />
+            </p>
+          </EuiText>
+          <EuiDescriptionList className="indexPatternListPrompt__descList">
+            <EuiDescriptionListTitle>
+              Single data source
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
               <FormattedMessage
                 id="kbn.management.indexPatternPrompt.exampleOne"
                 defaultMessage="Index a single data source named log-west-001 so you can build charts or query its contents fast."
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem className="indexPatternPromptListItem">
-              <EuiIcon type="copy"/>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            </EuiDescriptionListDescription>
+
+            <EuiDescriptionListTitle>
+              Multiple data sources
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
               <FormattedMessage
                 id="kbn.management.indexPatternPrompt.exampleTwo"
                 defaultMessage="Group all incoming data sources starting with log-west* so you can query against all your west coast server
                   logs."
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem className="indexPatternPromptListItem">
-              <EuiIcon type="calendar"/>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            </EuiDescriptionListDescription>
+
+            <EuiDescriptionListTitle>
+              Custom groupings
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
               <FormattedMessage
                 id="kbn.management.indexPatternPrompt.exampleThree"
                 defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so
                   you can aggregate histotical trends to compare."
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </Fragment>
-    }
-    actions={[
-      <CreateButton options={indexPatternCreationOptions}>
-        <FormattedMessage
-          id="kbn.management.indexPatternPrompt.createBtn"
-          defaultMessage="Create index pattern"
-        />
-      </CreateButton>
-    ]}
-  />);
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </Fragment>
+      }
+      actions={[
+        <CreateButton options={indexPatternCreationOptions}>
+          <FormattedMessage
+            id="kbn.management.indexPatternPrompt.createBtn"
+            defaultMessage="Create index pattern"
+          />
+        </CreateButton>
+      ]}
+    />
+  </EuiPageContent>
+);
