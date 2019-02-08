@@ -7,6 +7,7 @@
 import chrome from 'ui/chrome';
 import React from 'react';
 import { I18nContext } from 'ui/i18n';
+import { uiCapabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -237,56 +238,66 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     return { id };
   }
 
+  function buildTopNavMenu() {
+    const navItems = [{
+      key: 'full screen',
+      description: 'full screen',
+      testId: 'mapsFullScreenMode',
+      run() {
+        getStore().dispatch(enableFullScreen());
+      }
+    }, {
+      key: 'inspect',
+      description: 'Open Inspector',
+      testId: 'openInspectorButton',
+      run() {
+        Inspector.open(inspectorAdapters, {});
+      }
+    }];
+
+    if (uiCapabilities.maps.save) {
+      navItems.push({
+        key: 'save',
+        description: 'Save map',
+        testId: 'mapSaveButton',
+        run: async () => {
+          const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+            const currentTitle = savedMap.title;
+            savedMap.title = newTitle;
+            savedMap.copyOnSave = newCopyOnSave;
+            const saveOptions = {
+              confirmOverwrite: false,
+              isTitleDuplicateConfirmed,
+              onTitleDuplicate,
+            };
+            return doSave(saveOptions).then(({ id, error }) => {
+              // If the save wasn't successful, put the original values back.
+              if (!id || error) {
+                savedMap.title = currentTitle;
+              }
+              return { id, error };
+            });
+          };
+
+          const saveModal = (
+            <SavedObjectSaveModal
+              onSave={onSave}
+              onClose={() => { }}
+              title={savedMap.title}
+              showCopyOnSave={savedMap.id ? true : false}
+              objectType={'map'}
+            />);
+          showSaveModal(saveModal);
+        }
+      });
+    }
+    return navItems;
+  }
+
   // Hide angular timepicer/refresh UI from top nav
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
-  $scope.topNavMenu = [{
-    key: 'full screen',
-    description: 'full screen',
-    testId: 'mapsFullScreenMode',
-    run() {
-      getStore().dispatch(enableFullScreen());
-    }
-  }, {
-    key: 'inspect',
-    description: 'Open Inspector',
-    testId: 'openInspectorButton',
-    run() {
-      Inspector.open(inspectorAdapters, {});
-    }
-  }, {
-    key: 'save',
-    description: 'Save map',
-    testId: 'mapSaveButton',
-    run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedMap.title;
-        savedMap.title = newTitle;
-        savedMap.copyOnSave = newCopyOnSave;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return doSave(saveOptions).then(({ id, error }) => {
-          // If the save wasn't successful, put the original values back.
-          if (!id || error) {
-            savedMap.title = currentTitle;
-          }
-          return { id, error };
-        });
-      };
-
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedMap.title}
-          showCopyOnSave={savedMap.id ? true : false}
-          objectType={'map'}
-        />);
-      showSaveModal(saveModal);
-    }
-  }];
+  $scope.topNavMenu = buildTopNavMenu();
 });
+
