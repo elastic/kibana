@@ -7,13 +7,14 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Note } from '../../../lib/note';
-import { updateNote } from './actions';
+import { addError, removeError, updateNote } from './actions';
 import { AppModel, NotesById } from './model';
 
 export type AppState = AppModel;
 
 export const initialAppState: AppState = {
   notesById: {},
+  errors: [],
 };
 
 interface UpdateNotesByIdParams {
@@ -30,5 +31,13 @@ export const appReducer = reducerWithInitialState(initialAppState)
   .case(updateNote, (state, { note }) => ({
     ...state,
     notesById: updateNotesById({ note, notesById: state.notesById }),
+  }))
+  .case(addError, (state, { id, title, message }) => ({
+    ...state,
+    errors: state.errors.concat({ id, title, message }),
+  }))
+  .case(removeError, (state, { id }) => ({
+    ...state,
+    errors: state.errors.filter(error => error.id !== id),
   }))
   .build();

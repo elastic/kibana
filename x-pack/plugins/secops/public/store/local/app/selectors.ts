@@ -9,9 +9,11 @@ import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { Note } from '../../../lib/note';
 import { State } from '../../reducer';
-import { NotesById } from './model';
+import { ErrorModel, NotesById } from './model';
 
 const selectNotesById = (state: State): NotesById => state.local.app.notesById;
+
+const getErrors = (state: State): ErrorModel => state.local.app.errors;
 
 const getNotes = (notesById: NotesById, noteIds: string[]) =>
   keys(notesById).reduce((acc: Note[], noteId: string) => {
@@ -27,4 +29,10 @@ export const notesByIdsSelector = () =>
     selectNotesById,
     (notesById: NotesById) =>
       memoizeOne((noteIds: string[]): Note[] => getNotes(notesById, noteIds))
+  );
+
+export const errorsSelector = () =>
+  createSelector(
+    getErrors,
+    errors => ({ errors })
   );

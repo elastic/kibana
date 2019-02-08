@@ -10,4 +10,8 @@ export * from './selectors';
 export * from './epic';
 export * from './model';
 
-export { createStore } from './store';
+import { createStore } from './store';
+
+const store = createStore();
+
+export { store, createStore };

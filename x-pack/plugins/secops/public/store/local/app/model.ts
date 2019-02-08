@@ -6,10 +6,21 @@
 
 import { Note } from '../../../lib/note';
 
+export type ErrorState = ErrorModel;
+
 export interface NotesById {
   [id: string]: Note;
 }
 
+export interface Error {
+  id: string;
+  title: string;
+  message: string;
+}
+
+export type ErrorModel = Error[];
+
 export interface AppModel {
   notesById: NotesById;
+  errors: ErrorState;
 }

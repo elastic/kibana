@@ -13,8 +13,9 @@
     "@types/react-beautiful-dnd": "^10.0.1"
   },
   "dependencies": {
+    "react-beautiful-dnd": "^10.0.1",
     "lodash": "^4.17.10",
     "memoize-one": "^5.0.0",
-    "react-beautiful-dnd": "^10.0.1"
+    "apollo-link-error": "^1.1.7"
   }
 }
