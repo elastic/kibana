@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Boom from 'boom';
 import Joi from 'joi';
 import { getExportDocuments } from '../lib/export';
 
