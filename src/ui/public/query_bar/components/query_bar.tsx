@@ -84,6 +84,7 @@ interface Props {
   dateRangeTo?: string;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
+  showAutoRefreshOnly?: boolean;
   onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
@@ -679,6 +680,7 @@ export class QueryBarUI extends Component<Props, State> {
           recentlyUsedRanges={recentlyUsedRanges}
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={config.get('dateFormat')}
+          isAutoRefreshOnly={this.props.showAutoRefreshOnly}
         />
       </EuiFlexItem>
     );
