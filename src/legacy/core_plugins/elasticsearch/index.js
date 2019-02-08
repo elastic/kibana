@@ -35,7 +35,7 @@ export default function (kibana) {
       // All methods that ES plugin exposes are synchronous so we should get the first
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
-      const [bwcEsConfig, adminCluster, dataCluster] = await combineLatest(
+      const [esConfig, adminCluster, dataCluster] = await combineLatest(
         server.core.elasticsearch.legacy.config$,
         server.core.elasticsearch.adminClient$,
         server.core.elasticsearch.dataClient$
@@ -49,9 +49,9 @@ export default function (kibana) {
       ).toPromise();
 
       defaultVars = {
-        esRequestTimeout: bwcEsConfig.requestTimeout.asMilliseconds(),
-        esShardTimeout: bwcEsConfig.shardTimeout.asMilliseconds(),
-        esApiVersion: bwcEsConfig.apiVersion,
+        esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
+        esShardTimeout: esConfig.shardTimeout.asMilliseconds(),
+        esApiVersion: esConfig.apiVersion,
       };
 
       const clusters = new Map();
@@ -76,7 +76,7 @@ export default function (kibana) {
         // Elasticsearch config so that we don't depend on default values set and
         // controlled by underlying Elasticsearch JS client.
         const cluster = new Cluster(server.core.elasticsearch.createClient(name, {
-          ...bwcEsConfig,
+          ...esConfig,
           ...clientConfig,
         }));
 
@@ -95,7 +95,7 @@ export default function (kibana) {
       createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server, bwcEsConfig.healthCheckDelay.asMilliseconds());
+      const { start, waitUntilReady } = healthCheck(this, server, esConfig.healthCheckDelay.asMilliseconds());
       server.expose('waitUntilReady', waitUntilReady);
       start();
     }
