@@ -4,21 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
-TODO Fix these tests
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import { Provider } from 'react-redux';
 
-import { ErrorToast, showError } from '.';
+import { ErrorToast } from '.';
+import { mockGlobalState } from '../../mock';
+import { createStore, State } from '../../store';
 
 describe('Error Toast', () => {
+  const state: State = mockGlobalState;
+  let store = createStore(state);
+
+  beforeEach(() => {
+    store = createStore(state);
+  });
+
   describe('rendering', () => {
     test('it renders the default Authentication table', () => {
-      const wrapper = shallow(<ErrorToast toastLifeTimeMs={9999999999} />);
-      showError({ id: 'error-123', title: 'Title of Error', message: 'Message of Error' });
+      const wrapper = shallow(
+        <Provider store={store}>
+          <ErrorToast toastLifeTimeMs={9999999999} />
+        </Provider>
+      );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
   });
 });
-*/
