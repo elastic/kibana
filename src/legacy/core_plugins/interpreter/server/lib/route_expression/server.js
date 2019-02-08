@@ -20,8 +20,8 @@
 import { interpretProvider } from '@kbn/interpreter/common';
 import { createHandlers } from '../create_handlers';
 
-export const server = async ({ onFunctionNotFound, server, request }) => {
-  const { serverFunctions, types } = server.plugins.interpreter;
+export const server = async ({ server, request }) => {
+  const { serverFunctions, types } = server.plugins.interpreter.registries();
 
   return {
     interpret: (ast, context) => {
@@ -29,7 +29,6 @@ export const server = async ({ onFunctionNotFound, server, request }) => {
         types: types.toJS(),
         functions: serverFunctions.toJS(),
         handlers: createHandlers(request, server),
-        onFunctionNotFound,
       });
 
       return interpret(ast, context);

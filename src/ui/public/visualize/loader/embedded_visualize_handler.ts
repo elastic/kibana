@@ -17,8 +17,10 @@
  * under the License.
  */
 
+// @ts-ignore untyped dependency
+import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
-import { debounce, forEach } from 'lodash';
+import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -393,5 +395,32 @@ export class EmbeddedVisualizeHandler {
       this.dataSubject.next(data);
       return data;
     });
+  };
+
+  private rendererProvider = (response: VisResponseData | null) => {
+    let renderer: any = null;
+    let args: any[] = [];
+
+    if (EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__) {
+      renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
+      args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
+    } else {
+      renderer = visualizationLoader;
+      args = [
+        this.element,
+        this.vis,
+        get(response, 'value.visData', null),
+        this.uiState,
+        {
+          listenOnChange: false,
+        },
+      ];
+    }
+
+    if (!renderer) {
+      return null;
+    }
+
+    return () => renderer.render(...args);
   };
 }

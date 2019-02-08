@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export { loadBrowserRegistries } from './browser_registries';
-export { createSocket } from './socket';
 export { initializeInterpreter } from './interpreter';
+export { RenderFunctionsRegistry } from './render_functions_registry';
+export { registries } from './registries';
+import { registries } from './registries';
+import { registryFactory } from '../common';
+
+// Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
+// can register without a transpile step.
+global.kbnInterpreter = Object.assign(global.kbnInterpreter || {}, registryFactory(registries));
