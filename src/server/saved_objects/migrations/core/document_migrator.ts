@@ -147,7 +147,9 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public migrate = (doc: RawSavedObjectDoc): RawSavedObjectDoc => {
-    return this.transformDoc(doc);
+    // Clone the document to prevent accidental mutations on the original data
+    const clonedDoc = _.cloneDeep(doc);
+    return this.transformDoc(clonedDoc);
   };
 }
 
