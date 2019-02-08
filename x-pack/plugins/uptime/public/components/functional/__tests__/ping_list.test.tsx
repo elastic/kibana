@@ -260,7 +260,7 @@ describe('PingList component', () => {
     const component = shallowWithIntl(
       <PingList
         loading={false}
-        maxSearchSize={200}
+        maxSearchSize={100}
         pingResults={allPings}
         searchSizeOnBlur={jest.fn()}
         selectedOption={{ label: 'All', value: '' }}
