@@ -20,9 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import './saved_dashboard';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const module = uiModules.get('app/dashboard');
 

@@ -6,9 +6,8 @@
 
 import './saved_gis_map';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const module = uiModules.get('app/maps');
 

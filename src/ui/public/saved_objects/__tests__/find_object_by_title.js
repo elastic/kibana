@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { findObjectByTitle } from '../find_object_by_title';
-import { SavedObject } from '../saved_object';
+import { SimpleSavedObject } from '../simple_saved_object';
 
 describe('findObjectByTitle', () => {
   const sandbox = sinon.createSandbox();
@@ -38,7 +38,7 @@ describe('findObjectByTitle', () => {
   });
 
   it('matches any case', async () => {
-    const indexPattern = new SavedObject(savedObjectsClient, { attributes: { title: 'foo' } });
+    const indexPattern = new SimpleSavedObject(savedObjectsClient, { attributes: { title: 'foo' } });
     savedObjectsClient.find.returns(Promise.resolve({
       savedObjects: [indexPattern]
     }));

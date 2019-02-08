@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import './_saved_sheet.js';
 

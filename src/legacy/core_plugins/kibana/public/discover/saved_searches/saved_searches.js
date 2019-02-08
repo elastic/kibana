@@ -20,9 +20,8 @@
 import './_saved_search';
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'
 ]);
