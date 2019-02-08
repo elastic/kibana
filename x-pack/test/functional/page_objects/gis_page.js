@@ -273,7 +273,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
   }
   return new GisPage();
