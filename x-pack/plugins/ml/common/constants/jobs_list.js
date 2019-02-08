@@ -5,10 +5,6 @@
  */
 
 
-import { annotationProvider } from './annotation';
-
-export function annotationServiceProvider(callWithRequest) {
-  return {
-    ...annotationProvider(callWithRequest)
-  };
-}
+export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
+export const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+export const DELETING_JOBS_REFRESH_INTERVAL_MS = 2000;
