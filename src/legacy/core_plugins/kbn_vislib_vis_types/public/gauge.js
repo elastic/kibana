@@ -61,7 +61,7 @@ export default function GaugeVisType(Private, i18n) {
           scale: {
             show: true,
             labels: false,
-            color: '#8c8c8c33',
+            color: '#69707d33',
           },
           type: 'meter',
           style: {
@@ -70,7 +70,7 @@ export default function GaugeVisType(Private, i18n) {
             mask: false,
             bgMask: false,
             maskBars: 50,
-            bgFill: '#8c8c8c33',
+            bgFill: '#69707d33',
             bgColor: true,
             subText: '',
             fontSize: 60,

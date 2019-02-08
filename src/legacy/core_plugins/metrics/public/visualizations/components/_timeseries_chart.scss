@@ -34,6 +34,7 @@
 }
 
 .tvbVisTimeSeries__container {
+  @include euiFontSizeXS;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -41,7 +42,7 @@
 }
 
 .tvbVisTimeSeries__axisLabel {
-  @include euiFontSizeXS;
+  font-weight: $euiFontWeightBold;
   color: $tvbTextColor;
   text-align: center;
   min-height: 1.2em;
