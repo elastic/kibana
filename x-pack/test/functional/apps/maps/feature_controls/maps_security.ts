@@ -23,6 +23,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await esArchiver.load('maps/kibana');
     });
 
+    after(async () => {
+      await esArchiver.unload('maps/kibana');
+    });
+
     describe('global maps all privileges', () => {
       before(async () => {
         await security.role.create('global_maps_all_role', {
