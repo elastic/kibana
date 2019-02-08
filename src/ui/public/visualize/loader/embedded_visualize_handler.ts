@@ -17,10 +17,10 @@
  * under the License.
  */
 
+// @ts-ignore untyped dependency
+import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
-// @ts-ignore
-import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -469,7 +469,7 @@ export class EmbeddedVisualizeHandler {
     let args: any[] = [];
 
     if (EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__) {
-      renderer = renderFunctionsRegistry.get(get(response || {}, 'as', 'visualization'));
+      renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
       args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
     } else {
       renderer = visualizationLoader;
