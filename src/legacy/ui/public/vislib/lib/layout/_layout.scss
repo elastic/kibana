@@ -178,6 +178,10 @@
     }
   }
 
+  .grid > path {
+    stroke: $visLineColor;
+  }
+
   .label-line {
     fill: none;
     stroke-width: 2px;
@@ -209,7 +213,7 @@
 
   .tick text {
     @include fontSize($euiFontSizeXS - 1px);
-    fill: $visValueColor;
+    fill: $visTextColor;
   }
 
   .axis-title text {
@@ -282,7 +286,7 @@
   .chart-label,
   .label-text,
   .chart-text {
-    fill: $visValueColor;
+    fill: $visTextColor;
   }
 
   /* Brush Styling */
