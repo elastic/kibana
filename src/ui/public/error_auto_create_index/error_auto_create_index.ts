@@ -22,6 +22,7 @@ import { get } from 'lodash';
 
 import uiRoutes from '../routes';
 
+// @ts-ignore
 import template from './error_auto_create_index.html';
 
 uiRoutes.when('/error/action.auto_create_index', {

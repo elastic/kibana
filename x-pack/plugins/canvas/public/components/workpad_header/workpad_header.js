@@ -123,6 +123,7 @@ export const WorkpadHeader = ({
                   size="s"
                   iconType="vector"
                   onClick={() => setShowElementModal(true)}
+                  data-test-subj="add-element-button"
                 >
                   Add element
                 </EuiButton>

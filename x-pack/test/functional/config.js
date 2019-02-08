@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 
 import {
+  CanvasPageProvider,
   SecurityPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
@@ -140,6 +141,7 @@ export default async function ({ readConfigFile }) {
     // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
+      canvas: CanvasPageProvider,
       security: SecurityPageProvider,
       accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,

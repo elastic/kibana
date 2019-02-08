@@ -12,7 +12,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('smoke test', async () => {
     const workpadListSelector = 'canvasWorkpadLoaderTable canvasWorkpadLoaderWorkpad';
