@@ -1710,7 +1710,12 @@ describe('SavedObjectsRepository', () => {
       await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Not Found'));
     });
 
-    it('should error when attempting to \'bulkGet\' an unsupported type', async () => {
+    it('should return an error object when attempting to \'create\' an unsupported type', async () => {
+      await expect(savedObjectsRepository.create('hiddenType', { title: 'some title'}))
+        .rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
+    });
+
+    it('should return an error object when attempting to \'bulkGet\' an unsupported type', async () => {
       callAdminCluster.returns({
         docs: [
           {
@@ -1843,7 +1848,7 @@ describe('SavedObjectsRepository', () => {
     it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
       await expect(
         savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error('Unsupported saved object type: hiddenType: Bad Request'));
+      ).rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
     });
   });
 });

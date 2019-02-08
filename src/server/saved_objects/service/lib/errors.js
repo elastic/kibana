@@ -50,7 +50,7 @@ export function createBadRequestError(reason) {
   return decorateBadRequestError(new Error('Bad Request'), reason);
 }
 export function createUnsupportedTypeError(type) {
-  return createBadRequestError(`Unsupported saved object type: ${type}`);
+  return createBadRequestError(`Unsupported saved object type: \'${type}\'`);
 }
 export function isBadRequestError(error) {
   return error && error[code] === CODE_BAD_REQUEST;
