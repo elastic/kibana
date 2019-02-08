@@ -143,7 +143,7 @@ export function MochaReporterProvider({ getService }) {
     onPass = test => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time}`);
+      log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
     }
 
     onFail = runnable => {
