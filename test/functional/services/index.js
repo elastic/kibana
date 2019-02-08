@@ -35,6 +35,7 @@ export { BrowserProvider } from './browser';
 export { InspectorProvider } from './inspector';
 export { AppsMenuProvider } from './apps_menu';
 export { GlobalNavProvider } from './global_nav';
+export { SuperDatePickerProvider } from './super_date_picker';
 
 export * from './visualizations';
 export * from './dashboard';

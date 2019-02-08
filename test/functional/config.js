@@ -60,6 +60,7 @@ import {
   PieChartProvider,
   AppsMenuProvider,
   GlobalNavProvider,
+  SuperDatePickerProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -125,6 +126,7 @@ export default async function ({ readConfigFile }) {
       inspector: InspectorProvider,
       appsMenu: AppsMenuProvider,
       globalNav: GlobalNavProvider,
+      superDatePicker: SuperDatePickerProvider,
     },
     servers: commonConfig.get('servers'),
 
