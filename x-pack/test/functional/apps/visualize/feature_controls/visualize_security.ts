@@ -16,7 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     'header',
     'security',
     'spaceSelector',
-    'timepicker',
+    'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -81,7 +81,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timepicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       });
