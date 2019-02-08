@@ -89,7 +89,6 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async click() {
-    this._logger.debug('WebElementWrapper.click()');
     await this.scrollIntoViewIfNecessary();
     await this._webElement.click();
   }
@@ -160,7 +159,6 @@ export class WebElementWrapper {
    * @param {string} name
    */
   async getAttribute(name) {
-    this._logger.debug('WebElementWrapper.getAttribute()');
     const rectAttributes = ['height', 'width', 'x', 'y'];
     if (rectAttributes.includes(name)) {
       const rect = await this.getSize();
@@ -217,7 +215,6 @@ export class WebElementWrapper {
    * @return {Promise<string>}
    */
   async getVisibleText() {
-    this._logger.debug('WebElementWrapper.getVisibleText()');
     return await this._webElement.getText();
   }
 
