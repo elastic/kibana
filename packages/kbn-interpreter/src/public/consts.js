@@ -17,26 +17,5 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-
-import uiRoutes from '../routes';
-
-import template from './error_auto_create_index.html';
-
-uiRoutes
-  .when('/error/action.auto_create_index', {
-    template,
-    k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
-  });
-
-export function isAutoCreateIndexError(error) {
-  return (
-    get(error, 'res.status') === 503 &&
-    get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-}
-
-export function showAutoCreateIndexErrorPage() {
-  window.location.hash = '/error/action.auto_create_index';
-}
+// The server endpoint for retrieiving and running Canvas functions.
+export const FUNCTIONS_URL = '/api/canvas/fns';

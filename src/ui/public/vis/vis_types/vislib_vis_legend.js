@@ -92,6 +92,9 @@ uiModules.get('kibana')
         };
 
         $scope.canFilter = function (legendData) {
+          if (['heatmap', 'gauge'].includes($scope.vis.vislibVis.visConfigArgs.type)) {
+            return false;
+          }
           const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
           return filters.length;
         };
