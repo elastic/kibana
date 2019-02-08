@@ -46,18 +46,13 @@ export const createExportRoute = (prereqs) => ({
         .default(),
     },
     async handler(request, h) {
-      let docsToExport;
       const { savedObjectsClient } = request.pre;
-      try {
-        docsToExport = await getExportDocuments({
-          type: request.query.type,
-          objects: request.query.objects,
-          savedObjectsClient,
-          exportSizeLimit: EXPORT_SIZE_LIMIT,
-        });
-      } catch (err) {
-        throw Boom.boomify(err, { statusCode: 400 });
-      }
+      const docsToExport = await getExportDocuments({
+        type: request.query.type,
+        objects: request.query.objects,
+        savedObjectsClient,
+        exportSizeLimit: EXPORT_SIZE_LIMIT,
+      });
       // Send file to response
       return h
         .response(docsToExport.map(doc => JSON.stringify(doc)).join('\n'))
