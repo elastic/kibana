@@ -32,7 +32,7 @@ export class CreateSourceEditor extends Component {
         { url: tilemap.url },
         () => {
           if (this.state.url) {
-            this.props.previewTilemap(this.state.url);
+            this.props.previewTilemap();
           }
         }
       );
