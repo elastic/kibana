@@ -8,8 +8,6 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
@@ -65,13 +63,13 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       />
 
       <EuiSpacer size="l" />
-
-      <TransactionDetailsRequest
+      <WaterfallRequest
         urlParams={urlParams}
-        render={({ data }) => {
-          const transaction = idx(data, _ => _.transaction);
-          const errorCount = idx(data, _ => _.errorCount);
-
+        traceId={urlParams.traceId}
+        render={({ data: waterfall }) => {
+          const transaction = waterfall.getTransactionById(
+            urlParams.transactionId
+          );
           if (!transaction) {
             return (
               <EmptyMessage
@@ -93,20 +91,11 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
           }
 
           return (
-            <WaterfallRequest
-              urlParams={urlParams}
+            <Transaction
+              location={location}
               transaction={transaction}
-              render={({ data: waterfall }) => {
-                return (
-                  <Transaction
-                    location={location}
-                    transaction={transaction}
-                    urlParams={urlParams}
-                    waterfall={waterfall}
-                    errorCount={errorCount}
-                  />
-                );
-              }}
+              urlParams={urlParams}
+              waterfall={waterfall}
             />
           );
         }}
