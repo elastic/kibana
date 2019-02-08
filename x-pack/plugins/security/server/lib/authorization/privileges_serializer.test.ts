@@ -142,6 +142,35 @@ describe('features', () => {
     });
   });
 
+  test('features with no privileges are ignored', () => {
+    const application = 'foo-application';
+    const result = serializePrivileges(application, {
+      global: {},
+      space: {},
+      features: {
+        foo: {
+          quz: ['action-1', 'action-2'],
+          qux: ['action-3', 'action-4'],
+        },
+        bar: {},
+      },
+    });
+    expect(result[application]).toEqual({
+      'feature_foo.quz': {
+        application,
+        name: 'feature_foo.quz',
+        actions: ['action-1', 'action-2'],
+        metadata: {},
+      },
+      'feature_foo.qux': {
+        application,
+        name: 'feature_foo.qux',
+        actions: ['action-3', 'action-4'],
+        metadata: {},
+      },
+    });
+  });
+
   test(`feature privileges don't conflict`, () => {
     const application = 'foo-application';
     serializePrivileges(application, {
