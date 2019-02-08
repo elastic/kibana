@@ -214,6 +214,24 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
             '1': geoBoundsAgg.toDsl()
           };
         });
+
+        // This is a temporary solution to ensure that global queries & filters
+        // are included in searchSource when querying the geohash bounds.
+        // TODO: Remove this as a part of elastic/kibana#30593
+        const { filters, query } = this.vis.API.__UNSTABLE_GLOBAL_STATE_DATA__;
+        if (query) {
+          searchSource.setField('query', query);
+        }
+        searchSource.setField('filter', () => {
+          const activeFilters = [...filters];
+          const indexPattern = agg.getIndexPattern();
+          const useTimeFilter = !!indexPattern.timeFieldName;
+          if (useTimeFilter) {
+            activeFilters.push(this.vis.API.timeFilter.createFilter(indexPattern));
+          }
+          return activeFilters;
+        });
+
         let esResp;
         try {
           esResp = await searchSource.fetch();
