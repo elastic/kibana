@@ -112,7 +112,7 @@ export class EmbeddedVisualizeHandler {
       timeRange,
       filters,
       query,
-      autoFetch,
+      autoFetch = true,
       Private,
     } = params;
 
@@ -127,8 +127,6 @@ export class EmbeddedVisualizeHandler {
       forceFetch: false,
     };
 
-    this.autoFetch = !(autoFetch === false);
-
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
       this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
@@ -138,6 +136,7 @@ export class EmbeddedVisualizeHandler {
     element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
+    this.autoFetch = autoFetch;
     this.appState = appState;
     this.vis = vis;
     if (uiState) {
@@ -154,7 +153,9 @@ export class EmbeddedVisualizeHandler {
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
     this.uiState.on('change', this.onUiStateChange);
-    timefilter.on('autoRefreshFetch', this.reload);
+    if (autoFetch) {
+      timefilter.on('autoRefreshFetch', this.reload);
+    }
 
     this.dataLoader = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
       ? new PipelineDataLoader(vis)
@@ -236,7 +237,9 @@ export class EmbeddedVisualizeHandler {
   public destroy(): void {
     this.destroyed = true;
     this.debouncedFetchAndRender.cancel();
-    timefilter.off('autoRefreshFetch', this.reload);
+    if (this.autoFetch) {
+      timefilter.off('autoRefreshFetch', this.reload);
+    }
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
