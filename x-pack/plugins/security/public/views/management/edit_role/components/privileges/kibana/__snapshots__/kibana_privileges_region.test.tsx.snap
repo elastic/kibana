@@ -13,6 +13,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         "rawKibanaPrivileges": Object {
           "features": Object {},
           "global": Object {},
+          "reserved": Object {},
           "space": Object {},
         },
       }
@@ -24,6 +25,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
           "rawKibanaPrivileges": Object {
             "features": Object {},
             "global": Object {},
+            "reserved": Object {},
             "space": Object {},
           },
         },

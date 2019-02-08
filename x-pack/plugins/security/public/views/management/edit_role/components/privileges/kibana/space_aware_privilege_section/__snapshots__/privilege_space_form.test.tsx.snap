@@ -429,6 +429,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               "rawKibanaPrivileges": Object {
                 "features": Object {},
                 "global": Object {},
+                "reserved": Object {},
                 "space": Object {},
               },
             }
