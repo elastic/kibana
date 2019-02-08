@@ -17,21 +17,24 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
 import {
-  EuiEmptyPrompt,
-  EuiText,
-  EuiHorizontalRule,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiPageContent,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
 import { CreateButton } from '../create_button';
+import { IndexPatternCreationOption } from '../types';
 
 export const CreateIndexPatternPrompt = ({
-  indexPatternCreationOptions
+  indexPatternCreationOptions,
+}: {
+  indexPatternCreationOptions: IndexPatternCreationOption[];
 }) => (
   <EuiPageContent horizontalPosition="center">
     <EuiEmptyPrompt
@@ -39,9 +42,13 @@ export const CreateIndexPatternPrompt = ({
       title={
         <EuiText grow={false}>
           <h2>
-            <FormattedMessage id="kbn.management.indexPatternPrompt.title" defaultMessage="Create your first index pattern" />
+            <FormattedMessage
+              id="kbn.management.indexPatternPrompt.title"
+              defaultMessage="Create your first index pattern"
+            />
           </h2>
-        </EuiText>}
+        </EuiText>
+      }
       body={
         <Fragment>
           <p>
@@ -108,7 +115,7 @@ export const CreateIndexPatternPrompt = ({
             id="kbn.management.indexPatternPrompt.createBtn"
             defaultMessage="Create index pattern"
           />
-        </CreateButton>
+        </CreateButton>,
       ]}
     />
   </EuiPageContent>

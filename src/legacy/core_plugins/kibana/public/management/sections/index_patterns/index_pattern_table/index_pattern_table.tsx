@@ -17,31 +17,36 @@
  * under the License.
  */
 
-import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiInMemoryTable,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { CreateButton } from '../create_button';
+import { IndexPattern, IndexPatternCreationOption } from '../types';
 
 const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    render: (name, { id }) => (<EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>{name}</EuiButtonEmpty>),
+    render: (name, { id }) => (
+      <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>
+        {name}
+      </EuiButtonEmpty>
+    ),
     dataType: 'string',
     sortable: true,
-  }
+  },
 ];
 
 const pagination = {
   initialPageSize: 10,
-  pageSizeOptions: [5, 10, 25, 50]
+  pageSizeOptions: [5, 10, 25, 50],
 };
 
 const sorting = {
@@ -55,20 +60,28 @@ const search = {
   box: {
     incremental: true,
     schema: {
-      fields: { title: { type: 'string' } }
-    }
-  }
+      fields: { title: { type: 'string' } },
+    },
+  },
 };
 
 export const IndexPatternTable = ({
   indexPatterns,
   indexPatternCreationOptions,
+}: {
+  indexPatterns: IndexPattern[];
+  indexPatternCreationOptions: IndexPatternCreationOption[];
 }) => (
   <EuiPanel paddingSize="l">
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiText>
-          <h2><FormattedMessage id="kbn.management.indexPatternTable.title" defaultMessage="Index patterns" /></h2>
+          <h2>
+            <FormattedMessage
+              id="kbn.management.indexPatternTable.title"
+              defaultMessage="Index patterns"
+            />
+          </h2>
           <p>
             <FormattedMessage
               id="kbn.management.indexPatternTable.subtitle"
@@ -78,7 +91,7 @@ export const IndexPatternTable = ({
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem  grow={false}>
+      <EuiFlexItem grow={false}>
         <CreateButton options={indexPatternCreationOptions}>
           <FormattedMessage
             id="kbn.management.indexPatternTable.createBtn"
