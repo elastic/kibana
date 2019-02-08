@@ -19217,11 +19217,6 @@ script-loader@0.7.2:
   dependencies:
     raw-loader "~0.5.1"
 
-scriptjs@^2.5.8:
-  version "2.5.8"
-  resolved "https://registry.yarnpkg.com/scriptjs/-/scriptjs-2.5.8.tgz#d0c43955c2e6bad33b6e4edf7b53b8965aa7ca5f"
-  integrity sha1-0MQ5VcLmutM7bk7fe1O4llqnyl8=
-
 scroll-into-view@^1.3.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/scroll-into-view/-/scroll-into-view-1.9.1.tgz#90c3b338422f9fddaebad90e6954790940dc9c1e"
