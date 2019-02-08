@@ -271,7 +271,7 @@ class SavedObjectFinderUI extends React.Component<
           defaultMessage: 'Title',
         }),
         sortable: true,
-        render: (title: string, record: SavedObject<any>) => {
+        render: (title: string, record: SavedObject<SavedObjectAttributes>) => {
           const { onChoose, makeUrl } = this.props;
 
           if (!onChoose && !makeUrl) {
