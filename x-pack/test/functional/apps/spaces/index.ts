@@ -11,6 +11,5 @@ export default function spacesApp({ loadTestFile }: KibanaFunctionalTestDefaultP
     this.tags('ciGroup4');
 
     loadTestFile(require.resolve('./spaces_selection'));
-    loadTestFile(require.resolve('./disabled_features'));
   });
 }

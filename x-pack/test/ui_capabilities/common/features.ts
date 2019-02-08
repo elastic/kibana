@@ -9,6 +9,9 @@ interface Feature {
 }
 
 export class Features {
+  public advancedSettings: Feature = {
+    navLinkId: 'kibana:management',
+  };
   public apm: Feature = {
     navLinkId: 'apm',
   };

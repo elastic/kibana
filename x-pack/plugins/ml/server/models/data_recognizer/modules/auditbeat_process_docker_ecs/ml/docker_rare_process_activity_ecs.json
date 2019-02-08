@@ -3,9 +3,10 @@
   "description": "Auditbeat: Detect rare process executions in docker containers (ECS)",
   "groups": ["auditd"],
   "analysis_config": {
-    "bucket_span": "10m",
+    "bucket_span": "1h",
     "detectors": [
       {
+        "detector_description": "Rare process execution in docker containers",
         "function": "rare",
         "by_field_name": "process.executable",
         "partition_field_name": "container.name"

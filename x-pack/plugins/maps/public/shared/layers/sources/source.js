@@ -89,6 +89,10 @@ export class AbstractSource {
   getGeoGridPrecision() {
     return 0;
   }
+
+  isJoinable() {
+    return false;
+  }
 }
 
 
