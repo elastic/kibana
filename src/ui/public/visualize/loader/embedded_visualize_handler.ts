@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore untyped dependency
+import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
 import { debounce, forEach } from 'lodash';
 import * as Rx from 'rxjs';

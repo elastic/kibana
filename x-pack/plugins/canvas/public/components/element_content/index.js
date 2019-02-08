@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { registries } from '@kbn/interpreter/public';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -19,7 +20,7 @@ const mapStateToProps = state => ({
 export const ElementContent = compose(
   connect(mapStateToProps),
   withProps(({ renderable }) => ({
-    renderFunction: renderFunctionsRegistry.get(get(renderable, 'as')),
+    renderFunction: registries.renderers.get(get(renderable, 'as')),
   }))
 )(Component);
 
