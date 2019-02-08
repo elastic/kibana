@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runGulpTask('canvas:plugins:build');
+
+export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
+export const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+export const DELETING_JOBS_REFRESH_INTERVAL_MS = 2000;
