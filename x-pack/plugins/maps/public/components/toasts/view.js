@@ -7,12 +7,8 @@
 import { toastNotifications } from 'ui/notify';
 
 export function Toasts({ layerLoadToast, clearLayerLoadToast }) {
-  if (layerLoadToast === 'success') {
-    toastNotifications.add({
-      title: 'Layer added',
-      className: 'mapLayerToast'
-    }) && clearLayerLoadToast();
-  } else if (layerLoadToast === 'error') {
+  // TODO: Update for layer removal
+  if (layerLoadToast === 'error') {
     toastNotifications.addDanger({
       title: 'Error adding layer',
       className: 'mapLayerToast'
