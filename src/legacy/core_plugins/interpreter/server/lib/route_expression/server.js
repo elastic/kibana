@@ -21,7 +21,7 @@ import { interpreterProvider } from '@kbn/interpreter/common';
 import { createHandlers } from '../create_handlers';
 
 export const server = async ({ server, request }) => {
-  const { serverFunctions, types } = server.plugins.interpreter;
+  const { serverFunctions, types } = server.plugins.interpreter.registries();
 
   return {
     interpret: (ast, context) => {
