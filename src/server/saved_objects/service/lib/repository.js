@@ -46,9 +46,8 @@ function removeFromStr(str, key, val) {
 }
 
 async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
-  // if (['config', 'url'].includes(type)) return;
   const allTypes = Object.keys(getRootPropertiesObjects(savedObjectsRepository._mappings));
-  const { saved_objects: allObjects } = await savedObjectsRepository.find({ type: allTypes, perPage: 10000 });
+  const { saved_objects: allObjects } = await savedObjectsRepository.find({ type: allTypes, perPage: 10000, checkIfIdFound: false });
   const objectIds = allObjects.map((obj) => {
     if (obj.id.indexOf(':') !== -1) {
       return obj.id.substring(obj.id.lastIndexOf(':') + 1);
@@ -57,11 +56,11 @@ async function throwIfIdFound({ type, savedObjectsRepository, attributes }) {
   });
   const stringifiedData = JSON.stringify(attributes, null, 2);
   objectIds.forEach((id) => {
+    if (id === 'default') return;
     let searchStr = stringifiedData;
     searchStr = removeFromStr(searchStr, 'title', id);
     searchStr = removeFromStr(searchStr, 'version', id);
     if (searchStr.indexOf(id) !== -1) {
-      // throw new Error(`Id ${id} found in type "${type}" for ${searchStr}`);
       console.log(`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n` +
         `\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nId "${id}" found in type "${type}" for ${searchStr}` +
         `\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`);
@@ -364,6 +363,7 @@ export class SavedObjectsRepository {
       sortOrder,
       fields,
       namespace,
+      checkIfIdFound = true
     } = options;
 
     if (!type) {
@@ -413,6 +413,12 @@ export class SavedObjectsRepository {
       };
     }
 
+    if (checkIfIdFound) {
+      for (const hit of response.hits.hits) {
+        await throwIfIdFound({ type: hit._source.type, attributes: hit._source[hit._source.type], savedObjectsRepository: this });
+      }
+    }
+
     return {
       page,
       per_page: perPage,
@@ -453,6 +459,14 @@ export class SavedObjectsRepository {
         }))
       }
     });
+
+    for (const doc of response.docs) {
+      await throwIfIdFound({
+        type: doc._source.type,
+        attributes: doc._source[doc._source.type],
+        savedObjectsRepository: this,
+      });
+    }
 
     return {
       saved_objects: response.docs.map((doc, i) => {
@@ -509,6 +523,8 @@ export class SavedObjectsRepository {
     }
 
     const { updated_at: updatedAt } = response._source;
+
+    await throwIfIdFound({ type, attributes: response._source[type], savedObjectsRepository: this });
 
     return {
       id,
