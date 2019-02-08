@@ -199,7 +199,7 @@
     "lodash.topath": "^4.5.2",
     "lodash.uniqby": "^4.7.0",
     "lz-string": "^1.4.4",
-    "mapbox-gl": "0.45.0",
+    "mapbox-gl": "0.52.0",
     "markdown-it": "^8.4.1",
     "mime": "^2.2.2",
     "mkdirp": "0.5.1",
