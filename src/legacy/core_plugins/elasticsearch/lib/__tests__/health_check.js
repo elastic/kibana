@@ -28,7 +28,6 @@ import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 
 const esPort = 9220;
-const esUrl = `http://elastic:changement@localhost:9220`;
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {
@@ -59,7 +58,7 @@ describe('plugins/elasticsearch', () => {
         }
       };
 
-      cluster = { callWithInternalUser: sinon.stub() };
+      cluster = { callWithInternalUser: sinon.stub(), errors: { NoConnections } };
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
       cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
@@ -74,19 +73,11 @@ describe('plugins/elasticsearch', () => {
         }
       }));
 
-      // setup the config().get()/.set() stubs
-      const get = sinon.stub();
-      get.withArgs('elasticsearch.hosts').returns([esUrl]);
-      get.withArgs('kibana.index').returns('.my-kibana');
-      get.withArgs('pkg.version').returns('1.0.0');
-
-      const set = sinon.stub();
-
       // Setup the server mock
       server = {
         logWithMetadata: sinon.stub(),
         info: { port: 5601 },
-        config: function () { return { get, set }; },
+        config: () => ({ get: sinon.stub() }),
         plugins: {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
@@ -98,7 +89,7 @@ describe('plugins/elasticsearch', () => {
         ext: sinon.stub()
       };
 
-      health = healthCheck(plugin, server);
+      health = healthCheck(plugin, server, 0);
     });
 
     afterEach(() => sandbox.restore());
