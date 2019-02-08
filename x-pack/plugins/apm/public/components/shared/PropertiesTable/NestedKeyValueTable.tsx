@@ -82,7 +82,7 @@ export function NestedValue({
   depth,
   keySorter
 }: {
-  value: StringMap;
+  value: unknown;
   depth: number;
   parentKey?: string;
   keySorter?: KeySorter;
@@ -90,7 +90,7 @@ export function NestedValue({
   if (depth > 0 && isObject(value)) {
     return (
       <NestedKeyValueTable
-        data={value}
+        data={value as StringMap}
         parentKey={parentKey}
         keySorter={keySorter}
         depth={depth - 1}
@@ -107,7 +107,7 @@ export function NestedKeyValueTable({
   keySorter = Object.keys,
   depth = 0
 }: {
-  data: StringMap<any>;
+  data: StringMap;
   parentKey?: string;
   keySorter?: KeySorter;
   depth?: number;

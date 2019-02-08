@@ -30,6 +30,14 @@ rules:
   react-a11y-role: true
   react-a11y-tabindex-no-positive: true
   react-a11y-titles: true
+  ban:
+    - true
+    - name: [describe, only]
+      message: No exclusive suites.
+    - name: [it, only]
+      message: No exclusive tests.
+    - name: [test, only]
+      message: No exclusive tests.
   require-license-header:
     - true
     - |-

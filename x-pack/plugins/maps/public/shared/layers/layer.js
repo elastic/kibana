@@ -17,8 +17,8 @@ export class AbstractLayer {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
-    if (this._descriptor.dataRequests) {
-      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
+    if (this._descriptor.__dataRequests) {
+      this._dataRequests = this._descriptor.__dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
       this._dataRequests = [];
     }
@@ -32,7 +32,7 @@ export class AbstractLayer {
   static createDescriptor(options = {}) {
     const layerDescriptor = { ...options };
 
-    layerDescriptor.dataRequests = _.get(options, 'dataRequests', []);
+    layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
@@ -51,7 +51,7 @@ export class AbstractLayer {
   }
 
   isJoinable() {
-    return false;
+    return this._source.isJoinable();
   }
 
   async getDisplayName() {
@@ -150,11 +150,11 @@ export class AbstractLayer {
   }
 
   hasErrors() {
-    return _.get(this._descriptor, 'isInErrorState', false);
+    return _.get(this._descriptor, '__isInErrorState', false);
   }
 
   getErrors() {
-    return this.hasErrors() ? this._descriptor.errorMessage : '';
+    return this.hasErrors() ? this._descriptor.__errorMessage : '';
   }
 
   toLayerDescriptor() {
@@ -162,6 +162,10 @@ export class AbstractLayer {
   }
 
   async syncData() {
+    //no-op by default
+  }
+
+  syncLayerWithMb() {
     //no-op by default
   }
 
@@ -222,6 +226,10 @@ export class AbstractLayer {
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  async getOrdinalFields() {
+    return [];
   }
 
 }
