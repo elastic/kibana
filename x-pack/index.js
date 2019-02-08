@@ -38,6 +38,7 @@ import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { secretService } from './plugins/secret_service';
 import { ossTelemetry } from './plugins/oss_telemetry';
+import { actionsService } from './plugins/actions_service';
 
 module.exports = function (kibana) {
   return [
@@ -75,5 +76,6 @@ module.exports = function (kibana) {
     uptime(kibana),
     secretService(kibana),
     ossTelemetry(kibana),
+    actionsService(kibana),
   ];
 };
