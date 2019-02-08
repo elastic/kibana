@@ -51,7 +51,10 @@ const mockCollect = () => ({
 });
 
 export const logger = {
-  get: jest.fn(() => mockLog),
+  get: jest.fn((...context) => ({
+    context,
+    ...mockLog,
+  })),
   mockClear,
   mockCollect,
   mockLog,

@@ -29,6 +29,9 @@ Array [
         },
       },
       "log": Object {
+        "context": Array [
+          "server",
+        ],
         "debug": [MockFunction] {
           "calls": Array [
             Array [

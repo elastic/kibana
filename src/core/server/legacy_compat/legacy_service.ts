@@ -125,7 +125,7 @@ export class LegacyService implements CoreService {
 
     require('../../../cli/cluster/cluster_manager').create(
       this.coreContext.env.cliArgs,
-      config.toRaw(),
+      getLegacyRawConfig(config),
       await basePathProxy$.toPromise()
     );
   }
