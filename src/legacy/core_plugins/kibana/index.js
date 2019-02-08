@@ -178,6 +178,9 @@ export default function (kibana) {
               saved_objects: true,
               index_patterns: true,
             },
+            advancedSettings: {
+              save: true
+            },
             management: {
               /*
                * Management settings correspond to management section/link ids, and should not be changed

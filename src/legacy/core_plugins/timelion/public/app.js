@@ -80,9 +80,6 @@ require('ui/routes')
             'search': '/'
           }));
       }
-    },
-    controller($scope, config) {
-      config.bindToScope($scope, 'k7design');
     }
   });
 

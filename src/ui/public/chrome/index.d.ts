@@ -18,6 +18,7 @@
  */
 
 import { Brand } from '../../../core/public/chrome';
+import { SavedObjectsClient } from '../saved_objects';
 import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';
 import { ChromeNavLinks } from './api/nav';
@@ -34,6 +35,7 @@ declare interface Chrome extends ChromeNavLinks {
   getBasePath(): string;
   getXsrfToken(): string;
   getKibanaVersion(): string;
+  getSavedObjectsClient(): SavedObjectsClient;
   getUiSettingsClient(): any;
   setVisible(visible: boolean): any;
   getInjected(key: string, defaultValue?: any): any;

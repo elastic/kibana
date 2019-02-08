@@ -62,7 +62,7 @@ const buildRawKibanaPrivileges = () => {
 
   const actions = actionsFactory({ get: jest.fn(() => 'unit_test_version') });
 
-  return privilegesFactory(actions, xpackMainPlugin).get();
+  return privilegesFactory(actions, xpackMainPlugin as any).get();
 };
 
 const buildUICapabilities = (canManageSpaces = true) => {

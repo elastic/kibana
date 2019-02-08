@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { initTransactionsApi } from './server/routes/transactions';
 import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
@@ -34,6 +33,7 @@ export function apm(kibana) {
         euiIconType: 'apmApp',
         order: 8100
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
@@ -81,7 +81,6 @@ export function apm(kibana) {
         privileges: {}
       });
 
-      initTransactionsApi(server);
       initTransactionGroupsApi(server);
       initTracesApi(server);
       initServicesApi(server);

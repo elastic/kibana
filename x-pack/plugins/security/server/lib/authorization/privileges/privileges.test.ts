@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { Feature } from '../../../../xpack_main/types';
+import { Feature } from '../../../../../xpack_main/types';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
@@ -47,7 +46,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
@@ -120,7 +119,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
@@ -177,7 +176,7 @@ describe('features', () => {
       getFeatures: jest.fn().mockReturnValue(features),
     };
 
-    const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
@@ -235,6 +234,27 @@ describe('features', () => {
       ],
     });
   });
+
+  test(`features with no privileges are specified with an empty object`, () => {
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: 'Foo Feature',
+        icon: 'arrowDown',
+        app: [],
+        privileges: {},
+      },
+    ];
+
+    const mockXPackMainPlugin = {
+      getFeatures: jest.fn().mockReturnValue(features),
+    };
+
+    const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.foo', {});
+  });
 });
 
 // the `global` and `space` privileges behave very similarly, with the one exception being that
@@ -285,7 +305,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(group, {
@@ -369,7 +389,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.all`, [
@@ -512,7 +532,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.read`, [
@@ -592,7 +612,7 @@ describe('features', () => {
         getFeatures: jest.fn().mockReturnValue(features),
       };
 
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin);
+      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
       const actual = privileges.get();
       expect(actual).toHaveProperty(`${group}.read`, [

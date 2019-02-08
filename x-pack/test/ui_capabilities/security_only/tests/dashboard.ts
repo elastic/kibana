@@ -53,6 +53,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             });
             break;
           // these users can't do anything with Dashboard
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
           case 'canvas_all':
           case 'canvas_read':
           case 'dev_tools_read':

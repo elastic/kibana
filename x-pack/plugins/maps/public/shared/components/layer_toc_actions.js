@@ -16,7 +16,6 @@ import {
   EuiIconTip
 } from '@elastic/eui';
 
-
 function flattenPanelTree(tree, array = []) {
   array.push(tree);
 
@@ -32,8 +31,14 @@ function flattenPanelTree(tree, array = []) {
   return array;
 }
 
-export class LayerTocActions extends Component {
+function cleanDisplayName(displayName) {
+  if (!displayName) {
+    return displayName;
+  }
+  return displayName.split(' ').join('');
+}
 
+export class LayerTocActions extends Component {
 
   state = {
     isPopoverOpen: false
@@ -59,6 +64,7 @@ export class LayerTocActions extends Component {
         flush="left"
         color="text"
         onClick={this._onClick}
+        data-test-subj={`layerTocActionsPanelToggleButton${cleanDisplayName(this.props.displayName)}`}
       >
         {icon}
       </EuiButtonEmpty>);
@@ -130,6 +136,7 @@ export class LayerTocActions extends Component {
         {
           name: this.props.layer.isVisible() ? 'Hide layer' : 'Show layer',
           icon: visibilityToggle,
+          'data-test-subj': 'layerVisibilityToggleButton',
           onClick: () => {
             this._closePopover();
             this.props.toggleVisible();
@@ -155,6 +162,7 @@ export class LayerTocActions extends Component {
         <EuiContextMenu
           initialPanelId={0}
           panels={this._getPanels()}
+          data-test-subj={`layerTocActionsPanel${cleanDisplayName(this.props.displayName)}`}
         />
       </EuiPopover>);
   }

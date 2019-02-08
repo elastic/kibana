@@ -134,6 +134,46 @@ const All: All = {
   role: allRole,
 };
 
+interface AdvancedSettingsAll extends User {
+  username: 'advancedSettings_all';
+}
+const AdvancedSettingsAll: AdvancedSettingsAll = {
+  username: 'advancedSettings_all',
+  fullName: 'advancedSettings_all',
+  password: 'advancedSettings_all-password',
+  role: {
+    name: 'advancedSettings_all_role',
+    kibana: [
+      {
+        feature: {
+          advancedSettings: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+interface AdvancedSettingsRead extends User {
+  username: 'advancedSettings_read';
+}
+const AdvancedSettingsRead: AdvancedSettingsRead = {
+  username: 'advancedSettings_read',
+  fullName: 'advancedSettings_read',
+  password: 'advancedSettings_read-password',
+  role: {
+    name: 'advancedSettings_read_role',
+    kibana: [
+      {
+        feature: {
+          advancedSettings: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 interface ApmUser extends User {
   username: 'apm_user';
 }
@@ -609,6 +649,8 @@ export type UserScenarios =
   | DualPrivilegesAll
   | DualPrivilegesRead
   | All
+  | AdvancedSettingsAll
+  | AdvancedSettingsRead
   | ApmUser
   | ApmUserAndAll
   | CanvasAll
@@ -642,9 +684,9 @@ export const UserScenarios: UserScenarios[] = [
   DualPrivilegesAll,
   DualPrivilegesRead,
   All,
+  AdvancedSettingsRead,
   ApmUser,
   ApmUserAndAll,
-  CanvasAll,
   CanvasRead,
   DashboardAll,
   DashboardRead,
