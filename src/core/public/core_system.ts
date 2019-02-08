@@ -27,7 +27,7 @@ import { InjectedMetadataParams, InjectedMetadataService } from './injected_meta
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
-import { UICapabilitiesService } from './ui_capabilities/ui_capabilities_service';
+import { UICapabilitiesService } from './ui_capabilities';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
