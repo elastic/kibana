@@ -26,6 +26,7 @@ import { KibanaServerVersion } from './version';
 export function KibanaServerProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
+  const lifecycle = getService('lifecycle');
 
   return new class KibanaServer {
     constructor() {
@@ -33,6 +34,10 @@ export function KibanaServerProvider({ getService }) {
       this.status = new KibanaServerStatus(url);
       this.version = new KibanaServerVersion(this.status);
       this.uiSettings = new KibanaServerUiSettings(url, log, config.get('uiSettings.defaults'));
+
+      lifecycle.on('beforeTests', async () => {
+        await this.uiSettings.update(config.get('uiSettings.defaults'));
+      });
     }
   };
 }
