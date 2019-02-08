@@ -113,7 +113,7 @@ export class EsArchiver {
    *
    *  @param {String} name
    *  @param {() => Promise<any>} handler
-   *  @return Promise<Stats>
+   *  @return Promise<void>
    */
   async edit(name, handler) {
     return await editAction({
