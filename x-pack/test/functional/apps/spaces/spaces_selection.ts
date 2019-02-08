@@ -79,7 +79,7 @@ export default function spaceSelectorFunctonalTests({ getService, getPageObjects
             pathname: `/s/${spaceId}${homePath}`,
           },
         });
-        await PageObjects.home.addSampleDataSet('flights');
+        await PageObjects.home.addSampleDataSet('logs');
       });
 
       after(async () => {
@@ -95,7 +95,7 @@ export default function spaceSelectorFunctonalTests({ getService, getPageObjects
             pathname: `/s/${spaceId}${homePath}`,
           },
         });
-        await PageObjects.home.removeSampleDataSet('flights');
+        await PageObjects.home.removeSampleDataSet('logs');
         await PageObjects.security.logout();
         await esArchiver.unload('spaces');
       });
@@ -112,7 +112,7 @@ export default function spaceSelectorFunctonalTests({ getService, getPageObjects
               pathname: `/s/${spaceId}${dashboardPath}`,
             },
           });
-          await expectDashboardRenders('[Flights] Global Flight Dashboard');
+          await expectDashboardRenders('[Logs] Web Traffic');
         });
       });
     });
