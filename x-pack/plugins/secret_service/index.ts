@@ -6,6 +6,8 @@
 
 import crypto from 'crypto';
 import { resolve } from 'path';
+// @ts-ignore
+import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
 import { SecretService } from './server';
 
@@ -55,9 +57,10 @@ export const secretService = (kibana: any) => {
         'secretType',
       ]);
 
+      const auditor = new AuditLogger(server, this.id);
       server.expose(
         'secretService',
-        new SecretService(so, 'secretType', keystore.get(this.configKey))
+        new SecretService(so, 'secretType', keystore.get(this.configKey), auditor)
       );
     },
   });
