@@ -1248,6 +1248,31 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.notCalled(onBeforeWrite);
     });
 
+    it('handles missing ids gracefully', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        docs: [{
+          _type: '_doc',
+          _id: 'config:good',
+          found: true,
+          ...mockVersionProps,
+          _source: { ...mockTimestampFields, config: { title: 'Test' } }
+        }, {
+          _type: '_doc',
+          _id: 'config:bad',
+          found: false
+        }]
+      }));
+
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
+        [{ id: 'good', type: 'config' }, { type: 'config' }]
+      );
+
+      expect(savedObjects[1]).toEqual({
+        type: 'config',
+        error: { statusCode: 404, message: 'Not found' }
+      });
+    });
+
     it('reports error on missed objects', async () => {
       callAdminCluster.returns(Promise.resolve({
         docs: [{
@@ -1706,12 +1731,17 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('unsupported types', () => {
+    it('should error when attempting to \'update\' an unsupported type', async () => {
+      await expect(savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' }))
+        .rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
+    });
+
     it('should error when attempting to \'get\' an unsupported type', async () => {
       await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Not Found'));
     });
 
     it('should return an error object when attempting to \'create\' an unsupported type', async () => {
-      await expect(savedObjectsRepository.create('hiddenType', { title: 'some title'}))
+      await expect(savedObjectsRepository.create('hiddenType', { title: 'some title' }))
         .rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
     });
 
@@ -1727,13 +1757,16 @@ describe('SavedObjectsRepository', () => {
             _source: {
               updated_at: mockTimestamp
             }
-          },
+          }, {
+            id: 'bad',
+            type: 'config',
+            found: false,
+          }
         ]
       });
       const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
-        { id: 'two', type: 'index-pattern' },
-        { id: 'three', type: 'globaltype' },
+        { id: 'bad', type: 'config' },
         { id: 'four', type: 'hiddenType' },
       ]);
       expect(savedObjects).toEqual([
@@ -1743,7 +1776,22 @@ describe('SavedObjectsRepository', () => {
           updated_at: mockTimestamp,
           references: [],
           version: 'WzEsMV0=',
-        },
+        }, {
+          error: {
+            message: 'Not found',
+            statusCode: 404,
+          },
+          id: 'bad',
+          type: 'config',
+        }, {
+          id: 'four',
+          error: {
+            error: 'Bad Request',
+            message: 'Unsupported saved object type: \'hiddenType\': Bad Request',
+            statusCode: 400,
+          },
+          type: 'hiddenType',
+        }
       ]);
     });
 
@@ -1826,7 +1874,7 @@ describe('SavedObjectsRepository', () => {
                 title: 'Test One'
               }
             }
-          },
+          }
         ]
       });
       const results = await savedObjectsRepository.bulkCreate([
@@ -1841,6 +1889,14 @@ describe('SavedObjectsRepository', () => {
           references: [],
           version: 'WzEsMV0=',
           updated_at: mockTimestamp,
+        }, {
+          error: {
+            error: 'Bad Request',
+            message: 'Unsupported saved object type: \'hiddenType\': Bad Request',
+            statusCode: 400,
+          },
+          id: 'two',
+          type: 'hiddenType',
         }],
       });
     });

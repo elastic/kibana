@@ -148,7 +148,19 @@ export class SavedObjectsRepository {
     } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
-    objects = objects.filter(object => this._isTypeAllowed(object.type));
+    const unsupportedTypes = [];
+    objects = objects.filter((object) => {
+      if(!this._isTypeAllowed(object.type)) {
+        unsupportedTypes.push({
+          id: object.id,
+          type: object.type,
+          error: errors.createUnsupportedTypeError(object.type).output.payload,
+        });
+        return false;
+      }
+
+      return true;
+    });
 
     const rawObjectsToCreate = objects.map((object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
@@ -225,7 +237,7 @@ export class SavedObjectsRepository {
           attributes,
           references,
         };
-      })
+      }).concat(unsupportedTypes)
     };
   }
 
@@ -433,18 +445,21 @@ export class SavedObjectsRepository {
       return { saved_objects: [] };
     }
 
+    const unsupportedTypes = [];
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.map(object => {
-          if(!this._isTypeAllowed(object.type)) {
-            return undefined;
+        docs: objects.reduce((acc, { type, id }) => {
+          if(this._isTypeAllowed(type)) {
+            acc.push({
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _type: this._type,
+            });
+          }else{
+            unsupportedTypes.push({ id, type, error: errors.createUnsupportedTypeError(type).output.payload });
           }
-          return {
-            _id: this._serializer.generateRawId(namespace, object.type, object.id),
-            _type: this._type,
-          };
-        })
+          return acc;
+        }, [])
       }
     });
 
@@ -470,7 +485,7 @@ export class SavedObjectsRepository {
           references: doc._source.references || [],
           migrationVersion: doc._source.migrationVersion,
         };
-      })
+      }).concat(unsupportedTypes)
     };
   }
 
@@ -532,7 +547,7 @@ export class SavedObjectsRepository {
    */
   async update(type, id, attributes, options = {}) {
     if(!this._isTypeAllowed(type)) {
-      throw Error(`Unsupported saved object type: ${type}`);
+      throw errors.createGenericNotFoundError(type, id);
     }
 
     const {
