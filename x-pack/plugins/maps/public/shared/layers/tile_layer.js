@@ -10,8 +10,6 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 
-const TMS_LOAD_TIMEOUT = 32000;
-
 export class TileLayer extends AbstractLayer {
 
   static type = "TILE";
@@ -32,38 +30,6 @@ export class TileLayer extends AbstractLayer {
     return tileLayerDescriptor;
   }
 
-  _tileLoadErrorTracker(map, url) {
-    let tileLoad;
-    map.on('dataloading', ({ tile }) => {
-      if (tile && tile.request) {
-        // If at least one tile loads, endpoint/resource is valid
-        tile.request.onloadend = ({ loaded }) => {
-          if (loaded) {
-            tileLoad = true;
-          }
-        };
-      }
-    });
-
-    return new Promise((resolve, reject) => {
-      let tileLoadTimer = null;
-
-      const clearChecks = () => {
-        clearTimeout(tileLoadTimer);
-        map.off('dataloading');
-      };
-
-      tileLoadTimer = setTimeout(() => {
-        if (!tileLoad) {
-          reject(new Error(`Tiles from "${url}" could not be loaded`));
-        } else {
-          resolve();
-        }
-        clearChecks();
-      }, TMS_LOAD_TIMEOUT);
-    });
-  }
-
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
@@ -79,41 +45,36 @@ export class TileLayer extends AbstractLayer {
     }
   }
 
-  async syncLayerWithMB(mbMap) {
+  syncLayerWithMB(mbMap) {
 
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this.getId() + '_raster';
 
-    if (source) {
-      // If source exists, just sync style
-      this._setTileLayerProperties(mbMap, mbLayerId);
-      return;
+    if (!source) {
+      const sourceDataRequest = this.getSourceDataRequest();
+      const url = sourceDataRequest.getData();
+      if (!url) {
+        return;
+      }
+
+      const sourceId = this.getId();
+      mbMap.addSource(sourceId, {
+        type: 'raster',
+        tiles: [url],
+        tileSize: 256,
+        scheme: 'xyz',
+      });
+
+      mbMap.addLayer({
+        id: mbLayerId,
+        type: 'raster',
+        source: sourceId,
+        minzoom: this._descriptor.minZoom,
+        maxzoom: this._descriptor.maxZoom,
+      });
     }
 
-    const sourceDataRquest = this.getSourceDataRequest();
-    const url = sourceDataRquest.getData();
-    if (!url) {
-      return;
-    }
-
-    const sourceId = this.getId();
-    mbMap.addSource(sourceId, {
-      type: 'raster',
-      tiles: [url],
-      tileSize: 256,
-      scheme: 'xyz',
-    });
-
-    mbMap.addLayer({
-      id: mbLayerId,
-      type: 'raster',
-      source: sourceId,
-      minzoom: this._descriptor.minZoom,
-      maxzoom: this._descriptor.maxZoom,
-    });
     this._setTileLayerProperties(mbMap, mbLayerId);
-
-    await this._tileLoadErrorTracker(mbMap, url);
   }
 
   _setTileLayerProperties(mbMap, mbLayerId) {
