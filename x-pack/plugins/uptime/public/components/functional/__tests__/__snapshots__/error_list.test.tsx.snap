@@ -102,6 +102,7 @@ exports[`ErrorList component renders the error list without errors 1`] = `
         }
       }
       responsive={true}
+      sorting={false}
     />
   </EuiPanel>
 </Fragment>

@@ -1281,6 +1281,7 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
         }
       }
       responsive={true}
+      sorting={false}
     />
   </EuiPanel>
 </Fragment>
