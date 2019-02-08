@@ -62,7 +62,10 @@ export const CreateIndexPatternPrompt = ({
           </EuiText>
           <EuiDescriptionList className="indexPatternListPrompt__descList">
             <EuiDescriptionListTitle>
-              Single data source
+              <FormattedMessage
+                id="kbn.management.indexPatternPrompt.exampleOneTitle"
+                defaultMessage="Single data source"
+              />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <FormattedMessage
@@ -70,9 +73,11 @@ export const CreateIndexPatternPrompt = ({
                 defaultMessage="Index a single data source named log-west-001 so you can build charts or query its contents fast."
               />
             </EuiDescriptionListDescription>
-
             <EuiDescriptionListTitle>
-              Multiple data sources
+              <FormattedMessage
+                id="kbn.management.indexPatternPrompt.exampleTwoTitle"
+                defaultMessage="Multiple data sources"
+              />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <FormattedMessage
@@ -81,9 +86,11 @@ export const CreateIndexPatternPrompt = ({
                   logs."
               />
             </EuiDescriptionListDescription>
-
             <EuiDescriptionListTitle>
-              Custom groupings
+              <FormattedMessage
+                id="kbn.management.indexPatternPrompt.exampleThreeTitle"
+                defaultMessage="Custom groupings"
+              />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <FormattedMessage
