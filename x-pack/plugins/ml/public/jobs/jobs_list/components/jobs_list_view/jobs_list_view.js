@@ -82,6 +82,10 @@ export class JobsListView extends Component {
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
 
+    // check to see if we need to open the start datafeed modal
+    // after the page has rendered. This will happen if the user
+    // has just created a job in the advanced wizard and selected to
+    // start the datafeed now.
     this.openAutoStartDatafeedModal();
   }
 
