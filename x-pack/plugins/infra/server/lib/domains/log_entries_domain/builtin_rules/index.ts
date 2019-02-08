@@ -13,6 +13,7 @@ import { filebeatLogstashRules } from './filebeat_logstash';
 import { filebeatMongodbRules } from './filebeat_mongodb';
 import { filebeatMySQLRules } from './filebeat_mysql';
 import { filebeatNginxRules } from './filebeat_nginx';
+import { filebeatOsqueryRules } from './filebeat_osquery';
 import { filebeatRedisRules } from './filebeat_redis';
 import { filebeatSystemRules } from './filebeat_system';
 
@@ -30,6 +31,7 @@ export const builtinRules = [
   ...filebeatIisRules,
   ...filebeatLogstashRules,
   ...filebeatMongodbRules,
+  ...filebeatOsqueryRules,
   ...genericRules,
   {
     when: {
