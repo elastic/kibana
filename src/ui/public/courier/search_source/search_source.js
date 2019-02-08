@@ -147,7 +147,8 @@ export function SearchSourceProvider(Promise, Private, config) {
           return disabled === undefined || disabled === false;
         },
         (filter, data) => {
-          return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, data.index);
+          const index = data.index || this.getField('index');
+          return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
         }
       ];
     }
