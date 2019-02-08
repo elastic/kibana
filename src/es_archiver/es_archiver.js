@@ -108,8 +108,8 @@ export class EsArchiver {
   }
 
   /**
-   *  Parse and reformat all of the archives. This is primarily helpful
-   *  for working on the esArchiver.
+   *  Extract the gzipped files in an archive, then call the handler. When it
+   *  resolves re-archive the gzipped files.
    *
    *  @param {String} name
    *  @param {() => Promise<any>} handler
