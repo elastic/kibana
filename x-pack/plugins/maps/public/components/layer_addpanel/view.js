@@ -55,7 +55,7 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const { layerLoading, temporaryLayers, nextAction } = this.props;
+    const { layerLoading, temporaryLayers, saveLayerShowSettings } = this.props;
     return (
       <EuiButton
         disabled={!temporaryLayers || layerLoading}
@@ -65,7 +65,7 @@ export class AddLayerPanel extends Component {
         onClick={() => {
           const layerId = this.layer.getId();
           this.layer = null;
-          return nextAction(layerId);
+          return saveLayerShowSettings(layerId);
         }}
         fill
       >

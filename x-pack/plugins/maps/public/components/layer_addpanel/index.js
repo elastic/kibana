@@ -14,6 +14,7 @@ import {
   removeLayer,
   clearTemporaryLayers,
   setSelectedLayer,
+  promoteTemporaryLayers,
 } from "../../actions/store_actions";
 import _ from 'lodash';
 
@@ -40,7 +41,8 @@ function mapDispatchToProps(dispatch) {
       dispatch(addLayer(layer.toLayerDescriptor()));
     },
     removeLayer: id => dispatch(removeLayer(id)),
-    nextAction: id => {
+    saveLayerShowSettings: id => {
+      dispatch(promoteTemporaryLayers());
       dispatch(setSelectedLayer(id));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
