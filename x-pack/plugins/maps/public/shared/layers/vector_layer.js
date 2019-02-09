@@ -476,7 +476,7 @@ export class VectorLayer extends AbstractLayer {
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
         type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
+        data: EMPTY_FEATURE_COLLECTION
       });
     }
   }

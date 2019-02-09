@@ -10,10 +10,9 @@ import {
   getLayerList,
   getLayerListRaw,
   getDataFilters,
-  getSelectedLayer,
   getSelectedLayerId,
   getMapReady,
-  getWaitingForMapReadyLayerListRaw,
+  getWaitingForMapReadyLayerListRaw
 } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
@@ -24,7 +23,6 @@ export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER'
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
-export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const MAP_READY = 'MAP_READY';
@@ -37,7 +35,6 @@ export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
-export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
@@ -415,8 +412,8 @@ export function updateLayerAlpha(id, alpha) {
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();
-    const layer = getSelectedLayer(state);
-    dispatch(removeLayer(layer.getId()));
+    const layerId = getSelectedLayerId(state);
+    dispatch(removeLayer(layerId));
   };
 }
 
@@ -511,11 +508,11 @@ export function updateLayerStyle(layerId, styleDescriptor, temporary = true) {
 
 export function updateLayerStyleForSelectedLayer(styleDescriptor, temporary = true) {
   return (dispatch, getState) => {
-    const selectedLayer = getSelectedLayer(getState());
-    if (!selectedLayer) {
+    const selectedLayerId = getSelectedLayerId(getState());
+    if (!selectedLayerId) {
       return;
     }
-    dispatch(updateLayerStyle(selectedLayer.getId(), styleDescriptor, temporary));
+    dispatch(updateLayerStyle(selectedLayerId, styleDescriptor, temporary));
   };
 }
 
