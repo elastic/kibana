@@ -170,12 +170,6 @@ export function updateLayerOrder(newLayerOrder) {
   };
 }
 
-export function promoteTemporaryStyles() {
-  return {
-    type: PROMOTE_TEMPORARY_STYLES
-  };
-}
-
 export function promoteTemporaryLayers() {
   return {
     type: PROMOTE_TEMPORARY_LAYERS
@@ -439,13 +433,6 @@ export function removeLayer(id) {
       type: REMOVE_LAYER,
       id
     });
-  };
-}
-
-export function setMeta(metaJson) {
-  return {
-    type: SET_META,
-    meta: metaJson
   };
 }
 

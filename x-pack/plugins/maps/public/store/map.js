@@ -23,7 +23,6 @@ import {
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
-  PROMOTE_TEMPORARY_STYLES,
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
@@ -261,12 +260,6 @@ export function map(state = INITIAL_STATE, action) {
       const styleLayerId = action.layerId;
       return updateLayerInList(state, styleLayerId, 'style',
         { ...action.style });
-    case PROMOTE_TEMPORARY_STYLES:
-      const stylePromoteIdx = findLayerIndex(state.layerList, state.selectedLayerId);
-      const styleToSet = {
-        ...state.layerList[stylePromoteIdx].style
-      };
-      return updateLayerInList(state, state.selectedLayerId, 'style', styleToSet);
     default:
       return state;
   }

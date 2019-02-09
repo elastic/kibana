@@ -8,7 +8,6 @@ import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
 import {
-  promoteTemporaryStyles,
   clearTemporaryLayers,
   setSelectedLayer,
   removeSelectedLayer,
@@ -34,7 +33,6 @@ const mapDispatchToProps = dispatch => {
     },
     saveLayerEdits: isNewLayer => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(promoteTemporaryStyles());
       if (isNewLayer) {
         dispatch(promoteTemporaryLayers());
       }
