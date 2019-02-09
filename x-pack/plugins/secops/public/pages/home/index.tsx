@@ -40,6 +40,8 @@ const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
 
+const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
+
 /** Returns true if we are running with the k7 design */
 const isK7Design = () => chrome.getUiSettingsClient().get('k7design');
 /** the global Kibana navigation at the top of every page */
@@ -66,6 +68,7 @@ export const HomePage = pure(() => (
               })}
               headerHeight={flyoutHeaderHeight}
               timelineId="timeline-1"
+              usersViewing={usersViewing}
             >
               <StatefulTimeline
                 flyoutHeaderHeight={flyoutHeaderHeight}
@@ -128,7 +131,7 @@ const Page = styled(EuiPage)`
 const PageHeader = styled(EuiPageHeader)`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   position: fixed;
-  width: calc(100% - 30px);
+  width: calc(100% - 75px);
   z-index: 1;
   padding: 6px 0px 6px 0px;
   margin-bottom: 0px;

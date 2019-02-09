@@ -8,14 +8,15 @@ import { ColumnHeader } from './column_header';
 import * as i18n from './translations';
 
 /** The default minimum width of a column */
-export const DEFAULT_COLUMN_MIN_WIDTH = 115;
+export const DEFAULT_COLUMN_MIN_WIDTH = 120;
 
-export const TIMESTAMP_COLUMN_MIN_WIDTH = 185;
+export const TIMESTAMP_COLUMN_MIN_WIDTH = 190;
 
 /** The default column headers */
 export const defaultHeaders: ColumnHeader[] = [
   {
     columnHeaderType: 'not-filtered',
+    disableTextWrap: true,
     id: 'timestamp',
     minWidth: TIMESTAMP_COLUMN_MIN_WIDTH,
     text: i18n.TIME,

@@ -6,8 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
-import { get } from 'lodash/fp';
+import { get, noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -158,7 +157,7 @@ describe('ColumnHeaders', () => {
           wrapper
             .find('[data-test-subj="data-driven-columns"]')
             .first()
-            .find('[data-test-subj="timeline-event-timestamp-tool-tip"]')
+            .find('[data-test-subj="localized-date-tool-tip"]')
             .exists()
         ).toEqual(true);
       });

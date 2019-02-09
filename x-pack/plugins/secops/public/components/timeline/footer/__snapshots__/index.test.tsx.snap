@@ -2,25 +2,34 @@
 
 exports[`Footer Timeline Component rendering it renders the default timeline footer 1`] = `
 <Fragment>
-  <styled.div
+  <Styled(EuiFlexGroup)
     data-test-subj="timeline-footer"
+    direction="column"
+    gutterSize="none"
     height={100}
+    justifyContent="spaceAround"
   >
-    <EuiFlexGroup
+    <Styled(EuiFlexGroup)
       alignItems="center"
-      component="div"
+      data-test-subj="footer-flex-group"
       direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
         component="div"
+        data-test-subj="event-count-container"
         grow={false}
       >
-        <styled.div
-          data-test-subj="timeline-event-count"
+        <EuiFlexGroup
+          alignItems="center"
+          component="div"
+          data-test-subj="events-count"
+          direction="row"
+          gutterSize="none"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
         >
           <pure(Component)
             closePopover={[Function]}
@@ -65,13 +74,15 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
             onClick={[Function]}
             serverSideEventCount={15546}
           />
-        </styled.div>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
+        data-test-subj="paging-control-container"
         grow={false}
       >
         <pure(Component)
+          data-test-subj="paging-control"
           hasNextPage={true}
           isLoading={false}
           loadMore={[Function]}
@@ -79,14 +90,20 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
+        data-test-subj="last-updated-container"
         grow={false}
       >
-        <LastUpdatedAt
-          short={false}
-          updatedAt={1546878704036}
-        />
+        <styled.div
+          compact={true}
+          data-test-subj="fixed-width-last-updated"
+        >
+          <LastUpdatedAt
+            compact={true}
+            updatedAt={1546878704036}
+          />
+        </styled.div>
       </EuiFlexItem>
-    </EuiFlexGroup>
-  </styled.div>
+    </Styled(EuiFlexGroup)>
+  </Styled(EuiFlexGroup)>
 </Fragment>
 `;

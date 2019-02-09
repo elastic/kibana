@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiTextArea, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -44,14 +44,6 @@ export const search = {
   },
 };
 
-const AddNotesContainer = styled.div`
-  align-items: flex-end;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 25px;
-  user-select: none;
-`;
-
 const TitleText = styled.h3`
   user-select: none;
 `;
@@ -67,27 +59,6 @@ export const NotesCount = pure<{
   </EuiTitle>
 ));
 
-const TextArea = styled(EuiTextArea)`
-  margin-bottom: 5px;
-`;
-
-/** An input for entering a new note  */
-export const NewNote = pure<{
-  note: string;
-  updateNewNote: UpdateInternalNewNote;
-}>(({ note, updateNewNote }) => (
-  <TextArea
-    autoFocus
-    aria-label={i18n.ADD_A_NOTE}
-    data-test-subj="add-a-note"
-    fullWidth={true}
-    onChange={e => updateNewNote(e.target.value)}
-    placeholder={i18n.ADD_A_NOTE}
-    spellCheck={true}
-    value={note}
-  />
-));
-
 /** Creates a new instance of a `note` */
 export const createNote = ({
   newNote,
@@ -100,7 +71,7 @@ export const createNote = ({
   id: getNewNoteId(),
   lastEdit: null,
   note: newNote.trim(),
-  user: 'admin', // TODO: get the logged-in Kibana user
+  user: 'elastic', // TODO: get the logged-in Kibana user
 });
 
 interface UpdateAndAssociateNodeParams {
@@ -123,48 +94,3 @@ export const updateAndAssociateNode = ({
   associateNote(note.id); // associate the note with the (opaque) thing
   updateNewNote(''); // clear the input
 };
-
-/** Displays an input for entering a new note, with an adjacent "Add" button */
-export const AddNote = pure<{
-  associateNote: AssociateNote;
-  getNewNoteId: GetNewNoteId;
-  newNote: string;
-  updateNewNote: UpdateInternalNewNote;
-  updateNote: UpdateNote;
-}>(({ associateNote, getNewNoteId, newNote, updateNewNote, updateNote }) => (
-  <AddNotesContainer>
-    <NewNote note={newNote} updateNewNote={updateNewNote} />
-    <EuiButton
-      data-test-subj="add-note"
-      isDisabled={newNote.trim().length < 1}
-      fill={true}
-      onClick={() =>
-        updateAndAssociateNode({
-          associateNote,
-          getNewNoteId,
-          newNote,
-          updateNewNote,
-          updateNote,
-        })
-      }
-    >
-      {i18n.ADD_NOTE}
-    </EuiButton>
-  </AddNotesContainer>
-));
-
-/**
- * An item rendered in the table
- */
-export interface Item {
-  created: Date;
-  user: string;
-  note: string;
-}
-
-export const getItems = (noteIds: string[], getNotesByIds: (noteIds: string[]) => Note[]): Item[] =>
-  getNotesByIds(noteIds).map(note => ({
-    created: note.created,
-    user: note.user,
-    note: note.note,
-  }));

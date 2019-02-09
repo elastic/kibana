@@ -39,6 +39,7 @@ interface OwnProps {
   flyoutHeight: number;
   headerHeight: number;
   timelineId: string;
+  usersViewing: string[];
 }
 
 interface DispatchProps {
@@ -77,6 +78,7 @@ export const FlyoutComponent = pure<Props>(
     show,
     showTimeline,
     timelineId,
+    usersViewing,
     width,
   }) => (
     <>
@@ -86,6 +88,7 @@ export const FlyoutComponent = pure<Props>(
           headerHeight={headerHeight}
           onClose={() => showTimeline!({ id: timelineId, show: false })}
           timelineId={timelineId}
+          usersViewing={usersViewing}
           width={width!}
         >
           {children}

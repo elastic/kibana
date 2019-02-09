@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "react-beautiful-dnd": "^10.0.1",
+    "react-markdown": "^4.0.6",
     "lodash": "^4.17.10",
     "memoize-one": "^5.0.0",
     "apollo-link-error": "^1.1.7"

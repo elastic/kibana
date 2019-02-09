@@ -6,30 +6,37 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DATE = i18n.translate('xpack.secops.notes.date', {
-  defaultMessage: 'Date',
+export const ADD_NOTE = i18n.translate('xpack.secops.notes.addNoteButtonLabel', {
+  defaultMessage: 'Add Note',
 });
 
-export const USER = i18n.translate('xpack.secops.notes.user', {
-  defaultMessage: 'User',
-});
-
-export const ADD_NOTE = i18n.translate('xpack.secops.notes.addNote', {
-  defaultMessage: 'Add note',
-});
-
-export const ADD_A_NOTE = i18n.translate('xpack.secops.notes.addANote', {
+export const ADD_A_NOTE = i18n.translate('xpack.secops.notes.addANotePlaceholder', {
   defaultMessage: 'Add a Note',
 });
 
-export const NOTE = i18n.translate('xpack.secops.notes.note', {
+export const ADDED_A_NOTE = i18n.translate('xpack.secops.notes.addedANoteLabel', {
+  defaultMessage: 'Added a Note',
+});
+
+export const NOTE = i18n.translate('xpack.secops.notes.noteTitle', {
   defaultMessage: 'Note',
 });
 
-export const SEARCH_PLACEHOLDER = i18n.translate('xpack.secops.notes.search.placeholder', {
-  defaultMessage: 'Filter by User or Note...',
+export const PREVIEW_MARKDOWN = i18n.translate('xpack.secops.notes.previewMarkdownTitle', {
+  defaultMessage: 'Preview (Markdown)',
 });
 
-export const COPY_TO_CLIPBOARD = i18n.translate('xpack.secops.notes.copyToClipboard', {
-  defaultMessage: 'Copy to clipboard',
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.secops.notes.search.FilterByUserOrNotePlaceholder',
+  {
+    defaultMessage: 'Filter by User or Note',
+  }
+);
+
+export const CANCEL = i18n.translate('xpack.secops.notes.cancelButtonLabel', {
+  defaultMessage: 'Cancel',
+});
+
+export const COPY_TO_CLIPBOARD = i18n.translate('xpack.secops.notes.copyToClipboardButtonLabel', {
+  defaultMessage: 'Copy to Clipboard',
 });

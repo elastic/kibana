@@ -9,9 +9,12 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { Ecs } from '../../../../graphql/types';
+import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
+
+const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('unknown_column_renderer', () => {
   let mockDatum: Ecs;
@@ -24,13 +27,21 @@ describe('unknown_column_renderer', () => {
   });
 
   test('should return an empty value with a made up column name that does not have a valid data value', () => {
-    const emptyColumn = unknownColumnRenderer.renderColumn('a made up column name', mockDatum);
+    const emptyColumn = unknownColumnRenderer.renderColumn(
+      'a made up column name',
+      mockDatum,
+      allFieldsInSchemaByName['a made up column name']
+    );
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value with a column name that has valid id value', () => {
-    const emptyColumn = unknownColumnRenderer.renderColumn('_id', mockDatum);
+    const emptyColumn = unknownColumnRenderer.renderColumn(
+      '_id',
+      mockDatum,
+      allFieldsInSchemaByName._id
+    );
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

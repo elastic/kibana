@@ -19,6 +19,7 @@ interface FlyoutPaneProps {
   headerHeight: number;
   onClose: () => void;
   timelineId: string;
+  usersViewing: string[];
   width: number;
 }
 
@@ -39,7 +40,7 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   }
   .timeline-flyout-body {
     overflow-y: hidden;
-    padding: 0 5px 0 8px;
+    padding: 0;
   }
 `;
 
@@ -56,7 +57,7 @@ const WrappedCloseButton = styled.div`
 `;
 
 export const FlyoutPane = pure<FlyoutPaneProps>(
-  ({ flyoutHeight, headerHeight, timelineId, onClose, children, width }) => (
+  ({ flyoutHeight, headerHeight, timelineId, onClose, children, usersViewing, width }) => (
     <EuiFlyoutContainer
       headerHeight={headerHeight}
       data-test-subj="euiFlyoutContainer"
@@ -83,7 +84,7 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
                 />
               </EuiToolTip>
             </WrappedCloseButton>
-            <FlyoutHeader timelineId={timelineId} />
+            <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
           </FlyoutHeaderContainer>
         </EuiFlyoutHeader>
         <EuiFlyoutBody data-test-subj="flyoutChildren" className="timeline-flyout-body">

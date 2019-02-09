@@ -54,14 +54,20 @@ const NoWrap = styled.div`
 export const Empty = pure(() => (
   <EmptyContainer className="timeline-drop-area" data-test-subj="empty">
     <NoWrap>
-      <Text color="subdued">{i18n.DROP_ANYTHING}</Text>
-      <BadgeHighlighted color="#d9d9d9">{i18n.HIGHLIGHTED}</BadgeHighlighted>
+      <Text color="subdued" size="s">
+        {i18n.DROP_ANYTHING}
+      </Text>
+      <BadgeHighlighted>{i18n.HIGHLIGHTED}</BadgeHighlighted>
     </NoWrap>
 
     <NoWrap>
-      <Text color="subdued">{i18n.HERE_TO_BUILD_AN}</Text>
+      <Text color="subdued" size="s">
+        {i18n.HERE_TO_BUILD_AN}
+      </Text>
       <AndOrBadge type="or" />
-      <Text color="subdued">{i18n.QUERY}</Text>
+      <Text color="subdued" size="s">
+        {i18n.QUERY}
+      </Text>
     </NoWrap>
   </EmptyContainer>
 ));

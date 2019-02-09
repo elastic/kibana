@@ -15,6 +15,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { SelectableText } from '../selectable_text';
 import { WithHoverActions } from '../with_hover_actions';
 import { getIconFromType } from './helpers';
 import * as i18n from './translations';
@@ -29,10 +30,6 @@ interface Item {
   value: JSX.Element;
   valueAsString: string;
 }
-
-const SelectableText = styled.span`
-  user-select: text;
-`;
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -53,7 +50,11 @@ export const columns = [
     sortable: false,
     truncateText: false,
     width: '30px',
-    render: (type: string) => <EuiIcon type={getIconFromType(type)} />,
+    render: (type: string) => (
+      <EuiToolTip content={type}>
+        <EuiIcon type={getIconFromType(type)} />
+      </EuiToolTip>
+    ),
   },
   {
     field: 'field',

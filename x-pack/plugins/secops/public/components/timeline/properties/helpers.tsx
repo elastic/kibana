@@ -30,6 +30,8 @@ import * as i18n from './translations';
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
+export const NOTES_PANEL_WIDTH = 1024;
+export const NOTES_PANEL_HEIGHT = 633;
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -183,9 +185,9 @@ const NotesButtonComponent = pure<NotesButtonProps>(
         ) : (
           <SmallNotesButton noteIds={noteIds} toggleShowNotes={toggleShowNotes} />
         )}
-        {showNotes ? (
+        {size === 'l' && showNotes ? (
           <EuiOverlayMask>
-            <EuiModal onClose={toggleShowNotes}>
+            <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
               <Notes
                 associateNote={associateNote}
                 getNotesByIds={getNotesByIds}

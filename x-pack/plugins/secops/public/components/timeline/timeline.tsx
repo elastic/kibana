@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiFlexGroup } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -42,9 +43,11 @@ const WrappedByAutoSizer = styled.div`
   width: auto;
 `; // required by AutoSizer
 
-const TimelineContainer = styled.div`
-  padding 0 5px 0 5px;
+const TimelineContainer = styled(EuiFlexGroup)`
   user-select: none;
+  overflow: hidden;
+  padding: 0 10px 0 12px;
+  width: 100%;
 `;
 
 interface Props {
@@ -120,7 +123,12 @@ export const Timeline = pure<Props>(
     return (
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { height: timelineHeaderHeight = 0, width = 0 } }) => (
-          <TimelineContainer data-test-subj="timeline">
+          <TimelineContainer
+            data-test-subj="timeline"
+            direction="column"
+            gutterSize="none"
+            justifyContent="center"
+          >
             <WrappedByAutoSizer innerRef={measureRef}>
               <TimelineHeader
                 id={id}

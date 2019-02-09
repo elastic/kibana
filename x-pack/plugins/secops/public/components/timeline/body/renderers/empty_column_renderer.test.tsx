@@ -10,8 +10,11 @@ import React from 'react';
 
 import { emptyColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
+const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('empty_column_renderer', () => {
   let mockDatum: Ecs;
@@ -43,7 +46,11 @@ describe('empty_column_renderer', () => {
 
   test('should return an empty value', () => {
     const missingSource = omit('source', mockDatum);
-    const emptyColumn = emptyColumnRenderer.renderColumn('source', missingSource);
+    const emptyColumn = emptyColumnRenderer.renderColumn(
+      'source',
+      missingSource,
+      allFieldsInSchemaByName.source
+    );
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

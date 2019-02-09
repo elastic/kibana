@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import * as i18n from './translations';
 
 interface LastUpdatedAtProps {
-  short?: boolean;
+  compact?: boolean;
   updatedAt: number;
 }
 
@@ -56,37 +56,25 @@ export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastU
   }
 
   public render() {
-    const { short = false } = this.props;
+    const { compact = false } = this.props;
     const prefix = ` ${i18n.UPDATED} `;
 
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        data-test-subj="last-updated-at-container"
-        direction="row"
-        gutterSize="none"
-        justifyContent="flexEnd"
+      <EuiToolTip
+        data-test-subj="timeline-stream-tool-tip"
+        content={
+          <>
+            <Updated date={this.state.date} prefix={prefix} updatedAt={this.props.updatedAt} />
+          </>
+        }
       >
-        <EuiFlexItem grow={false}>
+        <EuiText size="s">
           <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiToolTip
-            data-test-subj="timeline-stream-tool-tip"
-            content={
-              <>
-                <Updated date={this.state.date} prefix={prefix} updatedAt={this.props.updatedAt} />
-              </>
-            }
-          >
-            <Updated
-              date={this.state.date}
-              prefix={!short ? prefix : ''}
-              updatedAt={this.props.updatedAt}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          {!compact ? (
+            <Updated date={this.state.date} prefix={prefix} updatedAt={this.props.updatedAt} />
+          ) : null}
+        </EuiText>
+      </EuiToolTip>
     );
   }
 }

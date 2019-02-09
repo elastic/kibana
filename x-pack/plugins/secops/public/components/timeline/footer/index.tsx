@@ -25,9 +25,39 @@ import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 
-const PagingContainer = styled.div`
-  padding: 0 10px 0 10px;
+const FixedWidthLastUpdated = styled.div<{ compact: boolean }>`
+  width: ${({ compact }) => (!compact ? 200 : 25)}px;
+  overflow: hidden;
+  text-align: end;
 `;
+
+const FooterContainer = styled(EuiFlexGroup)<{ height: number }>`
+  height: ${({ height }) => height}px;
+`;
+
+const FooterFlexGroup = styled(EuiFlexGroup)`
+  height: 35px;
+  width: 100%;
+`;
+
+const LoadingPanelContainer = styled.div`
+  padding-top: 3px;
+`;
+
+const PopoverRowItems = styled(EuiPopover)`
+  .euiButtonEmpty__content {
+    padding: 0px 0px;
+  }
+`;
+
+export const ServerSideEventCount = styled.div`
+  margin: 0 5px 0 5px;
+`;
+
+/** The height of the footer, exported for use in height calculations */
+export const footerHeight = 40; // px
+
+export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface FooterProps {
   dataProviders: DataProvider[];
@@ -51,13 +81,6 @@ interface FooterState {
   paginationLoading: boolean;
   updatedAt: number | null;
 }
-
-/** The height of the footer, exported for use in height calculations */
-export const footerHeight = 55; // px
-
-export const ServerSideEventCount = styled.div`
-  margin: 0 5px 0 5px;
-`;
 
 /** Displays the server-side count of events */
 export const EventsCount = pure<{
@@ -109,43 +132,17 @@ export const PagingControl = pure<{
 }>(({ hasNextPage, isLoading, loadMore }) => (
   <>
     {hasNextPage && (
-      <PagingContainer>
-        <EuiButton
-          data-test-subj="TimelineMoreButton"
-          isLoading={isLoading}
-          onClick={loadMore}
-          size="s"
-        >
-          {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
-        </EuiButton>
-      </PagingContainer>
+      <EuiButton
+        data-test-subj="TimelineMoreButton"
+        isLoading={isLoading}
+        onClick={loadMore}
+        size="s"
+      >
+        {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
+      </EuiButton>
     )}
   </>
 ));
-
-export const shortLastUpdated = (width: number): boolean => width < 500;
-
-const SpinnerAndEventCount = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const FooterContainer = styled.div<{ height: number }>`
-  height: ${({ height }) => height}px;
-  max-height: ${({ height }) => height}px;
-  overflow: hidden;
-  padding-top: 4px;
-  text-overflow: ellipsis;
-  user-select: none;
-  white-space: nowrap;
-`;
-
-const PopoverRowItems = styled(EuiPopover)`
-  .euiButtonEmpty__content {
-    padding: 0px 0px;
-  }
-`;
 
 /** Renders a loading indicator and paging controls */
 export class Footer extends React.PureComponent<FooterProps, FooterState> {
@@ -191,7 +188,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
 
     if (isLoading && !this.state.paginationLoading) {
       return (
-        <>
+        <LoadingPanelContainer>
           <LoadingPanel
             data-test-subj="LoadingPanelTimeline"
             height="35px"
@@ -199,7 +196,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             text={`${i18n.LOADING_TIMELINE_DATA}...`}
             width="100%"
           />
-        </>
+        </LoadingPanelContainer>
       );
     }
 
@@ -220,15 +217,27 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
     return (
       <>
         {dataProviders.length !== 0 && (
-          <FooterContainer height={height} data-test-subj="timeline-footer">
-            <EuiFlexGroup
-              gutterSize="none"
+          <FooterContainer
+            data-test-subj="timeline-footer"
+            direction="column"
+            height={height}
+            gutterSize="none"
+            justifyContent="spaceAround"
+          >
+            <FooterFlexGroup
               alignItems="center"
-              justifyContent="spaceBetween"
+              data-test-subj="footer-flex-group"
               direction="row"
+              gutterSize="none"
+              justifyContent="spaceBetween"
             >
-              <EuiFlexItem grow={false}>
-                <SpinnerAndEventCount data-test-subj="timeline-event-count">
+              <EuiFlexItem data-test-subj="event-count-container" grow={false}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  data-test-subj="events-count"
+                  direction="row"
+                  gutterSize="none"
+                >
                   <EventsCount
                     closePopover={this.closePopover}
                     isOpen={this.state.isPopoverOpen}
@@ -237,22 +246,30 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                     onClick={this.onButtonClick}
                     serverSideEventCount={serverSideEventCount}
                   />
-                </SpinnerAndEventCount>
+                </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+
+              <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
                 <PagingControl
+                  data-test-subj="paging-control"
                   hasNextPage={hasNextPage}
                   isLoading={isLoading}
                   loadMore={this.loadMore}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LastUpdatedAt
-                  updatedAt={this.state.updatedAt || getUpdatedAt()}
-                  short={shortLastUpdated(width)}
-                />
+
+              <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
+                <FixedWidthLastUpdated
+                  data-test-subj="fixed-width-last-updated"
+                  compact={isCompactFooter(width)}
+                >
+                  <LastUpdatedAt
+                    updatedAt={this.state.updatedAt || getUpdatedAt()}
+                    compact={isCompactFooter(width)}
+                  />
+                </FixedWidthLastUpdated>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </FooterFlexGroup>
           </FooterContainer>
         )}
       </>
