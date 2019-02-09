@@ -46,6 +46,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       const embeddableRows = await addPanel.findAllByClassName('euiLink');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
+        log.debug(`added ${await embeddableRows[i].getVisibleText()}`);
+        await PageObjects.common.sleep(100);
       }
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }

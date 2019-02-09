@@ -28,6 +28,7 @@ import expect from 'expect.js';
  */
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const find = getService('find');
   const browser = getService('browser');
   const pieChart = getService('pieChart');
@@ -115,7 +116,41 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(27);
+      log.debug(`---------------------------- panel count = ${panelCount}`);
+      const panelData = await PageObjects.dashboard.getPanelSharedItemData();
+      log.debug(`---------------------------- panelData.length = ${panelData.length}`);
+      const panelTitles = panelData.map(x => x.title);
+      log.debug(panelTitles);
+      // we've seen failures where we only find 26 of 27 expected panels with data-render-complete="true"
+      // and we've also seen failures where we only found 26 panels.  It's been hard
+      // to debug so let's just compare the whole set and we'll get more specific error logging
+      expect(panelTitles).to.eql([ 'Rendering Test: pie',
+        'Rendering Test: metric',
+        'Rendering Test: heatmap',
+        'Rendering Test: guage',
+        'Rendering Test: timelion',
+        'Rendering Test: markdown',
+        'Rendering Test: vega',
+        'Rendering Test: goal',
+        'Rendering Test: datatable',
+        'Rendering Test: bar',
+        'Rendering Test: tag cloud',
+        'Rendering Test: region map',
+        'Rendering Test: tsvb-guage',
+        'Rendering Test: input control',
+        'Rendering Test: tsvb-table',
+        'Rendering Test: tsvb-markdown',
+        'Rendering Test: tsvb-topn',
+        'Rendering Test: tsvb-metric',
+        'Rendering Test: tsvb-ts',
+        'Rendering Test: geo map',
+        'Rendering Test: input control parent',
+        'Rendering Test: animal sounds pie',
+        'Rendering Test: area with not filter',
+        'Rendering Test: scripted filter and query',
+        'Rendering Test: animal weights linked to search',
+        'Rendering Test: non timebased line chart - dog data - with filter',
+        'Filter Bytes Test: vega' ]);
     });
 
     it('adding saved searches', async () => {
@@ -124,6 +159,39 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
+      const panelData = await PageObjects.dashboard.getPanelSharedItemData();
+      const panelTitles = panelData.map(x => x.title);
+      console.log(panelTitles);
+
+      expect(panelTitles).to.eql([ 'Rendering Test: pie',
+        'Rendering Test: metric',
+        'Rendering Test: heatmap',
+        'Rendering Test: guage',
+        'Rendering Test: timelion',
+        'Rendering Test: markdown',
+        'Rendering Test: vega',
+        'Rendering Test: goal',
+        'Rendering Test: datatable',
+        'Rendering Test: bar',
+        'Rendering Test: tag cloud',
+        'Rendering Test: region map',
+        'Rendering Test: tsvb-guage',
+        'Rendering Test: input control',
+        'Rendering Test: tsvb-table',
+        'Rendering Test: tsvb-markdown',
+        'Rendering Test: tsvb-topn',
+        'Rendering Test: tsvb-metric',
+        'Rendering Test: tsvb-ts',
+        'Rendering Test: geo map',
+        'Rendering Test: input control parent',
+        'Rendering Test: animal sounds pie',
+        'Rendering Test: area with not filter',
+        'Rendering Test: scripted filter and query',
+        'Rendering Test: animal weights linked to search',
+        'Rendering Test: non timebased line chart - dog data - with filter',
+        'Filter Bytes Test: vega',
+        'Rendering Test: saved search' ]);
+
       expect(panelCount).to.be(28);
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
