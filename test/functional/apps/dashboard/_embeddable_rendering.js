@@ -90,7 +90,9 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+
+  // FLAKY: https://github.com/elastic/kibana/issues/28818
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
 
