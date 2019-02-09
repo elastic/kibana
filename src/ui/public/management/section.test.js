@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock('ui/chrome', () => ({
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {
-          kibana: {
-            sampleFeature1: true,
-            sampleFeature2: false,
-          }
-        }
-      };
+jest.mock('ui/capabilities', () => ({
+  uiCapabilities: {
+    navLinks: {},
+    management: {
+      kibana: {
+        sampleFeature1: true,
+        sampleFeature2: false,
+      }
     }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
   }
 }));
 

@@ -16,21 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock('ui/chrome', () => ({
-  getInjected: key => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {
-          item1: true,
-          item2: false,
-          item3: true,
-        },
-      };
-    }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
-  },
+jest.mock('ui/capabilities', () => ({
+  uiCapabilities: {
+    navLinks: {},
+    management: {},
+    catalogue: {
+      item1: true,
+      item2: false,
+      item3: true,
+    },
+  }
 }));
 import { FeatureCatalogueCategory, FeatureCatalogueRegistryProvider } from './feature_catalogue';
 
