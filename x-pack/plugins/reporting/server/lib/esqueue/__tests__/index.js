@@ -36,27 +36,11 @@ describe('Esqueue class', function () {
       const init = () => new Esqueue();
       expect(init).to.throwException(/must.+specify.+index/i);
     });
-
-    it('should throw with an invalid host', function () {
-      const init = () => new Esqueue('esqueue', {
-        client: { host: 'nope://nope' }
-      });
-
-      expect(init).to.throwException(/invalid.+protocol/i);
-    });
-
-    it('should throw with invalid hosts', function () {
-      const init = () => new Esqueue('esqueue', {
-        client: { hosts: [{ host: 'localhost', protocol: 'nope' }] }
-      });
-
-      expect(init).to.throwException(/invalid.+protocol/i);
-    });
   });
 
   describe('Queue construction', function () {
     it('should ping the ES server', function () {
-      const pingSpy = sinon.spy(client, 'ping');
+      const pingSpy = sinon.spy(client, 'callWithInternalUser').withArgs('ping');
       new Esqueue('esqueue', { client });
       sinon.assert.calledOnce(pingSpy);
     });

@@ -18,7 +18,7 @@ describe('Create Index', function () {
 
     beforeEach(function () {
       client = new ClientMock();
-      createSpy = sinon.spy(client.indices, 'create');
+      createSpy = sinon.spy(client, 'callWithInternalUser').withArgs('indices.create');
     });
 
     it('should return true', function () {
@@ -37,7 +37,7 @@ describe('Create Index', function () {
 
       return result
         .then(function () {
-          const payload = createSpy.getCall(0).args[0];
+          const payload = createSpy.getCall(0).args[1];
           sinon.assert.callCount(createSpy, 1);
           expect(payload).to.have.property('index', indexName);
           expect(payload).to.have.property('body');
@@ -57,7 +57,7 @@ describe('Create Index', function () {
 
       return result
         .then(function () {
-          const payload = createSpy.getCall(0).args[0];
+          const payload = createSpy.getCall(0).args[1];
           sinon.assert.callCount(createSpy, 1);
           expect(payload).to.have.property('index', indexName);
           expect(payload).to.have.property('body');
@@ -83,7 +83,7 @@ describe('Create Index', function () {
 
       return result
         .then(function () {
-          const payload = createSpy.getCall(0).args[0];
+          const payload = createSpy.getCall(0).args[1];
           sinon.assert.callCount(createSpy, 1);
           expect(payload).to.have.property('index', indexName);
           expect(payload).to.have.property('body');
@@ -102,8 +102,10 @@ describe('Create Index', function () {
 
     beforeEach(function () {
       client = new ClientMock();
-      sinon.stub(client.indices, 'exists').callsFake(() => Promise.resolve(true));
-      createSpy = sinon.spy(client.indices, 'create');
+      sinon.stub(client, 'callWithInternalUser')
+        .withArgs('indices.exists')
+        .callsFake(() => Promise.resolve(true));
+      createSpy = client.callWithInternalUser.withArgs('indices.create');
     });
 
     it('should return true', function () {
