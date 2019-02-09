@@ -6,7 +6,7 @@
 
 
 export function copyPersistentState(input) {
-  if (typeof input !== 'object' && input !== null) {//primitive
+  if (typeof input !== 'object' || input === null) {//primitive
     return input;
   }
   const copyInput = Array.isArray(input) ? [] : {};
