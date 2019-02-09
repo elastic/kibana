@@ -70,7 +70,7 @@ export default function (kibana) {
         return {
           uiCapabilities: {
             timelion: {
-              showWriteControls: true,
+              save: true,
             }
           }
         };

@@ -98,7 +98,7 @@ new CoreSystem({
           showWriteControls: true
         },
         timelion: {
-          showWriteControls: true
+          save: true
         },
       }
     },

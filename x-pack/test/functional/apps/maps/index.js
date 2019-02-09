@@ -36,5 +36,7 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./es_geo_grid_source'));
     loadTestFile(require.resolve('./joins'));
     loadTestFile(require.resolve('./layer_errors'));
+    loadTestFile(require.resolve('./feature_controls/maps_security'));
+    loadTestFile(require.resolve('./feature_controls/maps_spaces'));
   });
 }

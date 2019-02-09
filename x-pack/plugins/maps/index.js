@@ -81,14 +81,14 @@ export function maps(kibana) {
           all: {
             savedObject: {
               all: ['map'],
-              read: ['config']
+              read: ['config', 'index-pattern']
             },
-            ui: [],
+            ui: ['save'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'config']
+              read: ['map', 'config', 'index-pattern']
             },
             ui: [],
           },
