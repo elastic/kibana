@@ -88,6 +88,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     };
   }
 
+  public componentWillReceiveProps(nextProps: Props) {
+    if (this.props.importLoading && !nextProps.importLoading) {
+      this.closeModal();
+    }
+  }
+
   public closeModal = () => {
     this.setState({ showImportProjectModal: false });
   };
@@ -141,7 +147,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton onClick={this.closeModal}>Cancel</EuiButton>
-            <EuiButton fill onClick={this.submitImportProject}>
+            <EuiButton fill onClick={this.submitImportProject} disabled={this.props.importLoading}>
               Import Project
             </EuiButton>
           </EuiModalFooter>

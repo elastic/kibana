@@ -12791,7 +12791,7 @@ javascript-typescript-langserver@^2.11.2:
     rxjs "^5.5.0"
     semaphore-async-await "^1.5.1"
     string-similarity "^2.0.0"
-    typescript "~3.0.3"
+    typescript "~3.1.1"
     vscode-jsonrpc "^4.0.0"
     vscode-languageserver "^5.0.0"
     vscode-languageserver-types "^3.0.3"
