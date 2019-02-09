@@ -318,7 +318,7 @@ function VisEditor(
       $scope.indexPattern = vis.indexPattern;
     } else {
       indexPatterns.getDefault().then(defaultIndexPattern => {
-        $scope.$evalAsync(() => $scope.indexPattern = defaultIndexPattern);
+        $scope.indexPattern = defaultIndexPattern;
       });
     }
 
