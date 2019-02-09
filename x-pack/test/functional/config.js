@@ -161,6 +161,7 @@ export default async function ({ readConfigFile }) {
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.xpack_main.telemetry.enabled=false',
+        '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
     },
