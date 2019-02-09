@@ -28,10 +28,10 @@ export const kibanaTable = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.table.help', {
+  help: i18n.translate('interpreter.functions.table.help', {
     defaultMessage: 'Table visualization'
   }),
   args: {
@@ -50,10 +50,8 @@ export const kibanaTable = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: 'table',
-          params: visConfigParams,
-        },
+        visType: 'table',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

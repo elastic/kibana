@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
+/**
+ * The LegacyResponseHandler is not registered as a response handler and can't be used
+ * as such anymore. Since the function itself is still used as a utility in the table
+ * function and the vislib response handler, we'll keep it for now.
+ * As soon as we have a new table implementation (https://github.com/elastic/kibana/issues/16639)
+ * we should move this over into or close to the vislib response handler as a pure utility
+ * function.
+ */
 
 const LegacyResponseHandlerProvider = function () {
 
@@ -76,7 +83,5 @@ const LegacyResponseHandlerProvider = function () {
     }
   };
 };
-
-VisResponseHandlersRegistryProvider.register(LegacyResponseHandlerProvider);
 
 export { LegacyResponseHandlerProvider };

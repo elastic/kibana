@@ -70,6 +70,7 @@ export default function ({ getService }) {
               {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
                 field_security: {
                   grant: ['*'],
                   except: ['geo.*']
@@ -154,6 +155,7 @@ export default function ({ getService }) {
                   names: ['logstash-*'],
                   privileges: ['read', 'view_index_metadata'],
                   query: `{ "match": { "geo.src": "CN" } }`,
+                  allow_restricted_indices: true,
                 },
               ],
               run_as: ['watcher_user'],
@@ -188,6 +190,7 @@ export default function ({ getService }) {
               {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: true,
                 field_security: {
                   grant: ['*'],
                   except: ['geo.*']

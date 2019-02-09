@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 
 import {
+  CanvasPageProvider,
   SecurityPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
@@ -22,6 +23,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  UptimePageProvider,
 } from './page_objects';
 
 import {
@@ -51,6 +53,8 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
+  UserMenuProvider,
+  UptimeProvider,
 } from './services';
 
 import {
@@ -74,19 +78,24 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/advanced_settings'),
       resolve(__dirname, './apps/canvas'),
       resolve(__dirname, './apps/graph'),
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
+      resolve(__dirname, './apps/dashboard'),
       resolve(__dirname, './apps/dashboard_mode'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/gis'),
+      resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/uptime')
     ],
 
     // define the name and providers for services that should be
@@ -123,12 +132,15 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerProvider,
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
+      userMenu: UserMenuProvider,
+      uptime: UptimeProvider,
     },
 
     // just like services, PageObjects are defined as a map of
     // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
+      canvas: CanvasPageProvider,
       security: SecurityPageProvider,
       accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,
@@ -139,9 +151,10 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
-      gis: GisPageProvider,
+      maps: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
+      uptime: UptimePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -183,8 +196,8 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/logstash/pipelines',
       },
-      gis: {
-        pathname: '/app/gis',
+      maps: {
+        pathname: '/app/maps',
       },
       graph: {
         pathname: '/app/graph',
@@ -203,6 +216,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      uptime: {
+        pathname: '/app/uptime',
+      }
     },
 
     // choose where esArchiver should load archives from

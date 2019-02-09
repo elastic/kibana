@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPopover,
+  EuiPopoverProps,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -54,8 +55,7 @@ export class CustomizeSpace extends Component<Props, State> {
       defaultMessage: 'Customize your space',
     });
 
-    // TODO: awaiting https://github.com/elastic/eui/pull/1410 to land in next version of EUI for types
-    const extraPopoverProps: any = {
+    const extraPopoverProps: Partial<EuiPopoverProps> = {
       initialFocus: 'input[name="spaceInitials"]',
     };
 

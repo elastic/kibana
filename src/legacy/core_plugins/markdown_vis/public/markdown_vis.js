@@ -54,6 +54,7 @@ function MarkdownVisProvider(Private, i18n) {
     },
     options: {
       showTimePicker: false,
+      showFilterBar: false,
     },
     requestHandler: 'none',
     responseHandler: 'none',

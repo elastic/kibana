@@ -18,7 +18,6 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import classnames from 'classnames';
 import React from 'react';
 import { VisType } from 'ui/vis';
 
@@ -30,15 +29,9 @@ interface VisTypeIconProps {
  * This renders the icon for a specific visualization type.
  * This currently checks the following:
  * - If visType.image is set, use that as the `src` of an image
- * - If legacyIcon is set, use that as a classname for a span with kuiIcon (to be removed in 7.0)
  * - Otherwise use the visType.icon as an EuiIcon or the 'empty' icon if that's not set
  */
 export const VisTypeIcon = ({ visType }: VisTypeIconProps) => {
-  const legacyIconClass = classnames(
-    'kuiIcon',
-    'visNewVisDialog__typeLegacyIcon',
-    visType.legacyIcon
-  );
   return (
     <React.Fragment>
       {visType.image && (
@@ -50,8 +43,7 @@ export const VisTypeIcon = ({ visType }: VisTypeIconProps) => {
           className="visNewVisDialog__typeImage"
         />
       )}
-      {!visType.image && visType.legacyIcon && <span className={legacyIconClass} />}
-      {!visType.image && !visType.legacyIcon && (
+      {!visType.image && (
         <EuiIcon type={visType.icon || 'empty'} size="l" color="secondary" aria-hidden="true" />
       )}
     </React.Fragment>

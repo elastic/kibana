@@ -35,7 +35,7 @@ export const TranspileScssTask = {
 
     try {
       const bundles = await buildAll(uiExports.styleSheetPaths, log, build.resolvePath('built_assets/css'));
-      bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.source}`));
+      bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.sourcePath} (theme=${bundle.theme})`));
     } catch (error) {
       const { message, line, file } = error;
       throw new Error(`${message} on line ${line} of ${file}`);

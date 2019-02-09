@@ -24,14 +24,12 @@ exports[`it renders without blowing up 1`] = `
         textTransform="none"
       >
         <h3>
-          <React.Fragment>
-            <EuiIcon
-              className="collapsiblePanel__logo"
-              size="xl"
-              type="logoElasticsearch"
-            />
-             
-          </React.Fragment>
+          <EuiIcon
+            className="collapsiblePanel__logo"
+            size="xl"
+            type="logoElasticsearch"
+          />
+           
           Elasticsearch
         </h3>
       </EuiTitle>
@@ -47,17 +45,15 @@ exports[`it renders without blowing up 1`] = `
         onClick={[Function]}
         type="button"
       >
-        hide desc
+        hide
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <React.Fragment>
-    <EuiSpacer
-      size="l"
-    />
-    <p>
-      child
-    </p>
-  </React.Fragment>
+  <EuiSpacer
+    size="l"
+  />
+  <p>
+    child
+  </p>
 </EuiPanel>
 `;

@@ -26,10 +26,10 @@ export const vislib = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table', 'null'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.vislib.help', {
+  help: i18n.translate('interpreter.functions.vislib.help', {
     defaultMessage: 'Vislib visualization'
   }),
   args: {
@@ -51,10 +51,8 @@ export const vislib = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams,
-        },
+        visType: args.type,
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

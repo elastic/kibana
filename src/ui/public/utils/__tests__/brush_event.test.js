@@ -25,7 +25,7 @@ jest.mock('ui/chrome',
         get: (key) => {
           switch (key) {
             case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
+              return { from: 'now-15m', to: 'now' };
             case 'timepicker:refreshIntervalDefaults':
               return { display: 'Off', pause: false, value: 0 };
             default:
@@ -52,6 +52,12 @@ describe('brushEvent', () => {
   };
 
   const baseEvent = {
+    aggConfigs: [{
+      params: {},
+      getIndexPattern: () => ({
+        timeFieldName: 'time',
+      })
+    }],
     data: {
       fieldFormatter: _.constant({}),
       series: [
@@ -64,12 +70,6 @@ describe('brushEvent', () => {
                   columns: [
                     {
                       id: '1',
-                      aggConfig: {
-                        params: {},
-                        getIndexPattern: () => ({
-                          timeFieldName: 'time',
-                        })
-                      }
                     },
                   ]
                 }
@@ -110,7 +110,7 @@ describe('brushEvent', () => {
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = dateField;
+        dateEvent.aggConfigs[0].params.field = dateField;
         dateEvent.data.ordered = { date: true };
       });
 
@@ -126,8 +126,7 @@ describe('brushEvent', () => {
         const event = _.cloneDeep(dateEvent);
         event.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
         onBrushEvent(event, $state);
-        const { mode, from, to } = timefilter.getTime();
-        expect(mode).to.be('absolute');
+        const { from, to } = timefilter.getTime();
         // Set to a baseline timezone for comparison.
         expect(from).to.be(new Date(JAN_01_2014).toISOString());
         // Set to a baseline timezone for comparison.
@@ -144,7 +143,7 @@ describe('brushEvent', () => {
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = dateField;
+        dateEvent.aggConfigs[0].params.field = dateField;
         dateEvent.data.ordered = { date: true };
       });
 
@@ -200,7 +199,7 @@ describe('brushEvent', () => {
 
     beforeEach(() => {
       numberEvent = _.cloneDeep(baseEvent);
-      numberEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = numberField;
+      numberEvent.aggConfigs[0].params.field = numberField;
       numberEvent.data.ordered = { date: false };
     });
 

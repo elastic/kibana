@@ -27,7 +27,6 @@ export const WorkpadHeader = ({
   isWriteable,
   canUserWrite,
   toggleWriteable,
-  hasAssets,
   addElement,
   setShowElementModal,
   showElementModal,
@@ -115,17 +114,16 @@ export const WorkpadHeader = ({
         {isWriteable ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              {hasAssets && (
-                <EuiFlexItem grow={false}>
-                  <AssetManager />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <AssetManager />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
                   size="s"
                   iconType="vector"
                   onClick={() => setShowElementModal(true)}
+                  data-test-subj="add-element-button"
                 >
                   Add element
                 </EuiButton>
@@ -141,7 +139,6 @@ export const WorkpadHeader = ({
 WorkpadHeader.propTypes = {
   isWriteable: PropTypes.bool,
   toggleWriteable: PropTypes.func,
-  hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,
   showElementModal: PropTypes.bool,
   setShowElementModal: PropTypes.func,

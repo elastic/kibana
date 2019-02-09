@@ -24,14 +24,12 @@ exports[`it renders without blowing up 1`] = `
         textTransform="none"
       >
         <h2>
-          <React.Fragment>
-            <EuiIcon
-              className="collapsiblePanel__logo"
-              size="xl"
-              type="logoElasticsearch"
-            />
-             
-          </React.Fragment>
+          <EuiIcon
+            className="collapsiblePanel__logo"
+            size="xl"
+            type="logoElasticsearch"
+          />
+           
           Elasticsearch
         </h2>
       </EuiTitle>
@@ -53,13 +51,11 @@ exports[`it renders without blowing up 1`] = `
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <React.Fragment>
-    <EuiSpacer
-      size="l"
-    />
-    <p>
-      child
-    </p>
-  </React.Fragment>
+  <EuiSpacer
+    size="l"
+  />
+  <p>
+    child
+  </p>
 </EuiPanel>
 `;

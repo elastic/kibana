@@ -21,9 +21,10 @@ import {
 } from './server/routes/api/v1';
 import {
   CONFIG_TELEMETRY,
-  CONFIG_TELEMETRY_DESC,
+  getConfigTelemetryDesc,
 } from './common/constants';
 import mappings from './mappings.json';
+import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { registerOssFeatures } from './server/lib/register_oss_features';
@@ -34,15 +35,7 @@ import { registerOssFeatures } from './server/lib/register_oss_features';
  * @param {Object} config Kibana configuration object.
  */
 function isTelemetryEnabled(config) {
-  const enabled = config.get('xpack.xpack_main.telemetry.enabled');
-
-  // Remove deprecated 'report_stats' in 7.0
-  if (enabled) {
-    // if xpack.monitoring.enabled is false, then report_stats cannot be defined
-    return !config.get('xpack.monitoring.enabled') || config.get('xpack.monitoring.report_stats');
-  }
-
-  return enabled;
+  return config.get('xpack.xpack_main.telemetry.enabled');
 }
 
 export const xpackMain = (kibana) => {
@@ -71,15 +64,22 @@ export const xpackMain = (kibana) => {
       managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
-          name: 'Telemetry opt-in',
-          description: CONFIG_TELEMETRY_DESC,
+          name: i18n.translate('xpack.main.telemetry.telemetryConfigTitle', {
+            defaultMessage: 'Telemetry opt-in'
+          }),
+          description: getConfigTelemetryDesc(),
           value: false,
           readonly: true,
         },
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: 'Admin email',
+          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
+            defaultMessage: 'Admin email'
+          }),
           // TODO: change the description when email address is used for more things?
-          description: `Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.`,
+          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
+            defaultMessage:
+              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
+          }),
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
           value: null
         }

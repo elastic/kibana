@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { UICapabilities } from 'ui/capabilities';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
@@ -17,6 +18,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
+        const capabilities: UICapabilities = uiCapabilities.value as UICapabilities;
         switch (scenario.id) {
           case 'everything_space':
           case 'apm_disabled_space':
@@ -25,7 +27,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dashboard_disabled_space':
           case 'dev_tools_disabled_space':
           case 'graph_disabled_space':
-          case 'gis_disabled_space':
+          case 'maps_disabled_space':
           case 'infrastructure_disabled_space':
           case 'logs_disabled_space':
           case 'ml_disabled_space':
@@ -34,20 +36,22 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'uptime_disabled_space':
           case 'visualize_disabled_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               save: true,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           case 'nothing_space':
           case 'discover_disabled_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: false,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(false);
             break;
           default:
             throw new UnreachableError(scenario);

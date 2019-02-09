@@ -25,12 +25,6 @@
   flex: 0 0 auto;
   border-radius: 0;
   border-left-width: 0;
-
-  @include darkTheme {
-    border-left-width: 1px;
-    border-left-color: $localNavBackgroundColor--darkTheme;
-    border-right-color: $localNavBackgroundColor--darkTheme;
-  }
 }
 
 .kuiLocalSearchAssistedInput {
@@ -82,14 +76,5 @@
 
   &:focus {
     @include focus($kuiFocusColor, $kuiBorderColor);
-  }
-
-  @include darkTheme {
-    color: $localSearchButtonTextColor--darkTheme;
-    background-color: $localSearchButtonBackgroundColor--darkTheme;
-
-    &:focus {
-      @include focus($kuiFocusColor, $localNavBackgroundColor--darkTheme);
-    }
   }
 }

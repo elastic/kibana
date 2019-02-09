@@ -8,7 +8,6 @@
 
 import { resolve } from 'path';
 import Boom from 'boom';
-import { i18n } from '@kbn/i18n';
 import { checkLicense } from './server/lib/check_license';
 import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
 
@@ -18,6 +17,8 @@ import { jobRoutes } from './server/routes/anomaly_detectors';
 import { dataFeedRoutes } from './server/routes/datafeeds';
 import { indicesRoutes } from './server/routes/indices';
 import { jobValidationRoutes } from './server/routes/job_validation';
+import mappings from './mappings';
+import { makeMlUsageCollector } from './server/lib/ml_telemetry';
 import { notificationRoutes } from './server/routes/notification_settings';
 import { systemRoutes } from './server/routes/system';
 import { dataRecognizer } from './server/routes/modules';
@@ -29,6 +30,8 @@ import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
+import { i18n } from '@kbn/i18n';
+import { initMlServerLog } from './server/client/log';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -51,6 +54,12 @@ export const ml = (kibana) => {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        'ml-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings,
       home: ['plugins/ml/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
@@ -72,25 +81,27 @@ export const ml = (kibana) => {
 
       xpackMainPlugin.registerFeature({
         id: 'ml',
-        name: 'Machine Learning',
+        name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
+          defaultMessage: 'Machine Learning',
+        }),
         icon: 'machineLearningApp',
         navLinkId: 'ml',
+        app: ['ml', 'kibana'],
+        catalogue: ['ml'],
         privileges: {
           all: {
-            metadata: {
-              tooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-                defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
-              })
-            },
             catalogue: ['ml'],
-            app: ['ml', 'kibana'],
+            grantWithBaseRead: true,
             savedObject: {
               all: [],
               read: ['config']
             },
             ui: [],
           },
-        }
+        },
+        privilegesTooltip: i18n.translate('xpack.ml.privileges.tooltip', {
+          defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
+        })
       });
 
       // Add server routes and initialize the plugin here
@@ -131,6 +142,9 @@ export const ml = (kibana) => {
       jobServiceRoutes(server, commonRouteConfig);
       jobAuditMessagesRoutes(server, commonRouteConfig);
       fileDataVisualizerRoutes(server, commonRouteConfig);
+
+      initMlServerLog(server);
+      makeMlUsageCollector(server);
     }
 
   });

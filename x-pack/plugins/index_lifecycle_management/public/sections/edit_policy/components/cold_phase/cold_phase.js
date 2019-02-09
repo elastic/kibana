@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiFieldNumber,
   EuiDescribedFormGroup,
-  EuiButton,
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
@@ -32,6 +31,7 @@ import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { NodeAllocation } from '../node_allocation';
+import { SetPriorityInput } from '../set_priority_input';
 
 class ColdPhaseUi extends PureComponent {
   static propTypes = {
@@ -65,7 +65,7 @@ class ColdPhaseUi extends PureComponent {
       defaultMessage: 'Freeze index',
     });
     return (
-      <Fragment>
+      <div id="coldPhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
           title={
             <div>
@@ -90,38 +90,26 @@ class ColdPhaseUi extends PureComponent {
                   Because your queries are slower, you can reduce the number of replicas."
                 />
               </p>
-              {phaseData[PHASE_ENABLED] ? (
-                <EuiButton
-                  color="danger"
-                  onClick={async () => {
-                    await setPhaseData(PHASE_ENABLED, false);
-                  }}
-                  aria-controls="coldPhaseContent"
-                >
+              <EuiSwitch
+                data-test-subj="enablePhaseSwitch-cold"
+                label={
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldhase.deactivateColdPhaseButton"
-                    defaultMessage="Deactivate cold phase"
-                  />
-                </EuiButton>
-              ) : (
-                <EuiButton
-                  data-test-subj="activatePhaseButton-cold"
-                  onClick={async () => {
-                    await setPhaseData(PHASE_ENABLED, true);
-                  }}
-                  aria-controls="coldPhaseContent"
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
                     defaultMessage="Activate cold phase"
                   />
-                </EuiButton>
-              )}
+                }
+                id={`${PHASE_COLD}-${PHASE_ENABLED}`}
+                checked={phaseData[PHASE_ENABLED]}
+                onChange={async e => {
+                  await setPhaseData(PHASE_ENABLED, e.target.checked);
+                }}
+                aria-controls="coldPhaseContent"
+              />
             </Fragment>
           }
           fullWidth
         >
-          <div id="coldPhaseContent" aria-live="polite" role="region">
+          <Fragment>
             {phaseData[PHASE_ENABLED] ? (
               <Fragment>
                 <MinAgeInput
@@ -180,43 +168,52 @@ class ColdPhaseUi extends PureComponent {
 
               </Fragment>
             ) : <div />}
-          </div>
+          </Fragment>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
-          <EuiDescribedFormGroup
-            title={
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
-                  defaultMessage="Freeze"
-                />
-              </p>
-            }
-            description={
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                  defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
+          <Fragment>
+            <EuiDescribedFormGroup
+              title={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                    defaultMessage="Freeze"
+                  />
+                </p>
+              }
+              description={
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                    defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
                     You can search a frozen index, but expect queries to be slower."
-                />{' '}
-                <LearnMoreLink docPath="frozen-indices.html" />
-              </EuiTextColor>
-            }
-            fullWidth
-            titleSize="xs"
-          >
-            <EuiSwitch
-              data-test-subj="freezeSwitch"
-              checked={phaseData[PHASE_FREEZE_ENABLED]}
-              onChange={async e => {
-                await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
-              }}
-              label={freezeLabel}
-              aria-label={freezeLabel}
+                  />{' '}
+                  <LearnMoreLink docPath="frozen-indices.html" />
+                </EuiTextColor>
+              }
+              fullWidth
+              titleSize="xs"
+            >
+              <EuiSwitch
+                data-test-subj="freezeSwitch"
+                checked={phaseData[PHASE_FREEZE_ENABLED]}
+                onChange={async e => {
+                  await setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+                }}
+                label={freezeLabel}
+                aria-label={freezeLabel}
+              />
+            </EuiDescribedFormGroup>
+            <SetPriorityInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_COLD}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
             />
-          </EuiDescribedFormGroup>
+          </Fragment>
         ) : null }
-      </Fragment>
+      </div>
     );
   }
 }

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { injectI18nProvider } from '@kbn/i18n/react';
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -36,6 +36,7 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
+import 'ui/capabilities/route_setup';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -43,7 +44,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardListing', function (reactDirective) {
-  return reactDirective(injectI18nProvider(DashboardListing));
+  return reactDirective(wrapInI18nContext(DashboardListing));
 });
 
 function createNewDashboardCtrl($scope, i18n) {
@@ -54,7 +55,8 @@ function createNewDashboardCtrl($scope, i18n) {
 
 uiRoutes
   .defaults(/dashboard/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    requireUICapability: 'dashboard.show'
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
@@ -106,6 +108,7 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
+    requireUICapability: 'dashboard.createNew',
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()

@@ -112,9 +112,8 @@ export default async function (kbnServer, server, config) {
     }
   });
 
-  // Expose static assets (fonts, favicons).
-  server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
-  server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
+  // Expose static assets
+  server.exposeStaticDir('/ui/{path*}', resolve(__dirname, '../../ui/public/assets'));
 
   setupVersionCheck(server, config);
   setupXsrf(server, config);

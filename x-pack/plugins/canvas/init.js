@@ -40,22 +40,20 @@ export default async function(server /*options*/) {
     name: 'Canvas',
     icon: 'canvasApp',
     navLinkId: 'canvas',
+    app: ['canvas', 'kibana'],
+    catalogue: ['canvas'],
     privileges: {
       all: {
-        catalogue: ['canvas'],
-        app: ['canvas', 'kibana'],
         savedObject: {
-          all: ['canvas'],
+          all: ['canvas-workpad'],
           read: ['config', 'index-pattern'],
         },
-        ui: [],
+        ui: ['save'],
       },
       read: {
-        catalogue: ['canvas'],
-        app: ['canvas', 'kibana'],
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'canvas'],
+          read: ['config', 'index-pattern', 'canvas-workpad'],
         },
         ui: [],
       },

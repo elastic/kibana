@@ -18,7 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import $script from 'scriptjs';
+
+function loadPath(path, callback) {
+  const script = document.createElement('script');
+
+  script.setAttribute('async', '');
+  script.setAttribute('nonce', window.__webpack_nonce__);
+  script.addEventListener('error', () => {
+    console.error('Failed to load plugin bundle', path);
+  });
+  script.setAttribute('src', path);
+  script.addEventListener('load', callback);
+
+  document.head.appendChild(script);
+}
 
 export const loadBrowserRegistries = (registries, basePath) => {
   const remainingTypes = Object.keys(registries);
@@ -38,7 +51,7 @@ export const loadBrowserRegistries = (registries, basePath) => {
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
       const pluginPath = `${basePath}/api/canvas/plugins?type=${type}`;
-      $script(pluginPath, () => {
+      loadPath(pluginPath, () => {
         populatedTypes[type] = registries[type];
         loadType();
       });

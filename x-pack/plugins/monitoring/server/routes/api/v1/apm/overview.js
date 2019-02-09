@@ -10,6 +10,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
 import { getApmClusterStatus } from './_get_apm_cluster_status';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function apmOverviewRoute(server) {
   server.route({
@@ -33,7 +34,7 @@ export function apmOverviewRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
         const [

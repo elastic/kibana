@@ -5,7 +5,7 @@ exports[`ConditionsSectionExpression don't render when not enabled with conditio
 exports[`ConditionsSectionExpression don't render when the section is not enabled 1`] = `""`;
 
 exports[`ConditionsSectionExpression renders when enabled with empty conditions supplied 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSpacer
     size="s"
   />
@@ -21,11 +21,11 @@ exports[`ConditionsSectionExpression renders when enabled with empty conditions 
       values={Object {}}
     />
   </EuiButtonEmpty>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with no conditions supplied 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSpacer
     size="s"
   />
@@ -41,11 +41,11 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
       values={Object {}}
     />
   </EuiButtonEmpty>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with one condition 1`] = `
-<React.Fragment>
+<Fragment>
   <InjectIntl(ConditionExpression)
     appliesTo="actual"
     deleteCondition={[MockFunction]}
@@ -70,11 +70,11 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
       values={Object {}}
     />
   </EuiButtonEmpty>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with two conditions 1`] = `
-<React.Fragment>
+<Fragment>
   <InjectIntl(ConditionExpression)
     appliesTo="actual"
     deleteCondition={[MockFunction]}
@@ -108,5 +108,5 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
       values={Object {}}
     />
   </EuiButtonEmpty>
-</React.Fragment>
+</Fragment>
 `;

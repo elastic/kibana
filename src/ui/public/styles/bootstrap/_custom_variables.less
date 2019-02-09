@@ -1,26 +1,3 @@
-@import "variables.less";
-
-//== Colors
-//
-//## Gray and brand colors for use across Bootstrap.
-@white:                  #FFF;
-@blue:                   #006BB4;
-
-@brand-primary:          #343741;
-@brand-success:          #017D73;
-@brand-info:             @blue;
-@brand-warning:          #F5A700;
-@brand-danger:           #BD271E;
-
-@gray-base:              #000;
-@gray-darker:            #343741;
-@gray-dark:              #7b7b7b;
-@gray5:                  #69707D;
-@gray:                   #98A2B3;
-@gray-light:             lighten(#98A2B3, 9%); // ~#b4b4b4
-@gray-lighter:           #D3DAE6;
-@gray-lightest:          #F5F7FA;
-
 //== Scaffolding
 //
 // ## Settings for some of the most global styles.
@@ -126,6 +103,8 @@
 //##
 
 
+//** `<input>` background color
+@input-bg:                       lighten(@gray-lightest, 1.5%);
 //** Placeholder text color
 @input-color-placeholder:        @gray;
 
@@ -162,10 +141,10 @@
 @dropdown-link-active-color:    @white;
 
 //** Disabled dropdown menu item background color.
-@dropdown-link-disabled-color:  @text-muted;
+@dropdown-link-disabled-color:  @gray;
 
 //** Text color for headers within dropdown menus.
-@dropdown-header-color:         @text-muted;
+@dropdown-header-color:         @gray;
 
 // Note: Deprecated @dropdown-caret-color as of v3.1.0
 @dropdown-caret-color:          @gray-base;
@@ -199,7 +178,7 @@
 @navbar-padding-horizontal:        10px;
 
 // Default theme
-@navbar-default-bg:                     lighten(@gray-lighter, 50%);
+@navbar-default-bg:                     @gray-lightest;
 @navbar-default-color:                  @gray5;
 @navbar-default-border:                 transparent;
 @navbar-default-link-color:             @gray5;

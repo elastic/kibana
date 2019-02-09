@@ -18,7 +18,9 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce, forEach } from 'lodash';
+import { debounce, forEach, get } from 'lodash';
+// @ts-ignore
+import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -29,13 +31,19 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
-// import { VisualizeDataLoader } from './visualize_data_loader';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
+import { VisualizeDataLoader } from './visualize_data_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
-import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
+import { getTableAggs } from './pipeline_helpers/utilities';
+import {
+  VisResponseData,
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
@@ -45,6 +53,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 const LOADING_ATTRIBUTE = 'data-loading';
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
 /**
  * A handler to the embedded visualization. It offers several methods to interact
@@ -58,9 +67,11 @@ export class EmbeddedVisualizeHandler {
    * This should not be used by any plugin.
    * @ignore
    */
+  public static readonly __ENABLE_PIPELINE_DATA_LOADER__: boolean = false;
   public readonly data$: Rx.Observable<any>;
   public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
+  private handlers: any;
   private loaded: boolean = false;
   private destroyed: boolean = false;
 
@@ -81,7 +92,7 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: PipelineDataLoader;
+  private dataLoader: VisualizeDataLoader | PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
   private actions: any = {};
   private events$: Rx.Observable<any>;
@@ -94,7 +105,16 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, autoFetch } = params;
+    const {
+      appState,
+      uiState,
+      queryFilter,
+      timeRange,
+      filters,
+      query,
+      autoFetch = true,
+      Private,
+    } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -107,16 +127,16 @@ export class EmbeddedVisualizeHandler {
       forceFetch: false,
     };
 
-    this.autoFetch = !(autoFetch === false);
-
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
       this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
+    this.autoFetch = autoFetch;
     this.appState = appState;
     this.vis = vis;
     if (uiState) {
@@ -124,12 +144,22 @@ export class EmbeddedVisualizeHandler {
     }
     this.uiState = this.vis.getUiState();
 
+    this.handlers = {
+      vis: this.vis,
+      uiState: this.uiState,
+      onDestroy: (fn: () => never) => (this.handlers.destroyFn = fn),
+    };
+
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
     this.uiState.on('change', this.onUiStateChange);
-    timefilter.on('autoRefreshFetch', this.reload);
+    if (autoFetch) {
+      timefilter.on('autoRefreshFetch', this.reload);
+    }
 
-    this.dataLoader = new PipelineDataLoader(vis);
+    this.dataLoader = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
+      ? new PipelineDataLoader(vis)
+      : new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -144,10 +174,12 @@ export class EmbeddedVisualizeHandler {
       }
     });
 
-    this.vis.eventsSubject = new Rx.Subject();
-    this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
+    this.handlers.eventsSubject = new Rx.Subject();
+    this.vis.eventsSubject = this.handlers.eventsSubject;
+    this.events$ = this.handlers.eventsSubject.asObservable().pipe(share());
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
+        event.data.aggConfigs = getTableAggs(this.vis);
         this.actions[event.name](event.data);
       }
     });
@@ -205,13 +237,18 @@ export class EmbeddedVisualizeHandler {
   public destroy(): void {
     this.destroyed = true;
     this.debouncedFetchAndRender.cancel();
-    timefilter.off('autoRefreshFetch', this.reload);
+    if (this.autoFetch) {
+      timefilter.off('autoRefreshFetch', this.reload);
+    }
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
     this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
     this.renderCompleteHelper.destroy();
+    if (this.handlers.destroyFn) {
+      this.handlers.destroyFn();
+    }
   }
 
   /**
@@ -225,31 +262,24 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * renders visualization with provided data
-   * @param visData: visualization data
+   * @param response: visualization data
    */
-  public render = (pipelineResponse: any = null) => {
-    let visData;
-    if (pipelineResponse) {
-      if (!pipelineResponse.value) {
-        throw new Error(pipelineResponse.error);
-      }
-      visData = pipelineResponse.value.visData || pipelineResponse.value;
-      if (pipelineResponse.value.visConfig) {
-        this.vis.params = pipelineResponse.value.visConfig.params;
-      }
+  public render = (response: VisResponseData | null = null): void => {
+    const executeRenderer = this.rendererProvider(response);
+    if (!executeRenderer) {
+      return;
     }
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
-        listenOnChange: false,
-      })
-      .then(() => {
-        if (!this.loaded) {
-          this.loaded = true;
-          if (this.autoFetch) {
-            this.fetchAndRender();
-          }
+
+    // TODO: we have this weird situation when we need to render first,
+    // and then we call fetch and render... we need to get rid of that.
+    executeRenderer().then(() => {
+      if (!this.loaded) {
+        this.loaded = true;
+        if (this.autoFetch) {
+          this.fetchAndRender();
         }
-      });
+      }
+    });
   };
 
   /**
@@ -307,9 +337,15 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender(true);
   };
 
+  private incrementRenderingCount = () => {
+    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
+  };
+
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
+    this.incrementRenderingCount();
   };
 
   private onUiStateChange = () => {
@@ -383,10 +419,37 @@ export class EmbeddedVisualizeHandler {
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      if (data.value) {
+      if (data && data.value) {
         this.dataSubject.next(data.value);
       }
       return data;
     });
+  };
+
+  private rendererProvider = (response: VisResponseData | null) => {
+    let renderer: any = null;
+    let args: any[] = [];
+
+    if (EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__) {
+      renderer = renderFunctionsRegistry.get(get(response || {}, 'as', 'visualization'));
+      args = [this.element, get(response, 'value', { visType: this.vis.type.name }), this.handlers];
+    } else {
+      renderer = visualizationLoader;
+      args = [
+        this.element,
+        this.vis,
+        get(response, 'value.visData', null),
+        this.uiState,
+        {
+          listenOnChange: false,
+        },
+      ];
+    }
+
+    if (!renderer) {
+      return null;
+    }
+
+    return () => renderer.render(...args);
   };
 }

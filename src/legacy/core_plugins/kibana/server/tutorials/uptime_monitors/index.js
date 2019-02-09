@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/heartbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/heartbeat_instructions';
 
 export function uptimeMonitorsSpecProvider(server, context) {
   return {
@@ -32,7 +36,8 @@ export function uptimeMonitorsSpecProvider(server, context) {
       defaultMessage: 'Monitor services for their availability',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.uptimeMonitors.longDescription', {
-      defaultMessage: 'Monitor services for their availability with active probing. \
+      defaultMessage:
+        'Monitor services for their availability with active probing. \
         Given a list of URLs, Heartbeat asks the simple question: Are you alive? \
         [Learn more]({learnMoreLink}).',
       values: {
@@ -41,23 +46,24 @@ export function uptimeMonitorsSpecProvider(server, context) {
     }),
     euiIconType: 'heartbeatApp',
     artifacts: {
-      dashboards: [
-        {
-          id: 'f3e771c0-eb19-11e6-be20-559646f8b9ba',
-          linkLabel: i18n.translate('kbn.server.tutorials.uptimeMonitors.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Heartbeat dashboard',
-          }),
-          isOverview: true
-        }
-      ],
+      dashboards: [],
+      application: {
+        path: '/app/uptime',
+        label: i18n.translate(
+          'kbn.server.tutorials.uptimeMonitors.artifacts.dashboards.linkLabel',
+          {
+            defaultMessage: 'Uptime App',
+          }
+        ),
+      },
       exportedFields: {
-        documentationUrl: '{config.docs.beats.heartbeat}/exported-fields.html'
-      }
+        documentationUrl: '{config.docs.beats.heartbeat}/exported-fields.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions(null, null, null, context),
     elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions()
+    onPremElasticCloud: onPremCloudInstructions(),
   };
 }

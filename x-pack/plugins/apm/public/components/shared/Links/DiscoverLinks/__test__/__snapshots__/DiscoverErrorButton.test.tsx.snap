@@ -8,7 +8,7 @@ exports[`DiscoverErrorLink with kuery should match snapshot 1`] = `
         "interval": "auto",
         "query": Object {
           "language": "lucene",
-          "query": "context.service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupingKey\\" AND transaction.sampled: true",
+          "query": "service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupingKey\\" AND transaction.sampled: true",
         },
         "sort": Object {
           "@timestamp": "desc",
@@ -27,7 +27,7 @@ exports[`DiscoverErrorLink without kuery should match snapshot 1`] = `
         "interval": "auto",
         "query": Object {
           "language": "lucene",
-          "query": "context.service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupingKey\\"",
+          "query": "service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupingKey\\"",
         },
         "sort": Object {
           "@timestamp": "desc",

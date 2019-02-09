@@ -13,14 +13,13 @@ import {
   units,
   fontSizes,
   px,
-  colors,
   truncate
 } from '../../../../style/variables';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-around;
+  margin-left: ${px(unit * 5)};
   flex-wrap: wrap;
 
   /* add margin to all direct descendant divs */
@@ -35,7 +34,7 @@ const Container = styled.div`
 
 const LegendContent = styled.span`
   white-space: nowrap;
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   display: flex;
 `;
 
@@ -46,13 +45,13 @@ const TruncatedLabel = styled.span`
 
 const SeriesValue = styled.span`
   margin-left: ${px(units.quarter)};
-  color: ${colors.black};
+  color: ${theme.euiColorFullShade};
   display: inline-block;
 `;
 
 const MoreSeriesContainer = styled.div`
   font-size: ${fontSizes.small};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 function MoreSeries({ hiddenSeriesCount }) {

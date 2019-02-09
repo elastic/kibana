@@ -11,7 +11,7 @@
           input-focus
           disable-input-focus="disableAutoFocus"
           ng-model="query"
-          placeholder="Filter..."
+          placeholder="{{ ::'common.ui.paginateSelectableList.searchPlaceholder' | i18n: {defaultMessage: 'Filter…'} }}"
           class="form-control"
           name="query"
           type="text"
@@ -21,15 +21,18 @@
     </div>
 
     <div class="kuiBarSection">
-      <p class="kuiText kuiSubduedText">
-        {{ (hits | filter: query).length }} of {{ hitCount }}
-      </p>
+      <p
+        class="kuiText kuiSubduedText"
+        i18n-id="common.ui.paginateSelectableList.ofTotalHitCount"
+        i18n-default-message="{matchingHits} of {hitCount}"
+        i18n-values="{ hitCount, matchingHits: hitsByQuery.length }"
+      ></p>
     </div>
   </div>
 </form>
 
 <paginate
-  list="hits | filter: query"
+  list="hitsByQuery"
   per-page="{{ perPage }}"
   class="kuiVerticalRhythm"
 >
@@ -38,12 +41,28 @@
     ng-click="sortHits(hits)"
     aria-live="assertive"
   >
-    <span class="euiScreenReaderOnly">Sort by</span>
-    Name
+    <span class="euiScreenReaderOnly"
+      i18n-id="common.ui.paginateSelectableList.sortByButtonLabelScreenReaderOnly"
+      i18n-default-message="Sort by"
+    ></span>
+    <span
+      i18n-id="common.ui.paginateSelectableList.sortByButtonLabel"
+      i18n-default-message="Name"
+    ></span>
     <span
       class="fa"
-      ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-      <span class="euiScreenReaderOnly">({{isAscending ? 'ascending' : 'descending'}})</span>
+      ng-class="isAscending ? 'fa-caret-up' : 'fa-caret-down'"
+    >
+      <span class="euiScreenReaderOnly"
+        ng-if="isAscending"
+        i18n-id="common.ui.paginateSelectableList.sortByButtonLabeAscendingScreenReaderOnly"
+        i18n-default-message="ascending"
+      ></span>
+      <span class="euiScreenReaderOnly"
+        ng-if="!isAscending"
+        i18n-id="common.ui.paginateSelectableList.sortByButtonLabeDescendingScreenReaderOnly"
+        i18n-default-message="descending"
+      ></span>
     </span>
   </button>
   <ul class="li-striped list-group list-group-menu">
@@ -60,8 +79,10 @@
       </div>
     </li>
 
-    <li class="list-group-item list-group-no-results" ng-if="(hits | filter: query).length === 0">
-      <p>No matches found.</p>
+    <li class="list-group-item list-group-no-results" ng-if="hitsByQuery.length === 0">
+      <p i18n-id="common.ui.paginateSelectableList.noMatchesFoundDescription"
+        i18n-default-message="No matches found."
+      ></p>
     </li>
   </ul>
 </paginate>

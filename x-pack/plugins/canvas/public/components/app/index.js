@@ -5,7 +5,7 @@
  */
 
 import { functionsRegistry } from 'plugins/interpreter/functions_registry';
-import { getInterpreter, updateInterpreterFunctions } from 'plugins/interpreter/interpreter';
+import { getInterpreter } from 'plugins/interpreter/interpreter';
 import { loadBrowserRegistries } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -15,7 +15,7 @@ import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_func
 import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
-import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
+
 import {
   argTypeRegistry,
   datasourceRegistry,
@@ -38,7 +38,6 @@ const mapStateToProps = state => {
 
 const types = {
   elements: elementsRegistry,
-  renderers: renderFunctionsRegistry,
   transformUIs: transformRegistry,
   datasourceUIs: datasourceRegistry,
   modelUIs: modelRegistry,
@@ -56,7 +55,7 @@ const mapDispatchToProps = dispatch => ({
       await getInterpreter();
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions(functionsRegistry);
-      await updateInterpreterFunctions();
+
       await loadBrowserRegistries(types, basePath);
 
       // set app state to ready

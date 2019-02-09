@@ -7,7 +7,7 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "averagePercentMemoryUsed": Object {
+          "memoryUsedAvg": Object {
             "avg": Object {
               "script": Object {
                 "lang": "expression",
@@ -15,7 +15,7 @@ Array [
               },
             },
           },
-          "maximumPercentMemoryUsed": Object {
+          "memoryUsedMax": Object {
             "max": Object {
               "script": Object {
                 "lang": "expression",
@@ -25,7 +25,7 @@ Array [
           },
           "timeseriesData": Object {
             "aggs": Object {
-              "averagePercentMemoryUsed": Object {
+              "memoryUsedAvg": Object {
                 "avg": Object {
                   "script": Object {
                     "lang": "expression",
@@ -33,7 +33,7 @@ Array [
                   },
                 },
               },
-              "maximumPercentMemoryUsed": Object {
+              "memoryUsedMax": Object {
                 "max": Object {
                   "script": Object {
                     "lang": "expression",
@@ -58,7 +58,7 @@ Array [
             "filter": Array [
               Object {
                 "term": Object {
-                  "context.service.name": "test-service",
+                  "service.name": "test-service",
                 },
               },
               Object {
@@ -73,6 +73,16 @@ Array [
                     "gte": 100,
                     "lte": 200,
                   },
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "system.memory.total",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "system.memory.actual.free",
                 },
               },
               Object {

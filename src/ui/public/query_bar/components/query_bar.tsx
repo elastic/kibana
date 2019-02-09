@@ -19,12 +19,14 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { compact, debounce, isEqual } from 'lodash';
+import classNames from 'classnames';
+import _ from 'lodash';
+import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
+import { timeHistory } from 'ui/timefilter/time_history';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
@@ -36,15 +38,12 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+// @ts-ignore
+import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
+
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -66,14 +65,26 @@ interface Query {
   language: string;
 }
 
+interface DateRange {
+  from: string;
+  to: string;
+}
+
 interface Props {
   query: Query;
-  onSubmit: (query: { query: string | object; language: string }) => void;
+  onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
+  prepend?: any;
+  showDatePicker?: boolean;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
+  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
 interface State {
@@ -84,6 +95,9 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
   currentProps?: Props;
+  dateRangeFrom: string;
+  dateRangeTo: string;
+  isDateRangeInvalid: boolean;
 }
 
 export class QueryBarUI extends Component<Props, State> {
@@ -92,25 +106,41 @@ export class QueryBarUI extends Component<Props, State> {
       return null;
     }
 
+    let nextQuery = null;
     if (nextProps.query.query !== prevState.query.query) {
-      return {
-        query: {
-          query: toUser(nextProps.query.query),
-          language: nextProps.query.language,
-        },
-        currentProps: nextProps,
+      nextQuery = {
+        query: toUser(nextProps.query.query),
+        language: nextProps.query.language,
       };
     } else if (nextProps.query.language !== prevState.query.language) {
-      return {
-        query: {
-          query: '',
-          language: nextProps.query.language,
-        },
-        currentProps: nextProps,
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
       };
     }
 
-    return null;
+    let nextDateRange = null;
+    if (
+      nextProps.dateRangeFrom !== get(prevState, 'currentProps.dateRangeFrom') ||
+      nextProps.dateRangeTo !== get(prevState, 'currentProps.dateRangeTo')
+    ) {
+      nextDateRange = {
+        dateRangeFrom: nextProps.dateRangeFrom,
+        dateRangeTo: nextProps.dateRangeTo,
+      };
+    }
+
+    const nextState: any = {
+      currentProps: nextProps,
+    };
+    if (nextQuery) {
+      nextState.query = nextQuery;
+    }
+    if (nextDateRange) {
+      nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
+      nextState.dateRangeTo = nextDateRange.dateRangeTo;
+    }
+    return nextState;
   }
 
   /*
@@ -132,9 +162,13 @@ export class QueryBarUI extends Component<Props, State> {
     },
     inputIsPristine: true,
     isSuggestionsVisible: false,
+    currentProps: this.props,
     index: null,
     suggestions: [],
     suggestionLimit: 50,
+    dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
+    isDateRangeInvalid: false,
   };
 
   public updateSuggestions = debounce(async () => {
@@ -150,7 +184,15 @@ export class QueryBarUI extends Component<Props, State> {
   private persistedLog: PersistedLog | null = null;
 
   public isDirty = () => {
-    return this.state.query.query !== this.props.query.query;
+    if (!this.props.showDatePicker) {
+      return this.state.query.query !== this.props.query.query;
+    }
+
+    return (
+      this.state.query.query !== this.props.query.query ||
+      this.state.dateRangeFrom !== this.props.dateRangeFrom ||
+      this.state.dateRangeTo !== this.props.dateRangeTo
+    );
   };
 
   public increaseLimit = () => {
@@ -195,7 +237,7 @@ export class QueryBarUI extends Component<Props, State> {
       return recentSearchSuggestions;
     }
 
-    const indexPatterns = getFromLegacyIndexPattern(this.props.indexPatterns);
+    const indexPatterns = this.props.indexPatterns;
     const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -321,6 +363,22 @@ export class QueryBarUI extends Component<Props, State> {
     this.onInputChange(event.target.value);
   };
 
+  public onTimeChange = ({
+    start,
+    end,
+    isInvalid,
+  }: {
+    start: string;
+    end: string;
+    isInvalid: boolean;
+  }) => {
+    this.setState({
+      dateRangeFrom: start,
+      dateRangeTo: end,
+      isDateRangeInvalid: isInvalid,
+    });
+  };
+
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
       this.setState({ isSuggestionsVisible: true });
@@ -407,9 +465,20 @@ export class QueryBarUI extends Component<Props, State> {
       this.persistedLog.add(this.state.query.query);
     }
 
+    timeHistory.add({
+      from: this.state.dateRangeFrom,
+      to: this.state.dateRangeTo,
+    });
+
     this.props.onSubmit({
-      query: fromUser(this.state.query.query),
-      language: this.state.query.language,
+      query: {
+        query: fromUser(this.state.query.query),
+        language: this.state.query.language,
+      },
+      dateRange: {
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
+      },
     });
     this.setState({ isSuggestionsVisible: false });
   };
@@ -426,8 +495,14 @@ export class QueryBarUI extends Component<Props, State> {
 
     this.props.store.set('kibana.userQueryLanguage', language);
     this.props.onSubmit({
-      query: '',
-      language,
+      query: {
+        query: '',
+        language,
+      },
+      dateRange: {
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
+      },
     });
   };
 
@@ -461,8 +536,16 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   public render() {
+    const classes = classNames('kbnQueryBar', {
+      'kbnQueryBar--withDatePicker': this.props.showDatePicker,
+    });
+
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
+      <EuiFlexGroup
+        className={classes}
+        responsive={this.props.showDatePicker ? true : false}
+        gutterSize="s"
+      >
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
             {/* position:relative required on container so the suggestions appear under the query bar*/}
@@ -471,11 +554,11 @@ export class QueryBarUI extends Component<Props, State> {
               role="combobox"
               aria-haspopup="true"
               aria-expanded={this.state.isSuggestionsVisible}
-              aria-owns="typeahead-items"
-              aria-controls="typeahead-items"
+              aria-owns="kbnTypeahead__items"
+              aria-controls="kbnTypeahead__items"
             >
               <form role="form" name="queryBarForm">
-                <div className="kuiLocalSearch" role="search">
+                <div role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
                       className="kuiLocalSearchAssistedInput__input"
@@ -505,11 +588,12 @@ export class QueryBarUI extends Component<Props, State> {
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
-                      aria-controls="typeahead-items"
+                      aria-controls="kbnTypeahead__items"
                       aria-activedescendant={
                         this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
                       }
                       role="textbox"
+                      prepend={this.props.prepend}
                     />
                     <div className="kuiLocalSearchAssistedInput__assistance">
                       <QueryLanguageSwitcher
@@ -532,30 +616,74 @@ export class QueryBarUI extends Component<Props, State> {
             </div>
           </EuiOutsideClickDetector>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            aria-label={this.props.intl.formatMessage({
-              id: 'common.ui.queryBar.searchButtonAriaLabel',
-              defaultMessage: 'Search',
-            })}
-            data-test-subj="querySubmitButton"
-            color={this.isDirty() ? 'secondary' : 'primary'}
-            fill
-            onClick={this.onClickSubmitButton}
-          >
-            {this.isDirty() ? (
-              <FormattedMessage id="common.ui.queryBar.updateButtonLabel" defaultMessage="Update" />
-            ) : (
-              <FormattedMessage
-                id="common.ui.queryBar.refreshButtonLabel"
-                defaultMessage="Refresh"
-              />
-            )}
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }
+
+  private renderUpdateButton() {
+    const button = (
+      <EuiSuperUpdateButton
+        needsUpdate={this.isDirty()}
+        isDisabled={this.state.isDateRangeInvalid}
+        onClick={this.onClickSubmitButton}
+        data-test-subj="querySubmitButton"
+      />
+    );
+    if (this.props.showDatePicker) {
+      return (
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {this.renderDatePicker()}
+          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else {
+      return button;
+    }
+  }
+
+  private renderDatePicker() {
+    if (!this.props.showDatePicker) {
+      return null;
+    }
+
+    const recentlyUsedRanges = timeHistory
+      .get()
+      .map(({ from, to }: { from: string; to: string }) => {
+        return {
+          start: from,
+          end: to,
+        };
+      });
+
+    const commonlyUsedRanges = config
+      .get('timepicker:quickRanges')
+      .map(({ from, to, display }: { from: string; to: string; display: string }) => {
+        return {
+          start: from,
+          end: to,
+          label: display,
+        };
+      });
+
+    return (
+      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
+        <EuiSuperDatePicker
+          start={this.state.dateRangeFrom}
+          end={this.state.dateRangeTo}
+          isPaused={this.props.isRefreshPaused}
+          refreshInterval={this.props.refreshInterval}
+          onTimeChange={this.onTimeChange}
+          onRefreshChange={this.props.onRefreshChange}
+          showUpdateButton={false}
+          recentlyUsedRanges={recentlyUsedRanges}
+          commonlyUsedRanges={commonlyUsedRanges}
+          dateFormat={config.get('dateFormat')}
+        />
+      </EuiFlexItem>
     );
   }
 }
 
+// @ts-ignore
 export const QueryBar = injectI18n(QueryBarUI);

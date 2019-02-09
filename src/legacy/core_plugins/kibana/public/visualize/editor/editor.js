@@ -25,6 +25,8 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/query_bar';
 import { uiCapabilities } from 'ui/capabilities';
+import 'ui/search_bar';
+import 'ui/apply_filters';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -33,6 +35,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+import { migrateAppState } from './lib';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import editorTemplate from './editor.html';
@@ -117,6 +120,7 @@ function VisEditor(
   $route,
   AppState,
   $window,
+  $injector,
   kbnUrl,
   redirectWhenMissing,
   Private,
@@ -169,6 +173,12 @@ function VisEditor(
   const $state = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
+
+    // Initializing appState does two things - first it translates the defaults into AppState,
+    // second it updates appState based on the url (the url trumps the defaults). This means if
+    // we update the state format at all and want to handle BWC, we must not only migrate the
+    // data stored with saved vis, but also any old state in the url.
+    migrateAppState(appState);
 
     // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
     // defaults applied. If the url was from a previous session which included modifications to the
@@ -295,6 +305,27 @@ function VisEditor(
     }
     return [shareAction, inspectAction, refreshAction];
   }
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.onCancelApplyFilters = () => {
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.onApplyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.onApplyFilters(filters);
+    }
+  });
 
   function init() {
     // export some objects
@@ -320,18 +351,11 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (query) => {
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
-
-    $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || i18n('kbn.visualize.topNavMenu.unsavedVisualizationTitle', {
-        defaultMessage: '{visTitle} (unsaved)',
-        values: {
-          visTitle: savedVis.title,
-        },
-      });
-    };
 
     $scope.$watchMulti([
       'searchSource.getField("index")',
@@ -362,6 +386,7 @@ function VisEditor(
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
+      $scope.filters = queryFilter.getFilters();
       $scope.fetch();
     });
 
@@ -394,7 +419,7 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
@@ -444,6 +469,7 @@ function VisEditor(
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
+              chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }

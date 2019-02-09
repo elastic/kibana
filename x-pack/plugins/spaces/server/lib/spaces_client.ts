@@ -30,7 +30,7 @@ export class SpacesClient {
       return hasAllRequested;
     }
 
-    // If not RBAC, then we are legacy, and all legacy users can enumerate all spaces
+    // If not RBAC, then security isn't enabled and we can enumerate all spaces
     this.debugLogger(`SpacesClient.canEnumerateSpaces, NOT USING RBAC. Result: true`);
     return true;
   }
@@ -196,7 +196,7 @@ export class SpacesClient {
   }
 
   private useRbac(): boolean {
-    return this.authorization && this.authorization.mode.useRbacForRequest(this.request);
+    return this.authorization && this.authorization.mode.useRbac();
   }
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {

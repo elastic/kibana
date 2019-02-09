@@ -41,24 +41,22 @@ function toggleDisabledFeatures(
       navLinks[feature.navLinkId] = false;
     }
 
-    Object.values(feature.privileges).forEach(privilege => {
-      // Disable associated catalogue entries
-      const privilegeCatalogueEntries: string[] = privilege.catalogue || [];
-      privilegeCatalogueEntries.forEach(catalogueEntryId => {
-        catalogueEntries[catalogueEntryId] = false;
-      });
+    // Disable associated catalogue entries
+    const privilegeCatalogueEntries: string[] = feature.catalogue || [];
+    privilegeCatalogueEntries.forEach(catalogueEntryId => {
+      catalogueEntries[catalogueEntryId] = false;
+    });
 
-      // Disable associated management items
-      const privilegeManagementSections: Record<string, string[]> = privilege.management || {};
-      Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
-        sectionItems.forEach(item => {
-          if (
-            managementItems.hasOwnProperty(sectionId) &&
-            managementItems[sectionId].hasOwnProperty(item)
-          ) {
-            managementItems[sectionId][item] = false;
-          }
-        });
+    // Disable associated management items
+    const privilegeManagementSections: Record<string, string[]> = feature.management || {};
+    Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
+      sectionItems.forEach(item => {
+        if (
+          managementItems.hasOwnProperty(sectionId) &&
+          managementItems[sectionId].hasOwnProperty(item)
+        ) {
+          managementItems[sectionId][item] = false;
+        }
       });
     });
 

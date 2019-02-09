@@ -20,43 +20,41 @@
 import { getSortingParams } from './sorting_params';
 
 const MAPPINGS = {
-  rootType: {
-    properties: {
-      type: {
-        type: 'text',
-        fields: {
-          raw: {
-            type: 'keyword'
-          }
+  properties: {
+    type: {
+      type: 'text',
+      fields: {
+        raw: {
+          type: 'keyword'
         }
-      },
-      pending: {
-        properties: {
-          title: {
-            type: 'text',
-            fields: {
-              raw: {
-                type: 'keyword'
-              }
+      }
+    },
+    pending: {
+      properties: {
+        title: {
+          type: 'text',
+          fields: {
+            raw: {
+              type: 'keyword'
             }
           }
         }
-      },
-      saved: {
-        properties: {
-          title: {
-            type: 'text',
-            fields: {
-              raw: {
-                type: 'keyword'
-              }
+      }
+    },
+    saved: {
+      properties: {
+        title: {
+          type: 'text',
+          fields: {
+            raw: {
+              type: 'keyword'
             }
-          },
-          obj: {
-            properties: {
-              key1: {
-                type: 'text'
-              }
+          }
+        },
+        obj: {
+          properties: {
+            key1: {
+              type: 'text'
             }
           }
         }

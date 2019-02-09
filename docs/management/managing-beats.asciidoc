@@ -57,6 +57,23 @@ Add one or more configuration blocks to the tag. A tag can have configuration
 blocks for different types of {beats}. When the enrolled {beats} run, they will
 use the configuration blocks that are valid for their type.
 
+Central management supports configuration settings for:
+
+* {filebeat} modules
+* {metricbeat} modules
+* {filebeat} inputs
+* {filebeat} and {metricbeat} outputs 
+
+NOTE: Central management supports the following outputs only: {es}, {ls}, Kafka,
+and Redis. Other output types are not supported for {beats} that are enrolled in
+central management.
+
+Use the Central Management UI to define and manage settings for supported
+configuration blocks. You cannot define those settings in local {beats}
+configuration files. For configuration blocks that are not supported by central
+management, configure the settings in the local configuration file after
+enrolling the Beat in central management. 
+
 [float]
 === Manage enrolled {beats}
 

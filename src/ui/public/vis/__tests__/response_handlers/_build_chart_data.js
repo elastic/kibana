@@ -18,21 +18,13 @@
  */
 
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { AggResponseIndexProvider } from '../../../agg_response';
-import { VislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
+import { aggResponseIndex } from '../../../agg_response';
+import { VislibSeriesResponseHandlerProvider as vislibReponseHandler } from '../../response_handlers/vislib';
 
 describe('renderbot#buildChartData', function () {
-  let buildChartData;
-  let aggResponse;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    aggResponse = Private(AggResponseIndexProvider);
-    buildChartData = Private(VislibSeriesResponseHandlerProvider).handler;
-  }));
+  const buildChartData = vislibReponseHandler().handler;
 
   describe('for hierarchical vis', function () {
     it('defers to hierarchical aggResponse converter', function () {
@@ -43,7 +35,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
 
-      const stub = sinon.stub(aggResponse, 'hierarchical').returns(football);
+      const stub = sinon.stub(aggResponseIndex, 'hierarchical').returns(football);
       expect(buildChartData.call(renderbot, football)).to.be(football);
       expect(stub).to.have.property('callCount', 1);
       expect(stub.firstCall.args[0]).to.be(renderbot.vis);
@@ -60,7 +52,7 @@ describe('renderbot#buildChartData', function () {
       };
       const football = { tables: [], hits: { total: 1 } };
 
-      const stub = sinon.stub(aggResponse, 'tabify').returns(football);
+      const stub = sinon.stub(aggResponseIndex, 'tabify').returns(football);
       expect(buildChartData.call(renderbot, football)).to.eql({ rows: [], hits: 1 });
       expect(stub).to.have.property('callCount', 1);
       expect(stub.firstCall.args[0]).to.be(renderbot.vis);
@@ -80,7 +72,7 @@ describe('renderbot#buildChartData', function () {
       const esResp = { hits: { total: 1 } };
       const tabbed = { tables: [ {}] };
 
-      sinon.stub(aggResponse, 'tabify').returns(tabbed);
+      sinon.stub(aggResponseIndex, 'tabify').returns(tabbed);
       expect(buildChartData.call(renderbot, esResp)).to.eql(chart);
     });
 
@@ -98,7 +90,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
 
-      sinon.stub(aggResponse, 'tabify').returns({
+      sinon.stub(aggResponseIndex, 'tabify').returns({
         tables: [
           {
             aggConfig: { params: { row: true } },

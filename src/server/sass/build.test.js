@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
+import globby from 'globby';
 
 import del from 'del';
 
@@ -31,21 +32,95 @@ afterEach(async () => {
   await del(TMP);
 });
 
-it('builds SASS', async () => {
-  const cssPath = resolve(TMP, 'style.css');
-  await (new Build(FIXTURE, {
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-  }, cssPath)).build();
+it('builds light themed SASS', async () => {
+  const targetPath = resolve(TMP, 'style.css');
+  await new Build({
+    sourcePath: FIXTURE,
+    log: {
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    theme: 'light',
+    targetPath,
+  }).build();
 
-  expect(readFileSync(cssPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+  expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
 "foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex; }
+  display: flex;
+  background: #e6f0f8 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
 /*# sourceMappingURL=... */"
+`);
+});
+
+it('builds dark themed SASS', async () => {
+  const targetPath = resolve(TMP, 'style.css');
+  await new Build({
+    sourcePath: FIXTURE,
+    log: {
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    theme: 'dark',
+    targetPath,
+  }).build();
+
+  expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+    .toMatchInlineSnapshot(`
+"foo bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: #191919 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
+/*# sourceMappingURL=... */"
+`);
+});
+
+it('rewrites url imports', async () => {
+  const targetPath = resolve(TMP, 'style.css');
+  await new Build({
+    sourcePath: FIXTURE,
+    log: {
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    theme: 'dark',
+    targetPath,
+    urlImports: {
+      publicDir: dirname(FIXTURE),
+      urlBase: 'foo/bar',
+    },
+  }).build();
+
+  expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+    .toMatchInlineSnapshot(`
+"foo bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: #191919 url(__REPLACE_WITH_PUBLIC_PATH__foo/bar/images/img.png) url(__REPLACE_WITH_PUBLIC_PATH__ui/favicons/favicon.ico); }
+/*# sourceMappingURL=... */"
+`);
+
+  expect(
+    Buffer.compare(
+      readFileSync(resolve(TMP, 'images/img.png')),
+      readFileSync(resolve(dirname(FIXTURE), 'images/img.png'))
+    )
+  ).toBe(0);
+
+  expect(await globby('**/*', { cwd: TMP })).toMatchInlineSnapshot(`
+Array [
+  "style.css",
+  "images/img.png",
+]
 `);
 });

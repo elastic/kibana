@@ -28,6 +28,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.salesByCategoryTitle', {
         defaultMessage: '[eCommerce] Sales by Category',
@@ -46,6 +47,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.salesByGenderTitle', {
         defaultMessage: '[eCommerce] Sales by Gender',
@@ -64,6 +66,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.markdownTitle', {
         defaultMessage: '[eCommerce] Markdown',
@@ -82,6 +85,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.controlsTitle', {
         defaultMessage: '[eCommerce] Controls',
@@ -100,6 +104,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:17:30.755Z",
     "version": 2,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.promotionTrackingTitle', {
         defaultMessage: '[eCommerce] Promotion Tracking',
@@ -118,6 +123,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.totalRevenueTitle', {
         defaultMessage: '[eCommerce] Total Revenue',
@@ -136,6 +142,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.soldProductsPerDayTitle', {
         defaultMessage: '[eCommerce] Sold Products per Day',
@@ -154,6 +161,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSalesPriceTitle', {
         defaultMessage: '[eCommerce] Average Sales Price',
@@ -172,6 +180,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
         defaultMessage: '[eCommerce] Average Sold Quantity',
@@ -190,6 +199,7 @@ export const getSavedObjects = () => [
     "type": "search",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.ordersTitle', {
         defaultMessage: '[eCommerce] Orders',
@@ -217,6 +227,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
         defaultMessage: '[eCommerce] Average Sales Per Region',
@@ -235,6 +246,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.topSellingProductsTitle', {
         defaultMessage: '[eCommerce] Top Selling Products',
@@ -253,6 +265,7 @@ export const getSavedObjects = () => [
     "type": "index-pattern",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": "kibana_sample_data_ecommerce",
       "timeFieldName": "order_date",
@@ -265,6 +278,7 @@ export const getSavedObjects = () => [
     "type": "dashboard",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardTitle', {
         defaultMessage: '[eCommerce] Revenue Dashboard',
@@ -274,7 +288,7 @@ export const getSavedObjects = () => [
         defaultMessage: 'Analyze mock eCommerce orders and revenue',
       }),
       "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Men's Accessories\":\"#82B5D8\",\"Men's Clothing\":\"#F9BA8F\",\"Men's Shoes\":\"#F29191\",\"Women's Accessories\":\"#F4D598\",\"Women's Clothing\":\"#70DBED\",\"Women's Shoes\":\"#B7DBAB\"}}},\"gridData\":{\"x\":12,\"y\":18,\"w\":36,\"h\":10,\"i\":\"1\"},\"id\":\"37cc8650-b882-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"FEMALE\":\"#6ED0E0\",\"MALE\":\"#447EBC\"},\"legendOpen\":false}},\"gridData\":{\"x\":12,\"y\":7,\"w\":12,\"h\":11,\"i\":\"2\"},\"id\":\"ed8436b0-b88b-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":18,\"h\":7,\"i\":\"3\"},\"id\":\"09ffee60-b88c-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":7,\"i\":\"4\"},\"id\":\"1c389590-b88d-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":28,\"w\":48,\"h\":11,\"i\":\"5\"},\"id\":\"45e07720-b890-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"5\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":18,\"w\":12,\"h\":10,\"i\":\"6\"},\"id\":\"10f1a240-b891-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"6\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":7,\"w\":12,\"h\":11,\"i\":\"7\"},\"id\":\"b80e6540-b891-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 50\":\"#E24D42\",\"50 - 75\":\"#EAB839\",\"75 - 100\":\"#7EB26D\"},\"defaultColors\":{\"0 - 50\":\"rgb(165,0,38)\",\"50 - 75\":\"rgb(255,255,190)\",\"75 - 100\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"gridData\":{\"x\":24,\"y\":7,\"w\":12,\"h\":11,\"i\":\"8\"},\"id\":\"4b3ec120-b892-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"8\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 2\":\"#E24D42\",\"2 - 3\":\"#F2C96D\",\"3 - 4\":\"#9AC48A\"},\"defaultColors\":{\"0 - 2\":\"rgb(165,0,38)\",\"2 - 3\":\"rgb(255,255,190)\",\"3 - 4\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"gridData\":{\"x\":36,\"y\":7,\"w\":12,\"h\":11,\"i\":\"9\"},\"id\":\"9ca7aa90-b892-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":18,\"i\":\"10\"},\"id\":\"3ba638e0-b894-11e8-a6d9-e546fe2bba5f\",\"panelIndex\":\"10\",\"type\":\"search\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"mapZoom\":2,\"mapCenter\":[28.304380682962783,-22.148437500000004]},\"gridData\":{\"x\":0,\"y\":39,\"w\":24,\"h\":15,\"i\":\"11\"},\"id\":\"9c6f83f0-bb4d-11e8-9c84-77068524bcab\",\"panelIndex\":\"11\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":24,\"y\":39,\"w\":24,\"h\":15,\"i\":\"12\"},\"id\":\"b72dd430-bb4d-11e8-9c84-77068524bcab\",\"panelIndex\":\"12\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
-      "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
       "timeTo": "now",

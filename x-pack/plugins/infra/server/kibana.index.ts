@@ -5,22 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginProperties, Server } from 'hapi';
+import { Server } from 'hapi';
 import JoiNamespace from 'joi';
-import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
 
-interface KibanaPluginProperties extends PluginProperties {
-  xpack_main: {
-    registerFeature: (feature: Feature) => void;
-  };
-}
-
 export interface KbnServer extends Server {
   usage: any;
-  plugins: KibanaPluginProperties;
 }
 
 export const initServerWithKibana = (kbnServer: KbnServer) => {
@@ -33,14 +25,15 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
     id: 'infrastructure',
-    name: i18n.translate('xpack.infra.linkInfrastructureTitle', {
+    name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
       defaultMessage: 'Infrastructure',
     }),
+    icon: 'infraApp',
     navLinkId: 'infra:home',
+    app: ['infra', 'kibana'],
+    catalogue: ['infraops'],
     privileges: {
-      all: {
-        catalogue: ['infraops'],
-        app: ['infra', 'kibana'],
+      read: {
         savedObject: {
           all: [],
           read: ['config'],
@@ -52,14 +45,15 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
 
   xpackMainPlugin.registerFeature({
     id: 'logs',
-    name: i18n.translate('xpack.infra.linkLogsTitle', {
+    name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
       defaultMessage: 'Logs',
     }),
+    icon: 'loggingApp',
     navLinkId: 'infra:logs',
+    app: ['infra', 'kibana'],
+    catalogue: ['infralogging'],
     privileges: {
-      all: {
-        catalogue: ['infralogging'],
-        app: ['infra', 'kibana'],
+      read: {
         savedObject: {
           all: [],
           read: ['config'],
@@ -77,18 +71,10 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     fields: Joi.object({
       container: Joi.string(),
       host: Joi.string(),
-      message: Joi.array()
-        .items(Joi.string())
-        .single(),
       pod: Joi.string(),
       tiebreaker: Joi.string(),
       timestamp: Joi.string(),
     }),
-  });
-
-  const InfraSourceConfigSchema = InfraDefaultSourceConfigSchema.keys({
-    metricAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'metricAlias').required(),
-    logAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'logAlias').required(),
   });
 
   const InfraRootConfigSchema = Joi.object({
@@ -101,9 +87,15 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
       .keys({
         default: InfraDefaultSourceConfigSchema,
       })
-      .pattern(/.*/, InfraSourceConfigSchema)
       .default(),
   }).default();
 
   return InfraRootConfigSchema;
 };
+
+export const getDeprecations = () => [];
+
+// interface DeprecationHelpers {
+//   rename(oldKey: string, newKey: string): (settings: unknown, log: unknown) => void;
+//   unused(oldKey: string): (settings: unknown, log: unknown) => void;
+// }

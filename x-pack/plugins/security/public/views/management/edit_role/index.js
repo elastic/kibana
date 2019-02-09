@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiCapabilities } from 'ui/capabilities';
+import { kfetch } from 'ui/kfetch';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
 import 'angular-ui-select';
@@ -28,8 +28,7 @@ import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -65,10 +64,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             indices: [],
             run_as: [],
           },
-          kibana: {
-            global: [],
-            space: {},
-          },
+          kibana: [],
           _unrecognized_applications: [],
         }));
       }
@@ -90,6 +86,12 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         return new SpacesManager($http, chrome).getSpaces();
       }
       return [];
+    },
+    privileges() {
+      return  kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+    },
+    features() {
+      return kfetch({ method: 'get', pathname: '/api/features/v1' });
     }
   },
   controllerAs: 'editRole',
@@ -102,7 +104,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const xpackInfo = Private(XPackInfoProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
-    const rbacApplication = chrome.getInjected('rbacApplication');
 
     if (role.elasticsearch.indices.length === 0) {
       const emptyOption = {
@@ -127,28 +128,29 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       users,
       indexPatterns,
       spaces,
+      privileges,
+      features,
     } = $route.current.locals;
 
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <EditRolePage
             runAsUsers={users}
             role={role}
-            kibanaAppPrivileges={KibanaAppPrivileges}
             indexPatterns={indexPatterns}
-            rbacEnabled={true}
-            rbacApplication={rbacApplication}
             httpClient={$http}
             allowDocumentLevelSecurity={allowDocumentLevelSecurity}
             allowFieldLevelSecurity={allowFieldLevelSecurity}
             spaces={spaces}
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={uiCapabilities}
+            features={features}
+            privileges={privileges}
           />
-        </I18nProvider>, domNode);
+        </I18nContext>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

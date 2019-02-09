@@ -42,6 +42,7 @@ export const CheckupControlsUI: StatelessComponent<CheckupControlsProps> = ({
   <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
     <EuiFlexItem grow={true}>
       <EuiFieldSearch
+        aria-label="Filter"
         placeholder={intl.formatMessage({
           id: 'xpack.upgradeAssistant.checkupTab.controls.searchBarPlaceholder',
           defaultMessage: 'Filter',

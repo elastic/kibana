@@ -1,12 +1,12 @@
 {
-  "hits": 0, 
-  "timeRestore": false, 
-  "description": "", 
-  "title": "ML Apache2 Access Remote IP URL Explorer", 
-  "uiStateJSON": "{\"P-2\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-3\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-5\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}}", 
-  "panelsJSON": "[{\"col\":1,\"id\":\"ML-Apache2-Access-Unique-Count-URL-Timechart\",\"panelIndex\":1,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"ML-Apache2-Access-Response-Code-Timechart\",\"panelIndex\":2,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"ML-Apache2-Access-Top-Remote-IPs-Table\",\"panelIndex\":3,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"ML-Apache2-Access-Map\",\"panelIndex\":4,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"size_x\":12,\"size_y\":8,\"panelIndex\":5,\"type\":\"visualization\",\"id\":\"ML-Apache2-Access-Top-URLs-Table\",\"col\":1,\"row\":7}]", 
-  "optionsJSON": "{\"darkTheme\":false}", 
-  "version": 1, 
+  "hits": 0,
+  "timeRestore": false,
+  "description": "",
+  "title": "ML Apache2 Access Remote IP URL Explorer",
+  "uiStateJSON": "{\"P-2\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-3\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-5\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}}",
+  "panelsJSON": "[{\"col\":1,\"id\":\"ML-Apache2-Access-Unique-Count-URL-Timechart\",\"panelIndex\":1,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"ML-Apache2-Access-Response-Code-Timechart\",\"panelIndex\":2,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"ML-Apache2-Access-Top-Remote-IPs-Table\",\"panelIndex\":3,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"ML-Apache2-Access-Map\",\"panelIndex\":4,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"size_x\":12,\"size_y\":8,\"panelIndex\":5,\"type\":\"visualization\",\"id\":\"ML-Apache2-Access-Top-URLs-Table\",\"col\":1,\"row\":7}]",
+  "optionsJSON": "{}",
+  "version": 1,
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}],\"highlightAll\":true,\"version\":true}"
   }

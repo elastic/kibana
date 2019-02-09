@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function addToSiri(series, point, id, label, formatter) {
+export function addToSiri(series, point, id, label, format) {
   id = id == null ? '' : id + '';
 
   if (series.has(id)) {
@@ -30,6 +30,6 @@ export function addToSiri(series, point, id, label, formatter) {
     label: label == null ? id : label,
     count: 0,
     values: [point],
-    yAxisFormatter: formatter,
+    format: format,
   });
 }

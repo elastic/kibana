@@ -5,8 +5,12 @@
  */
 
 import expect from 'expect.js';
+import { UICapabilities } from 'ui/capabilities';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  GetUICapabilitiesFailureReason,
+  UICapabilitiesService,
+} from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
@@ -20,58 +24,68 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           username: scenario.username,
           password: scenario.password,
         });
+
+        const capabilities: UICapabilities = uiCapabilities.value as UICapabilities;
+
         switch (scenario.username) {
           // these users have a read/write view of Discover
-          case 'no_kibana_privileges': // we're stuck with this one until post 7.0
           case 'superuser':
           case 'all':
-          case 'legacy_all':
-          case 'legacy_read':
           case 'dual_privileges_all':
           case 'discover_all':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               save: true,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users have a read-only view of Discover
           case 'dual_privileges_read':
           case 'discover_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users can't do anything with Discover
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
           case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':
           case 'dashboard_all':
           case 'dashboard_read':
-          case 'dev_tools_all':
+          case 'dev_tools_read':
           case 'graph_all':
           case 'graph_read':
-          case 'gis_all':
-          case 'gis_read':
-          case 'infrastructure_all':
-          case 'logs_all':
+          case 'maps_all':
+          case 'maps_read':
+          case 'infrastructure_read':
+          case 'logs_read':
           case 'ml_all':
           case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
-          case 'uptime_all':
+          case 'uptime_read':
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: false,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(false);
+            break;
+          case 'no_kibana_privileges':
+          case 'legacy_all':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);

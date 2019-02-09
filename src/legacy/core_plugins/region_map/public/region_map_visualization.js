@@ -79,7 +79,9 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       const metricFieldFormatter = getFormat(this._vis.params.metric.format);
 
       this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
-      this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, termColumn.name, valueColumn.name);
+      if (termColumn && valueColumn) {
+        this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, termColumn.name, valueColumn.name);
+      }
 
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }

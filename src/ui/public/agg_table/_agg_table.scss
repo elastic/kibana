@@ -36,14 +36,3 @@ kbn-agg-table-group {
     padding: 0;
   }
 }
-
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  .kbnAggTable__paginated {
-    tr:hover td,
-    .kbnTableCellFilter {
-      background-color: $euiColorLightestShade;
-    }
-  }
-}

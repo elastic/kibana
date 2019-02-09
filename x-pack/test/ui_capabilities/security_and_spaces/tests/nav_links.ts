@@ -29,8 +29,6 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         switch (scenario.id) {
           case 'superuser at everything_space':
           case 'global_all at everything_space':
-          case 'legacy_all at everything_space':
-          case 'legacy_read at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'global_read at everything_space':
@@ -42,8 +40,6 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             break;
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
-          case 'legacy_all at nothing_space':
-          case 'legacy_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'global_read at nothing_space':
@@ -55,6 +51,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             break;
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
+          case 'legacy_all at everything_space':
+          case 'legacy_all at nothing_space':
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':

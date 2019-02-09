@@ -9,16 +9,14 @@ import Joi from 'joi';
 import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
-export interface FeaturePrivilegeDefinition {
-  metadata?: {
-    tooltip?: string;
-  };
+export interface FeatureKibanaPrivileges {
+  grantWithBaseRead?: boolean;
   management?: {
     [sectionId: string]: string[];
   };
   catalogue?: string[];
   api?: string[];
-  app: string[];
+  app?: string[];
   savedObject: {
     all: string[];
     read: string[];
@@ -33,9 +31,15 @@ export interface Feature {
   icon?: IconType;
   description?: string;
   navLinkId?: string;
-  privileges: {
-    [key: string]: FeaturePrivilegeDefinition;
+  app: string[];
+  management?: {
+    [sectionId: string]: string[];
   };
+  catalogue?: string[];
+  privileges: {
+    [key: string]: FeatureKibanaPrivileges;
+  };
+  privilegesTooltip?: string;
 }
 
 // Each feature gets its own property on the UICapabilities object,
@@ -45,6 +49,12 @@ const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'managem
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
+
+const managementSchema = Joi.object().pattern(
+  managementSectionIdRegex,
+  Joi.array().items(Joi.string())
+);
+const catalogueSchema = Joi.array().items(Joi.string());
 
 const schema = Joi.object({
   id: Joi.string()
@@ -56,19 +66,20 @@ const schema = Joi.object({
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string(),
+  app: Joi.array()
+    .items(Joi.string())
+    .required(),
+  management: managementSchema,
+  catalogue: catalogueSchema,
   privileges: Joi.object()
     .pattern(
       featurePrivilegePartRegex,
       Joi.object({
-        metadata: Joi.object({
-          tooltip: Joi.string(),
-        }),
-        management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
-        catalogue: Joi.array().items(Joi.string()),
+        grantWithBaseRead: Joi.bool(),
+        management: managementSchema,
+        catalogue: catalogueSchema,
         api: Joi.array().items(Joi.string()),
-        app: Joi.array()
-          .items(Joi.string())
-          .required(),
+        app: Joi.array().items(Joi.string()),
         savedObject: Joi.object({
           all: Joi.array()
             .items(Joi.string())
@@ -83,6 +94,7 @@ const schema = Joi.object({
       })
     )
     .required(),
+  privilegesTooltip: Joi.string(),
 });
 
 export class FeatureRegistry {
@@ -93,10 +105,8 @@ export class FeatureRegistry {
     if (this.locked) {
       throw new Error(`Features are locked, can't register new features`);
     }
-    const validateResult = Joi.validate(feature, schema);
-    if (validateResult.error) {
-      throw validateResult.error;
-    }
+
+    validateFeature(feature);
 
     if (feature.id in this.features) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
@@ -109,4 +119,60 @@ export class FeatureRegistry {
     this.locked = true;
     return _.cloneDeep(Object.values(this.features));
   }
+}
+
+function validateFeature(feature: Feature) {
+  const validateResult = Joi.validate(feature, schema);
+  if (validateResult.error) {
+    throw validateResult.error;
+  }
+  // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
+  const { app = [], management = {}, catalogue = [] } = feature;
+
+  Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
+    const unknownAppEntries = _.difference(privilegeDefinition.app || [], app);
+    if (unknownAppEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown app entries: ${unknownAppEntries.join(', ')}`
+      );
+    }
+
+    const unknownCatalogueEntries = _.difference(privilegeDefinition.catalogue || [], catalogue);
+    if (unknownCatalogueEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown catalogue entries: ${unknownCatalogueEntries.join(', ')}`
+      );
+    }
+
+    Object.entries(privilegeDefinition.management || {}).forEach(
+      ([managementSectionId, managementEntry]) => {
+        if (!management[managementSectionId]) {
+          throw new Error(
+            `Feature privilege ${
+              feature.id
+            }.${privilegeId} has unknown management section: ${managementSectionId}`
+          );
+        }
+
+        const unknownSectionEntries = _.difference(
+          managementEntry,
+          management[managementSectionId]
+        );
+
+        if (unknownSectionEntries.length > 0) {
+          throw new Error(
+            `Feature privilege ${
+              feature.id
+            }.${privilegeId} has unknown management entries for section ${managementSectionId}: ${unknownSectionEntries.join(
+              ', '
+            )}`
+          );
+        }
+      }
+    );
+  });
 }

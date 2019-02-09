@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { initTransactionsApi } from './server/routes/transactions';
 import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
@@ -34,6 +33,7 @@ export function apm(kibana) {
         euiIconType: 'apmApp',
         order: 8100
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
@@ -71,12 +71,16 @@ export function apm(kibana) {
     init(server) {
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
-        name: 'APM',
+        name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
+          defaultMessage: 'APM'
+        }),
         icon: 'apmApp',
         navLinkId: 'apm',
+        app: ['apm', 'kibana'],
+        catalogue: ['apm'],
         privileges: {
           all: {
-            app: ['apm', 'kibana'],
+            grantWithBaseRead: true,
             catalogue: ['apm'],
             savedObject: {
               all: [],
@@ -84,10 +88,13 @@ export function apm(kibana) {
             },
             ui: []
           }
-        }
+        },
+        privilegesTooltip: i18n.translate('xpack.apm.privileges.tooltip', {
+          defaultMessage:
+            'A role with access to the apm-* indicies should be assigned to users to grant access'
+        })
       });
 
-      initTransactionsApi(server);
       initTransactionGroupsApi(server);
       initTracesApi(server);
       initServicesApi(server);

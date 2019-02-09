@@ -5,6 +5,7 @@
  */
 
 import { AggregationSearchResponse } from 'elasticsearch';
+import { getMlIndex } from 'x-pack/plugins/apm/common/ml_job_constants';
 import { Setup } from '../../../helpers/setup_request';
 
 export interface ESBucket {
@@ -42,7 +43,7 @@ export async function anomalySeriesFetcher({
   intervalString: string;
   mlBucketSize: number;
   setup: Setup;
-}) {
+}): Promise<ESResponse | undefined> {
   const { client, start, end } = setup;
 
   // move the start back with one bucket size, to ensure to get anomaly data in the beginning
@@ -50,7 +51,7 @@ export async function anomalySeriesFetcher({
   const newStart = start - mlBucketSize * 1000;
 
   const params = {
-    index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`.toLowerCase(),
+    index: getMlIndex(serviceName, transactionType),
     body: {
       size: 0,
       query: {

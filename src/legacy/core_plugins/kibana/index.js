@@ -21,6 +21,7 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import { resolve } from 'path';
 
+import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
 import { searchApi } from './server/routes/api/search';
 import { scrollSearchApi } from './server/routes/api/scroll_search';
@@ -164,7 +165,9 @@ export default function (kibana) {
               showWriteControls: true
             },
             dashboard: {
-              showWriteControls: true
+              createNew: true,
+              show: true,
+              showWriteControls: true,
             },
             catalogue: {
               discover: true,
@@ -174,6 +177,9 @@ export default function (kibana) {
               advanced_settings: true,
               saved_objects: true,
               index_patterns: true,
+            },
+            advancedSettings: {
+              save: true
             },
             management: {
               /*
@@ -191,6 +197,8 @@ export default function (kibana) {
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
+
+      migrations,
     },
 
     preInit: async function (server) {

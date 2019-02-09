@@ -16,11 +16,13 @@ describe('validateSpaceName', () => {
         {
           id: 'foo',
           name: 'foo',
+          app: [],
           privileges: {},
         },
         {
           id: 'bar',
           name: 'bar',
+          app: [],
           privileges: {},
         },
       ],

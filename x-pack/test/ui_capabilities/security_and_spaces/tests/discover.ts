@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { UICapabilities } from 'ui/capabilities';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import {
   GetUICapabilitiesFailureReason,
@@ -25,55 +26,58 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           { username: user.username, password: user.password },
           space.id
         );
+        const capabilities: UICapabilities = uiCapabilities.value as UICapabilities;
         switch (scenario.id) {
           // these users have a read/write view of Discover
           case 'superuser at everything_space':
           case 'global_all at everything_space':
-          case 'legacy_all at everything_space':
-          case 'legacy_read at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities.discover).to.eql({
               show: true,
               save: true,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users have a read only view of Discover
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities.discover).to.eql({
               show: true,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // the nothing_space has no features enabled, so even if we have
           // privileges to perform these actions, we won't be able to
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
           case 'global_read at nothing_space':
-          case 'legacy_all at nothing_space':
-          case 'legacy_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities.discover).to.eql({
               show: false,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(false);
             break;
           // if we don't have access at the space itself, we're
           // redirected to the space selector and the ui capabilities
           // are lagely irrelevant because they won't be consumed
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
+          case 'legacy_all at everything_space':
+          case 'legacy_all at nothing_space':
           case 'everything_space_all at nothing_space':
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':

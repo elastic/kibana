@@ -11,7 +11,7 @@ import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
-export function createAuthorizationService(server, xpackInfoFeature, savedObjectTypes, xpackMainPlugin, spaces) {
+export function createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces) {
   const shieldClient = getClient(server);
   const config = server.config();
 
@@ -20,13 +20,9 @@ export function createAuthorizationService(server, xpackInfoFeature, savedObject
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(actions, application, shieldClient);
   const checkPrivilegesDynamicallyWithRequest = checkPrivilegesDynamicallyWithRequestFactory(checkPrivilegesWithRequest, spaces);
   const mode = authorizationModeFactory(
-    application,
-    config,
-    (...args) => server.log(...args),
-    shieldClient,
     xpackInfoFeature,
   );
-  const privileges = privilegesFactory(savedObjectTypes, actions, xpackMainPlugin);
+  const privileges = privilegesFactory(actions, xpackMainPlugin);
 
   return {
     actions,

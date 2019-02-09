@@ -43,7 +43,11 @@ describe('formatters', () => {
 
     it('should return fallback when denominator is 0 ', () => {
       expect(asPercent(3725, 0, 'n/a')).toEqual('n/a');
-      expect(asPercent(3725, 0)).toEqual('');
+    });
+
+    it('should return fallback when numerator or denominator is NaN', () => {
+      expect(asPercent(3725, NaN, 'n/a')).toEqual('n/a');
+      expect(asPercent(NaN, 10000, 'n/a')).toEqual('n/a');
     });
   });
 });

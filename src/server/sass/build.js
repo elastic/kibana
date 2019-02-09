@@ -17,30 +17,60 @@
  * under the License.
  */
 
-import path from 'path';
+import { resolve, relative, dirname, join } from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'node-sass';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
+import postcssUrl from 'postcss-url';
 import mkdirp from 'mkdirp';
+import chalk from 'chalk';
+import isPathInside from 'is-path-inside';
+import { PUBLIC_PATH_PLACEHOLDER } from '../../optimize/public_path_placeholder';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
+const exists = promisify(fs.exists);
+const copyFile = promisify(fs.copyFile);
 const mkdirpAsync = promisify(mkdirp);
 
+const UI_ASSETS_DIR = resolve(__dirname, '../../ui/public/assets');
+const DARK_THEME_IMPORTER = (url) => {
+  if (url.includes('eui_colors_light')) {
+    return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
+  }
+
+  return { file: url };
+};
+
+const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
+  const relativePath = relative(root, path);
+  return {
+    path,
+    root,
+    boundry,
+    url: join(`${PUBLIC_PATH_PLACEHOLDER}${urlRoot}`, relativePath).replace(/\\/g, '/'),
+    copyTo: copyRoot ? resolve(copyRoot, relativePath) : undefined,
+    requestUrl: request.url,
+  };
+};
+
 export class Build {
-  constructor(source, log, targetPath) {
-    this.source = source;
+  constructor({ log, sourcePath, targetPath, urlImports, theme }) {
     this.log = log;
+    this.sourcePath = sourcePath;
+    this.sourceDir = dirname(this.sourcePath);
     this.targetPath = targetPath;
-    this.includedFiles = [source];
+    this.targetDir = dirname(this.targetPath);
+    this.urlImports = urlImports;
+    this.theme = theme;
+    this.includedFiles = [sourcePath];
   }
 
   /**
    * Glob based on source path
    */
-
   async buildIfIncluded(path) {
     if (this.includedFiles && this.includedFiles.includes(path)) {
       await this.build();
@@ -56,23 +86,102 @@ export class Build {
 
   async build() {
     const rendered = await renderSass({
-      file: this.source,
+      file: this.sourcePath,
       outFile: this.targetPath,
       sourceMap: true,
       sourceMapEmbed: true,
       includePaths: [
-        path.resolve(__dirname, '../..'),
-        path.resolve(__dirname, '../../../node_modules')
-      ]
+        resolve(__dirname, '../..'),
+        resolve(__dirname, '../../../node_modules'),
+      ],
+      importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
     });
 
-    const prefixed = postcss([ autoprefixer ]).process(rendered.css);
+    const processor = postcss([ autoprefixer ]);
 
-    this.includedFiles = rendered.stats.includedFiles;
+    const urlAssets = [];
 
-    await mkdirpAsync(path.dirname(this.targetPath));
+    if (this.urlImports) {
+      processor.use(postcssUrl({
+        url: (request) => {
+          if (!request.pathname) {
+            return request.url;
+          }
+
+          const asset = makeAsset(request, (
+            request.pathname.startsWith('ui/assets')
+              ? {
+                path: resolve(UI_ASSETS_DIR, relative('ui/assets', request.pathname)),
+                root: UI_ASSETS_DIR,
+                boundry: UI_ASSETS_DIR,
+                urlRoot: `ui/`,
+              }
+              : {
+                path: resolve(this.sourceDir, request.pathname),
+                root: this.sourceDir,
+                boundry: this.urlImports.publicDir,
+                urlRoot: this.urlImports.urlBase,
+                copyRoot: this.targetDir,
+              }
+          ));
+
+          if (!urlAssets.some(({ path, copyTo }) => path === asset.path && copyTo === asset.copyTo)) {
+            urlAssets.push(asset);
+          }
+
+          return asset.url;
+        }
+      }));
+    }
+
+    const prefixed = await processor.process(rendered.css, {
+      from: this.sourcePath
+    });
+
+    this.includedFiles = [
+      ...rendered.stats.includedFiles,
+      ...urlAssets.map(({ path }) => path),
+    ];
+
+    // verify that asset sources exist and import is valid before writing anything
+    await Promise.all(urlAssets.map(async (asset) => {
+      if (!await exists(asset.path)) {
+        throw this._makeError(
+          'Invalid url() in css output',
+          `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
+          `  Make sure that the request is relative to "${asset.root}"`
+        );
+      }
+
+      if (!isPathInside(asset.path, asset.boundry)) {
+        throw this._makeError(
+          'Invalid url() in css output',
+          `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
+          `  which is outside of "${asset.boundry}"`
+        );
+      }
+    }));
+
+    // write css
+    await mkdirpAsync(this.targetDir);
     await writeFile(this.targetPath, prefixed.css);
 
+    // copy non-shared urlAssets
+    await Promise.all(urlAssets.map(async (asset) => {
+      if (!asset.copyTo) {
+        return;
+      }
+
+      await mkdirpAsync(dirname(asset.copyTo));
+      await copyFile(asset.path, asset.copyTo);
+    }));
+
     return this;
+  }
+
+  _makeError(title, message) {
+    const error = new Error(`${chalk.red(`${title} [${this.sourcePath}]`)}\n\n  ${message}\n`);
+    error.file = this.sourcePath;
+    return error;
   }
 }

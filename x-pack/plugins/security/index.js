@@ -10,6 +10,7 @@ import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initPublicRolesApi } from './server/routes/api/public/roles';
+import { initPrivilegesApi } from './server/routes/api/public/privileges';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
@@ -47,13 +48,19 @@ export const security = (kibana) => new kibana.Plugin({
       }).default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true) // deprecated
         }).default()
       }).default(),
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
     }).default();
+  },
+
+  deprecations: function ({ unused }) {
+    return [
+      unused('authorization.legacyFallback.enabled'),
+    ];
   },
 
   uiExports: {
@@ -94,7 +101,7 @@ export const security = (kibana) => new kibana.Plugin({
       // if we have a license which doesn't enable security, or we're a legacy user
       // we shouldn't disable any ui capabilities
       const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
+      if (!authorization.mode.useRbac()) {
         return originalInjectedVars;
       }
 
@@ -155,7 +162,7 @@ export const security = (kibana) => new kibana.Plugin({
     const spaces = createOptionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
 
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin, spaces);
+    const authorization = createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
@@ -167,7 +174,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      if (authorization.mode.useRbacForRequest(request)) {
+      if (authorization.mode.useRbac()) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
         return new savedObjects.SavedObjectsClient(internalRepository);
       }
@@ -177,8 +184,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
-      if (authorization.mode.useRbacForRequest(request)) {
-
+      if (authorization.mode.useRbac()) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
@@ -195,11 +201,12 @@ export const security = (kibana) => new kibana.Plugin({
 
     getUserProvider(server);
 
-    await initAuthenticator(server, authorization.mode);
+    await initAuthenticator(server);
     initAuthenticateApi(server);
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
+    initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
     initLoggedOutView(server);
@@ -225,7 +232,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
 
       // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbacForRequest(req)) {
+      if (!mode.useRbac()) {
         return h.continue;
       }
 

@@ -30,8 +30,10 @@ export function onBrushEvent(event, $state) {
   if (!xRaw) return;
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return;
-  const indexPattern = column.aggConfig.getIndexPattern();
-  const field = column.aggConfig.params.field;
+  const aggConfig = event.aggConfigs[xRaw.column];
+  if (!aggConfig) return;
+  const indexPattern = aggConfig.getIndexPattern();
+  const field = aggConfig.params.field;
   if (!field) return;
   const fieldName = field.name;
 

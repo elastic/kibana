@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
@@ -14,6 +15,7 @@ import { isValidHttpUrl } from '../../../../common/lib/httpurl';
 import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import './image_upload.scss';
+import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { FileForm, LinkForm } from './forms';
 
 class ImageUpload extends React.Component {
@@ -71,17 +73,21 @@ class ImageUpload extends React.Component {
 
   handleUpload = files => {
     const { onAssetAdd } = this.props;
-    const [upload] = files;
-    this.setState({ loading: true }); // start loading indicator
+    const [file] = files;
 
-    encode(upload)
-      .then(dataurl => onAssetAdd('dataurl', dataurl))
-      .then(assetId => {
-        this.updateAST(assetId);
+    const [type, subtype] = get(file, 'type', '').split('/');
+    if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
+      this.setState({ loading: true }); // start loading indicator
 
-        // this component can go away when onValueChange is called, check for _isMounted
-        this._isMounted && this.setState({ loading: false }); // set loading state back to false
-      });
+      encode(file)
+        .then(dataurl => onAssetAdd('dataurl', dataurl))
+        .then(assetId => {
+          this.updateAST(assetId);
+
+          // this component can go away when onValueChange is called, check for _isMounted
+          this._isMounted && this.setState({ loading: false }); // set loading state back to false
+        });
+    }
   };
 
   changeUrlType = optionId => {
@@ -119,7 +125,7 @@ class ImageUpload extends React.Component {
     );
 
     const forms = {
-      file: <FileForm loading={loading} onUpload={this.handleUpload} />,
+      file: <FileForm loading={loading} onChange={this.handleUpload} />,
       link: (
         <LinkForm
           url={url}

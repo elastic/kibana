@@ -1,6 +1,145 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`after fetch hideWriteControls 1`] = `
+exports[`after fetch hideWriteControls with dashboards 1`] = `
+<EuiPage
+  className="dshDashboardListing__page"
+  data-test-subj="dashboardLandingPage"
+  restrictWidth={true}
+>
+  <EuiPageBody
+    restrictWidth={false}
+  >
+    <EuiPageContent
+      horizontalPosition="center"
+      panelPaddingSize="l"
+    >
+      <div>
+        <EuiFlexGroup
+          alignItems="flexEnd"
+          component="div"
+          data-test-subj="top-nav"
+          direction="row"
+          gutterSize="l"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiTitle
+              size="l"
+              textTransform="none"
+            >
+              <h1>
+                <FormattedMessage
+                  defaultMessage="Dashboards"
+                  id="kbn.dashboard.listing.dashboardsTitle"
+                  values={Object {}}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="flexStart"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFieldSearch
+              aria-label="Filter dashboards"
+              compressed={false}
+              data-test-subj="searchFilter"
+              fullWidth={true}
+              incremental={false}
+              isLoading={false}
+              onChange={[Function]}
+              placeholder="Search…"
+              value=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiBasicTable
+          columns={
+            Array [
+              Object {
+                "field": "title",
+                "name": "Title",
+                "render": [Function],
+                "sortable": true,
+              },
+              Object {
+                "dataType": "string",
+                "field": "description",
+                "name": "Description",
+                "sortable": true,
+              },
+            ]
+          }
+          itemId="id"
+          items={
+            Array [
+              Object {
+                "description": "dashboard0 desc",
+                "id": "dashboard0",
+                "title": "dashboard0 title",
+              },
+            ]
+          }
+          loading={false}
+          noItemsMessage={
+            <FormattedMessage
+              defaultMessage="No dashboards matched your search."
+              id="kbn.dashboard.listing.noMatchedDashboardsMessage"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+          pagination={
+            Object {
+              "pageIndex": 0,
+              "pageSize": 20,
+              "pageSizeOptions": Array [
+                10,
+                20,
+                50,
+              ],
+              "totalItemCount": 1,
+            }
+          }
+          responsive={true}
+          selection={null}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
+        />
+      </div>
+    </EuiPageContent>
+  </EuiPageBody>
+</EuiPage>
+`;
+
+exports[`after fetch hideWriteControls with no dashboards 1`] = `
 <EuiPage
   className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
@@ -445,7 +584,14 @@ exports[`after fetch renders table rows 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>
@@ -517,50 +663,48 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         <EuiSpacer
           size="m"
         />
-        <React.Fragment>
-          <EuiCallOut
-            color="warning"
-            iconType="help"
-            size="m"
-            title={
-              <FormattedMessage
-                defaultMessage="Listing limit exceeded"
-                id="kbn.dashboard.listing.listingLimitExceededTitle"
-                values={Object {}}
-              />
-            }
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
-                id="kbn.dashboard.listing.listingLimitExceededDescription"
-                values={
-                  Object {
-                    "advancedSettingsLink": <EuiLink
-                      color="primary"
-                      href="#/management/kibana/settings"
-                      type="button"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Advanced Settings"
-                        id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
-                        values={Object {}}
-                      />
-                    </EuiLink>,
-                    "listingLimitText": <strong>
-                      listingLimit
-                    </strong>,
-                    "listingLimitValue": 1,
-                    "totalDashboards": 2,
-                  }
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          size="m"
+          title={
+            <FormattedMessage
+              defaultMessage="Listing limit exceeded"
+              id="kbn.dashboard.listing.listingLimitExceededTitle"
+              values={Object {}}
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+              id="kbn.dashboard.listing.listingLimitExceededDescription"
+              values={
+                Object {
+                  "advancedSettingsLink": <EuiLink
+                    color="primary"
+                    href="#/management/kibana/settings"
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Advanced Settings"
+                      id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
+                      values={Object {}}
+                    />
+                  </EuiLink>,
+                  "listingLimitText": <strong>
+                    listingLimit
+                  </strong>,
+                  "listingLimitValue": 1,
+                  "totalDashboards": 2,
                 }
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer
-            size="m"
-          />
-        </React.Fragment>
+              }
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer
+          size="m"
+        />
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
@@ -657,7 +801,14 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>

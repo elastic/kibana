@@ -20,7 +20,7 @@
 
 export function initXAxis(chart) {
   const x = chart.aspects.x[0];
-  chart.xAxisFormatter = x.fieldFormatter ? x.fieldFormatter : String;
+  chart.xAxisFormat = x.format;
   chart.xAxisLabel = x.title;
   if (x.params.date) {
     chart.ordered = {

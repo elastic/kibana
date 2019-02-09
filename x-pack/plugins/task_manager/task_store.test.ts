@@ -6,15 +6,25 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import {
+  TASK_MANAGER_API_VERSION as API_VERSION,
+  TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
+} from './constants';
 import { TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
+import { mockLogger } from './test_utils';
+
+const getKibanaUuid = sinon.stub().returns('kibana-uuid-123-test');
 
 describe('TaskStore', () => {
   describe('init', () => {
     test('creates the task manager index', async () => {
-      const callCluster = sinon.spy();
+      const callCluster = sinon.stub();
+      callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
@@ -22,7 +32,7 @@ describe('TaskStore', () => {
 
       await store.init();
 
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledTwice(callCluster); // store.init calls twice: once to check for existing template, once to put the template (if needed)
 
       sinon.assert.calledWithMatch(callCluster, 'indices.putTemplate', {
         body: {
@@ -35,27 +45,65 @@ describe('TaskStore', () => {
         name: 'tasky',
       });
     });
+
+    test('logs a warning if newer index template exists', async () => {
+      const callCluster = sinon.stub();
+      callCluster
+        .withArgs('indices.getTemplate')
+        .returns(Promise.resolve({ tasky: { version: Infinity } }));
+
+      const logger = {
+        info: sinon.spy(),
+        debug: sinon.spy(),
+        warning: sinon.spy(),
+        error: sinon.spy(),
+      };
+
+      const store = new TaskStore({
+        callCluster,
+        getKibanaUuid,
+        logger,
+        index: 'tasky',
+        maxAttempts: 2,
+        supportedTypes: ['a', 'b', 'c'],
+      });
+
+      await store.init();
+      const loggingCall = logger.warning.getCall(0);
+      expect(loggingCall.args[0]).toBe(
+        `This Kibana instance defines an older template version (${TEMPLATE_VERSION}) than is currently in Elasticsearch (Infinity). ` +
+          `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
+          `"kibana.apiVersion" <= ${API_VERSION} in the task metadata.`
+      );
+      expect(logger.warning.calledOnce).toBe(true);
+    });
   });
 
   describe('schedule', () => {
     async function testSchedule(task: TaskInstance) {
-      const callCluster = sinon.spy(() =>
+      const callCluster = sinon.stub();
+      callCluster.withArgs('index').returns(
         Promise.resolve({
           _id: 'testid',
-          _version: 3344,
+          _seq_no: 3344,
+          _primary_term: 3344,
         })
       );
+      callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['report', 'dernstraight', 'yawn'],
       });
+      await store.init();
       const result = await store.schedule(task);
 
-      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledThrice(callCluster);
 
-      return { result, callCluster, arg: callCluster.args[1][1] };
+      return { result, callCluster, arg: callCluster.args[2][1] };
     }
 
     test('serializes the params and state', async () => {
@@ -70,7 +118,6 @@ describe('TaskStore', () => {
 
       expect(arg).toMatchObject({
         index: 'tasky',
-        type: '_doc',
         body: {
           task: {
             params: JSON.stringify(task.params),
@@ -80,7 +127,7 @@ describe('TaskStore', () => {
       });
     });
 
-    test('retiurns a concrete task instance', async () => {
+    test('returns a concrete task instance', async () => {
       const task = {
         params: { hello: 'world' },
         state: { foo: 'bar' },
@@ -90,7 +137,8 @@ describe('TaskStore', () => {
 
       expect(result).toMatchObject({
         ...task,
-        version: 3344,
+        sequenceNumber: 3344,
+        primaryTerm: 3344,
         id: 'testid',
       });
     });
@@ -119,6 +167,8 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
@@ -138,7 +188,6 @@ describe('TaskStore', () => {
     test('empty call filters by type, sorts by runAt and id', async () => {
       const { args } = await testFetch();
       expect(args).toMatchObject({
-        type: '_doc',
         index: 'tasky',
         body: {
           sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
@@ -257,7 +306,8 @@ describe('TaskStore', () => {
             status: 'idle',
             taskType: 'foo',
             user: 'jimbo',
-            version: undefined,
+            sequenceNumber: undefined,
+            primaryTerm: undefined,
           },
           {
             attempts: 2,
@@ -270,7 +320,8 @@ describe('TaskStore', () => {
             status: 'running',
             taskType: 'bar',
             user: 'dabo',
-            version: undefined,
+            sequenceNumber: undefined,
+            primaryTerm: undefined,
           },
         ],
         searchAfter: ['b', 2],
@@ -283,6 +334,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
+        logger: mockLogger(),
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
         maxAttempts: 2,
@@ -304,6 +356,8 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
+        logger: mockLogger(),
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
         maxAttempts: 2,
@@ -339,6 +393,7 @@ describe('TaskStore', () => {
                       { terms: { 'task.taskType': ['foo', 'bar'] } },
                       { range: { 'task.attempts': { lte: maxAttempts } } },
                       { range: { 'task.runAt': { lte: 'now' } } },
+                      { range: { 'kibana.apiVersion': { lte: 1 } } },
                     ],
                   },
                 },
@@ -347,10 +402,9 @@ describe('TaskStore', () => {
           },
           size: 10,
           sort: { 'task.runAt': { order: 'asc' } },
-          version: true,
+          seq_no_primary_term: true,
         },
         index,
-        type: '_doc',
       });
     });
 
@@ -408,7 +462,8 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'foo',
           user: 'jimbo',
-          version: undefined,
+          sequenceNumber: undefined,
+          primaryTerm: undefined,
         },
         {
           attempts: 2,
@@ -421,7 +476,8 @@ describe('TaskStore', () => {
           status: 'running',
           taskType: 'bar',
           user: 'dabo',
-          version: undefined,
+          sequenceNumber: undefined,
+          primaryTerm: undefined,
         },
       ]);
     });
@@ -432,18 +488,26 @@ describe('TaskStore', () => {
       const runAt = new Date();
       const task = {
         runAt,
+        scheduledAt: runAt,
         id: 'task:324242',
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
-        version: 2,
+        sequenceNumber: 2,
+        primaryTerm: 2,
         attempts: 3,
         status: 'idle' as TaskStatus,
       };
 
-      const callCluster = sinon.spy(async () => ({ _version: task.version + 1 }));
+      const callCluster = sinon.spy(async () => ({
+        _seq_no: task.sequenceNumber + 1,
+        _primary_term: task.primaryTerm + 1,
+      }));
+
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
+        logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
@@ -457,13 +521,13 @@ describe('TaskStore', () => {
       expect(callCluster.args[0][1]).toMatchObject({
         id: task.id,
         index: 'tasky',
-        type: '_doc',
-        version: 2,
+        if_seq_no: 2,
+        if_primary_term: 2,
         refresh: true,
         body: {
           doc: {
             task: {
-              ...['id', 'version'].reduce((acc, prop) => _.omit(acc, prop), task),
+              ..._.omit(task, ['id', 'sequenceNumber', 'primaryTerm']),
               params: JSON.stringify(task.params),
               state: JSON.stringify(task.state),
             },
@@ -471,7 +535,11 @@ describe('TaskStore', () => {
         },
       });
 
-      expect(result).toEqual({ ...task, version: 3 });
+      expect(result).toEqual({
+        ...task,
+        sequenceNumber: 3,
+        primaryTerm: 3,
+      });
     });
   });
 
@@ -482,12 +550,15 @@ describe('TaskStore', () => {
         Promise.resolve({
           _index: 'myindex',
           _id: id,
-          _version: 32,
+          _seq_no: 32,
+          _primary_term: 32,
           result: 'deleted',
         })
       );
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
+        logger: mockLogger(),
         index: 'myindex',
         maxAttempts: 2,
         supportedTypes: ['a'],
@@ -500,14 +571,14 @@ describe('TaskStore', () => {
       expect(result).toEqual({
         id,
         index: 'myindex',
-        version: 32,
+        sequenceNumber: 32,
+        primaryTerm: 32,
         result: 'deleted',
       });
 
       expect(callCluster.args[0][1]).toMatchObject({
         id,
         index: 'myindex',
-        type: '_doc',
         refresh: true,
       });
     });

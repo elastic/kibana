@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { getEnabledFeatures } from '../../lib/feature_utils';
@@ -16,6 +17,7 @@ import { FeatureTable } from './feature_table';
 interface Props {
   space: Partial<Space>;
   features: Feature[];
+  uiCapabilities: UICapabilities;
   intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
@@ -125,9 +127,27 @@ export class EnabledFeatures extends Component<Props, {}> {
           <p>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
-              defaultMessage="This is not a security mechanism."
+              defaultMessage="The feature is hidden in the UI, but is not disabled."
             />
           </p>
+          {this.props.uiCapabilities.spaces.manage && (
+            <p>
+              <FormattedMessage
+                id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
+                defaultMessage="Want to secure access? Go to {rolesLink}."
+                values={{
+                  rolesLink: (
+                    <EuiLink href="#/management/security/roles">
+                      <FormattedMessage
+                        id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
+                        defaultMessage="Roles"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          )}
         </EuiText>
       </Fragment>
     );

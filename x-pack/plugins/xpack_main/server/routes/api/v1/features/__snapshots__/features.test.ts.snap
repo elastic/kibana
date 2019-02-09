@@ -3,6 +3,7 @@
 exports[`GET /api/features/v1 does not return features that arent allowed by current license 1`] = `
 Array [
   Object {
+    "app": Array [],
     "id": "feature_1",
     "name": "Feature 1",
     "privileges": Object {},
@@ -13,11 +14,15 @@ Array [
 exports[`GET /api/features/v1 returns a list of available features 1`] = `
 Array [
   Object {
+    "app": Array [],
     "id": "feature_1",
     "name": "Feature 1",
     "privileges": Object {},
   },
   Object {
+    "app": Array [
+      "bar-app",
+    ],
     "id": "licensed_feature",
     "name": "Licensed Feature",
     "privileges": Object {},

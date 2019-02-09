@@ -5,16 +5,12 @@
  */
 
 import React from 'react';
-import { SPAN_HEX_ID, SPAN_ID } from 'x-pack/plugins/apm/common/constants';
+import { SPAN_ID } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(span: Span) {
-  const query =
-    span.version === 'v2'
-      ? `${SPAN_HEX_ID}:"${span.span.hex_id}"`
-      : `${SPAN_ID}:"${span.span.id}"`;
-
+  const query = `${SPAN_ID}:"${span.span.id}"`;
   return {
     _a: {
       interval: 'auto',

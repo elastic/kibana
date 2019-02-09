@@ -46,9 +46,13 @@ themselves, and those messages will always be in English, so we don't have to ke
 defined inline.
 
 __Note:__ locale defined in `i18n.locale` and the one used for translation files should
-match exactly, e.g. `i18n.locale: zn` and `.../translations/zh_CN.json` won't match and
-default English translations will be used, but `i18n.locale: zh_CN` and`.../translations/zh_CN.json`
-or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
+match exactly, e.g. `i18n.locale: zh` and `.../translations/zh-CN.json` won't match and
+default English translations will be used, but `i18n.locale: zh-CN` and`.../translations/zh-CN.json`
+or `i18n.locale: zh` and `.../translations/zh.json` will work as expected.
+
+__Note:__ locale should look like `zh-CN` where `zh` - lowercase two-letter or three-letter ISO-639 code
+and `CN` - uppercase two-letter ISO-3166 code (optional).
+[ISO-639](https://www.iso.org/iso-639-language-codes.html) and [ISO-3166](https://www.iso.org/iso-3166-country-codes.html) codes should be separated with `-` character.
 
 ## I18n engine
 
@@ -159,7 +163,7 @@ import { i18n } from '@kbn/i18n';
 
 export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
   defaultMessage: 'Greetings, planet Earth!',
-}),
+});
 ```
 
 One more example with a parameter:
@@ -250,18 +254,7 @@ Optionally we can pass `description` prop into `FormattedMessage` component.
 This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
-In case when ReactJS component is rendered with the help of `reactDirective` AngularJS service, it's necessary to use React HOC `injectI18nProvider` to pass `intl` object to `FormattedMessage` component via context.
-
-```js
-import { injectI18nProvider } from '@kbn/i18n/react';
-import { Header } from './components/header';
-
-module.directive('headerGlobalNav', (reactDirective) => {
-  return reactDirective(injectI18nProvider(Header));
-});
-```
-
-**NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `injectI18nProvider` or `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
+**NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
 
 ### FormattedRelative
 

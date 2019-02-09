@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { convertTableProvider } from './_convert_table';
+import { buildHierarchicalData } from './build_hierarchical_data';
 import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
 
 jest.mock('../../registry/field_formats', () => ({
@@ -34,8 +34,6 @@ jest.mock('../../chrome', () => ({
 }));
 
 describe('buildHierarchicalData convertTable', () => {
-  const mockToolTipFormatter = () => ({});
-  const convertTable = convertTableProvider(mockToolTipFormatter);
   const responseHandler = legacyResponseHandlerProvider().handler;
 
   describe('metric only', () => {
@@ -60,7 +58,7 @@ describe('buildHierarchicalData convertTable', () => {
     });
 
     it('should set the slices with one child to a consistent label', () => {
-      const results = convertTable(table, dimensions);
+      const results = buildHierarchicalData(table, dimensions);
       const checkLabel = 'Average bytes';
       expect(results).toHaveProperty('names');
       expect(results.names).toEqual([checkLabel]);
@@ -120,40 +118,40 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the correct hits attribute for each of the results', () => {
       tables.forEach(t => {
-        const results = convertTable(t.tables[0], dimensions);
+        const results = buildHierarchicalData(t.tables[0], dimensions);
         expect(results).toHaveProperty('hits');
         expect(results.hits).toBe(4);
       });
     });
 
     it('should set the correct names for each of the results', () => {
-      const results0 = convertTable(tables[0].tables[0], dimensions);
+      const results0 = buildHierarchicalData(tables[0].tables[0], dimensions);
       expect(results0).toHaveProperty('names');
       expect(results0.names).toHaveLength(5);
 
-      const results1 = convertTable(tables[1].tables[0], dimensions);
+      const results1 = buildHierarchicalData(tables[1].tables[0], dimensions);
       expect(results1).toHaveProperty('names');
       expect(results1.names).toHaveLength(5);
 
-      const results2 = convertTable(tables[2].tables[0], dimensions);
+      const results2 = buildHierarchicalData(tables[2].tables[0], dimensions);
       expect(results2).toHaveProperty('names');
       expect(results2.names).toHaveLength(4);
     });
 
     it('should set the parent of the first item in the split', () => {
-      const results0 = convertTable(tables[0].tables[0], dimensions);
+      const results0 = buildHierarchicalData(tables[0].tables[0], dimensions);
       expect(results0).toHaveProperty('slices');
       expect(results0.slices).toHaveProperty('children');
       expect(results0.slices.children).toHaveLength(2);
       expect(results0.slices.children[0].rawData.table.$parent).toHaveProperty('key', 'png');
 
-      const results1 = convertTable(tables[1].tables[0], dimensions);
+      const results1 = buildHierarchicalData(tables[1].tables[0], dimensions);
       expect(results1).toHaveProperty('slices');
       expect(results1.slices).toHaveProperty('children');
       expect(results1.slices.children).toHaveLength(2);
       expect(results1.slices.children[0].rawData.table.$parent).toHaveProperty('key', 'css');
 
-      const results2 = convertTable(tables[2].tables[0], dimensions);
+      const results2 = buildHierarchicalData(tables[2].tables[0], dimensions);
       expect(results2).toHaveProperty('slices');
       expect(results2.slices).toHaveProperty('children');
       expect(results2.slices.children).toHaveLength(2);
@@ -191,7 +189,7 @@ describe('buildHierarchicalData convertTable', () => {
     });
 
     it('should set the hits attribute for the results', () => {
-      const results = convertTable(table, dimensions);
+      const results = buildHierarchicalData(table, dimensions);
       expect(results).toHaveProperty('raw');
       expect(results).toHaveProperty('slices');
       expect(results.slices).toHaveProperty('children');
@@ -226,7 +224,7 @@ describe('buildHierarchicalData convertTable', () => {
     });
 
     it('should set the hits attribute for the results', () => {
-      const results = convertTable(table, dimensions);
+      const results = buildHierarchicalData(table, dimensions);
       expect(results).toHaveProperty('raw');
       expect(results).toHaveProperty('slices');
       expect(results.slices).toHaveProperty('children');
@@ -261,7 +259,7 @@ describe('buildHierarchicalData convertTable', () => {
     });
 
     it('should set the hits attribute for the results', () => {
-      const results = convertTable(table, dimensions);
+      const results = buildHierarchicalData(table, dimensions);
       expect(results).toHaveProperty('raw');
       expect(results).toHaveProperty('slices');
       expect(results).toHaveProperty('names');

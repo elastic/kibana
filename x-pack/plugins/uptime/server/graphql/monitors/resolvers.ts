@@ -7,12 +7,15 @@
 import { UMGqlRange } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
+  FilterBar,
   GetErrorsListQueryArgs,
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
+  GetMonitorPageTitleQueryArgs,
   GetMonitorsQueryArgs,
   GetSnapshotQueryArgs,
+  MonitorPageTitle,
   Ping,
   Snapshot,
 } from '../../../common/graphql/types';
@@ -63,6 +66,13 @@ export type UMGetErrorsListResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetMontiorPageTitleResolver = UMResolver<
+  MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
+  any,
+  GetMonitorPageTitleQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
@@ -73,6 +83,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
     getErrorsList: UMGetErrorsListResolver;
+    getMonitorPageTitle: UMGetMontiorPageTitleResolver;
   };
 } => ({
   Query: {
@@ -83,26 +94,18 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         monitors: result,
       };
     },
-    async getSnapshot(
-      resolver,
-      { dateRangeStart, dateRangeEnd, downCount, windowSize, filters },
-      { req }
-    ): Promise<any> {
-      const { up, down, trouble } = await libs.monitors.getSnapshotCount(
+    async getSnapshot(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
+      const { up, down, total } = await libs.monitors.getSnapshotCount(
         req,
         dateRangeStart,
         dateRangeEnd,
-        downCount,
-        windowSize,
         filters
       );
 
       return {
         up,
         down,
-        // @ts-ignore TODO update typings and remove this comment
-        trouble,
-        total: up + down + trouble,
+        total,
         histogram: await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters),
       };
     },
@@ -120,7 +123,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     ): Promise<Ping[]> {
       return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd, monitorId);
     },
-    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<any> {
+    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<FilterBar> {
       return libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
     },
     async getErrorsList(
@@ -129,6 +132,13 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { req }
     ): Promise<any> {
       return libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
+    },
+    async getMonitorPageTitle(
+      resolver: any,
+      { monitorId },
+      { req }
+    ): Promise<MonitorPageTitle | null> {
+      return await libs.monitors.getMonitorPageTitle(req, monitorId);
     },
   },
 });

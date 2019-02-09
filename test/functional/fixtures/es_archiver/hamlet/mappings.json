@@ -9,15 +9,13 @@
       }
     },
     "mappings": {
-      "test": {
-        "properties": {
-          "mybook": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+      "properties": {
+        "mybook": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }

@@ -21,9 +21,9 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import url from 'url';
 
-import EMS_CATALOGUE from './ems_mocks/sample_manifest_6.6.json';
-import EMS_FILES from './ems_mocks/sample_files_6.6.json';
-import EMS_TILES from './ems_mocks/sample_tiles_6.6.json';
+import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
+import EMS_FILES from './ems_mocks/sample_files.json';
+import EMS_TILES from './ems_mocks/sample_tiles.json';
 import { ORIGIN } from '../../../../../legacy/core_plugins/tile_map/common/origin';
 
 describe('service_settings (FKA tilemaptest)', function () {
@@ -289,10 +289,9 @@ describe('service_settings (FKA tilemaptest)', function () {
     });
 
     it ('should get hotlink', async () => {
-      mapConfig.emsLandingPageUrl = 'https://foo/bar';
       const fileLayers = await serviceSettings.getFileLayers();
       const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
-      expect(hotlink).to.eql('undefined#file/world_countries');//undefined becuase emsLandingPageUrl is set at kibana-load
+      expect(hotlink).to.eql('?locale=en#file/world_countries');//url host undefined becuase emsLandingPageUrl is set at kibana-load
 
     });
 

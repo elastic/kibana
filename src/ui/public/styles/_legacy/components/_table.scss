@@ -67,17 +67,3 @@ table {
     }
   }
 }
-
-
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  kbn-table, .kbn-table, tbody[kbn-rows] {
-    dl.source {
-      dt {
-        background-color: transparentize(tint($euiColorPrimary, 60%), .8);
-        color: $euiTextColor;
-      }
-    }
-  }
-}

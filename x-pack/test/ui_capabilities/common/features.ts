@@ -9,6 +9,9 @@ interface Feature {
 }
 
 export class Features {
+  public advancedSettings: Feature = {
+    navLinkId: 'kibana:management',
+  };
   public apm: Feature = {
     navLinkId: 'apm',
   };
@@ -28,8 +31,8 @@ export class Features {
   public graph: Feature = {
     navLinkId: 'graph',
   };
-  public gis: Feature = {
-    navLinkId: 'gis',
+  public maps: Feature = {
+    navLinkId: 'maps',
   };
   public infrastructure: Feature = {
     navLinkId: 'infra:home',

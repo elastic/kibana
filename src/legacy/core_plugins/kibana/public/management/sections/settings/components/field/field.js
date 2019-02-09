@@ -57,6 +57,7 @@ class FieldUI extends PureComponent {
     setting: PropTypes.object.isRequired,
     save: PropTypes.func.isRequired,
     clear: PropTypes.func.isRequired,
+    enableSaving: PropTypes.bool.isRequired,
   }
 
   constructor(props) {
@@ -103,13 +104,15 @@ class FieldUI extends PureComponent {
     }
   }
 
-  getDisplayedDefaultValue(type, defVal) {
+  getDisplayedDefaultValue(type, defVal, optionLabels = {}) {
     if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
     }
     switch (type) {
       case 'array':
         return defVal.join(', ');
+      case 'select':
+        return optionLabels.hasOwnProperty(defVal) ? optionLabels[defVal] : String(defVal);
       default:
         return String(defVal);
     }
@@ -347,8 +350,9 @@ class FieldUI extends PureComponent {
   }
 
   renderField(setting) {
+    const { enableSaving } = this.props;
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options, isOverridden, ariaName } = setting;
+    const { name, value, type, options, optionLabels = {}, isOverridden, ariaName } = setting;
 
     switch (type) {
       case 'boolean':
@@ -367,7 +371,7 @@ class FieldUI extends PureComponent {
             )}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
             aria-label={ariaName}
@@ -387,7 +391,7 @@ class FieldUI extends PureComponent {
               height="auto"
               minLines={6}
               maxLines={30}
-              isReadOnly={isOverridden}
+              isReadOnly={isOverridden || !enableSaving}
               setOptions={{
                 showLineNumbers: false,
                 tabSize: 2,
@@ -412,7 +416,7 @@ class FieldUI extends PureComponent {
         } else {
           return (
             <EuiFilePicker
-              disabled={loading || isOverridden}
+              disabled={loading || isOverridden || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={(input) => { this.changeImageForm = input; }}
@@ -426,12 +430,15 @@ class FieldUI extends PureComponent {
           <EuiSelect
             aria-label={ariaName}
             value={unsavedValue}
-            options={options.map((text) => {
-              return { text, value: text };
+            options={options.map((option) => {
+              return {
+                text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
+                value: option
+              };
             })}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -443,7 +450,7 @@ class FieldUI extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -455,7 +462,7 @@ class FieldUI extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -479,10 +486,11 @@ class FieldUI extends PureComponent {
       );
     }
 
+    const canUpdateSetting = this.props.enableSaving;
     const defaultLink = this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
 
-    if (defaultLink || imageLink) {
+    if (canUpdateSetting && (defaultLink || imageLink)) {
       return (
         <span>
           {defaultLink}
@@ -542,7 +550,7 @@ class FieldUI extends PureComponent {
   }
 
   renderDefaultValue(setting) {
-    const { type, defVal } = setting;
+    const { type, defVal, optionLabels } = setting;
     if (isDefaultValue(setting)) {
       return;
     }
@@ -574,7 +582,7 @@ class FieldUI extends PureComponent {
                 id="kbn.management.settings.field.defaultValueText"
                 defaultMessage="Default: {value}"
                 values={{
-                  value: (<EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>),
+                  value: (<EuiCode>{this.getDisplayedDefaultValue(type, defVal, optionLabels)}</EuiCode>),
                 }}
               />
             </Fragment>

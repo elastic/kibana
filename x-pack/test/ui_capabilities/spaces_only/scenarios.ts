@@ -83,13 +83,13 @@ const DiscoverDisabledSpace: DiscoverDisabledSpace = {
   disabledFeatures: ['discover'],
 };
 
-interface GisDisabledSpace extends Space {
-  id: 'gis_disabled_space';
+interface MapsDisabledSpace extends Space {
+  id: 'maps_disabled_space';
 }
-const GisDisabledSpace: GisDisabledSpace = {
-  id: 'gis_disabled_space',
-  name: 'gis_disabled_space',
-  disabledFeatures: ['gis'],
+const MapsDisabledSpace: MapsDisabledSpace = {
+  id: 'maps_disabled_space',
+  name: 'maps_disabled_space',
+  disabledFeatures: ['maps'],
 };
 
 interface GraphDisabledSpace extends Space {
@@ -173,7 +173,7 @@ export type SpaceScenarios =
   | DashboardDisabledSpace
   | DevToolsDisabledSpace
   | DiscoverDisabledSpace
-  | GisDisabledSpace
+  | MapsDisabledSpace
   | GraphDisabledSpace
   | InfrastructureDisabledSpace
   | LogsDisabledSpace
@@ -191,7 +191,7 @@ export const SpaceScenarios: SpaceScenarios[] = [
   DashboardDisabledSpace,
   DevToolsDisabledSpace,
   DiscoverDisabledSpace,
-  GisDisabledSpace,
+  MapsDisabledSpace,
   GraphDisabledSpace,
   InfrastructureDisabledSpace,
   LogsDisabledSpace,

@@ -10,11 +10,12 @@ import { normalizeType } from './normalize_type';
 
 export const queryEsSQL = (elasticsearchClient, { count, query, filter }) =>
   elasticsearchClient('transport.request', {
-    path: '/_xpack/sql?format=json',
+    path: '/_sql?format=json',
     method: 'POST',
     body: {
       fetch_size: count,
       query: query,
+      client_id: 'canvas',
       filter: {
         bool: {
           must: [{ match_all: {} }, ...buildBoolArray(filter)],

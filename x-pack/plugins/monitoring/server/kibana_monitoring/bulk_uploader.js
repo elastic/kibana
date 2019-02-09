@@ -103,7 +103,8 @@ export class BulkUploader {
     if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        this._onPayload(payload);
+        await this._onPayload(payload);
+        this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {
         this._log.warn(err.stack);
         this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);

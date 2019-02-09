@@ -21,15 +21,15 @@ import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
 import { migrateToKibana660 } from './server/lib/migrations';
+import { initSpacesRequestInterceptors } from './server/lib/request_inteceptors';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
-import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
 import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { initPublicSpacesApi } from './server/routes/api/public';
 import { initPrivateApis } from './server/routes/api/v1';
 
-export const spaces = (kibana: any) =>
+export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'spaces',
     configPrefix: 'xpack.spaces',
@@ -138,7 +138,7 @@ export const spaces = (kibana: any) =>
       const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
 
       server.expose('spacesClient', {
-        getScopedClient: (request: any) => {
+        getScopedClient: (request: Record<string, any>) => {
           const adminCluster = server.plugins.elasticsearch.getCluster('admin');
           const { callWithRequest, callWithInternalUser } = adminCluster;
           const callCluster = (...args: any[]) => callWithRequest(request, ...args);

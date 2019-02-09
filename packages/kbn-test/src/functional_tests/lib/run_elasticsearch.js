@@ -37,6 +37,7 @@ export async function runElasticsearch({ config, options }) {
     log,
     basePath: resolve(KIBANA_ROOT, '.es'),
     esFrom: esFrom || config.get('esTestCluster.from'),
+    dataArchive: config.get('esTestCluster.dataArchive'),
   });
 
   const esArgs = config.get('esTestCluster.serverArgs');

@@ -13,6 +13,14 @@
       "details": "{.monitoring-logstash=[Coercion of boolean fields], .monitoring-es=[Coercion of boolean fields], .ml-anomalies-=[Coercion of boolean fields], .watch-history-6=[Coercion of boolean fields], .monitoring-kibana=[Coercion of boolean fields], security-index-template=[Coercion of boolean fields]}"
     }
   ],
+  "ml_settings": [
+    {
+      "level": "warning",
+      "message": "Datafeed [deprecation-datafeed] uses deprecated query options",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html#breaking_70_search_changes",
+      "details": "[Deprecated field [use_dis_max] used, replaced by [Set [tie_breaker] to 1 instead]]"
+    }
+  ],
   "node_settings": [
     {
       "level": "critical",
@@ -70,6 +78,5 @@
         "details": "[[type: tweet, field: liked]]"
       }
     ]
-  },
-  "ml_settings": []
+  }
 }
