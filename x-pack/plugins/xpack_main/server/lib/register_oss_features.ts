@@ -116,7 +116,7 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
     privilegesTooltip: i18n.translate('xpack.main.featureRegistry.devToolsPrivilegesTooltip', {
