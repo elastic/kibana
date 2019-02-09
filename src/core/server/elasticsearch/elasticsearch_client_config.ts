@@ -19,6 +19,7 @@
 
 import { ConfigOptions } from 'elasticsearch';
 import { readFileSync } from 'fs';
+import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
 import url from 'url';
@@ -177,7 +178,9 @@ export function parseElasticsearchClientConfig(
     esClientConfig.ssl.passphrase = config.ssl.keyPassphrase;
   }
 
-  return esClientConfig;
+  // Elasticsearch JS client mutates config object, so all properties that are
+  // usually passed by reference should be cloned to avoid any side effects.
+  return cloneDeep(esClientConfig);
 }
 
 function getDuration(duration: number | Duration) {

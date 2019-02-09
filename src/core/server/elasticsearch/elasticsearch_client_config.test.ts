@@ -22,7 +22,10 @@ jest.mock('fs', () => ({ readFileSync: mockReadFileSync }));
 
 import { duration } from 'moment';
 import { logger } from '../logging/__mocks__';
-import { parseElasticsearchClientConfig } from './elasticsearch_client_config';
+import {
+  ElasticsearchClientConfig,
+  parseElasticsearchClientConfig,
+} from './elasticsearch_client_config';
 
 afterEach(() => jest.clearAllMocks());
 
@@ -66,37 +69,46 @@ Object {
 test('parses fully specified config', () => {
   mockReadFileSync.mockImplementation(path => `content-of-${path}`);
 
-  expect(
-    parseElasticsearchClientConfig(
-      {
-        apiVersion: 'v7.0.0',
-        customHeaders: { xsrf: 'something' },
-        logQueries: true,
-        sniffOnStart: true,
-        sniffOnConnectionFault: true,
-        hosts: [
-          'http://localhost/elasticsearch',
-          'http://domain.com:1234/elasticsearch',
-          'https://es.local',
-        ],
-        requestHeadersWhitelist: [],
-        username: 'elastic',
-        password: 'changeme',
-        pingTimeout: 12345,
-        requestTimeout: 54321,
-        sniffInterval: 11223344,
-        ssl: {
-          verificationMode: 'certificate',
-          certificateAuthorities: ['ca-path-1', 'ca-path-2'],
-          certificate: 'certificate-path',
-          key: 'key-path',
-          keyPassphrase: 'key-pass',
-          alwaysPresentCertificate: true,
-        },
-      },
-      logger.get()
-    )
-  ).toMatchInlineSnapshot(`
+  const elasticsearchConfig: ElasticsearchClientConfig = {
+    apiVersion: 'v7.0.0',
+    customHeaders: { xsrf: 'something' },
+    logQueries: true,
+    sniffOnStart: true,
+    sniffOnConnectionFault: true,
+    hosts: [
+      'http://localhost/elasticsearch',
+      'http://domain.com:1234/elasticsearch',
+      'https://es.local',
+    ],
+    requestHeadersWhitelist: [],
+    username: 'elastic',
+    password: 'changeme',
+    pingTimeout: 12345,
+    requestTimeout: 54321,
+    sniffInterval: 11223344,
+    ssl: {
+      verificationMode: 'certificate',
+      certificateAuthorities: ['ca-path-1', 'ca-path-2'],
+      certificate: 'certificate-path',
+      key: 'key-path',
+      keyPassphrase: 'key-pass',
+      alwaysPresentCertificate: true,
+    },
+  };
+
+  const elasticsearchClientConfig = parseElasticsearchClientConfig(
+    elasticsearchConfig,
+    logger.get()
+  );
+
+  // Check that original references aren't used.
+  for (const host of elasticsearchClientConfig.hosts) {
+    expect(elasticsearchConfig.customHeaders).not.toBe(host.headers);
+  }
+
+  expect(elasticsearchConfig.ssl).not.toBe(elasticsearchClientConfig.ssl);
+
+  expect(elasticsearchClientConfig).toMatchInlineSnapshot(`
 Object {
   "apiVersion": "v7.0.0",
   "hosts": Array [
