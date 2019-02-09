@@ -177,7 +177,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               />
             </h3>
           </EuiTitle>
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="kbn.home.addData.addDataToKibanaDescription"
@@ -196,7 +196,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
       <EuiFlexGrid columns={mlEnabled !== false ? 3 : 2}>
         <EuiFlexItem className={footerItemClasses}>
-          <EuiText>
+          <EuiText size="s">
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.sampleDataTitle"
@@ -216,7 +216,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         </EuiFlexItem>
         {mlEnabled !== false ?
           <EuiFlexItem className={footerItemClasses}>
-            <EuiText>
+            <EuiText size="s">
               <strong style={{ height: 38 }}>
                 <FormattedMessage
                   id="kbn.home.addData.uploadFileTitle"
@@ -237,7 +237,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           : null
         }
         <EuiFlexItem className={footerItemClasses}>
-          <EuiText>
+          <EuiText size="s">
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.yourDataTitle"

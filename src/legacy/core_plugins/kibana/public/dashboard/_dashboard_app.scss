@@ -2,21 +2,17 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: $euiColorEmptyShade;
-}
-
-.dshAppContainer--withMargins {
-  background-color: $euiColorLightestShade;
 }
 
 .dshStartScreen {
   text-align: center;
-  margin: $euiSize auto;
-  max-width: 800px;
-  width: 100%;
-  background: $euiColorEmptyShade;
-  padding: $euiSizeXXL;
-  border-radius: $euiBorderRadius;
+  padding: $euiSize;
+  background-color: $euiColorLightestShade;
+  color: $euiColorDarkShade;
+
+  > * {
+    max-width: 36em !important;
+  }
 }
 
 .dshSaveModal,

@@ -10,3 +10,4 @@ const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LIN
 
 export const skippingDisconnectedClustersUrl = `${esBase}/modules-cross-cluster-search.html#_skipping_disconnected_clusters`;
 export const remoteClustersUrl = `${esBase}/modules-remote-clusters.html`;
+export const transportPortUrl = `${esBase}/modules-transport.html`;

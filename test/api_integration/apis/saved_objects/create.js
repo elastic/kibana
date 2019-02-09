@@ -51,10 +51,14 @@ export default function ({ getService }) {
                 visualization: '7.0.0'
               },
               updated_at: resp.body.updated_at,
-              version: 1,
+              version: 'WzgsMV0=',
               attributes: {
                 title: 'My favorite vis'
-              }
+              },
+              migrationVersion: {
+                visualization: '7.0.0',
+              },
+              references: [],
             });
           });
       });
@@ -92,10 +96,14 @@ export default function ({ getService }) {
                 visualization: '7.0.0'
               },
               updated_at: resp.body.updated_at,
-              version: 1,
+              version: 'WzAsMV0=',
               attributes: {
                 title: 'My favorite vis'
-              }
+              },
+              migrationVersion: {
+                visualization: '7.0.0',
+              },
+              references: [],
             });
           });
 

@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { NavControl } from '../';
-import { HeaderNavControl } from './header_nav_control';
+import { HeaderExtension } from './header_extension';
 
 interface Props {
   navControls: NavControl[];
@@ -47,7 +47,7 @@ export class HeaderNavControls extends Component<Props> {
       key={navControl.name}
       border={navControl.side === 'left' ? 'right' : 'left'}
     >
-      <HeaderNavControl navControl={navControl} />
+      <HeaderExtension extension={navControl.render} />
     </EuiHeaderSectionItem>
   );
 }

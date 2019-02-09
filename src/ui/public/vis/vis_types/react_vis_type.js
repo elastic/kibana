@@ -20,6 +20,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from '../../chrome';
+import { I18nContext } from '../../i18n';
 import { BaseVisTypeProvider } from './base_vis_type';
 
 export function ReactVisTypeProvider(Private) {
@@ -37,13 +38,16 @@ export function ReactVisTypeProvider(Private) {
       return new Promise((resolve) => {
         const Component = this.vis.type.visConfig.component;
         const config = chrome.getUiSettingsClient();
-        render(<Component
-          config={config}
-          vis={this.vis}
-          visData={visData}
-          renderComplete={resolve}
-          updateStatus={updateStatus}
-        />, this.el);
+        render(
+          <I18nContext>
+            <Component
+              config={config}
+              vis={this.vis}
+              visData={visData}
+              renderComplete={resolve}
+              updateStatus={updateStatus}
+            />
+          </I18nContext>, this.el);
       });
     }
 

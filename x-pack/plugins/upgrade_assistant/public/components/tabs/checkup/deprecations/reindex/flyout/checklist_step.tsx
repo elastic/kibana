@@ -44,14 +44,9 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex }) => {
-  const {
-    loadingState,
-    status,
-    reindexTaskPercComplete,
-    lastCompletedStep,
-    errorMessage,
-  } = reindexState;
+  cancelReindex: () => void;
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
   return (
@@ -71,16 +66,21 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
             will need to return to this page to resume reindexing.
           </p>
         </EuiCallOut>
+        {!hasRequiredPrivileges && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut
+              title="You do not have sufficient privileges to reindex this index"
+              color="danger"
+              iconType="alert"
+            />
+          </Fragment>
+        )}
         <EuiSpacer />
         <EuiTitle size="xs">
           <h3>Reindexing process</h3>
         </EuiTitle>
-        <ReindexProgress
-          lastCompletedStep={lastCompletedStep}
-          reindexStatus={status}
-          reindexTaskPercComplete={reindexTaskPercComplete}
-          errorMessage={errorMessage}
-        />
+        <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -96,7 +96,7 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
               iconType={status === ReindexStatus.paused ? 'play' : undefined}
               onClick={startReindex}
               isLoading={loading}
-              disabled={loading || status === ReindexStatus.completed}
+              disabled={loading || status === ReindexStatus.completed || !hasRequiredPrivileges}
             >
               {buttonLabel(status)}
             </EuiButton>

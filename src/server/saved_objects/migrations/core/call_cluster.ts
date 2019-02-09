@@ -34,9 +34,10 @@ export interface CallCluster {
   (path: 'indices.getAlias', opts: { name: string } & Ignorable): Promise<AliasResult | NotFound>;
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
-  (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
   (path: 'indices.refresh', opts: IndexOpts): Promise<any>;
   (path: 'indices.updateAliases', opts: UpdateAliasesOpts): Promise<any>;
+  (path: 'indices.deleteTemplate', opts: { name: string }): Promise<any>;
+  (path: 'cat.templates', opts: { format: 'json'; name: string }): Promise<Array<{ name: string }>>;
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
@@ -189,7 +190,15 @@ export interface MappingProperties {
   [type: string]: any;
 }
 
+export interface MappingMeta {
+  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
+  // with each key being a root-level mapping property, and each value being
+  // the md5 hash of that mapping's value when the index was created.
+  migrationMappingPropertyHashes?: { [k: string]: string };
+}
+
 export interface IndexMapping {
   dynamic: string;
   properties: MappingProperties;
+  _meta?: MappingMeta;
 }

@@ -30,7 +30,7 @@ context.keys().forEach(key => context(key));
 import '../styles/disable_animations';
 
 chrome.getUiSettingsClient()
-  .getUpdate$()
+  .getSaved$()
   .pipe(filter(update => update.key === 'theme:darkMode'))
   .subscribe(() => {
     toastNotifications.addSuccess(i18n.translate('common.ui.styles.themeAppliedToast', {

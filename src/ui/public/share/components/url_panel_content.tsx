@@ -95,35 +95,33 @@ class UrlPanelContentUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiForm className="sharePanelContent" data-test-subj="shareUrlForm">
+      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
         {this.renderExportAsRadioGroup()}
 
         {this.renderShortUrlSwitch()}
 
-        <EuiCopy textToCopy={this.state.url} anchorClassName="sharePanel__copyAnchor">
+        <EuiCopy textToCopy={this.state.url} anchorClassName="kbnShareContextMenu__copyAnchor">
           {(copy: () => void) => (
-            <EuiFormRow>
-              <EuiButton
-                fill
-                onClick={copy}
-                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-                data-share-url={this.state.url}
-                data-test-subj="copyShareUrlButton"
-                size="s"
-              >
-                {this.props.isEmbedded ? (
-                  <FormattedMessage
-                    id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="common.ui.share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
-                )}
-              </EuiButton>
-            </EuiFormRow>
+            <EuiButton
+              fill
+              onClick={copy}
+              disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+              data-share-url={this.state.url}
+              data-test-subj="copyShareUrlButton"
+              size="s"
+            >
+              {this.props.isEmbedded ? (
+                <FormattedMessage
+                  id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
+                  defaultMessage="Copy iFrame code"
+                />
+              ) : (
+                <FormattedMessage
+                  id="common.ui.share.urlPanel.copyLinkButtonLabel"
+                  defaultMessage="Copy link"
+                />
+              )}
+            </EuiButton>
           )}
         </EuiCopy>
       </EuiForm>

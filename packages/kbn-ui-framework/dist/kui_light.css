@@ -467,7 +467,7 @@ main {
   border-bottom-left-radius: 4px; }
 
 .kuiButtonGroup--united .kuiButton + .kuiButton {
-  margin-left: 2px; }
+  margin-left: 0; }
 
 .kuiButtonGroup--fullWidth {
   display: -webkit-box;

@@ -34,6 +34,11 @@ export const createFindRoute = (prereqs) => ({
         default_search_operator: Joi.string().valid('OR', 'AND').default('OR'),
         search_fields: Joi.array().items(Joi.string()).single(),
         sort_field: Joi.array().items(Joi.string()).single(),
+        has_reference: Joi.object()
+          .keys({
+            type: Joi.string().required(),
+            id: Joi.string().required(),
+          }).optional(),
         fields: Joi.array().items(Joi.string()).single()
       }).default()
     },

@@ -21,7 +21,8 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
-import { EMSClientV66 } from '../../../../legacy/core_plugins/tile_map/common/ems_client';
+import { EMSClient } from '../../../../legacy/core_plugins/tile_map/common/ems_client';
+import { i18n } from '@kbn/i18n';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -41,7 +42,8 @@ uiModules.get('kibana')
       constructor() {
 
         this._showZoomMessage = true;
-        this._emsClient = new EMSClientV66({
+        this._emsClient = new EMSClient({
+          language: i18n.getLocale(),
           kbnVersion: kbnVersion,
           manifestServiceUrl: mapConfig.manifestServiceUrl,
           htmlSanitizer: $sanitize,

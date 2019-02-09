@@ -23,6 +23,7 @@ import {
 } from 'react-vis';
 import { unit, colors } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -68,7 +69,8 @@ export class HistogramInner extends PureComponent {
       const padding = (item.x - item.x0) / 20;
       return {
         ...item,
-        color: item === selectedItem ? colors.blue2 : colors.apmLightBlue,
+        color:
+          item === selectedItem ? theme.euiColorPrimary : colors.apmLightBlue,
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
@@ -151,7 +153,7 @@ export class HistogramInner extends PureComponent {
               x={x(hoveredBucket.x0)}
               width={x(bucketSize) - x(0)}
               style={{
-                fill: colors.gray5
+                fill: theme.euiColorLightestShade
               }}
             />
           )}
@@ -176,7 +178,7 @@ export class HistogramInner extends PureComponent {
               width={x(bucketSize) - x(0)}
               style={{
                 fill: 'transparent',
-                stroke: colors.blue2,
+                stroke: theme.euiColorPrimary,
                 rx: '0px',
                 ry: '0px'
               }}

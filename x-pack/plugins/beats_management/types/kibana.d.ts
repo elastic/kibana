@@ -4,22 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'ui/index_patterns' {
-  export type IndexPattern = any;
-
-  export interface StaticIndexPatternField {
-    name: string;
-    type: string;
-    aggregatable: boolean;
-    searchable: boolean;
-  }
-
-  export interface StaticIndexPattern {
-    fields: StaticIndexPatternField[];
-    title: string;
-  }
-}
-
 declare module 'ui/autocomplete_providers' {
   import { StaticIndexPattern } from 'ui/index_patterns';
 
