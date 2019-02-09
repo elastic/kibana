@@ -241,18 +241,23 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           this.targetPort,
           this.targetHost
         );
+        this.onDisconnected(() => setTimeout(() => this.reconnect(), 1000));
       });
-    } else {
-      this.socket.connect(
-        this.targetPort,
-        this.targetHost
-      );
     }
     return this.connectingPromise;
   }
 
   public unloadWorkspace(workspaceDir: string): Promise<void> {
     return Promise.reject('should not hit here');
+  }
+
+  private reconnect() {
+    if (!this.isClosed) {
+      this.socket.connect(
+        this.targetPort,
+        this.targetHost
+      );
+    }
   }
 
   private onSocketClosed() {
