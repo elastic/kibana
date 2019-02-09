@@ -6,7 +6,7 @@
 
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { euiCodeBlockTagColor } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ import { monaco } from '../../monaco/monaco';
 import { registerEditor } from '../../monaco/single_selection_helper';
 
 const U = styled.u`
-  color: ${euiCodeBlockTagColor};
+  color: ${theme.euiCodeBlockTagColor};
 `;
 
 interface Props {

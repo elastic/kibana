@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { EuiButton, EuiButtonGroup, EuiTitle } from '@elastic/eui';
-import { euiSize, euiSizeS, euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -41,7 +41,7 @@ const ButtonsContainer = styled.div`
   display: flex;
   flex-direction: row;
   & > *:first-child {
-    margin-right: ${euiSizeS};
+    margin-right: ${theme.euiSizeS};
   }
 `;
 
@@ -88,7 +88,7 @@ enum ButtonOption {
 }
 
 const Title = styled(EuiTitle)`
-  margin: ${euiSizeXs} 0 ${euiSize};
+  margin: ${theme.euiSizeXs} 0 ${theme.euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {

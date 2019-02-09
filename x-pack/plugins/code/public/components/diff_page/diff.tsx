@@ -5,17 +5,7 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
-import {
-  euiBorderThick,
-  euiBorderThin,
-  euiColorDanger,
-  euiColorPrimary,
-  euiColorVis0,
-  euiSize,
-  euiSizeS,
-  euiSizeXs,
-  paddingSizes,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { MouseEvent } from 'react';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -35,56 +25,56 @@ const B = styled.b`
 `;
 
 const PrimaryB = styled(B)`
-  color: ${euiColorPrimary};
+  color: ${theme.euiColorPrimary};
 `;
 
 const CommitId = styled.span`
   display: inline-block;
-  padding: 0 ${paddingSizes.xs};
-  border: ${euiBorderThin};
+  padding: 0 ${theme.paddingSizes.xs};
+  border: ${theme.euiBorderThin};
 `;
 
 const Addition = styled.div`
-  padding: ${paddingSizes.xs} ${paddingSizes.s};
-  border-radius: ${euiSizeXs};
+  padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.s};
+  border-radius: ${theme.euiSizeXs};
   color: white;
-  margin-right: ${euiSizeS};
-  background-color: ${euiColorDanger};
+  margin-right: ${theme.euiSizeS};
+  background-color: ${theme.euiColorDanger};
 `;
 
 const Deletion = styled(Addition)`
-  background-color: ${euiColorVis0};
+  background-color: ${theme.euiColorVis0};
 `;
 
 const Container = styled.div`
-  padding: ${paddingSizes.xs} ${paddingSizes.m};
+  padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.m};
 `;
 
 const TopBarContainer = styled.div`
   height: calc(48rem / 14);
-  border-bottom: ${euiBorderThin};
-  padding: 0 ${paddingSizes.m};
+  border-bottom: ${theme.euiBorderThin};
+  padding: 0 ${theme.paddingSizes.m};
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 `;
 
 const Accordion = styled(EuiAccordion)`
-  border: ${euiBorderThick};
-  border-radius: ${euiSizeS};
-  margin-bottom: ${euiSize};
+  border: ${theme.euiBorderThick};
+  border-radius: ${theme.euiSizeS};
+  margin-bottom: ${theme.euiSize};
 `;
 
 const Icon = styled(EuiIcon)`
-  margin-right: ${euiSizeS};
+  margin-right: ${theme.euiSizeS};
 `;
 
 const Parents = styled.div`
-  border-left: ${euiBorderThin};
+  border-left: ${theme.euiBorderThin};
   height: calc(32rem / 14);
   line-height: calc(32rem / 14);
-  padding-left: ${paddingSizes.s};
-  margin: ${euiSizeS} 0;
+  padding-left: ${theme.paddingSizes.s};
+  margin: ${theme.euiSizeS} 0;
 `;
 
 const H4 = styled.h4`

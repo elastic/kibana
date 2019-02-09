@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiBorderThick, paddingSizes } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 import { SearchScope } from '../../../model';
@@ -18,9 +18,9 @@ const TopBarContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: ${paddingSizes.s};
+  padding: ${theme.paddingSizes.s};
   min-height: 80px;
-  border-bottom: ${euiBorderThick};
+  border-bottom: ${theme.euiBorderThick};
   nav {
     a {
       display: inline;

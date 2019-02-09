@@ -5,7 +5,7 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import { euiFontSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 // @ts-ignore
 import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
 // @ts-ignore
@@ -17,7 +17,7 @@ import { MarkedString } from 'vscode-languageserver-types';
 const Text = styled(EuiText)`
   p {
     color: #8c8c8c;
-    font-size: ${euiFontSizeXs};
+    font-size: ${theme.euiFontSizeXs};
   }
 `;
 

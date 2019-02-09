@@ -5,15 +5,7 @@
  */
 
 import { EuiToken, IconType } from '@elastic/eui';
-import {
-  euiBorderColor,
-  euiBorderWidthThin,
-  euiColorDarkShade,
-  euiColorLightShade,
-  euiFontSizeXs,
-  euiSize,
-  euiSizeS,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
@@ -39,10 +31,10 @@ interface Props {
 }
 
 const SuggestionGroupHeader = styled.div`
-  border-top: ${euiBorderWidthThin} solid ${euiBorderColor};
+  border-top: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
   display: flex;
   justify-content: space-between;
-  padding: ${euiSize};
+  padding: ${theme.euiSize};
 `;
 
 const SuggestionGroupHeaderTitle = styled.div`
@@ -50,32 +42,32 @@ const SuggestionGroupHeaderTitle = styled.div`
 `;
 
 const SuggestionGroupHeaderTitleText = styled.span`
-  margin-left: ${euiSizeS};
+  margin-left: ${theme.euiSizeS};
 `;
 
 const SuggestionGroupHeaderResult = styled.div`
-  color: ${euiColorDarkShade};
+  color: ${theme.euiColorDarkShade};
 `;
 
 const ViewMore = styled.div`
-  height: ${euiSize};
-  line-height: ${euiSize};
+  height: ${theme.euiSize};
+  line-height: ${theme.euiSize};
   text-align: center;
-  font-size: ${euiFontSizeXs};
-  margin: ${euiSizeS};
+  font-size: ${theme.euiFontSizeXs};
+  margin: ${theme.euiSizeS};
 `;
 
 const PressReturn = styled.div`
-  border-top: ${euiBorderWidthThin} solid ${euiBorderColor};
-  padding: ${euiSizeS};
+  border-top: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
+  padding: ${theme.euiSizeS};
   text-align: center;
   font-weight: bold;
 `;
 
 const PressReturnText = styled.div`
-  background: ${euiColorLightShade};
-  margin: ${euiSizeS};
-  padding: ${euiSizeS};
+  background: ${theme.euiColorLightShade};
+  margin: ${theme.euiSizeS};
+  padding: ${theme.euiSizeS};
 `;
 
 export class SuggestionsComponent extends Component<Props> {

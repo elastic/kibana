@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiIcon, EuiSideNav } from '@elastic/eui';
 import classes from 'classnames';
 
-import { euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,7 +19,7 @@ import { RootState } from '../../reducers';
 import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
 const DirectoryNode = styled.span`
-  margin-left: ${euiSizeXs};
+  margin-left: ${theme.euiSizeXs};
   vertical-align: middle;
 `;
 

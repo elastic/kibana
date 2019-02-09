@@ -5,11 +5,7 @@
  */
 
 import { EuiTabbedContent } from '@elastic/eui';
-import {
-  euiBorderThin,
-  euiColorLightestShade,
-  paddingSizes,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -27,7 +23,7 @@ enum Tabs {
 
 const Container = styled.div`
   width: calc(256rem / 14);
-  border-right: ${euiBorderThin};
+  border-right: ${theme.euiBorderThin};
   display: flex;
   flex-direction: column;
   & > div {
@@ -51,8 +47,8 @@ const FileTreeContainer = styled.div`
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
-  padding: ${paddingSizes.l} ${paddingSizes.m};
-  background-color: ${euiColorLightestShade};
+  padding: ${theme.paddingSizes.l} ${theme.paddingSizes.m};
+  background-color: ${theme.euiColorLightestShade};
 `;
 
 class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {

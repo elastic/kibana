@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  euiBorderColor,
-  euiBorderWidthThin,
-  paddingSizes,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import querystring from 'querystring';
 import React from 'react';
 import styled from 'styled-components';
@@ -29,8 +25,8 @@ import {
 
 const SearchBarContainer = styled.div`
   height: 4rem;
-  padding: ${paddingSizes.s};
-  border-bottom: ${euiBorderWidthThin} solid ${euiBorderColor};
+  padding: ${theme.paddingSizes.s};
+  border-bottom: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
 `;
 
 interface Props {

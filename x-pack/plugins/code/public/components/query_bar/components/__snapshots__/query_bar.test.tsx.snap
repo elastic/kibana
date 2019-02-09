@@ -209,6 +209,7 @@ exports[`render correctly with empty query string 1`] = `
                 popoverRef={[Function]}
               >
                 <EuiOutsideClickDetector
+                  isDisabled={true}
                   onOutsideClick={[Function]}
                 >
                   <div
@@ -322,49 +323,91 @@ exports[`render correctly with empty query string 1`] = `
                                   className="euiScreenReaderOnly"
                                   id="0.i"
                                 >
-                                  Select an option: 
-                                  <div>
-                                    <EuiText
-                                      grow={true}
-                                      size="s"
-                                    >
-                                      <div
-                                        className="euiText euiText--small"
-                                      >
-                                        <EuiIcon
-                                          size="m"
-                                          type="bullseye"
-                                        >
-                                          <bullseye
-                                            className="euiIcon euiIcon--medium"
-                                            focusable="false"
-                                            height="16"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
+                                  <EuiI18n
+                                    default="Select an option: {selectedValue}, is selected"
+                                    token="euiSuperSelectControl.selectAnOption"
+                                    values={
+                                      Object {
+                                        "selectedValue": <div>
+                                          <EuiText
+                                            grow={true}
+                                            size="s"
                                           >
-                                            <svg
-                                              className="euiIcon euiIcon--medium"
-                                              focusable="false"
-                                              height="16"
-                                              style={null}
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
+                                            <EuiIcon
+                                              size="m"
+                                              type="bullseye"
+                                            />
+                                             
+                                            Search Everything
+                                          </EuiText>
+                                        </div>,
+                                      }
+                                    }
+                                  >
+                                    <Component
+                                      selectedValue={
+                                        <div>
+                                          <EuiText
+                                            grow={true}
+                                            size="s"
+                                          >
+                                            <EuiIcon
+                                              size="m"
+                                              type="bullseye"
+                                            />
+                                             
+                                            Search Everything
+                                          </EuiText>
+                                        </div>
+                                      }
+                                    >
+                                      Select an option: 
+                                      <div
+                                        key="1"
+                                      >
+                                        <EuiText
+                                          grow={true}
+                                          size="s"
+                                        >
+                                          <div
+                                            className="euiText euiText--small"
+                                          >
+                                            <EuiIcon
+                                              size="m"
+                                              type="bullseye"
                                             >
-                                              <path
-                                                d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
-                                              />
-                                            </svg>
-                                          </bullseye>
-                                        </EuiIcon>
-                                         
-                                        Search Everything
+                                              <bullseye
+                                                className="euiIcon euiIcon--medium"
+                                                focusable="false"
+                                                height="16"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <svg
+                                                  className="euiIcon euiIcon--medium"
+                                                  focusable="false"
+                                                  height="16"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width="16"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                  <path
+                                                    d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                                  />
+                                                </svg>
+                                              </bullseye>
+                                            </EuiIcon>
+                                             
+                                            Search Everything
+                                          </div>
+                                        </EuiText>
                                       </div>
-                                    </EuiText>
-                                  </div>
-                                  , is selected
+                                      , is selected
+                                    </Component>
+                                  </EuiI18n>
                                 </span>
                               </EuiScreenReaderOnly>
                               <button
@@ -921,6 +964,7 @@ exports[`render correctly with input query string changed 1`] = `
                     popoverRef={[Function]}
                   >
                     <EuiOutsideClickDetector
+                      isDisabled={true}
                       onOutsideClick={[Function]}
                     >
                       <div
@@ -1034,49 +1078,91 @@ exports[`render correctly with input query string changed 1`] = `
                                       className="euiScreenReaderOnly"
                                       id="0.i"
                                     >
-                                      Select an option: 
-                                      <div>
-                                        <EuiText
-                                          grow={true}
-                                          size="s"
-                                        >
-                                          <div
-                                            className="euiText euiText--small"
-                                          >
-                                            <EuiIcon
-                                              size="m"
-                                              type="bullseye"
-                                            >
-                                              <bullseye
-                                                className="euiIcon euiIcon--medium"
-                                                focusable="false"
-                                                height="16"
-                                                style={null}
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                xmlns="http://www.w3.org/2000/svg"
+                                      <EuiI18n
+                                        default="Select an option: {selectedValue}, is selected"
+                                        token="euiSuperSelectControl.selectAnOption"
+                                        values={
+                                          Object {
+                                            "selectedValue": <div>
+                                              <EuiText
+                                                grow={true}
+                                                size="s"
                                               >
-                                                <svg
-                                                  className="euiIcon euiIcon--medium"
-                                                  focusable="false"
-                                                  height="16"
-                                                  style={null}
-                                                  viewBox="0 0 16 16"
-                                                  width="16"
-                                                  xmlns="http://www.w3.org/2000/svg"
+                                                <EuiIcon
+                                                  size="m"
+                                                  type="bullseye"
+                                                />
+                                                 
+                                                Search Everything
+                                              </EuiText>
+                                            </div>,
+                                          }
+                                        }
+                                      >
+                                        <Component
+                                          selectedValue={
+                                            <div>
+                                              <EuiText
+                                                grow={true}
+                                                size="s"
+                                              >
+                                                <EuiIcon
+                                                  size="m"
+                                                  type="bullseye"
+                                                />
+                                                 
+                                                Search Everything
+                                              </EuiText>
+                                            </div>
+                                          }
+                                        >
+                                          Select an option: 
+                                          <div
+                                            key="1"
+                                          >
+                                            <EuiText
+                                              grow={true}
+                                              size="s"
+                                            >
+                                              <div
+                                                className="euiText euiText--small"
+                                              >
+                                                <EuiIcon
+                                                  size="m"
+                                                  type="bullseye"
                                                 >
-                                                  <path
-                                                    d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
-                                                  />
-                                                </svg>
-                                              </bullseye>
-                                            </EuiIcon>
-                                             
-                                            Search Everything
+                                                  <bullseye
+                                                    className="euiIcon euiIcon--medium"
+                                                    focusable="false"
+                                                    height="16"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                    <svg
+                                                      className="euiIcon euiIcon--medium"
+                                                      focusable="false"
+                                                      height="16"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width="16"
+                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                      <path
+                                                        d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                                      />
+                                                    </svg>
+                                                  </bullseye>
+                                                </EuiIcon>
+                                                 
+                                                Search Everything
+                                              </div>
+                                            </EuiText>
                                           </div>
-                                        </EuiText>
-                                      </div>
-                                      , is selected
+                                          , is selected
+                                        </Component>
+                                      </EuiI18n>
                                     </span>
                                   </EuiScreenReaderOnly>
                                   <button

@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
-import { euiSizeS, paddingSizes } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
@@ -16,17 +16,17 @@ import { history } from '../../utils/url';
 import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
 const Root = styled(EuiSideNav)`
-  padding: ${paddingSizes.l} ${paddingSizes.m};
+  padding: ${theme.paddingSizes.l} ${theme.paddingSizes.m};
   overflow: auto;
 `;
 
 const Symbol = styled(EuiFlexGroup)`
-  margin-bottom: ${euiSizeS};
+  margin-bottom: ${theme.euiSizeS};
   cursor: pointer;
 `;
 
 const Token = styled(EuiToken)`
-  margin-right: ${euiSizeS};
+  margin-right: ${theme.euiSizeS};
 `;
 
 interface Props {
