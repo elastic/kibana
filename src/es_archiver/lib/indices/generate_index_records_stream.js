@@ -45,6 +45,8 @@ export function createGenerateIndexRecordsStream(client, stats) {
           this.push({
             type: 'index',
             value: {
+              // always rewrite the .kibana_* index to .kibana_1 so that
+              // when it is loaded it can skip migration, if possible
               index: index.startsWith('.kibana') ? '.kibana_1' : index,
               settings,
               mappings,

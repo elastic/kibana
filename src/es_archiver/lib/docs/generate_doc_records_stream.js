@@ -54,6 +54,8 @@ export function createGenerateDocRecordsStream(client, stats) {
             this.push({
               type: 'doc',
               value: {
+                // always rewrite the .kibana_* index to .kibana_1 so that
+                // when it is loaded it can skip migration, if possible
                 index: hit._index.startsWith('.kibana') ? '.kibana_1' : hit._index,
                 type: hit._type,
                 id: hit._id,
