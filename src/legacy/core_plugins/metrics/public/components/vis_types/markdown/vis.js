@@ -92,7 +92,6 @@ MarkdownVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
