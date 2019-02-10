@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runGulpTask('canvas:plugins:build');
+export default function ({ loadTestFile }) {
+  describe('rollup job', function () {
+    this.tags('ciGroup1');
+
+    loadTestFile(require.resolve('./rollup_jobs'));
+  });
+}
