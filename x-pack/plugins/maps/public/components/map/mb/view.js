@@ -215,7 +215,7 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady) {
+    if (!this.props.isMapReady || !inspectorAdapters.map) {
       return;
     }
 
