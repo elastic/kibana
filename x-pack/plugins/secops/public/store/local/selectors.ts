@@ -8,4 +8,5 @@ export { appSelectors } from './app';
 export * from './drag_and_drop';
 export { hostsSelectors } from './hosts';
 export * from './inputs';
+export { networkSelectors } from './network';
 export { timelineSelectors } from './timeline';

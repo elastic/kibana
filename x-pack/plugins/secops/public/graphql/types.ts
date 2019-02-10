@@ -33,6 +33,8 @@ export interface Source {
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
+  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  NetworkTopNFlow: NetworkTopNFlowData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -153,6 +155,8 @@ export interface SourceEcsFields {
   ip?: string | null;
 
   port?: number | null;
+
+  domain?: string | null;
 }
 
 export interface HostEcsFields {
@@ -245,10 +249,14 @@ export interface DestinationEcsFields {
   ip?: string | null;
 
   port?: number | null;
+
+  domain?: string | null;
 }
 
 export interface EventEcsFields {
   category?: string | null;
+
+  duration?: number | null;
 
   id?: number | null;
 
@@ -305,6 +313,54 @@ export interface HostItem {
   host?: HostEcsFields | null;
 }
 
+export interface NetworkTopNFlowData {
+  edges: NetworkTopNFlowEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface NetworkTopNFlowEdges {
+  node: NetworkTopNFlowItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopNFlowItem {
+  _id?: string | null;
+
+  source?: NetworkTopNFlowSource | null;
+
+  destination?: NetworkTopNFlowDestination | null;
+
+  event?: NetworkTopNFlowEvent | null;
+
+  network?: NetworkTopNFlowNetwork | null;
+}
+
+export interface NetworkTopNFlowSource {
+  ip?: string | null;
+
+  domain?: string | null;
+}
+
+export interface NetworkTopNFlowDestination {
+  ip?: string | null;
+
+  domain?: string | null;
+}
+
+export interface NetworkTopNFlowEvent {
+  duration?: number | null;
+}
+
+export interface NetworkTopNFlowNetwork {
+  bytes?: number | null;
+
+  packets?: number | null;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -358,6 +414,12 @@ export interface Thread {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
+}
+
+export interface NetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
 }
 
 // ====================================================
@@ -421,6 +483,17 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface NetworkTopNFlowSourceArgs {
+  id?: string | null;
+
+  type: NetworkTopNFlowType;
+
+  timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  filterQuery?: string | null;
+}
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
@@ -446,6 +519,11 @@ export enum IndexType {
 export enum Direction {
   ascending = 'ascending',
   descending = 'descending',
+}
+
+export enum NetworkTopNFlowType {
+  source = 'source',
+  destination = 'destination',
 }
 
 // ====================================================
@@ -965,6 +1043,110 @@ export namespace GetKpiEventsQuery {
   };
 }
 
+export namespace GetNetworkTopNFlowQuery {
+  export type Variables = {
+    sourceId: string;
+    type: NetworkTopNFlowType;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkTopNFlow: NetworkTopNFlow;
+  };
+
+  export type NetworkTopNFlow = {
+    __typename?: 'NetworkTopNFlowData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkTopNFlowEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkTopNFlowItem';
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+
+    event?: Event | null;
+
+    network?: Network | null;
+  };
+
+  export type _Source = {
+    __typename?: 'NetworkTopNFlowSource';
+
+    ip?: string | null;
+
+    domain?: string | null;
+  };
+
+  export type Destination = {
+    __typename?: 'NetworkTopNFlowDestination';
+
+    ip?: string | null;
+
+    domain?: string | null;
+  };
+
+  export type Event = {
+    __typename?: 'NetworkTopNFlowEvent';
+
+    duration?: number | null;
+  };
+
+  export type Network = {
+    __typename?: 'NetworkTopNFlowNetwork';
+
+    bytes?: number | null;
+
+    packets?: number | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
 export namespace SourceQuery {
   export type Variables = {
     sourceId?: string | null;
@@ -1005,6 +1187,12 @@ export namespace SourceQuery {
     auditbeatAliasExists: boolean;
 
     auditbeatIndices: string[];
+
+    filebeatIndicesExist: boolean;
+
+    filebeatAliasExists: boolean;
+
+    filebeatIndices: string[];
 
     indexFields: IndexFields[];
   };

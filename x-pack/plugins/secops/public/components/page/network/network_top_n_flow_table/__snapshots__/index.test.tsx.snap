@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Authentication Table Component rendering it renders the default Authentication table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "node": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "failures": 10,
+          "lastFailure": Object {
+            "host": Object {
+              "id": "host-id-1",
+              "name": "host-2",
+            },
+            "source": Object {
+              "ip": "8.8.8.8",
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "lastSuccess": Object {
+            "host": Object {
+              "id": "host-id-1",
+              "name": "host-1",
+            },
+            "source": Object {
+              "ip": "127.0.0.1",
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "successes": 0,
+          "user": Object {
+            "name": "Evan Hassanabad",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "failures": 10,
+          "lastFailure": Object {
+            "host": Object {
+              "id": "host-id-1",
+              "name": "host-2",
+            },
+            "source": Object {
+              "ip": "8.8.8.8",
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "lastSuccess": Object {
+            "host": Object {
+              "id": "host-id-1",
+              "name": "host-1",
+            },
+            "source": Object {
+              "ip": "127.0.0.1",
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "successes": 0,
+          "user": Object {
+            "name": "Braden Hassanabad",
+          },
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  networkTopNFlowType="source"
+  nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+  startDate={1546965070707}
+  totalCount={4}
+  type="page"
+/>
+`;
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default Authentication table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "10.100.7.198",
+        },
+        "node": Object {
+          "destination": null,
+          "event": Object {
+            "duration": 84712891000000,
+          },
+          "network": Object {
+            "bytes": 3826633497,
+            "packets": 4185805,
+          },
+          "source": Object {
+            "domain": "nest-frontdoor.iot.sr.local.crowbird.com",
+            "ip": "10.100.7.198",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "54.192.48.92",
+        },
+        "node": Object {
+          "destination": null,
+          "event": Object {
+            "duration": 602171000000,
+          },
+          "network": Object {
+            "bytes": 325909849,
+            "packets": 221494,
+          },
+          "source": Object {
+            "domain": "server-54-192-48-92.jfk5.r.cloudfront.net",
+            "ip": "54.192.48.92",
+          },
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  networkTopNFlowType="source"
+  nextCursor="10"
+  startDate={1546965070707}
+  totalCount={524}
+  type="page"
+/>
+`;

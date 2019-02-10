@@ -55,6 +55,25 @@ export const mockGlobalState: State = {
         filterQueryDraft: null,
       },
     },
+    network: {
+      page: {
+        queries: {
+          topSource: {
+            limit: 10,
+          },
+          topDestination: {
+            limit: 10,
+          },
+        },
+        filterQuery: null,
+        filterQueryDraft: null,
+      },
+      details: {
+        filterQuery: null,
+        filterQueryDraft: null,
+        queries: null,
+      },
+    },
     inputs: {
       global: {
         timerange: {

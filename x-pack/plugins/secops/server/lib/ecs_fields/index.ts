@@ -60,11 +60,18 @@ export const suricataFieldsMap: Readonly<Record<string, string>> = {
 export const sourceFieldsMap: Readonly<Record<string, string>> = {
   'source.ip': 'source.ip',
   'source.port': 'source.port',
+  'source.domain': 'source.domain',
 };
 
 export const destinationFieldsMap: Readonly<Record<string, string>> = {
   'destination.ip': 'destination.ip',
   'destination.port': 'destination.port',
+  'destination.domain': 'destination.domain',
+};
+
+export const networkFieldsMap: Readonly<Record<string, string>> = {
+  'network.bytes': 'network.bytes',
+  'network.packets': 'network.packets',
 };
 
 export const geoFieldsMap: Readonly<Record<string, string>> = {
@@ -74,6 +81,7 @@ export const geoFieldsMap: Readonly<Record<string, string>> = {
 
 export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.category': 'suricata.eve.alert.category',
+  'event.duration': 'event.duration',
   // NOTE: This is only for the index filebeat. If you're using auditbeat, then this needs to be changed out for 'event.id': 'event.id'
   'event.id': 'suricata.eve.flow_id',
   'event.module': 'event.module',
@@ -84,10 +92,11 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
-  ...{ ...hostFieldsMap },
-  ...{ ...eventBaseFieldsMap },
-  ...{ ...suricataFieldsMap },
-  ...{ ...sourceFieldsMap },
   ...{ ...destinationFieldsMap },
+  ...{ ...eventBaseFieldsMap },
   ...{ ...geoFieldsMap },
+  ...{ ...hostFieldsMap },
+  ...{ ...networkFieldsMap },
+  ...{ ...sourceFieldsMap },
+  ...{ ...suricataFieldsMap },
 };

@@ -10,28 +10,32 @@ import { appReducer, AppState, initialAppState } from './app';
 import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from './drag_and_drop';
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
 import { initialInputsState, inputsReducer, InputsState } from './inputs';
+import { initialNetworkState, networkReducer, NetworkState } from './network';
 import { initialTimelineState, timelineReducer, TimelineState } from './timeline';
 
 export interface LocalState {
   app: AppState;
   dragAndDrop: DragAndDropState;
-  timeline: TimelineState;
   hosts: HostsState;
   inputs: InputsState;
+  network: NetworkState;
+  timeline: TimelineState;
 }
 
 export const initialLocalState: LocalState = {
   app: initialAppState,
   dragAndDrop: initialDragAndDropState,
-  timeline: initialTimelineState,
   hosts: initialHostsState,
   inputs: initialInputsState,
+  network: initialNetworkState,
+  timeline: initialTimelineState,
 };
 
 export const localReducer = combineReducers<LocalState>({
   app: appReducer,
   dragAndDrop: dragAndDropReducer,
-  timeline: timelineReducer,
   hosts: hostsReducer,
   inputs: inputsReducer,
+  network: networkReducer,
+  timeline: timelineReducer,
 });

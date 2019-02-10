@@ -15,6 +15,7 @@ import { sourceQuery } from './index.gql_query';
 
 interface WithSourceArgs {
   auditbeatIndicesExist: boolean;
+  filebeatIndicesExist: boolean;
   indexPattern: StaticIndexPattern;
 }
 
@@ -55,6 +56,7 @@ export const WithSource = ({
       }
       return children({
         auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
+        filebeatIndicesExist: get('source.status.filebeatIndicesExist', data),
         indexPattern: {
           fields: get('source.status.indexFields', data),
           title: indexPatternTitle.join(),

@@ -5,7 +5,11 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+
+export type NetworkComponentProps = RouteComponentProps<{
+  ip: string;
+}>;
 
 export const RedirectToNetworkPage = () => {
   return <Redirect to={'/network'} />;

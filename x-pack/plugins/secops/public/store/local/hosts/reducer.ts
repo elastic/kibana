@@ -6,7 +6,6 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { get } from 'lodash/fp';
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,
@@ -64,8 +63,9 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
   .case(updateAuthenticationsLimit, (state, { limit, hostsType }) => ({
     ...state,
     [hostsType]: {
+      ...state[hostsType],
       queries: {
-        ...get(`${hostsType}.queries`, state),
+        ...state[hostsType].queries,
         authentications: {
           limit,
         },
@@ -75,9 +75,9 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
   .case(updateHostsLimit, (state, { limit, hostsType }) => ({
     ...state,
     [hostsType]: {
-      ...get(`${hostsType}`, state),
+      ...state[hostsType],
       queries: {
-        ...get(`${hostsType}.queries`, state),
+        ...state[hostsType].queries,
         hosts: {
           limit,
         },
@@ -87,8 +87,9 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
   .case(updateEventsLimit, (state, { limit, hostsType }) => ({
     ...state,
     [hostsType]: {
+      ...state[hostsType],
       queries: {
-        ...get(`${hostsType}.queries`, state),
+        ...state[hostsType].queries,
         events: {
           limit,
         },
@@ -98,9 +99,9 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
   .case(updateUncommonProcessesLimit, (state, { limit, hostsType }) => ({
     ...state,
     [hostsType]: {
-      ...get(`${hostsType}`, state),
+      ...state[hostsType],
       queries: {
-        ...get(`${hostsType}.queries`, state),
+        ...state[hostsType].queries,
         uncommonProcesses: {
           limit,
         },
@@ -110,14 +111,14 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
   .case(setHostsFilterQueryDraft, (state, { filterQueryDraft, hostsType }) => ({
     ...state,
     [hostsType]: {
-      ...get(`${hostsType}`, state),
+      ...state[hostsType],
       filterQueryDraft,
     },
   }))
   .case(applyHostsFilterQuery, (state, { filterQuery, hostsType }) => ({
     ...state,
     [hostsType]: {
-      ...get(`${hostsType}`, state),
+      ...state[hostsType],
       filterQueryDraft: filterQuery.query,
       filterQuery,
     },

@@ -33,7 +33,7 @@ import { StatefulTimeline } from '../../components/timeline';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { getBreadcrumbs } from '../hosts/host_details';
-import { Network } from '../network';
+import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 
 const WrappedByAutoSizer = styled.div`
@@ -109,7 +109,7 @@ export const HomePage = pure(() => (
                 <Redirect from="/" exact={true} to="/overview" />
                 <Route path="/overview" component={Overview} />
                 <Route path="/hosts" component={HostsContainer} />
-                <Route path="/network" component={Network} />
+                <Route path="/network" component={NetworkContainer} />
                 <Route path="/link-to" component={LinkToPage} />
                 <Route component={NotFoundPage} />
               </Switch>

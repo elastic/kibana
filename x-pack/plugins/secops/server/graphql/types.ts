@@ -62,6 +62,8 @@ export interface Source {
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
+  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  NetworkTopNFlow: NetworkTopNFlowData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -182,6 +184,8 @@ export interface SourceEcsFields {
   ip?: string | null;
 
   port?: number | null;
+
+  domain?: string | null;
 }
 
 export interface HostEcsFields {
@@ -274,10 +278,14 @@ export interface DestinationEcsFields {
   ip?: string | null;
 
   port?: number | null;
+
+  domain?: string | null;
 }
 
 export interface EventEcsFields {
   category?: string | null;
+
+  duration?: number | null;
 
   id?: number | null;
 
@@ -334,6 +342,54 @@ export interface HostItem {
   host?: HostEcsFields | null;
 }
 
+export interface NetworkTopNFlowData {
+  edges: NetworkTopNFlowEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface NetworkTopNFlowEdges {
+  node: NetworkTopNFlowItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopNFlowItem {
+  _id?: string | null;
+
+  source?: NetworkTopNFlowSource | null;
+
+  destination?: NetworkTopNFlowDestination | null;
+
+  event?: NetworkTopNFlowEvent | null;
+
+  network?: NetworkTopNFlowNetwork | null;
+}
+
+export interface NetworkTopNFlowSource {
+  ip?: string | null;
+
+  domain?: string | null;
+}
+
+export interface NetworkTopNFlowDestination {
+  ip?: string | null;
+
+  domain?: string | null;
+}
+
+export interface NetworkTopNFlowEvent {
+  duration?: number | null;
+}
+
+export interface NetworkTopNFlowNetwork {
+  bytes?: number | null;
+
+  packets?: number | null;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -387,6 +443,12 @@ export interface Thread {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
+}
+
+export interface NetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
 }
 
 // ====================================================
@@ -450,6 +512,17 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface NetworkTopNFlowSourceArgs {
+  id?: string | null;
+
+  type: NetworkTopNFlowType;
+
+  timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  filterQuery?: string | null;
+}
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
@@ -475,6 +548,11 @@ export enum IndexType {
 export enum Direction {
   ascending = 'ascending',
   descending = 'descending',
+}
+
+export enum NetworkTopNFlowType {
+  source = 'source',
+  destination = 'destination',
 }
 
 // ====================================================
@@ -525,6 +603,8 @@ export namespace SourceResolvers {
     Events?: EventsResolver<EventsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
+    /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+    NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
     UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, Context>;
     /** Just a simple example to get the app name */
@@ -583,6 +663,23 @@ export namespace SourceResolvers {
   >;
   export interface HostsArgs {
     id?: string | null;
+
+    timerange: TimerangeInput;
+
+    pagination: PaginationInput;
+
+    filterQuery?: string | null;
+  }
+
+  export type NetworkTopNFlowResolver<
+    R = NetworkTopNFlowData,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, NetworkTopNFlowArgs>;
+  export interface NetworkTopNFlowArgs {
+    id?: string | null;
+
+    type: NetworkTopNFlowType;
 
     timerange: TimerangeInput;
 
@@ -976,6 +1073,8 @@ export namespace SourceEcsFieldsResolvers {
     ip?: IpResolver<string | null, TypeParent, Context>;
 
     port?: PortResolver<number | null, TypeParent, Context>;
+
+    domain?: DomainResolver<string | null, TypeParent, Context>;
   }
 
   export type IpResolver<
@@ -985,6 +1084,11 @@ export namespace SourceEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
     R = number | null,
+    Parent = SourceEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DomainResolver<
+    R = string | null,
     Parent = SourceEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1280,6 +1384,8 @@ export namespace DestinationEcsFieldsResolvers {
     ip?: IpResolver<string | null, TypeParent, Context>;
 
     port?: PortResolver<number | null, TypeParent, Context>;
+
+    domain?: DomainResolver<string | null, TypeParent, Context>;
   }
 
   export type IpResolver<
@@ -1292,11 +1398,18 @@ export namespace DestinationEcsFieldsResolvers {
     Parent = DestinationEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type DomainResolver<
+    R = string | null,
+    Parent = DestinationEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace EventEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EventEcsFields> {
     category?: CategoryResolver<string | null, TypeParent, Context>;
+
+    duration?: DurationResolver<number | null, TypeParent, Context>;
 
     id?: IdResolver<number | null, TypeParent, Context>;
 
@@ -1309,6 +1422,11 @@ export namespace EventEcsFieldsResolvers {
 
   export type CategoryResolver<
     R = string | null,
+    Parent = EventEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DurationResolver<
+    R = number | null,
     Parent = EventEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1477,6 +1595,160 @@ export namespace HostItemResolvers {
   export type HostResolver<
     R = HostEcsFields | null,
     Parent = HostItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowData> {
+    edges?: EdgesResolver<NetworkTopNFlowEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<
+    R = NetworkTopNFlowEdges[],
+    Parent = NetworkTopNFlowData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = NetworkTopNFlowData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = NetworkTopNFlowData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowEdgesResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowEdges> {
+    node?: NodeResolver<NetworkTopNFlowItem, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<
+    R = NetworkTopNFlowItem,
+    Parent = NetworkTopNFlowEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = NetworkTopNFlowEdges,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowItemResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowItem> {
+    _id?: IdResolver<string | null, TypeParent, Context>;
+
+    source?: SourceResolver<NetworkTopNFlowSource | null, TypeParent, Context>;
+
+    destination?: DestinationResolver<NetworkTopNFlowDestination | null, TypeParent, Context>;
+
+    event?: EventResolver<NetworkTopNFlowEvent | null, TypeParent, Context>;
+
+    network?: NetworkResolver<NetworkTopNFlowNetwork | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceResolver<
+    R = NetworkTopNFlowSource | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationResolver<
+    R = NetworkTopNFlowDestination | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type EventResolver<
+    R = NetworkTopNFlowEvent | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NetworkResolver<
+    R = NetworkTopNFlowNetwork | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowSourceResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowSource> {
+    ip?: IpResolver<string | null, TypeParent, Context>;
+
+    domain?: DomainResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IpResolver<
+    R = string | null,
+    Parent = NetworkTopNFlowSource,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DomainResolver<
+    R = string | null,
+    Parent = NetworkTopNFlowSource,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowDestinationResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowDestination> {
+    ip?: IpResolver<string | null, TypeParent, Context>;
+
+    domain?: DomainResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IpResolver<
+    R = string | null,
+    Parent = NetworkTopNFlowDestination,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DomainResolver<
+    R = string | null,
+    Parent = NetworkTopNFlowDestination,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowEventResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowEvent> {
+    duration?: DurationResolver<number | null, TypeParent, Context>;
+  }
+
+  export type DurationResolver<
+    R = number | null,
+    Parent = NetworkTopNFlowEvent,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkTopNFlowNetworkResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowNetwork> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+  }
+
+  export type BytesResolver<
+    R = number | null,
+    Parent = NetworkTopNFlowNetwork,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = NetworkTopNFlowNetwork,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1657,4 +1929,23 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace NetworkEcsFieldResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkEcsField> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+  }
+
+  export type BytesResolver<
+    R = number | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }

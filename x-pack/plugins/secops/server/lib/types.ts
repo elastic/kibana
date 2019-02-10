@@ -10,6 +10,7 @@ import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
+import { NetworkTopNFlow } from './network_top_n_flow';
 import { SourceStatus } from './source_status';
 import { SourceConfigurations, Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
@@ -17,11 +18,12 @@ import { UncommonProcesses } from './uncommon_processes';
 export * from './hosts';
 
 export interface AppDomainLibs {
+  authentications: Authentications;
   events: Events;
   fields: IndexFields;
   hosts: Hosts;
+  networkTopNFlow: NetworkTopNFlow;
   uncommonProcesses: UncommonProcesses;
-  authentications: Authentications;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

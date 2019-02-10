@@ -9,18 +9,22 @@ import { sharedSchema } from '../../common/graphql/shared';
 import { getSourceQueryMock } from '../graphql/sources/source.mock';
 import { getAllSourcesQueryMock } from '../graphql/sources/sources.mock';
 import { Logger } from '../utils/logger';
-import { authenticationsSchema } from './authentications/schema.gql';
-import { eventsSchema } from './events/schema.gql';
-import { hostsSchema } from './hosts/schema.gql';
-import { sourceStatusSchema } from './source_status/schema.gql';
-import { sourcesSchema } from './sources/schema.gql';
+import { authenticationsSchema } from './authentications';
+import { ecsSchema } from './ecs';
+import { eventsSchema } from './events';
+import { hostsSchema } from './hosts';
+import { networkTopNFlowSchema } from './network_top_n_flow';
+import { sourceStatusSchema } from './source_status';
+import { sourcesSchema } from './sources';
 import { uncommonProcessesSchema } from './uncommon_processes';
-import { whoAmISchema } from './who_am_i/schema.gql';
+import { whoAmISchema } from './who_am_i';
 
 export const schemas = [
+  ecsSchema,
   authenticationsSchema,
   eventsSchema,
   hostsSchema,
+  networkTopNFlowSchema,
   rootSchema,
   sourcesSchema,
   sourceStatusSchema,
