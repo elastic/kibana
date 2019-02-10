@@ -5,7 +5,7 @@
  */
 
 import squel from 'squel';
-import { queryEsSQL } from '../../../../server/lib/query_es_sql';
+import { queryEsSQL } from '../../../server/lib/query_es_sql';
 
 export const esdocs = () => ({
   name: 'esdocs',
