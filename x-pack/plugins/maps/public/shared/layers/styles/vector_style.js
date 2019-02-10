@@ -219,10 +219,21 @@ export class VectorStyle extends AbstractStyle {
         max = Math.max(max, newValue);
       }
     }
-    //scale to [0,1]
+    const diff = max - min;
     const propName = VectorStyle.getComputedFieldName(fieldName);
+
+    //scale to [0,1] domain
     for (let i = 0; i < features.length; i++) {
-      features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
+      const unscaledValue = features[i].properties[fieldName];
+      let scaledValue;
+      if (typeof  unscaledValue !== 'number' || isNaN(unscaledValue)) {//cannot scale
+        scaledValue = -1;//put outside range
+      } else if (diff === 0) {//values are identical
+        scaledValue = 1;//snap to end of color range
+      } else {
+        scaledValue = (features[i].properties[fieldName] - min) / diff;
+      }
+      features[i].properties[propName] =  scaledValue;
     }
     featureCollection.computed.push(fieldName);
     return true;

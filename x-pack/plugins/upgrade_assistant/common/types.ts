@@ -54,6 +54,8 @@ export enum ReindexWarning {
 
   // 7.0 -> 8.0 warnings
   apmReindex,
+
+  // 8.0 -> 9.0 warnings
 }
 
 export enum IndexGroup {

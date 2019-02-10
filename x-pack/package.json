@@ -1,12 +1,11 @@
 {
   "name": "x-pack",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
   "scripts": {
     "kbn": "node ../scripts/kbn",
-    "kbn:bootstrap": "gulp canvas:plugins:build",
     "start": "gulp dev",
     "build": "gulp build",
     "testonly": "gulp testonly",
@@ -120,7 +119,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.10.0",
+    "@elastic/eui": "6.10.1",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
@@ -200,7 +199,7 @@
     "lodash.topath": "^4.5.2",
     "lodash.uniqby": "^4.7.0",
     "lz-string": "^1.4.4",
-    "mapbox-gl": "0.45.0",
+    "mapbox-gl": "0.52.0",
     "markdown-it": "^8.4.1",
     "mime": "^2.2.2",
     "mkdirp": "0.5.1",
