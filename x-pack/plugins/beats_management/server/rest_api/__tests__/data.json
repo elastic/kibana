@@ -1,4 +1,5 @@
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -19,6 +20,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -39,6 +41,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -64,6 +67,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -84,6 +88,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -98,6 +103,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -112,6 +118,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -126,6 +133,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -144,6 +152,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -161,6 +170,7 @@
 }
 
 {
+  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
