@@ -17,6 +17,7 @@ import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { I18nContext } from 'ui/i18n';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
@@ -33,22 +34,24 @@ export async function startApp(libs: InfraFrontendLibs) {
 
   libs.framework.render(
     <I18nContext>
-      <EuiErrorBoundary>
-        <ConstateProvider devtools>
-          <ReduxStoreProvider store={store}>
-            <ApolloProvider client={libs.apolloClient}>
-              <ThemeProvider
-                theme={() => ({
-                  eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
-                  darkMode: libs.framework.darkMode,
-                })}
-              >
-                <PageRouter history={history} />
-              </ThemeProvider>
-            </ApolloProvider>
-          </ReduxStoreProvider>
-        </ConstateProvider>
-      </EuiErrorBoundary>
+      <UICapabilitiesProvider>
+        <EuiErrorBoundary>
+          <ConstateProvider devtools>
+            <ReduxStoreProvider store={store}>
+              <ApolloProvider client={libs.apolloClient}>
+                <ThemeProvider
+                  theme={() => ({
+                    eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
+                    darkMode: libs.framework.darkMode,
+                  })}
+                >
+                  <PageRouter history={history} />
+                </ThemeProvider>
+              </ApolloProvider>
+            </ReduxStoreProvider>
+          </ConstateProvider>
+        </EuiErrorBoundary>
+      </UICapabilitiesProvider>
     </I18nContext>
   );
 }

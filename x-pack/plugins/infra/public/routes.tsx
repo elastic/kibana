@@ -8,6 +8,8 @@ import { History } from 'history';
 import React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilites } from 'ui/capabilities/react';
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
 import { LinkToPage } from './pages/link_to';
@@ -16,15 +18,17 @@ import { MetricDetail } from './pages/metrics';
 
 interface RouterProps {
   history: History;
+  uiCapabilities: UICapabilities;
 }
 
-export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
+const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }) => {
+  const defaultRoute = uiCapabilities.infrastructure.show ? '/home' : '/logs';
   return (
     <Router history={history}>
       <Switch>
-        <Redirect from="/" exact={true} to="/home" />
-        <Route path="/logs" component={LogsPage} />
-        <Route path="/home" component={HomePage} />
+        <Redirect from="/" exact={true} to={defaultRoute} />
+        {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
+        {uiCapabilities.infrastructure.show && <Route path="/home" component={HomePage} />}
         <Route path="/link-to" component={LinkToPage} />
         <Route path="/metrics/:type/:node" component={MetricDetail} />
         <Route component={NotFoundPage} />
@@ -32,3 +36,5 @@ export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
     </Router>
   );
 };
+
+export const PageRouter = injectUICapabilites<{ history: History }>(PageRouterComponent);
