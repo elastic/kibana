@@ -222,15 +222,17 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         if (query) {
           searchSource.setField('query', query);
         }
-        searchSource.setField('filter', () => {
-          const activeFilters = [...filters];
-          const indexPattern = agg.getIndexPattern();
-          const useTimeFilter = !!indexPattern.timeFieldName;
-          if (useTimeFilter) {
-            activeFilters.push(this.vis.API.timeFilter.createFilter(indexPattern));
-          }
-          return activeFilters;
-        });
+        if (Array.isArray(filters)) {
+          searchSource.setField('filter', () => {
+            const activeFilters = [...filters];
+            const indexPattern = agg.getIndexPattern();
+            const useTimeFilter = !!indexPattern.timeFieldName;
+            if (useTimeFilter) {
+              activeFilters.push(this.vis.API.timeFilter.createFilter(indexPattern));
+            }
+            return activeFilters;
+          });
+        }
 
         let esResp;
         try {
