@@ -864,6 +864,7 @@ exports[`Field for image setting should render as read only with help text if ov
           allowFullScreen={true}
           alt="image:test:setting"
           aria-label="image test setting"
+          className="mgtAdvancedSettings__fieldImagePreview"
           fullScreenIconColor="light"
           size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
@@ -1144,6 +1145,7 @@ exports[`Field for image setting should render user value if there is user value
           allowFullScreen={true}
           alt="image:test:setting"
           aria-label="image test setting"
+          className="mgtAdvancedSettings__fieldImagePreview"
           fullScreenIconColor="light"
           size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
