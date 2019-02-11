@@ -10,6 +10,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./kpi_events'));
+    loadTestFile(require.resolve('./network_top_n_flow'));
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./uncommon_processes'));
