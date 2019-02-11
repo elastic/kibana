@@ -16,20 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getInjected(injected: string) {
-      if (injected === 'uiCapabilities') {
-        return {
-          dashboard: { show: true, save: true },
-          visualize: { show: true, save: true },
-        };
-      }
-    },
-  }),
-  { virtual: true }
-);
 
 import { ReactWrapper } from 'enzyme';
 import _ from 'lodash';

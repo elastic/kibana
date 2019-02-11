@@ -26,18 +26,6 @@ import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
-jest.mock('ui/chrome',
-  () => ({
-    getInjected(injected) {
-      if (injected === 'uiCapabilities') {
-        return {
-          dashboard: { show: true, save: true },
-          visualize: { show: true, save: true },
-        };
-      }
-    }
-  }), { virtual: true });
-
 import {
   updateViewMode,
   setPanels,
