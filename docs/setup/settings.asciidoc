@@ -13,7 +13,7 @@ you'll need to update your `kibana.yml` file. You can also enable SSL and set a
 variety of other options. Finally, environment variables can be injected into
 configuration using `${MY_ENV_VAR}` syntax.
 
-.Kibana Configuration Settings
+.Kibana configuration settings
 
 `console.enabled:`:: *Default: true* Set to false to disable Console.  Toggling
 this will cause the server to regenerate assets on the next startup, which may
@@ -288,3 +288,15 @@ disable the License Management user interface.
 
 `xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
 Rollup user interface.
+
+include::{docdir}/settings/apm-settings.asciidoc[]
+include::{docdir}/settings/dev-settings.asciidoc[]
+include::{docdir}/settings/graph-settings.asciidoc[]
+include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{docdir}/settings/logs-ui-settings.asciidoc[]
+include::{docdir}/settings/ml-settings.asciidoc[]
+include::{docdir}/settings/monitoring-settings.asciidoc[]
+include::{docdir}/settings/reporting-settings.asciidoc[]
+include::secure-settings.asciidoc[]
+include::{docdir}/settings/security-settings.asciidoc[]
+include::{docdir}/settings/spaces-settings.asciidoc[]
