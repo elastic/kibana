@@ -17,9 +17,23 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-    loadTestFile(require.resolve('./csp'));
+import expect from 'expect.js';
+
+export default function ({ getService }) {
+  const supertest = getService('supertest');
+
+  describe('csp smoke test', () => {
+    it('app response sends content security policy headers', async () => {
+      const response = await supertest.get('/app/kibana');
+
+      expect(response.headers).to.have.property('content-security-policy');
+    });
+
+    it('csp header does not allow all inline scripts', async () => {
+      const response = await supertest.get('/app/kibana');
+
+      expect(response.headers['content-security-policy']).to.contain('script-src');
+      expect(response.headers['content-security-policy']).not.to.contain('unsafe-inline');
+    });
   });
 }
