@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import {
   borderRadius,
-  colors,
   fontFamilyCode,
   px,
   unit,
@@ -16,18 +15,19 @@ import {
 } from '../../../../../../../style/variables';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 
 const ContextUrl = styled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${colors.gray5};
+  background: ${theme.euiColorLightestShade};
   border-radius: ${borderRadius};
-  border: 1px solid ${colors.gray4};
+  border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};
 `;
 
 interface Props {
-  httpContext: Span['context']['http'];
+  httpContext: NonNullable<Span['context']>['http'];
 }
 
 export function HttpContext({ httpContext }: Props) {

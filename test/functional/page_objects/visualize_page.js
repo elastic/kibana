@@ -231,18 +231,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
-    async setFromTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
-    }
-
-    async setToTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
-    }
-
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -383,8 +371,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @param {*} aggregationId the ID if the aggregation. On Tests, it start at from 2
      */
     async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
-      const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
-      await inputField.type(filterValue);
+      await testSubjects.setValue(`visEditorFilterInput_${aggregationId}_${filterIndex}`, filterValue);
     }
 
     async addNewFilterAggregation() {
@@ -440,10 +427,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // it would be nice to get the correct axis by name like "LeftAxis-1"
       // instead of an incremented index, but this link isn't under the div above
       const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`);
+        await find.byCssSelector(`#axisOptionsValueAxis-1 .visEditorSidebar__advancedLinkIcon`);
 
-      const advancedLinkState = await advancedLink.getAttribute('class');
-      if (advancedLinkState.includes('fa-caret-right')) {
+      const advancedLinkState = await advancedLink.getAttribute('type');
+      if (advancedLinkState.includes('arrowRight')) {
         await advancedLink.moveMouseTo();
         log.debug('click advancedLink');
         await advancedLink.click();
@@ -566,7 +553,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const prevRenderingCount = await this.getVisualizationRenderingCount();
       log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
-      await this.waitForRenderingCount(prevRenderingCount);
+      await this.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     async clickReset() {
@@ -931,22 +918,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return Number(renderingCount);
     }
 
-    async waitForRenderingCount(previousCount = 0, increment = 1) {
-      await retry.try(async () => {
+    async waitForRenderingCount(minimumCount = 1) {
+      await retry.waitFor(`rendering count to be greater than or equal to [${minimumCount}]`, async () => {
         const currentRenderingCount = await this.getVisualizationRenderingCount();
-        log.debug(`Readed rendering count ${previousCount} ${currentRenderingCount}`);
-        expect(currentRenderingCount).to.be(previousCount + increment);
+        log.debug(`-- currentRenderingCount=${currentRenderingCount}`);
+        return currentRenderingCount >= minimumCount;
       });
     }
 
     async waitForVisualizationRenderingStabilized() {
       //assuming rendering is done when data-rendering-count is constant within 1000 ms
-      await retry.try(async () => {
-        const previousCount = await this.getVisualizationRenderingCount();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await this.getVisualizationRenderingCount();
+        log.debug(`-- firstCount=${firstCount}`);
+
         await PageObjects.common.sleep(1000);
-        const currentCount = await this.getVisualizationRenderingCount();
-        log.debug(`Readed rendering count ${previousCount} ${currentCount}`);
-        expect(currentCount).to.be(previousCount);
+
+        const secondCount = await this.getVisualizationRenderingCount();
+        log.debug(`-- secondCount=${secondCount}`);
+
+        return firstCount === secondCount;
       });
     }
 

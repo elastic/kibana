@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickGauge');
       await PageObjects.visualize.clickGauge();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
 
@@ -68,10 +67,10 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         expect(await PageObjects.visualize.getGaugeValue()).to.eql([
-          '2,904\nwin 8',
-          '2,858\nwin xp',
-          '2,814\nwin 7',
-          '2,784\nios'
+          'win 8',
+          'win xp',
+          'win 7',
+          'ios'
         ]);
       });
     });

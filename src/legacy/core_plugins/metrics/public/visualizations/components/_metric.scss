@@ -3,7 +3,6 @@
   // depending on dark/light theme and/or background color provided
   // An easier way would be to provide if the theme is dark in the JS,
   // but it wasn't passed down.
-  .tab-dashboard.theme-dark .tvbVisMetric--noBackground &,
   .tvbVisMetric--reversed & {
     @content;
   }

@@ -23,6 +23,7 @@ export const uptime = (kibana: any) =>
           description: 'The description text that will be shown to users in Kibana',
         }),
         icon: 'plugins/uptime/icons/heartbeat_white.svg',
+        euiIconType: 'uptimeApp',
         title: 'Uptime',
         main: 'plugins/uptime/app',
         order: 8900,

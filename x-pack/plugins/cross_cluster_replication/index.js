@@ -8,7 +8,8 @@ import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerRoutes } from './server/routes/register_routes';
-
+import { ccrDataEnricher } from './cross_cluster_replication_data';
+import { addIndexManagementDataEnricher } from '../index_management/index_management_data';
 export function crossClusterReplication(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
@@ -41,6 +42,11 @@ export function crossClusterReplication(kibana) {
     init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);
+      if (
+        server.config().get('xpack.ccr.ui.enabled')
+      ) {
+        addIndexManagementDataEnricher(ccrDataEnricher);
+      }
     },
   });
 }

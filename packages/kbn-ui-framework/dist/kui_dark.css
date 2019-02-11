@@ -467,7 +467,7 @@ main {
   border-bottom-left-radius: 4px; }
 
 .kuiButtonGroup--united .kuiButton + .kuiButton {
-  margin-left: 2px; }
+  margin-left: 0; }
 
 .kuiButtonGroup--fullWidth {
   display: -webkit-box;
@@ -1003,9 +1003,17 @@ main {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  padding-left: 10px;
+  padding: 12px 8px;
   /* 1 */
-  height: 100%; }
+  border-bottom: 1px solid #333;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  -webkit-flex-basis: 100%;
+      -ms-flex-preferred-size: 100%;
+          flex-basis: 100%;
+  background-color: #222; }
 
 .kuiLocalBreadcrumb {
   font-size: 14px;
@@ -1100,8 +1108,8 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #242424, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #242424, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
+            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
     /* 3 */
     color: #DDD;
     /* 1 */ }
@@ -1147,8 +1155,8 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #242424, 0 0 0 2px #4DA1C0;
-            box-shadow: 0 0 0 1px #242424, 0 0 0 2px #4DA1C0;
+    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
+            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #4DA1C0;
     /* 3 */
     color: #DDD;
     /* 1 */ }
@@ -1170,10 +1178,8 @@ main {
 
 .kuiLocalDropdown {
   position: relative;
-  padding: 10px 10px 14px;
-  background-color: #242424;
-  border-bottom: solid 1px #333;
-  border-top: solid 1px #333;
+  padding: 10px 8px 14px;
+  background-color: transparent;
   margin-bottom: 10px;
   line-height: 20px; }
 
@@ -1308,7 +1314,9 @@ main {
   -webkit-box-align: stretch;
   -webkit-align-items: stretch;
       -ms-flex-align: stretch;
-          align-items: stretch; }
+          align-items: stretch;
+  padding-top: 8px;
+  padding-bottom: 8px; }
 
 .kuiLocalMenuItem {
   display: -webkit-box;
@@ -1319,32 +1327,29 @@ main {
   -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
-  height: 100%;
-  padding: 0 10px;
+  padding: 2px 8px;
   font-size: 14px;
   background-color: transparent;
   color: #DDD;
   border: 0;
   cursor: pointer;
-  border-right: solid 1px transparent;
-  border-left: solid 1px transparent; }
+  border-bottom: solid 2px transparent; }
   .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
-    background-color: #4DA1C0;
-    color: #242424; }
+    background-color: rgba(77, 161, 192, 0.15);
+    text-decoration: underline; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
-    background-color: #242424;
-    border-color: #333;
-    height: calc(100% + 1px);
-    z-index: 2;
-    color: #4DA1C0; }
+    color: #4DA1C0;
+    background-color: transparent;
+    border-color: #4DA1C0;
+    z-index: 2; }
     .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
-      color: #4DA1C0; }
+      text-decoration: none; }
   .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled {
     opacity: 0.5;
     cursor: not-allowed; }
     .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
       background-color: transparent;
-      color: #DDD; }
+      text-decoration: none; }
 
 .kuiLocalMenuItem__icon {
   margin-right: 5px;
@@ -1390,11 +1395,7 @@ main {
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
-          justify-content: space-between;
-  min-height: 29px;
-  /* 1 */
-  line-height: 29px;
-  /* 1 */ }
+          justify-content: space-between; }
 
 .kuiLocalNavRow__section {
   display: -webkit-box;
@@ -1414,18 +1415,13 @@ main {
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  padding: 0 10px;
+  padding: 0 8px;
   /* 1 */
   -webkit-box-align: start;
   -webkit-align-items: flex-start;
       -ms-flex-align: start;
           align-items: flex-start;
   /* 1 */ }
-
-.kuiLocalNav__popover {
-  height: 100%; }
-  .kuiLocalNav__popover .kuiLocalNav__popoverAnchor {
-    height: 100%; }
 
 .kuiLocalSearch {
   display: -webkit-box;
@@ -1632,9 +1628,21 @@ main {
       -ms-flex-align: center;
           align-items: center;
   height: 100%;
-  padding-left: 10px;
+  padding: 12px 8px;
   font-size: 14px;
-  font-weight: bold; }
+  font-weight: bold;
+  border-bottom: 1px solid #333;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  -webkit-flex-basis: 100%;
+      -ms-flex-preferred-size: 100%;
+          flex-basis: 100%;
+  background-color: #222; }
+  .kuiLocalTitle:empty {
+    padding: 0;
+    display: none; }
 
 /**
  * 1. Allow class to be applied to `ul` and `ol` elements

@@ -150,6 +150,7 @@ export class FileDataVisualizerView extends Component {
       }
 
       if (serverOverrides === undefined) {
+        // if no overrides were used, store all the settings returned from the endpoint
         this.originalSettings = serverSettings;
       } else {
         Object.keys(serverOverrides).forEach((o) => {
@@ -164,7 +165,7 @@ export class FileDataVisualizerView extends Component {
         Object.keys(serverSettings).forEach((o) => {
           const value = serverSettings[o];
           if (
-            this.overrides[o] === undefined &&
+            (this.overrides[o] === undefined) &&
             (Array.isArray(value) && (isEqual(value, this.originalSettings[o]) === false) ||
             (value !== this.originalSettings[o]))
           ) {

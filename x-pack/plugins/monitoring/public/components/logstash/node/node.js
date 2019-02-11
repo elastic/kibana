@@ -5,7 +5,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { DetailStatus } from '../detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 
@@ -25,17 +25,19 @@ export class Node extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent>
+          <EuiPanel>
             <DetailStatus stats={stats}/>
-            <EuiSpacer size="m"/>
-            <EuiFlexGrid columns={2} gutterSize="none">
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPageContent>
+            <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (
-                <EuiFlexItem key={index} style={{ width: '50%' }}>
+                <EuiFlexItem key={index}>
                   <MonitoringTimeseriesContainer
                     series={metric}
                     {...rest}
                   />
-                  <EuiSpacer size="m"/>
+                  <EuiSpacer />
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>

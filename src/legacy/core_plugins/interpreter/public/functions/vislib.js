@@ -26,7 +26,7 @@ export const vislib = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.vislib.help', {
@@ -51,10 +51,8 @@ export const vislib = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams,
-        },
+        visType: args.type,
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

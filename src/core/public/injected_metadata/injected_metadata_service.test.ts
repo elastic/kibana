@@ -43,6 +43,39 @@ describe('#getKibanaBuildNumber', () => {
   });
 });
 
+describe('start.getCspConfig()', () => {
+  it('returns injectedMetadata.csp', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        csp: {
+          warnLegacyBrowsers: true,
+        },
+      },
+    } as any);
+
+    const contract = injectedMetadata.start();
+    expect(contract.getCspConfig()).toEqual({
+      warnLegacyBrowsers: true,
+    });
+  });
+
+  it('csp config is frozen', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        csp: {
+          warnLegacyBrowsers: true,
+        },
+      },
+    } as any);
+
+    const csp = injectedMetadata.start().getCspConfig();
+    expect(() => {
+      // @ts-ignore TS knows this shouldn't be possible
+      csp.warnLegacyBrowsers = false;
+    }).toThrowError();
+  });
+});
+
 describe('start.getLegacyMetadata()', () => {
   it('returns injectedMetadata.legacyMetadata', () => {
     const injectedMetadata = new InjectedMetadataService({

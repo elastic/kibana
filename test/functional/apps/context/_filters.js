@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
-const TEST_ANCHOR_TYPE = 'doc';
+const TEST_ANCHOR_TYPE = '_doc';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
 const TEST_ANCHOR_FILTER_VALUE = 'IN';

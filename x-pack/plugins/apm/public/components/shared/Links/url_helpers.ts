@@ -60,7 +60,11 @@ const DEFAULT_KIBANA_TIME_RANGE = {
   }
 };
 
-function getQueryWithRisonParams(location: Location, query: RisonDecoded = {}) {
+function getQueryWithRisonParams(
+  location: Location,
+  pathname: string,
+  query: RisonDecoded = {}
+) {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
   const decodedG = risonSafeDecode(currentQuery._g);
@@ -68,11 +72,22 @@ function getQueryWithRisonParams(location: Location, query: RisonDecoded = {}) {
   const encodedG = rison.encode(combinedG);
   const encodedA = query._a ? rison.encode(query._a) : '';
 
-  return {
+  const nextQuery: StringMap = {
     ...query,
-    _g: encodedG,
-    _a: encodedA
+    _g: encodedG
   };
+
+  // Preserve kuery for apm links
+  const isApmLink = pathname.includes('app/apm') || pathname === '';
+  if (currentQuery.kuery && isApmLink) {
+    nextQuery.kuery = currentQuery.kuery;
+  }
+
+  if (encodedA) {
+    nextQuery._a = encodedA;
+  }
+
+  return nextQuery;
 }
 
 export interface KibanaHrefArgs {
@@ -88,7 +103,11 @@ export function getKibanaHref({
   hash,
   query = {}
 }: KibanaHrefArgs): string {
-  const queryWithRisonParams = getQueryWithRisonParams(location, query);
+  const queryWithRisonParams = getQueryWithRisonParams(
+    location,
+    pathname,
+    query
+  );
   const search = stringifyWithoutEncoding(queryWithRisonParams);
   const href = url.format({
     pathname: chrome.addBasePath(pathname),
@@ -116,8 +135,8 @@ interface RisonEncoded {
 }
 
 interface RisonDecoded {
-  _g?: StringMap;
-  _a?: StringMap;
+  _g?: StringMap<any>;
+  _a?: StringMap<any>;
 }
 
 export type QueryParams = APMQueryParams & RisonEncoded;

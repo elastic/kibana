@@ -314,7 +314,6 @@ export class PolicyTableUi extends Component {
     const button = (
       <EuiButtonEmpty
         data-test-subj="policyActionsContextMenuButton"
-        aria-label="Policy options"
         onClick={() => this.togglePolicyPopover(policy)}
         color="primary"
       >
@@ -410,8 +409,11 @@ export class PolicyTableUi extends Component {
                   color="danger"
                   onClick={() => this.setState({ showDeleteConfirmation: true })}
                 >
-                  Delete {numSelected} polic
-                  {numSelected > 1 ? 'ies' : 'y'}
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.policyTable.deletedPoliciesText"
+                    defaultMessage="Deleted {numSelected} {numSelected, plural, one {policy} other {policies}}"
+                    values={{ numSelected }}
+                  />
                 </EuiButton>
               </EuiFlexItem>
             ) : null}
@@ -427,7 +429,10 @@ export class PolicyTableUi extends Component {
                   id: 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
                   defaultMessage: 'Search',
                 })}
-                aria-label="Search policies"
+                aria-label={intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
+                  defaultMessage: 'Search policies',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -461,7 +466,12 @@ export class PolicyTableUi extends Component {
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiBetaBadge label="Beta" />
+                        <EuiBetaBadge
+                          label={intl.formatMessage({
+                            id: 'xpack.indexLifecycleMgmt.policyTable.sectionHeadingBetaBadgeText',
+                            defaultMessage: 'Beta',
+                          })}
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

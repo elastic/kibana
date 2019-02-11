@@ -26,9 +26,9 @@ import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pa
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-import EMS_CATALOGUE from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest_6.6.json';
-import EMS_FILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files_6.6.json';
-import EMS_TILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles_6.6.json';
+import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
+import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';

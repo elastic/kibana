@@ -25,9 +25,9 @@ import { toArray } from 'rxjs/operators';
 import wreck from 'wreck';
 
 import { deleteIndex } from './delete_index';
-import { collectUiExports } from '../../../ui/ui_exports';
-import { KibanaMigrator } from '../../../server/saved_objects/migrations';
-import { findPluginSpecs } from '../../../plugin_discovery';
+import { collectUiExports } from '../../../legacy/ui/ui_exports';
+import { KibanaMigrator } from '../../../legacy/server/saved_objects/migrations';
+import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**
  * This is an expensive operation, so we'll ensure it only happens once
@@ -137,7 +137,7 @@ async function getKibanaStatuses({ kibanaUrl }) {
 export async function createDefaultSpace({ index, client }) {
   await client.index({
     index,
-    type: 'doc',
+    type: '_doc',
     id: 'space:default',
     body: {
       type: 'space',

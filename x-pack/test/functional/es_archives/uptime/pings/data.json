@@ -2,162 +2,160 @@
   "type": "doc",
   "value": {
     "index": "heartbeat",
-    "type": "_doc",
     "source": {
-      "@timestamp" : "2018-10-30T18:51:56.792Z",
-      "host" : {
-        "name" : "foo.home",
-        "architecture" : "x86_64",
-        "os" : {
-          "version" : "10.14",
-          "family" : "darwin",
-          "build" : "18A391",
-          "platform" : "darwin"
+      "@timestamp": "2018-10-30T18:51:56.792Z",
+      "host": {
+        "name": "foo.home",
+        "architecture": "x86_64",
+        "os": {
+          "version": "10.14",
+          "family": "darwin",
+          "build": "18A391",
+          "platform": "darwin"
         }
       },
-      "tls" : {
-        "rtt" : {
-          "handshake" : {
-            "us" : 29547
+      "tls": {
+        "rtt": {
+          "handshake": {
+            "us": 29547
           }
         },
-        "certificate_not_valid_before" : "2018-05-08T00:00:00.000Z",
-        "certificate_not_valid_after" : "2020-06-03T12:00:00.000Z"
+        "certificate_not_valid_before": "2018-05-08T00:00:00.000Z",
+        "certificate_not_valid_after": "2020-06-03T12:00:00.000Z"
       },
-      "monitor" : {
-        "name" : "http",
-        "type" : "http",
-        "ip" : "192.30.253.112",
-        "host" : "www.github.com",
-        "status" : "up",
-        "duration" : {
-          "us" : 197695
+      "monitor": {
+        "name": "http",
+        "type": "http",
+        "ip": "192.30.253.112",
+        "host": "www.github.com",
+        "status": "up",
+        "duration": {
+          "us": 197695
         },
-        "scheme" : "https",
-        "id" : "http@https://www.github.com/"
+        "scheme": "https",
+        "id": "http@https://www.github.com/"
       },
-      "resolve" : {
-        "rtt" : {
-          "us" : 2615
+      "resolve": {
+        "rtt": {
+          "us": 2615
         },
-        "host" : "www.github.com",
-        "ip" : "192.30.253.112"
+        "host": "www.github.com",
+        "ip": "192.30.253.112"
       },
-      "http" : {
-        "rtt" : {
-          "write_request" : {
-            "us" : 59
+      "http": {
+        "rtt": {
+          "write_request": {
+            "us": 59
           },
-          "response_header" : {
-            "us" : 71100
+          "response_header": {
+            "us": 71100
           },
-          "validate" : {
-            "us" : 71111
+          "validate": {
+            "us": 71111
           },
-          "content" : {
-            "us" : 10
+          "content": {
+            "us": 10
           },
-          "total" : {
-            "us" : 167348
+          "total": {
+            "us": 167348
           }
         },
-        "url" : "https://www.github.com/",
-        "response" : {
-          "status_code" : 200
+        "url": "https://www.github.com/",
+        "response": {
+          "status_code": 200
         }
       },
-      "tcp" : {
-        "port" : 443,
-        "rtt" : {
-          "connect" : {
-            "us" : 9431
+      "tcp": {
+        "port": 443,
+        "rtt": {
+          "connect": {
+            "us": 9431
           }
         }
       },
-      "beat" : {
-        "hostname" : "foo.home",
-        "version" : "6.5.0",
-        "name" : "foo.home"
+      "beat": {
+        "hostname": "foo.home",
+        "version": "6.5.0",
+        "name": "foo.home"
       }
     }
   }
 }
 
 {
-  "type" : "doc",
+  "type": "doc",
   "value": {
     "index": "heartbeat",
-    "type": "_doc",
     "source": {
-      "@timestamp" : "2018-10-30T14:49:23.889Z",
-      "tcp" : {
-        "rtt" : {
-          "connect" : {
-            "us" : 475
+      "@timestamp": "2018-10-30T14:49:23.889Z",
+      "tcp": {
+        "rtt": {
+          "connect": {
+            "us": 475
           }
         },
-        "port" : 12349
+        "port": 12349
       },
-      "http" : {
-        "response" : {
-          "status_code" : 404
+      "http": {
+        "response": {
+          "status_code": 404
         },
-        "rtt" : {
-          "response_header" : {
-            "us" : 12467
+        "rtt": {
+          "response_header": {
+            "us": 12467
           },
-          "validate" : {
-            "us" : 12482
+          "validate": {
+            "us": 12482
           },
-          "content" : {
-            "us" : 14
+          "content": {
+            "us": 14
           },
-          "total" : {
-            "us" : 13028
+          "total": {
+            "us": 13028
           },
-          "write_request" : {
-            "us" : 470
+          "write_request": {
+            "us": 470
           }
         },
-        "url" : "http://localhost:12349/service/status"
+        "url": "http://localhost:12349/service/status"
       },
-      "monitor" : {
-        "host" : "localhost",
-        "ip" : "127.0.0.1",
-        "status" : "down",
-        "duration" : {
-          "us" : 14846
+      "monitor": {
+        "host": "localhost",
+        "ip": "127.0.0.1",
+        "status": "down",
+        "duration": {
+          "us": 14846
         },
-        "scheme" : "http",
-        "id" : "http@http://localhost:12349/service/status",
-        "name" : "http",
-        "type" : "http"
+        "scheme": "http",
+        "id": "http@http://localhost:12349/service/status",
+        "name": "http",
+        "type": "http"
       },
-      "resolve" : {
-        "host" : "localhost",
-        "ip" : "127.0.0.1",
-        "rtt" : {
-          "us" : 1592
+      "resolve": {
+        "host": "localhost",
+        "ip": "127.0.0.1",
+        "rtt": {
+          "us": 1592
         }
       },
-      "error" : {
-        "type" : "validate",
-        "message" : "received status code 404 expecting 200"
+      "error": {
+        "type": "validate",
+        "message": "received status code 404 expecting 200"
       },
-      "beat" : {
-        "version" : "6.5.0",
-        "name" : "foo_heartbeat",
-        "hostname" : "foo.heartbeat.com"
+      "beat": {
+        "version": "6.5.0",
+        "name": "foo_heartbeat",
+        "hostname": "foo.heartbeat.com"
       },
-      "host" : {
-        "name" : "foo",
-        "os" : {
-          "family" : "darwin",
-          "build" : "18A391",
-          "platform" : "darwin",
-          "version" : "10.14"
+      "host": {
+        "name": "foo",
+        "os": {
+          "family": "darwin",
+          "build": "18A391",
+          "platform": "darwin",
+          "version": "10.14"
         },
-        "architecture" : "x86_64"
+        "architecture": "x86_64"
       }
     }
   }

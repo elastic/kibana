@@ -7,9 +7,9 @@ import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
 import {
   METRIC_PROCESS_CPU_PERCENT,
   METRIC_SYSTEM_CPU_PERCENT,
-  PROCESSOR_NAME,
+  PROCESSOR_EVENT,
   SERVICE_NAME
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
@@ -40,7 +40,7 @@ export async function fetch({
   const { intervalString } = getBucketSize(start, end, 'auto');
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_NAME]: 'metric' } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
     {
       range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
     }
