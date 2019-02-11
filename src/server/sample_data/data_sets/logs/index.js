@@ -32,6 +32,7 @@ export function logsSpecProvider() {
       defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
     }),
     previewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard.png',
+    darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard_dark.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
     savedObjects: getSavedObjects(),

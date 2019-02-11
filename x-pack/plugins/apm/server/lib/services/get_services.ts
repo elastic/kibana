@@ -13,6 +13,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export interface IServiceListItem {
@@ -31,24 +32,8 @@ export async function getServices(
   const { start, end, esFilterQuery, client, config } = setup;
 
   const filter: ESFilter[] = [
-    {
-      bool: {
-        should: [
-          { term: { [PROCESSOR_EVENT]: 'metric' } },
-          { term: { [PROCESSOR_EVENT]: 'transaction' } },
-          { term: { [PROCESSOR_EVENT]: 'error' } }
-        ]
-      }
-    },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
+    { range: rangeFilter(start, end) }
   ];
 
   if (esFilterQuery) {

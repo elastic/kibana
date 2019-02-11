@@ -35,8 +35,15 @@
             index-patterns="[indexPattern]"
             filters="filters"
             on-filters-updated="onFiltersUpdated"
-            show-query-bar="vis.type.requiresSearch && vis.type.options.showQueryBar"
+            show-query-bar="showQueryBar()"
             show-filter-bar="vis.type.options.showFilterBar && chrome.getVisible()"
+            show-date-picker="enableQueryBarTimeRangeSelector"
+            date-range-from="timeRange.from"
+            date-range-to="timeRange.to"
+            is-refresh-paused="refreshInterval.pause"
+            refresh-interval="refreshInterval.value"
+            show-auto-refresh-only="showAutoRefreshOnlyInQueryBar"
+            on-refresh-change="onRefreshChange"
             watch-depth="reference"
           ></search-bar>
         </div>
