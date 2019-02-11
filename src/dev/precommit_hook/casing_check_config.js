@@ -185,7 +185,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
   'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
   'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
-  'webpackShims/angular-ui-select.js',
   'webpackShims/elasticsearch-browser.js',
   'webpackShims/moment-timezone.js',
   'webpackShims/ui-bootstrap.js',

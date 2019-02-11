@@ -7,6 +7,12 @@
 
 import 'angular';
 
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana', [
+  'ui.bootstrap',
+]);
+
 /*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/

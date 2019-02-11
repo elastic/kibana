@@ -54,3 +54,7 @@ import '../courier/saved_object/ui/saved_object_save_as_checkbox';
 import '../react_components';
 import '../i18n';
 import '../query_bar/directive';
+
+import '@elastic/ui-ace';
+import { uiModules } from 'ui/modules';
+uiModules.get('kibana', ['ui.ace']);

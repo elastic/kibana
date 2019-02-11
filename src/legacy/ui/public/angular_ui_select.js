@@ -17,7 +17,11 @@
  * under the License.
  */
 
-require('jquery');
-require('angular');
-require('angular-sanitize');
-require('ui-select/dist/select');
+import 'jquery';
+import 'angular';
+import 'angular-sanitize';
+import 'ui-select/dist/select';
+
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana', ['ui.select', 'ngSanitize']);
