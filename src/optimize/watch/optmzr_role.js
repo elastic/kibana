@@ -21,21 +21,22 @@ import { resolve } from 'path';
 
 import WatchServer from './watch_server';
 import WatchOptimizer, { STATUS } from './watch_optimizer';
+import { DllCompiler } from '../dynamic_dll_plugin';
 import { WatchCache } from './watch_cache';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
-  const log = (tags, data) => kibanaHapiServer.log(tags, data);
+  const logWithMetadata = (tags, message, metadata) => kibanaHapiServer.logWithMetadata(tags, message, metadata);
 
   const watchOptimizer = new WatchOptimizer({
-    log,
+    logWithMetadata,
     uiBundles: kbnServer.uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     prebuild: config.get('optimize.watchPrebuild'),
-    unsafeCache: config.get('optimize.unsafeCache'),
     watchCache: new WatchCache({
-      log,
+      logWithMetadata,
       outputPath: config.get('path.data'),
+      dllsPath: DllCompiler.getRawDllConfig().outputPath,
       cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../'),
     })
   });

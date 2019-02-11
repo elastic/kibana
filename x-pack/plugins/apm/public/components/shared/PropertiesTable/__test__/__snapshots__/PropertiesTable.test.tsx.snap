@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PropertiesTable AgentFeatureTipMessage component should render null empty string when no docs are returned 1`] = `""`;
+
+exports[`PropertiesTable AgentFeatureTipMessage component should render when docs are returned 1`] = `
+<styled.div>
+  <Styled(EuiIcon)
+    type="iInCircle"
+  />
+  You can configure your agent to add contextual information about your users.
+   
+  <EuiLink
+    color="primary"
+    href="mock-url"
+    rel="noopener noreferrer"
+    target="_blank"
+    type="button"
+  >
+    Learn more in the documentation.
+  </EuiLink>
+</styled.div>
+`;
+
+exports[`PropertiesTable PropertiesTable component should render empty when data isn't present 1`] = `
+<styled.div>
+  <Styled(styled.div)>
+    No data available
+  </Styled(styled.div)>
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
+</styled.div>
+`;
+
+exports[`PropertiesTable PropertiesTable component should render with data 1`] = `
+<styled.div>
+  <NestedKeyValueTable
+    data={
+      Object {
+        "a": "hello",
+        "b": "bananas",
+      }
+    }
+    depth={1}
+    keySorter={[Function]}
+    parentKey="testPropKey"
+  />
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
+</styled.div>
+`;
+
+exports[`PropertiesTable PropertiesTable component should still render NestedKeyValueTable even when data has no keys 1`] = `
+<styled.div>
+  <NestedKeyValueTable
+    data={Object {}}
+    depth={1}
+    keySorter={[Function]}
+    parentKey="testPropKey"
+  />
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
+</styled.div>
+`;

@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+set -e
+
+function report {
+  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
+    cd "$KIBANA_DIR"
+    node src/dev/failed_tests/cli
+  else
+    echo "Failure issues not created on pull requests"
+  fi
+}
+
+trap report EXIT
+
 source src/dev/ci_setup/checkout_sibling_es.sh
 
 export TEST_BROWSER_HEADLESS=1
@@ -12,7 +25,8 @@ node scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroup3 \
   --include-tag ciGroup4 \
   --include-tag ciGroup5 \
-  --include-tag ciGroup6
+  --include-tag ciGroup6 \
+  --include-tag ciGroup7
 
 echo " -> building and extracting default Kibana distributable for use in functional tests"
 cd "$KIBANA_DIR"

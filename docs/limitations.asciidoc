@@ -3,10 +3,17 @@
 
 [partintro]
 --
-Kibana currently has the following limitations.
+{kib} currently has the following limitations.
 
 * <<nested-objects>>
 * <<export-data>>
+* <<graph-limitations,Graph analytics>>
+
+These {stack} features also have limitations that affect {kib}:
+
+* {stack-ov}/watcher-limitations.html[Alerting]
+* {stack-ov}/ml-limitations.html[Machine learning]
+* {stack-ov}/security-limitations.html[Security]
 
 --
 

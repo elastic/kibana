@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Service for the container for the anomaly charts in the
  * Machine Learning Explorer dashboard.
@@ -23,47 +21,52 @@ import {
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
+import {
+  mlSelectSeverityService,
+  SEVERITY_OPTIONS,
+} from '../../components/controls/select_severity/select_severity';
+import { getChartContainerWidth } from '../legacy_utils';
 
 import { CHART_TYPE } from '../explorer_constants';
 
-export function explorerChartsContainerServiceFactory(
-  mlSelectSeverityService,
-  callback,
-  $chartContainer
-) {
+export function getDefaultChartsData() {
+  return {
+    chartsPerRow: 1,
+    seriesToPlot: [],
+    // default values, will update on every re-render
+    tooManyBuckets: false,
+    timeFieldName: 'timestamp'
+  };
+}
+
+export function explorerChartsContainerServiceFactory(callback) {
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
-  const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
+  const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
   const MAX_CHARTS_PER_ROW = 4;
 
-  function getDefaultData() {
-    return {
-      seriesToPlot: [],
-      // default values, will update on every re-render
-      tooManyBuckets: false,
-      timeFieldName: 'timestamp'
-    };
-  }
-
-  callback(getDefaultData());
+  callback(getDefaultChartsData());
 
   let requestCount = 0;
-  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+  const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs) {
     const newRequestCount = ++requestCount;
     requestCount = newRequestCount;
 
-    const data = getDefaultData();
+    const data = getDefaultChartsData();
 
-    const threshold = mlSelectSeverityService.state.get('threshold');
+    const threshold = (mlSelectSeverityService.initalized)
+      ? mlSelectSeverityService.state.get('threshold')
+      : SEVERITY_OPTIONS[0];
+
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= threshold.val;
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
-    const chartsContainerWidth = Math.floor($chartContainer.width());
+    const chartsContainerWidth = getChartContainerWidth();
     let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
     if (allSeriesRecords.length === 1) {
       chartsPerRow = 1;
@@ -105,7 +108,6 @@ export function explorerChartsContainerServiceFactory(
       const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
       return mlResultsService.getMetricData(
         config.datafeedConfig.indices,
-        config.datafeedConfig.types,
         config.entityFields,
         datafeedQuery,
         config.metricFunction,
@@ -165,7 +167,6 @@ export function explorerChartsContainerServiceFactory(
       const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
       return mlResultsService.getEventDistributionData(
         config.datafeedConfig.indices,
-        config.datafeedConfig.types,
         splitField,
         filterField,
         datafeedQuery,
@@ -209,7 +210,16 @@ export function explorerChartsContainerServiceFactory(
         const filterField = records[0].by_field_value || records[0].over_field_value;
         chartData = eventDistribution.filter(d => (d.entity !== filterField));
         _.map(metricData, (value, time) => {
-          if (value > 0) {
+          // The filtering for rare/event_distribution charts needs to be handled
+          // differently because of how the source data is structured.
+          // For rare chart values we are only interested wether a value is either `0` or not,
+          // `0` acts like a flag in the chart whether to display the dot/marker.
+          // All other charts (single metric, population) are metric based and with
+          // those a value of `null` acts as the flag to hide a datapoint.
+          if (
+            (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
+            (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
+          ) {
             chartData.push({
               date: +time,
               value: value,
@@ -246,7 +256,7 @@ export function explorerChartsContainerServiceFactory(
         if (chartPoint !== undefined) {
           chartPoint.anomalyScore = record.record_score;
 
-          if (_.has(record, 'actual')) {
+          if (record.actual !== undefined) {
             chartPoint.actual = record.actual;
             chartPoint.typical = record.typical;
           } else {
@@ -263,7 +273,7 @@ export function explorerChartsContainerServiceFactory(
             }
           }
 
-          if (_.has(record, 'multi_bucket_impact')) {
+          if (record.multi_bucket_impact !== undefined) {
             chartPoint.multiBucketImpact = record.multi_bucket_impact;
           }
         }
@@ -388,13 +398,13 @@ export function explorerChartsContainerServiceFactory(
         return;
       }
       const jobId = record.job_id;
-      if (!_.has(aggregatedData, jobId)) {
+      if (aggregatedData[jobId] === undefined) {
         aggregatedData[jobId] = {};
       }
       const detectorsForJob = aggregatedData[jobId];
 
       const detectorIndex = record.detector_index;
-      if (!_.has(detectorsForJob, detectorIndex)) {
+      if (detectorsForJob[detectorIndex] === undefined) {
         detectorsForJob[detectorIndex] = {};
       }
 
@@ -404,11 +414,11 @@ export function explorerChartsContainerServiceFactory(
       if (firstFieldName !== undefined) {
         const groupsForDetector = detectorsForJob[detectorIndex];
 
-        if (!_.has(groupsForDetector, firstFieldName)) {
+        if (groupsForDetector[firstFieldName] === undefined) {
           groupsForDetector[firstFieldName] = {};
         }
         const valuesForGroup = groupsForDetector[firstFieldName];
-        if (!_.has(valuesForGroup, firstFieldValue)) {
+        if (valuesForGroup[firstFieldValue] === undefined) {
           valuesForGroup[firstFieldValue] = {};
         }
 
@@ -423,7 +433,7 @@ export function explorerChartsContainerServiceFactory(
         }
 
         if (isSecondSplit === false) {
-          if (!_.has(dataForGroupValue, 'maxScoreRecord')) {
+          if (dataForGroupValue.maxScoreRecord === undefined) {
             dataForGroupValue.maxScore = record.record_score;
             dataForGroupValue.maxScoreRecord = record;
           } else {
@@ -437,17 +447,17 @@ export function explorerChartsContainerServiceFactory(
           const secondFieldName = record.over_field_name || record.by_field_name;
           const secondFieldValue = record.over_field_value || record.by_field_value;
 
-          if (!_.has(dataForGroupValue, secondFieldName)) {
+          if (dataForGroupValue[secondFieldName] === undefined) {
             dataForGroupValue[secondFieldName] = {};
           }
 
           const splitsForGroup = dataForGroupValue[secondFieldName];
-          if (!_.has(splitsForGroup, secondFieldValue)) {
+          if (splitsForGroup[secondFieldValue] === undefined) {
             splitsForGroup[secondFieldValue] = {};
           }
 
           const dataForSplitValue = splitsForGroup[secondFieldValue];
-          if (!_.has(dataForSplitValue, 'maxScoreRecord')) {
+          if (dataForSplitValue.maxScoreRecord === undefined) {
             dataForSplitValue.maxScore = record.record_score;
             dataForSplitValue.maxScoreRecord = record;
           } else {
@@ -460,7 +470,7 @@ export function explorerChartsContainerServiceFactory(
       } else {
         // Detector with no partition or by field.
         const dataForDetector = detectorsForJob[detectorIndex];
-        if (!_.has(dataForDetector, 'maxScoreRecord')) {
+        if (dataForDetector.maxScoreRecord === undefined) {
           dataForDetector.maxScore = record.record_score;
           dataForDetector.maxScoreRecord = record;
         } else {
@@ -478,13 +488,13 @@ export function explorerChartsContainerServiceFactory(
     // Convert to an array of the records with the highest record_score per unique series.
     _.each(aggregatedData, (detectorsForJob) => {
       _.each(detectorsForJob, (groupsForDetector) => {
-        if (_.has(groupsForDetector, 'maxScoreRecord')) {
+        if (groupsForDetector.maxScoreRecord !== undefined) {
           // Detector with no partition / by field.
           recordsForSeries.push(groupsForDetector.maxScoreRecord);
         } else {
           _.each(groupsForDetector, (valuesForGroup) => {
             _.each(valuesForGroup, (dataForGroupValue) => {
-              if (_.has(dataForGroupValue, 'maxScoreRecord')) {
+              if (dataForGroupValue.maxScoreRecord !== undefined) {
                 recordsForSeries.push(dataForGroupValue.maxScoreRecord);
               } else {
                 // Second level of aggregation for partition and by/over.
@@ -566,6 +576,6 @@ export function explorerChartsContainerServiceFactory(
     };
   }
 
-  return anomalyDataChangeListener;
+  return anomalyDataChange;
 
 }

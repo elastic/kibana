@@ -29,6 +29,7 @@ test('it renders without crashing', () => {
     validator: new RoleValidator(),
     onChange: jest.fn(),
     onDelete: jest.fn(),
+    intl: {} as any,
   };
 
   const wrapper = shallowWithIntl(<IndexPrivilegeForm {...props} />);
@@ -55,6 +56,7 @@ describe('delete button', () => {
     validator: new RoleValidator(),
     onChange: jest.fn(),
     onDelete: jest.fn(),
+    intl: {} as any,
   };
 
   test('it is hidden when allowDelete is false', () => {
@@ -106,6 +108,7 @@ describe(`document level security`, () => {
     validator: new RoleValidator(),
     onChange: jest.fn(),
     onDelete: jest.fn(),
+    intl: {} as any,
   };
 
   test(`inputs are hidden when DLS is not allowed`, () => {
@@ -164,6 +167,7 @@ describe('field level security', () => {
     validator: new RoleValidator(),
     onChange: jest.fn(),
     onDelete: jest.fn(),
+    intl: {} as any,
   };
 
   test(`input is hidden when FLS is not allowed`, () => {

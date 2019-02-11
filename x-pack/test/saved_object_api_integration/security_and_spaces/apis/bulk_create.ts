@@ -15,12 +15,11 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const {
-    bulkCreateTest,
-    createExpectLegacyForbidden,
-    createExpectResults,
-    expectRbacForbidden,
-  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
+  const { bulkCreateTest, createExpectResults, expectRbacForbidden } = bulkCreateTestSuiteFactory(
+    es,
+    esArchiver,
+    supertest
+  );
 
   describe('_bulk_create', () => {
     [
@@ -30,7 +29,6 @@ export default function({ getService }: TestInvoker) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -46,7 +44,6 @@ export default function({ getService }: TestInvoker) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -63,7 +60,7 @@ export default function({ getService }: TestInvoker) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectRbacForbidden,
           },
         },
       });
@@ -84,19 +81,8 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-        },
-      });
-
-      bulkCreateTest(`legacy readonly user within the ${scenario.spaceId} space`, {
-        user: scenario.users.legacyRead,
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
+            response: expectRbacForbidden,
           },
         },
       });

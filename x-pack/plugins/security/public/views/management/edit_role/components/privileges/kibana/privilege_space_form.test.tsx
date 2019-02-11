@@ -34,12 +34,15 @@ const buildProps = (customProps = {}) => {
     onChange: jest.fn(),
     onDelete: jest.fn(),
     validator: new RoleValidator(),
+    intl: {} as any,
     ...customProps,
   };
 };
 
 describe('<PrivilegeSpaceForm>', () => {
   it('renders without crashing', () => {
-    expect(shallowWithIntl(<PrivilegeSpaceForm {...buildProps()} />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(<PrivilegeSpaceForm.WrappedComponent {...buildProps()} />)
+    ).toMatchSnapshot();
   });
 });

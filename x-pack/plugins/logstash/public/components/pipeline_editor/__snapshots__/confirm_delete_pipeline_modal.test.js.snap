@@ -4,12 +4,34 @@ exports[`ConfirmDeletePipelineModal component renders as expected 1`] = `
 <EuiOverlayMask>
   <EuiConfirmModal
     buttonColor="danger"
-    cancelButtonText="Cancel"
-    confirmButtonText="Delete pipeline"
+    cancelButtonText={
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="xpack.logstash.confirmDeletePipelineModal.cancelButtonText"
+        values={Object {}}
+      />
+    }
+    confirmButtonText={
+      <FormattedMessage
+        defaultMessage="Delete pipeline"
+        id="xpack.logstash.confirmDeletePipelineModal.confirmButtonText"
+        values={Object {}}
+      />
+    }
     defaultFocusedButton="cancel"
     onCancel={[MockFunction]}
     onConfirm={[MockFunction]}
-    title="Delete pipeline the id"
+    title={
+      <FormattedMessage
+        defaultMessage="Delete pipeline {id}"
+        id="xpack.logstash.confirmDeletePipelineModal.deletePipelineTitle"
+        values={
+          Object {
+            "id": "the id",
+          }
+        }
+      />
+    }
   >
     <p>
       You cannot recover a deleted pipeline.

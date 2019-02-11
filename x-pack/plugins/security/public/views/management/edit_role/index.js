@@ -22,16 +22,22 @@ import { SpacesManager } from '../../../../../spaces/public/lib';
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
+import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.name
+      ? getEditRoleBreadcrumbs
+      : getCreateRoleBreadcrumbs
+  ),
   resolve: {
     role($route, ShieldRole, kbnUrl, Promise, Notifier) {
       const name = $route.current.params.name;
@@ -128,7 +134,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       const domNode = document.getElementById('editRoleReactRoot');
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <EditRolePage
             runAsUsers={users}
             role={role}
@@ -143,7 +149,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             spacesEnabled={enableSpaceAwarePrivileges}
             userProfile={userProfile}
           />
-        </I18nProvider>, domNode);
+        </I18nContext>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

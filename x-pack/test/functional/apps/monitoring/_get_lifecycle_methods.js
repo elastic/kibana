@@ -6,7 +6,7 @@
 
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'timePicker']);
   const noData = getService('monitoringNoData');
   let _archive;
 
@@ -15,9 +15,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       _archive = archive;
 
       const kibanaServer = getService('kibanaServer');
-      const remote = getService('remote');
+      const browser = getService('browser');
 
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await esArchiver.load(archive);
       await kibanaServer.uiSettings.replace({
@@ -30,9 +30,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
 
       // pause autorefresh in the time filter because we don't wait any ticks,
       // and we don't want ES to log a warning when data gets wiped out
-      await PageObjects.header.pauseAutoRefresh();
+      await PageObjects.timePicker.pauseAutoRefresh();
 
-      await PageObjects.header.setAbsoluteRange(from, to);
+      await PageObjects.timePicker.setAbsoluteRange(from, to);
     },
 
     tearDown() {

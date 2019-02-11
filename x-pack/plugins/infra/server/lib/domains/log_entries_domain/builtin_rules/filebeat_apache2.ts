@@ -6,15 +6,65 @@
 
 export const filebeatApache2Rules = [
   {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'apache.access',
+      },
+    },
+    format: [
+      {
+        constant: '[Apache][access] ',
+      },
+      {
+        field: 'source.ip',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'user.name',
+      },
+      {
+        constant: ' "',
+      },
+      {
+        field: 'http.request.method',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'url.original',
+      },
+      {
+        constant: ' HTTP/',
+      },
+      {
+        field: 'http.version',
+      },
+      {
+        constant: '" ',
+      },
+      {
+        field: 'http.response.status_code',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'http.response.body.bytes',
+      },
+    ],
+  },
+  {
+    // pre-ECS
     when: {
       exists: ['apache2.access'],
     },
     format: [
       {
-        constant: 'apache2',
-      },
-      {
-        constant: ' ',
+        constant: '[Apache][access] ',
       },
       {
         field: 'apache2.access.remote_ip',
@@ -54,6 +104,48 @@ export const filebeatApache2Rules = [
       },
       {
         field: 'apache2.access.body_sent.bytes',
+      },
+    ],
+  },
+  {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'apache.error',
+      },
+    },
+    format: [
+      {
+        constant: '[Apache][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'message',
+      },
+    ],
+  },
+  {
+    // pre-ECS
+    when: {
+      exists: ['apache2.error.message'],
+    },
+    format: [
+      {
+        constant: '[Apache][',
+      },
+      {
+        field: 'apache2.error.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'apache2.error.message',
       },
     ],
   },

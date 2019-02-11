@@ -28,6 +28,8 @@ import chrome from 'ui/chrome';
 import { FORECAST_REQUEST_STATE } from 'plugins/ml/../common/constants/states';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { isTimeSeriesViewJob } from '../../../../../../common/util/job_utils';
 
 const MAX_FORECASTS = 500;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -35,7 +37,7 @@ const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
  */
-class ForecastsTable extends Component {
+class ForecastsTableUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -63,7 +65,10 @@ class ForecastsTable extends Component {
           console.log('Error loading list of forecasts for jobs list:', resp);
           this.setState({
             isLoading: false,
-            errorMessage: 'Error loading the list of forecasts run on this job',
+            errorMessage: this.props.intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobDetails.forecastsTable.loadingErrorMessage',
+              defaultMessage: 'Error loading the list of forecasts run on this job'
+            }),
             forecasts: []
           });
         });
@@ -96,7 +101,6 @@ class ForecastsTable extends Component {
     });
 
     const appState = {
-      filters: [],
       query: {
         query_string: {
           analyze_wildcard: true,
@@ -150,65 +154,116 @@ class ForecastsTable extends Component {
     if (forecasts.length === 0) {
       return (
         <EuiCallOut
-          title="No forecasts have been run for this job"
+          title={(<FormattedMessage
+            id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsTitle"
+            defaultMessage="No forecasts have been run for this job"
+          />)}
           iconType="iInCircle"
         >
-          <p>
-            To run a forecast,
-            open the <EuiLink onClick={() => this.openSingleMetricView()}>Single Metric Viewer</EuiLink>
-          </p>
+          {isTimeSeriesViewJob(this.props.job) &&
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription"
+                defaultMessage="To run a forecast, open the {singleMetricViewerLink}"
+                values={{
+                  singleMetricViewerLink: (
+                    <EuiLink onClick={() => this.openSingleMetricView()}>
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription.linkText"
+                        defaultMessage="Single Metric Viewer"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
+            </p>
+          }
         </EuiCallOut>
       );
     }
 
+    const { intl } = this.props;
+
     const columns = [
       {
         field: 'forecast_create_timestamp',
-        name: 'Created',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.createdLabel',
+          defaultMessage: 'Created'
+        }),
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
         field: 'forecast_start_timestamp',
-        name: 'From',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.fromLabel',
+          defaultMessage: 'From'
+        }),
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
         field: 'forecast_end_timestamp',
-        name: 'To',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.toLabel',
+          defaultMessage: 'To'
+        }),
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
         field: 'forecast_status',
-        name: 'Status',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.statusLabel',
+          defaultMessage: 'Status'
+        }),
         sortable: true
       },
       {
         field: 'forecast_memory_bytes',
-        name: 'Memory size',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.memorySizeLabel',
+          defaultMessage: 'Memory size'
+        }),
         render: (bytes) => formatNumber(bytes, '0b'),
         sortable: true
       },
       {
         field: 'processing_time_ms',
-        name: 'Processing time',
-        render: (ms) => `${ms} ms`,
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel',
+          defaultMessage: 'Processing time'
+        }),
+        render: (ms) => intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.msTimeUnitLabel',
+          defaultMessage: '{ms} ms' }, {
+          ms
+        }),
         sortable: true
       },
       {
         field: 'forecast_expiry_timestamp',
-        name: 'Expires',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel',
+          defaultMessage: 'Expires'
+        }),
         render: (date) => formatDate(date, TIME_FORMAT),
+        textOnly: true,
         sortable: true
       },
       {
         field: 'forecast_messages',
-        name: 'Messages',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.messagesLabel',
+          defaultMessage: 'Messages'
+        }),
         sortable: false,
         render: (messages) => {
           return (
@@ -218,10 +273,14 @@ class ForecastsTable extends Component {
               })}
             </div>
           );
-        }
+        },
+        textOnly: true,
       },
       {
-        name: 'View',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel',
+          defaultMessage: 'View'
+        }),
         render: (forecast) => (
           <EuiButton
             onClick={() => this.openSingleMetricView(forecast)}
@@ -247,8 +306,10 @@ class ForecastsTable extends Component {
     );
   }
 }
-ForecastsTable.propTypes = {
+ForecastsTableUI.propTypes = {
   job: PropTypes.object.isRequired,
 };
+
+const ForecastsTable = injectI18n(ForecastsTableUI);
 
 export { ForecastsTable };

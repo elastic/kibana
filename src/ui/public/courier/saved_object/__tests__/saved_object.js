@@ -42,13 +42,13 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
-   * @returns {{attributes: {}, type: string, id: *, _version: integer}}
+   * @returns {{attributes: {}, type: string, id: *, _version: string}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return {
       type: 'dashboard',
       id: indexPatternId,
-      _version: 2,
+      _version: 'foo',
       attributes: {},
       ...additionalOptions
     };
@@ -242,7 +242,11 @@ describe('Saved Object', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
         sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-          return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
+          return BluebirdPromise.resolve({
+            type: 'dashboard',
+            id: 'myId',
+            _version: 'foo'
+          });
         });
 
         stubESResponse(mockDocResponse);
@@ -261,7 +265,9 @@ describe('Saved Object', function () {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve({
-              type: 'dashboard', id, version: 2
+              type: 'dashboard',
+              id,
+              version: 'foo'
             });
           });
           expect(savedObject.isSaving).to.be(false);
@@ -283,6 +289,120 @@ describe('Saved Object', function () {
             expect(savedObject.isSaving).to.be(false);
           });
         });
+      });
+    });
+
+    describe('to extract references', () => {
+      it('when "extractReferences" function when passed in', async () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        const extractReferences = ({ attributes, references }) => {
+          references.push({
+            name: 'test',
+            type: 'index-pattern',
+            id: 'my-index',
+          });
+          return { attributes, references };
+        };
+        return createInitializedSavedObject({ type: 'dashboard', extractReferences })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 'foo',
+                type: 'dashboard',
+              });
+            });
+            return savedObject
+              .save()
+              .then(() => {
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'test',
+                  type: 'index-pattern',
+                  id: 'my-index',
+                });
+              });
+          });
+      });
+
+      it('when index exists in searchSourceJSON', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setField('index', new IndexPattern('my-index', null, []));
+            return savedObject
+              .save()
+              .then(() => {
+                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: JSON.stringify({
+                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    }),
+                  },
+                });
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  type: 'index-pattern',
+                  id: 'my-index',
+                });
+              });
+          });
+      });
+
+      it('when indexes exists in filter of searchSourceJSON', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setField('filter', [{
+              meta: {
+                index: 'my-index',
+              }
+            }]);
+            return savedObject
+              .save()
+              .then(() => {
+                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: JSON.stringify({
+                      filter: [
+                        {
+                          meta: {
+                            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                          }
+                        }
+                      ],
+                    }),
+                  },
+                });
+                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+                expect(references).to.have.length(1);
+                expect(references[0]).to.eql({
+                  name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                  type: 'index-pattern',
+                  id: 'my-index',
+                });
+              });
+          });
       });
     });
   });
@@ -405,6 +525,121 @@ describe('Saved Object', function () {
         });
     });
 
+    it('does not inject references when references array is missing', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('notCalled', true);
+        });
+    });
+
+    it('does not inject references when references array is empty', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+            references: [],
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('notCalled', true);
+        });
+    });
+
+    it('injects references when function is provided and references exist', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+            references: [{}],
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('calledOnce', true);
+        });
+    });
+
+    it('injects references from searchSourceJSON', async () => {
+      const savedObject = new SavedObject({ type: 'dashboard', searchSource: true });
+      return savedObject
+        .init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  filter: [
+                    {
+                      meta: {
+                        indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                      },
+                    },
+                  ],
+                }),
+              },
+            },
+            references: [
+              {
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+                id: 'my-index-1',
+              },
+              {
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                type: 'index-pattern',
+                id: 'my-index-2',
+              },
+            ],
+          };
+          savedObject.applyESResp(response);
+          expect(savedObject.searchSource.getFields()).to.eql({
+            index: 'my-index-1',
+            filter: [
+              {
+                meta: {
+                  index: 'my-index-2',
+                },
+              },
+            ],
+          });
+        });
+    });
   });
 
   describe ('config', function () {
@@ -451,7 +686,7 @@ describe('Saved Object', function () {
           attributes: {
             title: 'testIndexPattern'
           },
-          _version: 2
+          _version: 'foo'
         });
 
         const savedObject = new SavedObject(config);

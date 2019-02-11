@@ -33,7 +33,7 @@ import {
   isStateHash,
 } from '../state_storage';
 import { HashedItemStore } from '../state_storage/hashed_item_store';
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 
 describe('State Management', () => {
@@ -293,10 +293,18 @@ describe('State Management', () => {
           expect(toastNotifications.list[0].title).to.match(/use the share functionality/i);
         });
 
-        it('triggers fatal error linking to github when setting item fails', () => {
+        it.skip('triggers fatal error linking to github when setting item fails', () => {
+          // NOTE: this test needs to be written in jest and removed from the browser ones
+          // More info could be read in the opened issue:
+          // https://github.com/elastic/kibana/issues/22751
           const { state, hashedItemStore } = setup({ storeInHash: true });
-          const fatalErrorStub = sandbox.stub(FatalErrorNS, 'fatalError');
-          sinon.stub(hashedItemStore, 'setItem').returns(false);
+          const fatalErrorStub = sandbox.stub();
+          Object.defineProperty(FatalErrorNS, 'fatalError', {
+            writable: true,
+            value: fatalErrorStub
+          });
+
+          sandbox.stub(hashedItemStore, 'setItem').returns(false);
           state.toQueryParam();
           sinon.assert.calledOnce(fatalErrorStub);
           sinon.assert.calledWith(fatalErrorStub, sinon.match(error => (

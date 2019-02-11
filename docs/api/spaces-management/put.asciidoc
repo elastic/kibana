@@ -5,6 +5,8 @@ experimental[This API is *experimental* and may be changed or removed completely
 
 Updates an existing {kib} space. To create a new space, use the POST command.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 To update a space, issue a PUT request to the 

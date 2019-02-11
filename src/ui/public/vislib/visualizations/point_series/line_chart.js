@@ -75,7 +75,7 @@ export function VislibVisualizationsLineChartProvider(Private) {
         .selectAll('circle')
         .data(function appendData() {
           return data.values.filter(function (d) {
-            return !_.isNull(d.y);
+            return !_.isNull(d.y) && (d.y || !d.y0);
           });
         });
 

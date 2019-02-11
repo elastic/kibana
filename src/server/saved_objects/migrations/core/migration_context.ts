@@ -41,6 +41,12 @@ export interface MigrationOpts {
   mappingProperties: MappingProperties;
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
+
+  /**
+   * If specified, templates matching the specified pattern will be removed
+   * prior to running migrations. For example: 'kibana_index_template*'
+   */
+  obsoleteIndexTemplatePattern?: string;
 }
 
 export interface Context {
@@ -54,6 +60,7 @@ export interface Context {
   pollInterval: number;
   scrollDuration: string;
   serializer: SavedObjectsSerializer;
+  obsoleteIndexTemplatePattern?: string;
 }
 
 /**
@@ -78,6 +85,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     pollInterval: opts.pollInterval,
     scrollDuration: opts.scrollDuration,
     serializer: opts.serializer,
+    obsoleteIndexTemplatePattern: opts.obsoleteIndexTemplatePattern,
   };
 }
 
@@ -104,12 +112,10 @@ function createDestContext(
     exists: false,
     indexName: nextIndexName(source.indexName, alias),
     mappings: {
-      doc: {
-        ...activeMappings.doc,
-        properties: {
-          ...source.mappings.doc.properties,
-          ...activeMappings.doc.properties,
-        },
+      ...activeMappings,
+      properties: {
+        ...source.mappings.properties,
+        ...activeMappings.properties,
       },
     },
   };

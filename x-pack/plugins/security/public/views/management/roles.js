@@ -13,9 +13,11 @@ import template from 'plugins/security/views/management/roles.html';
 import 'plugins/security/services/shield_role';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { ROLES_PATH, EDIT_ROLES_PATH } from './management_urls';
+import { getRolesBreadcrumbs } from './breadcrumbs';
 
 routes.when(ROLES_PATH, {
   template,
+  k7Breadcrumbs: getRolesBreadcrumbs,
   resolve: {
     roles(ShieldRole, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself

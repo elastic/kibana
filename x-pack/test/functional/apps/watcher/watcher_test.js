@@ -11,16 +11,16 @@ const watchID = "watchID";
 const watchName = "watch Name";
 const updatedName = "updatedName";
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('watcher_test', function () {
     before('initialize tests', async () => {
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.clickLinkText('Watcher');
+      await testSubjects.click('watcher');
       await PageObjects.watcher.clearAllWatches();
     });
 

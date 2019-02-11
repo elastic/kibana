@@ -18,6 +18,7 @@
  */
 
 import { SearchError } from './search_error';
+import { i18n } from '@kbn/i18n';
 
 export const noOpSearchStrategy = {
   id: 'noOp',
@@ -25,8 +26,12 @@ export const noOpSearchStrategy = {
   search: async () => {
     const searchError = new SearchError({
       status: '418', // "I'm a teapot" error
-      title: 'No search strategy registered',
-      message: `Couldn't find a search strategy for the search request`,
+      title: i18n.translate('common.ui.courier.noSearchStrategyRegisteredErrorMessageTitle', {
+        defaultMessage: 'No search strategy registered',
+      }),
+      message: i18n.translate('common.ui.courier.noSearchStrategyRegisteredErrorMessageDescription', {
+        defaultMessage: `Couldn't find a search strategy for the search request`,
+      }),
       type: 'NO_OP_SEARCH_STRATEGY',
       path: '',
     });

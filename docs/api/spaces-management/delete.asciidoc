@@ -8,6 +8,8 @@ experimental[This API is *experimental* and may be changed or removed completely
 Deleting a space will automatically delete all saved objects that belong to that space. This operation cannot be undone!
 ==================================================
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 To delete a space, submit a DELETE request to the `/api/spaces/space/<space_id>`

@@ -5,17 +5,11 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
 
 import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { sourceSelectors, State } from '../store';
 import { RendererFunction } from '../utils/typed_react';
-
-const withIndexPattern = connect((state: State) => ({
-  indexPattern: sourceSelectors.selectDerivedIndexPattern(state),
-}));
 
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
@@ -36,73 +30,70 @@ interface WithKueryAutocompletionLifecycleState {
   suggestions: AutocompleteSuggestion[];
 }
 
-export const WithKueryAutocompletion = withIndexPattern(
-  class WithKueryAutocompletionLifecycle extends React.Component<
-    WithKueryAutocompletionLifecycleProps,
-    WithKueryAutocompletionLifecycleState
-  > {
-    public readonly state: WithKueryAutocompletionLifecycleState = {
-      currentRequest: null,
-      suggestions: [],
+export class WithKueryAutocompletion extends React.Component<
+  WithKueryAutocompletionLifecycleProps,
+  WithKueryAutocompletionLifecycleState
+> {
+  public readonly state: WithKueryAutocompletionLifecycleState = {
+    currentRequest: null,
+    suggestions: [],
+  };
+
+  public render() {
+    const { currentRequest, suggestions } = this.state;
+
+    return this.props.children({
+      isLoadingSuggestions: currentRequest !== null,
+      loadSuggestions: this.loadSuggestions,
+      suggestions,
+    });
+  }
+
+  private loadSuggestions = async (
+    expression: string,
+    cursorPosition: number,
+    maxSuggestions?: number
+  ) => {
+    const { indexPattern } = this.props;
+    const autocompletionProvider = getAutocompleteProvider('kuery');
+    const config = {
+      get: () => true,
     };
 
-    public render() {
-      const { currentRequest, suggestions } = this.state;
-
-      return this.props.children({
-        isLoadingSuggestions: currentRequest !== null,
-        loadSuggestions: this.loadSuggestions,
-        suggestions,
-      });
+    if (!autocompletionProvider) {
+      return;
     }
 
-    private loadSuggestions = async (
-      expression: string,
-      cursorPosition: number,
-      maxSuggestions?: number
-    ) => {
-      const { indexPattern } = this.props;
-      const autocompletionProvider = getAutocompleteProvider('kuery');
-      const config = {
-        get: () => true,
-      };
+    const getSuggestions = autocompletionProvider({
+      config,
+      indexPatterns: [indexPattern],
+      boolFilter: [],
+    });
 
-      if (!autocompletionProvider) {
-        return;
-      }
+    this.setState({
+      currentRequest: {
+        expression,
+        cursorPosition,
+      },
+      suggestions: [],
+    });
 
-      const getSuggestions = autocompletionProvider({
-        config,
-        indexPatterns: [indexPattern],
-        boolFilter: [],
-      });
+    const suggestions = await getSuggestions({
+      query: expression,
+      selectionStart: cursorPosition,
+      selectionEnd: cursorPosition,
+    });
 
-      this.setState({
-        currentRequest: {
-          expression,
-          cursorPosition,
-        },
-        suggestions: [],
-      });
-
-      const suggestions = await getSuggestions({
-        query: expression,
-        selectionStart: cursorPosition,
-        selectionEnd: cursorPosition,
-      });
-
-      this.setState(
-        state =>
-          state.currentRequest &&
-          state.currentRequest.expression !== expression &&
-          state.currentRequest.cursorPosition !== cursorPosition
-            ? state // ignore this result, since a newer request is in flight
-            : {
-                ...state,
-                currentRequest: null,
-                suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
-              }
-      );
-    };
-  }
-);
+    this.setState(state =>
+      state.currentRequest &&
+      state.currentRequest.expression !== expression &&
+      state.currentRequest.cursorPosition !== cursorPosition
+        ? state // ignore this result, since a newer request is in flight
+        : {
+            ...state,
+            currentRequest: null,
+            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
+          }
+    );
+  };
+}

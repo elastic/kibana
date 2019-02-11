@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -122,15 +122,21 @@ export default function ({ getService, getPageObjects }) {
         const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
         expect(countOfDashboards).to.equal(1);
       });
+
+      it('is using AND operator', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('three words');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(0);
+      });
     });
 
     describe('search by title', function () {
       it('loads a dashboard if title matches', async function () {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=Two%20Words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
-        await remote.get(newUrl.toString(), useTimeStamp);
+        await browser.get(newUrl.toString(), useTimeStamp);
 
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
@@ -138,11 +144,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('title match is case insensitive', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
-        await remote.get(newUrl.toString(), useTimeStamp);
+        await browser.get(newUrl.toString(), useTimeStamp);
 
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
@@ -150,11 +156,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('stays on listing page if title matches no dashboards', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=nodashboardsnamedme';
         // Only works on a hard refresh.
         const useTimeStamp = true;
-        await remote.get(newUrl.toString(), useTimeStamp);
+        await browser.get(newUrl.toString(), useTimeStamp);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
@@ -170,11 +176,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('two words', { needsConfirm: true });
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';
         // Only works on a hard refresh.
         const useTimeStamp = true;
-        await remote.get(newUrl.toString(), useTimeStamp);
+        await browser.get(newUrl.toString(), useTimeStamp);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
@@ -190,12 +196,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('i am !@#$%^&*()_+~`,.<>{}[]; so special');
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         // Need to encode that one.
         const newUrl = currentUrl + '&title=i%20am%20%21%40%23%24%25%5E%26%2A%28%29_%2B~%60%2C.%3C%3E%7B%7D%5B%5D%3B%20so%20special';
         // Only works on a hard refresh.
         const useTimeStamp = true;
-        await remote.get(newUrl.toString(), useTimeStamp);
+        await browser.get(newUrl.toString(), useTimeStamp);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();

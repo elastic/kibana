@@ -23,23 +23,13 @@ import { initXAxis } from '../_init_x_axis';
 
 describe('initXAxis', function () {
 
-  const field = {};
-  const indexPattern = {};
-
   const baseChart = {
     aspects: {
-      x: {
-        aggConfig: {
-          fieldFormatter: _.constant({}),
-          write: _.constant({ params: {} }),
-          aggConfigs: {},
-          getIndexPattern: () => {
-            return indexPattern;
-          },
-          type: {}
-        },
-        title: 'label'
-      }
+      x: [{
+        format: {},
+        title: 'label',
+        params: {}
+      }]
     }
   };
 
@@ -48,45 +38,28 @@ describe('initXAxis', function () {
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
-      .and.have.property('xAxisFormatter', chart.aspects.x.aggConfig.fieldFormatter());
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format);
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
     const chart = _.cloneDeep(baseChart);
-    chart.aspects.x.aggConfig.type.ordered = true;
-    chart.aspects.x.aggConfig.params = {
-      field: field
-    };
-    chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
+    chart.aspects.x[0].params.date = true;
 
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
-      .and.have.property('xAxisFormatter', chart.aspects.x.aggConfig.fieldFormatter())
-      .and.have.property('indexPattern', indexPattern)
-      .and.have.property('xAxisField', field)
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
-
-    expect(chart.ordered)
-      .to.be.an('object')
-      .and.not.have.property('interval');
   });
 
   it('reads the interval param from the x agg', function () {
     const chart = _.cloneDeep(baseChart);
-    chart.aspects.x.aggConfig.type.ordered = true;
-    chart.aspects.x.aggConfig.write = _.constant({ params: { interval: 10 } });
-    chart.aspects.x.aggConfig.params = {
-      field: field
-    };
-    chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
-
+    chart.aspects.x[0].params.date = true;
+    chart.aspects.x[0].params.interval = 10;
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
-      .and.have.property('xAxisFormatter', chart.aspects.x.aggConfig.fieldFormatter())
-      .and.have.property('indexPattern', indexPattern)
-      .and.have.property('xAxisField', field)
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
 
     expect(chart.ordered)

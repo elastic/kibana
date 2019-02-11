@@ -23,6 +23,10 @@ const options = {
           location: resolve(__dirname, '..', 'mocks', 'uiNotify'),
         },
         {
+          pattern: 'ui/storage',
+          location: resolve(__dirname, '..', 'mocks', 'uiStorage'),
+        },
+        {
           pattern: 'ui/url/absolute_to_parsed_url',
           location: resolve(__dirname, '..', 'mocks', 'absoluteToParsedUrl'),
         },

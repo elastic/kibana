@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'isomorphic-fetch';
 import { merge } from 'lodash';
 // @ts-ignore not really worth typing
 import { metadata } from 'ui/metadata';
@@ -25,7 +24,7 @@ import url from 'url';
 import chrome from '../chrome';
 import { KFetchError } from './kfetch_error';
 
-interface KFetchQuery {
+export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
 
@@ -61,7 +60,7 @@ export async function kfetch(
         query,
       });
 
-      return fetch(fullUrl, restOptions).then(async res => {
+      return window.fetch(fullUrl, restOptions).then(async res => {
         const body = await getBodyAsJson(res);
         if (res.ok) {
           return body;

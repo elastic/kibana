@@ -2,17 +2,18 @@
 
 exports[`SuggestionComponent Should display the suggestion and use the provided ariaId 1`] = `
 <div
-  className="typeahead-item"
+  aria-selected={false}
+  className="kbnTypeahead__item"
   id="suggestion-1"
   onClick={[Function]}
   onMouseEnter={[Function]}
   role="option"
 >
   <div
-    className="suggestionItem suggestionItem--value"
+    className="kbnSuggestionItem kbnSuggestionItem--value"
   >
     <div
-      className="suggestionItem__type"
+      className="kbnSuggestionItem__type"
     >
       <EuiIcon
         size="m"
@@ -20,12 +21,12 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
       />
     </div>
     <div
-      className="suggestionItem__text"
+      className="kbnSuggestionItem__text"
     >
       as promised, not helpful
     </div>
     <div
-      className="suggestionItem__description"
+      className="kbnSuggestionItem__description"
       dangerouslySetInnerHTML={
         Object {
           "__html": "This is not a helpful suggestion",
@@ -38,17 +39,18 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
 
 exports[`SuggestionComponent Should make the element active if the selected prop is true 1`] = `
 <div
-  className="typeahead-item active"
+  aria-selected={true}
+  className="kbnTypeahead__item active"
   id="suggestion-1"
   onClick={[Function]}
   onMouseEnter={[Function]}
   role="option"
 >
   <div
-    className="suggestionItem suggestionItem--value"
+    className="kbnSuggestionItem kbnSuggestionItem--value"
   >
     <div
-      className="suggestionItem__type"
+      className="kbnSuggestionItem__type"
     >
       <EuiIcon
         size="m"
@@ -56,12 +58,12 @@ exports[`SuggestionComponent Should make the element active if the selected prop
       />
     </div>
     <div
-      className="suggestionItem__text"
+      className="kbnSuggestionItem__text"
     >
       as promised, not helpful
     </div>
     <div
-      className="suggestionItem__description"
+      className="kbnSuggestionItem__description"
       dangerouslySetInnerHTML={
         Object {
           "__html": "This is not a helpful suggestion",

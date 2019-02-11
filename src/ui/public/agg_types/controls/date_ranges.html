@@ -2,10 +2,18 @@
     <table class="visEditorAgg__rangesTable form-group" ng-show="agg.params.ranges.length">
       <tr>
         <th scope="col">
-          <label id="visEditorDateRangeFrom{{agg.id}}">From</label>
+          <label
+            id="visEditorDateRangeFrom{{agg.id}}"
+            i18n-id="common.ui.aggTypes.dateRanges.fromColumnLabel"
+            i18n-default-message="From"
+          ></label>
         </th>
         <th scope="col" colspan="2">
-          <label id="visEditorDateRangeTo{{agg.id}}">To</label>
+          <label
+            id="visEditorDateRangeTo{{agg.id}}"
+            i18n-id="common.ui.aggTypes.dateRanges.toColumnLabel"
+            i18n-default-message="To"
+          ></label>
         </th>
       </tr>
 
@@ -31,7 +39,7 @@
         <td>
           <button
             type="button"
-            aria-label="Remove this range"
+            aria-label="{{ ::'common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel' | i18n: { defaultMessage: 'Remove this range' } }}"
             ng-click="agg.params.ranges.splice($index, 1)"
             class="kuiButton kuiButton--danger kuiButton--small">
             <i class="fa fa-times" ></i>
@@ -46,9 +54,9 @@
               documentation-href="date.dateMath"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              Accepted date formats
-            </a>
+              i18n-id="common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText"
+              i18n-default-message="Accepted date formats"
+            ></a>
           </small>
         </td>
       </tr>
@@ -58,15 +66,22 @@
     <div class="hintbox" ng-show="aggForm.rangeLength.$invalid">
       <p>
         <i class="fa fa-danger text-danger"></i>
-        <strong>Required:</strong> You must specify at least one date range.
+        <strong
+          i18n-id="common.ui.aggTypes.dateRanges.requiredDateRangeLabel"
+          i18n-default-message="Required:"
+        ></strong>
+        <span
+          i18n-id="common.ui.aggTypes.dateRanges.requiredDateRangeDescription"
+          i18n-default-message="You must specify at least one date range."
+        ></span>
       </p>
     </div>
 
     <button
       ng-click="agg.params.ranges.push({})"
       class="kuiButton kuiButton--primary kuiButton--fullWidth"
-    >
-      Add Range
-    </button>
+      i18n-id="common.ui.aggTypes.dateRanges.addRangeButtonLabel"
+      i18n-default-message="Add Range"
+    ></button>
   </div>
 </div>

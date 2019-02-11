@@ -32,6 +32,7 @@ interface VisualizationChartProps {
   uiState: PersistedState;
   vis: Vis;
   visData: any;
+  listenOnChange: boolean;
 }
 
 class VisualizationChart extends React.Component<VisualizationChartProps> {
@@ -88,9 +89,9 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
   public render() {
     return (
       <div className="visChart__container" tabIndex={0} ref={this.containerDiv}>
-        <span className="kuiScreenReaderOnly">
+        <p className="euiScreenReaderOnly">
           {this.props.vis.type.title} visualization, not yet accessible
-        </span>
+        </p>
         <div
           aria-hidden={!this.props.vis.type.isAccessible}
           className="visChart"
@@ -123,6 +124,10 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     this.resizeChecker = new ResizeChecker(this.containerDiv.current);
     this.resizeChecker.on('resize', () => this.startRenderVisualization());
 
+    if (this.props.listenOnChange) {
+      this.props.uiState.on('change', this.onUiStateChanged);
+    }
+
     this.startRenderVisualization();
   }
 
@@ -141,6 +146,10 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
       this.visualization.destroy();
     }
   }
+
+  private onUiStateChanged = () => {
+    this.startRenderVisualization();
+  };
 
   private startRenderVisualization(): void {
     if (this.containerDiv.current && this.chartDiv.current) {

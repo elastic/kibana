@@ -23,11 +23,11 @@ import rison from 'rison-node';
 import '../../doc_viewer';
 import '../../filters/trust_as_html';
 import '../../filters/short_dots';
-import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
+import { noWhiteSpace } from '../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { uiModules } from '../../modules';
-import { disableFilter } from '../../filter_bar';
+import { disableFilter } from '@kbn/es-query';
 import { dispatchRenderComplete } from '../../render_complete';
 
 const module = uiModules.get('app/discover');
@@ -45,7 +45,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl) {
+module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -61,7 +61,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       onRemoveColumn: '=?',
     },
     link: function ($scope, $el) {
-      $el.after('<tr data-test-subj="docTableDetailsRow">');
+      $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
       $el.empty();
 
       // when we compile the details, we use this $scope
@@ -139,7 +139,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         ];
 
         const mapping = indexPattern.fields.byName;
-        if (indexPattern.timeFieldName) {
+        const hideTimeColumn = config.get('doc_table:hideTimeColumn');
+        if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(cellTemplate({
             timefield: true,
             formatted: _displayField(row, indexPattern.timeFieldName),

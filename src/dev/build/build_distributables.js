@@ -21,6 +21,8 @@ import { getConfig, createRunner } from './lib';
 
 import {
   BuildPackagesTask,
+  CleanClientModulesOnDLLTask,
+  CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
@@ -32,6 +34,7 @@ import {
   CreateArchivesSourcesTask,
   CreateArchivesTask,
   CreateDebPackageTask,
+  CreateDockerPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -62,6 +65,7 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    createDockerPackage,
     versionQualifier,
     targetAllPlatforms,
   } = options;
@@ -116,8 +120,10 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
-  await run(CleanExtraFilesFromModulesTask);
   await run(OptimizeBuildTask);
+  await run(CleanClientModulesOnDLLTask);
+  await run(CleanExtraFilesFromModulesTask);
+  await run(CleanEmptyFoldersTask);
 
   /**
    * copy generic build outputs into platform-specific build
@@ -140,6 +146,9 @@ export async function buildDistributables(options) {
   }
   if (createRpmPackage) { // control w/ --rpm or --skip-os-packages
     await run(CreateRpmPackageTask);
+  }
+  if (createDockerPackage) { // control w/ --docker or --skip-os-packages
+    await run(CreateDockerPackageTask);
   }
 
   /**

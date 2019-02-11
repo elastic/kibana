@@ -19,7 +19,7 @@ kbn-agg-table-group {
   }
 
   tr:hover td,
-  .table-cell-filter {
+  .kbnTableCellFilter {
     background-color: $euiColorLightestShade;
   }
 }
@@ -34,16 +34,5 @@ kbn-agg-table-group {
     flex: 1 0 auto;
     margin: 0;
     padding: 0;
-  }
-}
-
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  .kbnAggTable__paginated {
-    tr:hover td,
-    .table-cell-filter {
-      background-color: $euiColorLightestShade;
-    }
   }
 }

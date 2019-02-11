@@ -5,27 +5,16 @@
  */
 
 /* tslint:disable no-console */
-import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
-import { Request } from 'hapi';
+import {
+  AggregationSearchResponse,
+  ESFilter,
+  SearchParams
+} from 'elasticsearch';
+import { Legacy } from 'kibana';
 import moment from 'moment';
 
-function decodeEsQuery(esQuery?: string): object {
+function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
-}
-
-interface KibanaConfig {
-  get: <T = void>(key: string) => T;
-}
-
-// Extend the defaults with the plugins and server methods we need.
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-  }
-
-  interface Server {
-    config: () => KibanaConfig;
-  }
 }
 
 export type ESClient = <T = void, U = void>(
@@ -36,9 +25,9 @@ export type ESClient = <T = void, U = void>(
 export interface Setup {
   start: number;
   end: number;
-  esFilterQuery?: any;
+  esFilterQuery?: ESFilter;
   client: ESClient;
-  config: KibanaConfig;
+  config: Legacy.KibanaConfig;
 }
 
 interface APMRequestQuery {
@@ -48,13 +37,17 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-export function setupRequest(req: Request): Setup {
+export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
+  const uiSettings = req.getUiSettingsService();
 
-  const client: ESClient = (type, params) => {
+  const client: ESClient = async (type, params) => {
+    const includeFrozen = await uiSettings.get('search:includeFrozen');
+
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
+      console.log({ includeFrozen });
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
           query
@@ -63,7 +56,13 @@ export function setupRequest(req: Request): Setup {
       console.log(`GET ${params.index}/_search`);
       console.log(JSON.stringify(params.body, null, 4));
     }
-    return cluster.callWithRequest(req, type, params);
+
+    const nextParams = {
+      ...params,
+      ignore_throttled: !includeFrozen,
+      rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    };
+    return cluster.callWithRequest(req, type, nextParams);
   };
 
   return {

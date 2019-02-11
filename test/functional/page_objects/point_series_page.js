@@ -18,170 +18,103 @@
  */
 
 export function PointSeriesPageProvider({ getService }) {
-  const remote = getService('remote');
-  const config = getService('config');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-
-  const defaultFindTimeout = config.get('timeouts.find');
+  const find = getService('find');
 
   class PointSeriesVis {
-    clickOptions() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Panel Settings')
-        .click();
+    async clickOptions() {
+      return await find.clickByPartialLinkText('Panel Settings');
     }
 
-    clickAxisOptions() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Metrics & Axes')
-        .click();
+    async clickAxisOptions() {
+      return await find.clickByPartialLinkText('Metrics & Axes');
     }
 
     async clickAddAxis() {
       return await testSubjects.click('visualizeAddYAxisButton');
     }
 
-    setAxisTitle(title, { index = 0 } = {}) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`#valueAxisTitle${index}`)
-        .clearValue()
-        .type(title);
+    async setAxisTitle(title, { index = 0 } = {}) {
+      return await find.setValue(`#valueAxisTitle${index}`, title);
     }
 
-    getValueAxesCount() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.kuiSideBarSection:contains("Value Axes") > .kuiSideBarSection')
-        .then(all => all.length);
+    async getValueAxesCount() {
+      const axes = await find.allByCssSelector('.visEditorSidebar__section:contains("Value Axes") > .visEditorSidebar__section');
+      return axes.length;
     }
 
-    getSeriesCount() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.kuiSideBarSection:contains("Series") > .kuiSideBarSection')
-        .then(all => all.length);
+    async getSeriesCount() {
+      const series = await find.allByCssSelector('.visEditorSidebar__section:contains("Series") > .visEditorSidebar__section');
+      return series.length;
     }
 
-    getRightValueAxes() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.visAxis__column--right g.axis')
-        .then(all => all.length);
+    async getRightValueAxes() {
+      const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
+      return axes.length;
     }
 
-    getHistogramSeries() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.series.histogram')
-        .then(all => all.length);
+    async getHistogramSeries() {
+      const series = await find.allByCssSelector('.series.histogram');
+      return series.length;
     }
 
-    getGridLines() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('g.grid > path')
-        .then(function (data) {
-          function getGridLine(gridLine) {
-            return gridLine
-              .getAttribute('d')
-              .then(dAttribute => {
-                const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
-                return { x: parseFloat(firstPoint[0]), y: parseFloat(firstPoint[1]) };
-              });
-          }
-          const promises = data.map(getGridLine);
-          return Promise.all(promises);
-        })
-        .then(function (gridLines) {
-          return gridLines;
-        });
+    async getGridLines() {
+      const gridLines = await find.allByCssSelector('g.grid > path');
+
+      return await Promise.all(gridLines.map(async (gridLine) => {
+        const dAttribute = await gridLine.getAttribute('d');
+
+        const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
+        return {
+          x: parseFloat(firstPoint[0]),
+          y: parseFloat(firstPoint[1]),
+        };
+      }));
     }
 
-    toggleGridCategoryLines() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('#showCategoryLines')
-        .click();
+    async toggleGridCategoryLines() {
+      return await find.clickByCssSelector('#showCategoryLines');
     }
 
-    setGridValueAxis(axis) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#gridAxis option[value="${axis}"]`)
-        .click();
+    async setGridValueAxis(axis) {
+      return await find.clickByCssSelector(`select#gridAxis option[value="${axis}"]`);
     }
 
-    toggleCollapsibleTitle(title) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.kuiSideBarCollapsibleTitle .kuiSideBarCollapsibleTitle__text')
-        .then(sidebarTitles => {
-          log.debug('found sidebar titles ' + sidebarTitles.length);
-          function getTitle(titleDiv) {
-            return titleDiv
-              .getVisibleText()
-              .then(titleString => {
-                log.debug('sidebar title ' + titleString);
-                if (titleString === title) {
-                  log.debug('clicking sidebar title ' + titleString);
-                  return titleDiv.click();
-                }
-              });
-          }
-          const sidebarTitlePromises = sidebarTitles.map(getTitle);
-          return Promise.all(sidebarTitlePromises);
-        });
+    async toggleCollapsibleTitle(title) {
+      const sidebarTitles = await find.allByCssSelector('.visEditorSidebar__collapsibleTitle .visEditorSidebar__collapsibleTitleText');
+      log.debug('found sidebar titles ' + sidebarTitles.length);
+
+      return Promise.all(sidebarTitles.map(async (titleDiv) => {
+        const titleString = await titleDiv.getVisibleText();
+        log.debug('sidebar title ' + titleString);
+
+        if (titleString === title) {
+          log.debug('clicking sidebar title ' + titleString);
+          return titleDiv.click();
+        }
+      }));
     }
 
-    setValue(newValue) {
-      return remote
-        .setFindTimeout(defaultFindTimeout * 2)
-        .findByCssSelector('button[ng-click="numberListCntr.add()"]')
-        .click()
-        .then(() => {
-          return remote
-            .setFindTimeout(defaultFindTimeout)
-            .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
-            .clearValue();
-        })
-        .then(() => {
-          return remote
-            .setFindTimeout(defaultFindTimeout)
-            .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
-            .type(newValue);
-        });
+    async setValue(newValue) {
+      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]');
+      await find.setValue('input[ng-model="numberListCntr.getList()[$index]"]', newValue);
     }
 
-    setValueAxisPosition(axis, position) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#valueAxisPosition${axis} option[label="${position}"]`)
-        .click();
+    async setValueAxisPosition(axis, position) {
+      await find.clickByCssSelector(`select#valueAxisPosition${axis} option[label="${position}"]`);
     }
 
-    setCategoryAxisPosition(newValue) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#categoryAxisPosition option[label="${newValue}"]`)
-        .click();
+    async setCategoryAxisPosition(newValue) {
+      await find.clickByCssSelector(`select#categoryAxisPosition option[label="${newValue}"]`);
     }
 
-    setSeriesAxis(series, axis) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`)
-        .click();
+    async setSeriesAxis(series, axis) {
+      await find.clickByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`);
     }
 
-    setSeriesType(series, type) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#seriesType${series} option[label="${type}"]`)
-        .click();
+    async setSeriesType(series, type) {
+      await find.clickByCssSelector(`select#seriesType${series} option[label="${type}"]`);
     }
   }
 

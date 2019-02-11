@@ -23,11 +23,9 @@ import expect from 'expect.js';
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const find = getService('find');
   const flyout = getService('flyout');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -40,19 +38,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText(text);
     }
     async clickKibanaSettings() {
-      await find.clickByDisplayedLinkText('Advanced Settings');
+      await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      // Verify navigation is successful.
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
-      await find.clickByDisplayedLinkText('Saved Objects');
+      await testSubjects.click('objects');
     }
 
-    async clickKibanaIndices() {
-      log.debug('clickKibanaIndices link');
-      await find.clickByDisplayedLinkText('Index Patterns');
+    async clickKibanaIndexPatterns() {
+      log.debug('clickKibanaIndexPatterns link');
+      await testSubjects.click('index_patterns');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -172,13 +169,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return Promise.all(getChartTypesPromises);
     }
 
-    getTableRow(rowNumber, colNumber) {
-      return remote.setFindTimeout(defaultFindTimeout)
-        // passing in zero-based index, but adding 1 for css 1-based indexes
-        .findByCssSelector('table.euiTable tbody tr:nth-child(' +
-          (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
-          (colNumber + 1) + ')'
-        );
+    async getTableRow(rowNumber, colNumber) {
+      // passing in zero-based index, but adding 1 for css 1-based indexes
+      return await find.byCssSelector(
+        'table.euiTable tbody tr:nth-child(' +
+        (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
+        (colNumber + 1) + ')'
+      );
     }
 
     async getFieldsTabCount() {
@@ -274,12 +271,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickKibanaIndices();
+        await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField(indexPatternName);
+          await this.setIndexPatternField({ indexPatternName });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -291,9 +288,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/indices\/.+\?/)) {
+        if (!currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
@@ -311,7 +308,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getIndexPatternIdFromUrl() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const indexPatternId = currentUrl.match(/.*\/(.*)/)[1];
 
       log.debug('index pattern ID: ', indexPatternId);
@@ -319,14 +316,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-') {
+    async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName);
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(`${indexPatternName}*`);
+      expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
@@ -356,8 +353,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('confirmModalConfirmButton');
       });
       await retry.try(async () => {
-        const currentUrl = await remote.getCurrentUrl();
-        if (currentUrl.match(/indices\/.+\?/)) {
+        const currentUrl = await browser.getCurrentUrl();
+        if (currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
       });
@@ -520,17 +517,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async closeScriptedFieldHelp() {
-      log.debug('close Scripted Fields help');
-      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('scriptedFieldsHelpFlyout');
-          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-          if (isOpen) {
-            throw new Error('Failed to close scripted fields help');
-          }
-        });
-      }
+      await flyout.ensureClosed('scriptedFieldsHelpFlyout');
     }
 
     async executeScriptedField(script, additionalField) {
@@ -599,7 +586,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAll('css selector', 'td:nth-child(3)');
+      const cells = await table.findAllByCssSelector('td:nth-child(3)');
 
       const objects = [];
       for (const cell of cells) {

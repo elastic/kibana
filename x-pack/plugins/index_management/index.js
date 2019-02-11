@@ -11,19 +11,21 @@ import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
-
+import { addIndexManagementDataEnricher } from "./index_management_data";
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.index_management',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
         'plugins/index_management',
       ]
     },
     init: function (server) {
+      server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
       registerLicenseChecker(server);
       registerIndicesRoutes(server);
       registerSettingsRoutes(server);

@@ -108,7 +108,8 @@ describe('get_pipeline', () => {
           ip: '127.0.0.1',
           name: 'B0buMd-',
           attributes: {
-            'ml.enabled': 'true'
+            'ml.machine_memory': '17179869184',
+            'ml.max_open_jobs': '20'
           }
         },
         logstash_state: {

@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
@@ -63,7 +64,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon
-                  aria-label={'Delete index privilege'}
+                  aria-label={i18n.translate(
+                    'xpack.security.management.editRoles.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
+                    { defaultMessage: 'Delete index privilege' }
+                  )}
                   color={'danger'}
                   onClick={this.props.onDelete}
                   iconType={'trash'}
@@ -202,8 +206,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               }
               // @ts-ignore
               compressed={true}
-              // @ts-ignore
-              value={this.state.queryExpanded}
+              checked={this.state.queryExpanded}
               onChange={this.toggleDocumentQuery}
             />
           </EuiFlexItem>

@@ -98,13 +98,38 @@ function getClauseForType(schema, namespace, type) {
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
+ *  @param  {String} defaultSearchOperator
+ *  @param  {Object} hasReference
  *  @return {Object}
  */
-export function getQueryParams(mappings, schema, namespace, type, search, searchFields) {
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields, defaultSearchOperator, hasReference) {
   const types = getTypes(mappings, type);
   const bool = {
     filter: [{
       bool: {
+        must: hasReference
+          ? [{
+            nested: {
+              path: 'references',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'references.id': hasReference.id,
+                      },
+                    },
+                    {
+                      term: {
+                        'references.type': hasReference.type,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }]
+          : undefined,
         should: types.map(type => getClauseForType(schema, namespace, type)),
         minimum_should_match: 1
       }
@@ -119,7 +144,8 @@ export function getQueryParams(mappings, schema, namespace, type, search, search
           ...getFieldsForTypes(
             searchFields,
             types
-          )
+          ),
+          ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         }
       }
     ];

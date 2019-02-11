@@ -49,7 +49,7 @@ export function createGenerateCsv(logger) {
         }
 
         if (!builder.tryAppend(formatCsvValues(flattenHit(hit)) + '\n')) {
-          logger('max Size Reached');
+          logger.warn('max Size Reached');
           maxSizeReached = true;
           cancellationToken.cancel();
           break;
@@ -58,11 +58,13 @@ export function createGenerateCsv(logger) {
     } finally {
       await iterator.return();
     }
+    const size = builder.getSizeInBytes();
+    logger.debug(`finished generating, total size in bytes: ${size}`);
 
-    logger('finished generating');
     return {
       content: builder.getString(),
-      maxSizeReached
+      maxSizeReached,
+      size,
     };
   };
 }

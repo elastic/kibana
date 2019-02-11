@@ -5,16 +5,16 @@
  */
 import Joi from 'joi';
 import { omit } from 'lodash';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
-import { BeatEnrollmentStatus } from '../../lib/lib';
+import { BeatEnrollmentStatus, CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: write to Kibana audit log file
+// TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agent/{beatId}',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   config: {
     auth: false,
     validate: {
@@ -61,7 +61,7 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
           return h.response({ access_token: accessToken }).code(201);
       }
     } catch (err) {
-      // TODO move this to kibana route thing in adapter
+      // FIXME move this to kibana route thing in adapter
       return wrapEsError(err);
     }
   },

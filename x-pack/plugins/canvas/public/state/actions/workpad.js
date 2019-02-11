@@ -15,6 +15,7 @@ export const setName = createAction('setName');
 export const setWriteable = createAction('setWriteable');
 export const setColors = createAction('setColors');
 export const setRefreshInterval = createAction('setRefreshInterval');
+export const setWorkpadCSS = createAction('setWorkpadCSS');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
   dispatch(fetchAllRenderables());
@@ -22,7 +23,9 @@ export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch })
 
 export const addColor = createThunk('addColor', ({ dispatch, getState }, color) => {
   const colors = getWorkpadColors(getState()).slice(0);
-  if (!includes(colors, color)) colors.push(color);
+  if (!includes(colors, color)) {
+    colors.push(color);
+  }
   dispatch(setColors(colors));
 });
 
@@ -35,6 +38,8 @@ export const setWorkpad = createThunk(
   ({ dispatch, type }, workpad, { loadPages = true } = {}) => {
     dispatch(setRefreshInterval(0)); // disable refresh interval
     dispatch(createAction(type)(workpad)); // set the workpad object in state
-    if (loadPages) dispatch(initializeWorkpad()); // load all the elements on the workpad
+    if (loadPages) {
+      dispatch(initializeWorkpad());
+    } // load all the elements on the workpad
   }
 );

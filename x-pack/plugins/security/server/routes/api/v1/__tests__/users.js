@@ -9,6 +9,7 @@ import Joi from 'joi';
 import sinon from 'sinon';
 
 import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
+import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
 import { AuthenticationResult } from '../../../../../server/lib/authentication/authentication_result';
 import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
 import { initUsersApi } from '../users';
@@ -43,12 +44,12 @@ describe('User routes', () => {
         .firstCall
         .args[0];
 
-      request = {
+      request = requestFixture({
         headers: {},
         auth: { credentials: { username: 'user' } },
         params: { username: 'target-user' },
         payload: { password: 'old-password', newPassword: 'new-password' }
-      };
+      });
     });
 
     it('correctly defines route.', async () => {
@@ -74,7 +75,7 @@ describe('User routes', () => {
 
         getUserStub = serverStub.plugins.security.getUser
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'old-password'))
+            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'old-password'))
           );
       });
 
@@ -99,7 +100,7 @@ describe('User routes', () => {
 
         serverStub.plugins.security.authenticate
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'new-password'))
+            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'new-password'))
           )
           .returns(
             Promise.resolve(AuthenticationResult.failed(new Error('Something went wrong.')))
@@ -151,7 +152,7 @@ describe('User routes', () => {
 
         serverStub.plugins.security.authenticate
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'new-password'))
+            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'new-password'))
           )
           .returns(
             Promise.resolve(AuthenticationResult.succeeded({}))

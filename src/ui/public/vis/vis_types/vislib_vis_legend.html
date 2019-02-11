@@ -3,12 +3,14 @@
     type="button"
     ng-click="toggleLegend()"
     class="kuiCollapseButton visLegend__toggle"
+    ng-class="{'visLegend__toggle--isOpen': open}"
     aria-label="{{::'common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel' | i18n: { defaultMessage: 'Toggle legend' } }}"
     aria-expanded="{{!!open}}"
     aria-controls="{{::legendId}}"
     data-test-subj="vislibToggleLegend"
+    title="{{::'common.ui.vis.visTypes.legend.toggleLegendButtonTitle' | i18n: { defaultMessage: 'Toggle legend' } }}"
   >
-    <span class="kuiIcon {{getToggleLegendClasses()}}"></span>
+    <icon type="'list'"></icon>
   </button>
   <ul class="visLegend__list" ng-show="open" id="{{::legendId}}">
 
@@ -69,7 +71,7 @@
           <div class="visLegend__valueColorPicker" role="listbox">
             <span
               id="{{legendId}}ColorPickerDesc"
-              class="kuiScreenReaderOnly"
+              class="euiScreenReaderOnly"
               i18n-id="common.ui.vis.visTypes.legend.setColorScreenReaderDescription"
               i18n-default-message="Set color for value {legendDataLabel}"
               i18n-values="{ legendDataLabel: legendData.label }"

@@ -4,6 +4,8 @@
 The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
 where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
 
+NOTE: You cannot interact with Kibana API endpoints via the Console.
+
 .The Console UI
 image::dev-tools/console/images/introduction_screen.png[Screenshot]
 
@@ -50,18 +52,10 @@ triangle that appears next to the URL line of the request. Notice that as you mo
 .The Action Menu
 image::dev-tools/console/images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
 
-When the response come back, you should see it in the left hand panel:
+When the response come back, you should see it in the right hand panel:
 
 .The Output Pane
 image::dev-tools/console/images/introduction_output.png[Screenshot]
-
-[float]
-[[console-ui]]
-=== The Console UI
-
-In this section you will find a more detailed description of UI of Console. The basic aspects of the UI are explained
-in the <<console-kibana>> section.
-
 
 include::multi-requests.asciidoc[]
 

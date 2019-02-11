@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { withRouter } from 'react-router-dom';
-
 import {
-  EuiModal,
-  EuiOverlayMask,
+  EuiHeader,
+  EuiHeaderBreadcrumbs,
+  EuiHeaderSection,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -18,45 +16,68 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Component, ReactNode } from 'react';
+import styled from 'styled-components';
+import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
+type RenderCallback = ((component: () => JSX.Element) => void);
 interface PrimaryLayoutProps {
-  title: string;
+  title: string | React.ReactNode;
   actionSection?: React.ReactNode;
-  modalRender?: () => React.ReactNode;
-  modalClosePath?: string;
+  hideBreadcrumbs?: boolean;
 }
+export class PrimaryLayout extends Component<PrimaryLayoutProps> {
+  private actionSection: (() => JSX.Element) | null = null;
+  constructor(props: PrimaryLayoutProps) {
+    super(props);
+  }
 
-export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = withRouter<any>(
-  ({ actionSection, title, modalRender, modalClosePath, children, history }) => {
-    const modalContent = modalRender && modalRender();
+  public render() {
+    const children: (callback: RenderCallback) => void | ReactNode = this.props.children as any;
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle>
-                <h1>{title}</h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-            <EuiPageHeaderSection> {actionSection}</EuiPageHeaderSection>
-          </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>{children}</EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-        {modalContent && (
-          <EuiOverlayMask>
-            <EuiModal
-              onClose={() => {
-                history.push(modalClosePath);
-              }}
-              style={{ width: '640px' }}
-            >
-              {modalContent}
-            </EuiModal>
-          </EuiOverlayMask>
+      <React.Fragment>
+        {!this.props.hideBreadcrumbs && (
+          <BreadcrumbConsumer>
+            {({ breadcrumbs }) => (
+              <HeaderWrapper>
+                <EuiHeaderSection>
+                  <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />
+                </EuiHeaderSection>
+              </HeaderWrapper>
+            )}
+          </BreadcrumbConsumer>
         )}
-      </EuiPage>
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageHeader>
+              <EuiPageHeaderSection>
+                <EuiTitle>
+                  <h1>{this.props.title}</h1>
+                </EuiTitle>
+              </EuiPageHeaderSection>
+              <EuiPageHeaderSection>
+                {(this.actionSection && this.actionSection()) || this.props.actionSection}
+              </EuiPageHeaderSection>
+            </EuiPageHeader>
+            <EuiPageContent>
+              <EuiPageContentBody>
+                {(children && typeof children === 'function'
+                  ? children(this.renderAction)
+                  : children) || <span />}
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      </React.Fragment>
     );
   }
-) as any;
+
+  private renderAction = (component: () => JSX.Element) => {
+    this.actionSection = component;
+    this.forceUpdate();
+  };
+}
+
+const HeaderWrapper = styled(EuiHeader)`
+  height: 29px;
+`;

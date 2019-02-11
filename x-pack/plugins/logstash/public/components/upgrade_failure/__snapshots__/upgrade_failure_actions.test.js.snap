@@ -34,7 +34,11 @@ exports[`UpgradeFailureActions component renders component as expected 1`] = `
       onClick={[MockFunction]}
       type="button"
     >
-      Go back
+      <FormattedMessage
+        defaultMessage="Go back"
+        id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+        values={Object {}}
+      />
     </EuiButtonEmpty>
   </EuiFlexItem>
 </EuiFlexGroup>

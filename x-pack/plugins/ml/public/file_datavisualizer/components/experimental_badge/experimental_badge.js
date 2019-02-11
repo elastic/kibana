@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -13,7 +14,16 @@ import {
 export function ExperimentalBadge({ tooltipContent }) {
   return (
     <span>
-      <EuiBetaBadge className="ml-experimental-badge" label="Experimental" tooltipContent={tooltipContent} />
+      <EuiBetaBadge
+        className="ml-experimental-badge"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.experimentalBadge.experimentalLabel"
+            defaultMessage="Experimental"
+          />
+        }
+        tooltipContent={tooltipContent}
+      />
     </span>
   );
 }

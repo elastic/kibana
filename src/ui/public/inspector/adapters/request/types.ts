@@ -36,6 +36,7 @@ export enum RequestStatus {
 }
 
 export interface Request extends RequestParams {
+  id: string;
   name: string;
   json?: object;
   response?: Response;
@@ -46,11 +47,16 @@ export interface Request extends RequestParams {
 }
 
 export interface RequestParams {
+  id?: string;
   description?: string;
 }
 
 export interface RequestStatistics {
-  [key: string]: any;
+  [key: string]: {
+    label: string;
+    description?: string;
+    value: any;
+  };
 }
 
 export interface Response {

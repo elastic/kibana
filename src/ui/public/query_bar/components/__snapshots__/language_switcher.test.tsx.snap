@@ -11,7 +11,11 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       size="xs"
       type="button"
     >
-      Options
+      <FormattedMessage
+        defaultMessage="Options"
+        id="common.ui.queryBar.optionsButtonLabel"
+        values={Object {}}
+      />
     </EuiButtonEmpty>
   }
   className="eui-displayBlock"
@@ -24,7 +28,11 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
   withTitle={true}
 >
   <EuiPopoverTitle>
-    Syntax options
+    <FormattedMessage
+      defaultMessage="Syntax options"
+      id="common.ui.queryBar.syntaxOptionsTitle"
+      values={Object {}}
+    />
   </EuiPopoverTitle>
   <div
     style={
@@ -38,17 +46,27 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       size="m"
     >
       <p>
-        Our experimental autocomplete and simple syntax features can help you create your queries. Just start typing and you’ll see matches related to your data. See docs
-         
-        <EuiLink
-          color="primary"
-          href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
-          target="_blank"
-          type="button"
-        >
-          here
-        </EuiLink>
-        .
+        <FormattedMessage
+          defaultMessage="Our new autocomplete and simple syntax features can help you create your
+                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+          id="common.ui.queryBar.syntaxOptionsDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="here"
+                  id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
       </p>
     </EuiText>
     <EuiSpacer
@@ -64,7 +82,13 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
           checked={false}
           data-test-subj="languageToggle"
           id="queryEnhancementOptIn"
-          label="Turn on query features"
+          label={
+            <FormattedMessage
+              defaultMessage="Turn on query features"
+              id="common.ui.queryBar.turnOnQueryFeaturesLabel"
+              values={Object {}}
+            />
+          }
           name="popswitch"
           onChange={[Function]}
         />
@@ -79,17 +103,26 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       size="xs"
     >
       <p>
-        Not ready yet? Find our lucene docs
-         
-        <EuiLink
-          color="primary"
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
-          target="_blank"
-          type="button"
-        >
-          here
-        </EuiLink>
-        .
+        <FormattedMessage
+          defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
+          id="common.ui.queryBar.luceneDocsDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="here"
+                  id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
       </p>
     </EuiText>
   </div>
@@ -107,7 +140,11 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       size="xs"
       type="button"
     >
-      Options
+      <FormattedMessage
+        defaultMessage="Options"
+        id="common.ui.queryBar.optionsButtonLabel"
+        values={Object {}}
+      />
     </EuiButtonEmpty>
   }
   className="eui-displayBlock"
@@ -120,7 +157,11 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
   withTitle={true}
 >
   <EuiPopoverTitle>
-    Syntax options
+    <FormattedMessage
+      defaultMessage="Syntax options"
+      id="common.ui.queryBar.syntaxOptionsTitle"
+      values={Object {}}
+    />
   </EuiPopoverTitle>
   <div
     style={
@@ -134,17 +175,27 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       size="m"
     >
       <p>
-        Our experimental autocomplete and simple syntax features can help you create your queries. Just start typing and you’ll see matches related to your data. See docs
-         
-        <EuiLink
-          color="primary"
-          href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
-          target="_blank"
-          type="button"
-        >
-          here
-        </EuiLink>
-        .
+        <FormattedMessage
+          defaultMessage="Our new autocomplete and simple syntax features can help you create your
+                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+          id="common.ui.queryBar.syntaxOptionsDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="here"
+                  id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
       </p>
     </EuiText>
     <EuiSpacer
@@ -160,7 +211,13 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
           checked={true}
           data-test-subj="languageToggle"
           id="queryEnhancementOptIn"
-          label="Turn on query features"
+          label={
+            <FormattedMessage
+              defaultMessage="Turn on query features"
+              id="common.ui.queryBar.turnOnQueryFeaturesLabel"
+              values={Object {}}
+            />
+          }
           name="popswitch"
           onChange={[Function]}
         />
@@ -175,17 +232,26 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       size="xs"
     >
       <p>
-        Not ready yet? Find our lucene docs
-         
-        <EuiLink
-          color="primary"
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
-          target="_blank"
-          type="button"
-        >
-          here
-        </EuiLink>
-        .
+        <FormattedMessage
+          defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
+          id="common.ui.queryBar.luceneDocsDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                color="primary"
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
+                target="_blank"
+                type="button"
+              >
+                <FormattedMessage
+                  defaultMessage="here"
+                  id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
       </p>
     </EuiText>
   </div>

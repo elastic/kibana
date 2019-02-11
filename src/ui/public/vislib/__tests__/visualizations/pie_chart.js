@@ -37,6 +37,18 @@ const rowAgg = [
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
+const rowAggDimensions = {
+  splitRow: [{
+    accessor: 0,
+  }], buckets: [{
+    accessor: 2,
+  }, {
+    accessor: 4,
+  }], metric: {
+    accessor: 5,
+  }
+};
+
 const colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
@@ -44,16 +56,38 @@ const colAgg = [
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
+const colAggDimensions = {
+  splitColumn: [{
+    accessor: 0,
+  }], buckets: [{
+    accessor: 2,
+  }, {
+    accessor: 4,
+  }], metric: {
+    accessor: 5,
+  }
+};
+
 const sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
 ];
 
+const sliceAggDimensions = {
+  buckets: [{
+    accessor: 0,
+  }, {
+    accessor: 2,
+  }], metric: {
+    accessor: 3,
+  }
+};
+
 const aggArray = [
-  rowAgg,
-  colAgg,
-  sliceAgg
+  [rowAgg, rowAggDimensions],
+  [colAgg, colAggDimensions],
+  [sliceAgg, sliceAggDimensions]
 ];
 
 const names = [
@@ -78,73 +112,49 @@ describe('No global chart settings', function () {
     addLegend: true,
     addTooltip: true
   };
-  const visLibParams2 = {
-    el: '<div class=chart2></div>',
-    type: 'pie',
-    addLegend: true,
-    addTooltip: true
-  };
   let chart1;
-  let chart2;
   let Vis;
   let persistedState;
   let indexPattern;
   let responseHandler;
   let data1;
-  let data2;
   let stubVis1;
-  let stubVis2;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
-    chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
 
     let id1 = 1;
-    let id2 = 1;
     stubVis1 = new Vis(indexPattern, {
       type: 'pie',
       aggs: rowAgg
     });
-    stubVis2 = new Vis(indexPattern, {
-      type: 'pie',
-      aggs: colAgg
-    });
 
     stubVis1.isHierarchical = () => true;
-    stubVis2.isHierarchical = () => true;
 
     // We need to set the aggs to a known value.
     _.each(stubVis1.aggs, function (agg) {
       agg.id = 'agg_' + id1++;
     });
-    _.each(stubVis2.aggs, function (agg) {
-      agg.id = 'agg_' + id2++;
-    });
   }));
 
   beforeEach(async () => {
     const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
-    const table2 = tabifyAggResponse(stubVis2.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
-    data1 = await responseHandler(table1);
-    data2 = await responseHandler(table2);
+    data1 = await responseHandler(table1, rowAggDimensions);
 
     chart1.render(data1, persistedState);
-    chart2.render(data2, persistedState);
   });
 
   afterEach(function () {
     chart1.destroy();
-    chart2.destroy();
   });
 
   it('should render chart titles for all charts', function () {
     expect($(chart1.el).find('.visAxis__splitTitles--y').length).to.be(1);
-    expect($(chart2.el).find('.visAxis__splitTitles--x').length).to.be(1);
   });
 
   describe('_validatePieData method', function () {
@@ -184,7 +194,8 @@ describe('No global chart settings', function () {
 });
 
 describe('Vislib PieChart Class Test Suite', function () {
-  aggArray.forEach(function (dataAgg, i) {
+  aggArray.forEach(function (aggItem, i) {
+    const [ dataAgg, dataDimensions ] = aggItem;
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
       const visLibParams = {
         type: 'pie',
@@ -220,7 +231,7 @@ describe('Vislib PieChart Class Test Suite', function () {
 
       beforeEach(async () => {
         const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
-        data = await responseHandler(table);
+        data = await responseHandler(table, dataDimensions);
         vis.render(data, persistedState);
       });
 

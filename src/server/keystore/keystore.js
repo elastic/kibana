@@ -51,7 +51,7 @@ export class Keystore {
 
   static decrypt(data, password = '') {
     try {
-      const bData = new Buffer(data, 'base64');
+      const bData = Buffer.from(data, 'base64');
 
       // convert data to buffers
       const salt = bData.slice(0, 64);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export type ResponseHandler = <Response, Data>(response: Response) => Data;
+export type ResponseHandler = <Response, Data>(response: Response, dimensions?: any) => Data;
 
 export interface ResponseHandlerDescription {
   name: string;

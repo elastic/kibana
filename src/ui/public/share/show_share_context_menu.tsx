@@ -25,6 +25,8 @@ import { ShareActionProvider } from './share_action';
 
 import { EuiWrappingPopover } from '@elastic/eui';
 
+import { I18nContext } from 'ui/i18n';
+
 let isOpen = false;
 
 const container = document.createElement('div');
@@ -64,26 +66,28 @@ export function showShareContextMenu({
 
   document.body.appendChild(container);
   const element = (
-    <EuiWrappingPopover
-      className="navbar__popover"
-      id="sharePopover"
-      button={anchorElement}
-      isOpen={true}
-      closePopover={onClose}
-      panelPaddingSize="none"
-      withTitle
-    >
-      <ShareContextMenu
-        allowEmbed={allowEmbed}
-        getUnhashableStates={getUnhashableStates}
-        objectId={objectId}
-        objectType={objectType}
-        shareContextMenuExtensions={shareContextMenuExtensions}
-        sharingData={sharingData}
-        isDirty={isDirty}
-        onClose={onClose}
-      />
-    </EuiWrappingPopover>
+    <I18nContext>
+      <EuiWrappingPopover
+        id="sharePopover"
+        button={anchorElement}
+        isOpen={true}
+        closePopover={onClose}
+        panelPaddingSize="none"
+        withTitle
+        anchorPosition="downLeft"
+      >
+        <ShareContextMenu
+          allowEmbed={allowEmbed}
+          getUnhashableStates={getUnhashableStates}
+          objectId={objectId}
+          objectType={objectType}
+          shareContextMenuExtensions={shareContextMenuExtensions}
+          sharingData={sharingData}
+          isDirty={isDirty}
+          onClose={onClose}
+        />
+      </EuiWrappingPopover>
+    </I18nContext>
   );
   ReactDOM.render(element, container);
 }

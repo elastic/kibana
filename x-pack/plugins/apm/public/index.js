@@ -18,40 +18,32 @@ import './style/global_overrides.css';
 
 import template from './templates/index.html';
 import Main from './components/app/Main';
-import Breadcrumbs from './components/app/Main/Breadcrumbs';
 
 import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
 
-import { history } from './utils/url';
+import { history } from './components/shared/Links/url_helpers';
+
+import { I18nContext } from 'ui/i18n';
 
 chrome.setRootTemplate(template);
 const store = configureStore();
 
 initTimepicker(history, store.dispatch).then(() => {
-  const showPluginBreadcrumbs = !chrome
-    .getUiSettingsClient()
-    .get('k7design', false);
-
   ReactDOM.render(
-    <Router history={history}>
-      <Breadcrumbs showPluginBreadcrumbs={showPluginBreadcrumbs} />
-    </Router>,
-    document.getElementById('react-apm-breadcrumbs')
-  );
-
-  ReactDOM.render(
-    <Provider store={store}>
-      <Fragment>
-        <GlobalProgress />
-        <LicenseChecker />
-        <Router history={history}>
-          <Main />
-        </Router>
-      </Fragment>
-    </Provider>,
+    <I18nContext>
+      <Provider store={store}>
+        <Fragment>
+          <GlobalProgress />
+          <LicenseChecker />
+          <Router history={history}>
+            <Main />
+          </Router>
+        </Fragment>
+      </Provider>
+    </I18nContext>,
     document.getElementById('react-apm-root')
   );
 });

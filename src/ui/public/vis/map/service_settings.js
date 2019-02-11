@@ -20,12 +20,16 @@
 import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { modifyUrl } from '../../url';
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { EMSClient } from '../../../../legacy/core_plugins/tile_map/common/ems_client';
+import { i18n } from '@kbn/i18n';
 
 const markdownIt = new MarkdownIt({
   html: false,
   linkify: true
 });
+
+const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
@@ -33,117 +37,67 @@ uiModules.get('kibana')
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
 
-    const extendUrl = (url, props) => (
-      modifyUrl(url, parsed => _.merge(parsed, props))
-    );
-
-    /**
-     *  Unescape a url template that was escaped by encodeURI() so leaflet
-     *  will be able to correctly locate the variables in the template
-     *  @param  {String} url
-     *  @return {String}
-     */
-    const unescapeTemplateVars = url => {
-      const ENCODED_TEMPLATE_VARS_RE = /%7B(\w+?)%7D/g;
-      return url.replace(ENCODED_TEMPLATE_VARS_RE, (total, varName) => `{${varName}}`);
-    };
-
-
-
     class ServiceSettings {
 
       constructor() {
-        this._queryParams = {
-          my_app_version: kbnVersion
+
+        this._showZoomMessage = true;
+        this._emsClient = new EMSClient({
+          language: i18n.getLocale(),
+          kbnVersion: kbnVersion,
+          manifestServiceUrl: mapConfig.manifestServiceUrl,
+          htmlSanitizer: $sanitize,
+          landingPageUrl: mapConfig.emsLandingPageUrl
+        });
+
+      }
+
+      shouldShowZoomMessage({ origin }) {
+        return origin === ORIGIN.EMS && this._showZoomMessage;
+      }
+
+      disableZoomMessage() {
+        this._showZoomMessage = false;
+      }
+
+      __debugStubManifestCalls(manifestRetrieval) {
+        const oldGetManifest = this._emsClient._getManifest;
+        this._emsClient._getManifest = manifestRetrieval;
+        return {
+          removeStub: () => {
+            delete this._emsClient._getManifest;
+            //not strictly necessary since this is prototype method
+            if (this._emsClient._getManifest !== oldGetManifest) {
+              this._emsClient._getManifest = oldGetManifest;
+            }
+          }
         };
-
-        this._loadCatalogue = null;
-        this._loadFileLayers = null;
-        this._loadTMSServices = null;
-
-        this._invalidateSettings();
       }
-      _invalidateSettings() {
-
-        this._loadCatalogue = _.once(async () => {
-
-          if (!mapConfig.includeElasticMapsService) {
-            return { services: [] };
-          }
-
-          try {
-            const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
-            return response.data;
-          } catch (e) {
-            if (!e) {
-              e = new Error('Unknown error');
-            }
-            if (!(e instanceof Error)) {
-              e = new Error(e.data || `status ${e.statusText || e.status}`);
-            }
-            throw new Error(`Could not retrieve manifest from the tile service: ${e.message}`);
-          }
-        });
-
-
-        this._loadFileLayers = _.once(async () => {
-          const catalogue = await this._loadCatalogue();
-
-          const fileService = catalogue.services.find(service => service.type === 'file');
-          if (!fileService) {
-            return [];
-          }
-
-          const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-          const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
-          layers.forEach((layer) => {
-            layer.url = this._extendUrlWithParams(layer.url);
-            layer.attribution = $sanitize(markdownIt.render(layer.attribution));
-          });
-          return layers;
-        });
-
-        this._loadTMSServices = _.once(async () => {
-
-          const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.find((service) => service.type === 'tms');
-          if (!tmsService) {
-            return [];
-          }
-          const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
-          const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
-            const preppedService = _.cloneDeep(tmsService);
-            preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
-            preppedService.subdomains = preppedService.subdomains || [];
-            preppedService.url = this._extendUrlWithParams(preppedService.url);
-            return preppedService;
-          });
-
-          return preppedTMSServices;
-
-        });
-
-      }
-
-      _extendUrlWithParams(url) {
-        return unescapeTemplateVars(extendUrl(url, {
-          query: this._queryParams
-        }));
-      }
-
-      /**
-       * this internal method is overridden by the tests to simulate custom manifest.
-       */
-      async _getManifest(manifestUrl) {
-        return $http({
-          url: extendUrl(manifestUrl, { query: this._queryParams }),
-          method: 'GET'
-        });
-      }
-
 
       async getFileLayers() {
-        return await this._loadFileLayers();
+
+        if (!mapConfig.includeElasticMapsService) {
+          return [];
+        }
+
+        const fileLayers = await this._emsClient.getFileLayers();
+        return fileLayers.map(fileLayer => {
+
+          //backfill to older settings
+          const format = fileLayer.getDefaultFormatType();
+          const meta = fileLayer.getDefaultFormatMeta();
+
+          return {
+            name: fileLayer.getDisplayName(),
+            origin: fileLayer.getOrigin(),
+            id: fileLayer.getId(),
+            created_at: fileLayer.getCreatedAt(),
+            attribution: fileLayer.getHTMLAttribution(),
+            fields: fileLayer.getFieldsInLanguage(),
+            format: format, //legacy: format and meta are split up
+            meta: meta //legacy, format and meta are split up
+          };
+        });
       }
 
 
@@ -153,17 +107,32 @@ uiModules.get('kibana')
        */
       async getTMSServices() {
 
-        const allServices = [];
+        let allServices = [];
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-          tmsService.url = tilemapsConfig.deprecated.config.url;
-          tmsService.id = 'TMS in config/kibana.yml';
+          tmsService.id = TMS_IN_YML_ID;
+          tmsService.origin = ORIGIN.KIBANA_YML;
           allServices.push(tmsService);
         }
 
-        const servicesFromManifest = await this._loadTMSServices();
-        return allServices.concat(servicesFromManifest);
 
+        if  (mapConfig.includeElasticMapsService) {
+          const servicesFromManifest = await this._emsClient.getTMSServices();
+          const strippedServiceFromManifest = servicesFromManifest.map((service) => {
+            //shim for compatibility
+            const shim = {
+              origin: service.getOrigin(),
+              id: service.getId(),
+              minZoom: service.getMinZoom(),
+              maxZoom: service.getMaxZoom(),
+              attribution: service.getHTMLAttribution()
+            };
+            return shim;
+          });
+          allServices = allServices.concat(strippedServiceFromManifest);
+        }
+
+        return allServices;
       }
 
       /**
@@ -172,22 +141,87 @@ uiModules.get('kibana')
        * @param additionalQueryParams
        */
       addQueryParams(additionalQueryParams) {
-        for (const key in additionalQueryParams) {
-          if (additionalQueryParams.hasOwnProperty(key)) {
-            if (additionalQueryParams[key] !== this._queryParams[key]) {
-              //changes detected.
-              this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
-              this._invalidateSettings();
-              break;
-            }
+        this._emsClient.addQueryParams(additionalQueryParams);
+      }
+
+      async getEMSHotLink(fileLayerConfig) {
+        const fileLayers = await this._emsClient.getFileLayers();
+        const layer = fileLayers.find(fileLayer => {
+          const hasIdByName =  fileLayer.hasId(fileLayerConfig.name);//legacy
+          const hasIdById =  fileLayer.hasId(fileLayerConfig.id);
+          return hasIdByName || hasIdById;
+        });
+        return  (layer) ? layer.getEMSHotLink() : null;
+      }
+
+
+      async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
+        const tmsServices = await this._emsClient.getTMSServices();
+        const tmsService = tmsServices.find(service => {
+          return service.getId() === tmsServiceConfig.id;
+        });
+        return tmsService.getUrlTemplate();
+      }
+
+      async getUrlTemplateForTMSLayer(tmsServiceConfig) {
+
+        if (tmsServiceConfig.origin === ORIGIN.EMS) {
+          return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+        } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
+          return tilemapsConfig.deprecated.config.url;
+        } else {
+          //this is an older config. need to resolve this dynamically.
+          if (tmsServiceConfig.id === TMS_IN_YML_ID) {
+            return tilemapsConfig.deprecated.config.url;
+          } else {
+            //assume ems
+            return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
           }
+        }
+
+      }
+
+      async _getFileUrlFromEMS(fileLayerConfig) {
+        const fileLayers = await this._emsClient.getFileLayers();
+        const layer = fileLayers.find(fileLayer => {
+          const hasIdByName =  fileLayer.hasId(fileLayerConfig.name);//legacy
+          const hasIdById =  fileLayer.hasId(fileLayerConfig.id);
+          return hasIdByName || hasIdById;
+        });
+
+        if (layer) {
+          return layer.getDefaultFormatUrl();
+        } else {
+          throw new Error(`File  ${fileLayerConfig.name} not recognized`);
         }
       }
 
-      getEMSHotLink(fileLayer) {
-        const id = `file/${fileLayer.name}`;
-        return `${mapConfig.emsLandingPageUrl}#${id}`;
+      async getUrlForRegionLayer(fileLayerConfig) {
+        let url;
+        if (fileLayerConfig.origin === ORIGIN.EMS) {
+          url = this._getFileUrlFromEMS(fileLayerConfig);
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
+          //fallback for older saved objects
+          url = this._getFileUrlFromEMS(fileLayerConfig);
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.KIBANA_YML}.`)) {
+          //fallback for older saved objects
+          url = fileLayerConfig.url;
+        } else {
+          //generic fallback
+          url = fileLayerConfig.url;
+        }
+        return url;
       }
+
+      async getJsonForRegionLayer(fileLayerConfig) {
+        const url = await this.getUrlForRegionLayer(fileLayerConfig);
+        const json = await $http({
+          url: url,
+          method: 'GET'
+        });
+        return json.data;
+      }
+
     }
 
     return new ServiceSettings();

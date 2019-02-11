@@ -1,6 +1,6 @@
-<div class="sidebar-container visEditorSidebar__container">
+<div class="visEditorSidebar__container">
   <form
-    class="sidebar-list visEditorSidebar__form"
+    class="visEditorSidebar__form"
     ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
     name="visualizeEditor"
     novalidate
@@ -17,14 +17,14 @@
         }
       }}"
       ng-if="vis.type.requiresSearch && vis.type.options.showIndexSelection"
-      class="index-pattern visEditorSidebar__indexPattern"
+      class="visEditorSidebar__indexPattern"
       tabindex="0"
       id="sidebarIndexPatternTitle"
     >
       {{ vis.indexPattern.title }}
     </div>
 
-    <nav class="navbar navbar-default subnav visEditorSidebar__nav">
+    <nav class="navbar visEditorSidebar__nav">
       <div class="container-fluid">
 
         <!-- tabs -->
@@ -115,7 +115,7 @@
             tooltip="{{::'common.ui.vis.editors.sidebar.applyChangesTooltip' | i18n: { defaultMessage: 'Apply changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
-            ng-hide="autoApplyEnabled"
+            ng-hide="autoApplyEnabled || visualizeEditor.softErrorCount() > 0"
           >
             <button
               data-test-subj="visualizeEditorRenderButton"
@@ -137,7 +137,7 @@
           >
             <button
               data-test-subj="visualizeEditorResetButton"
-              class="kuiButton kuiButton--basic navbar-btn-link visEditorSidebar__navButtonLink"
+              class="kuiButton navbar-btn-link visEditorSidebar__navButtonLink"
               ng-disabled="!vis.dirty"
               ng-click="resetEditableVis()"
               aria-label="{{::'common.ui.vis.editors.sidebar.discardChangesAriaLabel' | i18n: { defaultMessage: 'Reset the visualization' } }}"

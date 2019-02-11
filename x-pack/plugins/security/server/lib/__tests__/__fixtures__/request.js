@@ -5,8 +5,13 @@
  */
 
 import url from 'url';
+import { stub } from 'sinon';
+import { LoginAttempt } from '../../authentication/login_attempt';
+
 export function requestFixture({
   headers = { accept: 'something/html' },
+  auth = undefined,
+  params = undefined,
   path = '/wat',
   basePath = '',
   search = '',
@@ -14,9 +19,12 @@ export function requestFixture({
 } = {}) {
   return {
     raw: { req: { headers } },
+    auth,
     headers,
+    params,
     url: { path, search },
     getBasePath: () => basePath,
+    loginAttempt: stub().returns(new LoginAttempt()),
     query: search ? url.parse(search, { parseQueryString: true }).query : {},
     payload,
     state: { user: 'these are the contents of the user client cookie' }

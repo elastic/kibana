@@ -37,10 +37,12 @@ import {
   loadIndexPatterns,
 } from '../edit_utils';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 const MAX_NUMBER_DASHBOARDS = 1000;
 const MAX_NUMBER_INDEX_PATTERNS = 1000;
 
-export class CustomUrls extends Component {
+class CustomUrlsUI extends Component {
   constructor(props) {
     super(props);
 
@@ -65,13 +67,18 @@ export class CustomUrls extends Component {
   }
 
   componentDidMount() {
+    const { intl } = this.props;
+
     loadSavedDashboards(MAX_NUMBER_DASHBOARDS)
       .then((dashboards)=> {
         this.setState({ dashboards });
       })
       .catch((resp) => {
         console.log('Error loading list of dashboards:', resp);
-        toastNotifications.addDanger('An error occurred loading the list of saved Kibana dashboards');
+        toastNotifications.addDanger(intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.loadSavedDashboardsErrorNotificationMessage',
+          defaultMessage: 'An error occurred loading the list of saved Kibana dashboards'
+        }));
       });
 
     loadIndexPatterns(MAX_NUMBER_INDEX_PATTERNS)
@@ -80,7 +87,10 @@ export class CustomUrls extends Component {
       })
       .catch((resp) => {
         console.log('Error loading list of dashboards:', resp);
-        toastNotifications.addDanger('An error occurred loading the list of saved index patterns');
+        toastNotifications.addDanger(intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
+          defaultMessage: 'An error occurred loading the list of saved index patterns'
+        }));
       });
   }
 
@@ -103,7 +113,7 @@ export class CustomUrls extends Component {
   }
 
   addNewCustomUrl = () => {
-    buildCustomUrlFromSettings(this.state.editorSettings, this.props.job)
+    buildCustomUrlFromSettings(this.state.editorSettings)
       .then((customUrl) => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.setCustomUrls(customUrls);
@@ -111,13 +121,17 @@ export class CustomUrls extends Component {
       })
       .catch((resp) => {
         console.log('Error building custom URL from settings:', resp);
-        toastNotifications.addDanger('An error occurred building the new custom URL from the supplied settings');
+        toastNotifications.addDanger(this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
+          defaultMessage: 'An error occurred building the new custom URL from the supplied settings'
+        }));
       });
   }
 
   onTestButtonClick = () => {
     const job = this.props.job;
-    buildCustomUrlFromSettings(this.state.editorSettings, job)
+    const { intl } = this.props;
+    buildCustomUrlFromSettings(this.state.editorSettings)
       .then((customUrl) => {
         getTestUrl(job, customUrl)
           .then((testUrl) => {
@@ -125,12 +139,18 @@ export class CustomUrls extends Component {
           })
           .catch((resp) => {
             console.log('Error obtaining URL for test:', resp);
-            toastNotifications.addWarning('An error occurred obtaining the URL to test the configuration');
+            toastNotifications.addWarning(intl.formatMessage({
+              id: 'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
+              defaultMessage: 'An error occurred obtaining the URL to test the configuration'
+            }));
           });
       })
       .catch((resp) => {
         console.log('Error building custom URL from settings:', resp);
-        toastNotifications.addWarning('An error occurred building the custom URL for testing from the supplied settings');
+        toastNotifications.addWarning(intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.buildUrlErrorNotificationMessage',
+          defaultMessage: 'An error occurred building the custom URL for testing from the supplied settings'
+        }));
       });
   }
 
@@ -160,7 +180,10 @@ export class CustomUrls extends Component {
               size="s"
               onClick={() => this.editNewCustomUrl()}
             >
-              Add custom URL
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+                defaultMessage="Add custom URL"
+              />
             </EuiButton>
           </React.Fragment>
         ) : (
@@ -170,7 +193,10 @@ export class CustomUrls extends Component {
                 color="text"
                 onClick={() => this.closeEditor()}
                 iconType="cross"
-                aria-label="Close custom URL editor"
+                aria-label={this.props.intl.formatMessage({
+                  id: 'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
+                  defaultMessage: 'Close custom URL editor'
+                })}
                 className="close-editor-button"
               />
               <CustomUrlEditor
@@ -188,7 +214,10 @@ export class CustomUrls extends Component {
                     onClick={() => this.addNewCustomUrl()}
                     isDisabled={!isValidEditorSettings}
                   >
-                    Add
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.editJobFlyout.customUrls.addButtonLabel"
+                      defaultMessage="Add"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -198,7 +227,10 @@ export class CustomUrls extends Component {
                     onClick={() => this.onTestButtonClick()}
                     isDisabled={!isValidEditorSettings}
                   >
-                    Test
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.editJobFlyout.customUrls.testButtonLabel"
+                      defaultMessage="Test"
+                    />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
 
@@ -217,8 +249,10 @@ export class CustomUrls extends Component {
     );
   }
 }
-CustomUrls.propTypes = {
+CustomUrlsUI.propTypes = {
   job: PropTypes.object.isRequired,
   jobCustomUrls: PropTypes.array.isRequired,
   setCustomUrls: PropTypes.func.isRequired,
 };
+
+export const CustomUrls = injectI18n(CustomUrlsUI);

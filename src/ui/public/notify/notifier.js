@@ -21,13 +21,11 @@ import _ from 'lodash';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import '../render_directive';
+import { i18n } from '@kbn/i18n';
 
 const notifs = [];
 
-const {
-  version,
-  buildNum,
-} = metadata;
+const { version, buildNum } = metadata;
 
 function closeNotif(notif, cb = _.noop, key) {
   return function () {
@@ -67,13 +65,17 @@ function startNotifTimer(notif, cb) {
 
   notif.timeRemaining = Math.floor(notif.lifetime / interval);
 
-  notif.timerId = Notifier.config.setInterval(function () {
-    notif.timeRemaining -= 1;
+  notif.timerId = Notifier.config.setInterval(
+    function () {
+      notif.timeRemaining -= 1;
 
-    if (notif.timeRemaining <= 0) {
-      closeNotif(notif, cb, 'ignore')();
-    }
-  }, interval, notif.timeRemaining);
+      if (notif.timeRemaining <= 0) {
+        closeNotif(notif, cb, 'ignore')();
+      }
+    },
+    interval,
+    notif.timeRemaining
+  );
 
   notif.cancelTimer = timerCanceler(notif, cb);
 }
@@ -87,7 +89,7 @@ const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
   info: 'kuiButton--primary',
 };
-const buttonHierarchyClass = (index) => {
+const buttonHierarchyClass = index => {
   if (index === 0) {
     // first action: primary className
     return 'kuiButton--primary';
@@ -120,7 +122,7 @@ function add(notif, cb) {
         getButtonClass() {
           const buttonTypeClass = typeToButtonClassMap[notif.type];
           return `${buttonHierarchyClass(index)} ${buttonTypeClass}`;
-        }
+        },
       };
     });
   }
@@ -133,11 +135,11 @@ function add(notif, cb) {
 
   // decorate the notification with helper functions for the template
   notif.getButtonClass = () => typeToButtonClassMap[notif.type];
-  notif.getAlertClassStack = () => `toast-stack alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getAlertClassStack = () => `kbnToast__stack alert ${typeToAlertClassMap[notif.type]}`;
   notif.getIconClass = () => `fa fa-${notif.icon}`;
-  notif.getToastMessageClass = ()  => 'toast-message';
-  notif.getAlertClass = () => `toast alert ${typeToAlertClassMap[notif.type]}`;
-  notif.getButtonGroupClass = () => 'toast-controls';
+  notif.getToastMessageClass = () => 'kbnToast__message';
+  notif.getAlertClass = () => `kbnToast alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getButtonGroupClass = () => 'kbnToast__controls';
 
   let dup = null;
   if (notif.content) {
@@ -174,9 +176,7 @@ export function Notifier(opts) {
   // label type thing to say where notifications came from
   self.from = opts.location;
 
-  const notificationLevels = [
-    'error',
-  ];
+  const notificationLevels = ['error'];
 
   notificationLevels.forEach(function (m) {
     self[m] = _.bind(self[m], self);
@@ -188,7 +188,7 @@ Notifier.config = {
   errorLifetime: 300000,
   infoLifetime: 5000,
   setInterval: window.setInterval,
-  clearInterval: window.clearInterval
+  clearInterval: window.clearInterval,
 };
 
 Notifier.applyConfig = function (config) {
@@ -215,10 +215,13 @@ Notifier.prototype.error = function (err, opts, cb) {
     type: 'danger',
     content: formatMsg(err, this.from),
     icon: 'warning',
-    title: 'Error',
+    title: i18n.translate('common.ui.notify.toaster.errorTitle', {
+      defaultMessage: 'Error',
+    }),
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
     stack: formatStack(err)
   }, _.pick(opts, overridableOptions));
+
   return add(config, cb);
 };

@@ -105,9 +105,8 @@ export function initUsersApi(server) {
 
         // Now we authenticate user with the new password again updating current session if any.
         if (isCurrentUser) {
-          const authenticationResult = await server.plugins.security.authenticate(
-            BasicCredentials.decorateRequest(request, username, newPassword)
-          );
+          request.loginAttempt().setCredentials(username, newPassword);
+          const authenticationResult = await server.plugins.security.authenticate(request);
 
           if (!authenticationResult.succeeded()) {
             throw Boom.unauthorized((authenticationResult.error));

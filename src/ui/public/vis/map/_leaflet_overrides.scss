@@ -99,7 +99,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   display: none !important;
 }
 
-.leaflet-control-attribution {
+.leaflet-container .leaflet-control-attribution {
   background-color: transparentize($euiColorEmptyShade, .7);
   color: $euiColorDarkShade;
 

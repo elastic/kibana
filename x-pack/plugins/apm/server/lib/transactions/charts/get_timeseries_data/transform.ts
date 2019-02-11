@@ -5,7 +5,8 @@
  */
 
 import { isNumber, round, sortBy } from 'lodash';
-import { oc } from 'ts-optchain';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { ESResponse } from './fetcher';
 
@@ -31,13 +32,13 @@ export function timeseriesTransformer({
   bucketSize: number;
 }): ApmTimeSeriesResponse {
   const aggs = timeseriesResponse.aggregations;
-  const overallAvgDuration = oc(aggs).overall_avg_duration.value();
-
-  const responseTimeBuckets = oc(aggs)
-    .response_times.buckets([])
-    .slice(1, -1);
+  const overallAvgDuration = idx(aggs, _ => _.overall_avg_duration.value);
+  const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
-  const transactionResultBuckets = oc(aggs).transaction_results.buckets([]);
+  const transactionResultBuckets = idx(
+    aggs,
+    _ => _.transaction_results.buckets
+  );
   const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
 
   return {
@@ -53,19 +54,24 @@ export function timeseriesTransformer({
 }
 
 export function getTpmBuckets(
-  transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'],
+  transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'] = [],
   bucketSize: number
 ) {
-  const buckets = transactionResultBuckets.map(({ key, timeseries }) => {
-    const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
-      return {
-        x: bucket.key,
-        y: round(bucket.doc_count * (60 / bucketSize), 1)
-      };
-    });
+  const buckets = transactionResultBuckets.map(
+    ({ key: resultKey, timeseries }) => {
+      const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
+        return {
+          x: bucket.key,
+          y: round(bucket.doc_count * (60 / bucketSize), 1)
+        };
+      });
 
-    return { key, dataPoints };
-  });
+      // Handle empty string result keys
+      const key = resultKey === '' ? NOT_AVAILABLE_LABEL : resultKey;
+
+      return { key, dataPoints };
+    }
+  );
 
   return sortBy(
     buckets,
@@ -74,9 +80,9 @@ export function getTpmBuckets(
 }
 
 function getResponseTime(
-  responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets']
+  responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets'] = []
 ) {
-  return responseTimeBuckets.reduce(
+  return responseTimeBuckets.slice(1, -1).reduce(
     (acc, bucket) => {
       const { '95.0': p95, '99.0': p99 } = bucket.pct.values;
 

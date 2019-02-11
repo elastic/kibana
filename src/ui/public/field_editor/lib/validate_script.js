@@ -24,7 +24,6 @@ export const executeScript = async ({ name, lang, script, indexPatternTitle, add
   const header = {
     index: indexPatternTitle,
     ignore_unavailable: true,
-    timeout: 30000
   };
 
   const search = {
@@ -40,6 +39,7 @@ export const executeScript = async ({ name, lang, script, indexPatternTitle, add
       }
     },
     size: 10,
+    timeout: '30s',
   };
 
   if (additionalFields.length > 0) {

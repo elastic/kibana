@@ -87,6 +87,7 @@ export function getReportCountsByParameter(callCluster, config, fields, withinDa
   }
 
   const params = {
+    rest_total_hits_as_int: true,
     index: `${reportingIndex}-*`,
     filterPath: ['hits.total'],
     body: {

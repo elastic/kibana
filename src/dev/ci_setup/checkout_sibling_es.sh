@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function checkout_sibling {
   project=$1
   targetDir=$2

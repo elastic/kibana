@@ -93,6 +93,7 @@ ObjDefine.prototype.create = function () {
     // clone the object on serialization and choose which properties
     // to include or trim manually. This is currently only in use in PhantomJS
     // due to https://github.com/ariya/phantomjs/issues/11856
+    // TODO: remove this: https://github.com/elastic/kibana/issues/27136
     self.obj.toJSON = function () {
       return _.transform(self.obj, function (json, val, key) {
         const desc = self.descs[key];

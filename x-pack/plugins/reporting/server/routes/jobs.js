@@ -124,6 +124,16 @@ export function jobs(server) {
       const { docId } = request.params;
 
       let response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, h, { docId });
+      const { statusCode } = response;
+
+      if (statusCode !== 200) {
+        const logLevel = statusCode === 500 ? 'error' : 'debug';
+        server.log(
+          [logLevel, "reporting", "download"],
+          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(response.source)}]`
+        );
+      }
+
       if (!response.isBoom) {
         response = response.header('accept-ranges', 'none');
       }

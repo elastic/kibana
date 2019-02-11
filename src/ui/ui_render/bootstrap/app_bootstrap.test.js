@@ -17,23 +17,15 @@
  * under the License.
  */
 
-import mockFs from 'mock-fs';
-import { resolve } from 'path';
-
 const mockTemplate = `
 {{appId}}
-{{bundlePath}}
+{{regularBundlePath}}
 {{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
-const templatePath = resolve(__dirname, 'template.js.hbs');
-
-beforeEach(() => {
-  mockFs({
-    [templatePath]: mockTemplate
-  });
-});
-afterEach(mockFs.restore);
+jest.mock('fs', () => ({
+  readFile: jest.fn().mockImplementation((path, encoding, cb) => cb(null, mockTemplate))
+}));
 
 import { AppBootstrap } from './app_bootstrap';
 
@@ -102,7 +94,7 @@ describe('ui_render/AppBootstrap', () => {
         ...mockConfig(),
         templateData: {
           appId: 'not123',
-          bundlePath: 'not/foo/bar'
+          regularBundlePath: 'not/foo/bar'
         }
       };
       const bootstrap2 = new AppBootstrap(config2);
@@ -113,13 +105,17 @@ describe('ui_render/AppBootstrap', () => {
       expect(hash2).not.toEqual(hash1);
     });
   });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 });
 
 function mockConfig() {
   return {
     templateData: {
       appId: 123,
-      bundlePath: '/foo/bar'
+      regularBundlePath: '/foo/bar'
     }
   };
 }

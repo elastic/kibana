@@ -45,7 +45,7 @@ exports.downloadSnapshot = async function installSnapshot({
   log = defaultLog,
 }) {
   const fileName = getFilename(license, version);
-  const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  const url = getUrl(fileName);
   const dest = path.resolve(basePath, 'cache', fileName);
 
   log.info('version: %s', chalk.bold(version));
@@ -145,8 +145,32 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
-  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
+  const platform = os.platform();
+  let suffix = null;
+  switch (platform) {
+    case 'darwin':
+      suffix = 'darwin-x86_64.tar.gz';
+      break;
+    case 'linux':
+      suffix = 'linux-x86_64.tar.gz';
+      break;
+    case 'win32':
+      suffix = 'windows-x86_64.zip';
+      break;
+    default:
+      throw new Error(`Unsupported platform ${platform}`);
+  }
 
-  return `${basename}-SNAPSHOT.${extension}`;
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
+  return `${basename}-SNAPSHOT-${suffix}`;
+}
+
+function getUrl(fileName) {
+  if (process.env.TEST_ES_SNAPSHOT_VERSION) {
+    return `https://snapshots.elastic.co/${
+      process.env.TEST_ES_SNAPSHOT_VERSION
+    }/downloads/elasticsearch/${fileName}`;
+  } else {
+    return `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  }
 }

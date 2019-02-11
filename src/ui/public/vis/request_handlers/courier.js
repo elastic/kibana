@@ -87,7 +87,7 @@ const CourierRequestHandlerProvider = function () {
 
       const queryHash = calculateObjectHash(reqBody);
       // We only need to reexecute the query, if forceFetch was true or the hash of the request body has changed
-      // since the last request.
+      // since the last request
       const shouldQuery = forceFetch || (searchSource.lastQuery !== queryHash);
 
       if (shouldQuery) {
@@ -101,35 +101,42 @@ const CourierRequestHandlerProvider = function () {
         );
         request.stats(getRequestInspectorStats(requestSearchSource));
 
-        const response = await requestSearchSource.fetch();
+        try {
+          const response = await requestSearchSource.fetch();
 
-        searchSource.lastQuery = queryHash;
+          searchSource.lastQuery = queryHash;
 
-        request
-          .stats(getResponseInspectorStats(searchSource, response))
-          .ok({ json: response });
+          request
+            .stats(getResponseInspectorStats(searchSource, response))
+            .ok({ json: response });
 
-        searchSource.rawResponse = response;
-
-        let resp = cloneDeep(response);
-        for (const agg of aggs) {
-          if (has(agg, 'type.postFlightRequest')) {
-            resp = await agg.type.postFlightRequest(
-              resp,
-              aggs,
-              agg,
-              requestSearchSource,
-              inspectorAdapters
-            );
-          }
+          searchSource.rawResponse = response;
+        } catch(e) {
+          // Log any error during request to the inspector
+          request.error({ json: e });
+          throw e;
+        } finally {
+          // Add the request body no matter if things went fine or not
+          requestSearchSource.getSearchRequestBody().then(req => {
+            request.json(req);
+          });
         }
-
-        searchSource.finalResponse = resp;
-
-        requestSearchSource.getSearchRequestBody().then(req => {
-          request.json(req);
-        });
       }
+
+      let resp = cloneDeep(searchSource.rawResponse);
+      for (const agg of aggs) {
+        if (has(agg, 'type.postFlightRequest')) {
+          resp = await agg.type.postFlightRequest(
+            resp,
+            aggs,
+            agg,
+            requestSearchSource,
+            inspectorAdapters
+          );
+        }
+      }
+
+      searchSource.finalResponse = resp;
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyParams = {

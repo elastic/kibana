@@ -87,7 +87,7 @@ Object {
 Object {
   "data": "some-message",
   "tags": Array [
-    "trace",
+    "debug",
     "some-context",
     "sub-context",
     "important",

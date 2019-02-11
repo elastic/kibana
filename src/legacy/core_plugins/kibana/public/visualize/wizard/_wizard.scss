@@ -1,0 +1,32 @@
+@include euiBreakpoint('xl') {
+  .visWizard {
+    display: flex;
+  }
+
+  .visWizard__column {
+    display: flex;
+    flex-direction: column;
+    padding: 0px $euiSizeXS;
+  }
+
+  .visWizard__row {
+    flex: 1;
+    background-color: $euiColorEmptyShade;
+  }
+
+  .visWizard__column--small {
+    flex: 2;
+  }
+
+  .visWizard__column--large {
+    flex: 3;
+  }
+}
+
+/**
+ * 1. Hack in some padding for these panels.
+ */
+.visWizard__list--paginated--selectable,
+.visWizard__savedObjectFinder {
+  padding: $euiSizeS; /* 1 */
+}

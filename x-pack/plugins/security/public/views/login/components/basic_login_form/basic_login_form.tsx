@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import { LoginState } from '../../../../../common/login_state';
 
@@ -14,6 +15,7 @@ interface Props {
   infoMessage?: string;
   loginState: LoginState;
   next: string;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -24,7 +26,7 @@ interface State {
   message: string;
 }
 
-export class BasicLoginForm extends Component<Props, State> {
+class BasicLoginFormUI extends Component<Props, State> {
   public state = {
     hasError: false,
     isLoading: false,
@@ -39,7 +41,14 @@ export class BasicLoginForm extends Component<Props, State> {
         {this.renderMessage()}
         <EuiPanel>
           <form onSubmit={this.submit}>
-            <EuiFormRow label="Username">
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+                  defaultMessage="Username"
+                />
+              }
+            >
               <EuiFieldText
                 id="username"
                 name="username"
@@ -48,12 +57,19 @@ export class BasicLoginForm extends Component<Props, State> {
                 onChange={this.onUsernameChange}
                 disabled={this.state.isLoading}
                 isInvalid={false}
-                aria-required
+                aria-required={true}
                 inputRef={this.setUsernameInputRef}
               />
             </EuiFormRow>
 
-            <EuiFormRow label="Password">
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+                  defaultMessage="Password"
+                />
+              }
+            >
               <EuiFieldText
                 id="password"
                 name="password"
@@ -63,7 +79,7 @@ export class BasicLoginForm extends Component<Props, State> {
                 onChange={this.onPasswordChange}
                 disabled={this.state.isLoading}
                 isInvalid={false}
-                aria-required
+                aria-required={true}
               />
             </EuiFormRow>
 
@@ -75,7 +91,10 @@ export class BasicLoginForm extends Component<Props, State> {
               isLoading={this.state.isLoading}
               data-test-subj="loginSubmit"
             >
-              Log in
+              <FormattedMessage
+                id="xpack.security.login.basicLoginForm.logInButtonLabel"
+                defaultMessage="Log in"
+              />
             </EuiButton>
           </form>
         </EuiPanel>
@@ -152,7 +171,7 @@ export class BasicLoginForm extends Component<Props, State> {
       message: '',
     });
 
-    const { http, window, next } = this.props;
+    const { http, window, next, intl } = this.props;
 
     const { username, password } = this.state;
 
@@ -161,9 +180,15 @@ export class BasicLoginForm extends Component<Props, State> {
       (error: any) => {
         const { statusCode = 500 } = error.data || {};
 
-        let message = 'Oops! Error. Try again.';
+        let message = intl.formatMessage({
+          id: 'xpack.security.login.basicLoginForm.unknownErrorMessage',
+          defaultMessage: 'Oops! Error. Try again.',
+        });
         if (statusCode === 401) {
-          message = 'Invalid username or password. Please try again.';
+          message = intl.formatMessage({
+            id: 'xpack.security.login.basicLoginForm.invalidUsernameOrPasswordErrorMessage',
+            defaultMessage: 'Invalid username or password. Please try again.',
+          });
         }
 
         this.setState({
@@ -175,3 +200,5 @@ export class BasicLoginForm extends Component<Props, State> {
     );
   };
 }
+
+export const BasicLoginForm = injectI18n(BasicLoginFormUI);

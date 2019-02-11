@@ -132,10 +132,10 @@ describe('Notifier', function () {
     it('has css class helper functions', function () {
       expect(notify('error').getIconClass()).to.equal('fa fa-warning');
       expect(notify('error').getButtonClass()).to.equal('kuiButton--danger');
-      expect(notify('error').getAlertClassStack()).to.equal('toast-stack alert alert-danger');
-      expect(notify('error').getAlertClass()).to.equal('toast alert alert-danger');
-      expect(notify('error').getButtonGroupClass()).to.equal('toast-controls');
-      expect(notify('error').getToastMessageClass()).to.equal('toast-message');
+      expect(notify('error').getAlertClassStack()).to.equal('kbnToast__stack alert alert-danger');
+      expect(notify('error').getAlertClass()).to.equal('kbnToast alert alert-danger');
+      expect(notify('error').getButtonGroupClass()).to.equal('kbnToast__controls');
+      expect(notify('error').getToastMessageClass()).to.equal('kbnToast__message');
     });
   });
 

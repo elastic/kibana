@@ -33,14 +33,6 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql('');
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFoundResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
@@ -119,7 +111,6 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   return {
     createExpectEmptyResult,
-    createExpectLegacyForbidden,
     createExpectNotFoundResult,
     createExpectRbacForbidden,
     createExpectResults,

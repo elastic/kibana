@@ -6,12 +6,11 @@
 
 import {
   FrameworkRequest,
-  FrameworkWrappableRequest,
+  internalAuthData,
+  KibanaServerRequest,
 } from '../lib/adapters/framework/adapter_types';
 
-export const internalAuthData = Symbol('internalAuthData');
-
-export function wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
+export function wrapRequest<InternalRequest extends KibanaServerRequest>(
   req: InternalRequest
 ): FrameworkRequest<InternalRequest> {
   const { params, payload, query, headers, info } = req;

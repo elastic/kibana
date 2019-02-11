@@ -1,0 +1,57 @@
+[[creating-index-lifecycle-policies]]
+=== Creating an index lifecycle policy
+
+An index lifecycle policy enables you to define rules over when to perform 
+certain actions, such as a rollover or force merge, on an index. Index lifecycle 
+management automates execution of those actions at the right time.
+
+When you create an index lifecycle policy, consider the tradeoffs between 
+performance and availability. As you move your index through the lifecycle, 
+you’re likely moving your data to less performant hardware and reducing the 
+number of shards and replicas.  It’s important to ensure that the index 
+continues to have enough replicas to prevent data loss in the event of failures.
+
+*Index Lifecycle Policies* is automatically enabled in {kib}. Go to 
+*Management > {es} > Index Lifecycle Policies*. 
+
+NOTE: If you don’t want to use this feature, you can disable it by setting 
+`xpack.ilm.enabled` to false in your `kibana.yml` configuration file. If you 
+disable *Index Management*, then *Index Lifecycle Policies* is also disabled.
+
+[role="screenshot"]
+image::images/index-lifecycle-policies-create.png[][UI for creating an index lifecycle policy]
+
+You can define up to four phases in the index lifecycle. For each phase, you 
+can enable actions to optimize performance for that phase. Transitioning 
+between phases is based on the age of the index.
+
+The four phases of an index lifecycle policy are:
+
+* *Hot.* The index is actively being queried and written to. You can optionally 
+roll over to a new index when the 
+original index reaches a specified size or age.  When a rollover occurs, a new 
+index is created, added to the index alias, and designated as the new “hot” 
+index. You can still query the previous indices, but you only ever write to 
+the “hot” index. See {ref}/indices-rollover-index.html[Rollover index] for more information.
+
+* *Warm.* The index is typically searched at a lower rate than when the data is 
+hot. The index is not used for storing for new data, but might occasionally add 
+late-arriving data, for example, from a Beat that had a network problem that's now fixed.  
+You can optionally shrink the number replicas and move the shards to a 
+different set of nodes with smaller or less performant hardware. You can also 
+reduce the number of primary shards and force merge the index into 
+smaller {ref}/indices-segments.html[segments].
+ 
+* *Cold.* The index is no longer being updated and is seldom queried, but is 
+still searchable. If you have a big deployment, you can move it to even 
+less performant hardware. You might also reduce the number of replicas because 
+you expect the data to be queried less frequently.
+
+* *Delete.* The index is no longer relevant. You can define when it is safe to 
+delete it.
+
+The index lifecycle always includes an active hot phase. The warm, cold, and 
+delete phases are optional. For example, you might define all four phases for 
+one policy and only a hot and delete phase for another.  See {ref}/_actions.html[Actions]
+for more information on the actions available in each phase. 
+

@@ -1,0 +1,63 @@
+.conApp {
+  display: flex;
+  flex: 1 1 auto;
+  position: relative;
+  padding: $euiSizeS;
+  // Make sure the editor actions don't create scrollbars on this container
+  // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
+  // overflow: hidden;
+}
+
+.conApp__editor {
+  // Default size of left side is half the large breakpoint
+  // but this is inline overridden by the resizer
+  width: map-get($euiBreakpoints, "l") / 2;
+  display: flex;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.conApp__output {
+  display: flex;
+  flex: 1 1 1px;
+}
+
+.conApp__editorContent,
+.conApp__outputContent {
+  flex: 1 1 1px;
+}
+
+.conApp__editorActions {
+  position: absolute;
+  z-index: $euiZLevel1;
+  top: 0;
+  // Adjust for possible scrollbars
+  right: $euiSize;
+  line-height: 1;
+}
+
+.conApp__editorActionButton {
+  padding: 0 $euiSizeXS;
+  appearance: none;
+  border: none;
+  background: none;
+}
+
+.conApp__editorActionButton--success {
+  color: $euiColorSuccess;
+}
+
+.conApp__resizer {
+  @include kibana-resizer;
+}
+
+// SASSTODO: This component seems to not be used anymore?
+// Possibly replaced by the Ace version
+.conApp__autoComplete {
+  position: absolute;
+  left: -1000px;
+  visibility: hidden;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: $euiZLevel1 + 2;
+  margin-top: 22px;
+}

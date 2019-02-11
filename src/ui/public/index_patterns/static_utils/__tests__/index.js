@@ -20,26 +20,50 @@
 import expect from 'expect.js';
 import { isFilterable } from '../index';
 
+const mockField = {
+  name: 'foo',
+  scripted: false,
+  searchable: true,
+  type: 'string',
+};
+
 describe('static utils', () => {
   describe('isFilterable', () => {
-    it('should be filterable', () => {
-      ['string', 'number', 'date', 'ip', 'boolean'].forEach(type => {
-        expect(isFilterable({ type })).to.be(true);
+    describe('types', () => {
+      it('should return true for filterable types', () => {
+        ['string', 'number', 'date', 'ip', 'boolean'].forEach(type => {
+          expect(isFilterable({ ...mockField, type })).to.be(true);
+        });
+      });
+
+      it('should return false for filterable types if the field is not searchable', () => {
+        ['string', 'number', 'date', 'ip', 'boolean'].forEach(type => {
+          expect(isFilterable({ ...mockField, type, searchable: false })).to.be(false);
+        });
+      });
+
+      it('should return false for un-filterable types', () => {
+        [
+          'geo_point',
+          'geo_shape',
+          'attachment',
+          'murmur3',
+          '_source',
+          'unknown',
+          'conflict',
+        ].forEach(type => {
+          expect(isFilterable({ ...mockField, type })).to.be(false);
+        });
       });
     });
 
-    it('should not be filterable', () => {
-      [
-        'geo_point',
-        'geo_shape',
-        'attachment',
-        'murmur3',
-        '_source',
-        'unknown',
-        'conflict',
-      ].forEach(type => {
-        expect(isFilterable({ type })).to.be(false);
-      });
+
+    it('should return true for scripted fields', () => {
+      expect(isFilterable({ ...mockField, scripted: true, searchable: false })).to.be(true);
+    });
+
+    it('should return true for the _id field', () => {
+      expect(isFilterable({ ...mockField, name: '_id' })).to.be(true);
     });
   });
 });

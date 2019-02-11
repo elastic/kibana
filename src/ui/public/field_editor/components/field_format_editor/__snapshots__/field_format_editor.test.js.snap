@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FieldFormatEditor should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <TestEditor
     fieldType="number"
     format={Object {}}
@@ -9,7 +9,7 @@ exports[`FieldFormatEditor should render normally 1`] = `
     onChange={[Function]}
     onError={[Function]}
   />
-</React.Fragment>
+</Fragment>
 `;
 
-exports[`FieldFormatEditor should render nothing if there is no editor for the format 1`] = `<React.Fragment />`;
+exports[`FieldFormatEditor should render nothing if there is no editor for the format 1`] = `<Fragment />`;

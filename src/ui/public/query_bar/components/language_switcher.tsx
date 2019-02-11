@@ -29,6 +29,7 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { documentationLinks } from '../../documentation_links/documentation_links';
 
@@ -52,7 +53,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
   public render() {
     const button = (
       <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
-        Options
+        <FormattedMessage id="common.ui.queryBar.optionsButtonLabel" defaultMessage="Options" />
       </EuiButtonEmpty>
     );
 
@@ -67,18 +68,30 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
         closePopover={this.closePopover}
         withTitle
       >
-        <EuiPopoverTitle>Syntax options</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="common.ui.queryBar.syntaxOptionsTitle"
+            defaultMessage="Syntax options"
+          />
+        </EuiPopoverTitle>
         <div style={{ width: '350px' }}>
           <EuiText>
             <p>
-              Our experimental autocomplete and simple syntax features can help you create your
-              queries. Just start typing and you’ll see matches related to your data. See docs{' '}
-              {
-                <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
-                  here
-                </EuiLink>
-              }
-              .
+              <FormattedMessage
+                id="common.ui.queryBar.syntaxOptionsDescription"
+                defaultMessage="Our new autocomplete and simple syntax features can help you create your
+                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+                values={{
+                  docsLink: (
+                    <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
+                      <FormattedMessage
+                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                        defaultMessage="here"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
 
@@ -89,7 +102,12 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
               <EuiSwitch
                 id="queryEnhancementOptIn"
                 name="popswitch"
-                label="Turn on query features"
+                label={
+                  <FormattedMessage
+                    id="common.ui.queryBar.turnOnQueryFeaturesLabel"
+                    defaultMessage="Turn on query features"
+                  />
+                }
                 checked={this.props.language === 'kuery'}
                 onChange={this.onSwitchChange}
                 data-test-subj="languageToggle"
@@ -101,13 +119,20 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
 
           <EuiText size="xs">
             <p>
-              Not ready yet? Find our lucene docs{' '}
-              {
-                <EuiLink href={luceneQuerySyntaxDocs} target="_blank">
-                  here
-                </EuiLink>
-              }
-              .
+              <FormattedMessage
+                id="common.ui.queryBar.luceneDocsDescription"
+                defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
+                values={{
+                  docsLink: (
+                    <EuiLink href={luceneQuerySyntaxDocs} target="_blank">
+                      <FormattedMessage
+                        id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
+                        defaultMessage="here"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
         </div>

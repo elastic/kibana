@@ -18,8 +18,9 @@ export class FullscreenControl extends React.PureComponent {
     const { children, isFullscreen } = this.props;
 
     const keyHandler = action => {
-      if (action === 'FULLSCREEN' || (isFullscreen && action === 'FULLSCREEN_EXIT'))
+      if (action === 'FULLSCREEN' || (isFullscreen && action === 'FULLSCREEN_EXIT')) {
         this.toggleFullscreen();
+      }
     };
 
     return (

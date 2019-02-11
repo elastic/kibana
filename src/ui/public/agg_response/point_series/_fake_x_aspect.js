@@ -17,25 +17,16 @@
  * under the License.
  */
 
-import { AggType } from '../../agg_types/agg_type';
-
-const allAgg = new AggType({
-  name: 'all',
-  title: 'All docs',
-  ordered: false,
-  hasNoDsl: true
-});
+import { i18n } from '@kbn/i18n';
 
 export function makeFakeXAspect() {
-  const fake = {
-    makeLabel: () => 'all',
-    fieldFormatter: () => '',
-    type: allAgg
-  };
 
   return {
-    i: -1,
-    aggConfig: fake,
-    title: fake.makeLabel(),
+    accessor: -1,
+    title: i18n.translate('common.ui.aggResponse.allDocsTitle', {
+      defaultMessage: 'All docs'
+    }),
+    params: {},
+    format: {}
   };
 }

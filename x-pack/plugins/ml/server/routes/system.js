@@ -26,7 +26,8 @@ export function systemRoutes(server, commonRouteConfig) {
         if (typeof resp.nodes === 'object') {
           Object.keys(resp.nodes).forEach((k) => {
             if (resp.nodes[k].attributes !== undefined) {
-              if (resp.nodes[k].attributes['ml.enabled'] === 'true') {
+              const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
+              if (maxOpenJobs !== null && maxOpenJobs > 0) {
                 count++;
               }
             }
@@ -39,20 +40,33 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/_has_privileges',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      // isSecurityDisabled will return true if it is a basic license
-      // this will cause the subsequent ml.privilegeCheck to fail.
-      // therefore, check for a basic license first and report that security
-      // is disabled because its not available on basic
-      if (isBasicLicense(server) || isSecurityDisabled(server)) {
-        // if xpack.security.enabled has been explicitly set to false
-        // return that security is disabled and don't call the privilegeCheck endpoint
-        return { securityDisabled: true };
-      } else {
-        const body = request.payload;
-        return callWithRequest('ml.privilegeCheck', { body })
-          .catch(resp => wrapError(resp));
+      try {
+        const info = await callWithRequest('ml.info');
+        // if ml indices are currently being migrated, upgrade_mode will be set to true
+        // pass this back with the privileges to allow for the disabling of UI controls.
+        const upgradeInProgress = (info.upgrade_mode === true);
+
+        // isSecurityDisabled will return true if it is a basic license
+        // this will cause the subsequent ml.privilegeCheck to fail.
+        // therefore, check for a basic license first and report that security
+        // is disabled because its not available on basic
+        if (isBasicLicense(server) || isSecurityDisabled(server)) {
+          // if xpack.security.enabled has been explicitly set to false
+          // return that security is disabled and don't call the privilegeCheck endpoint
+          return {
+            securityDisabled: true,
+            upgradeInProgress
+          };
+        } else {
+          const body = request.payload;
+          const resp = await callWithRequest('ml.privilegeCheck', { body });
+          resp.upgradeInProgress = upgradeInProgress;
+          return resp;
+        }
+      } catch (error) {
+        return wrapError(error);
       }
     },
     config: {

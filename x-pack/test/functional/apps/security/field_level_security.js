@@ -9,7 +9,7 @@ import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
@@ -18,9 +18,9 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('security/flstest');
       await esArchiver.load('empty_kibana');
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('flstest', null);
     });
 
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to
-        .be('customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type:customer_type _index:flstest _score:1');
+        .be('customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type:_doc _index:flstest _score:0');
     });
 
     it('user customer2 should not see ssn', async function () {
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('customer_name:ABC Company customer_region:WEST _id:2 _type:customer_type _index:flstest _score:1');
+      expect(rowData).to.be('customer_name:ABC Company customer_region:WEST _id:2 _type:_doc _index:flstest _score:0');
     });
 
     after(async function () {

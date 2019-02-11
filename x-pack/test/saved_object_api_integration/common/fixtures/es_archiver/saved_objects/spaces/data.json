@@ -122,7 +122,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"visualization\",\"id\":\"dd7caf20-9efd-11e7-acb3-3dab96693fab\",\"col\":1,\"row\":1}]",
-        "optionsJSON": "{\"darkTheme\":false}",
+        "optionsJSON": "{}",
         "uiStateJSON": "{}",
         "version": 1,
         "timeRestore": true,
@@ -195,7 +195,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"index\":\"91200a00-9efd-11e7-acb3-3dab96693fab\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+          "searchSourceJSON": "{\"index\":\"space_1-91200a00-9efd-11e7-acb3-3dab96693fab\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       }
     }
@@ -216,8 +216,8 @@
         "title": "Requests",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"visualization\",\"id\":\"dd7caf20-9efd-11e7-acb3-3dab96693fab\",\"col\":1,\"row\":1}]",
-        "optionsJSON": "{\"darkTheme\":false}",
+        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"visualization\",\"id\":\"space_1-dd7caf20-9efd-11e7-acb3-3dab96693fab\",\"col\":1,\"row\":1}]",
+        "optionsJSON": "{}",
         "uiStateJSON": "{}",
         "version": 1,
         "timeRestore": true,
@@ -291,7 +291,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"index\":\"91200a00-9efd-11e7-acb3-3dab96693fab\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+          "searchSourceJSON": "{\"index\":\"space_2-91200a00-9efd-11e7-acb3-3dab96693fab\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       }
     }
@@ -312,8 +312,8 @@
         "title": "Requests",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"visualization\",\"id\":\"dd7caf20-9efd-11e7-acb3-3dab96693fab\",\"col\":1,\"row\":1}]",
-        "optionsJSON": "{\"darkTheme\":false}",
+        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"visualization\",\"id\":\"space_2-dd7caf20-9efd-11e7-acb3-3dab96693fab\",\"col\":1,\"row\":1}]",
+        "optionsJSON": "{}",
         "uiStateJSON": "{}",
         "version": 1,
         "timeRestore": true,
