@@ -6,6 +6,6 @@
 
 import { createAction } from 'redux-actions';
 
-export const loadUserConfig = createAction('USER CONFIG');
-export const loadUserConfigSuccess = createAction<string>('USER CONFIG SUCCESS');
-export const loadUserConfigFailed = createAction<string>('USER CONFIG FAILED');
+export const loadUserProfile = createAction('LOAD USER PROFILE');
+export const loadUserProfileSuccess = createAction<string>('LOAD USER PROFILE SUCCESS');
+export const loadUserProfileFailed = createAction<string>('LOAD USER PROFILE FAILED');

@@ -43,6 +43,7 @@ export class SecureRoute {
                 const userRoles = new Set(req.auth.credentials.roles || []);
                 const authorized =
                   userRoles.has('superuser') ||
+                  userRoles.has('code_admin') ||
                   requiredRoles.every((value: string) => userRoles.has(value));
                 if (!authorized) {
                   throw Boom.forbidden('not authorized user.');

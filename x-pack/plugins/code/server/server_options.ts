@@ -28,8 +28,6 @@ export class ServerOptions {
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
-  // This is a temporary config item.
-  public readonly isAdmin: boolean = this.options.isAdmin;
   public readonly disableScheduler: boolean = this.options.disableScheduler;
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;

@@ -45,7 +45,6 @@ export const code = (kibana: any) =>
         lspRequestTimeoutMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
-        isAdmin: Joi.boolean().default(true), // If we show the admin buttons
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNode: Joi.boolean().default(false),

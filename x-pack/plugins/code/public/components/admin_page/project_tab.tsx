@@ -204,9 +204,10 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem grow />
           <EuiFlexItem grow />
           <EuiFlexItem>
-            {/*
-              // @ts-ignore */}
-            <NewProjectButton onClick={this.openModal}>Add New Project</NewProjectButton>
+            {isAdmin && (
+              // @ts-ignore
+              <NewProjectButton onClick={this.openModal}>Add New Project</NewProjectButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
@@ -228,7 +229,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 const mapStateToProps = (state: RootState) => ({
   projects: state.repository.repositories,
   status: state.status.status,
-  isAdmin: state.userConfig.isAdmin,
+  isAdmin: state.userProfile.isCodeAdmin,
   importLoading: state.repository.importLoading,
 });
 
