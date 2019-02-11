@@ -12,7 +12,8 @@
   }
 
   &ImagePreview > img {
-    height: 100px;
+    max-height: 100px;
     width: auto;
+    max-width: 100%;
   }
 }
