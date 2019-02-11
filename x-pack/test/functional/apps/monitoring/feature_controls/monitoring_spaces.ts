@@ -20,10 +20,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await esArchiver.load('empty_kibana');
     });
 
-    after(async () => {
-      await esArchiver.unload('empty_kibana');
-    });
-
     describe('space with no features disabled', () => {
       before(async () => {
         await spacesService.create({
