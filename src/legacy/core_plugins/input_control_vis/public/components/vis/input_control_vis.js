@@ -99,7 +99,7 @@ export class InputControlVis extends Component {
 
   renderStagingButtons() {
     return (
-      <EuiFlexGroup wrap={true}>
+      <EuiFlexGroup wrap={true} className="icvContent">
         <EuiFlexItem grow={false}>
 
           <EuiButton
