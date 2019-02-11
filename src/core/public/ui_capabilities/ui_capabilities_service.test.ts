@@ -38,4 +38,25 @@ describe('#start', () => {
       bar: 'baz',
     });
   });
+
+  it(`does not allow UICapabilities to be modified`, () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          uiCapabilities: {
+            foo: 'bar',
+            bar: 'baz',
+          },
+        },
+      } as any,
+    });
+    const service = new UICapabilitiesService();
+    const startContract = service.start({ injectedMetadata: injectedMetadata.start() });
+    const capabilities = startContract.getUICapabilities();
+
+    // @ts-ignore TypeScript knows this shouldn't be possible
+    expect(() => (capabilities.foo = 'foo')).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'foo' of object '#<Object>'"`
+    );
+  });
 });

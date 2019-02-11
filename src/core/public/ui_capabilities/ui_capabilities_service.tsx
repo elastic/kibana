@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { cloneDeep } from 'lodash';
 import { InjectedMetadataStartContract } from '../injected_metadata';
+import { deepFreeze } from '../utils/deep_freeze';
 
 interface StartDeps {
   injectedMetadata: InjectedMetadataStartContract;
@@ -39,7 +39,9 @@ export class UICapabilitiesService {
   public start({ injectedMetadata }: StartDeps) {
     return {
       getUICapabilities: () =>
-        cloneDeep(injectedMetadata.getInjectedVar('uiCapabilities')) as UICapabilities,
+        deepFreeze<UICapabilities>(injectedMetadata.getInjectedVar(
+          'uiCapabilities'
+        ) as UICapabilities),
     };
   }
 
