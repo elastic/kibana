@@ -291,7 +291,7 @@ export class DynamicDllPlugin {
     return stubModule;
   }
 
-  async areMaxCompilationsPerformed() {
+  async assertMaxCompilations() {
     // Logic to run the max compilation requirements.
     // Only enable this for CI builds in order to ensure
     // we have an healthy dll ecosystem.
@@ -312,7 +312,7 @@ export class DynamicDllPlugin {
     }
 
     try {
-      await this.areMaxCompilationsPerformed();
+      await this.assertMaxCompilations();
     } catch (e) {
       runCompilerErrors.push(e);
     }
