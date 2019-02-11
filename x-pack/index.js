@@ -38,6 +38,7 @@ import { translations } from './plugins/translations';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
+import { siemRules } from './plugins/siem_rules';
 
 module.exports = function (kibana) {
   return [
@@ -74,6 +75,10 @@ module.exports = function (kibana) {
     translations(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
+<<<<<<< HEAD
     ossTelemetry(kibana),
+=======
+    siemRules(kibana),
+>>>>>>> Rebased on top of feature-secops. Not quite working yet
   ];
 };
