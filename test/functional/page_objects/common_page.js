@@ -117,7 +117,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
                     'defaultIndex': 'logstash-*',
-                    'telemetry:optIn': false
                   });
                 }
               }

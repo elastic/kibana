@@ -31,12 +31,8 @@ export async function getMlBucketSize({
       size: 1,
       query: {
         bool: {
-          must: {
-            exists: {
-              field: 'bucket_span'
-            }
-          },
           filter: [
+            { exists: { field: 'bucket_span' } },
             {
               range: {
                 timestamp: {

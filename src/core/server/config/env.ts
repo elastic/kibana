@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import process from 'process';
 
-import { pkg } from '../../../utils/package_json';
+import { pkg } from '../../../legacy/utils/package_json';
 
 export interface PackageInfo {
   version: string;
