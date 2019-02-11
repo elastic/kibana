@@ -13,6 +13,7 @@
       { "key": "auto-http-0XC9CDA429418EDC2B", "url": "https://www.wikipedia.org/" },
       { "key": "auto-http-0XE3B163481423197D", "url": "https://news.google.com/" }
     ],
+    "names": [],
     "schemes": ["tcp", "http"]
   }
 }

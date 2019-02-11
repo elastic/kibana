@@ -19,9 +19,9 @@ import { WithSource } from '../../containers/with_source';
 export const HomePageContent: React.SFC = () => (
   <PageContent>
     <WithSource>
-      {({ configuredFields, derivedIndexPattern }) => (
+      {({ configuration, derivedIndexPattern, sourceId }) => (
         <WithOptions>
-          {({ wafflemap, sourceId }) => (
+          {({ wafflemap }) => (
             <WithWaffleFilter indexPattern={derivedIndexPattern}>
               {({ filterQueryAsJson, applyFilterQuery }) => (
                 <WithWaffleTime>
@@ -41,7 +41,12 @@ export const HomePageContent: React.SFC = () => (
                               nodes={nodes}
                               loading={nodes.length > 0 && isAutoReloading ? false : loading}
                               nodeType={nodeType}
-                              options={{ ...wafflemap, metric, fields: configuredFields, groupBy }}
+                              options={{
+                                ...wafflemap,
+                                metric,
+                                fields: configuration && configuration.fields,
+                                groupBy,
+                              }}
                               reload={refetch}
                               onDrilldown={applyFilterQuery}
                               timeRange={currentTimeRange}

@@ -25,7 +25,7 @@ import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 
 import { safeDump } from 'js-yaml';
-import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../utils/streams';
+import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../legacy/utils/streams';
 import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');

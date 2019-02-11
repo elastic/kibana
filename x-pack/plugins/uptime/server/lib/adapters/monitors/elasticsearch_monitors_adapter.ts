@@ -150,7 +150,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         query,
         size: 0,
         aggs: {
-          urls: {
+          ids: {
             composite: {
               sources: [
                 {
@@ -160,14 +160,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                     },
                   },
                 },
-                {
-                  port: {
-                    terms: {
-                      field: 'url.full',
-                    },
-                  },
-                },
               ],
+              size: 10000,
             },
             aggs: {
               latest: {
@@ -186,35 +180,33 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const queryResult = await this.database.search(request, params);
-    const hostBuckets = get(queryResult, 'aggregations.urls.buckets', []);
-    const monitorStatuses = hostBuckets.map(bucket => {
-      const latest = get(bucket, 'latest.hits.hits', []);
-      return latest.reduce(
-        (acc, doc) => {
-          const status = get(doc, '_source.monitor.status', null);
-          if (statusFilter && statusFilter !== status) {
-            return acc;
-          }
+    let up: number = 0;
+    let down: number = 0;
+    let searchAfter: any = null;
+
+    do {
+      if (searchAfter) {
+        set(params, 'body.aggs.ids.composite.after', searchAfter);
+      }
+
+      const queryResult = await this.database.search(request, params);
+      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
+
+      idBuckets.forEach(bucket => {
+        // We only get the latest doc
+        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
+        if (!statusFilter || (statusFilter && statusFilter === status)) {
           if (status === 'up') {
-            acc.up += 1;
+            up++;
           } else {
-            acc.down += 1;
+            down++;
           }
-          return acc;
-        },
-        { up: 0, down: 0 }
-      );
-    });
-    const { up, down } = monitorStatuses.reduce(
-      (acc, status) => {
-        acc.up += status.up;
-        acc.down += status.down;
-        return acc;
-      },
-      // @ts-ignore TODO update typings and remove this comment
-      { up: 0, down: 0 }
-    );
+        }
+      });
+
+      searchAfter = get(queryResult, 'aggregations.ids.after_key');
+    } while (searchAfter);
+
     return { up, down, total: up + down };
   }
 
@@ -260,6 +252,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   },
                 },
               ],
+              size: 50,
             },
             aggs: {
               latest: {
@@ -351,7 +344,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        _source: ['monitor.id', 'monitor.type', 'url.full', 'url.port'],
+        _source: ['monitor.id', 'monitor.type', 'url.full', 'url.port', 'monitor.name'],
         size: 1000,
         query: {
           range: {
@@ -373,6 +366,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const ids: MonitorKey[] = [];
     const ports = new Set<number>();
     const types = new Set<string>();
+    const names = new Set<string>();
 
     const hits = get(result, 'hits.hits', []);
     hits.forEach((hit: any) => {
@@ -380,6 +374,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       const url: string | null = get(hit, '_source.url.full', null);
       const port: number | undefined = get(hit, '_source.url.port', undefined);
       const type: string | undefined = get(hit, '_source.monitor.type', undefined);
+      const name: string | null = get(hit, '_source.monitor.name', null);
 
       if (key) {
         ids.push({ key, url });
@@ -390,12 +385,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       if (type) {
         types.add(type);
       }
+      if (name) {
+        names.add(name);
+      }
     });
 
     return {
       ids,
       ports: Array.from(ports),
       schemes: Array.from(types),
+      names: Array.from(names),
       statuses: ['up', 'down'],
     };
   }

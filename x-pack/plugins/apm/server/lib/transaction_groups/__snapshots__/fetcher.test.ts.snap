@@ -44,7 +44,7 @@ Array [
               },
             },
             "terms": Object {
-              "field": "transaction.name.keyword",
+              "field": "transaction.name",
               "order": Object {
                 "sum": "desc",
               },

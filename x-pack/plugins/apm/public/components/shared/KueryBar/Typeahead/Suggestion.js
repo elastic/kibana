@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { EuiIcon } from '@elastic/eui';
 import {
-  colors,
   fontFamilyCode,
   px,
   units,
@@ -17,31 +16,32 @@ import {
   unit
 } from '../../../../style/variables';
 import { tint } from 'polished';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 function getIconColor(type) {
   switch (type) {
     case 'field':
-      return colors.apmOrange;
+      return theme.euiColorVis7;
     case 'value':
-      return colors.teal;
+      return theme.euiColorVis0;
     case 'operator':
-      return colors.apmBlue;
+      return theme.euiColorVis1;
     case 'conjunction':
-      return colors.apmPurple;
+      return theme.euiColorVis3;
     case 'recentSearch':
-      return colors.gray3;
+      return theme.euiColorMediumShade;
   }
 }
 
 const Description = styled.div`
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
 
   p {
     display: inline;
 
     span {
       font-family: ${fontFamilyCode};
-      color: ${colors.black};
+      color: ${theme.euiColorFullShade};
       padding: 0 ${px(units.quarter)};
       display: inline-block;
     }
@@ -53,13 +53,17 @@ const ListItem = styled.li`
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props => (props.selected ? colors.gray5 : 'initial')};
+  background: ${props =>
+    props.selected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props => (props.selected ? colors.white : colors.gray5)};
+      background: ${props =>
+        props.selected
+          ? theme.euiColorEmptyShade
+          : theme.euiColorLightestShade};
     }
   }
 `;
@@ -76,7 +80,7 @@ const Icon = styled.div`
 
 const TextValue = styled.div`
   flex: 0 0 ${px(unit * 16)};
-  color: ${colors.black2};
+  color: ${theme.euiColorDarkestShade};
   padding: 0 ${px(units.half)};
 `;
 
