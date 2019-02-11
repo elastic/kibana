@@ -30,9 +30,15 @@ interface QueryGeohashBoundsParams {
   query?: Query;
 }
 
-// This is a temporary solution to ensure that global queries & filters
-// are included in searchSource when querying the geohash bounds.
-// TODO: Remove this as a part of elastic/kibana#30593
+/**
+ * Coordinate map visualization needs to be able to query for the latest geohash
+ * bounds when a user clicks the "fit to data" map icon, which requires knowing
+ * about global filters & queries. This logic has been extracted here so we can
+ * keep `searchSource` out of the vis, but ultimately we need to design a
+ * long-term solution for situations like this.
+ *
+ * TODO: Remove this as a part of elastic/kibana#30593
+ */
 export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsParams) {
   const agg = vis.getAggConfig().find((a: AggConfig) => {
     return get(a, 'type.dslName') === 'geohash_grid';
