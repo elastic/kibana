@@ -440,9 +440,10 @@ it('should render normally', async () => {
 
 3. Check functionality of an element (button is clicked, checkbox is checked/unchecked, etc.).
 
-4. Run i18n validation tool and skim through created `en.json`:
-    ```js
-      node scripts/i18n_check --output ./
+4. Run i18n validation/extraction tools and skim through created `en.json`:
+    ```bash
+    $ node scripts/i18n_check --ignore-missing
+    $ node scripts/i18n_extract --output-dir ./
     ```
 
 5. Run linters and type checker as you normally do.
