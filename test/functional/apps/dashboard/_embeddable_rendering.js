@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
+  const retry = getService('retry');
 
   const expectAllDataRenders = async () => {
     await pieChart.expectPieSliceCount(16);
@@ -158,42 +159,44 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      const panelCount = await PageObjects.dashboard.getPanelCount();
-      const panelData = await PageObjects.dashboard.getPanelSharedItemData();
-      const panelTitles = panelData.map(x => x.title);
-      console.log(panelTitles);
 
-      expect(panelTitles).to.eql([ 'Rendering Test: pie',
-        'Rendering Test: metric',
-        'Rendering Test: heatmap',
-        'Rendering Test: guage',
-        'Rendering Test: timelion',
-        'Rendering Test: markdown',
-        'Rendering Test: vega',
-        'Rendering Test: goal',
-        'Rendering Test: datatable',
-        'Rendering Test: bar',
-        'Rendering Test: tag cloud',
-        'Rendering Test: region map',
-        'Rendering Test: tsvb-guage',
-        'Rendering Test: input control',
-        'Rendering Test: tsvb-table',
-        'Rendering Test: tsvb-markdown',
-        'Rendering Test: tsvb-topn',
-        'Rendering Test: tsvb-metric',
-        'Rendering Test: tsvb-ts',
-        'Rendering Test: geo map',
-        'Rendering Test: input control parent',
-        'Rendering Test: animal sounds pie',
-        'Rendering Test: area with not filter',
-        'Rendering Test: scripted filter and query',
-        'Rendering Test: animal weights linked to search',
-        'Rendering Test: non timebased line chart - dog data - with filter',
-        'Filter Bytes Test: vega',
-        'Rendering Test: saved search' ]);
+      await retry.try(async function tryingForTime() {
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelData = await PageObjects.dashboard.getPanelSharedItemData();
+        const panelTitles = panelData.map(x => x.title);
+        console.log(panelTitles);
 
-      expect(panelCount).to.be(28);
+        expect(panelTitles).to.eql([ 'Rendering Test: pie',
+          'Rendering Test: metric',
+          'Rendering Test: heatmap',
+          'Rendering Test: guage',
+          'Rendering Test: timelion',
+          'Rendering Test: markdown',
+          'Rendering Test: vega',
+          'Rendering Test: goal',
+          'Rendering Test: datatable',
+          'Rendering Test: bar',
+          'Rendering Test: tag cloud',
+          'Rendering Test: region map',
+          'Rendering Test: tsvb-guage',
+          'Rendering Test: input control',
+          'Rendering Test: tsvb-table',
+          'Rendering Test: tsvb-markdown',
+          'Rendering Test: tsvb-topn',
+          'Rendering Test: tsvb-metric',
+          'Rendering Test: tsvb-ts',
+          'Rendering Test: geo map',
+          'Rendering Test: input control parent',
+          'Rendering Test: animal sounds pie',
+          'Rendering Test: area with not filter',
+          'Rendering Test: scripted filter and query',
+          'Rendering Test: animal weights linked to search',
+          'Rendering Test: non timebased line chart - dog data - with filter',
+          'Filter Bytes Test: vega',
+          'Rendering Test: saved search' ]);
 
+        expect(panelCount).to.be(28);
+      });
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
 
