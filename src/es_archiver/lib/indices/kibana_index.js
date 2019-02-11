@@ -136,7 +136,7 @@ async function getKibanaPluginEnabled({ pluginId, kibanaUrl }) {
     return payload.status.statuses
       .some(({ id }) => id.includes(`plugin:${pluginId}@`));
   } catch (error) {
-    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}`);
+    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}: ${error}`);
   }
 }
 
