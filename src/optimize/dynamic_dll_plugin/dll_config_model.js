@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';

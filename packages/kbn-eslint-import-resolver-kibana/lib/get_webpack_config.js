@@ -26,8 +26,8 @@ exports.getWebpackConfig = function(kibanaPath, projectRoot, config) {
   const fromKibana = (...path) => resolve(kibanaPath, ...path);
 
   const alias = {
-    // Kibana defaults https://github.com/elastic/kibana/blob/6998f074542e8c7b32955db159d15661aca253d7/src/ui/ui_bundler_env.js#L30-L36
-    ui: fromKibana('src/ui/public'),
+    // Kibana defaults https://github.com/elastic/kibana/blob/6998f074542e8c7b32955db159d15661aca253d7/src/legacy/ui/ui_bundler_env.js#L30-L36
+    ui: fromKibana('src/legacy/ui/public'),
     test_harness: fromKibana('src/test_harness/public'),
     querystring: 'querystring-browser',
     moment$: fromKibana('webpackShims/moment'),
