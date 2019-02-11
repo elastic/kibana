@@ -52,6 +52,12 @@ export class TileLayer extends AbstractLayer {
 
     if (!source) {
       const sourceDataRequest = this.getSourceDataRequest();
+      if (!sourceDataRequest) {
+        //this is possible if the layer was invisible at startup.
+        //the actions will not perform any data=syncing as an optimization when a layer is invisible
+        //when turning the layer back into visible, it's possible the url has not been resovled yet.
+        return;
+      }
       const url = sourceDataRequest.getData();
       if (!url) {
         return;
