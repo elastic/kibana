@@ -49,6 +49,7 @@ export const sampleDataSchema = {
   name: Joi.string().required(),
   description: Joi.string().required(),
   previewImagePath: Joi.string().required(),
+  darkPreviewImagePath: Joi.string(),
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: Joi.string().required(),
