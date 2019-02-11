@@ -71,7 +71,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
 import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
@@ -147,15 +147,8 @@ export function SearchSourceProvider(Promise, Private, config) {
           return disabled === undefined || disabled === false;
         },
         (filter, data) => {
-          if (!config.get('courier:ignoreFilterIfFieldNotInIndex')) {
-            return true;
-          }
-
-          if ('meta' in filter && 'index' in data) {
-            const field = data.index.fields.byName[filter.meta.key];
-            if (!field) return false;
-          }
-          return true;
+          const index = data.index || this.getField('index');
+          return !config.get('courier:ignoreFilterIfFieldNotInIndex') || filterMatchesIndex(filter, index);
         }
       ];
     }
@@ -610,10 +603,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           }
 
           try {
-            const esQueryConfigs = {
-              allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
-              queryStringOptions: config.get('query:queryString:options'),
-            };
+            const esQueryConfigs = getEsQueryConfig(config);
             flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
           } catch (e) {
             if (e.message === 'OutdatedKuerySyntaxError') {
