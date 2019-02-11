@@ -103,7 +103,7 @@ export const CreateIndexPatternPrompt = ({
               <FormattedMessage
                 id="kbn.management.indexPatternPrompt.exampleThree"
                 defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so
-                  you can aggregate histotical trends to compare."
+                  you can aggregate historical trends to compare."
               />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
