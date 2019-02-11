@@ -55,13 +55,14 @@ export class SampleDataSetCard extends React.Component {
     switch (this.props.status) {
       case INSTALLED_STATUS:
         return (
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 isLoading={this.props.isProcessing}
                 onClick={this.uninstall}
                 color="danger"
                 data-test-subj={`removeSampleDataSet${this.props.id}`}
+                flush="left"
               >
                 {this.props.isProcessing
                   ? <FormattedMessage
@@ -104,7 +105,7 @@ export class SampleDataSetCard extends React.Component {
                   />
                   : <FormattedMessage
                     id="kbn.home.sampleDataSetCard.addButtonLabel"
-                    defaultMessage="Add"
+                    defaultMessage="Add data"
                   />
                 }
               </EuiButton>
@@ -134,7 +135,7 @@ export class SampleDataSetCard extends React.Component {
                 >
                   <FormattedMessage
                     id="kbn.home.sampleDataSetCard.default.addButtonLabel"
-                    defaultMessage="Add"
+                    defaultMessage="Add data"
                   />
                 </EuiButton>
               </EuiToolTip>
@@ -148,6 +149,7 @@ export class SampleDataSetCard extends React.Component {
   render() {
     return (
       <EuiCard
+        textAlign="left"
         className="homSampleDataSetCard"
         image={this.props.previewUrl}
         title={this.props.name}

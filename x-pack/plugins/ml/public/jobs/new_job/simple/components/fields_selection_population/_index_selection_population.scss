@@ -48,25 +48,9 @@
             width: 130px;
             flex-grow: 0;
             padding: 5px 10px;
-            -webkit-appearance: none; 
+            -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-          }
-
-          &::after {
-            content: "";
-            position: absolute;
-            width: 0;
-            height: 0;
-            margin-left: $euiSizeXS / 2;
-            vertical-align: middle;
-            border-top: $euiSizeXS dashed;
-            border-top: $euiSizeXS solid $euiColorFullShade;
-            border-right: $euiSizeXS solid transparent;
-            border-left: $euiSizeXS solid transparent;
-            right: 43px;
-            top: 14px;
-            pointer-events: none;
           }
         }
 
