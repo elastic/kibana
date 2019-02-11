@@ -3,6 +3,7 @@ files:
     - 'x-pack/plugins/rollup/**/*.s+(a|c)ss'
     - 'x-pack/plugins/security/**/*.s+(a|c)ss'
     - 'src/legacy/core_plugins/metrics/**/*.s+(a|c)ss'
+    - 'src/legacy/core_plugins/timelion/**/*.s+(a|c)ss'
 rules:
   quotes:
     - 2
