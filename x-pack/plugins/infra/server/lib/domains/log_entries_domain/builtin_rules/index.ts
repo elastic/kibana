@@ -16,6 +16,7 @@ import { filebeatNginxRules } from './filebeat_nginx';
 import { filebeatOsqueryRules } from './filebeat_osquery';
 import { filebeatRedisRules } from './filebeat_redis';
 import { filebeatSystemRules } from './filebeat_system';
+import { filebeatTraefikRules } from './filebeat_traefik';
 
 import { genericRules } from './generic';
 
@@ -32,6 +33,7 @@ export const builtinRules = [
   ...filebeatLogstashRules,
   ...filebeatMongodbRules,
   ...filebeatOsqueryRules,
+  ...filebeatTraefikRules,
   ...genericRules,
   {
     when: {
