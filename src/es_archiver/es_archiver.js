@@ -126,6 +126,7 @@ export class EsArchiver {
     await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
+      kibanaUrl: this.kibanaUrl,
     });
   }
 }
