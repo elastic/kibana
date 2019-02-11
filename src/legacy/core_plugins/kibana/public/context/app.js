@@ -22,6 +22,7 @@ import _ from 'lodash';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
+import 'ui/filter_bar';
 import './components/loading_button';
 import './components/size_picker/size_picker';
 import { getFirstSortableField } from './api/utils/sorting';
@@ -73,8 +74,6 @@ function ContextAppController($scope, config, Private) {
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
-
-  config.bindToScope($scope, 'k7design');
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),

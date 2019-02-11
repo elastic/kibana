@@ -13,6 +13,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -45,7 +46,7 @@ export function esNodeRoute(server) {
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;

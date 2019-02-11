@@ -12,7 +12,7 @@ import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_ser
 import { loadAgentStatus } from '../../../services/rest/apm/status_check';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
+import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceList } from './ServiceList';
 
 interface Props {

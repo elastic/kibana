@@ -67,7 +67,7 @@
   </div>
 
   <ml-loading-indicator
-    label="Loading"
+    label="{{ ::'xpack.ml.timeSeriesExplorer.loadingLabel' | i18n: {defaultMessage: 'Loading'} }}"
     is-loading="loading === true"
   />
 
@@ -178,8 +178,7 @@
           zoom-from="zoomFrom"
           zoom-to="zoomTo"
           auto-zoom-duration="autoZoomDuration"
-          refresh="refresh">
-        </ml-timeseries-chart>
+        />
 
       </div>
 
@@ -196,8 +195,10 @@
           number-badge="true"
         />
 
-        <br /><br />
+        <div class="euiSpacer euiSpacer--l"></div>
       </div>
+
+      <ml-annotation-flyout />
 
       <span
         class="panel-title euiText"

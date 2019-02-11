@@ -9,7 +9,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/logstash/listing';
 
 uiRoutes.when('/logstash/nodes', {
@@ -38,7 +38,7 @@ uiRoutes.when('/logstash/nodes', {
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <Listing
               data={data.nodes}
               stats={data.clusterStatus}
@@ -47,7 +47,7 @@ uiRoutes.when('/logstash/nodes', {
               onTableChange={this.onTableChange}
               angular={{ kbnUrl, scope: $scope }}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }

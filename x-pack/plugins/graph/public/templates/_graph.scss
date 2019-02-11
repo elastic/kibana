@@ -1,4 +1,4 @@
-@import 'ui/public/chrome/variables';
+@import 'src/legacy/ui/public/chrome/variables';
 
 @mixin gphSvgText() {
   font-family: $euiFontFamily;
@@ -14,6 +14,7 @@
  */
 
 .gphGraph__container {
+  background: $euiColorEmptyShade;
   position: fixed;
   height: 100%;
   width: calc(100% - #{$kbnGlobalNavClosedWidth}); /* 1 */

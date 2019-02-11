@@ -2,7 +2,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "config:6.0.0-alpha1",
     "source": {
       "type": "config",
@@ -18,7 +17,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space:default",
     "source": {
       "type": "space",
@@ -34,7 +32,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space:another-space",
     "source": {
       "type": "space",

@@ -28,6 +28,11 @@ import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { injectI18n } from '@kbn/i18n/react';
 
+const SCSS = {
+  mlDragselectDragging: 'mlDragselectDragging',
+  mlHideRangeSelection: 'mlHideRangeSelection'
+};
+
 export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.Component {
   static propTypes = {
     chartWidth: PropTypes.number.isRequired,
@@ -53,13 +58,6 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
   }
 
   componentDidMount() {
-    const element = d3.select(this.rootNode.parentNode);
-
-    // Consider the setting to support to select a range of cells
-    if (!mlExplorerDashboardService.allowCellRangeSelection) {
-      element.classed('ml-hide-range-selection', true);
-    }
-
     // save the bound dragSelectListener to this property so it can be accessed again
     // in componentWillUnmount(), otherwise mlExplorerDashboardService.dragSelect.unwatch
     // is not able to check properly if it's still the same listener
@@ -111,7 +109,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
       this.cellMouseoverActive = true;
     } else if (action === DRAG_SELECT_ACTION.ELEMENT_SELECT) {
-      element.classed('ml-dragselect-dragging', true);
+      element.classed(SCSS.mlDragselectDragging, true);
       return;
     } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
       this.cellMouseoverActive = false;
@@ -119,7 +117,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     }
 
     this.previousSelectedData = null;
-    element.classed('ml-dragselect-dragging', false);
+    element.classed(SCSS.mlDragselectDragging, false);
     elements.map(e => d3.select(e).classed('ds-selected', false));
   }
 
@@ -195,7 +193,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     if (swimlaneType === 'viewBy') {
       // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
-      const overallSwimlane = d3.select('ml-explorer-swimlane[swimlane-type="overall"]');
+      const overallSwimlane = d3.select('.ml-swimlane-overall');
       times.forEach(time => {
         const overallCell = overallSwimlane.selectAll(`div[data-time="${time}"]`).selectAll('.sl-cell-inner,.sl-cell-inner-dragselect');
         overallCell.classed('sl-cell-inner-selected', true);
@@ -216,6 +214,11 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
   renderSwimlane() {
     const element = d3.select(this.rootNode.parentNode);
+
+    // Consider the setting to support to select a range of cells
+    if (!mlExplorerDashboardService.allowCellRangeSelection) {
+      element.classed(SCSS.mlHideRangeSelection, true);
+    }
 
     const cellMouseoverActive = this.cellMouseoverActive;
 
@@ -489,6 +492,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
   }
 
   render() {
-    return <div className="ml-swimlanes" ref={this.setRef.bind(this)} />;
+    const { swimlaneType } = this.props;
+
+    return <div className={`ml-swimlanes ml-swimlane-${swimlaneType}`} ref={this.setRef.bind(this)} />;
   }
 });

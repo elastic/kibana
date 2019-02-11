@@ -39,7 +39,7 @@ export function getEditBreadcrumbs($route) {
     MANAGEMENT_BREADCRUMB,
     {
       text: indexPattern.title,
-      href: `#/management/kibana/indices/${indexPattern.id}`
+      href: `#/management/kibana/index_patterns/${indexPattern.id}`
     }
   ];
 }

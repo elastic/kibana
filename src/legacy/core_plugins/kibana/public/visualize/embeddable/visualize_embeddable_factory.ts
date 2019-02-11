@@ -18,12 +18,12 @@
  */
 
 import { EmbeddableFactory } from 'ui/embeddable';
-import { getVisualizeLoader, VisualizeLoader } from 'ui/visualize/loader';
+import { getVisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import { getIndexPattern } from 'ui/embeddable/get_index_pattern';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 
@@ -53,30 +53,28 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
    * @param {function} onEmbeddableStateChanged
    * @return {Promise.<{ metadata, onContainerStateChanged, render, destroy }>}
    */
-  public create(
+  public async create(
     panelMetadata: VisualizeEmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
 
-    const waitFor: [Promise<VisualizeLoader>, Promise<VisSavedObject>] = [
-      getVisualizeLoader(),
-      this.savedVisualizations.get(visId),
-    ];
-    return Promise.all(waitFor).then(([loader, savedObject]: [VisualizeLoader, VisSavedObject]) => {
-      const isLabsEnabled = this.config.get<boolean>('visualize:enableLabs');
+    const loader = await getVisualizeLoader();
+    const savedObject = await this.savedVisualizations.get(visId);
+    const isLabsEnabled = this.config.get<boolean>('visualize:enableLabs');
 
-      if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
-        return new DisabledLabEmbeddable(savedObject.title);
-      } else {
-        return new VisualizeEmbeddable({
-          onEmbeddableStateChanged,
-          savedVisualization: savedObject,
-          editUrl,
-          loader,
-        });
-      }
+    if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
+      return new DisabledLabEmbeddable(savedObject.title);
+    }
+
+    const indexPattern = await getIndexPattern(savedObject);
+    return new VisualizeEmbeddable({
+      onEmbeddableStateChanged,
+      savedVisualization: savedObject,
+      editUrl,
+      loader,
+      indexPattern,
     });
   }
 }

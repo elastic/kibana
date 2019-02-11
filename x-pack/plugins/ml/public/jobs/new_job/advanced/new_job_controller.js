@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
+import 'angular-ui-select';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
@@ -77,7 +78,6 @@ module.controller('MlNewJob',
     $location,
     $modal,
     Private,
-    mlDatafeedService,
     mlConfirmModalService,
     i18n) {
 
@@ -621,7 +621,8 @@ module.controller('MlNewJob',
                       if (datafeedConfig) {
                         // open job successful, create a new datafeed
                         mlJobService.saveNewDatafeed(datafeedConfig, jobId)
-                          .then(() => {
+                          .then((resp) => {
+                            datafeedConfig.datafeed_id = resp.datafeed_id;
                             $scope.saveLock = false;
                           })
                           .catch((resp) => {
@@ -1374,7 +1375,7 @@ module.controller('MlNewJob',
             return {
               pscope: $scope,
               openDatafeed: function () {
-                mlDatafeedService.openJobTimepickerWindow($scope.job);
+                mlJobService.currentJob = $scope.job;
               }
             };
           }

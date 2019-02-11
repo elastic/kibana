@@ -231,18 +231,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
-    async setFromTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
-    }
-
-    async setToTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
-    }
-
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -383,8 +371,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * @param {*} aggregationId the ID if the aggregation. On Tests, it start at from 2
      */
     async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
-      const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
-      await inputField.type(filterValue);
+      await testSubjects.setValue(`visEditorFilterInput_${aggregationId}_${filterIndex}`, filterValue);
     }
 
     async addNewFilterAggregation() {
@@ -440,10 +427,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // it would be nice to get the correct axis by name like "LeftAxis-1"
       // instead of an incremented index, but this link isn't under the div above
       const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`);
+        await find.byCssSelector(`#axisOptionsValueAxis-1 .visEditorSidebar__advancedLinkIcon`);
 
-      const advancedLinkState = await advancedLink.getAttribute('class');
-      if (advancedLinkState.includes('fa-caret-right')) {
+      const advancedLinkState = await advancedLink.getAttribute('type');
+      if (advancedLinkState.includes('arrowRight')) {
         await advancedLink.moveMouseTo();
         log.debug('click advancedLink');
         await advancedLink.click();

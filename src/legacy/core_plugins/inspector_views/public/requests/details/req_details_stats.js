@@ -35,7 +35,7 @@ class RequestDetailsStats extends Component {
   renderStatRow = (stat) => {
     return [
       <EuiTableRow
-        key={stat.name}
+        key={stat.id}
       >
         <EuiTableRowCell>
           <span className="insRequestDetailsStats__icon">
@@ -55,7 +55,7 @@ class RequestDetailsStats extends Component {
               />
             }
           </span>
-          {stat.name}
+          {stat.label}
         </EuiTableRowCell>
         <EuiTableRowCell>{stat.value}</EuiTableRowCell>
       </EuiTableRow>
@@ -64,7 +64,7 @@ class RequestDetailsStats extends Component {
 
   render() {
     const { stats } = this.props.request;
-    const sortedStats = Object.keys(stats).sort().map(name => ({ name, ...stats[name] }));
+    const sortedStats = Object.keys(stats).sort().map(id => ({ id, ...stats[id] }));
     // TODO: Replace by property once available
     return (
       <EuiTable

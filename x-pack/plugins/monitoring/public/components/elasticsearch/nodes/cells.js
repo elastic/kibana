@@ -7,7 +7,8 @@
 import React from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
-import { EuiStat, EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 function OfflineCell() {
   return (
@@ -37,30 +38,35 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     const format = get(metric, 'metric.format');
 
     return (
-      <EuiStat
-        description=""
-        title={(
-          <EuiFlexGroup alignItems="center" {...props}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h4>
-                  { metricVal(lastVal, format, isPercent) }
-                  &nbsp;
-                  <span className={`fa fa-long-arrow-${getSlopeArrow(slope)}`} />
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                { metricVal(maxVal, format, isPercent) + ' max' }
-              </EuiText>
-              <EuiText size="xs">
-                { metricVal(minVal, format, isPercent) + ' min' }
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      />
+      <EuiFlexGroup gutterSize="m" alignItems="center" wrap {...props}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h4>
+              { metricVal(lastVal, format, isPercent) }
+              &nbsp;
+              <span className={`fa fa-long-arrow-${getSlopeArrow(slope)}`} />
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
+              defaultMessage: '{metric} max',
+              values: {
+                metric: metricVal(maxVal, format, isPercent)
+              }
+            })}
+          </EuiText>
+          <EuiText size="xs">
+            {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
+              defaultMessage: '{metric} min',
+              values: {
+                metric: metricVal(minVal, format, isPercent)
+              }
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

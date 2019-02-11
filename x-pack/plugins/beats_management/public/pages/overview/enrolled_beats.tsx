@@ -16,11 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { flatten, intersection, sortBy } from 'lodash';
+import { flatten, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatsTableType, Table } from '../../components/table';
@@ -37,6 +36,8 @@ interface PageProps extends AppPageProps {
 interface PageState {
   notifications: any[];
   tags: BeatTag[] | null;
+  beats: CMBeat[];
+  assignmentOptions: BeatTag[] | null;
 }
 
 class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
@@ -47,12 +48,28 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     this.state = {
       notifications: [],
       tags: null,
+      beats: [],
+      assignmentOptions: null,
     };
 
-    if (props.urlState.beatsKBar) {
-      props.containers.beats.reload(props.urlState.beatsKBar);
-    }
     props.renderAction(this.renderActionArea);
+  }
+
+  public componentDidMount() {
+    if (this.props.urlState.beatsKBar) {
+      this.props.containers.beats.reload(this.props.urlState.beatsKBar);
+    }
+    this.updateBeatsData(this.props.urlState.beatsKBar);
+  }
+
+  public async updateBeatsData(beatsKBar?: string) {
+    const beats = sortBy(await this.props.libs.beats.getAll(beatsKBar), 'id') || [];
+    const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map(beat => beat.tags)));
+
+    this.setState({
+      tags,
+      beats,
+    });
   }
 
   public renderActionArea = () => (
@@ -159,17 +176,18 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 filterQueryDraft: 'false', // todo
                 isValid: this.props.libs.elasticsearch.isKueryValid(
                   this.props.urlState.beatsKBar || ''
-                ), // todo check if query converts to es query correctly
+                ),
                 onChange: (value: any) => {
                   this.props.setUrlState({ beatsKBar: value });
-                  this.props.containers.beats.reload(this.props.urlState.beatsKBar);
-                }, // todo
+
+                  this.updateBeatsData(value);
+                },
                 onSubmit: () => null, // todo
                 value: this.props.urlState.beatsKBar || '',
               }}
               actions={beatsListActions}
               actionData={{
-                tags: this.filterTags(this.props.containers.tags.state.list),
+                tags: this.state.assignmentOptions,
               }}
               actionHandler={async (action: AssignmentActionType, payload: any) => {
                 switch (action) {
@@ -178,18 +196,26 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                       payload,
                       this.getSelectedBeats()
                     );
+                    await this.updateBeatsData();
                     this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
                     break;
                   case AssignmentActionType.Delete:
-                    this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    await this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    await this.updateBeatsData();
                     this.notifyBeatDisenrolled(this.getSelectedBeats());
                     break;
                   case AssignmentActionType.Reload:
-                    this.props.containers.tags.reload();
+                    const assignmentOptions = await this.props.libs.tags.getassignableTagsForBeats(
+                      this.getSelectedBeats()
+                    );
+                    this.setState({ assignmentOptions });
                     break;
                 }
               }}
-              items={sortBy(this.props.containers.beats.state.list, 'id') || []}
+              items={this.state.beats.map(beat => ({
+                ...beat,
+                tags: (this.state.tags || []).filter(tag => beat.tags.includes(tag.id)),
+              }))}
               ref={this.tableRef}
               type={BeatsTableType}
             />
@@ -204,7 +230,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     );
   }
 
-  private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
+  private notifyBeatDisenrolled = async (beats: CMBeat[]) => {
     const { intl } = this.props;
     let title;
     let text;
@@ -251,7 +277,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
 
   private notifyUpdatedTagAssociation = (
     action: 'added' | 'removed',
-    beats: CMPopulatedBeat[],
+    beats: CMBeat[],
     tag: string
   ) => {
     const { intl } = this.props;
@@ -312,12 +338,12 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     });
   };
 
-  private getSelectedBeats = (): CMPopulatedBeat[] => {
+  private getSelectedBeats = (): CMBeat[] => {
     if (!this.tableRef.current) {
       return [];
     }
     const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
-    const beats: CMPopulatedBeat[] = [];
+    const beats: CMBeat[] = [];
     selectedIds.forEach((id: any) => {
       const beat = this.props.containers.beats.state.list.find(b => b.id === id);
       if (beat) {
@@ -326,33 +352,6 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     });
     return beats;
   };
-
-  private filterTags = (tags: BeatTag[]) => {
-    return this.selectedBeatConfigsRequireUniqueness()
-      ? tags.map(this.disableTagForUniquenessEnforcement)
-      : tags;
-  };
-
-  private configBlocksRequireUniqueness = (configurationBlocks: ConfigurationBlock[]) =>
-    intersection(UNIQUENESS_ENFORCING_TYPES, configurationBlocks.map(block => block.type))
-      .length !== 0;
-
-  private disableTagForUniquenessEnforcement = (tag: BeatTag) =>
-    this.configBlocksRequireUniqueness(tag.configuration_blocks) &&
-    // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
-    !this.getSelectedBeats().some(beat => beat.full_tags.some(({ id }) => id === tag.id))
-      ? { ...tag, disabled: true }
-      : tag;
-
-  private selectedBeatConfigsRequireUniqueness = () =>
-    // union beat tags
-    flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
-      // map tag list to bool
-      .map(tag => {
-        return this.configBlocksRequireUniqueness(tag ? tag.configuration_blocks : []);
-      })
-      // reduce to result
-      .reduce((acc, cur) => acc || cur, false);
 }
 
 export const BeatsPage = injectI18n(BeatsPageComponent);
