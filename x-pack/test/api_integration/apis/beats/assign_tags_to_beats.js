@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
+import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -32,7 +32,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -49,7 +48,6 @@ export default function ({ getService }) {
       // Before adding the existing tag
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -70,7 +68,6 @@ export default function ({ getService }) {
       // After adding the existing tag
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -101,7 +98,6 @@ export default function ({ getService }) {
       // Beat foo
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -111,7 +107,6 @@ export default function ({ getService }) {
       // Beat bar
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -138,7 +133,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -169,7 +163,6 @@ export default function ({ getService }) {
       // Beat foo
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:foo`,
       });
 
@@ -179,7 +172,6 @@ export default function ({ getService }) {
       // Beat bar
       esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -220,7 +212,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
@@ -246,7 +237,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:bar`,
       });
 
