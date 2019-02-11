@@ -183,7 +183,7 @@ const rotationManipulation = config => ({
   const vector = mvMultiply(multiply(center, directShape.localTransformMatrix), ORIGIN);
   const oldAngle = Math.atan2(centerPosition[1] - vector[1], centerPosition[0] - vector[0]);
   const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
-  const closest45deg = (Math.round(newAngle / (Math.PI / 4)) * Math.PI) / 4;
+  const closest45deg = (Math.round(newAngle / (Math.PI / 12)) * Math.PI) / 12;
   const radius = Math.sqrt(Math.pow(centerPosition[0] - x, 2) + Math.pow(centerPosition[1] - y, 2));
   const closest45degPosition = [Math.cos(closest45deg) * radius, Math.sin(closest45deg) * radius];
   const pixelDifference = Math.sqrt(
@@ -625,11 +625,27 @@ const rotationAnnotation = (config, shapes, selectedShapes, shape, i) => {
     interactive: true,
     parent: foundShape.id,
     localTransformMatrix: transform,
-    backgroundColor: 'rgb(0,0,255,0.3)',
     a: config.rotationHandleSize,
     b: config.rotationHandleSize,
   };
 };
+
+export const getRotationTooltipAnnotation = (config, proper, shape, intents, cursorPosition) =>
+  shape && shape.subtype === config.rotationHandleName
+    ? [
+        {
+          id: config.rotationTooltipName + '_' + proper.id,
+          type: 'annotation',
+          subtype: config.rotationTooltipName,
+          interactive: false,
+          parent: null,
+          localTransformMatrix: translate(cursorPosition.x, cursorPosition.y, config.tooltipZ),
+          a: 0,
+          b: 0,
+          text: String(Math.round((matrixToAngle(proper.transformMatrix) / Math.PI) * 180)),
+        },
+      ]
+    : [];
 
 const resizePointAnnotations = (config, parent, a, b) => ([x, y, cursorAngle]) => {
   const markerPlace = translate(x * a, y * b, config.resizeAnnotationOffsetZ);
@@ -1366,13 +1382,16 @@ export const getAnnotatedShapes = (
   alignmentGuideAnnotations,
   hoverAnnotations,
   rotationAnnotations,
-  resizeAnnotations
+  resizeAnnotations,
+  rotationTooltipAnnotation
 ) => {
+  // fixme update it to a simple concatenator, no need for enlisting the now pretty long subtype list
   const annotations = [].concat(
     alignmentGuideAnnotations,
     hoverAnnotations,
     rotationAnnotations,
-    resizeAnnotations
+    resizeAnnotations,
+    rotationTooltipAnnotation
   );
   // remove preexisting annotations
   const contentShapes = shapes.filter(shape => shape.type !== 'annotation');
