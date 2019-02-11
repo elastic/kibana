@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import moment from 'moment-timezone';
 import { createDateFormat } from '../date';
-import { FieldFormat } from '../../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
 
 const DateFormat = createDateFormat(FieldFormat);
 
