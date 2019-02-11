@@ -337,13 +337,7 @@ export interface Snapshot {
 
   total?: number | null;
 
-  histogram?: HistogramSeries[] | null;
-}
-
-export interface HistogramSeries {
-  monitorId?: string | null;
-
-  data?: HistogramDataPoint[] | null;
+  histogram: HistogramDataPoint[];
 }
 
 export interface HistogramDataPoint {
