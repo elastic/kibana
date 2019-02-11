@@ -26,28 +26,25 @@ import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
-import { get } from 'lodash';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import { fetchFields } from '../lib/fetch_fields';
 import chrome from 'ui/chrome';
-import { I18nProvider } from '@kbn/i18n/react';
+
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
     this.appState = vis.API.getAppState();
-    const reversed = get(this.appState, 'options.darkTheme', false);
     this.state = {
       model: props.vis.params,
       dirty: false,
       autoApply: true,
-      reversed,
       visFields: {},
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
-    this.handleAppStateChange = this.handleAppStateChange.bind(this);
     this.getConfig = this.getConfig.bind(this);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
@@ -59,23 +56,6 @@ class VisEditor extends Component {
 
   handleUiState(vis, ...args) {
     vis.uiStateVal(...args);
-  }
-
-  componentWillMount() {
-    if (this.appState) {
-      this.appState.on('save_with_changes', this.handleAppStateChange);
-    }
-  }
-
-  handleAppStateChange() {
-    const reversed = get(this.appState, 'options.darkTheme', false);
-    this.setState({ reversed });
-  }
-
-  componentWillUnmount() {
-    if (this.appState) {
-      this.appState.off('save_with_changes', this.handleAppStateChange);
-    }
   }
 
   fetchIndexPatternFields = async () => {
@@ -134,21 +114,18 @@ class VisEditor extends Component {
       if (!this.props.vis.params || !this.props.visData) {
         return null;
       }
-      const reversed = this.state.reversed;
       return (
-        <I18nProvider>
-          <Visualization
-            dateFormat={this.props.config.get('dateFormat')}
-            reversed={reversed}
-            onBrush={this.onBrush}
-            onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
-            fields={this.state.visFields}
-            model={this.props.vis.params}
-            visData={this.props.visData}
-            getConfig={this.getConfig}
-          />
-        </I18nProvider>
+        <Visualization
+          dateFormat={this.props.config.get('dateFormat')}
+          reversed={IS_DARK_THEME}
+          onBrush={this.onBrush}
+          onUiState={this.handleUiState}
+          uiState={this.props.vis.getUiState()}
+          fields={this.state.visFields}
+          model={this.props.vis.params}
+          visData={this.props.visData}
+          getConfig={this.getConfig}
+        />
       );
     }
 

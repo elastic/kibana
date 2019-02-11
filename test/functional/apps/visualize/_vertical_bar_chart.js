@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const filterBar = getService('filterBar');
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
   describe('vertical bar chart', function () {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -36,8 +37,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');
@@ -46,21 +46,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
     };
 
 
     before(initBarChart);
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
@@ -118,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
       const fromTime = '2015-09-20 06:31:44.000';
       const toTime = '2015-09-22 18:31:44.000';
 
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       let expectedChartValues = [
         82, 218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
@@ -262,6 +256,16 @@ export default function ({ getService, getPageObjects }) {
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it ('should correctly filter by legend', async () => {
+        await PageObjects.visualize.filterLegend('200');
+        await PageObjects.visualize.waitForVisualization();
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        const expectedEntries = ['200'];
+        expect(legendEntries).to.eql(expectedEntries);
+        await filterBar.removeFilter('response.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
     });
 

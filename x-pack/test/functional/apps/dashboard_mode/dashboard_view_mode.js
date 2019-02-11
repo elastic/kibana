@@ -11,11 +11,12 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
-  const find = getService('find');
   const pieChart = getService('pieChart');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const appsMenu = getService('appsMenu');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -23,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
     'dashboard',
     'header',
     'settings',
+    'timePicker',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
@@ -115,17 +117,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.security.logout();
         await PageObjects.security.login('dashuser', '123456');
 
-        const dashboardAppExists = await find.existsByLinkText('Dashboard');
-        expect(dashboardAppExists).to.be(true);
-        const accountSettingsLinkExists = await find.existsByLinkText('dashuser');
-        expect(accountSettingsLinkExists).to.be(true);
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        expect(logoutLinkExists).to.be(true);
-        const collapseLinkExists = await find.existsByLinkText('Collapse');
-        expect(collapseLinkExists).to.be(true);
-
-        const navLinks = await find.allByCssSelector('.kbnGlobalNavLink');
-        expect(navLinks.length).to.equal(5);
+        const appLinks = await appsMenu.readLinks();
+        expect(appLinks).to.have.length(1);
+        expect(appLinks[0]).to.have.property('text', 'Dashboard');
       });
 
       it('shows the dashboard landing page by default', async () => {
@@ -148,8 +142,8 @@ export default function ({ getService, getPageObjects }) {
       it('can filter on a visualization', async () => {
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await pieChart.filterOnPieSlice();
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
       });
 
       it('does not show the edit menu item', async () => {
@@ -181,7 +175,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows the timepicker', async () => {
-        const timePickerExists = await testSubjects.exists('globalTimepickerButton');
+        const timePickerExists = await PageObjects.timePicker.timePickerExists();
         expect(timePickerExists).to.be(true);
       });
 
@@ -193,16 +187,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.security.logout();
         await PageObjects.security.login('mixeduser', '123456');
 
-        const managementAppExists = await find.existsByLinkText('Management');
-        expect(managementAppExists).to.be(false);
+        if (await appsMenu.linkExists('Management')) {
+          throw new Error('Expected management nav link to not be shown');
+        }
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
         await PageObjects.security.logout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        const managementAppExists = await find.existsByLinkText('Management');
-        expect(managementAppExists).to.be(true);
+        if (!await appsMenu.linkExists('Management')) {
+          throw new Error('Expected management nav link to be shown');
+        }
       });
 
     });

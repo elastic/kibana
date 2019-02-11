@@ -34,6 +34,7 @@ describe('plugins/elasticsearch', () => {
     beforeEach(function () {
       server = {
         log: sinon.stub(),
+        logWithMetadata: sinon.stub(),
         plugins: {
           elasticsearch: {
             getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }),
@@ -120,17 +121,17 @@ describe('plugins/elasticsearch', () => {
     it('warns if a node is only off by a patch version', async () => {
       setNodes('5.1.1');
       await ensureEsVersion(server, KIBANA_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
+      sinon.assert.callCount(server.logWithMetadata, 2);
+      expect(server.logWithMetadata.getCall(0).args[0]).to.contain('debug');
+      expect(server.logWithMetadata.getCall(1).args[0]).to.contain('warning');
     });
 
     it('warns if a node is off by a patch version and without http publish address', async () => {
       setNodeWithoutHTTP('5.1.1');
       await ensureEsVersion(server, KIBANA_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
+      sinon.assert.callCount(server.logWithMetadata, 2);
+      expect(server.logWithMetadata.getCall(0).args[0]).to.contain('debug');
+      expect(server.logWithMetadata.getCall(1).args[0]).to.contain('warning');
     });
 
     it('errors if a node incompatible and without http publish address', async () => {
@@ -147,28 +148,28 @@ describe('plugins/elasticsearch', () => {
       setNodes('5.1.1');
 
       await ensureEsVersion(server, KIBANA_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
+      sinon.assert.callCount(server.logWithMetadata, 2);
+      expect(server.logWithMetadata.getCall(0).args[0]).to.contain('debug');
+      expect(server.logWithMetadata.getCall(1).args[0]).to.contain('warning');
 
       await ensureEsVersion(server, KIBANA_VERSION);
-      sinon.assert.callCount(server.log, 3);
-      expect(server.log.getCall(2).args[0]).to.contain('debug');
+      sinon.assert.callCount(server.logWithMetadata, 3);
+      expect(server.logWithMetadata.getCall(2).args[0]).to.contain('debug');
     });
 
     it('warns again if the node list changes', async () => {
       setNodes('5.1.1');
 
       await ensureEsVersion(server, KIBANA_VERSION);
-      sinon.assert.callCount(server.log, 2);
-      expect(server.log.getCall(0).args[0]).to.contain('debug');
-      expect(server.log.getCall(1).args[0]).to.contain('warning');
+      sinon.assert.callCount(server.logWithMetadata, 2);
+      expect(server.logWithMetadata.getCall(0).args[0]).to.contain('debug');
+      expect(server.logWithMetadata.getCall(1).args[0]).to.contain('warning');
 
       setNodes('5.1.2');
       await ensureEsVersion(server, KIBANA_VERSION);
-      sinon.assert.callCount(server.log, 4);
-      expect(server.log.getCall(2).args[0]).to.contain('debug');
-      expect(server.log.getCall(3).args[0]).to.contain('warning');
+      sinon.assert.callCount(server.logWithMetadata, 4);
+      expect(server.logWithMetadata.getCall(2).args[0]).to.contain('debug');
+      expect(server.logWithMetadata.getCall(3).args[0]).to.contain('warning');
     });
   });
 });

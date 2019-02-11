@@ -22,7 +22,7 @@ interface Props {
 export function CPUUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <span>
           {i18n.translate(
             'xpack.apm.serviceDetails.metrics.cpuUsageChartTitle',
@@ -37,7 +37,7 @@ export function CPUUsageChart({ data, hoverXHandlers }: Props) {
         noHits={data.totalHits === 0}
         series={data.series}
         tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
-        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0)}
+        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0, 1)}
         yMax={1}
       />
     </React.Fragment>

@@ -6,10 +6,14 @@
 
 import gql from 'graphql-tag';
 
-export const getDocCountQuery = gql`
-  {
-    getDocCount {
-      count
-    }
+export const getDocCountQueryString = `
+{
+  getDocCount {
+    count
   }
+}
+`;
+
+export const getDocCountQuery = gql`
+  ${getDocCountQueryString}
 `;

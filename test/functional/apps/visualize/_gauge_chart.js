@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickGauge');
       await PageObjects.visualize.clickGauge();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
 
@@ -55,7 +54,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show Split Gauges', async function () {
-      const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios' ];
       await PageObjects.visualize.clickMetricEditor();
       log.debug('Bucket = Split Group');
       await PageObjects.visualize.clickBucket('Split Group');
@@ -66,9 +64,14 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Size = 4');
       await PageObjects.visualize.setSize('4');
       await PageObjects.visualize.clickGo();
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getGaugeValue();
-        expect(expectedTexts).to.eql(metricValue);
+
+      await retry.try(async () => {
+        expect(await PageObjects.visualize.getGaugeValue()).to.eql([
+          'win 8',
+          'win xp',
+          'win 7',
+          'ios'
+        ]);
       });
     });
 

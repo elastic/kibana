@@ -30,7 +30,9 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: (ErrorListItem | null)[] | null;
+  getErrorsList?: ErrorListItem[] | null;
+
+  getMonitorPageTitle?: MonitorPageTitle | null;
 }
 
 export interface PingResults {
@@ -42,10 +44,14 @@ export interface PingResults {
 export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
+  /** Milliseconds from the timestamp to the current time */
+  millisFromNow?: number | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
   docker?: Docker | null;
+
+  ecs?: Ecs | null;
 
   error?: Error | null;
 
@@ -65,11 +71,15 @@ export interface Ping {
 
   socks5?: Socks5 | null;
 
+  summary?: Summary | null;
+
   tags?: string | null;
 
   tcp?: Tcp | null;
 
   tls?: Tls | null;
+
+  url?: Url | null;
 }
 /** An agent for recording a beat */
 export interface Beat {
@@ -90,6 +100,10 @@ export interface Docker {
   name?: string | null;
 }
 
+export interface Ecs {
+  version?: string | null;
+}
+
 export interface Error {
   code?: number | null;
 
@@ -102,6 +116,8 @@ export interface Host {
   architecture?: string | null;
 
   id?: string | null;
+
+  hostname?: string | null;
 
   ip?: string | null;
 
@@ -120,6 +136,10 @@ export interface Os {
   platform?: string | null;
 
   version?: string | null;
+
+  name?: string | null;
+
+  build?: string | null;
 }
 
 export interface Http {
@@ -149,7 +169,7 @@ export interface HttpRtt {
 }
 /** The monitor's status for a ping */
 export interface Duration {
-  us?: number | null;
+  us?: UnsignedInteger | null;
 }
 
 export interface Icmp {
@@ -220,6 +240,8 @@ export interface Monitor {
   status?: string | null;
   /** The type of host being monitored */
   type?: string | null;
+
+  check_group?: string | null;
 }
 
 export interface Resolve {
@@ -242,6 +264,12 @@ export interface Rtt {
   validate?: Duration | null;
 }
 
+export interface Summary {
+  up?: number | null;
+
+  down?: number | null;
+}
+
 export interface Tcp {
   port?: number | null;
 
@@ -258,16 +286,30 @@ export interface Tls {
   rtt?: Rtt | null;
 }
 
+export interface Url {
+  full?: string | null;
+
+  scheme?: string | null;
+
+  domain?: string | null;
+
+  port?: number | null;
+
+  path?: string | null;
+
+  query?: string | null;
+}
+
 export interface DocCount {
   count: UnsignedInteger;
 }
 
 export interface LatestMonitorsResult {
-  monitors?: (LatestMonitor | null)[] | null;
+  monitors?: LatestMonitor[] | null;
 }
 
 export interface LatestMonitor {
-  key?: MonitorKey | null;
+  id: MonitorKey;
 
   ping?: Ping | null;
 
@@ -277,9 +319,9 @@ export interface LatestMonitor {
 }
 
 export interface MonitorKey {
-  id?: string | null;
+  key: string;
 
-  port?: number | null;
+  url?: string | null;
 }
 
 export interface MonitorSeriesPoint {
@@ -293,17 +335,15 @@ export interface Snapshot {
 
   down?: number | null;
 
-  trouble?: number | null;
-
   total?: number | null;
 
-  histogram?: (HistogramSeries | null)[] | null;
+  histogram?: HistogramSeries[] | null;
 }
 
 export interface HistogramSeries {
   monitorId?: string | null;
 
-  data?: (HistogramDataPoint | null)[] | null;
+  data?: HistogramDataPoint[] | null;
 }
 
 export interface HistogramDataPoint {
@@ -357,13 +397,15 @@ export interface StatusData {
 }
 
 export interface FilterBar {
-  id?: (string | null)[] | null;
+  ids?: MonitorKey[] | null;
 
-  port?: (number | null)[] | null;
+  names?: string[] | null;
 
-  scheme?: (string | null)[] | null;
+  ports?: number[] | null;
 
-  status?: (string | null)[] | null;
+  schemes?: string[] | null;
+
+  statuses?: string[] | null;
 }
 
 export interface ErrorListItem {
@@ -380,6 +422,14 @@ export interface ErrorListItem {
   timestamp?: string | null;
 }
 
+export interface MonitorPageTitle {
+  id: string;
+
+  url?: string | null;
+
+  name?: string | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -393,53 +443,52 @@ export interface AllPingsQueryArgs {
 
   status?: string | null;
 
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
-
-  downCount?: number | null;
-
-  windowSize?: number | null;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
-  monitorId?: string | null;
+  monitorId: string;
 
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 }
 export interface GetLatestMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   monitorId?: string | null;
 }
 export interface GetFilterBarQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetErrorsListQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
+}
+export interface GetMonitorPageTitleQueryArgs {
+  monitorId: string;
 }
 
 // ====================================================

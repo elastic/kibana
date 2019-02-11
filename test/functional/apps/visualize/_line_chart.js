@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('line charts', function () {
     const vizName1 = 'Visualization LineChart';
@@ -37,8 +37,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = Split Chart');
       await PageObjects.visualize.clickBucket('Split Chart');
       log.debug('Aggregation = Terms');
@@ -112,10 +111,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();

@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
+import {
+  fromQuery,
+  history,
+  QueryParams,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from '../../../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../../../utils/url';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { AgentMark } from '../get_agent_marks';
@@ -39,7 +45,7 @@ interface Props {
   agentMarks: AgentMark[];
   urlParams: IUrlParams;
   waterfall: IWaterfall;
-  location: any;
+  location: Location;
   serviceColors: IServiceColors;
 }
 
@@ -58,7 +64,7 @@ export class Waterfall extends Component<Props> {
     });
   };
 
-  public getWaterfallItem = (item: IWaterfallItem) => {
+  public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
 
     return (
@@ -106,7 +112,8 @@ export class Waterfall extends Component<Props> {
             onClose={this.onCloseFlyout}
             location={location}
             urlParams={urlParams}
-            waterfall={waterfall}
+            traceRootDuration={waterfall.traceRootDuration}
+            errorCount={currentItem.errorCount}
           />
         );
       default:
@@ -117,7 +124,7 @@ export class Waterfall extends Component<Props> {
   public render() {
     const { waterfall } = this.props;
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
-    const waterfallHeight = itemContainerHeight * waterfall.items.length;
+    const waterfallHeight = itemContainerHeight * waterfall.orderedItems.length;
 
     return (
       <Container>
@@ -134,7 +141,7 @@ export class Waterfall extends Component<Props> {
               paddingTop: TIMELINE_MARGINS.top
             }}
           >
-            {waterfall.items.map(this.getWaterfallItem)}
+            {waterfall.orderedItems.map(this.renderWaterfallItem)}
           </div>
         </StickyContainer>
 
@@ -143,7 +150,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: Partial<IUrlParams>) {
+  private setQueryParams(params: QueryParams) {
     const { location } = this.props;
     history.replace({
       ...location,

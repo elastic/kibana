@@ -44,7 +44,8 @@ describe('optimizer/bundle route', () => {
     const {
       regularBundlesPath = outputFixture,
       dllBundlesPath = outputFixture,
-      basePublicPath = ''
+      basePublicPath = '',
+      builtCssPath = outputFixture
     } = options;
 
     const server = new Hapi.Server();
@@ -54,6 +55,7 @@ describe('optimizer/bundle route', () => {
       regularBundlesPath,
       dllBundlesPath,
       basePublicPath,
+      builtCssPath
     }));
 
     return server;

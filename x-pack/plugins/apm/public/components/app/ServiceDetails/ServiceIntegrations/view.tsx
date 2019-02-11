@@ -11,6 +11,7 @@ import {
   EuiPopover
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { memoize } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
@@ -20,7 +21,7 @@ import { WatcherFlyout } from './WatcherFlyout';
 
 interface ServiceIntegrationProps {
   mlAvailable: boolean;
-  location: any;
+  location: Location;
   serviceTransactionTypes: string[];
   urlParams: IUrlParams;
 }

@@ -25,8 +25,8 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../common/util/anomaly_utils';
-import { AnnotationFlyout } from '../annotation_flyout';
-import { DeleteAnnotationModal } from '../delete_annotation_modal';
+import { annotation$ } from '../../../services/annotations_service';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -91,22 +91,20 @@ function getSvgHeight() {
   return focusHeight + contextChartHeight + swimlaneHeight + chartSpacing + margin.top + margin.bottom;
 }
 
-export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Component {
+const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Component {
   static propTypes = {
-    indexAnnotation: PropTypes.func,
+    annotation: PropTypes.object,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
     contextChartData: PropTypes.array,
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
-    deleteAnnotation: PropTypes.func,
     detectorIndex: PropTypes.string,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool.isRequired,
-    refresh: PropTypes.func,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -114,131 +112,9 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     svgWidth: PropTypes.number.isRequired,
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
-    toastNotifications: PropTypes.object,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
   };
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      annotation: {},
-      isFlyoutVisible: false,
-      isDeleteModalVisible: false,
-    };
-  }
-
-  closeDeleteModal = () => {
-    this.setState({ isDeleteModalVisible: false });
-  }
-
-  closeFlyout = () => {
-    const chartElement = d3.select(this.rootNode);
-    chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
-    this.setState({ isFlyoutVisible: false, annotation: {} });
-  }
-
-  showFlyout = (annotation) => {
-    this.setState({ isFlyoutVisible: true, annotation });
-  }
-
-  handleAnnotationChange = (e) => {
-    // e is a React Syntethic Event, we need to cast it to
-    // a placeholder variable so it's still valid in the
-    // setState() asynchronous callback
-    const annotation = e.target.value;
-    this.setState((state) => {
-      state.annotation.annotation = annotation;
-      return state;
-    });
-  }
-
-  deleteAnnotation = () => {
-    this.setState({ isDeleteModalVisible: true });
-  }
-
-  deleteAnnotationConfirmation = async () => {
-    const {
-      deleteAnnotation,
-      refresh,
-      toastNotifications,
-      intl
-    } = this.props;
-
-    const { annotation } = this.state;
-
-    try {
-      await deleteAnnotation(annotation._id);
-      toastNotifications.addSuccess(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
-          defaultMessage: 'Deleted annotation for job with ID {jobId}.',
-        }, { jobId: annotation.job_id })
-      );
-    } catch (err) {
-      toastNotifications
-        .addDanger(
-          intl.formatMessage({
-            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
-            defaultMessage: 'An error occured deleting the annotation for job with ID {jobId}: {error}',
-          }, { jobId: annotation.job_id, error: JSON.stringify(err) })
-        );
-    }
-
-    this.closeDeleteModal();
-    this.closeFlyout();
-
-    refresh();
-  }
-
-  indexAnnotation = (annotation) => {
-    const {
-      indexAnnotation,
-      refresh,
-      toastNotifications,
-      intl
-    } = this.props;
-
-    this.closeFlyout();
-
-    indexAnnotation(annotation)
-      .then(() => {
-        refresh();
-        if (typeof annotation._id === 'undefined') {
-          toastNotifications.addSuccess(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.addedAnnotationNotificationMessage',
-              defaultMessage: 'Added an annotation for job with ID {jobId}.',
-            }, { jobId: annotation.job_id })
-          );
-        } else {
-          toastNotifications.addSuccess(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage',
-              defaultMessage: 'Updated annotation for job with ID {jobId}.',
-            }, { jobId: annotation.job_id })
-          );
-        }
-      })
-      .catch((resp) => {
-        if (typeof annotation._id === 'undefined') {
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
-              defaultMessage: 'An error occured creating the annotation for job with ID {jobId}: {error}',
-            }, { jobId: annotation.job_id, error: JSON.stringify(resp) })
-          );
-        } else {
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
-              defaultMessage: 'An error occured updating the annotation for job with ID {jobId}: {error}',
-            }, { jobId: annotation.job_id, error: JSON.stringify(resp) })
-          );
-        }
-      });
-  }
 
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
@@ -328,6 +204,11 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     }
 
     this.renderFocusChart();
+
+    if (mlAnnotationsEnabled && this.props.annotation === null) {
+      const chartElement = d3.select(this.rootNode);
+      chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
+    }
   }
 
   renderChart() {
@@ -626,7 +507,6 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     const data = focusChartData;
 
     const contextYScale = this.contextYScale;
-    const showFlyout = this.showFlyout.bind(this);
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
 
     const focusChart = d3.select('.focus-chart');
@@ -677,10 +557,20 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       }
 
       yMin = d3.min(combinedData, (d) => {
-        return d.lower !== undefined ? Math.min(d.value, d.lower) : d.value;
+        let metricValue = d.value;
+        if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+          // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+          metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+        }
+        return d.lower !== undefined ? Math.min(metricValue, d.lower) : metricValue;
       });
       yMax = d3.max(combinedData, (d) => {
-        return d.upper !== undefined ? Math.max(d.value, d.upper) : d.value;
+        let metricValue = d.value;
+        if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+          // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+          metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+        }
+        return d.upper !== undefined ? Math.max(metricValue, d.upper) : metricValue;
       });
 
       if (yMax === yMin) {
@@ -702,7 +592,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
-        // TODO needs revisting to be a more robust normalization
+        // TODO needs revisiting to be a more robust normalization
         yMax = yMax * (1 + (maxLevel + 1) / 5);
       }
       this.focusYScale.domain([yMin, yMax]);
@@ -743,8 +633,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
         focusChartHeight,
         this.focusXScale,
         showAnnotations,
-        showFocusChartTooltip,
-        showFlyout
+        showFocusChartTooltip
       );
 
       // disable brushing (creation of annotations) when annotations aren't shown
@@ -758,9 +647,11 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
 
     // Render circle markers for the points.
     // These are used for displaying tooltips on mouseover.
-    // Don't render dots where value=null (data gaps) or for multi-bucket anomalies.
+    // Don't render dots where value=null (data gaps, with no anomalies)
+    // or for multi-bucket anomalies.
     const dots = d3.select('.focus-chart-markers').selectAll('.metric-value')
-      .data(data.filter(d => (d.value !== null && !showMultiBucketAnomalyMarker(d))));
+      .data(data.filter(d => ((d.value !== null || typeof d.anomalyScore === 'number') &&
+        !showMultiBucketAnomalyMarker(d))));
 
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();
@@ -778,11 +669,10 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (_.has(d, 'anomalyScore')) {
-          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
+          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
         }
         return markerClass;
       });
-
 
     // Render cross symbols for any multi-bucket anomalies.
     const multiBucketMarkers = d3.select('.focus-chart-markers').selectAll('.multi-bucket')
@@ -801,7 +691,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
 
     // Update all markers to new positions.
     multiBucketMarkers.attr('transform', d => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`)
-      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`);
+      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
 
     // Add rectangular markers for any scheduled events.
@@ -1522,13 +1412,13 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
         selectedMarker.enter().append('path')
           .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
           .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
-          .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)} highlighted`);
+          .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id} highlighted`);
       } else {
         selectedMarker.enter().append('circle')
           .attr('r', LINE_CHART_ANOMALY_RADIUS)
           .attr('cx', d => focusXScale(d.date))
           .attr('cy', d => focusYScale(d.value))
-          .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore)} highlighted`);
+          .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore).id} highlighted`);
       }
 
       // Display the chart tooltip for this marker.
@@ -1555,29 +1445,11 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
   }
 
   render() {
-    const { annotation, isDeleteModalVisible, isFlyoutVisible } = this.state;
-
-    return (
-      <React.Fragment>
-        <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {mlAnnotationsEnabled && isFlyoutVisible &&
-          <React.Fragment>
-            <AnnotationFlyout
-              annotation={annotation}
-              cancelAction={this.closeFlyout}
-              controlFunc={this.handleAnnotationChange}
-              deleteAction={this.deleteAnnotation}
-              saveAction={this.indexAnnotation}
-            />
-            <DeleteAnnotationModal
-              annotation={annotation}
-              cancelAction={this.closeDeleteModal}
-              deleteAction={this.deleteAnnotationConfirmation}
-              isVisible={isDeleteModalVisible}
-            />
-          </React.Fragment>
-        }
-      </React.Fragment>
-    );
+    return <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />;
   }
 });
+
+export const TimeseriesChart = injectObservablesAsProps(
+  { annotation: annotation$ },
+  TimeseriesChartIntl
+);

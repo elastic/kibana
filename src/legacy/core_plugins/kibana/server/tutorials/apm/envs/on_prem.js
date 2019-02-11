@@ -91,7 +91,7 @@ export function onPremInstructions(apmIndexPattern) {
               bool: {
                 filter: {
                   exists: {
-                    field: 'listening',
+                    field: 'observer.listening',
                   },
                 },
               },

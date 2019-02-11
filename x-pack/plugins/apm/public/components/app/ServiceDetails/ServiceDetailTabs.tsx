@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 import { HistoryTabs } from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -15,7 +16,7 @@ import { ServiceMetrics } from './ServiceMetrics';
 interface TabsProps {
   transactionTypes: string[];
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export class ServiceDetailTabs extends React.Component<TabsProps> {
@@ -52,7 +53,9 @@ export class ServiceDetailTabs extends React.Component<TabsProps> {
           defaultMessage: 'Metrics'
         }),
         path: `/${serviceName}/metrics`,
-        render: () => <ServiceMetrics urlParams={urlParams} />
+        render: () => (
+          <ServiceMetrics urlParams={urlParams} location={location} />
+        )
       }
     ];
 

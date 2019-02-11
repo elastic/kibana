@@ -610,7 +610,13 @@ function getInfluencerValueMaxScoreByTime(
         if (i > 0) {
           influencerFilterStr += ' OR ';
         }
-        influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        if (value.trim().length > 0) {
+          influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        } else {
+          // Wrap whitespace influencer field values in quotes for the query_string query.
+          influencerFilterStr += `influencer_field_value:"${value}"`;
+        }
+
       });
       boolCriteria.push({
         query_string: {

@@ -6,32 +6,31 @@
 
 import gql from 'graphql-tag';
 
-export const getMonitorListQuery = gql`
-  query MonitorList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $filters: String
-  ) {
+export const getMonitorListQueryString = `
+  query MonitorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
     monitorStatus: getMonitors(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
       filters: $filters
     ) {
       monitors {
-        key {
-          id
-          port
+        id {
+          key
+          url
         }
         ping {
           timestamp
           monitor {
-            status
-            type
-            host
-            ip
             duration {
               us
             }
+            id
+            ip
+            name
+            status
+          }
+          url {
+            full
           }
         }
         upSeries {
@@ -45,4 +44,8 @@ export const getMonitorListQuery = gql`
       }
     }
   }
+`;
+
+export const getMonitorListQuery = gql`
+  ${getMonitorListQueryString}
 `;

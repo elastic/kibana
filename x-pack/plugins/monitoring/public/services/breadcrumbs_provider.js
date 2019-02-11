@@ -147,7 +147,11 @@ export function breadcrumbsProvider() {
       breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
 
-    chrome.breadcrumbs.set(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
+    chrome.breadcrumbs.set(breadcrumbs.map(b => ({
+      text: b.label,
+      href: b.url,
+      'data-test-subj': b.testSubj
+    })));
 
     return breadcrumbs;
   };

@@ -25,7 +25,7 @@ export const inputControlVis = () => ({
   context: {
     types: [],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.input_control.help', {
+  help: i18n.translate('interpreter.functions.input_control.help', {
     defaultMessage: 'Input control visualization'
   }),
   args: {
@@ -40,10 +40,8 @@ export const inputControlVis = () => ({
       type: 'render',
       as: 'visualization',
       value: {
-        visConfig: {
-          type: 'input_controls_vis',
-          params: params
-        },
+        visType: 'input_control_vis',
+        visConfig: params
       }
     };
   }

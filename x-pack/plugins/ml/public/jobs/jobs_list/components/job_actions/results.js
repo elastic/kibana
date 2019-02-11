@@ -54,6 +54,7 @@ function ResultLinksUI({ jobs, intl }) {
   });
   const singleMetricVisible = (jobs.length < 2);
   const singleMetricEnabled = (jobs.length === 1 && jobs[0].isSingleMetricViewerJob);
+  const jobActionsDisabled = (jobs.length === 1 && jobs[0].deleting === true);
   return (
     <React.Fragment>
       {(singleMetricVisible) &&
@@ -66,7 +67,7 @@ function ResultLinksUI({ jobs, intl }) {
             iconType="stats"
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
-            isDisabled={(singleMetricEnabled === false)}
+            isDisabled={(singleMetricEnabled === false || jobActionsDisabled === true)}
           />
         </EuiToolTip>
       }
@@ -79,6 +80,7 @@ function ResultLinksUI({ jobs, intl }) {
           iconType="tableOfContents"
           aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
+          isDisabled={(jobActionsDisabled === true)}
         />
       </EuiToolTip>
       <div className="actions-border"/>

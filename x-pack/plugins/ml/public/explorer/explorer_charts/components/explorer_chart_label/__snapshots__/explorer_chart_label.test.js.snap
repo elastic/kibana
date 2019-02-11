@@ -1,77 +1,67 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
-<React.Fragment>
+<Fragment>
   <span
     className="ml-explorer-chart-label"
   >
     <span
       className="ml-explorer-chart-label-detector"
     >
-      <React.Fragment>
-        high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-      </React.Fragment>
-      <React.Fragment>
-         – 
-      </React.Fragment>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+       – 
     </span>
-    <React.Fragment>
-      <ExplorerChartLabelBadge
-        entity={
-          Object {
-            "$$hashKey": "object:813",
-            "fieldName": "nginx.access.remote_ip",
-            "fieldValue": "72.57.0.53",
-          }
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
         }
-        key="nginx.access.remote_ip 72.57.0.53"
+      }
+      key="nginx.access.remote_ip 72.57.0.53"
+    />
+     
+    <span
+      className="ml-explorer-chart-info-icon"
+    >
+      <EuiIconTip
+        aria-label="Info"
+        className="ml-explorer-chart-eui-icon-tip"
+        content={
+          <InjectIntl(ExplorerChartInfoTooltip)
+            aggregationInterval="1h"
+            chartFunction="sum nginx.access.body_sent.bytes"
+            entityFields={
+              Array [
+                Object {
+                  "fieldName": "nginx.access.remote_ip",
+                  "fieldValue": "72.57.0.53",
+                },
+              ]
+            }
+            jobId="population-03"
+          />
+        }
+        position="top"
+        size="s"
+        type="questionInCircle"
       />
-       
-      <span
-        className="ml-explorer-chart-info-icon"
-      >
-        <EuiIconTip
-          aria-label="Info"
-          className="ml-explorer-chart-eui-icon-tip"
-          content={
-            <InjectIntl(ExplorerChartInfoTooltip)
-              aggregationInterval="1h"
-              chartFunction="sum nginx.access.body_sent.bytes"
-              entityFields={
-                Array [
-                  Object {
-                    "fieldName": "nginx.access.remote_ip",
-                    "fieldValue": "72.57.0.53",
-                  },
-                ]
-              }
-              jobId="population-03"
-            />
-          }
-          position="top"
-          size="s"
-          type="questionInCircle"
-        />
-      </span>
-    </React.Fragment>
+    </span>
   </span>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
-<React.Fragment>
+<Fragment>
   <span
     className="ml-explorer-chart-label"
   >
     <span
       className="ml-explorer-chart-label-detector"
     >
-      <React.Fragment>
-        high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-      </React.Fragment>
-      <React.Fragment>
-         
-      </React.Fragment>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+       
     </span>
     <span
       className="ml-explorer-chart-info-icon"
@@ -114,5 +104,5 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       key="nginx.access.remote_ip 72.57.0.53"
     />
   </span>
-</React.Fragment>
+</Fragment>
 `;

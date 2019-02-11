@@ -1,18 +1,18 @@
-<kbn-management-app section="kibana/indices" omit-breadcrumb-pages="['indices']">
-  <kbn-management-indices>
+<kbn-management-app section="kibana/index_patterns" omit-breadcrumb-pages="['index_patterns']">
+  <kbn-management-index-patterns>
     <div
-      ng-controller="managementIndicesEdit"
+      ng-controller="managementIndexPatternsEdit"
       data-test-subj="editIndexPattern"
       role="region"
       aria-label="{{::'kbn.management.editIndexPattern.detailsAria' | i18n: { defaultMessage: 'Index pattern details' } }}"
     >
       <!-- Header -->
-      <kbn-management-index-header
+      <kbn-management-index-patterns-header
         index-pattern="indexPattern"
         set-default="setDefaultPattern()"
         refresh-fields="refreshFields()"
         delete="removePattern()"
-      ></kbn-management-index-header>
+      ></kbn-management-index-patterns-header>
 
       <div class="euiSpacer euiSpacer--s"></div>
       <p ng-if="::(indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length))">
@@ -178,5 +178,5 @@
         <div id="reactSourceFiltersTable"></div>
       </div>
     </div>
-  </kbn-management-indices>
+  </kbn-management-index-patterns>
 </kbn-management-app>

@@ -54,10 +54,6 @@ uiRoutes
     resolve: {
       createNewVis: () => true,
     },
-  })
-  // Old path, will be removed in 7.0
-  .when('/visualize/step/1', {
-    redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
   });
 
 FeatureCatalogueRegistryProvider.register(i18n => {

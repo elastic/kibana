@@ -10,7 +10,7 @@ import { Route } from 'react-router-dom';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
-
+import { renderBadges } from '../../../../lib/render_badges';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -50,7 +50,6 @@ export class DetailPanel extends Component {
       );
     });
   }
-
   render() {
     const { panelType, indexName, index, closeDetailPanel } = this.props;
     if (!panelType) {
@@ -126,7 +125,7 @@ export class DetailPanel extends Component {
       >
         <EuiFlyoutHeader>
           <EuiTitle size="l" id="indexDetailsFlyoutTitle">
-            <h2>{indexName}</h2>
+            <h2>{indexName}{renderBadges(index)}</h2>
           </EuiTitle>
           {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null }
         </EuiFlyoutHeader>

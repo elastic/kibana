@@ -7,33 +7,28 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { DisabledTagBadge } from './disabled_tag_badge';
 
 interface TagBadgeProps {
   iconType?: any;
   onClick?: () => void;
   onClickAriaLabel?: string;
   maxIdRenderSize?: number;
-  tag: { color?: string; disabled?: boolean; id: string };
+  tag: { name: string; color: string; disabled?: boolean; id: string };
 }
 
 export const TagBadge = (props: TagBadgeProps) => {
-  const {
-    iconType,
-    onClick,
-    onClickAriaLabel,
-    tag: { color, disabled, id },
-  } = props;
+  const { iconType, onClick, onClickAriaLabel, tag } = props;
   const maxIdRenderSize = props.maxIdRenderSize || TABLE_CONFIG.TRUNCATE_TAG_LENGTH;
-  const idToRender = id.length > maxIdRenderSize ? `${id.substring(0, maxIdRenderSize)}...` : id;
-  return disabled ? (
-    <DisabledTagBadge maxIdRenderSize={props.maxIdRenderSize} id={id} />
-  ) : (
+  const idToRender = `${tag.name.substring(0, maxIdRenderSize)}${
+    tag.name.length > maxIdRenderSize ? '...' : ''
+  }`;
+
+  return (
     <EuiBadge
-      color={color || 'primary'}
-      iconType={iconType}
-      onClick={onClick}
-      onClickAriaLabel={onClickAriaLabel}
+      color={tag.disabled ? 'default' : tag.color || 'primary'}
+      iconType={tag.disabled ? 'cross' : iconType}
+      onClick={tag.disabled ? undefined : onClick}
+      onClickAriaLabel={tag.disabled ? undefined : onClickAriaLabel}
     >
       {idToRender}
     </EuiBadge>

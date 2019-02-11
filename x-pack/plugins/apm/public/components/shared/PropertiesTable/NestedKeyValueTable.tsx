@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontFamilyCode,
-  fontSizes,
-  px,
-  units
-} from '../../../style/variables';
+import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 
@@ -27,7 +21,7 @@ const Table = styled.table`
 `;
 
 const Row = styled.tr`
-  border-bottom: ${px(1)} solid ${colors.gray4};
+  border-bottom: ${px(1)} solid ${theme.euiColorLightShade};
   &:last-child {
     border: 0;
   }
@@ -53,7 +47,7 @@ const Cell = styled.td`
 `;
 
 const EmptyValue = styled.span`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 export function FormattedKey({
@@ -76,13 +70,7 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
   } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
   } else if (!value) {
-    return (
-      <EmptyValue>
-        {i18n.translate('xpack.apm.propertiesTable.notAvailableLabel', {
-          defaultMessage: 'N/A'
-        })}
-      </EmptyValue>
-    );
+    return <EmptyValue>{NOT_AVAILABLE_LABEL}</EmptyValue>;
   }
 
   return <React.Fragment>{value}</React.Fragment>;
@@ -94,7 +82,7 @@ export function NestedValue({
   depth,
   keySorter
 }: {
-  value: StringMap;
+  value: unknown;
   depth: number;
   parentKey?: string;
   keySorter?: KeySorter;
@@ -102,7 +90,7 @@ export function NestedValue({
   if (depth > 0 && isObject(value)) {
     return (
       <NestedKeyValueTable
-        data={value}
+        data={value as StringMap}
         parentKey={parentKey}
         keySorter={keySorter}
         depth={depth - 1}
@@ -119,7 +107,7 @@ export function NestedKeyValueTable({
   keySorter = Object.keys,
   depth = 0
 }: {
-  data: StringMap<any>;
+  data: StringMap;
   parentKey?: string;
   keySorter?: KeySorter;
   depth?: number;

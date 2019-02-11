@@ -196,6 +196,6 @@ describe('CreateIndexPatternWizard', () => {
     expect(get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
-    expect(changeUrl).toBeCalledWith(`/management/kibana/indices/id`);
+    expect(changeUrl).toBeCalledWith(`/management/kibana/index_patterns/id`);
   });
 });

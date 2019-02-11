@@ -27,16 +27,6 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbiddenResponse = (username: string, action = 'write/index') => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
-    });
-  };
-
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -132,7 +122,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   createTest.only = makeCreateTest(describe.only);
 
   return {
-    createExpectLegacyForbiddenResponse,
     createTest,
     expectConflictResponse,
     expectNewSpaceResult,

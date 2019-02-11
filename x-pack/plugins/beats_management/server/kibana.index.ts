@@ -7,7 +7,7 @@
 import { compose } from './lib/compose/kibana';
 import { initManagementServer } from './management_server';
 
-export const initServerWithKibana = async (hapiServer: any) => {
+export const initServerWithKibana = (hapiServer: any) => {
   const libs = compose(hapiServer);
-  await initManagementServer(libs);
+  initManagementServer(libs);
 };

@@ -1,24 +1,23 @@
-<div class="kuiSideBarSection">
+<div class="visEditorSidebar__section">
   <div class="form-group">
-    <div class="kuiSideBarSectionTitle">
+    <div class="visEditorSidebar__sectionTitle">
       <div
-        class="kuiSideBarSectionTitle__text"
         i18n-id="regionMap.visParams.layerSettingsTitle"
         i18n-default-message="Layer Settings"
       ></div>
     </div>
 
-    <div class="kuiSideBarFormRow">
+    <div class="visEditorSidebar__formRow">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="regionMap"
         i18n-id="regionMap.visParams.vectorMapLabel"
         i18n-default-message="Vector map"
       ></label>
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <select
           id="regionMap"
-          class="kuiSelect kuiSideBarSelect"
+          class="kuiSelect visEditorSidebar__select"
           ng-model="editorState.params.selectedLayer"
           ng-options="layer.name for layer in collections.vectorLayers track by layer.layerId"
           ng-change="onLayerChange()"
@@ -46,16 +45,16 @@
       </a>
     </div>
 
-    <div class="kuiSideBarFormRow">
+    <div class="visEditorSidebar__formRow">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="joinField"
         i18n-id="regionMap.visParams.joinFieldLabel"
         i18n-default-message="Join field"
       ></label>
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <select id="joinField"
-          class="kuiSelect kuiSideBarSelect"
+          class="kuiSelect visEditorSidebar__select"
           ng-model="editorState.params.selectedJoinField"
           ng-options="field.description for field in editorState.params.selectedLayer.fields track by field.name"
         >
@@ -67,15 +66,15 @@
         </select>
       </div>
     </div>
-    <div class="kuiSideBarFormRow">
+    <div class="visEditorSidebar__formRow">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="displayWarnings"
         i18n-id="regionMap.visParams.displayWarningsLabel"
         i18n-default-message="Display warnings"
       ></label>
 
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <input id="displayWarnings" type="checkbox" ng-model="editorState.params.isDisplayWarning">
         &nbsp;
         <icon-tip
@@ -86,14 +85,14 @@
         ></icon-tip>
       </div>
     </div>
-    <div class="kuiSideBarFormRow">
+    <div class="visEditorSidebar__formRow">
       <label
-        class="kuiSideBarFormRow__label"
+        class="visEditorSidebar__formLabel"
         for="onlyShowMatchingShapes"
         i18n-id="regionMap.visParams.showAllShapesLabel"
         i18n-default-message="Show all shapes"
       ></label>
-      <div class="kuiSideBarFormRow__control">
+      <div class="visEditorSidebar__formControl">
         <input id="onlyShowMatchingShapes" type="checkbox" ng-model="editorState.params.showAllShapes">
         &nbsp;
         <icon-tip
@@ -107,42 +106,41 @@
   </div>
 </div>
 
-<div class="kuiSideBarSection">
+<div class="visEditorSidebar__section">
 
-  <div class="kuiSideBarSectionTitle">
+  <div class="visEditorSidebar__sectionTitle">
     <div
-      class="kuiSideBarSectionTitle__text"
       i18n-id="regionMap.visParams.styleSettingsLabel"
       i18n-default-message="Style settings"
     ></div>
   </div>
-  <div class="kuiSideBarFormRow" >
+  <div class="visEditorSidebar__formRow" >
     <label
-      class="kuiSideBarFormRow__label"
+      class="visEditorSidebar__formLabel"
       for="colorSchema"
       i18n-id="regionMap.visParams.colorSchemaLabel"
       i18n-default-message="Color Schema"
     ></label>
-    <div class="kuiSideBarFormRow__control">
+    <div class="visEditorSidebar__formControl">
       <select
         id="colorSchema"
-        class="kuiSelect kuiSideBarSelect"
+        class="kuiSelect visEditorSidebar__select"
         ng-model="editorState.params.colorSchema"
         ng-options="mode.id as mode.label for mode in collections.colorSchemas"
       ></select>
     </div>
   </div>
-  <div class="kuiSideBarFormRow" >
+  <div class="visEditorSidebar__formRow" >
     <label
-      class="kuiSideBarFormRow__label"
+      class="visEditorSidebar__formLabel"
       for="outlineWeight"
       i18n-id="regionMap.visParams.outlineWeightLabel"
       i18n-default-message="Outline weight"
     ></label>
-    <div class="kuiSideBarFormRow__control">
+    <div class="visEditorSidebar__formControl">
       <input
         id="outlineWeight"
-        class="kuiInput kuiSideBarInput"
+        class="kuiInput visEditorSidebar__input"
         type="number"
         ng-model="editorState.params.outlineWeight"
       >

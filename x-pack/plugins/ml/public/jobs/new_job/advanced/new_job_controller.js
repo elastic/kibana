@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
+import 'angular-ui-select';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
@@ -77,7 +78,6 @@ module.controller('MlNewJob',
     $location,
     $modal,
     Private,
-    mlDatafeedService,
     mlConfirmModalService,
     i18n) {
 
@@ -595,6 +595,7 @@ module.controller('MlNewJob',
                     );
                     // update status
                     $scope.ui.saveStatus.job = 2;
+                    $scope.$applyAsync();
 
                     // save successful, attempt to open the job
                     mlJobService.openJob($scope.job.job_id)
@@ -620,7 +621,8 @@ module.controller('MlNewJob',
                       if (datafeedConfig) {
                         // open job successful, create a new datafeed
                         mlJobService.saveNewDatafeed(datafeedConfig, jobId)
-                          .then(() => {
+                          .then((resp) => {
+                            datafeedConfig.datafeed_id = resp.datafeed_id;
                             $scope.saveLock = false;
                           })
                           .catch((resp) => {
@@ -631,10 +633,14 @@ module.controller('MlNewJob',
                               resp
                             );
                             $scope.saveLock = false;
+                          })
+                          .then(() => {
+                            $scope.$applyAsync();
                           });
                       } else {
                         // no datafeed, so save is complete
                         $scope.saveLock = false;
+                        $scope.$applyAsync();
                       }
                     }
 
@@ -650,6 +656,7 @@ module.controller('MlNewJob',
                         values: { message: result.resp.message }
                       })
                     );
+                    $scope.$applyAsync();
                   }
                 }).catch((result) => {
                   $scope.ui.saveStatus.job = -1;
@@ -660,6 +667,7 @@ module.controller('MlNewJob',
                       values: { message: result.resp.message }
                     })
                   );
+                  $scope.$applyAsync();
                 });
             }
           })
@@ -670,11 +678,13 @@ module.controller('MlNewJob',
               })
             );
             console.log('save(): job validation failed. Jobs list could not be loaded.');
+            $scope.$applyAsync();
           });
       }
       else {
         msgs.error(jobValid.message);
         console.log('save(): job validation failed');
+        $scope.$applyAsync();
       }
     };
 
@@ -689,6 +699,7 @@ module.controller('MlNewJob',
       })
         .then(() => {
           msgs.clear();
+          $scope.$applyAsync();
           $location.path('jobs');
         });
     };
@@ -1364,7 +1375,7 @@ module.controller('MlNewJob',
             return {
               pscope: $scope,
               openDatafeed: function () {
-                mlDatafeedService.openJobTimepickerWindow($scope.job);
+                mlJobService.currentJob = $scope.job;
               }
             };
           }

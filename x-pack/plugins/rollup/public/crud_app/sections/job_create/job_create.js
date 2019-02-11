@@ -292,6 +292,7 @@ export class JobCreateUi extends Component {
         !this.canGoToStep(stepId)
         || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
       ),
+      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
     }));
   }
 
@@ -494,9 +495,7 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPageContent
-          horizontalPosition="center"
-        >
+        <EuiPageContent>
           <EuiPageContentHeader>
             <EuiTitle size="m">
               <h1>

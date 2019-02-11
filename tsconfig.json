@@ -5,7 +5,7 @@
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "ui/*": [
-        "src/ui/public/*"
+        "src/legacy/ui/public/*"
       ],
       "test_utils/*": [
         "src/test_utils/public/*"

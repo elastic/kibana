@@ -72,7 +72,6 @@
     "indices": [
       "farequote"
     ],
-    "types": [],
     "query": {
       "bool": {
         "must": [

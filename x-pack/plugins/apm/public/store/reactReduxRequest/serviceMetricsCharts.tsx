@@ -19,16 +19,12 @@ const ID = 'metricsChartData';
 const INITIAL_DATA: MetricsChartAPIResponse = {
   memory: {
     series: {
-      totalMemory: [],
-      freeMemory: [],
-      processMemoryRss: [],
-      processMemorySize: []
+      memoryUsedAvg: [],
+      memoryUsedMax: []
     },
     overallValues: {
-      totalMemory: null,
-      freeMemory: null,
-      processMemoryRss: null,
-      processMemorySize: null
+      memoryUsedAvg: null,
+      memoryUsedMax: null
     },
     totalHits: 0
   },
