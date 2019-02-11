@@ -118,7 +118,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   return kibanaServer.uiSettings.update({
                     'dateFormat:tz': 'UTC',
                     'defaultIndex': 'logstash-*',
-                    'telemetry:optIn': false
                   });
                 }
               }
