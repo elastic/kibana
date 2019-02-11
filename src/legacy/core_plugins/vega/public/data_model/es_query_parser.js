@@ -150,7 +150,8 @@ export class EsQueryParser {
   mapRequest = (request) => {
     const esRequest = request.url;
     if (this._esShardTimeout) {
-      const { body = {}, ...rest } = esRequest;
+      // remove possible timeout query param to prevent two conflicting timeout parameters
+      const { body = {}, timeout, ...rest } = esRequest; //eslint-disable-line no-unused-vars
       body.timeout = `${this._esShardTimeout}ms`;
       return {
         body,
