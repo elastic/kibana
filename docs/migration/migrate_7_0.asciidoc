@@ -268,3 +268,9 @@ Example structure after:
 ```
 
 *Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
+
+[float]
+=== Imported Kibana dashboards may require small grid layout adjustments due to design changes
+*Details:* Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate. 
+
+*Impact:* Minimal. In most cases the dashboards should render as they did previously. In some cases panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
