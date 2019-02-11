@@ -28,7 +28,11 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
+          case 'apm_user_and_all':
           case 'canvas_all':
+          case 'machine_learning_admin_and_all':
+          case 'machine_learning_user_and_all':
+          case 'monitoring_user_and_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
@@ -47,7 +51,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
           // these users can't do anything with Canvas
           case 'advancedSettings_all':
           case 'advancedSettings_read':
-          case 'apm_all':
+          case 'apm_user':
           case 'dashboard_all':
           case 'dashboard_read':
           case 'dev_tools_read':
@@ -57,10 +61,11 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
           case 'graph_read':
           case 'infrastructure_read':
           case 'logs_read':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
           case 'maps_all':
           case 'maps_read':
-          case 'ml_all':
-          case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
           case 'uptime_read':

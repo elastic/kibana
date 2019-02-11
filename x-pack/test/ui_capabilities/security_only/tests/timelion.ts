@@ -28,6 +28,10 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
+          case 'apm_user_and_all':
+          case 'machine_learning_admin_and_all':
+          case 'machine_learning_user_and_all':
+          case 'monitoring_user_and_all':
           case 'timelion_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('timelion');
@@ -47,7 +51,7 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
           // these users can't do anything with Timelion
           case 'advancedSettings_all':
           case 'advancedSettings_read':
-          case 'apm_all':
+          case 'apm_user':
           case 'canvas_all':
           case 'canvas_read':
           case 'dev_tools_read':
@@ -61,8 +65,9 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
           case 'maps_read':
           case 'infrastructure_read':
           case 'logs_read':
-          case 'ml_all':
-          case 'monitoring_all':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
           case 'uptime_read':
           case 'visualize_all':
           case 'visualize_read':
