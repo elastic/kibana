@@ -6,13 +6,9 @@
 
 import React from 'react';
 import { configure, setAddon, addDecorator } from '@storybook/react';
-import JSXAddon from 'storybook-addon-jsx';
 import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
 import { withOptions } from '@storybook/addon-options';
-
-// Import the default EUI theme
-import '@elastic/eui/dist/eui_theme_k6_light.css';
 
 // If we're running Storyshots, be sure to register the require context hook.
 // Otherwise, add the other decorators.
@@ -36,20 +32,12 @@ if (process.env.NODE_ENV === 'test') {
 
   // Add optional knobs to customize each story.
   addDecorator(withKnobs);
-
-  // Add JSX output.
-  setAddon(JSXAddon);
 }
 
 // Automatically import all files ending in *.examples.ts
 const req = require.context('./..', true, /.examples.tsx$/);
 
-// Wrap each story with a div -- we may make this smarter later.
-// const storyWrapper = story => <div style={{ margin: 24 }}>{story()}</div>;
-// addDecorator(storyWrapper);
-
 function loadStories() {
-  //require('./welcome');
   req.keys().forEach(filename => req(filename));
 }
 

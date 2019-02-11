@@ -1,8 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 const path = require('path');
 const TSDocgenPlugin = require('react-docgen-typescript-webpack-plugin');
 
-module.exports = (baseConfig, env, config) => {
-
+module.exports = (_baseConfig, _env, config) => {
   config.module.rules.push(
     {
       test: /\.js$/,
@@ -13,9 +18,9 @@ module.exports = (baseConfig, env, config) => {
       },
     },
   );
-  
+
   config.module.rules.push({
-    test: /\.less$/,
+    test: /\.scss$/,
     use: [
       { loader: 'style-loader' },
       { loader: 'css-loader', options: { importLoaders: 2 } },
@@ -25,25 +30,47 @@ module.exports = (baseConfig, env, config) => {
           config: { path: path.resolve(__dirname, './../../../../src/optimize/postcss.config.js') },
         },
       },
-      { loader: 'less-loader' },
+      { loader: 'sass-loader' },
+      {
+        loader: 'sass-resources-loader',
+        options: {
+          resources: ['../../../node_modules/@elastic/eui/src/theme_light.scss'],
+        },
+      },
+    ],
+    include: [
+      path.resolve(__dirname, '../'),
     ],
   });
 
-  config.module.rules.push({
-    test: /\.scss$/,
-    loaders: ['style-loader', 'css-loader', 'sass-loader'],
-    exclude: /node_modules/
-  });
+  // config.module.rules.push({
+  //   test: /\.(ts|tsx)$/,
+  //   use: [
+  //     require.resolve('ts-loader'),
+  //     require.resolve('react-docgen-typescript-loader'),
+  //   ],
+  // });
 
   config.module.rules.push({
-    test: /\.(ts|tsx)$/,
+    test: /\.tsx?$/,
     use: [
-      require.resolve('awesome-typescript-loader'),
-      require.resolve("react-docgen-typescript-loader"),
+      {
+        loader: 'ts-loader',
+        options: {
+          transpileOnly: true,
+          experimentalWatchApi: true,
+          onlyCompileBundledFiles: true,
+          configFile: require.resolve('../../../../tsconfig.json'),
+          compilerOptions: {
+            sourceMap: true,
+          },
+        },
+      },
+      require.resolve('react-docgen-typescript-loader'),
     ],
   });
 
-  config.plugins.push(new TSDocgenPlugin()); // optional
+  config.plugins.push(new TSDocgenPlugin());
   config.resolve.extensions.push('.ts', '.tsx');
   config.resolve.alias.ui = path.resolve(__dirname, './../../../../src/ui/public');
   return config;
