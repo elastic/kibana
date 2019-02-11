@@ -27,7 +27,7 @@ export interface SourceDomainBuckets {
 
 export interface NetworkTopNFlowBuckets {
   key: string;
-  source_domain: {
+  domain: {
     buckets: SourceDomainBuckets[];
   };
 }

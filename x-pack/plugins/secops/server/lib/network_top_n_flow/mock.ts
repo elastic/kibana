@@ -94,7 +94,7 @@ export const mockResponse = {
           network_bytes: {
             value: 11276023407,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: -1,
             sum_other_doc_count: 6249,
             buckets: [
@@ -120,7 +120,7 @@ export const mockResponse = {
           network_bytes: {
             value: 5469323342,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: -1,
             sum_other_doc_count: 552,
             buckets: [
@@ -146,7 +146,7 @@ export const mockResponse = {
           network_bytes: {
             value: 3807671322,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
@@ -172,7 +172,7 @@ export const mockResponse = {
           network_bytes: {
             value: 166517626,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 47,
             buckets: [
@@ -198,7 +198,7 @@ export const mockResponse = {
           network_bytes: {
             value: 104785026,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 42,
             buckets: [
@@ -224,7 +224,7 @@ export const mockResponse = {
           network_bytes: {
             value: 28804250,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 31,
             buckets: [
@@ -250,7 +250,7 @@ export const mockResponse = {
           network_bytes: {
             value: 23032363,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
@@ -276,7 +276,7 @@ export const mockResponse = {
           network_bytes: {
             value: 21424889,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
@@ -302,7 +302,7 @@ export const mockResponse = {
           network_bytes: {
             value: 19205000,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
@@ -328,7 +328,7 @@ export const mockResponse = {
           network_bytes: {
             value: 11407633,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
@@ -354,7 +354,7 @@ export const mockResponse = {
           network_bytes: {
             value: 11393327,
           },
-          source_domain: {
+          domain: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [

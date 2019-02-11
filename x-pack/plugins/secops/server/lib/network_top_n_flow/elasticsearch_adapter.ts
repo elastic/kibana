@@ -37,17 +37,20 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = buckets.map(
       (bucket: NetworkTopNFlowBuckets) => ({
         node:
-          bucket.source_domain.buckets.length > 0
+          bucket.domain.buckets.length > 0
             ? {
                 _id: bucket.key,
                 [networkTopNFlowItemAttr]: {
-                  domain: bucket.source_domain.buckets[0].key,
+                  domain:
+                    bucket.domain.buckets[0].key === '__missing__'
+                      ? ''
+                      : bucket.domain.buckets[0].key,
                   ip: bucket.key,
                 },
-                event: { duration: bucket.source_domain.buckets[0].event_duration.value },
+                event: { duration: bucket.domain.buckets[0].event_duration.value },
                 network: {
-                  bytes: bucket.source_domain.buckets[0].network_bytes.value,
-                  packets: bucket.source_domain.buckets[0].network_packets.value,
+                  bytes: bucket.domain.buckets[0].network_bytes.value,
+                  packets: bucket.domain.buckets[0].network_packets.value,
                 },
               }
             : {},

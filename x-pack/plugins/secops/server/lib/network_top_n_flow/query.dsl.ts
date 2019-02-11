@@ -32,12 +32,12 @@ export const buildQuery = ({
   ];
 
   const networkTopNFlowField =
-    networkTopNFlowType === NetworkTopNFlowType.source ? 'source.ip' : 'destination.ip';
+    networkTopNFlowType === NetworkTopNFlowType.source ? 'source' : 'destination';
 
   const agg = {
     network_top_n_flow_count: {
       cardinality: {
-        field: networkTopNFlowField,
+        field: `${networkTopNFlowField}.ip`,
       },
     },
   };
@@ -51,7 +51,7 @@ export const buildQuery = ({
         ...agg,
         network_top_n_flow: {
           terms: {
-            field: networkTopNFlowField,
+            field: `${networkTopNFlowField}.ip`,
             size: limit + 1,
             order: {
               network_bytes: 'desc',
@@ -63,13 +63,14 @@ export const buildQuery = ({
                 field: 'network.bytes',
               },
             },
-            source_domain: {
+            domain: {
               terms: {
-                field: 'source.domain',
+                field: `${networkTopNFlowField}.domain`,
                 size: 1,
                 order: {
                   network_bytes: 'desc',
                 },
+                missing: '__missing__',
               },
               aggs: {
                 network_bytes: {
@@ -94,16 +95,6 @@ export const buildQuery = ({
       },
       query: {
         bool: {
-          must: [
-            { exists: { field: 'source.domain' } },
-            {
-              match_phrase: {
-                'event.action': {
-                  query: 'netflow_flow',
-                },
-              },
-            },
-          ],
           filter,
         },
       },

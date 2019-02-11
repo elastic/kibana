@@ -155,9 +155,7 @@ const getNetworkTopNFlowColumns = (
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(
-                `networkTopNFlow-table-${NetworkTopNFlowType.source}-ip-${ip}`
-              ),
+              id: escapeDataProviderId(`networkTopNFlow-table-${networkTopNFlowType}-ip-${ip}`),
               name: ip,
               excluded: false,
               kqlQuery: '',
@@ -201,7 +199,7 @@ const getNetworkTopNFlowColumns = (
               and: [],
               enabled: true,
               id: escapeDataProviderId(
-                `networkTopNFlow-table-${NetworkTopNFlowType.source}-domain-${domain}`
+                `networkTopNFlow-table-${networkTopNFlowType}-domain-${domain}`
               ),
               name: domain,
               excluded: false,
