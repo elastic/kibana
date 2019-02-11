@@ -39,19 +39,22 @@ export async function mergeConfigs(configPaths: string | string[] = []) {
   const mergedConfig: I18nConfig = { exclude: [], translations: [], ...rootConfig };
 
   for (const configPath of Array.isArray(configPaths) ? configPaths : [configPaths]) {
-    const additionalConfig: Partial<I18nConfig> = JSON.parse(
-      await readFileAsync(resolve(configPath))
-    );
+    const additionalConfig: I18nConfig = {
+      paths: {},
+      exclude: [],
+      translations: [],
+      ...JSON.parse(await readFileAsync(resolve(configPath))),
+    };
 
-    for (const [namespace, path] of Object.entries(additionalConfig.paths || [])) {
+    for (const [namespace, path] of Object.entries(additionalConfig.paths)) {
       mergedConfig.paths[namespace] = normalizePath(resolve(configPath, '..', path));
     }
 
-    for (const exclude of additionalConfig.exclude || []) {
+    for (const exclude of additionalConfig.exclude) {
       mergedConfig.exclude.push(normalizePath(resolve(configPath, '..', exclude)));
     }
 
-    for (const translations of additionalConfig.translations || []) {
+    for (const translations of additionalConfig.translations) {
       mergedConfig.translations.push(normalizePath(resolve(configPath, '..', translations)));
     }
   }
@@ -61,7 +64,7 @@ export async function mergeConfigs(configPaths: string | string[] = []) {
 
 /**
  * Filters out custom paths based on the paths defined in config and that are
- * known to contain 1i8n strings.
+ * known to contain i18n strings.
  * @param inputPaths List of paths to filter.
  * @param config I18n config instance.
  */

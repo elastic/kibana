@@ -75,11 +75,13 @@ export function verifyMessages(
     }
   }
 
-  const missingTranslations = difference(defaultMessagesIds, localizedMessagesIds);
-  if (!options.ignoreMissing && missingTranslations.length > 0) {
-    errorMessage += `\n${
-      missingTranslations.length
-    } missing translation(s):\n${missingTranslations.join(', ')}`;
+  if (!options.ignoreMissing) {
+    const missingTranslations = difference(defaultMessagesIds, localizedMessagesIds);
+    if (missingTranslations.length > 0) {
+      errorMessage += `\n${
+        missingTranslations.length
+      } missing translation(s):\n${missingTranslations.join(', ')}`;
+    }
   }
 
   for (const messageId of localizedMessagesIds) {
