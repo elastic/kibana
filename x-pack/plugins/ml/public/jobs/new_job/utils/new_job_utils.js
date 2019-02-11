@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
@@ -49,10 +49,7 @@ export function SearchItemsProvider(Private, $route, config) {
       if (fs.length) {
         filters = fs;
       }
-      const esQueryConfigs = {
-        allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
-        queryStringOptions: config.get('query:queryString:options'),
-      };
+      const esQueryConfigs = getEsQueryConfig(config);
       combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
 
