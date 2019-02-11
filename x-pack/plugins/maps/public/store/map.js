@@ -33,7 +33,9 @@ import {
   SET_GOTO,
   CLEAR_GOTO,
   TRACK_CURRENT_LAYER_STATE,
-  ROLLBACK_TO_TRACKED_LAYER_STATE, REMOVE_TRACKED_LAYER_STATE
+  ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE,
+  ROLLBACK_TO_TRACKED_LAYER_STATE,
+  REMOVE_TRACKED_LAYER_STATE
 } from "../actions/store_actions";
 
 import { copyPersistentState } from './util';
@@ -102,8 +104,10 @@ export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
-    case TRACK_CURRENT_LAYER_STATE:
+    case ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE:
       rollbackAnyTrailingTrackedLayerState(state);//do this because users can select different layers while the layer panel is open, which automatically switches the selection
+      return { ...state };
+    case TRACK_CURRENT_LAYER_STATE:
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
       return rollbackTrackedLayerState(state, action.layerId);

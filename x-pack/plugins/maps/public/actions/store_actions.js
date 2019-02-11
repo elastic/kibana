@@ -44,6 +44,7 @@ export const SET_GOTO = 'SET_GOTO';
 export const CLEAR_GOTO = 'CLEAR_GOTO';
 export const RESET_LAYER_LOAD = 'RESET_LAYER_LOAD';
 export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
+export const ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE = 'ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE,';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 
@@ -69,6 +70,12 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
+}
+
+export function rollbackAnyTrailingTrackedLayerState() {
+  return {
+    type: ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE
+  };
 }
 
 export function trackCurrentLayerState(layerId) {
@@ -149,8 +156,9 @@ export function toggleLayerVisible(layerId) {
 }
 
 export function setSelectedLayer(layerId) {
-  return  dispatch => {
+  return async dispatch => {
     if (layerId) {
+      dispatch(rollbackAnyTrailingTrackedLayerState());
       dispatch(trackCurrentLayerState(layerId));
     }
     dispatch({
