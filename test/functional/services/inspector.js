@@ -94,7 +94,7 @@ export function InspectorProvider({ getService }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      const $ = await tableBody.getInnerHtml();
+      const $ = await tableBody.parseDomContent();
       return $('tr').toArray().map(tr => {
         return $(tr).find('td').toArray().map(cell => $(cell).text().trim());
       });
@@ -107,7 +107,7 @@ export function InspectorProvider({ getService }) {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
         return await inspectorPanel.findByTagName('thead');
       });
-      const $ = await dataTableHeader.getInnerHtml();
+      const $ = await dataTableHeader.parseDomContent();
       return $('th span.euiTableCellContent__text').toArray()
         .map(cell => $(cell).text().trim());
     }

@@ -347,7 +347,7 @@ export class LeadfootElementWrapper {
    * @nonstandard
    * @return {Promise<void>}
    */
-  async getInnerHtml() {
+  async parseDomContent() {
     const htmlContent = await this.getProperty('innerHTML');
     return cheerio.load(htmlContent, {
       normalizeWhitespace: true,
