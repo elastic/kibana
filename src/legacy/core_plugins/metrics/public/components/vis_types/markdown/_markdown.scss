@@ -20,9 +20,11 @@
   &--middle {
     justify-content: center;
   }
+
   &--bottom {
     justify-content: flex-end;
   }
+
   &-isScrolling {
     overflow: auto;
   }
