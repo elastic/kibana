@@ -26,7 +26,13 @@ export const appEntryTemplate = (bundle) => `
  * context: ${bundle.getContext()}
  */
 
-// import global polyfills before everything else
+// ensure the csp nonce is set in the dll
+import 'dll/set_csp_nonce';
+
+// set the csp nonce in the primary webpack bundle too
+__webpack_nonce__ = window.__webpack_nonce__;
+
+// import global polyfills
 import 'babel-polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
@@ -49,9 +55,9 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
         ${bundle.getRequires().join('\n  ')}
       }
     });
-    
+
     const coreStartContract = coreSystem.start();
-    
+
     if (i18nError) {
       coreStartContract.fatalErrors.add(i18nError);
     }
