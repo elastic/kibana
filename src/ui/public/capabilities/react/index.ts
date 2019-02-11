@@ -18,6 +18,5 @@
  */
 
 export { UICapabilitiesProvider } from './ui_capabilities_provider';
-export { injectUICapabilites } from './inject_ui_capabilities';
-export { injectUICapabilitiesProvider } from './inject_ui_capabilities_provider';
+export { injectUICapabilities } from './inject_ui_capabilities';
 export { RequiresUICapability } from './requires_ui_capability';

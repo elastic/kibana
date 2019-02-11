@@ -8,7 +8,7 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elas
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilites } from 'ui/capabilities/react';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
@@ -25,7 +25,7 @@ interface Props {
   uiCapabilities: UICapabilities;
 }
 
-export const NodeContextMenu = injectUICapabilites(
+export const NodeContextMenu = injectUICapabilities(
   injectI18n(
     ({
       options,

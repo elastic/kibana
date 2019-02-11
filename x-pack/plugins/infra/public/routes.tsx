@@ -9,7 +9,7 @@ import React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilites } from 'ui/capabilities/react';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
 import { LinkToPage } from './pages/link_to';
@@ -37,4 +37,4 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
   );
 };
 
-export const PageRouter = injectUICapabilites<{ history: History }>(PageRouterComponent);
+export const PageRouter = injectUICapabilities<{ history: History }>(PageRouterComponent);

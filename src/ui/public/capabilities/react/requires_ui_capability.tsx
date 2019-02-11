@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { UICapabilities } from '../ui_capabilities';
-import { injectUICapabilites } from './inject_ui_capabilities';
+import { injectUICapabilities } from './inject_ui_capabilities';
 
 interface Props {
   uiCapability: string;
@@ -26,7 +26,7 @@ interface Props {
   children: React.ReactElement<any>;
 }
 
-export const RequiresUICapability = injectUICapabilites((props: Props) => {
+export const RequiresUICapability = injectUICapabilities((props: Props) => {
   if (_.get(props.uiCapabilities, props.uiCapability)) {
     return props.children;
   }

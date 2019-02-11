@@ -29,12 +29,12 @@ interface InjectedProps {
   uiCapabilities: UICapabilities;
 }
 
-export function injectUICapabilites<P>(
+export function injectUICapabilities<P>(
   WrappedComponent: ComponentType<P & InjectedProps>
 ): ComponentClass<Pick<P, Exclude<keyof P, keyof InjectedProps>>> & {
   WrappedComponent: ComponentType<P & InjectedProps>;
 } {
-  class InjectUICapabilites extends Component<P, any> {
+  class InjectUICapabilities extends Component<P, any> {
     public static displayName = `InjectUICapabilities(${getDisplayName(WrappedComponent)})`;
 
     public static WrappedComponent: ComponentType<P & InjectedProps> = WrappedComponent;
@@ -53,5 +53,5 @@ export function injectUICapabilites<P>(
       );
     }
   }
-  return InjectUICapabilites;
+  return InjectUICapabilities;
 }
