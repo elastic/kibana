@@ -18,18 +18,6 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
     async navigateToPlugin() {
       await testSubjects.click('homeSynopsisLinkuptime');
     },
-    async setStartOfDatePickerRange(dateRangeStart: string) {
-      await testSubjects.click('superDatePickerShowDatesButton');
-      await wait(1);
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
-      await wait(1);
-      await testSubjects.click('superDatePickerAbsoluteTab');
-      await wait(1);
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', dateRangeStart);
-    },
-    async dateRangeIsAlreadySet() {
-      return await testSubjects.exists('superDatePickerstartDatePopoverButton');
-    },
     async monitorIdExists(key: string) {
       await wait(1);
       await testSubjects.existOrFail(key);
