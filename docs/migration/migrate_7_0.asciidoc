@@ -268,3 +268,15 @@ Example structure after:
 ```
 
 *Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
+
+[float]
+=== Removed support for deeply nested table splits in data table visualizations
+*Details:* Previously a user was able to create multiple "split table" aggregations in one table on arbitrary levels.
+The potential for deeply nested tables posed maintenance and accessibility challenges, and was inconsistent with other
+visualizations which only allow one table split. This change does not limit the number of split rows a user can put into
+a table; it only restricts the number of split tables to one.
+
+*Impact:* To prevent breaking existing visualizations, saved objects containing nested table splits will be automatically
+migrated to contain only one split table, converting any existing split tables beyond the first to split rows. No action
+should be required as a result of this change, but be aware that users with saved data table visualizations that contain
+multiple split tables will now see those tables rendered differently.
