@@ -21,7 +21,7 @@ export function scheduleTask(server, taskManager) {
         state: { stats: {}, runs: 0 },
       });
     }catch(e) {
-      server.log(['warning', `Error scheduling maps telemetry task ${e.message}`]);
+      server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
     }
   });
 }

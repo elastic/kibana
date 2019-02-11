@@ -37,7 +37,7 @@ export function scheduleTasks(server: HapiServer) {
         state: { stats: {}, runs: 0 },
       });
     } catch (e) {
-      server.log(['warning'], `telemetry task could not be scheduled ${e.message}`);
+      server.log(['warning', 'telemetry'], `Error scheduling task, received ${e.message}`);
     }
   });
 }
