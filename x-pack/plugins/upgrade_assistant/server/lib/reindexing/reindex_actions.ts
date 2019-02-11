@@ -241,7 +241,7 @@ export const reindexActionsFactory = (
     async getBooleanFieldPaths(indexName: string) {
       const results = await callCluster('indices.getMapping', {
         index: indexName,
-        includeTypeName: true,
+        include_type_name: true,
       });
       const mapping = getSingleMappingType(results[indexName].mappings);
 

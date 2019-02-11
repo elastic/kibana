@@ -119,7 +119,7 @@ export const createInstallRoute = () => ({
                 }
               }
             },
-            includeTypeName: true
+            include_type_name: true
           };
           await callWithRequest(request, 'indices.create', createIndexParams);
         } catch (err) {

@@ -20,7 +20,7 @@ function formatHit(hit, indexName) {
 async function fetchMapping(callWithRequest, indexName) {
   const params = {
     expand_wildcards: 'none',
-    includeTypeName: true,
+    include_type_name: true,
     index: indexName,
   };
 

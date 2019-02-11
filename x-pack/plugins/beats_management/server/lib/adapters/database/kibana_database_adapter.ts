@@ -108,7 +108,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     const result = await this.callWithUser({ kind: 'internal' }, 'indices.putTemplate', {
       name,
       body: template,
-      includeTypeName: true,
+      include_type_name: true,
     });
 
     return result;
