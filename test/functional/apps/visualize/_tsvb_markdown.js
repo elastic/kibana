@@ -19,14 +19,9 @@
 
 import expect from 'expect.js';
 
-/**
- *
- *
- * @export
- * @param {TestWrapper} { getService, getPageObjects }
- */
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const find = getService('find');
   const { visualBuilder, timePicker } = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
@@ -37,6 +32,14 @@ export default function ({ getService, getPageObjects }) {
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
         await timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+      });
+
+      it('should be render all markdown components', async () => {
+        const table = await find.byCssSelector('table.table');
+        const isExisting = find.exists(table);
+        const tabsCount = await visualBuilder.getSubTabsCount();
+        expect(tabsCount).to.be(3);
+        expect(isExisting).to.be.ok();
       });
 
       it('should allow printing raw timestamp of data', async () => {
@@ -50,13 +53,32 @@ export default function ({ getService, getPageObjects }) {
       it('should allow printing raw value of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('0');
+        expect(text).to.be('6');
       });
 
       it('should be show empty table variables', async () => {
         const variables = await visualBuilder.getMarkdownTableVariables();
-        console.log(variables);
         expect(variables).to.be('No variables available for the selected data metrics.');
+      });
+
+      it('should render html as plain text', async () => {
+        const html = '<h1>hello world</h1>';
+        await visualBuilder.enterMarkdown(html);
+        const markdownText = await visualBuilder.getMarkdownText();
+        expect(markdownText).to.be(html);
+      });
+
+      it('should render mustache list', async () => {
+        const list =
+          `{{#each _all}}
+- {{ data.formatted.[0] }} {{ data.raw.[0] }}
+{{/each}}`;
+
+        const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
+
+        await visualBuilder.enterMarkdown(list);
+        const markdownText = await visualBuilder.getMarkdownText();
+        expect(markdownText).to.be(expectedRenderer);
       });
     });
   });
