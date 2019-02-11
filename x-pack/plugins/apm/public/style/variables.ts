@@ -30,15 +30,6 @@ export function pct(value: number): string {
 // Styling
 export const borderRadius = '5px';
 
-// Colors (from dark to light)
-export const colors = {
-  black: '#000000',
-  yellow: '#FCF2E6',
-
-  // custom APM palette
-  apmLightBlue: '#80bcd2'
-};
-
 // Fonts
 export const fontFamily = '"Open Sans", Helvetica, Arial, sans-serif';
 export const fontFamilyCode =

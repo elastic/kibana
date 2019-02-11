@@ -50,6 +50,7 @@ export interface FindOptions extends BaseOptions {
   search?: string;
   searchFields?: string[];
   hasReference?: { type: string; id: string };
+  defaultSearchOperator?: 'AND' | 'OR';
 }
 
 export interface FindResponse<T extends SavedObjectAttributes = any> {
