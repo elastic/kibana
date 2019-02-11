@@ -95,6 +95,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/machine_learning'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/uptime')
     ],
