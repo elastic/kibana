@@ -208,9 +208,14 @@ export class DynamicDllPlugin {
       if (stats.compilation.needsDLLCompilation) {
         // Run the dlls compiler and increment
         // the performed compilations
+        //
+        // NOTE: check the need for this extra try/catch after upgrading
+        // past webpack v4.29.3. For now it is needed so we can log the error
+        // otherwise the error log we'll get will be something like: [fatal] [object Object]
         try {
           await this.runDLLCompiler(compiler);
         } catch (error) {
+          this.logWithMetadata(['error', 'optimize:dynamic_dll_plugin'], error.message);
           throw error;
         }
 
@@ -296,7 +301,7 @@ export class DynamicDllPlugin {
     // Only enable this for CI builds in order to ensure
     // we have an healthy dll ecosystem.
     if (this.performedCompilations === this.maxCompilations) {
-      return Promise.reject('All the allowed dll compilations were already performed and one more is needed which is not possible');
+      throw new Error('All the allowed dll compilations were already performed and one more is needed which is not possible');
     }
   }
 
@@ -326,6 +331,6 @@ export class DynamicDllPlugin {
       return;
     }
 
-    return Promise.reject(runCompilerErrors.join('\n-'));
+    throw new Error(runCompilerErrors.join('\n-'));
   }
 }

@@ -260,7 +260,12 @@ export class DllCompiler {
         if (notAllowedModules.length) {
           // Delete the built dll, as it contains invalid modules, and reject listing
           // all the not allowed modules
-          await rimrafAsync(this.rawDllConfig.outputPath);
+          try {
+            await rimrafAsync(this.rawDllConfig.outputPath);
+          } catch (e) {
+            return reject(e);
+          }
+
           return reject(`The following modules are not allowed to be bundled into the dll: \n${notAllowedModules.join('\n')}`);
         }
 
