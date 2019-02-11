@@ -22,6 +22,7 @@ import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/search_bar';
@@ -66,7 +67,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
-  return reactDirective(DashboardViewportProvider);
+  return reactDirective(wrapInI18nContext(DashboardViewportProvider));
 });
 
 app.directive('dashboardApp', function ($injector) {
@@ -124,7 +125,7 @@ app.directive('dashboardApp', function ($injector) {
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
       if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
-        dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
+        dashboardStateManager.syncTimefilterWithDashboard(timefilter);
       }
 
       const updateState = () => {
@@ -136,6 +137,8 @@ app.directive('dashboardApp', function ($injector) {
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
+          timeRange: timefilter.getTime(),
+          refreshInterval: timefilter.getRefreshInterval(),
         };
         $scope.panels = dashboardStateManager.getPanels();
 
@@ -170,8 +173,8 @@ app.directive('dashboardApp', function ($injector) {
         queryFilter.getFilters()
       );
 
-      timefilter.enableAutoRefreshSelector();
-      timefilter.enableTimeRangeSelector();
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
 
       updateState();
 
@@ -205,7 +208,6 @@ app.directive('dashboardApp', function ($injector) {
       };
       updateBreadcrumbs();
       dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardStateManager.saveState();
@@ -229,7 +231,9 @@ app.directive('dashboardApp', function ($injector) {
             dashboardStateManager.getPanels().find((panel) => panel.panelIndex === panelIndex);
       };
 
-      $scope.updateQueryAndFetch = function ({ query }) {
+      $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+        timefilter.setTime(dateRange);
+
         const oldQuery = $scope.model.query;
         if (_.isEqual(oldQuery, query)) {
           // The user can still request a reload in the query bar, even if the
@@ -241,6 +245,13 @@ app.directive('dashboardApp', function ($injector) {
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         }
         $scope.refresh();
+      };
+
+      $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+        timefilter.setRefreshInterval({
+          pause: isPaused,
+          value: refreshInterval ? refreshInterval : $scope.model.refreshInterval.value
+        });
       };
 
       $scope.onFiltersUpdated = filters => {
@@ -280,6 +291,8 @@ app.directive('dashboardApp', function ($injector) {
         // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
         $scope.refresh();
       });
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateState);
+      $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateState);
 
       function updateViewMode(newMode) {
         $scope.topNavMenu = getTopNavConfig(newMode, navActions, dashboardConfig.getHideWriteControls()); // eslint-disable-line no-use-before-define
@@ -307,7 +320,7 @@ app.directive('dashboardApp', function ($injector) {
           // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
           // reload will cause it not to sync.
           if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter);
           }
         }
 

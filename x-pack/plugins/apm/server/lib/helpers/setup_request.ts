@@ -40,10 +40,14 @@ interface APMRequestQuery {
 export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
+  const uiSettings = req.getUiSettingsService();
 
-  const client: ESClient = (type, params) => {
+  const client: ESClient = async (type, params) => {
+    const includeFrozen = await uiSettings.get('search:includeFrozen');
+
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
+      console.log({ includeFrozen });
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
           query
@@ -55,6 +59,7 @@ export function setupRequest(req: Legacy.Request): Setup {
 
     const nextParams = {
       ...params,
+      ignore_throttled: !includeFrozen,
       rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
     };
     return cluster.callWithRequest(req, type, nextParams);

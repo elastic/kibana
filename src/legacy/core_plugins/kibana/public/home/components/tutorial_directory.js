@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
@@ -33,7 +33,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiPageBody,
-  EuiLink,
 } from '@elastic/eui';
 
 
@@ -87,15 +86,13 @@ class TutorialDirectoryUi extends React.Component {
   async componentDidMount() {
     this._isMounted = true;
 
-    if(this.props.isK7Design) {
-      chrome.breadcrumbs.set([
-        {
-          text: homeTitle,
-          href: '#/home'
-        },
-        { text: addDataTitle }
-      ]);
-    }
+    chrome.breadcrumbs.set([
+      {
+        text: homeTitle,
+        href: '#/home'
+      },
+      { text: addDataTitle }
+    ]);
 
     const tutorialConfigs = await getTutorials();
 
@@ -197,24 +194,9 @@ class TutorialDirectoryUi extends React.Component {
   }
 
   render() {
-    let breadcrumbs;
-    if (!this.props.isK7Design) {
-      breadcrumbs = (
-        <Fragment>
-          <div>
-            <EuiLink href="#/home">{homeTitle}</EuiLink> / {addDataTitle}
-          </div>
-          <EuiSpacer size="s" />
-        </Fragment>
-      );
-    }
-
     return (
-      <EuiPage className="homPage">
+      <EuiPage restrictWidth={1200}>
         <EuiPageBody>
-
-          {breadcrumbs}
-
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
@@ -242,7 +224,6 @@ TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
-  isK7Design: PropTypes.bool.isRequired,
 };
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

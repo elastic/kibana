@@ -84,6 +84,7 @@ interface Props {
   dateRangeTo?: string;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
+  showAutoRefreshOnly?: boolean;
   onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
@@ -554,8 +555,8 @@ export class QueryBarUI extends Component<Props, State> {
               role="combobox"
               aria-haspopup="true"
               aria-expanded={this.state.isSuggestionsVisible}
-              aria-owns="typeahead-items"
-              aria-controls="typeahead-items"
+              aria-owns="kbnTypeahead__items"
+              aria-controls="kbnTypeahead__items"
             >
               <form role="form" name="queryBarForm">
                 <div role="search">
@@ -588,7 +589,7 @@ export class QueryBarUI extends Component<Props, State> {
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
-                      aria-controls="typeahead-items"
+                      aria-controls="kbnTypeahead__items"
                       aria-activedescendant={
                         this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
                       }
@@ -679,6 +680,7 @@ export class QueryBarUI extends Component<Props, State> {
           recentlyUsedRanges={recentlyUsedRanges}
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={config.get('dateFormat')}
+          isAutoRefreshOnly={this.props.showAutoRefreshOnly}
         />
       </EuiFlexItem>
     );

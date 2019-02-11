@@ -27,6 +27,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
 
@@ -59,6 +60,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
+    responseHandler: convertToGeoJson,
     editorConfig: {
       collections: {
         colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),

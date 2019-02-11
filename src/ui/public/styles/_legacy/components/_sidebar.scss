@@ -8,7 +8,7 @@
   border-bottom-color: transparent;
 
   .sidebar-well {
-    background-color: tint($euiColorPrimary, 90%);
+    background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
   }
 
   .sidebar-list {
@@ -94,7 +94,7 @@
     padding: $euiSizeXS $euiSizeS;
     display: flex;
     justify-content: space-between;
-    background-color: shade($euiColorPrimary, 60%);
+    background-color: shadeOrTint($euiColorPrimary, 60%, 60%);
     color: $euiColorEmptyShade;
     line-height: $euiSizeL;
 
@@ -110,8 +110,9 @@
     }
   }
 
-  .index-pattern-selection .ui-select-toggle {
-    border-radius: 0;
+  .index-pattern-selection {
+    padding: $euiSizeS;
+    padding-bottom: 0;
   }
 
   .index-pattern-selection .ui-select-choices {

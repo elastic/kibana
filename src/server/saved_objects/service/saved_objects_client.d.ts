@@ -25,7 +25,8 @@ export interface BaseOptions {
 
 export interface CreateOptions extends BaseOptions {
   id?: string;
-  override?: boolean;
+  overwrite?: boolean;
+  references?: SavedObjectReference[];
 }
 
 export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
@@ -48,6 +49,8 @@ export interface FindOptions extends BaseOptions {
   fields?: string[];
   search?: string;
   searchFields?: string[];
+  hasReference?: { type: string; id: string };
+  defaultSearchOperator?: 'AND' | 'OR';
 }
 
 export interface FindResponse<T extends SavedObjectAttributes = any> {
@@ -58,7 +61,7 @@ export interface FindResponse<T extends SavedObjectAttributes = any> {
 }
 
 export interface UpdateOptions extends BaseOptions {
-  version?: number;
+  version?: string;
 }
 
 export interface BulkGetObject {
@@ -71,6 +74,10 @@ export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
+export interface MigrationVersion {
+  [pluginName: string]: string;
+}
+
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
@@ -78,13 +85,14 @@ export interface SavedObjectAttributes {
 export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
-  version?: number;
+  version?: string;
   updated_at?: string;
   error?: {
     message: string;
   };
   attributes: T;
   references: SavedObjectReference[];
+  migrationVersion?: MigrationVersion;
 }
 
 export interface SavedObjectReference {
@@ -92,6 +100,10 @@ export interface SavedObjectReference {
   type: string;
   id: string;
 }
+
+export type GetResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+export type CreateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+export type UpdateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
 
 export declare class SavedObjectsClient {
   public static errors: typeof errors;
@@ -103,7 +115,7 @@ export declare class SavedObjectsClient {
     type: string,
     attributes: T,
     options?: CreateOptions
-  ): Promise<SavedObject<T>>;
+  ): Promise<CreateResponse<T>>;
   public bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions
@@ -120,11 +132,11 @@ export declare class SavedObjectsClient {
     type: string,
     id: string,
     options?: BaseOptions
-  ): Promise<SavedObject<T>>;
+  ): Promise<GetResponse<T>>;
   public update<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,
     attributes: Partial<T>,
     options?: UpdateOptions
-  ): Promise<SavedObject<T>>;
+  ): Promise<UpdateResponse<T>>;
 }

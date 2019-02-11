@@ -194,10 +194,10 @@ describe('AggTable Directive', function () {
       $scope.table = response.tables[0];
       $scope.showTotal = true;
       $scope.totalFunc = totalFunc;
-      const $el = $(`<kbn-agg-table 
-                      table="table" 
-                      show-total="showTotal" 
-                      total-func="totalFunc"  
+      const $el = $(`<kbn-agg-table
+                      table="table"
+                      show-total="showTotal"
+                      total-func="totalFunc"
                       dimensions="dimensions"></kbn-agg-table>`);
       $compile($el)($scope);
       $scope.$digest();
@@ -224,7 +224,7 @@ describe('AggTable Directive', function () {
         '',
         '2014-09-28',
         '9,283',
-        'September 28th 2014, 00:00:00.000',
+        'Sep 28, 2014 @ 00:00:00.000',
         '1',
         '11'
       ]);
@@ -234,7 +234,7 @@ describe('AggTable Directive', function () {
         '',
         '2014-10-03',
         '220,943',
-        'October 3rd 2014, 00:00:00.000',
+        'Oct 3, 2014 @ 00:00:00.000',
         '239',
         '837'
       ]);
