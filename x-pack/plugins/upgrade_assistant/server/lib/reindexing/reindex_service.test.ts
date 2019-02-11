@@ -16,8 +16,6 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { apmReindexScript } from '../apm';
-import apmMappings from '../apm/mapping.json';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 describe('reindexService', () => {
@@ -60,7 +58,7 @@ describe('reindexService', () => {
         },
       })),
     };
-    service = reindexServiceFactory(callCluster, xpackInfo as any, actions, ['apm-*']);
+    service = reindexServiceFactory(callCluster, xpackInfo as any, actions);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -732,43 +730,6 @@ describe('reindexService', () => {
         });
       });
 
-      it('used APM mapping for legacy APM index', async () => {
-        const indexName = 'apm-1';
-        const newIndexName = 'apm-1-reindexed';
-
-        actions.getFlatSettings.mockResolvedValueOnce({
-          settings: {
-            'index.number_of_replicas': 5,
-          },
-          mappings: {
-            _meta: {
-              version: '6.7.0',
-            },
-          },
-        });
-
-        callCluster.mockResolvedValueOnce({ acknowledged: true }); // indices.create
-        await service.processNextStep({
-          id: '1',
-          attributes: {
-            ...defaultAttributes,
-            indexName,
-            newIndexName,
-            lastCompletedStep: ReindexStep.readonly,
-          },
-        } as ReindexSavedObject);
-
-        expect(callCluster).toHaveBeenCalledWith('indices.create', {
-          index: newIndexName,
-          body: {
-            mappings: apmMappings,
-            settings: {
-              'index.number_of_replicas': 5,
-            },
-          },
-        });
-      });
-
       it('fails if create index is not acknowledged', async () => {
         callCluster
           .mockResolvedValueOnce({ myIndex: settingsMappings })
@@ -822,43 +783,6 @@ describe('reindexService', () => {
           body: {
             source: { index: 'myIndex' },
             dest: { index: 'myIndex-reindex-0' },
-          },
-        });
-      });
-
-      it('uses APM script for legacy APM index', async () => {
-        const indexName = 'apm-1';
-        const newIndexName = 'apm-1-reindexed';
-
-        callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex
-        actions.getFlatSettings.mockResolvedValueOnce({
-          settings: {},
-          mappings: {
-            _meta: {
-              version: '6.7.0',
-            },
-          },
-        });
-
-        await service.processNextStep({
-          id: '1',
-          attributes: {
-            ...defaultAttributes,
-            indexName,
-            newIndexName,
-            lastCompletedStep: ReindexStep.newIndexCreated,
-          },
-        } as ReindexSavedObject);
-        expect(callCluster).toHaveBeenLastCalledWith('reindex', {
-          refresh: true,
-          waitForCompletion: false,
-          body: {
-            source: { index: indexName },
-            dest: { index: newIndexName },
-            script: {
-              lang: 'painless',
-              source: apmReindexScript,
-            },
           },
         });
       });
