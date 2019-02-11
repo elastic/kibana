@@ -44,6 +44,7 @@ import {
   VisualizeLoaderParams,
   VisualizeUpdateParams,
 } from './types';
+import { queryGeohashBounds } from './utils';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
@@ -160,10 +161,11 @@ export class EmbeddedVisualizeHandler {
     // This is a hack to give maps visualizations access to data in the
     // globalState, since they can no longer access it via searchSource.
     // TODO: Remove this as a part of elastic/kibana#30593
-    // (see also this.update below)
-    this.vis.API.__UNSTABLE_GLOBAL_STATE_DATA__ = {
-      filters: this.dataLoaderParams.filters,
-      query: this.dataLoaderParams.query,
+    this.vis.API.getGeohashBounds = () => {
+      return queryGeohashBounds(this.vis, {
+        filters: this.dataLoaderParams.filters,
+        query: this.dataLoaderParams.query,
+      });
     };
 
     this.dataLoader = EmbeddedVisualizeHandler.__ENABLE_PIPELINE_DATA_LOADER__
@@ -228,12 +230,10 @@ export class EmbeddedVisualizeHandler {
     if (params.hasOwnProperty('filters')) {
       fetchRequired = true;
       this.dataLoaderParams.filters = params.filters;
-      this.vis.API.__UNSTABLE_GLOBAL_STATE_DATA__.filters = params.filters;
     }
     if (params.hasOwnProperty('query')) {
       fetchRequired = true;
       this.dataLoaderParams.query = params.query;
-      this.vis.API.__UNSTABLE_GLOBAL_STATE_DATA__.query = params.query;
     }
 
     if (fetchRequired) {
