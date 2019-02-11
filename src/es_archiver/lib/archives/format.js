@@ -23,7 +23,7 @@ import { PassThrough } from 'stream';
 import {
   createIntersperseStream,
   createJsonStringifyStream
-} from '../../../utils';
+} from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 
