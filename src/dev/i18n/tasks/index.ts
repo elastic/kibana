@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { serializeToJson } from './json';
-export { serializeToJson5 } from './json5';
+export { extractDefaultMessages } from './extract_default_translations';
