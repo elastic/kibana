@@ -7,7 +7,6 @@
 import { Server } from 'hapi';
 import {
   APM_TELEMETRY_DOC_ID,
-  ApmTelemetry,
   createApmTelementry,
   getSavedObjectsClient
 } from './apm_telemetry';
@@ -16,8 +15,8 @@ import {
 interface KibanaHapiServer extends Server {
   usage: {
     collectorSet: {
-      makeUsageCollector: any;
-      register: any;
+      makeUsageCollector: (options: unknown) => unknown;
+      register: (options: unknown) => unknown;
     };
   };
 }
@@ -25,7 +24,7 @@ interface KibanaHapiServer extends Server {
 export function makeApmUsageCollector(server: KibanaHapiServer): void {
   const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'apm',
-    fetch: async (): Promise<ApmTelemetry> => {
+    fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient(server);
       try {
         const apmTelemetrySavedObject = await savedObjectsClient.get(

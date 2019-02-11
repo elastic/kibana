@@ -374,7 +374,7 @@ class TutorialUi extends React.Component {
     }
 
     return (
-      <EuiPage className="homPage">
+      <EuiPage restrictWidth={1200}>
         <EuiPageBody>
           {content}
         </EuiPageBody>
