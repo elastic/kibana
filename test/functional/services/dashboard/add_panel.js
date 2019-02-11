@@ -47,7 +47,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
         log.debug(`added ${await embeddableRows[i].getVisibleText()}`);
-        await PageObjects.common.sleep(1000);
+        // await PageObjects.common.sleep(1000);
       }
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }
