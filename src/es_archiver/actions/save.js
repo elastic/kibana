@@ -26,7 +26,7 @@ import mkdirp from 'mkdirp';
 import {
   createListStream,
   createPromiseFromStreams,
-} from '../../utils';
+} from '../../legacy/utils';
 
 import {
   createStats,
