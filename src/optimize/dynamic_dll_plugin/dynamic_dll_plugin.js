@@ -298,8 +298,6 @@ export class DynamicDllPlugin {
     if (this.performedCompilations === this.maxCompilations) {
       return Promise.reject('All the allowed dll compilations were already performed and one more is needed which is not possible');
     }
-
-    return Promise.resolve();
   }
 
   async runDLLCompiler(mainCompiler) {
