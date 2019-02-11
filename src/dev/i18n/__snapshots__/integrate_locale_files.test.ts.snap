@@ -142,22 +142,28 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 1`] = `
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 1`] = `
 "
-Missing translations:
+1 missing translation(s):
 plugin-1.message-id-2"
 `;
 
-exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 2`] = `
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 2`] = `
 "
-Unused translations:
+1 unused translation(s):
 plugin-1.message-id-3"
 `;
 
-exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 3`] = `
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 3`] = `
 "
-Unused translations:
+1 unused translation(s):
 plugin-2.message
-Missing translations:
+1 missing translation(s):
 plugin-2.message-id"
+`;
+
+exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id, missing id or the incompatible ones 4`] = `
+"
+Incompatible translation: some properties are missing in \\"values\\" object (\\"plugin-1.message-id-2\\"): [value].
+"
 `;

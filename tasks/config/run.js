@@ -115,6 +115,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/i18n_check'),
+        '--ignore-missing',
       ]
     },
 
