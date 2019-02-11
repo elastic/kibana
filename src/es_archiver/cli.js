@@ -121,7 +121,7 @@ async function execute(fn) {
     };
 
     if (!fn) {
-      error('Unknown command');
+      error(`Unknown command "${cmd.args[0]}"`);
     }
 
     if (!cmd.esUrl) {
