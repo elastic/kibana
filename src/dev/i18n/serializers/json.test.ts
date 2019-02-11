@@ -17,9 +17,21 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { serializeToJson } from './json';
 
-export function createFailError(msg: string, exitCode?: number): Error;
-export function run(
-  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
-): Promise<void>;
+describe('dev/i18n/serializers/json', () => {
+  test('should serialize default messages to JSON', () => {
+    const messages: Array<[string, { message: string; description?: string }]> = [
+      ['plugin1.message.id-1', { message: 'Message text 1 ' }],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          description: 'Message description',
+        },
+      ],
+    ];
+
+    expect(serializeToJson(messages)).toMatchSnapshot();
+  });
+});
