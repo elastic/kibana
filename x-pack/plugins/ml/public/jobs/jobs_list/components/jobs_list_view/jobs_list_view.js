@@ -24,6 +24,12 @@ import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { isEqual } from 'lodash';
 
+import {
+  DEFAULT_REFRESH_INTERVAL_MS,
+  MINIMUM_REFRESH_INTERVAL_MS,
+  DELETING_JOBS_REFRESH_INTERVAL_MS,
+} from '../../../../../common/constants/jobs_list';
+
 import React, {
   Component
 } from 'react';
@@ -34,9 +40,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-const DEFAULT_REFRESH_INTERVAL_MS = 30000;
-const MINIMUM_REFRESH_INTERVAL_MS = 5000;
-const DELETING_JOBS_REFRESH_INTERVAL_MS = 2000;
+
 let jobsRefreshInterval =  null;
 let deletingJobsRefreshTimeout = null;
 
