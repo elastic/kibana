@@ -31,8 +31,7 @@ import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
- * it is enabled in the Kibana server. This is an expensive operation, so we
- * cache the results
+ * it is enabled in the Kibana server.
  */
 const getUiExports = async (kibanaUrl) => {
   const xpackEnabled = await getKibanaPluginEnabled({
