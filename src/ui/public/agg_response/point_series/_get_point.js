@@ -43,14 +43,17 @@ export function getPoint(x, series, yScale, row, y, z) {
   }
 
   if (series) {
+    const seriesRow = row[series.i];
     const seriesArray = series.length ? series : [ series ];
     point.aggConfig = seriesArray[0].aggConfig;
     point.series = seriesArray.map(s => s.aggConfig.fieldFormatter()(unwrap(row[s.i]))).join(' - ');
+    point.seriesRow = seriesRow;
   } else if (y) {
     // If the data is not split up with a series aspect, then
     // each point's "series" becomes the y-agg that produced it
     point.aggConfig = y.aggConfig;
     point.series = y.title;
+    point.seriesRow = y;
   }
 
   if (yScale) {
