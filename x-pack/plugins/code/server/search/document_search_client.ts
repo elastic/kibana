@@ -14,7 +14,7 @@ import {
   SourceHit,
   SourceRange,
 } from '../../model';
-import { DocumentIndexNamePrefix } from '../indexer/schema';
+import { DocumentIndexNamePrefix, DocumentSearchIndexWithScope } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import {
@@ -76,8 +76,8 @@ export class DocumentSearchClient extends AbstractSearchClient {
 
     // Post filters for repository
     let repositoryPostFilters: object[] = [];
-    if (req.repoFileters) {
-      repositoryPostFilters = req.repoFileters.map((repoUri: string) => {
+    if (req.repoFilters) {
+      repositoryPostFilters = req.repoFilters.map((repoUri: string) => {
         return {
           term: {
             repoUri,
@@ -98,8 +98,12 @@ export class DocumentSearchClient extends AbstractSearchClient {
       });
     }
 
+    const index = req.repoScope
+      ? DocumentSearchIndexWithScope(req.repoScope)
+      : `${DocumentIndexNamePrefix}*`;
+
     const rawRes = await this.client.search({
-      index: `${DocumentIndexNamePrefix}*`,
+      index,
       body: {
         from,
         size,
@@ -230,8 +234,12 @@ export class DocumentSearchClient extends AbstractSearchClient {
     const from = (req.page - 1) * resultsPerPage;
     const size = resultsPerPage;
 
+    const index = req.repoScope
+      ? DocumentSearchIndexWithScope(req.repoScope)
+      : `${DocumentIndexNamePrefix}*`;
+
     const rawRes = await this.client.search({
-      index: `${DocumentIndexNamePrefix}*`,
+      index,
       body: {
         from,
         size,

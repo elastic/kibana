@@ -58,3 +58,6 @@ export const SymbolIndexNamePrefix = `.code-symbol`;
 export const SymbolIndexName = (repoUri: RepositoryUri) => {
   return `${SymbolIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };
+export const SymbolSearchIndexWithScope = (repoScope: RepositoryUri[]) => {
+  return repoScope.map((repoUri: RepositoryUri) => `${SymbolIndexName(repoUri)}*`).join(',');
+};

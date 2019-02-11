@@ -45,15 +45,21 @@ export interface SearchRequest {
 
 export interface RepositorySearchRequest extends SearchRequest {
   query: string;
+  repoScope?: RepositoryUri[];
 }
 
 export interface DocumentSearchRequest extends SearchRequest {
   query: string;
-  repoFileters?: string[];
+  // repoFilters is used for search within these repos but return
+  // search stats across all repositories.
+  repoFilters?: string[];
+  // repoScope hard limit the search coverage only to these repositories.
+  repoScope?: RepositoryUri[];
   langFilters?: string[];
 }
 export interface SymbolSearchRequest extends SearchRequest {
   query: string;
+  repoScope?: RepositoryUri[];
 }
 
 // The base interface of any kind of search result.
