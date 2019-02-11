@@ -158,7 +158,7 @@ export function workpad(server) {
 
       return savedObjectsClient
         .get(CANVAS_TYPE, id)
-        .then(obj => obj.attributes)
+        .then(obj => ({ id: obj.id, ...obj.attributes }))
         .then(formatResponse)
         .catch(formatResponse);
     },
@@ -233,7 +233,7 @@ export function workpad(server) {
         .then(resp => {
           return {
             total: resp.total,
-            workpads: resp.saved_objects.map(hit => hit.attributes),
+            workpads: resp.saved_objects.map(hit => ({ id: hit.id, ...hit.attributes })),
           };
         })
         .catch(() => {
