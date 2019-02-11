@@ -10,4 +10,9 @@
   &Actions {
     padding-top: $euiSizeM;
   }
+
+  &ImagePreview > img {
+    height: 100px;
+    width: auto;
+  }
 }

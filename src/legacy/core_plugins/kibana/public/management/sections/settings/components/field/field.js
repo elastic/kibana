@@ -409,6 +409,7 @@ class FieldUI extends PureComponent {
               allowFullScreen
               url={value}
               alt={name}
+              className="mgtAdvancedSettings__fieldImagePreview"
             />
           );
         } else {
