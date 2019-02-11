@@ -1,5 +1,4 @@
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "beat:qux",
@@ -19,7 +18,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "beat:baz",
@@ -39,7 +37,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "beat:foo",
@@ -64,7 +61,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "beat:bar",
@@ -84,7 +80,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "tag:production",
@@ -98,7 +93,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "tag:development",
@@ -112,7 +106,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "id": "tag:qa",
@@ -126,7 +119,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -145,7 +137,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
@@ -163,7 +154,6 @@
 }
 
 {
-  "type": "doc",
   "value": {
     "index": ".management-beats",
     "type": "_doc",
