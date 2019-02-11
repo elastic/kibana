@@ -25,7 +25,7 @@ export * from './target/types/type_exports';
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
 import * as LegacyElasticsearch from './src/legacy/core_plugins/elasticsearch';
-import * as LegacyKibanaServer from './src/server/kbn_server';
+import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 
 /**
  *  Re-export legacy types under a namespace.

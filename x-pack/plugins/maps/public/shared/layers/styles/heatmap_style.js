@@ -5,12 +5,14 @@
  */
 
 import { GRID_RESOLUTION } from '../grid_resolution';
+import { AbstractStyle } from './abstract_style';
 
-export class HeatmapStyle {
+export class HeatmapStyle extends AbstractStyle {
 
   static type = 'HEATMAP';
 
   constructor(styleDescriptor = {}) {
+    super();
     this._descriptor = HeatmapStyle.createDescriptor(
       styleDescriptor.refinement,
       styleDescriptor.properties

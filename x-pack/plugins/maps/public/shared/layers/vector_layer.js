@@ -30,7 +30,6 @@ export class VectorLayer extends AbstractLayer {
   static popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false,
-    className: 'euiPanel euiPanel--shadow',
   });
 
   static tooltipContainer = document.createElement('div');
@@ -65,10 +64,6 @@ export class VectorLayer extends AbstractLayer {
     this._joins.forEach(joinSource => {
       joinSource.destroy();
     });
-  }
-
-  isJoinable() {
-    return !this._source.isFilterByMapBounds();
   }
 
   getJoins() {

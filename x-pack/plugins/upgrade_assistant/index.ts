@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Server } from 'hapi';
 import Joi from 'joi';
+import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import mappings from './mappings.json';
 import { initServer } from './server';
@@ -35,7 +35,7 @@ export function upgradeAssistant(kibana: any) {
       }).default();
     },
 
-    init(server: Server) {
+    init(server: Legacy.Server) {
       // Add server routes and initialize the plugin here
       initServer(server);
     },

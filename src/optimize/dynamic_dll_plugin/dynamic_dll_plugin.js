@@ -19,7 +19,7 @@
 
 import { DllCompiler } from './dll_compiler';
 import { notInNodeModulesOrWebpackShims, inPluginNodeModules } from './dll_allowed_modules';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';

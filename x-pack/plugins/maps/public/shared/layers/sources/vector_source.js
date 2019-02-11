@@ -32,7 +32,7 @@ export class AbstractVectorSource extends AbstractSource {
     }
 
     if (format === 'topojson') {
-      const features = _.get(fetchedJson, featureCollectionPath);
+      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
       return topojson.feature(fetchedJson, features);
     }
 
@@ -102,4 +102,7 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
+  isJoinable() {
+    return true;
+  }
 }
