@@ -94,13 +94,10 @@ export function InspectorProvider({ getService }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      // Convert the data into a nested array format:
-      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
-      return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => await cell.getVisibleText()));
-      }));
+      const $ = await tableBody.getInnerHtml();
+      return $('tr').toArray().map(tr => {
+        return $(tr).find('td').toArray().map(cell => $(cell).text().trim());
+      });
     }
 
     async getTableHeaders() {
@@ -110,11 +107,9 @@ export function InspectorProvider({ getService }) {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
         return await inspectorPanel.findByTagName('thead');
       });
-      const cells = await dataTableHeader.findAllByTagName('th');
-      return await Promise.all(cells.map(async (cell) => {
-        const untrimmed = await cell.getVisibleText();
-        return untrimmed.trim();
-      }));
+      const $ = await dataTableHeader.getInnerHtml();
+      return $('th span.euiTableCellContent__text').toArray()
+        .map(cell => $(cell).text().trim());
     }
 
     async expectTableHeaders(expected) {
