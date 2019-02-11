@@ -50,6 +50,7 @@ import {
   getResizeManipulator,
   getRestateShapesEvent,
   getRotationAnnotations,
+  getRotationTooltipAnnotation,
   getScene,
   getSelectedPrimaryShapeIds,
   getSelectedShapeObjects,
@@ -172,6 +173,14 @@ const constrainedShapesWithPreexistingAnnotations = select(
   getConstrainedShapesWithPreexistingAnnotations
 )(snappedShapes, transformedShapes);
 
+const rotationTooltipAnnotation = select(getRotationTooltipAnnotation)(
+  configuration,
+  draggedPrimaryShape,
+  draggedShape,
+  transformIntents,
+  cursorPosition
+);
+
 const groupAction = select(getGroupAction)(actionEvent);
 
 const grouping = select(getGrouping)(
@@ -201,6 +210,7 @@ const annotatedShapes = select(getAnnotatedShapes)(
   hoverAnnotations,
   rotationAnnotations,
   resizeAnnotations,
+  rotationTooltipAnnotation,
   adHocChildrenAnnotations
 );
 
