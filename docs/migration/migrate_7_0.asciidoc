@@ -120,8 +120,28 @@ Previously set `xpack.monitoring.elasticsearch.ssl.verify` is equal to `xpack.mo
 *Impact:* Users with `xpack.monitoring.report_stats` set should use `xpack.xpack_main.telemetry.enabled` instead.
 
 [float]
-=== kibana.yml setting `xpack.monitoring.*.index_pattern` is no longer valid
-*Details:* This unsupported setting has been officially removed. The ability to customize these patterns is no longer supported.
+=== kibana.yml setting `xpack.monitoring.index_pattern` is no longer valid
+*Details:* This unsupported setting has been officially removed. The ability to customize this pattern is no longer supported.
+
+[float]
+=== kibana.yml setting `xpack.monitoring.kibana.index_pattern` is no longer valid
+*Details:* This unsupported setting has been officially removed. The ability to customize this pattern is no longer supported
+
+[float]
+=== kibana.yml setting `xpack.monitoring.beats.index_pattern` is no longer valid
+*Details:* This unsupported setting has been officially removed. The ability to customize this pattern is no longer supported
+
+[float]
+=== kibana.yml setting `xpack.monitoring.logstash.index_pattern` is no longer valid
+*Details:* This unsupported setting has been officially removed. The ability to customize this pattern is no longer supported
+
+[float]
+=== kibana.yml setting `xpack.monitoring.elasticsearch.index_pattern` is no longer valid
+*Details:* This unsupported setting has been officially removed. The ability to customize this pattern is no longer supported
+
+[float]
+=== kibana.yml setting `xpack.monitoring.cluster_alerts.index` is no longer valid
+*Details:* This unsupported setting has been officially removed. The ability to customize this index is no longer supported
 
 [float]
 === Deprecated API `/shorten` has been removed
