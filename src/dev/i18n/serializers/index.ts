@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export { filterPaths, extractMessagesFromPathToMap } from './extract_default_translations';
-export { writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
-export { serializeToJson, serializeToJson5 } from './serializers';
+import { i18n } from '@kbn/i18n';
+
+export { serializeToJson } from './json';
+export { serializeToJson5 } from './json5';
+
+export type Serializer = (
+  messages: Array<[string, { message: string; description?: string }]>,
+  formats?: typeof i18n.formats
+) => string;
