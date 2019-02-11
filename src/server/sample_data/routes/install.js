@@ -118,7 +118,8 @@ export const createInstallRoute = () => ({
                   properties: dataIndexConfig.fields
                 }
               }
-            }
+            },
+            includeTypeName: true
           };
           await callWithRequest(request, 'indices.create', createIndexParams);
         } catch (err) {

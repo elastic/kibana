@@ -88,7 +88,8 @@ export function createIndex(client, indexName,
       if (!exists) {
         return client.indices.create({
           index: indexName,
-          body: body
+          body: body,
+          includeTypeName: true,
         })
           .then(() => true)
           .catch(err => {

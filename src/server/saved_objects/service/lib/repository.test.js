@@ -1210,7 +1210,7 @@ describe('SavedObjectsRepository', () => {
         },
         ignore: [404],
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
       });
 
       sinon.assert.calledOnce(onBeforeWrite);
@@ -1229,7 +1229,7 @@ describe('SavedObjectsRepository', () => {
         },
         ignore: [404],
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
       });
 
       sinon.assert.calledOnce(onBeforeWrite);
@@ -1252,7 +1252,7 @@ describe('SavedObjectsRepository', () => {
         },
         ignore: [404],
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
       });
 
       sinon.assert.calledOnce(onBeforeWrite);

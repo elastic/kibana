@@ -219,6 +219,7 @@ async function createIndex({ callCluster, index }) {
   };
   await callCluster('indices.create', {
     index,
+    includeTypeName: true,
     body: { mappings: { doc: { dynamic: 'strict', properties } } },
   });
 }
