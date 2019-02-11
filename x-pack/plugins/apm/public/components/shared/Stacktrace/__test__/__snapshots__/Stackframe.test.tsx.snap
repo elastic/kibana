@@ -24,7 +24,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   height: 18px;
   top: 36px;
   pointer-events: none;
-  background-color: #FCF2E6;
+  background-color: #fef6e5;
 }
 
 .c6 {
@@ -59,7 +59,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   line-height: 18px;
   text-align: right;
   border-right: 1px solid rgb(211,218,230);
-  background-color: #FCF2E6;
+  background-color: #fef6e5;
 }
 
 .c8:last-of-type {
