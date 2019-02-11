@@ -88,6 +88,11 @@ exports.Cluster = class Cluster {
     const { installPath } = await installSnapshot({
       log: this._log,
       ...options,
+
+      // HACK. This is a temporary hack to get Kibana 6.7 tests
+      // to run against Elasticsearch 7.0, so we can test the upgrade
+      // scenario. This will be removed prior to merge / final code review.
+      version: '7.0.0',
     });
 
     this._log.indent(-4);
