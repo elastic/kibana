@@ -172,15 +172,39 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch from a nightly snapshot.
+### Running Elasticsearch
+
+There are a few options when it comes to running Elasticsearch:
+
+First, you'll need to have a `java` binary in `PATH` and `JAVA_HOME` set. The version of Java required is specified in [.ci/java-version.properties](https://github.com/elastic/elasticsearch/blob/master/.ci/java-versions.properties) on the ES branch.
+
+**Nightly snapshot**
+
+These snapshots are built on a nightly basis which expire after a couple weeks. If running from an old, untracted branch this snapshot might not exist. In which case you might need to run from source or an archive.
 
 ```bash
 yarn es snapshot
 ```
 
-This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+**Source**
 
-> You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
+By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
+
+```bash
+yarn es source
+```
+
+**Archive**
+
+Use this if you already have a distributable. For released versions, one can be obtained on the [Elasticsearch downloads](https://www.elastic.co/downloads/elasticsearch) page.
+
+```bash
+yarn es archive <full_path_to_archive>
+```
+
+
+Each of these will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+
 
 If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
 

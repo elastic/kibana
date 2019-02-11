@@ -18,7 +18,7 @@
  */
 
 import { configModel } from './dll_config_model';
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../../legacy/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
