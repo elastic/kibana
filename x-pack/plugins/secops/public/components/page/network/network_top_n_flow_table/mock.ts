@@ -13,8 +13,8 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
       {
         node: {
           source: {
-            ip: '10.100.7.198',
-            domain: 'nest-frontdoor.iot.sr.local.crowbird.com',
+            ip: '8.8.8.8',
+            domain: 'test.domain.com',
           },
           destination: null,
           event: {
@@ -26,14 +26,14 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
           },
         },
         cursor: {
-          value: '10.100.7.198',
+          value: '8.8.8.8',
         },
       },
       {
         node: {
           source: {
-            ip: '54.192.48.92',
-            domain: 'server-54-192-48-92.jfk5.r.cloudfront.net',
+            ip: '9.9.9.9',
+            domain: 'test.domain.net',
           },
           destination: null,
           event: {
@@ -45,7 +45,7 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
           },
         },
         cursor: {
-          value: '54.192.48.92',
+          value: '9.9.9.9',
         },
       },
     ],
