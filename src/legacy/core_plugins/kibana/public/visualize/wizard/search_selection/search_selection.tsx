@@ -28,15 +28,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import PropTypes from 'prop-types';
 import React from 'react';
 
-// @ts-ignore
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { VisType } from 'ui/vis';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
-  visType: VisType;
 }
 
 interface SearchSelectionState {
@@ -46,10 +44,14 @@ interface SearchSelectionState {
 interface TabProps {
   id: string;
   name: string;
-  savedObjectFinder: SavedObjectFinder;
+  savedObjectFinder: React.ReactNode;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
+  public static propTypes = {
+    onSearchSelected: PropTypes.func,
+  };
+
   private tabs: TabProps[] = [];
 
   constructor(props: SearchSelectionProps) {
@@ -74,7 +76,6 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           <SavedObjectFinder
             key="visSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
-            visTypes={this.props.visType}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.indexPatternTab.notFoundLabel',
               { defaultMessage: 'No matching index patterns found.' }
@@ -93,7 +94,6 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
             callToActionButton={manageSearchesBtn}
-            visTypes={this.props.visType}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.savedSearchTab.notFoundLabel',
               { defaultMessage: 'No matching saved searches found.' }

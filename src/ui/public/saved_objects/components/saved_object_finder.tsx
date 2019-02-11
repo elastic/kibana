@@ -60,7 +60,7 @@ interface SavedObjectFinderUIProps extends InjectedIntlProps {
   ) => void;
   makeUrl?: (id: SavedObject<SavedObjectAttributes>['id']) => void;
   noItemsMessage?: React.ReactNode;
-  savedObjectType: 'visualization' | 'search';
+  savedObjectType: 'visualization' | 'search' | 'index-pattern';
   visTypes?: VisTypesRegistryProvider;
 }
 
@@ -73,7 +73,7 @@ class SavedObjectFinderUI extends React.Component<
     onChoose: PropTypes.func,
     makeUrl: PropTypes.func,
     noItemsMessage: PropTypes.node,
-    savedObjectType: PropTypes.oneOf(['visualization', 'search']).isRequired,
+    savedObjectType: PropTypes.oneOf(['visualization', 'search', 'index-pattern']).isRequired,
     visTypes: PropTypes.object,
   };
 

@@ -36,16 +36,16 @@ interface TypeSelectionProps {
   editorParams?: string[];
 }
 
+interface TypeSelectionState {
+  showSearchVisModal: boolean;
+  visType?: VisType;
+}
+
 const baseUrl = `#${VisualizeConstants.CREATE_PATH}?`;
 
-class NewVisModal extends React.Component<TypeSelectionProps> {
+class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public static defaultProps = {
     editorParams: [],
-  };
-
-  public state = {
-    showSearchVisModal: false,
-    visType: {} as VisType,
   };
 
   private readonly isLabsEnabled: boolean;
@@ -53,6 +53,10 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
   constructor(props: TypeSelectionProps) {
     super(props);
     this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
+
+    this.state = {
+      showSearchVisModal: false,
+    };
   }
 
   public render() {
@@ -62,7 +66,7 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
 
     const selectionModal = this.state.showSearchVisModal ? (
       <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
-        <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
+        <SearchSelection onSearchSelected={this.onSearchSelected} />
       </EuiModal>
     ) : (
       <EuiModal onClose={this.onCloseModal} maxWidth={'100vw'} className="visNewVisDialog">
@@ -84,7 +88,10 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
 
   private onVisTypeSelected = (visType: VisType) => {
     if (visType.requiresSearch && visType.options.showIndexSelection) {
-      this.setState({ showSearchVisModal: true, visType });
+      this.setState({
+        showSearchVisModal: true,
+        visType,
+      });
     } else {
       const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
       this.props.onClose();
@@ -93,6 +100,11 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
   };
 
   private onSearchSelected = (searchId: string, searchType: string) => {
+    if (!this.state.visType) {
+      this.props.onClose();
+      return;
+    }
+
     const params = [
       `type=${encodeURIComponent(this.state.visType.name)}`,
       `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
