@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { serializeToJson5 } from './json5';
 
-export function serializeToJson(messages, formats = i18n.formats) {
-  const resultJsonObject = { formats, messages: {} };
+describe('dev/i18n/serializers/json5', () => {
+  test('should serialize default messages to JSON5', () => {
+    const messages: Array<[string, { message: string; description?: string }]> = [
+      [
+        'plugin1.message.id-1',
+        {
+          message: 'Message text 1',
+        },
+      ],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          description: 'Message description',
+        },
+      ],
+    ];
 
-  for (const [mapKey, mapValue] of messages) {
-    if (mapValue.description) {
-      resultJsonObject.messages[mapKey] = { text: mapValue.message, comment: mapValue.description };
-    } else {
-      resultJsonObject.messages[mapKey] = mapValue.message;
-    }
-  }
-
-  return JSON.stringify(resultJsonObject, undefined, 2);
-}
+    expect(serializeToJson5(messages).toString()).toMatchSnapshot();
+  });
+});

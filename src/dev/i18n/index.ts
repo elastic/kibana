@@ -17,26 +17,10 @@
  * under the License.
  */
 
-import { serializeToJson5 } from './json5';
-
-describe('dev/i18n/serializers/json5', () => {
-  test('should serialize default messages to JSON5', () => {
-    const messages = [
-      [
-        'plugin1.message.id-1',
-        {
-          message: 'Message text 1',
-        },
-      ],
-      [
-        'plugin2.message.id-2',
-        {
-          message: 'Message text 2',
-          description: 'Message description',
-        },
-      ],
-    ];
-
-    expect(serializeToJson5(messages).toString()).toMatchSnapshot();
-  });
-});
+// @ts-ignore
+export { extractMessagesFromPathToMap } from './extract_default_translations';
+// @ts-ignore
+export { writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
+export { serializeToJson, serializeToJson5 } from './serializers';
+export { I18nConfig, filterConfigPaths, mergeConfigs } from './config';
+export { integrateLocaleFiles } from './integrate_locale_files';
