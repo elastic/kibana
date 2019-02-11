@@ -18,15 +18,11 @@ exports[`props exportedFieldsUrl 1`] = `
       alignItems="center"
       component="div"
       direction="row"
-      gutterSize="s"
+      gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
       <EuiFlexItem
         component="div"
         grow={false}
@@ -91,7 +87,7 @@ exports[`props iconType 1`] = `
       alignItems="center"
       component="div"
       direction="row"
-      gutterSize="s"
+      gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
@@ -102,11 +98,6 @@ exports[`props iconType 1`] = `
       >
         <EuiIcon
           size="xl"
-          style={
-            Object {
-              "marginRight": 16,
-            }
-          }
           type="logoElastic"
         />
       </EuiFlexItem>
@@ -154,15 +145,11 @@ exports[`props isBeta 1`] = `
       alignItems="center"
       component="div"
       direction="row"
-      gutterSize="s"
+      gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
       <EuiFlexItem
         component="div"
         grow={false}
@@ -211,15 +198,11 @@ exports[`props previewUrl 1`] = `
       alignItems="center"
       component="div"
       direction="row"
-      gutterSize="s"
+      gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
       <EuiFlexItem
         component="div"
         grow={false}
@@ -273,15 +256,11 @@ exports[`render 1`] = `
       alignItems="center"
       component="div"
       direction="row"
-      gutterSize="s"
+      gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      />
       <EuiFlexItem
         component="div"
         grow={false}

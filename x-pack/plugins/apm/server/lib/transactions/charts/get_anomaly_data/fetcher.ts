@@ -56,12 +56,8 @@ export async function anomalySeriesFetcher({
       size: 0,
       query: {
         bool: {
-          must: {
-            exists: {
-              field: 'bucket_span'
-            }
-          },
           filter: [
+            { exists: { field: 'bucket_span' } },
             {
               range: {
                 timestamp: {
