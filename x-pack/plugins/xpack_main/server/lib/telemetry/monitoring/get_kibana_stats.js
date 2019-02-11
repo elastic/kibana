@@ -66,6 +66,7 @@ export function getUsageStats(rawStats) {
     const top = omit(pluginsNested, 'xpack');
     const plugins = { ...top, ...pluginsNested.xpack };
 
+
     return {
       ...accum,
       [clusterUuid]: {
