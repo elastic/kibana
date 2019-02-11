@@ -268,3 +268,9 @@ Example structure after:
 ```
 
 *Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
+
+[float]
+=== Dark mode is now global
+*Details:* Both the Dashboard and Maps applications offer "Dark Mode" options which have been removed in favor of a global dark mode advanced setting. This means that instead of having to turn on dark mode in many places, users can choose to turn on the `theme:darkMode` advanced setting and it will apply to all applications.
+
+*Impact:* The dark mode setting for Dashboards and Maps will be ignored and the global setting will be used instead.
