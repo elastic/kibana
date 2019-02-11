@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { initTransactionsApi } from './server/routes/transactions';
 import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
@@ -70,7 +69,6 @@ export function apm(kibana) {
     },
 
     init(server) {
-      initTransactionsApi(server);
       initTransactionGroupsApi(server);
       initTracesApi(server);
       initServicesApi(server);

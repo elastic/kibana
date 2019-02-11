@@ -135,8 +135,8 @@ interface RisonEncoded {
 }
 
 interface RisonDecoded {
-  _g?: StringMap;
-  _a?: StringMap;
+  _g?: StringMap<any>;
+  _a?: StringMap<any>;
 }
 
 export type QueryParams = APMQueryParams & RisonEncoded;
