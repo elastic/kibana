@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import './saved_gis_map';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
@@ -19,8 +20,22 @@ SavedObjectRegistryProvider.register({
   title: 'gisMaps'
 });
 
-// This is the only thing that gets injected into controllers
-module.service('gisMapSavedObjectLoader', function (Private, SavedGisMap, kbnIndex, kbnUrl, $http, chrome) {
+function mapSavedObjectLoaderProvider(Private, SavedGisMap, kbnIndex, kbnUrl, $http, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   return new SavedObjectLoader(SavedGisMap, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
-});
+}
+
+export const getMapSavedObjectLoader = async () => {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  return mapSavedObjectLoaderProvider(
+    $injector.get('Private'),
+    $injector.get('SavedGisMap'),
+    $injector.get('kbnIndex'),
+    $injector.get('kbnUrl'),
+    $injector.get('$http'),
+    $injector.get('chrome')
+  );
+}
+
+// This is the only thing that gets injected into controllers
+module.service('gisMapSavedObjectLoader', mapSavedObjectLoaderProvider);

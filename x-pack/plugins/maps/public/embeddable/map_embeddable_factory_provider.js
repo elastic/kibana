@@ -7,10 +7,8 @@
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { MapEmbeddableFactory } from './map_embeddable_factory';
 
-function mapEmbeddableFactoryProvider(Private, gisMapSavedObjectLoader) {
-  return new MapEmbeddableFactory(gisMapSavedObjectLoader);
+function mapEmbeddableFactoryProvider() {
+  return new MapEmbeddableFactory();
 }
-
-console.log('mapEmbeddableFactoryProvider registered');
 
 EmbeddableFactoriesRegistryProvider.register(mapEmbeddableFactoryProvider);

@@ -39,7 +39,7 @@ export function maps(kibana) {
         };
       },
       embeddableFactories: [
-        'plugins/map/embeddable/map_embeddable_factory_provider'
+        'plugins/maps/embeddable/map_embeddable_factory_provider'
       ],
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',

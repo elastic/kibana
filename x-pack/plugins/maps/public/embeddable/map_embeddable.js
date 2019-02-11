@@ -20,7 +20,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {HTMLElement} domNode
    * @param {ContainerState} containerState
    */
-  public render(domNode, containerState) {
+  render(domNode, containerState) {
     this.timeRange = containerState.timeRange;
     this.query = containerState.query;
     this.filters = containerState.filters;
@@ -31,11 +31,11 @@ export class MapEmbeddable extends Embeddable {
     );
   }
 
-  public destroy() {
+  destroy() {
     this.savedMap.destroy();
   }
 
-  public reload() {
+  reload() {
 
   }
 }
