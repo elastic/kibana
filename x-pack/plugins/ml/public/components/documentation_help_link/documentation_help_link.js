@@ -42,9 +42,7 @@ module.directive('mlDocumentationHelpLink', function () {
         );
       }
 
-      scope.$watch('uri', () => {
-        renderReactComponent();
-      });
+      scope.$watch('uri', renderReactComponent);
     }
   };
 
