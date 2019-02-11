@@ -77,7 +77,6 @@ mentioned use "_default_".
 `timepicker:timeDefaults`:: The default time filter selection.
 `timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
 `timepicker:quickRanges`:: The list of ranges to show in the Quick section of the time picker. This should be an array of objects, with each object containing `from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), `display` (the title to be displayed), and `section` (which column to put the option in).
-`dashboard:defaultDarkTheme`:: Set this property to `true` to make new dashboards use the dark theme by default.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports

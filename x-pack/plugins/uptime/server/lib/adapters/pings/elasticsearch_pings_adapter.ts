@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
@@ -128,6 +129,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
               latest: {
                 top_hits: {
                   size: 1,
+                  sort: {
+                    '@timestamp': { order: 'desc' },
+                  },
                 },
               },
             },
@@ -142,10 +146,16 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     } = await this.database.search(request, params);
 
     // @ts-ignore TODO fix destructuring implicit any
-    return buckets.map(({ latest: { hits: { hits } } }) => ({
-      ...hits[0]._source,
-      timestamp: hits[0]._source[`@timestamp`],
-    }));
+    return buckets.map(({ latest: { hits: { hits } } }) => {
+      const timestamp = hits[0]._source[`@timestamp`];
+      const momentTs = moment(timestamp);
+      const millisFromNow = moment().diff(momentTs);
+      return {
+        ...hits[0]._source,
+        timestamp,
+        millisFromNow,
+      };
+    });
   }
 
   public async getPingHistogram(

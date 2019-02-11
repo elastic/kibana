@@ -3,7 +3,7 @@
   "hits": 0,
   "description": "Dashboard to explore processes for a host",
   "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":25,\"h\":22,\"i\":\"1\"},\"id\":\"ml_auditbeat_hosts_process_occurrence\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.6.0\"},{\"gridData\":{\"x\":0,\"y\":22,\"w\":48,\"h\":35,\"i\":\"2\"},\"version\":\"6.6.0\",\"panelIndex\":\"2\",\"type\":\"search\",\"id\":\"ml_auditbeat_hosts_process_events\",\"embeddableConfig\":{}},{\"gridData\":{\"x\":25,\"y\":0,\"w\":23,\"h\":22,\"i\":\"3\"},\"version\":\"6.6.0\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"id\":\"ml_auditbeat_hosts_process_event_rate_by_process\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":true}}}\n]",
-  "optionsJSON": "{\"darkTheme\": false,\"hidePanelTitles\": false,\"useMargins\": true\n}",
+  "optionsJSON": "{\"hidePanelTitles\": false,\"useMargins\": true\n}",
   "version": 1,
   "timeRestore": false,
   "kibanaSavedObjectMeta": {

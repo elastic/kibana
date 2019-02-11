@@ -37,7 +37,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       laneLabels: PropTypes.array.isRequired
     }).isRequired,
     swimlaneType: PropTypes.string.isRequired,
-    selection: PropTypes.object
+    selection: PropTypes.object,
+    swimlaneRenderDoneListener: PropTypes.func.isRequired,
   }
 
   // Since this component is mostly rendered using d3 and cellMouseoverActive is only
@@ -85,14 +86,14 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     const { swimlaneType } = this.props;
 
     if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
-      const firstCellData = d3.select(elements[0]).node().__clickData__;
+      const firstSelectedCell = d3.select(elements[0]).node().__clickData__;
 
-      if (typeof firstCellData !== 'undefined' && swimlaneType === firstCellData.swimlaneType) {
+      if (typeof firstSelectedCell !== 'undefined' && swimlaneType === firstSelectedCell.swimlaneType) {
         const selectedData = elements.reduce((d, e) => {
-          const cellData = d3.select(e).node().__clickData__;
-          d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
-          d.laneLabels.push(cellData.laneLabel);
-          d.times.push(cellData.time);
+          const cell = d3.select(e).node().__clickData__;
+          d.bucketScore = Math.max(d.bucketScore, cell.bucketScore);
+          d.laneLabels.push(cell.laneLabel);
+          d.times.push(cell.time);
           return d;
         }, {
           bucketScore: 0,
@@ -142,9 +143,9 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     // since it also includes the "viewBy" attribute which might differ depending
     // on whether the overall or viewby swimlane was selected.
     const oldSelection = {
-      selectedType: selection.selectedType,
-      selectedLanes: selection.selectedLanes,
-      selectedTimes: selection.selectedTimes
+      selectedType: selection && selection.type,
+      selectedLanes: selection && selection.lanes,
+      selectedTimes: selection && selection.times
     };
 
     const newSelection = {
@@ -162,13 +163,13 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       return;
     }
 
-    const cellData = {
-      fieldName: swimlaneData.fieldName,
+    const selectedCells = {
+      viewByFieldName: swimlaneData.fieldName,
       lanes: laneLabels,
       times: d3.extent(times),
       type: swimlaneType
     };
-    swimlaneCellClick(cellData);
+    swimlaneCellClick(selectedCells);
   }
 
   highlightSelection(cellsToSelect, laneLabels, times) {
@@ -249,7 +250,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     const swimlanes = element.select('.ml-swimlanes');
     swimlanes.html('');
 
-    const cellWidth = Math.floor(chartWidth / numBuckets);
+    const cellWidth = Math.floor(chartWidth / numBuckets * 100) / 100;
 
     const xAxisWidth = cellWidth * numBuckets;
     const xAxisScale = d3.time.scale()
@@ -309,7 +310,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .style('width', `${laneLabelWidth}px`)
       .html(label => mlEscape(label))
       .on('click', () => {
-        if (typeof selection.selectedLanes !== 'undefined') {
+        if (typeof selection.lanes !== 'undefined') {
           swimlaneCellClick({});
         }
       })
@@ -424,13 +425,11 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       }
     });
 
-    mlExplorerDashboardService.swimlaneRenderDone.changed();
-
     // Check for selection and reselect the corresponding swimlane cell
     // if the time range and lane label are still in view.
     const selectionState = selection;
-    const selectedType = _.get(selectionState, 'selectedType', undefined);
-    const viewBy = _.get(selectionState, 'viewBy', '');
+    const selectedType = _.get(selectionState, 'type', undefined);
+    const selectionViewByFieldName = _.get(selectionState, 'viewByFieldName', '');
 
     // If a selection was done in the other swimlane, add the "masked" classes
     // to de-emphasize the swimlane cells.
@@ -439,15 +438,19 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
     }
 
-    if ((swimlaneType !== selectedType) ||
-      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== viewBy)) {
+    this.props.swimlaneRenderDoneListener();
+
+    if (
+      (swimlaneType !== selectedType) ||
+      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== selectionViewByFieldName)
+    ) {
       // Not this swimlane which was selected.
       return;
     }
 
     const cellsToSelect = [];
-    const selectedLanes = _.get(selectionState, 'selectedLanes', []);
-    const selectedTimes = _.get(selectionState, 'selectedTimes', []);
+    const selectedLanes = _.get(selectionState, 'lanes', []);
+    const selectedTimes = _.get(selectionState, 'times', []);
     const selectedTimeExtent = d3.extent(selectedTimes);
 
     selectedLanes.forEach((selectedLane) => {

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomUrlEditor renders the editor for a dashboard type URL with a label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -194,11 +194,11 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a discover type URL with an entity and empty time range interval 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -431,11 +431,11 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a discover type URL with valid time range interval 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -664,11 +664,11 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -865,11 +865,11 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for other type of URL with duplicate label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -975,11 +975,11 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       />
     </EuiFormRow>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`CustomUrlEditor renders the editor for other type of URL with unique label 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -1081,5 +1081,5 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       />
     </EuiFormRow>
   </EuiForm>
-</React.Fragment>
+</Fragment>
 `;

@@ -12,10 +12,10 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { TMSSource } from './tms_source';
+import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 
-export class WMSSource extends TMSSource {
+export class WMSSource extends AbstractTMSSource {
 
   static type = 'WMS';
   static title = 'Web Map Service';

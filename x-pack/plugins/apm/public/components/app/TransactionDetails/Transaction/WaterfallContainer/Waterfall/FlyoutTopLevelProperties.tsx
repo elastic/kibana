@@ -31,8 +31,8 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <KibanaLink hash={`/${transaction.context.service.name}`}>
-          {transaction.context.service.name}
+        <KibanaLink hash={`/${transaction.service.name}`}>
+          {transaction.service.name}
         </KibanaLink>
       ),
       width: '50%'

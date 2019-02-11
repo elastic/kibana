@@ -5,7 +5,7 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   PROCESSOR_EVENT,
@@ -58,5 +58,5 @@ export async function getTransaction(
   };
 
   const resp = await client<Transaction>('search', params);
-  return oc(resp).hits.hits[0]._source();
+  return idx(resp, _ => _.hits.hits[0]._source);
 }

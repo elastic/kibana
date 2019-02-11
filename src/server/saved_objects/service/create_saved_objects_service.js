@@ -49,17 +49,20 @@ export function createSavedObjectsService(server, schema, serializer, migrator) 
         },
       });
     } catch (error) {
-      server.log(['debug', 'savedObjects'], {
-        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
-        es: {
-          resp: error.body,
-          status: error.status,
-        },
-        err: {
-          message: error.message,
-          stack: error.stack,
-        },
-      });
+      server.logWithMetadata(
+        ['debug', 'savedObjects'],
+        `Attempt to write indexTemplate for SavedObjects index failed: ${error.message}`,
+        {
+          es: {
+            resp: error.body,
+            status: error.status,
+          },
+          err: {
+            message: error.message,
+            stack: error.stack,
+          },
+        }
+      );
 
       // We reject with `es.ServiceUnavailable` because writing an index
       // template is a very simple operation so if we get an error here

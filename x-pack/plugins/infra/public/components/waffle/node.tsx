@@ -38,7 +38,8 @@ export class Node extends React.PureComponent<Props, State> {
     const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
     const { isPopoverOpen } = this.state;
     const { metric } = node;
-    const valueMode = squareSize > 110;
+    const valueMode = squareSize > 70;
+    const ellipsisMode = squareSize > 30;
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);
     const value = formatter(rawValue);
@@ -64,11 +65,17 @@ export class Node extends React.PureComponent<Props, State> {
           >
             <SquareOuter color={color}>
               <SquareInner color={color}>
-                {valueMode && (
+                {valueMode ? (
                   <ValueInner>
                     <Label color={color}>{node.name}</Label>
                     <Value color={color}>{value}</Value>
                   </ValueInner>
+                ) : (
+                  ellipsisMode && (
+                    <ValueInner>
+                      <Label color={color}>...</Label>
+                    </ValueInner>
+                  )
                 )}
               </SquareInner>
             </SquareOuter>

@@ -66,7 +66,6 @@ export function checkLicense(xpackLicenseInfo) {
           values: { licenseType, pluginName },
         },
       ),
-      message: `.`,
     };
   }
 

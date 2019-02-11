@@ -11,6 +11,10 @@
   opacity: 0.5;
 }
 
+.gisTocEntry__grab {
+  margin-left: $euiSizeXS;
+}
+
 .gisTocEntry__grab:hover {
   cursor: grab;
 }

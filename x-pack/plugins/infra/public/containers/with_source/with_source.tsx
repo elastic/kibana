@@ -138,7 +138,7 @@ interface WithSourceProps {
 export const WithSource: React.SFC<WithSourceProps> = ({ children }) => (
   <ApolloConsumer>
     {client => (
-      <ConstateContainer pure {...createContainerProps('default', client)}>
+      <ConstateContainer {...createContainerProps('default', client)}>
         {({
           getConfiguredFields,
           getDerivedIndexPattern,

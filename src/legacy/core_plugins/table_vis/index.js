@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import { migrations } from './migrations';
 
 export default function (kibana) {
 
@@ -27,7 +28,8 @@ export default function (kibana) {
         'plugins/table_vis/table_vis'
       ],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+      migrations,
+    },
   });
 
 }

@@ -35,7 +35,7 @@ export class ValidatedRange extends React.Component {
   }
 
   _onRangeChange = (e) => {
-    const sanitizedValue = parseInt(e.target.value, 10);
+    const sanitizedValue = parseFloat(e.target.value, 10);
     let newValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
     // work around for https://github.com/elastic/eui/issues/1458
     // TODO remove once above EUI issue is resolved
@@ -56,11 +56,19 @@ export class ValidatedRange extends React.Component {
   };
 
   render() {
+    const {
+      max,
+      min,
+      value, // eslint-disable-line no-unused-vars
+      onChange, // eslint-disable-line no-unused-vars
+      ...rest
+    } = this.props;
+
     let errorMessage;
     if (!this.state.isValid) {
       errorMessage = (
         <EuiFormErrorText>
-          {`Must be between ${this.props.min} and ${this.props.max}`}
+          {`Must be between ${min} and ${max}`}
         </EuiFormErrorText>
       );
     }
@@ -68,12 +76,11 @@ export class ValidatedRange extends React.Component {
     return (
       <Fragment>
         <EuiRange
-          min={this.props.min}
-          max={this.props.max}
+          min={min}
+          max={max}
           value={this.state.value.toString()}
           onChange={this._onRangeChange}
-          showInput
-          showRange
+          {...rest}
         />
         {errorMessage}
       </Fragment>

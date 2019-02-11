@@ -10,7 +10,6 @@ import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransaction } from '../lib/transactions/get_transaction';
-import { getSpans } from '../lib/transactions/spans/get_spans';
 
 export function initTransactionsApi(server: Server) {
   server.route({
@@ -33,22 +32,6 @@ export function initTransactionsApi(server: Server) {
       } else {
         throw Boom.notFound('Cannot find the requested page');
       }
-    }
-  });
-
-  // TODO: this can be removed by 7.0 when v1 compatability can be dropped
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transactions/{transactionId}/spans`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      }
-    },
-    handler: req => {
-      const { transactionId } = req.params;
-      const setup = setupRequest(req);
-      return getSpans(transactionId, setup);
     }
   });
 }

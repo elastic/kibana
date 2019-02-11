@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ActionsSection renders with no actions selected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiText
     grow={true}
     size="m"
@@ -116,11 +116,11 @@ exports[`ActionsSection renders with no actions selected 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiText
     grow={true}
     size="m"
@@ -235,11 +235,11 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ActionsSection renders with skip_result selected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiText
     grow={true}
     size="m"
@@ -354,5 +354,5 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</React.Fragment>
+</Fragment>
 `;

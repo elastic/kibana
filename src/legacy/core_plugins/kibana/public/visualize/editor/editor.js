@@ -32,6 +32,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+import { migrateAppState } from './lib';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import editorTemplate from './editor.html';
@@ -264,6 +265,12 @@ function VisEditor(
   const $state = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
+
+    // Initializing appState does two things - first it translates the defaults into AppState,
+    // second it updates appState based on the url (the url trumps the defaults). This means if
+    // we update the state format at all and want to handle BWC, we must not only migrate the
+    // data stored with saved vis, but also any old state in the url.
+    migrateAppState(appState);
 
     // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
     // defaults applied. If the url was from a previous session which included modifications to the

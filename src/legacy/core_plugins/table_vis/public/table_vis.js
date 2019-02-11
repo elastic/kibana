@@ -102,6 +102,8 @@ function TableVisTypeProvider(Private) {
           title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
             defaultMessage: 'Split Table',
           }),
+          min: 0,
+          max: 1,
           aggFilter: ['!filter']
         }
       ])

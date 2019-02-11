@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 
@@ -43,16 +44,31 @@ export function ConnectionStatus({ isConnected }) {
     });
   }
 
+  const seedNodeTooltip = i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedToolTip', {
+    defaultMessage: "Ensure the seed nodes are configured with the remote cluster's transport port, not the http port.",
+  });
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        {icon}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {icon}
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiText>
+              {message}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiText>
-          {message}
-        </EuiText>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          color="subdued"
+          content={seedNodeTooltip}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

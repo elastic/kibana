@@ -7,7 +7,6 @@
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { LOGSTASH } from '../../../../common/constants';
 
 import {
@@ -20,6 +19,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiToolTip
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -139,15 +139,14 @@ function LogstashPanelUi(props) {
                   { pipelineCount: props.pipeline_count }
                   )}
                 >
-                  <Tooltip
-                    text={props.intl.formatMessage({
+                  <EuiToolTip
+                    content={props.intl.formatMessage({
                       id: 'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
                       defaultMessage: 'Beta Feature' })}
-                    placement="bottom"
-                    trigger="hover"
+                    position="bottom"
                   >
                     <span className="kuiIcon fa-flask betaIcon" />
-                  </Tooltip>
+                  </EuiToolTip>
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel"
                     defaultMessage="Pipelines: {pipelineCount}"

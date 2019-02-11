@@ -120,5 +120,5 @@ Object.defineProperties(Field.prototype, {
 });
 
 Field.prototype.routes = {
-  edit: '/management/kibana/indices/{{indexPattern.id}}/field/{{name}}'
+  edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}'
 };

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { BuildHierarchicalDataProvider } from '../../agg_response/hierarchical/build_hierarchical_data';
-import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
+import { buildHierarchicalData } from '../../agg_response/hierarchical/build_hierarchical_data';
+import { buildPointSeriesData } from '../../agg_response/point_series/point_series';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from './legacy';
 
@@ -78,18 +78,14 @@ const handlerFunction =  function (convertTable) {
   };
 };
 
-const VislibSeriesResponseHandlerProvider = function (Private) {
-  const buildPointSeriesData = Private(AggResponsePointSeriesProvider);
-
+const VislibSeriesResponseHandlerProvider = function () {
   return {
     name: 'vislib_series',
     handler: handlerFunction(buildPointSeriesData)
   };
 };
 
-const VislibSlicesResponseHandlerProvider = function (Private) {
-  const buildHierarchicalData = Private(BuildHierarchicalDataProvider);
-
+const VislibSlicesResponseHandlerProvider = function () {
   return {
     name: 'vislib_slices',
     handler: handlerFunction(buildHierarchicalData)

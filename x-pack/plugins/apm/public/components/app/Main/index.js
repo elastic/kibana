@@ -11,6 +11,7 @@ import { routes } from './routeConfig';
 import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
 import { px, units, unit, topNavHeight } from '../../../style/variables';
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
+import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
 
 const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
@@ -21,12 +22,13 @@ const MainContainer = styled.div`
 export default function Main() {
   return (
     <MainContainer>
+      <UpdateBreadcrumbs />
       <Route component={ConnectRouterToRedux} />
       <Route component={ScrollToTopOnPathChange} />
       {routes.map((route, i) => {
-        return route.switch ? (
+        return route.switchRoutes ? (
           <Switch key={i}>
-            {route.routes.map((route, i) => (
+            {route.switchRoutes.map((route, i) => (
               <Route key={i} {...route} />
             ))}
           </Switch>

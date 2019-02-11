@@ -22,7 +22,6 @@ import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
@@ -230,8 +229,6 @@ app.directive('dashboardApp', function ($injector) {
         $scope.refresh();
       };
 
-      updateTheme();
-
       $scope.indexPatterns = [];
 
       $scope.onPanelRemoved = (panelIndex) => {
@@ -433,11 +430,6 @@ app.directive('dashboardApp', function ($injector) {
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({
           anchorElement,
-          darkTheme: dashboardStateManager.getDarkTheme(),
-          onDarkThemeChange: (isChecked) => {
-            dashboardStateManager.setDarkTheme(isChecked);
-            updateTheme();
-          },
           useMargins: dashboardStateManager.getUseMargins(),
           onUseMarginsChange: (isChecked) => {
             dashboardStateManager.setUseMargins(isChecked);
@@ -475,26 +467,7 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.$on('$destroy', () => {
         dashboardStateManager.destroy();
-
-        // Remove dark theme to keep it from affecting the appearance of other apps.
-        setLightTheme();
       });
-
-      function updateTheme() {
-        dashboardStateManager.getDarkTheme() ? setDarkTheme() : setLightTheme();
-      }
-
-      function setDarkTheme() {
-        chrome.removeApplicationClass(['theme-light']);
-        chrome.addApplicationClass('theme-dark');
-        applyTheme('dark');
-      }
-
-      function setLightTheme() {
-        chrome.removeApplicationClass(['theme-dark']);
-        chrome.addApplicationClass('theme-light');
-        applyTheme('light');
-      }
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
         dashboardStateManager.addNewPanel($route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM], 'visualization');

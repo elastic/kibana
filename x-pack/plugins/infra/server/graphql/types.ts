@@ -37,7 +37,7 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // ====================================================
 
 export interface Query {
-  /** Get an infrastructure data source by id */
+  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
   source: InfraSource;
   /** Get a list of all infrastructure data sources */
   allSources: InfraSource[];
@@ -46,6 +46,10 @@ export interface Query {
 export interface InfraSource {
   /** The id of the source */
   id: string;
+  /** The version number the source configuration was last persisted with */
+  version?: number | null;
+  /** The timestamp the source configuration was last persisted at */
+  updatedAt?: number | null;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
@@ -65,6 +69,10 @@ export interface InfraSource {
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description: string;
   /** The alias to read metric data from */
   metricAlias: string;
   /** The alias to read log data from */
@@ -78,8 +86,6 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -239,6 +245,30 @@ export interface InfraDataPoint {
   value?: number | null;
 }
 
+export interface Mutation {
+  /** Create a new source of infrastructure data */
+  createSource: CreateSourceResult;
+  /** Modify an existing source using the given sequence of update operations */
+  updateSource: UpdateSourceResult;
+  /** Delete a source of infrastructure data */
+  deleteSource: DeleteSourceResult;
+}
+/** The result of a successful source creation */
+export interface CreateSourceResult {
+  /** The source that was created */
+  source: InfraSource;
+}
+/** The result of a sequence of source update operations */
+export interface UpdateSourceResult {
+  /** The source after the operations were performed */
+  source: InfraSource;
+}
+/** The result of a source deletion operations */
+export interface DeleteSourceResult {
+  /** The id of the source that was deleted */
+  id: string;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -279,6 +309,73 @@ export interface InfraPathFilterInput {
 export interface InfraMetricInput {
   /** The type of metric */
   type: InfraMetricType;
+}
+/** The source to be created */
+export interface CreateSourceInput {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description?: string | null;
+  /** The alias to read metric data from */
+  metricAlias?: string | null;
+  /** The alias to read log data from */
+  logAlias?: string | null;
+  /** The field mapping to use for this source */
+  fields?: CreateSourceFieldsInput | null;
+}
+/** The mapping of semantic fields of the source to be created */
+export interface CreateSourceFieldsInput {
+  /** The field to identify a container by */
+  container?: string | null;
+  /** The fields to identify a host by */
+  host?: string | null;
+  /** The field to identify a pod by */
+  pod?: string | null;
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker?: string | null;
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp?: string | null;
+}
+/** The update operations to be performed */
+export interface UpdateSourceInput {
+  /** The name update operation to be performed */
+  setName?: UpdateSourceNameInput | null;
+  /** The description update operation to be performed */
+  setDescription?: UpdateSourceDescriptionInput | null;
+  /** The alias update operation to be performed */
+  setAliases?: UpdateSourceAliasInput | null;
+  /** The field update operation to be performed */
+  setFields?: UpdateSourceFieldsInput | null;
+}
+/** A name update operation */
+export interface UpdateSourceNameInput {
+  /** The new name to be set */
+  name: string;
+}
+/** A description update operation */
+export interface UpdateSourceDescriptionInput {
+  /** The new description to be set */
+  description: string;
+}
+/** An alias update operation */
+export interface UpdateSourceAliasInput {
+  /** The new log index pattern or alias to bet set */
+  logAlias?: string | null;
+  /** The new metric index pattern or alias to bet set */
+  metricAlias?: string | null;
+}
+/** A field update operations */
+export interface UpdateSourceFieldsInput {
+  /** The new container field to be set */
+  container?: string | null;
+  /** The new host field to be set */
+  host?: string | null;
+  /** The new pod field to be set */
+  pod?: string | null;
+  /** The new tiebreaker field to be set */
+  tiebreaker?: string | null;
+  /** The new timestamp field to be set */
+  timestamp?: string | null;
 }
 
 // ====================================================
@@ -347,6 +444,22 @@ export interface NodesInfraResponseArgs {
   path: InfraPathInput[];
 
   metric: InfraMetricInput;
+}
+export interface CreateSourceMutationArgs {
+  /** The id of the source */
+  id: string;
+
+  source: CreateSourceInput;
+}
+export interface UpdateSourceMutationArgs {
+  /** The id of the source */
+  id: string;
+  /** A sequence of update operations */
+  changes: UpdateSourceInput[];
+}
+export interface DeleteSourceMutationArgs {
+  /** The id of the source */
+  id: string;
 }
 
 // ====================================================
@@ -438,7 +551,7 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = never> {
-    /** Get an infrastructure data source by id */
+    /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
     source?: SourceResolver<InfraSource, TypeParent, Context>;
     /** Get a list of all infrastructure data sources */
     allSources?: AllSourcesResolver<InfraSource[], TypeParent, Context>;
@@ -466,6 +579,10 @@ export namespace InfraSourceResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraSource> {
     /** The id of the source */
     id?: IdResolver<string, TypeParent, Context>;
+    /** The version number the source configuration was last persisted with */
+    version?: VersionResolver<number | null, TypeParent, Context>;
+    /** The timestamp the source configuration was last persisted at */
+    updatedAt?: UpdatedAtResolver<number | null, TypeParent, Context>;
     /** The raw configuration of the source */
     configuration?: ConfigurationResolver<InfraSourceConfiguration, TypeParent, Context>;
     /** The status of the source */
@@ -489,6 +606,16 @@ export namespace InfraSourceResolvers {
     Parent,
     Context
   >;
+  export type VersionResolver<
+    R = number | null,
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedAtResolver<
+    R = number | null,
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type ConfigurationResolver<
     R = InfraSourceConfiguration,
     Parent = InfraSource,
@@ -589,6 +716,10 @@ export namespace InfraSourceResolvers {
 /** A set of configuration options for an infrastructure data source */
 export namespace InfraSourceConfigurationResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraSourceConfiguration> {
+    /** The name of the data source */
+    name?: NameResolver<string, TypeParent, Context>;
+    /** A description of the data source */
+    description?: DescriptionResolver<string, TypeParent, Context>;
     /** The alias to read metric data from */
     metricAlias?: MetricAliasResolver<string, TypeParent, Context>;
     /** The alias to read log data from */
@@ -597,6 +728,16 @@ export namespace InfraSourceConfigurationResolvers {
     fields?: FieldsResolver<InfraSourceFields, TypeParent, Context>;
   }
 
+  export type NameResolver<
+    R = string,
+    Parent = InfraSourceConfiguration,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type DescriptionResolver<
+    R = string,
+    Parent = InfraSourceConfiguration,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
   export type MetricAliasResolver<
     R = string,
     Parent = InfraSourceConfiguration,
@@ -620,8 +761,6 @@ export namespace InfraSourceFieldsResolvers {
     container?: ContainerResolver<string, TypeParent, Context>;
     /** The fields to identify a host by */
     host?: HostResolver<string, TypeParent, Context>;
-    /** The fields that may contain the log event message. The first field found win. */
-    message?: MessageResolver<string[], TypeParent, Context>;
     /** The field to identify a pod by */
     pod?: PodResolver<string, TypeParent, Context>;
     /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -637,11 +776,6 @@ export namespace InfraSourceFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = string,
-    Parent = InfraSourceFields,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type MessageResolver<
-    R = string[],
     Parent = InfraSourceFields,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
@@ -1049,7 +1183,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    label?: DisplayNameResolver<string, TypeParent, Context>;
+    label?: LabelResolver<string, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1057,11 +1191,11 @@ export namespace InfraNodePathResolvers {
     Parent,
     Context
   >;
-  export type DisplayNameResolver<
-    R = string,
-    Parent = InfraNodePath,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
+  export type LabelResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace InfraNodeMetricResolvers {
@@ -1136,6 +1270,90 @@ export namespace InfraDataPointResolvers {
   export type ValueResolver<
     R = number | null,
     Parent = InfraDataPoint,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace MutationResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = never> {
+    /** Create a new source of infrastructure data */
+    createSource?: CreateSourceResolver<CreateSourceResult, TypeParent, Context>;
+    /** Modify an existing source using the given sequence of update operations */
+    updateSource?: UpdateSourceResolver<UpdateSourceResult, TypeParent, Context>;
+    /** Delete a source of infrastructure data */
+    deleteSource?: DeleteSourceResolver<DeleteSourceResult, TypeParent, Context>;
+  }
+
+  export type CreateSourceResolver<
+    R = CreateSourceResult,
+    Parent = never,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, CreateSourceArgs>;
+  export interface CreateSourceArgs {
+    /** The id of the source */
+    id: string;
+
+    source: CreateSourceInput;
+  }
+
+  export type UpdateSourceResolver<
+    R = UpdateSourceResult,
+    Parent = never,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, UpdateSourceArgs>;
+  export interface UpdateSourceArgs {
+    /** The id of the source */
+    id: string;
+    /** A sequence of update operations */
+    changes: UpdateSourceInput[];
+  }
+
+  export type DeleteSourceResolver<
+    R = DeleteSourceResult,
+    Parent = never,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, DeleteSourceArgs>;
+  export interface DeleteSourceArgs {
+    /** The id of the source */
+    id: string;
+  }
+}
+/** The result of a successful source creation */
+export namespace CreateSourceResultResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = CreateSourceResult> {
+    /** The source that was created */
+    source?: SourceResolver<InfraSource, TypeParent, Context>;
+  }
+
+  export type SourceResolver<
+    R = InfraSource,
+    Parent = CreateSourceResult,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** The result of a sequence of source update operations */
+export namespace UpdateSourceResultResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = UpdateSourceResult> {
+    /** The source after the operations were performed */
+    source?: SourceResolver<InfraSource, TypeParent, Context>;
+  }
+
+  export type SourceResolver<
+    R = InfraSource,
+    Parent = UpdateSourceResult,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** The result of a source deletion operations */
+export namespace DeleteSourceResultResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = DeleteSourceResult> {
+    /** The id of the source that was deleted */
+    id?: IdResolver<string, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string,
+    Parent = DeleteSourceResult,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

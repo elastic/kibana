@@ -3,7 +3,7 @@
 exports[`ScopeSection don't render when no partitioning fields 1`] = `""`;
 
 exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut when no filter list IDs 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="m"
     textTransform="none"
@@ -37,17 +37,15 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <NoPermissionCallOut />
-  </React.Fragment>
+  <NoPermissionCallOut />
   <EuiSpacer
     size="xxl"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="m"
     textTransform="none"
@@ -81,31 +79,29 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <ScopeExpression
-      enabled={false}
-      fieldName="domain"
-      filterId="web_domains"
-      filterListIds={
-        Array [
-          "web_domains",
-          "safe_domains",
-          "uk_domains",
-        ]
-      }
-      filterType="include"
-      key="0"
-      updateScope={[MockFunction]}
-    />
-  </React.Fragment>
+  <ScopeExpression
+    enabled={false}
+    fieldName="domain"
+    filterId="web_domains"
+    filterListIds={
+      Array [
+        "web_domains",
+        "safe_domains",
+        "uk_domains",
+      ]
+    }
+    filterType="include"
+    key="0"
+    updateScope={[MockFunction]}
+  />
   <EuiSpacer
     size="xxl"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ScopeSection renders when enabled with scope supplied 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="m"
     textTransform="none"
@@ -139,31 +135,29 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <ScopeExpression
-      enabled={true}
-      fieldName="domain"
-      filterId="uk_domains"
-      filterListIds={
-        Array [
-          "web_domains",
-          "safe_domains",
-          "uk_domains",
-        ]
-      }
-      filterType="include"
-      key="0"
-      updateScope={[MockFunction]}
-    />
-  </React.Fragment>
+  <ScopeExpression
+    enabled={true}
+    fieldName="domain"
+    filterId="uk_domains"
+    filterListIds={
+      Array [
+        "web_domains",
+        "safe_domains",
+        "uk_domains",
+      ]
+    }
+    filterType="include"
+    key="0"
+    updateScope={[MockFunction]}
+  />
   <EuiSpacer
     size="xxl"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ScopeSection renders when not enabled 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="m"
     textTransform="none"
@@ -200,11 +194,11 @@ exports[`ScopeSection renders when not enabled 1`] = `
   <EuiSpacer
     size="xxl"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTitle
     size="m"
     textTransform="none"
@@ -238,11 +232,9 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <NoFilterListsCallOut />
-  </React.Fragment>
+  <NoFilterListsCallOut />
   <EuiSpacer
     size="xxl"
   />
-</React.Fragment>
+</Fragment>
 `;

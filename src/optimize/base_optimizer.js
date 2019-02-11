@@ -44,9 +44,19 @@ const STATS_WARNINGS_FILTER = new RegExp([
   '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
 
+function recursiveIssuer(m) {
+  if (m.issuer) {
+    return recursiveIssuer(m.issuer);
+  } else if (m.name) {
+    return m.name;
+  } else {
+    return false;
+  }
+}
+
 export default class BaseOptimizer {
   constructor(opts) {
-    this.log = opts.log || (() => null);
+    this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
     this.profile = opts.profile || false;
 
@@ -239,7 +249,15 @@ export default class BaseOptimizer {
       node: { fs: 'empty' },
       context: fromRoot('.'),
       cache: true,
-      entry: this.uiBundles.toWebpackEntries(),
+      entry: {
+        ...this.uiBundles.toWebpackEntries(),
+        light_theme: [
+          require.resolve('../ui/public/styles/bootstrap_light.less'),
+        ],
+        dark_theme: [
+          require.resolve('../ui/public/styles/bootstrap_dark.less'),
+        ],
+      },
 
       devtool: this.sourceMaps,
       profile: this.profile || false,
@@ -257,9 +275,21 @@ export default class BaseOptimizer {
           cacheGroups: {
             commons: {
               name: 'commons',
-              chunks: 'initial',
+              chunks: chunk => chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
               minChunks: 2,
               reuseExistingChunk: true
+            },
+            light_theme: {
+              name: 'light_theme',
+              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
+              chunks: 'all',
+              enforce: true
+            },
+            dark_theme: {
+              name: 'dark_theme',
+              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
+              chunks: 'all',
+              enforce: true
             }
           }
         },
@@ -270,7 +300,7 @@ export default class BaseOptimizer {
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
-          log: this.log
+          logWithMetadata: this.logWithMetadata
         }),
 
         new MiniCssExtractPlugin({

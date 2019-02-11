@@ -15,6 +15,7 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter }) =>
     body: {
       fetch_size: count,
       query: query,
+      client_id: 'canvas',
       filter: {
         bool: {
           must: [{ match_all: {} }, ...buildBoolArray(filter)],

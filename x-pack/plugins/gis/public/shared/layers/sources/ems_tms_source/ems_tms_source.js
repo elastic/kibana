@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { TMSSource } from '../tms_source';
+import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import {
   EuiText,
@@ -14,7 +14,7 @@ import {
 import _ from 'lodash';
 
 
-export class EMSTMSSource extends TMSSource {
+export class EMSTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_TMS';
   static title = 'Elastic Maps Service tiles';
@@ -71,6 +71,10 @@ export class EMSTMSSource extends TMSSource {
   }
 
   _getTMSOptions() {
+    if(!this._emsTileServices) {
+      return;
+    }
+
     return this._emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
@@ -96,9 +100,11 @@ export class EMSTMSSource extends TMSSource {
 
   async getAttributions() {
     const service = this._getTMSOptions();
-    const attributions = service.attributionMarkdown.split('|');
+    if (!service || !service.attributionMarkdown) {
+      return [];
+    }
 
-    return attributions.map((attribution) => {
+    return service.attributionMarkdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;
@@ -112,8 +118,9 @@ export class EMSTMSSource extends TMSSource {
 
   getUrlTemplate() {
     const service = this._getTMSOptions();
+    if (!service || !service.url) {
+      throw new Error('Can not generate EMS TMS url template');
+    }
     return service.url;
   }
-
-
 }

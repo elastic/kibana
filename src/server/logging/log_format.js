@@ -162,11 +162,6 @@ export default class TransformObjStream extends Stream.Transform {
     else if (logWithMetadata.isLogEvent(event.data)) {
       _.assign(data, logWithMetadata.getLogEventData(event.data));
     }
-    else if (_.isPlainObject(event.data) && event.data.tmpl) {
-      _.assign(data, event.data);
-      data.tmpl = undefined;
-      data.message = _.template(event.data.tmpl)(event.data);
-    }
     else {
       data.message = _.isString(event.data) ? event.data : inspect(event.data);
     }

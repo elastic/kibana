@@ -12,6 +12,7 @@ import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
 
 import {
+  EuiButtonIcon,
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
@@ -70,7 +71,9 @@ export class LayerPanel  extends React.Component {
         <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              {selectedLayer.getIcon()}
+              <EuiButtonIcon iconType={selectedLayer.getLayerTypeIconName()} iconSide="right" onClick={this.props.fitToBounds}>
+                Fit
+              </EuiButtonIcon>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">

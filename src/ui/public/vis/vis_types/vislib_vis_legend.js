@@ -23,7 +23,7 @@ import { VislibLibDataProvider } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';
 import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
-
+import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
@@ -106,7 +106,7 @@ uiModules.get('kibana')
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = visFilters.filter({ data: legendData.values }, { simulate: true });
+          const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
           return filters.length;
         };
 
@@ -157,6 +157,8 @@ uiModules.get('kibana')
           if (vislibVis.visConfig) {
             $scope.getColor = vislibVis.visConfig.data.getColorFunc();
           }
+
+          $scope.tableAggs = getTableAggs($scope.vis);
         }
 
         // Most of these functions were moved directly from the old Legend class. Not a fan of this.

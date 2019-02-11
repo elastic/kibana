@@ -29,18 +29,10 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     fields: Joi.object({
       container: Joi.string(),
       host: Joi.string(),
-      message: Joi.array()
-        .items(Joi.string())
-        .single(),
       pod: Joi.string(),
       tiebreaker: Joi.string(),
       timestamp: Joi.string(),
     }),
-  });
-
-  const InfraSourceConfigSchema = InfraDefaultSourceConfigSchema.keys({
-    metricAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'metricAlias').required(),
-    logAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'logAlias').required(),
   });
 
   const InfraRootConfigSchema = Joi.object({
@@ -53,9 +45,15 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
       .keys({
         default: InfraDefaultSourceConfigSchema,
       })
-      .pattern(/.*/, InfraSourceConfigSchema)
       .default(),
   }).default();
 
   return InfraRootConfigSchema;
 };
+
+export const getDeprecations = () => [];
+
+// interface DeprecationHelpers {
+//   rename(oldKey: string, newKey: string): (settings: unknown, log: unknown) => void;
+//   unused(oldKey: string): (settings: unknown, log: unknown) => void;
+// }

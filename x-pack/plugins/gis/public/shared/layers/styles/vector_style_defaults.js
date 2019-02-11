@@ -8,7 +8,7 @@ import { VectorStyle } from './vector_style';
 import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-export const DEFAULT_ALPHA_VALUE = 1;
+
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
 
@@ -43,7 +43,6 @@ export function getDefaultStaticProperties(mapColors = []) {
         size: 10
       }
     },
-    alphaValue: DEFAULT_ALPHA_VALUE
   };
 }
 
@@ -75,6 +74,5 @@ export function getDefaultDynamicProperties() {
         maxSize: DEFAULT_MAX_SIZE
       }
     },
-    alphaValue: DEFAULT_ALPHA_VALUE
   };
 }

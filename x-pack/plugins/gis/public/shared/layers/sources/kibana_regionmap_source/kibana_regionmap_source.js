@@ -5,14 +5,14 @@
  */
 
 import _ from 'lodash';
-import { VectorSource } from '../vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import {
   EuiText,
 } from '@elastic/eui';
 import { CreateSourceEditor } from './create_source_editor';
 
-export class KibanaRegionmapSource extends VectorSource {
+export class KibanaRegionmapSource extends AbstractVectorSource {
 
   static type = 'REGIONMAP_FILE';
   static title = 'Custom vector shapes';
@@ -62,7 +62,7 @@ export class KibanaRegionmapSource extends VectorSource {
 
   async getGeoJsonWithMeta() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
-    const featureCollection = await VectorSource.getGeoJson(fileSource, fileSource.url);
+    const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fileSource.url);
     return {
       data: featureCollection
     };

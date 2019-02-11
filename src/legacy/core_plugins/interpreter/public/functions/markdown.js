@@ -46,12 +46,10 @@ export const kibanaMarkdown = () => ({
       type: 'render',
       as: 'visualization',
       value: {
+        visType: 'markdown',
         visConfig: {
-          type: 'markdown',
-          params: {
-            markdown: args.spec,
-            ...params,
-          }
+          markdown: args.spec,
+          ...params,
         },
       }
     };

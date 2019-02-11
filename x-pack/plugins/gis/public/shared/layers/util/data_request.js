@@ -9,14 +9,6 @@ export class DataRequest {
     this._descriptor = descriptor;
   }
 
-  hasLoadError() {
-    return !!this._descriptor.dataHasLoadError;
-  }
-
-  getLoadError() {
-    return this._descriptor.dataLoadError;
-  }
-
   getData() {
     return this._descriptor.data;
   }

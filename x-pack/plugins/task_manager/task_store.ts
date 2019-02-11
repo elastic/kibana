@@ -41,7 +41,6 @@ export interface RemoveResult {
 export interface RawTaskDoc {
   _id: string;
   _index: string;
-  _type: string;
   _version: number;
   _source: {
     type: string;
@@ -126,7 +125,7 @@ export class TaskStore {
         body: {
           index_patterns: [this.index],
           mappings: {
-            _doc: {
+            [DOC_TYPE]: {
               dynamic: 'strict',
               properties,
             },
@@ -173,7 +172,6 @@ export class TaskStore {
       id,
       body,
       index: this.index,
-      type: DOC_TYPE,
       refresh: true,
     });
 
@@ -249,7 +247,6 @@ export class TaskStore {
       },
       id: doc.id,
       index: this.index,
-      type: DOC_TYPE,
       version: doc.version,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
@@ -272,7 +269,6 @@ export class TaskStore {
     const result = await this.callCluster('delete', {
       id,
       index: this.index,
-      type: DOC_TYPE,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
       refresh: true,
@@ -294,7 +290,6 @@ export class TaskStore {
       : queryOnlyTasks;
 
     const result = await this.callCluster('search', {
-      type: DOC_TYPE,
       index: this.index,
       ignoreUnavailable: true,
       body: {
@@ -355,7 +350,6 @@ function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
     _id: doc.id,
     _index: index,
     _source: { type, task },
-    _type: DOC_TYPE,
     _version: doc.version,
   };
 }

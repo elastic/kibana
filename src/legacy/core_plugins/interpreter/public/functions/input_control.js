@@ -40,10 +40,8 @@ export const inputControlVis = () => ({
       type: 'render',
       as: 'visualization',
       value: {
-        visConfig: {
-          type: 'input_controls_vis',
-          params: params
-        },
+        visType: 'input_control_vis',
+        visConfig: params
       }
     };
   }

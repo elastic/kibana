@@ -32,6 +32,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_SHRINK_ENABLED,
 } from '../../../../store/constants';
+import { SetPriorityInput } from '../set_priority_input';
 import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
@@ -344,6 +345,13 @@ class WarmPhaseUi extends PureComponent {
                 ) : null}
               </div>
             </EuiDescribedFormGroup>
+            <SetPriorityInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_WARM}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+            />
           </Fragment>
         ) : null}
       </Fragment>

@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       browser.setWindowSize(1600, 1000);
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('flstest', null);
     });
 

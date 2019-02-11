@@ -29,7 +29,7 @@ describe('tooltipFormatter', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    tooltipFormatter = Private(PointSeriesTooltipFormatter);
+    tooltipFormatter = Private(PointSeriesTooltipFormatter)();
   }));
 
   function cell($row, i) {

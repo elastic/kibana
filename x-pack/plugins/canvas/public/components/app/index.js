@@ -15,7 +15,7 @@ import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_func
 import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
-import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
+
 import {
   argTypeRegistry,
   datasourceRegistry,
@@ -38,7 +38,6 @@ const mapStateToProps = state => {
 
 const types = {
   elements: elementsRegistry,
-  renderers: renderFunctionsRegistry,
   transformUIs: transformRegistry,
   datasourceUIs: datasourceRegistry,
   modelUIs: modelRegistry,

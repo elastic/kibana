@@ -47,20 +47,20 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.removeIndexPattern();
     });
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -267,7 +267,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');

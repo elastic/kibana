@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
 import { TextScale } from '../../../../common/log_text_scale';
@@ -101,7 +102,18 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const { targetId } = this.state;
     const hasItems = items.length > 0;
     if (isReloading && !hasItems) {
-      return <InfraLoadingPanel height={height} width={width} text="Loading entries" />;
+      return (
+        <InfraLoadingPanel
+          height={height}
+          width={width}
+          text={
+            <FormattedMessage
+              id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
+              defaultMessage="Loading entries"
+            />
+          }
+        />
+      );
     } else if (!hasItems) {
       return <LogTextStreamEmptyView reload={this.handleReload} />;
     } else {

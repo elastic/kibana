@@ -570,7 +570,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     urls: [
       {
         // eslint-disable-next-line max-len
-        fmt: '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>',
+        fmt: '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>&lines_to_sample=<%=lines_to_sample%>',
         req: {
           charset: {
             type: 'string'
@@ -600,6 +600,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'string'
           },
           timestamp_format: {
+            type: 'string'
+          },
+          lines_to_sample: {
             type: 'string'
           },
         }

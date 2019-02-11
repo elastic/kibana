@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { TMSSource } from '../tms_source';
+import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { EuiText } from '@elastic/eui';
 
-export class KibanaTilemapSource extends  TMSSource {
+export class KibanaTilemapSource extends  AbstractTMSSource {
 
   static type = 'KIBANA_TILEMAP';
   static title = 'Custom Tile Map Service';

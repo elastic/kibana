@@ -1,361 +1,217 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Error v2 ERROR_CULPRIT 1`] = `"handleOopsie"`;
+exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
-exports[`Error v2 ERROR_EXC_HANDLED 1`] = `false`;
+exports[`Error ERROR_EXC_HANDLED 1`] = `false`;
 
-exports[`Error v2 ERROR_EXC_MESSAGE 1`] = `"sonic boom"`;
+exports[`Error ERROR_EXC_MESSAGE 1`] = `"sonic boom"`;
 
-exports[`Error v2 ERROR_EXC_STACKTRACE 1`] = `undefined`;
+exports[`Error ERROR_EXC_STACKTRACE 1`] = `undefined`;
 
-exports[`Error v2 ERROR_GROUP_ID 1`] = `"grouping key"`;
+exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
-exports[`Error v2 ERROR_LOG_MESSAGE 1`] = `undefined`;
+exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
-exports[`Error v2 ERROR_LOG_STACKTRACE 1`] = `undefined`;
+exports[`Error ERROR_LOG_STACKTRACE 1`] = `undefined`;
 
-exports[`Error v2 METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
-exports[`Error v2 METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
+exports[`Error METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
-exports[`Error v2 METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
+exports[`Error METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
 
-exports[`Error v2 METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+exports[`Error METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
 
-exports[`Error v2 METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 
-exports[`Error v2 METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
-exports[`Error v2 PARENT_ID 1`] = `"parentId"`;
+exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
-exports[`Error v2 PROCESSOR_EVENT 1`] = `"error"`;
+exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Error v2 PROCESSOR_NAME 1`] = `"error"`;
+exports[`Error PARENT_ID 1`] = `"parentId"`;
 
-exports[`Error v2 REQUEST_METHOD 1`] = `undefined`;
+exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
-exports[`Error v2 REQUEST_URL_FULL 1`] = `undefined`;
+exports[`Error PROCESSOR_NAME 1`] = `"error"`;
 
-exports[`Error v2 SERVICE_AGENT_NAME 1`] = `"agent name"`;
+exports[`Error SERVICE_AGENT_NAME 1`] = `"agent name"`;
 
-exports[`Error v2 SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+exports[`Error SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
 
-exports[`Error v2 SERVICE_NAME 1`] = `"service name"`;
+exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
-exports[`Error v2 SPAN_DURATION 1`] = `undefined`;
+exports[`Error SPAN_DURATION 1`] = `undefined`;
 
-exports[`Error v2 SPAN_HEX_ID 1`] = `undefined`;
+exports[`Error SPAN_ID 1`] = `undefined`;
 
-exports[`Error v2 SPAN_ID 1`] = `undefined`;
+exports[`Error SPAN_NAME 1`] = `undefined`;
 
-exports[`Error v2 SPAN_NAME 1`] = `undefined`;
+exports[`Error SPAN_SQL 1`] = `undefined`;
 
-exports[`Error v2 SPAN_SQL 1`] = `undefined`;
+exports[`Error SPAN_START 1`] = `undefined`;
 
-exports[`Error v2 SPAN_START 1`] = `undefined`;
+exports[`Error SPAN_TYPE 1`] = `undefined`;
 
-exports[`Error v2 SPAN_TYPE 1`] = `undefined`;
+exports[`Error TRACE_ID 1`] = `"trace id"`;
 
-exports[`Error v2 TRACE_ID 1`] = `"trace id"`;
+exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
-exports[`Error v2 TRANSACTION_DURATION 1`] = `undefined`;
+exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
-exports[`Error v2 TRANSACTION_ID 1`] = `"transaction id"`;
+exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 
-exports[`Error v2 TRANSACTION_NAME 1`] = `undefined`;
+exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 
-exports[`Error v2 TRANSACTION_RESULT 1`] = `undefined`;
+exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
 
-exports[`Error v2 TRANSACTION_SAMPLED 1`] = `undefined`;
+exports[`Error TRANSACTION_TYPE 1`] = `undefined`;
 
-exports[`Error v2 TRANSACTION_TYPE 1`] = `undefined`;
+exports[`Error URL_FULL 1`] = `undefined`;
 
-exports[`Error v2 USER_ID 1`] = `undefined`;
+exports[`Error USER_ID 1`] = `undefined`;
 
-exports[`Span v1 ERROR_CULPRIT 1`] = `undefined`;
+exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
-exports[`Span v1 ERROR_EXC_HANDLED 1`] = `undefined`;
+exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
 
-exports[`Span v1 ERROR_EXC_MESSAGE 1`] = `undefined`;
+exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 
-exports[`Span v1 ERROR_EXC_STACKTRACE 1`] = `undefined`;
+exports[`Span ERROR_EXC_STACKTRACE 1`] = `undefined`;
 
-exports[`Span v1 ERROR_GROUP_ID 1`] = `undefined`;
+exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
-exports[`Span v1 ERROR_LOG_MESSAGE 1`] = `undefined`;
+exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
-exports[`Span v1 ERROR_LOG_STACKTRACE 1`] = `undefined`;
+exports[`Span ERROR_LOG_STACKTRACE 1`] = `undefined`;
 
-exports[`Span v1 METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
-exports[`Span v1 METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
+exports[`Span METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
-exports[`Span v1 METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
+exports[`Span METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
 
-exports[`Span v1 METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+exports[`Span METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
 
-exports[`Span v1 METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 
-exports[`Span v1 METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
-exports[`Span v1 PARENT_ID 1`] = `undefined`;
+exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
-exports[`Span v1 PROCESSOR_EVENT 1`] = `"span"`;
+exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Span v1 PROCESSOR_NAME 1`] = `"transaction"`;
+exports[`Span PARENT_ID 1`] = `"parentId"`;
 
-exports[`Span v1 REQUEST_METHOD 1`] = `undefined`;
+exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
-exports[`Span v1 REQUEST_URL_FULL 1`] = `undefined`;
+exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
 
-exports[`Span v1 SERVICE_AGENT_NAME 1`] = `"agent name"`;
+exports[`Span SERVICE_AGENT_NAME 1`] = `"agent name"`;
 
-exports[`Span v1 SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+exports[`Span SERVICE_LANGUAGE_NAME 1`] = `undefined`;
 
-exports[`Span v1 SERVICE_NAME 1`] = `"service name"`;
+exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
-exports[`Span v1 SPAN_DURATION 1`] = `1337`;
+exports[`Span SPAN_DURATION 1`] = `1337`;
 
-exports[`Span v1 SPAN_HEX_ID 1`] = `undefined`;
+exports[`Span SPAN_ID 1`] = `"span id"`;
 
-exports[`Span v1 SPAN_ID 1`] = `1337`;
+exports[`Span SPAN_NAME 1`] = `"span name"`;
 
-exports[`Span v1 SPAN_NAME 1`] = `"span name"`;
+exports[`Span SPAN_SQL 1`] = `"db statement"`;
 
-exports[`Span v1 SPAN_SQL 1`] = `"db statement"`;
+exports[`Span SPAN_START 1`] = `undefined`;
 
-exports[`Span v1 SPAN_START 1`] = `1337`;
+exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
-exports[`Span v1 SPAN_TYPE 1`] = `"span type"`;
+exports[`Span TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span v1 TRACE_ID 1`] = `undefined`;
+exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
-exports[`Span v1 TRANSACTION_DURATION 1`] = `undefined`;
+exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
-exports[`Span v1 TRANSACTION_ID 1`] = `"transaction id"`;
+exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 
-exports[`Span v1 TRANSACTION_NAME 1`] = `undefined`;
+exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
 
-exports[`Span v1 TRANSACTION_RESULT 1`] = `undefined`;
+exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
 
-exports[`Span v1 TRANSACTION_SAMPLED 1`] = `undefined`;
+exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
-exports[`Span v1 TRANSACTION_TYPE 1`] = `undefined`;
+exports[`Span URL_FULL 1`] = `undefined`;
 
-exports[`Span v1 USER_ID 1`] = `undefined`;
+exports[`Span USER_ID 1`] = `undefined`;
 
-exports[`Span v2 ERROR_CULPRIT 1`] = `undefined`;
+exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
-exports[`Span v2 ERROR_EXC_HANDLED 1`] = `undefined`;
+exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
 
-exports[`Span v2 ERROR_EXC_MESSAGE 1`] = `undefined`;
+exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 
-exports[`Span v2 ERROR_EXC_STACKTRACE 1`] = `undefined`;
+exports[`Transaction ERROR_EXC_STACKTRACE 1`] = `undefined`;
 
-exports[`Span v2 ERROR_GROUP_ID 1`] = `undefined`;
+exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
-exports[`Span v2 ERROR_LOG_MESSAGE 1`] = `undefined`;
+exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
-exports[`Span v2 ERROR_LOG_STACKTRACE 1`] = `undefined`;
+exports[`Transaction ERROR_LOG_STACKTRACE 1`] = `undefined`;
 
-exports[`Span v2 METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
-exports[`Span v2 METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
+exports[`Transaction METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
-exports[`Span v2 METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
+exports[`Transaction METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
 
-exports[`Span v2 METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+exports[`Transaction METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
 
-exports[`Span v2 METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 
-exports[`Span v2 METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
-exports[`Span v2 PARENT_ID 1`] = `"parentId"`;
+exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
-exports[`Span v2 PROCESSOR_EVENT 1`] = `"span"`;
+exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Span v2 PROCESSOR_NAME 1`] = `"transaction"`;
+exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
-exports[`Span v2 REQUEST_METHOD 1`] = `undefined`;
+exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
-exports[`Span v2 REQUEST_URL_FULL 1`] = `undefined`;
+exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
 
-exports[`Span v2 SERVICE_AGENT_NAME 1`] = `"agent name"`;
+exports[`Transaction SERVICE_AGENT_NAME 1`] = `"agent name"`;
 
-exports[`Span v2 SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+exports[`Transaction SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
 
-exports[`Span v2 SERVICE_NAME 1`] = `"service name"`;
+exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
-exports[`Span v2 SPAN_DURATION 1`] = `1337`;
+exports[`Transaction SPAN_DURATION 1`] = `undefined`;
 
-exports[`Span v2 SPAN_HEX_ID 1`] = `"hex id"`;
+exports[`Transaction SPAN_ID 1`] = `undefined`;
 
-exports[`Span v2 SPAN_ID 1`] = `1337`;
+exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
-exports[`Span v2 SPAN_NAME 1`] = `"span name"`;
+exports[`Transaction SPAN_SQL 1`] = `undefined`;
 
-exports[`Span v2 SPAN_SQL 1`] = `"db statement"`;
+exports[`Transaction SPAN_START 1`] = `undefined`;
 
-exports[`Span v2 SPAN_START 1`] = `undefined`;
+exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
-exports[`Span v2 SPAN_TYPE 1`] = `"span type"`;
+exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span v2 TRACE_ID 1`] = `"trace id"`;
+exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
-exports[`Span v2 TRANSACTION_DURATION 1`] = `undefined`;
+exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
-exports[`Span v2 TRANSACTION_ID 1`] = `"transaction id"`;
+exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 
-exports[`Span v2 TRANSACTION_NAME 1`] = `undefined`;
+exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
 
-exports[`Span v2 TRANSACTION_RESULT 1`] = `undefined`;
+exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
 
-exports[`Span v2 TRANSACTION_SAMPLED 1`] = `undefined`;
+exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
-exports[`Span v2 TRANSACTION_TYPE 1`] = `undefined`;
+exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 
-exports[`Span v2 USER_ID 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_CULPRIT 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_EXC_HANDLED 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_EXC_MESSAGE 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_EXC_STACKTRACE 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_GROUP_ID 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_LOG_MESSAGE 1`] = `undefined`;
-
-exports[`Transaction v1: ERROR_LOG_STACKTRACE 1`] = `undefined`;
-
-exports[`Transaction v1: METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Transaction v1: METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
-
-exports[`Transaction v1: METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
-
-exports[`Transaction v1: METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Transaction v1: METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
-
-exports[`Transaction v1: METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
-
-exports[`Transaction v1: PARENT_ID 1`] = `undefined`;
-
-exports[`Transaction v1: PROCESSOR_EVENT 1`] = `"transaction"`;
-
-exports[`Transaction v1: PROCESSOR_NAME 1`] = `"transaction"`;
-
-exports[`Transaction v1: REQUEST_METHOD 1`] = `"GET"`;
-
-exports[`Transaction v1: REQUEST_URL_FULL 1`] = `"http://www.elastic.co"`;
-
-exports[`Transaction v1: SERVICE_AGENT_NAME 1`] = `"agent name"`;
-
-exports[`Transaction v1: SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
-
-exports[`Transaction v1: SERVICE_NAME 1`] = `"service name"`;
-
-exports[`Transaction v1: SPAN_DURATION 1`] = `undefined`;
-
-exports[`Transaction v1: SPAN_HEX_ID 1`] = `undefined`;
-
-exports[`Transaction v1: SPAN_ID 1`] = `undefined`;
-
-exports[`Transaction v1: SPAN_NAME 1`] = `undefined`;
-
-exports[`Transaction v1: SPAN_SQL 1`] = `undefined`;
-
-exports[`Transaction v1: SPAN_START 1`] = `undefined`;
-
-exports[`Transaction v1: SPAN_TYPE 1`] = `undefined`;
-
-exports[`Transaction v1: TRACE_ID 1`] = `undefined`;
-
-exports[`Transaction v1: TRANSACTION_DURATION 1`] = `1337`;
-
-exports[`Transaction v1: TRANSACTION_ID 1`] = `"transaction id"`;
-
-exports[`Transaction v1: TRANSACTION_NAME 1`] = `"transaction name"`;
-
-exports[`Transaction v1: TRANSACTION_RESULT 1`] = `"transaction result"`;
-
-exports[`Transaction v1: TRANSACTION_SAMPLED 1`] = `true`;
-
-exports[`Transaction v1: TRANSACTION_TYPE 1`] = `"transaction type"`;
-
-exports[`Transaction v1: USER_ID 1`] = `"1337"`;
-
-exports[`Transaction v2 ERROR_CULPRIT 1`] = `undefined`;
-
-exports[`Transaction v2 ERROR_EXC_HANDLED 1`] = `undefined`;
-
-exports[`Transaction v2 ERROR_EXC_MESSAGE 1`] = `undefined`;
-
-exports[`Transaction v2 ERROR_EXC_STACKTRACE 1`] = `undefined`;
-
-exports[`Transaction v2 ERROR_GROUP_ID 1`] = `undefined`;
-
-exports[`Transaction v2 ERROR_LOG_MESSAGE 1`] = `undefined`;
-
-exports[`Transaction v2 ERROR_LOG_STACKTRACE 1`] = `undefined`;
-
-exports[`Transaction v2 METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Transaction v2 METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
-
-exports[`Transaction v2 METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
-
-exports[`Transaction v2 METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Transaction v2 METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
-
-exports[`Transaction v2 METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
-
-exports[`Transaction v2 PARENT_ID 1`] = `"parentId"`;
-
-exports[`Transaction v2 PROCESSOR_EVENT 1`] = `"transaction"`;
-
-exports[`Transaction v2 PROCESSOR_NAME 1`] = `"transaction"`;
-
-exports[`Transaction v2 REQUEST_METHOD 1`] = `"GET"`;
-
-exports[`Transaction v2 REQUEST_URL_FULL 1`] = `"http://www.elastic.co"`;
-
-exports[`Transaction v2 SERVICE_AGENT_NAME 1`] = `"agent name"`;
-
-exports[`Transaction v2 SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
-
-exports[`Transaction v2 SERVICE_NAME 1`] = `"service name"`;
-
-exports[`Transaction v2 SPAN_DURATION 1`] = `undefined`;
-
-exports[`Transaction v2 SPAN_HEX_ID 1`] = `undefined`;
-
-exports[`Transaction v2 SPAN_ID 1`] = `undefined`;
-
-exports[`Transaction v2 SPAN_NAME 1`] = `undefined`;
-
-exports[`Transaction v2 SPAN_SQL 1`] = `undefined`;
-
-exports[`Transaction v2 SPAN_START 1`] = `undefined`;
-
-exports[`Transaction v2 SPAN_TYPE 1`] = `undefined`;
-
-exports[`Transaction v2 TRACE_ID 1`] = `"trace id"`;
-
-exports[`Transaction v2 TRANSACTION_DURATION 1`] = `1337`;
-
-exports[`Transaction v2 TRANSACTION_ID 1`] = `"transaction id"`;
-
-exports[`Transaction v2 TRANSACTION_NAME 1`] = `"transaction name"`;
-
-exports[`Transaction v2 TRANSACTION_RESULT 1`] = `"transaction result"`;
-
-exports[`Transaction v2 TRANSACTION_SAMPLED 1`] = `true`;
-
-exports[`Transaction v2 TRANSACTION_TYPE 1`] = `"transaction type"`;
-
-exports[`Transaction v2 USER_ID 1`] = `"1337"`;
+exports[`Transaction USER_ID 1`] = `"1337"`;

@@ -19,8 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
+import { AggConfig, Vis } from 'ui/vis';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
+// @ts-ignore
+import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
@@ -97,4 +100,12 @@ export const getFormat = (mapping: any) => {
   } else {
     return getFieldFormat(id, mapping.params);
   }
+};
+
+export const getTableAggs = (vis: Vis): AggConfig[] => {
+  if (!vis.aggs || !vis.aggs.getResponseAggs) {
+    return [];
+  }
+  const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
+  return columns.map((c: any) => c.aggConfig);
 };

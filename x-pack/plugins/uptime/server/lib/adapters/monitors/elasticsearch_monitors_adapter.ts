@@ -250,7 +250,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 {
                   port: {
                     terms: {
-                      field: 'tcp.port',
+                      field: 'url.port',
                     },
                   },
                 },
@@ -340,7 +340,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           },
           port: {
             terms: {
-              field: 'tcp.port',
+              field: 'url.port',
             },
           },
           scheme: {

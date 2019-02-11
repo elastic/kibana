@@ -64,7 +64,9 @@ export async function generateNoticeFromSource({ productName, directory, log }) 
         let match;
         while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
           log.info(`Found @notice comment in ${file.relative}`);
-          noticeComments.push(match[1]);
+          if (!noticeComments.includes(match[1])) {
+            noticeComments.push(match[1]);
+          }
         }
       })
       .on('error', reject)

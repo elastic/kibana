@@ -42,15 +42,6 @@ const createBulkRequests = (spaceId: string) => [
 ];
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/mget] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/mget] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFoundResults = (spaceId: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       saved_objects: [
@@ -97,6 +88,9 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         {
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
           type: 'visualization',
+          migrationVersion: {
+            visualization: '7.0.0',
+          },
           updated_at: '2017-09-21T18:51:23.794Z',
           version: resp.body.saved_objects[0].version,
           attributes: {
@@ -157,7 +151,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
 
   return {
     bulkGetTest,
-    createExpectLegacyForbidden,
     createExpectNotFoundResults,
     createExpectResults,
     expectRbacForbidden,

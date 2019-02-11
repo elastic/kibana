@@ -9,7 +9,7 @@ import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import {
   colors,
   fontFamilyCode,

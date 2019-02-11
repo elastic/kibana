@@ -33,6 +33,10 @@ export function StyleTabs({ layer, reset, updateStyle }) {
       resetStyle: () => reset()
     });
 
+    if (!styleEditor) {
+      return null;
+    }
+
     return (
       <EuiPanel key={index}>
         <EuiTitle size="xs"><h5>{Style.getDisplayName()}</h5></EuiTitle>

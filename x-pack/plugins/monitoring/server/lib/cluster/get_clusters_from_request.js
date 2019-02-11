@@ -17,9 +17,10 @@ import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { getClustersSummary } from './get_clusters_summary';
-import { CLUSTER_ALERTS_SEARCH_SIZE } from '../../../common/constants';
+import { CLUSTER_ALERTS_SEARCH_SIZE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
+import { standaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -34,8 +35,29 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     alertsIndex
   } = indexPatterns;
 
-  // get clusters with stats and cluster state
-  let clusters = await getClustersStats(req, esIndexPattern, clusterUuid);
+  const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+
+  let clusters = [];
+
+  if (isStandaloneCluster) {
+    clusters.push(standaloneClusterDefinition);
+  }
+  else {
+    // get clusters with stats and cluster state
+    clusters = await getClustersStats(req, esIndexPattern, clusterUuid);
+  }
+
+  if (!clusterUuid && !isStandaloneCluster) {
+    const indexPatternsToCheckForNonClusters = [
+      lsIndexPattern,
+      beatsIndexPattern,
+      apmIndexPattern
+    ];
+
+    if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
+      clusters.push(standaloneClusterDefinition);
+    }
+  }
 
   // TODO: this handling logic should be two different functions
   if (clusterUuid) { // if is defined, get specific cluster (no need for license checking)
@@ -63,7 +85,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     if (alerts) {
       cluster.alerts = alerts;
     }
-  } else {
+  } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
       // we do NOT throw 404 here so that the no-data page can use this to check for data
@@ -89,7 +111,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   }
 
   // add kibana data
-  const kibanas = await getKibanasForClusters(req, kbnIndexPattern, clusters);
+  const kibanas = isStandaloneCluster ? [] : await getKibanasForClusters(req, kbnIndexPattern, clusters);
   // add the kibana data to each cluster
   kibanas.forEach(kibana => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: kibana.clusterUuid });

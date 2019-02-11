@@ -96,7 +96,9 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
       updateVisualizationConfig(state.params, this.params);
 
-      this.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
+      if (state.aggs || !this.aggs) {
+        this.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
+      }
     }
 
     setState(state, updateCurrentState = true) {

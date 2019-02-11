@@ -16,8 +16,6 @@ import { FieldTypeIcon } from '../../../components/field_type_icon';
 
 export function FieldStatsCard({ field }) {
 
-  const percent = Math.round(field.percent * 100) / 100;
-
   let type = field.type;
   if (type === 'double' || type === 'long') {
     type = 'number';
@@ -45,7 +43,7 @@ export function FieldStatsCard({ field }) {
                       defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
                       values={{
                         fieldCount: field.count,
-                        fieldPercent: percent,
+                        fieldPercent: field.percent,
                       }}
                     />
                   </div>
@@ -61,7 +59,7 @@ export function FieldStatsCard({ field }) {
                   </div>
 
                   {
-                    (field.mean_value) &&
+                    (field.median_value) &&
                     <React.Fragment>
                       <div>
                         <div className="stat min heading">

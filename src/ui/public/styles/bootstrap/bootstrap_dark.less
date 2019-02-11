@@ -1,0 +1,76 @@
+/*!
+ * Bootstrap v3.3.6 (http://getbootstrap.com)
+ * Copyright 2011-2015 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
+
+/* @notice
+ * This product bundles bootstrap@3.3.6 which is available under a
+ * "MIT" license.
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2011-2015 Twitter, Inc
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+// PLANNED FOR REMOVAL
+// We are trying to remove bootstrap. The below are the files we're currently using.
+// There's an audit in the comments to cover what's left to remove.
+
+// Core variables and mixins
+@import "variables.less";
+@import "_colors_dark.less";
+@import "_custom_variables.less";
+@import "mixins.less";
+
+// Hard to remove, used in many places
+@import "grid.less"; // Used in a lot of places
+@import "tables.less"; // Used in a lot of places
+@import "forms.less"; // Used in a lot of places
+
+// Easy to remove
+@import "type.less"; // Can be search / replaced with EUI
+@import "component-animations.less"; // Used in angular bootstrap
+@import "buttons.less";
+@import "navbar.less"; // Used in Graph
+@import "close.less"; // Only in angular-bootstrap
+@import "modals.less"; // Only in angular-bootstrap
+@import "progress-bars.less"; // Used in ML, angular-bootstrap
+@import "list-group.less"; // Used in Timelion, Graph
+@import "navs.less"; // Used in ML
+@import "alerts.less"; // Only in angular-bootstrap
+@import "tooltip.less"; // Only in angular-bootstrap
+@import "responsive-utilities.less"; // Minimal usage
+
+// Decent usage in multiple areas
+@import "dropdowns.less"; // Used in console, datepicker, watcher
+@import "input-groups.less"; // Used in ML, typeahead, reporting, graph
+@import "pagination.less";
+@import "pager.less";
+@import "labels.less"; // Hard to judge usage because of generic selector names
+@import "panels.less"; // Used in ML, dashboards, notify, angular-bootstrap
+@import "popovers.less"; // Hard to judge usage because of generic selector names
+
+// Utility classes
+@import "utilities.less";
+
+// OVERRIDES
+@import "_overrides.less";

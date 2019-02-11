@@ -103,7 +103,7 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.osxTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
       commands: [
         './heartbeat setup',
@@ -115,7 +115,7 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.debTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
       commands: [
         'sudo heartbeat setup',
@@ -127,7 +127,7 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.rpmTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
       commands: [
         'sudo heartbeat setup',
@@ -139,7 +139,7 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.heartbeatInstructions.start.windowsTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
       }),
       commands: [
         '.\\heartbeat.exe setup',

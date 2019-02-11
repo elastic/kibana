@@ -19,6 +19,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { FlyoutSession, openFlyout } from 'ui/flyout';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
@@ -72,10 +73,15 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {
-    'data-test-subj': 'inspectorPanel',
-    closeButtonAriaLabel: closeButtonLabel,
-  });
+  return openFlyout(
+    <I18nProvider>
+      <InspectorPanel views={views} adapters={adapters} title={options.title} />
+    </I18nProvider>,
+    {
+      'data-test-subj': 'inspectorPanel',
+      closeButtonAriaLabel: closeButtonLabel,
+    }
+  );
 }
 
 const Inspector = {

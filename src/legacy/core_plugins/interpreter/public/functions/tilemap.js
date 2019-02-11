@@ -25,7 +25,7 @@ export const tilemap = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.tilemap.help', {
@@ -51,10 +51,8 @@ export const tilemap = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: 'tile_map',
-          params: visConfigParams,
-        },
+        visType: 'tile_map',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

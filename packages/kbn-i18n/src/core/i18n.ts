@@ -234,3 +234,17 @@ export function init(newTranslation?: Translation) {
     setFormats(newTranslation.formats);
   }
 }
+
+/**
+ * Loads JSON with translations from the specified URL and initializes i18n engine with them.
+ * @param translationsUrl URL pointing to the JSON bundle with translations.
+ */
+export async function load(translationsUrl: string) {
+  const response = await fetch(translationsUrl);
+
+  if (response.status >= 300) {
+    throw new Error(`Translations request failed with status code: ${response.status}`);
+  }
+
+  init(await response.json());
+}

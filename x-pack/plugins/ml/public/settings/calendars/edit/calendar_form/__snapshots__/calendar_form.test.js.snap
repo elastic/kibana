@@ -25,58 +25,56 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
 
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
-  <React.Fragment>
-    <EuiFormRow
-      describedByIds={Array []}
-      error={
-        Array [
-          "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
-        ]
-      }
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-      isInvalid={true}
-      label={
-        <FormattedMessage
-          defaultMessage="Calendar ID"
-          id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
-          values={Object {}}
-        />
-      }
-    >
-      <EuiFieldText
-        compressed={false}
-        disabled={false}
-        fullWidth={false}
-        isLoading={false}
-        name="calendarId"
-        onChange={[MockFunction]}
-        value=""
+  <EuiFormRow
+    describedByIds={Array []}
+    error={
+      Array [
+        "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
+      ]
+    }
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    label={
+      <FormattedMessage
+        defaultMessage="Calendar ID"
+        id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
+        values={Object {}}
       />
-    </EuiFormRow>
-    <EuiFormRow
-      describedByIds={Array []}
+    }
+  >
+    <EuiFieldText
+      compressed={false}
+      disabled={false}
       fullWidth={false}
-      hasEmptyLabelSpace={false}
-      label={
-        <FormattedMessage
-          defaultMessage="Description"
-          id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-          values={Object {}}
-        />
-      }
-    >
-      <EuiFieldText
-        compressed={false}
-        disabled={false}
-        fullWidth={false}
-        isLoading={false}
-        name="description"
-        onChange={[MockFunction]}
-        value=""
+      isLoading={false}
+      name="calendarId"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Description"
+        id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+        values={Object {}}
       />
-    </EuiFormRow>
-  </React.Fragment>
+    }
+  >
+    <EuiFieldText
+      compressed={false}
+      disabled={false}
+      fullWidth={false}
+      isLoading={false}
+      name="description"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
     fullWidth={false}

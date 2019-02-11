@@ -27,7 +27,7 @@ const ContextUrl = styled.div`
 `;
 
 interface Props {
-  httpContext: Span['context']['http'];
+  httpContext: NonNullable<Span['context']>['http'];
 }
 
 export function HttpContext({ httpContext }: Props) {

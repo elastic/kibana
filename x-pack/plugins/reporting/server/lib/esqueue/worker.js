@@ -259,6 +259,7 @@ export class Worker extends events.EventEmitter {
           if (err.statusCode === 409) return false;
           this.warn(`Failure saving job output ${job._id}`, err);
           this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
+          return this._failJob(job, (err.message) ? err.message : false);
         });
     }, (jobErr) => {
       if (!jobErr) {

@@ -6,3 +6,4 @@
 
 import './register_ccr_section';
 import './register_routes';
+import './extend_index_management';
