@@ -21,7 +21,6 @@ const NO_TILEMAP_LAYER_MSG =
 
 export class CreateSourceEditor extends Component {
 
-
   state = {
     url: null
   }
@@ -29,10 +28,14 @@ export class CreateSourceEditor extends Component {
   _loadUrl = async () => {
     const tilemap = await getKibanaTileMap();
     if (this._isMounted) {
-      this.setState({
-        url: tilemap.url
-      });
-      this.props.previewTilemap(this.props.url);
+      this.setState(
+        { url: tilemap.url },
+        () => {
+          if (this.state.url) {
+            this.props.previewTilemap();
+          }
+        }
+      );
     }
   }
 
@@ -47,7 +50,7 @@ export class CreateSourceEditor extends Component {
 
   render() {
 
-    if (this.state.url === null) {
+    if (this.state.url === null) {//still loading
       return null;
     }
 
