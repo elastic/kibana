@@ -25,9 +25,9 @@ import { toArray } from 'rxjs/operators';
 import wreck from 'wreck';
 
 import { deleteIndex } from './delete_index';
-import { collectUiExports } from '../../../ui/ui_exports';
-import { KibanaMigrator } from '../../../server/saved_objects/migrations';
-import { findPluginSpecs } from '../../../plugin_discovery';
+import { collectUiExports } from '../../../legacy/ui/ui_exports';
+import { KibanaMigrator } from '../../../legacy/server/saved_objects/migrations';
+import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 const uiExportsCache = new Map();
 const kibanaPluginIdsCache = new Map();
