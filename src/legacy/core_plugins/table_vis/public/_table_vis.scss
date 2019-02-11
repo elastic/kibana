@@ -6,6 +6,7 @@
   flex-direction: column;
   flex: 1 0 100%;
   overflow: auto;
+  @include euiScrollBar;
 }
 
 .table-vis-container {
