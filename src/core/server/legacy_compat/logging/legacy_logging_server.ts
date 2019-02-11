@@ -20,9 +20,9 @@
 import { ServerExtType } from 'hapi';
 import Podium from 'podium';
 // @ts-ignore: implicit any for JS file
-import { Config, transformDeprecations } from '../../../../server/config';
+import { Config, transformDeprecations } from '../../../../legacy/server/config';
 // @ts-ignore: implicit any for JS file
-import { setupLogging } from '../../../../server/logging';
+import { setupLogging } from '../../../../legacy/server/logging';
 import { LogLevel } from '../../logging/log_level';
 import { LogRecord } from '../../logging/log_record';
 
