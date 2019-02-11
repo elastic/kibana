@@ -67,12 +67,7 @@ module.factory('SavedGisMap', function (Private) {
 
   SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
-    // Layer list from store contains requested data.
-    // We do not want to store this in the saved object so it is getting removed
-    const layerListConfigOnly = layerList.map(layer => {
-      delete layer.dataRequests;
-      return layer;
-    });
+    const layerListConfigOnly = copyPersistentState(layerList);
     this.layerListJSON = JSON.stringify(layerListConfigOnly);
 
     this.mapStateJSON = JSON.stringify({
@@ -90,3 +85,17 @@ module.factory('SavedGisMap', function (Private) {
 
   return SavedGisMap;
 });
+
+
+function copyPersistentState(input) {
+  if (typeof input !== 'object' && input !== null) {//primitive
+    return input;
+  }
+  const copyInput = Array.isArray(input) ? [] : {};
+  for(const key in input) {
+    if (!key.startsWith('__')) {
+      copyInput[key] = copyPersistentState(input[key]);
+    }
+  }
+  return copyInput;
+}

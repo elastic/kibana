@@ -29,3 +29,4 @@ export { castProvider } from './interpreter/cast';
 export { parse } from './lib/grammar';
 export { getByAlias } from './lib/get_by_alias';
 export { Registry } from './lib/registry';
+export { addRegistries, register, registryFactory } from './registries';
