@@ -29,6 +29,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       _source: true,
       size: 10000,
       index: INDEX_NAMES.BEATS,
+      type: '_doc',
       body: {
         ids: ids.map(id => `configuration_block:${id}`),
       },
@@ -57,6 +58,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     const params = {
       ignore: [404],
       index: INDEX_NAMES.BEATS,
+      type: '_doc',
       body: {
         from: page === -1 ? undefined : page * size,
         size,
@@ -91,6 +93,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       body: ids.map(id => ({ delete: { _id: `configuration_block:${id}` } })),
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
+      type: '_doc',
     });
 
     if (result.errors) {
@@ -120,6 +123,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
         },
       },
       index: INDEX_NAMES.BEATS,
+      type: '_doc',
     });
 
     if (result.failures.length > 0) {
@@ -152,6 +156,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
+      type: '_doc',
     });
 
     if (result.errors) {
