@@ -50,6 +50,7 @@ export default function mapsTests({ getService }: KibanaFunctionalTestDefaultPro
           case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':
+          case 'dev_tools_all':
           case 'dev_tools_read':
           case 'dashboard_all':
           case 'dashboard_read':

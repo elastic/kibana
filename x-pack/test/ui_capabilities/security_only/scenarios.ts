@@ -272,6 +272,26 @@ const DashboardRead: DashboardRead = {
   },
 };
 
+interface DevToolsAll extends User {
+  username: 'dev_tools_all';
+}
+const DevToolsAll: DevToolsAll = {
+  username: 'dev_tools_all',
+  fullName: 'dev_tools_all',
+  password: 'dev_tools_all-password',
+  role: {
+    name: 'dev_tools_all_role',
+    kibana: [
+      {
+        feature: {
+          dev_tools: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 interface DevToolsRead extends User {
   username: 'dev_tools_read';
 }
@@ -606,6 +626,7 @@ export type UserScenarios =
   | CanvasRead
   | DashboardAll
   | DashboardRead
+  | DevToolsAll
   | DevToolsRead
   | DiscoverAll
   | DiscoverRead
@@ -636,6 +657,7 @@ export const UserScenarios: UserScenarios[] = [
   CanvasRead,
   DashboardAll,
   DashboardRead,
+  DevToolsAll,
   DevToolsRead,
   DiscoverAll,
   DiscoverRead,

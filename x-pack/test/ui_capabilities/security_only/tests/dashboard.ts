@@ -55,6 +55,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'canvas_all':
           case 'canvas_read':
           case 'dev_tools_read':
+          case 'dev_tools_all':
           case 'discover_all':
           case 'discover_read':
           case 'graph_all':

@@ -37,8 +37,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           kibana: [
             {
               feature: {
-                // TODO: CHANGE THIS TO ALL ONCE WE HAVE ALL
-                dev_tools: ['read'],
+                dev_tools: ['all'],
               },
               spaces: ['*'],
             },

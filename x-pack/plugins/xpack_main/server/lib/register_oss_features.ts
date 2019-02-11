@@ -110,6 +110,14 @@ const kibanaFeatures: Feature[] = [
     app: ['kibana'],
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
+      all: {
+        api: ['console/execute'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show'],
+      },
       read: {
         api: ['console/execute'],
         savedObject: {

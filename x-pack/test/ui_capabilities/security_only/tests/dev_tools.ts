@@ -13,12 +13,10 @@ import {
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function advancedSettingsTests({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('advancedSettings', () => {
+  describe('dev_tools', () => {
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
@@ -26,32 +24,34 @@ export default function advancedSettingsTests({
           password: scenario.password,
         });
         switch (scenario.username) {
-          // these users have a read/write view of Advanced Settings
+          // these users have a read/write view of Dev Tools
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
-          case 'advancedSettings_all':
+          case 'dev_tools_all':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: true,
+            expect(uiCapabilities.value).to.have.property('dev_tools');
+            expect(uiCapabilities.value!.dev_tools).to.eql({
+              show: true,
             });
             break;
-          // these users have a read-only view of Advanced Settings
+          // these users have a read-only view of Dev Tools
+          // for the time being, this is functionally equivalent to the read/write view
           case 'dual_privileges_read':
-          case 'advancedSettings_read':
+          case 'dev_tools_all':
+          case 'dev_tools_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: false,
+            expect(uiCapabilities.value).to.have.property('dev_tools');
+            expect(uiCapabilities.value!.dev_tools).to.eql({
+              show: true,
             });
             break;
-          // these users can't do anything with Advanced Settings
+          // these users can't do anything with Dev Tools
+          case 'advancedSettings_all':
+          case 'advancedSettings_read':
           case 'apm_all':
           case 'canvas_all':
           case 'canvas_read':
-          case 'dev_tools_all':
-          case 'dev_tools_read':
           case 'dashboard_all':
           case 'dashboard_read':
           case 'discover_all':
@@ -70,9 +70,9 @@ export default function advancedSettingsTests({
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: false,
+            expect(uiCapabilities.value).to.have.property('dev_tools');
+            expect(uiCapabilities.value!.dev_tools).to.eql({
+              show: false,
             });
             break;
           case 'legacy_all':

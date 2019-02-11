@@ -60,6 +60,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'canvas_read':
           case 'dashboard_all':
           case 'dashboard_read':
+          case 'dev_tools_all':
           case 'dev_tools_read':
           case 'graph_all':
           case 'graph_read':

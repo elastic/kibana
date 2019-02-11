@@ -50,6 +50,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
           case 'apm_all':
           case 'dashboard_all':
           case 'dashboard_read':
+          case 'dev_tools_all':
           case 'dev_tools_read':
           case 'discover_all':
           case 'discover_read':

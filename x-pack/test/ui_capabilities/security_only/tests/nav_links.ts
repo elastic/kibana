@@ -62,7 +62,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('dashboard', 'management')
             );
             break;
-
+          case 'dev_tools_all':
           case 'dev_tools_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
