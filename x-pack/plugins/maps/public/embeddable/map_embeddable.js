@@ -5,6 +5,8 @@
  */
 
 import { Embeddable } from 'ui/embeddable';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
 export class MapEmbeddable extends Embeddable {
 
@@ -21,6 +23,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {ContainerState} containerState
    */
   render(domNode, containerState) {
+    this.domNode = domNode;
     this.timeRange = containerState.timeRange;
     this.query = containerState.query;
     this.filters = containerState.filters;
@@ -33,6 +36,9 @@ export class MapEmbeddable extends Embeddable {
 
   destroy() {
     this.savedMap.destroy();
+    if (this.domNode) {
+      unmountComponentAtNode(this.domNode);
+    }
   }
 
   reload() {

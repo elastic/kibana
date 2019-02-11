@@ -23,7 +23,7 @@
       "title": "[Logs] Total Requests and Bytes",
       "hits": 0,
       "description": "",
-      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":27,\"y\":11,\"w\":21,\"h\":13,\"i\":\"1\"},\"id\":\"de71f4f0-1902-11e9-919b-ffe5949a18d2\",\"panelIndex\":\"1\",\"type\":\"map\",\"version\":\"7.0.0-alpha1\"}]",
+      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":20,\"i\":\"1\"},\"id\":\"de71f4f0-1902-11e9-919b-ffe5949a18d2\",\"panelIndex\":\"1\",\"type\":\"map\",\"version\":\"7.0.0-alpha1\"}]",
       "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
