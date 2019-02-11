@@ -29,37 +29,26 @@ import { collectUiExports } from '../../../legacy/ui/ui_exports';
 import { KibanaMigrator } from '../../../legacy/server/saved_objects/migrations';
 import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
-const uiExportsCache = new Map();
-const kibanaPluginIdsCache = new Map();
-
 /**
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
  * it is enabled in the Kibana server. This is an expensive operation, so we
  * cache the results
  */
 const getUiExports = async (kibanaUrl) => {
-  if (uiExportsCache.has(kibanaUrl)) {
-    return await uiExportsCache.get(kibanaUrl);
-  }
+  const xpackEnabled = await getKibanaPluginEnabled({
+    kibanaUrl,
+    pluginId: 'xpack_main'
+  });
 
-  uiExportsCache.set(kibanaUrl, (async () => {
-    const xpackEnabled = await getKibanaPluginEnabled({
-      kibanaUrl,
-      pluginId: 'xpack_main'
-    });
+  const { spec$ } = await findPluginSpecs({
+    plugins: {
+      scanDirs: [path.resolve(__dirname, '../../../legacy/core_plugins')],
+      paths: xpackEnabled ? [path.resolve(__dirname, '../../../../x-pack')] : [],
+    },
+  });
 
-    const { spec$ } = await findPluginSpecs({
-      plugins: {
-        scanDirs: [path.resolve(__dirname, '../../../legacy/core_plugins')],
-        paths: xpackEnabled ? [path.resolve(__dirname, '../../../../x-pack')] : [],
-      },
-    });
-
-    const specs = await spec$.pipe(toArray()).toPromise();
-    return collectUiExports(specs);
-  })());
-
-  return await uiExportsCache.get(kibanaUrl);
+  const specs = await spec$.pipe(toArray()).toPromise();
+  return collectUiExports(specs);
 };
 
 /**
@@ -138,28 +127,17 @@ export async function isSpacesEnabled({ kibanaUrl }) {
 }
 
 async function getKibanaPluginEnabled({ pluginId, kibanaUrl }) {
-  if (!kibanaPluginIdsCache.has(kibanaUrl)) {
-    kibanaPluginIdsCache.set(kibanaUrl, (async () => {
-      try {
-        const { payload } = await wreck.get('/api/status', {
-          baseUrl: kibanaUrl,
-          json: true
-        });
+  try {
+    const { payload } = await wreck.get('/api/status', {
+      baseUrl: kibanaUrl,
+      json: true
+    });
 
-        return payload.status.statuses
-          .map(({ id }) => {
-            const match = id.match(/^plugin:(.+)@.*$/, '$1');
-            return match ? match[1] : undefined;
-          })
-          .filter(Boolean);
-
-      } catch (error) {
-        throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}`);
-      }
-    })());
+    return payload.status.statuses
+      .some(({ id }) => id.includes(`plugin:${pluginId}@`));
+  } catch (error) {
+    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}`);
   }
-
-  return (await kibanaPluginIdsCache.get(kibanaUrl)).includes(pluginId);
 }
 
 export async function createDefaultSpace({ index, client }) {
