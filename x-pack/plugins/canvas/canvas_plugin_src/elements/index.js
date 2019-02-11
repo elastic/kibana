@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { applyElementStrings, i18nProvider } from '../strings';
 import { areaChart } from './area_chart';
 import { bubbleChart } from './bubble_chart';
 import { debug } from './debug';
@@ -33,10 +31,7 @@ import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
 
-// i18n is only available from Kibana when specs are registered.  Init the Canvas i18n Provider with that instance.
-i18nProvider.init(i18n);
-
-export const elementSpecs = applyElementStrings([
+export const elementSpecs = [
   areaChart,
   bubbleChart,
   debug,
@@ -63,4 +58,4 @@ export const elementSpecs = applyElementStrings([
   verticalBarChart,
   verticalProgressBar,
   verticalProgressPill,
-]);
+];

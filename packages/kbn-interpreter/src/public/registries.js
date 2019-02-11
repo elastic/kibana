@@ -18,13 +18,11 @@
  */
 
 import { register, FunctionsRegistry, TypesRegistry } from '../common';
-import { RenderFunctionsRegistry } from './render_functions_registry';
 import { browserFunctions } from '../plugin/functions/browser';
 import { typeSpecs } from '../plugin/types';
 
 export const registries = {
   browserFunctions: new FunctionsRegistry(),
-  renderers: new RenderFunctionsRegistry(),
   types: new TypesRegistry(),
 };
 

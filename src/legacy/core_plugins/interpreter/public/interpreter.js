@@ -17,16 +17,8 @@
  * under the License.
  */
 
-import { register } from '@kbn/interpreter/common';
 import { initializeInterpreter, registries } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
-import { functions } from './functions';
-import { visualization } from './renderers/visualization';
-
-register(registries, {
-  browserFunctions: functions,
-  renderers: [visualization],
-});
 
 let _resolve;
 let _interpreterPromise;
@@ -39,7 +31,7 @@ const initialize = async () => {
 
 export const getInterpreter = async () => {
   if (!_interpreterPromise) {
-    _interpreterPromise = new Promise(resolve => _resolve = resolve);
+    _interpreterPromise = new Promise(resolve => (_resolve = resolve));
     initialize();
   }
   return await _interpreterPromise;
