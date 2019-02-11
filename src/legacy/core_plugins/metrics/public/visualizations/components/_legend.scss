@@ -5,7 +5,7 @@
   display: flex;
   width: 200px;
   padding: $euiSizeXS 0;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .tvbLegend__toggle {
@@ -19,6 +19,8 @@
 
 .tvbLegend__series {
   flex-grow: 1;
+  @include euiScrollBar;
+  overflow: auto;
 }
 
 .tvbLegend__item {

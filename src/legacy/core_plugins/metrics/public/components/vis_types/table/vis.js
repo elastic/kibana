@@ -205,14 +205,16 @@ class TableVis extends Component {
     }
     return(
       <div className={`tvbVis ${reversedClass}`} data-test-subj="tableView">
-        <table className="table">
-          <thead>
-            {header}
-          </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
+        <div className="tvbTable__container">
+          <table className="table">
+            <thead>
+              {header}
+            </thead>
+            <tbody>
+              {rows}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }

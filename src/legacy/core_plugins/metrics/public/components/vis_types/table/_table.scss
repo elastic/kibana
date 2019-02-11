@@ -1,0 +1,4 @@
+.tvbTable__container{
+  overflow: auto;
+  @include euiScrollBar;
+}

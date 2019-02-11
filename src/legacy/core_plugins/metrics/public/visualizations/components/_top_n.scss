@@ -5,6 +5,7 @@
   overflow: auto;
   display: flex;
   flex-direction: column;
+  @include euiScrollBar;
 
   tr:hover td {
     background-color: $tvbHoverBackgroundColor;

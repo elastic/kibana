@@ -3,6 +3,9 @@
   flex-direction: column;
   flex: 1 0 auto;
   position: relative;
+  overflow: auto;
+  @include euiScrollBar;
+
 }
 
 .tvbMarkdown__content {
@@ -14,7 +17,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
+
 
   &.middle {
     justify-content: center;
