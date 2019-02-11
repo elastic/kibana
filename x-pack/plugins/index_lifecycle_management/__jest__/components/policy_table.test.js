@@ -108,17 +108,16 @@ describe('policy table', () => {
     rendered.update();
     snapshot(namesText(rendered));
   });
-  // TODO fix test with a non-brittal selector
-  /*test('should show more when per page value is increased', () => {
+  test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-    const perPageButton = rendered.find('span[children="Rows per page: 10"]');
+    const perPageButton = rendered.find('#customizablePagination').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const fiftyButton = rendered.find('span[children="50 rows"]');
+    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);
-  });*/
+  });
   test('should filter based on content of search input', () => {
     const rendered = mountWithIntl(component);
     const searchInput = rendered.find('.euiFieldSearch').first();

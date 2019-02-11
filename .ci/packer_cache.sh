@@ -21,6 +21,5 @@ tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
   x-pack/node_modules \
   x-pack/plugins/*/node_modules \
   x-pack/plugins/reporting/.chromium \
-  x-pack/plugins/reporting/.phantom \
   test/plugin_functional/plugins/*/node_modules \
   .es;

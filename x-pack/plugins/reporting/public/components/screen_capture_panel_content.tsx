@@ -19,6 +19,7 @@ interface Props {
 }
 
 interface State {
+  isPreserveLayoutSupported: boolean;
   usePrintLayout: boolean;
 }
 
@@ -26,7 +27,10 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const isPreserveLayoutSupported =
+      props.reportType !== 'png' && props.objectType !== 'visualization';
     this.state = {
+      isPreserveLayoutSupported,
       usePrintLayout: false,
     };
   }
@@ -35,6 +39,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     return (
       <ReportingPanelContent
         reportType={this.props.reportType}
+        layoutId={this.getLayout().id}
         objectType={this.props.objectType}
         objectId={this.props.objectId}
         getJobParams={this.getJobParams}
@@ -46,13 +51,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   }
 
   private renderOptions = () => {
-    if (this.props.reportType === 'png') {
-      return (
-        <Fragment>
-          <EuiSpacer size="s" />
-        </Fragment>
-      );
-    } else {
+    if (this.state.isPreserveLayoutSupported) {
       return (
         <Fragment>
           <EuiSwitch
@@ -70,6 +69,12 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         </Fragment>
       );
     }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
   };
 
   private handlePrintLayoutChange = (evt: any) => {
@@ -84,27 +89,19 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     const el = document.querySelector('[data-shared-items-container]');
     const bounds = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
 
-    if (this.props.reportType === 'png') {
-      return {
-        dimensions: {
-          height: bounds.height,
-          width: bounds.width,
-        },
-      };
-    } else {
-      return {
-        id: 'preserve_layout',
-        dimensions: {
-          height: bounds.height,
-          width: bounds.width,
-        },
-      };
-    }
+    return {
+      id: this.props.reportType === 'png' ? 'png' : 'preserve_layout',
+      dimensions: {
+        height: bounds.height,
+        width: bounds.width,
+      },
+    };
   };
 
   private getJobParams = () => {
-    const jobParams = this.props.getJobParams();
-    jobParams.layout = this.getLayout();
-    return jobParams;
+    return {
+      ...this.props.getJobParams(),
+      layout: this.getLayout(),
+    };
   };
 }

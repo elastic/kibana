@@ -10,76 +10,65 @@ import { parseCrossClusterPrefix, prefixIndexPattern } from '../ccs_utils';
 
 describe('ccs_utils', () => {
   describe('prefixIndexPattern', () => {
-    const indexPatternName = 'xyz';
     const indexPattern = '.monitoring-xyz-1-*,.monitoring-xyz-2-*';
 
     it('returns the index pattern if ccs is not enabled', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs(indexPatternName).returns(indexPattern);
       get.withArgs('xpack.monitoring.ccs.enabled').returns(false);
 
       // falsy string values should be ignored
-      const allPattern = prefixIndexPattern(config, indexPatternName, '*');
-      const onePattern = prefixIndexPattern(config, indexPatternName, 'do_not_use_me');
+      const allPattern = prefixIndexPattern(config, indexPattern, '*');
+      const onePattern = prefixIndexPattern(config, indexPattern, 'do_not_use_me');
 
       expect(allPattern).to.be(indexPattern);
       expect(onePattern).to.be(indexPattern);
-      // uses the config and indexPatternName supplied
-      expect(get.callCount).to.eql(4);
+      expect(get.callCount).to.eql(2);
     });
 
     it('returns the index pattern if ccs is not used', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs(indexPatternName).returns(indexPattern);
       get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
 
       // falsy string values should be ignored
-      const undefinedPattern = prefixIndexPattern(config, indexPatternName);
-      const nullPattern = prefixIndexPattern(config, indexPatternName, null);
-      const blankPattern = prefixIndexPattern(config, indexPatternName, '');
+      const undefinedPattern = prefixIndexPattern(config, indexPattern);
+      const nullPattern = prefixIndexPattern(config, indexPattern, null);
+      const blankPattern = prefixIndexPattern(config, indexPattern, '');
 
       expect(undefinedPattern).to.be(indexPattern);
       expect(nullPattern).to.be(indexPattern);
       expect(blankPattern).to.be(indexPattern);
-      // uses the config and indexPatternName supplied
-      expect(get.callCount).to.eql(6);
+      expect(get.callCount).to.eql(3);
     });
 
     it('returns the ccs-prefixed index pattern', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs(indexPatternName).returns(indexPattern);
       get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
 
-      const abcPattern = prefixIndexPattern(config, indexPatternName, 'aBc');
-      const underscorePattern = prefixIndexPattern(config, indexPatternName, 'cluster_one');
+      const abcPattern = prefixIndexPattern(config, indexPattern, 'aBc');
+      const underscorePattern = prefixIndexPattern(config, indexPattern, 'cluster_one');
 
       expect(abcPattern).to.eql('aBc:.monitoring-xyz-1-*,aBc:.monitoring-xyz-2-*');
       expect(underscorePattern).to.eql('cluster_one:.monitoring-xyz-1-*,cluster_one:.monitoring-xyz-2-*');
-
-      // uses the config and indexPatternName supplied, but only calls once
-      expect(get.callCount).to.eql(4);
+      expect(get.callCount).to.eql(2);
     });
 
     it('returns the ccs-prefixed index pattern when wildcard and the local cluster pattern', () => {
       const get = sinon.stub();
       const config = { get };
 
-      get.withArgs(indexPatternName).returns(indexPattern);
       get.withArgs('xpack.monitoring.ccs.enabled').returns(true);
 
-      const pattern = prefixIndexPattern(config, indexPatternName, '*');
+      const pattern = prefixIndexPattern(config, indexPattern, '*');
 
       // it should have BOTH patterns so that it searches all CCS clusters and the local cluster
       expect(pattern).to.eql('*:.monitoring-xyz-1-*,*:.monitoring-xyz-2-*' + ',' + indexPattern);
-
-      // uses the config and indexPatternName supplied, but only calls once
-      expect(get.callCount).to.eql(2);
+      expect(get.callCount).to.eql(1);
     });
   });
 

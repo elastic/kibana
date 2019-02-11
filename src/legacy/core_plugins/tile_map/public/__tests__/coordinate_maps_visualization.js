@@ -28,9 +28,9 @@ import initial from './initial.png';
 import blues from './blues.png';
 import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
-import EMS_CATALOGUE from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest_6.6.json';
-import EMS_FILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files_6.6.json';
-import EMS_TILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles_6.6.json';
+import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
+import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
 
 function mockRawData() {
   const stack = [dummyESResponse];

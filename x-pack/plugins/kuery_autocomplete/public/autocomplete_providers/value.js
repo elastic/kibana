@@ -4,21 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, memoize } from 'lodash';
+import { flatten } from 'lodash';
 import { escapeQuotes } from './escape_kuery';
-import { kfetch } from 'ui/kfetch';
+import { getSuggestions } from 'ui/value_suggestions';
 
 const type = 'value';
 
-const requestSuggestions = memoize((query, field, boolFilter) => {
-  return kfetch({
-    pathname: `/api/kibana/suggestions/values/${field.indexPatternTitle}`,
-    method: 'POST',
-    body: JSON.stringify({ query, field: field.name, boolFilter }),
-  });
-}, resolver);
-
-export function getSuggestionsProvider({ config, indexPatterns, boolFilter }) {
+export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
   const allFields = flatten(
     indexPatterns.map(indexPattern => {
       return indexPattern.fields.map(field => ({
@@ -27,7 +19,6 @@ export function getSuggestionsProvider({ config, indexPatterns, boolFilter }) {
       }));
     })
   );
-  const shouldSuggestValues = config.get('filterEditor:suggestValues');
 
   return function getValueSuggestions({
     start,
@@ -40,18 +31,8 @@ export function getSuggestionsProvider({ config, indexPatterns, boolFilter }) {
     const query = `${prefix}${suffix}`;
 
     const suggestionsByField = fields.map(field => {
-      if (field.type === 'boolean') {
-        return wrapAsSuggestions(start, end, query, ['true', 'false']);
-      } else if (
-        !shouldSuggestValues ||
-        !field.aggregatable ||
-        field.type !== 'string'
-      ) {
-        return [];
-      }
-
-      return requestSuggestions(query, field, boolFilter).then(data => {
-        const quotedValues = data.map(value => `"${escapeQuotes(value)}"`);
+      return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
+        const quotedValues = data.map(value => typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });
     });
@@ -69,10 +50,4 @@ function wrapAsSuggestions(start, end, query, values) {
       const text = `${value} `;
       return { type, text, start, end };
     });
-}
-
-function resolver(query, field, boolFilter) {
-  // Only cache results for a minute
-  const ttl = Math.floor(Date.now() / 1000 / 60);
-  return [ttl, query, field.indexPatternTitle, field.name, JSON.stringify(boolFilter)].join('|');
 }

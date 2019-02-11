@@ -14,7 +14,7 @@ import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactR
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
 // @ts-ignore
-import List from './List';
+import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {
   urlParams: IUrlParams;
@@ -35,7 +35,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
               <Distribution
                 distribution={data}
                 title={
-                  <EuiTitle size="s">
+                  <EuiTitle size="xs">
                     <span>
                       {i18n.translate(
                         'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
@@ -57,7 +57,11 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
       <ErrorGroupOverviewRequest
         urlParams={urlParams}
         render={({ data }) => (
-          <List urlParams={urlParams} items={data} location={location} />
+          <ErrorGroupList
+            urlParams={urlParams}
+            items={data}
+            location={location}
+          />
         )}
       />
     </React.Fragment>

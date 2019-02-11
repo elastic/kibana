@@ -69,6 +69,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -88,6 +89,9 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         {
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
           type: 'visualization',
+          migrationVersion: {
+            visualization: '7.0.0',
+          },
           updated_at: '2017-09-21T18:51:23.794Z',
           version: resp.body.saved_objects[0].version,
           attributes: {
@@ -99,6 +103,13 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
             kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
           },
+          references: [
+            {
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+            },
+          ],
         },
         {
           id: `${getIdPrefix(spaceId)}does not exist`,
@@ -116,6 +127,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });

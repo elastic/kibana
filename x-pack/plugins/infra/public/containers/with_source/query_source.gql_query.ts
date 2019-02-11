@@ -6,29 +6,14 @@
 
 import gql from 'graphql-tag';
 
+import { sourceFieldsFragment } from './source_fields_fragment.gql_query';
+
 export const sourceQuery = gql`
   query SourceQuery($sourceId: ID = "default") {
     source(id: $sourceId) {
-      id
-      configuration {
-        metricAlias
-        logAlias
-        fields {
-          container
-          host
-          pod
-        }
-      }
-      status {
-        indexFields {
-          name
-          type
-          searchable
-          aggregatable
-        }
-        logIndicesExist
-        metricIndicesExist
-      }
+      ...SourceFields
     }
   }
+
+  ${sourceFieldsFragment}
 `;

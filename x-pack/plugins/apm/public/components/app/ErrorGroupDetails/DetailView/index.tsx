@@ -11,6 +11,7 @@ import {
   EuiTabs,
   EuiTitle
 } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first, get, isEmpty } from 'lodash';
@@ -23,7 +24,8 @@ import {
   TRANSACTION_ID,
   URL_FULL,
   USER_ID
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import {
@@ -32,21 +34,12 @@ import {
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import {
-  NOT_AVAILABLE_LABEL,
-  STATUS
-} from 'x-pack/plugins/apm/public/constants';
+import { STATUS } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import {
-  borderRadius,
-  colors,
-  px,
-  unit,
-  units
-} from '../../../../style/variables';
+import { borderRadius, px, unit, units } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
@@ -58,7 +51,7 @@ import { StickyProperties } from '../../../shared/StickyProperties';
 
 const Container = styled.div`
   position: relative;
-  border: 1px solid ${colors.gray4};
+  border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${borderRadius};
   margin-top: ${px(units.plus)};
 `;
@@ -140,7 +133,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         defaultMessage: 'Handled'
       }),
       val:
-        String(idx(error, _ => _.error.exception.handled)) ||
+        String(idx(error, _ => _.error.exception[0].handled)) ||
         NOT_AVAILABLE_LABEL,
       width: '25%'
     },
@@ -273,8 +266,8 @@ export function TabContent({
 }) {
   const codeLanguage = error.service.name;
   const agentName = error.agent.name;
-  const excStackframes = idx(error, _ => _.error.exception.stacktrace);
-  const logStackframes = idx(error, _ => _.error.exception.stacktrace);
+  const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
 
   switch (currentTab.key) {
     case logStacktraceTab.key:

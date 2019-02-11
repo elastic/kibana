@@ -35,7 +35,10 @@ describe('route handlers should fail with a Boom error', () => {
             getCluster: () => mockCluster
           }
         }
-      }
+      },
+      getUiSettingsService: jest.fn(() => ({
+        get: jest.fn()
+      }))
     };
 
     const routes = flatten(mockServer.route.mock.calls);

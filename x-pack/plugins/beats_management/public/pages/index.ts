@@ -13,14 +13,16 @@ import { NoAccessPage } from './error/no_access';
 import { TagsPage } from './overview/configuration_tags';
 import { BeatsPage } from './overview/enrolled_beats';
 import { MainPage } from './overview/index';
-import { TagPage } from './tag';
+import { TagCreatePage } from './tag/create';
+import { TagEditPage } from './tag/edit';
 import { BeatsInitialEnrollmentPage } from './walkthrough/initial/beat';
 import { FinishWalkthroughPage } from './walkthrough/initial/finish';
 import { InitialWalkthroughPage } from './walkthrough/initial/index';
 import { InitialTagPage } from './walkthrough/initial/tag';
 
 export const routeMap = [
-  { path: '/tag/:action/:tagid?', component: TagPage },
+  { path: '/tag/create/:tagid?', component: TagCreatePage },
+  { path: '/tag/edit/:tagid?', component: TagEditPage },
   {
     path: '/beat/:beatId',
     component: BeatDetailsPage,

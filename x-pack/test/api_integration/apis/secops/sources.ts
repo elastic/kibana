@@ -38,7 +38,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           expect(sourceStatus.indexFields.length).to.be(345);
           expect(sourceStatus.auditbeatIndices.length).to.be(1);
           expect(sourceStatus.auditbeatIndicesExist).to.be(true);
-          expect(sourceStatus.auditbeatAliasExists).to.be(false);
+          expect(sourceStatus.auditbeatAliasExists).to.be(true);
         });
     });
   });

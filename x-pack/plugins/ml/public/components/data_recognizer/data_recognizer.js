@@ -49,6 +49,9 @@ export class DataRecognizer extends Component {
         this.setState({
           results
         });
+      })
+      .catch((e) => {
+        console.error('Error attempting to recognize index', e);
       });
   }
 

@@ -9,7 +9,7 @@ import { TIMEOUT } from './constants';
 /**
  * Get the cluster stats from the connected cluster.
  *
- * This is the equivalent of GET /_xpack/license?local=true .
+ * This is the equivalent of GET /_license?local=true .
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  *
@@ -19,7 +19,7 @@ import { TIMEOUT } from './constants';
 export function getXPackLicense(callCluster) {
   return callCluster('transport.request', {
     method: 'GET',
-    path: '/_xpack/license',
+    path: '/_license',
     query: {
       // Fetching the local license is cheaper than getting it from the master and good enough
       local: 'true'
@@ -51,7 +51,7 @@ export function getXPackUsage(callCluster) {
 /**
  * Combine the X-Pack responses into a single response as Monitoring does already.
  *
- * @param {Object} license The license returned from /_xpack/license
+ * @param {Object} license The license returned from /_license
  * @param {Object} usage The usage details returned from /_xpack/usage
  * @return {Object} An object containing both the license and usage.
  */

@@ -84,19 +84,21 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           type: 'dashboard',
           id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
           updated_at: resp.body.saved_objects[1].updated_at,
-          version: 1,
+          version: resp.body.saved_objects[1].version,
           attributes: {
             title: 'A great new dashboard',
           },
+          references: [],
         },
         {
           type: 'globaltype',
           id: `05976c65-1145-4858-bbf0-d225cc78a06e`,
           updated_at: resp.body.saved_objects[2].updated_at,
-          version: 1,
+          version: resp.body.saved_objects[2].version,
           attributes: {
             name: 'A new globaltype object',
           },
+          references: [],
         },
         {
           type: 'globaltype',
@@ -116,7 +118,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
       // query ES directory to ensure namespace was or wasn't specified
       const { _source } = await es.get({
         id: `${expectedSpacePrefix}${savedObject.type}:${savedObject.id}`,
-        type: 'doc',
+        type: '_doc',
         index: '.kibana',
       });
 

@@ -2,25 +2,23 @@
   "type": "index",
   "value": {
     "index": "testlargestring",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
+    "mappings": {
+      "properties": {
+        "mybook": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        }
       }
     },
-    "mappings": {
-      "test": {
-        "properties": {
-          "mybook": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          }
-        }
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }

@@ -1,10 +1,12 @@
 {
   "extends": "../tsconfig.json",
   "include": [
+    "typings/**/*",
     "common/**/*",
     "server/**/*",
     "plugins/**/*",
-    "test_utils/**/*"
+    "test_utils/**/*",
+    "typings/**/*"
   ],
   "exclude": [
     "test/**/*"
@@ -12,7 +14,7 @@
   "compilerOptions": {
     "paths": {
       "ui/*": [
-        "src/ui/public/*"
+        "src/legacy/ui/public/*"
       ],
       "plugins/xpack_main/*": [
         "x-pack/plugins/xpack_main/public/*"

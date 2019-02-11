@@ -3,7 +3,7 @@
 exports[`when response has data Initially should have 3 legends  1`] = `
 Array [
   Object {
-    "color": "#3185fc",
+    "color": "rgb(49, 133, 252)",
     "disabled": undefined,
     "onClick": [Function],
     "text": <styled.span>
@@ -14,7 +14,7 @@ Array [
     </styled.span>,
   },
   Object {
-    "color": "#ecae23",
+    "color": "rgb(230, 194, 32)",
     "disabled": undefined,
     "onClick": [Function],
     "text": <styled.span>
@@ -22,7 +22,7 @@ Array [
     </styled.span>,
   },
   Object {
-    "color": "#f98510",
+    "color": "rgb(249, 133, 16)",
     "disabled": undefined,
     "onClick": [Function],
     "text": <styled.span>
@@ -441,7 +441,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "rgb(249, 133, 16)",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -462,9 +462,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -479,9 +479,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -496,9 +496,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -513,9 +513,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -530,9 +530,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -547,9 +547,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -564,9 +564,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -581,9 +581,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -598,9 +598,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -615,9 +615,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -632,9 +632,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -649,9 +649,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -666,9 +666,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -683,9 +683,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -700,9 +700,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -717,9 +717,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -734,9 +734,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -751,9 +751,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -768,9 +768,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -785,9 +785,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -802,9 +802,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -819,9 +819,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -836,9 +836,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -853,9 +853,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -870,9 +870,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -887,9 +887,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -904,9 +904,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -921,9 +921,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -938,9 +938,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -955,9 +955,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -972,9 +972,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -994,7 +994,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#ecae23",
+                  "stroke": "rgb(230, 194, 32)",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -1015,9 +1015,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1032,9 +1032,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1049,9 +1049,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1066,9 +1066,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1083,9 +1083,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1100,9 +1100,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1117,9 +1117,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1134,9 +1134,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1151,9 +1151,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1168,9 +1168,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1185,9 +1185,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1202,9 +1202,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1219,9 +1219,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1236,9 +1236,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1253,9 +1253,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1270,9 +1270,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1287,9 +1287,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1304,9 +1304,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1321,9 +1321,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1338,9 +1338,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1355,9 +1355,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1372,9 +1372,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1389,9 +1389,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1406,9 +1406,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1423,9 +1423,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1440,9 +1440,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1457,9 +1457,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1474,9 +1474,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1491,9 +1491,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1508,9 +1508,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1525,9 +1525,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1547,7 +1547,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "rgb(49, 133, 252)",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -1568,9 +1568,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1585,9 +1585,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1602,9 +1602,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1619,9 +1619,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1636,9 +1636,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1653,9 +1653,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1670,9 +1670,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1687,9 +1687,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1704,9 +1704,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1721,9 +1721,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1738,9 +1738,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1755,9 +1755,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1772,9 +1772,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1789,9 +1789,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1806,9 +1806,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1823,9 +1823,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1840,9 +1840,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1857,9 +1857,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1874,9 +1874,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1891,9 +1891,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1908,9 +1908,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1925,9 +1925,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1942,9 +1942,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1959,9 +1959,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1976,9 +1976,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -1993,9 +1993,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -2010,9 +2010,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -2027,9 +2027,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -2044,9 +2044,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -2061,9 +2061,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -2078,9 +2078,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -2635,7 +2635,7 @@ Array [
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #69707D;
+  color: rgb(105,112,125);
   cursor: pointer;
   opacity: 1;
   -webkit-user-select: none;
@@ -2648,7 +2648,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #3185fc;
+  background: rgb(49,133,252);
   border-radius: 100%;
 }
 
@@ -2656,7 +2656,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #ecae23;
+  background: rgb(230,194,32);
   border-radius: 100%;
 }
 
@@ -2664,7 +2664,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #f98510;
+  background: rgb(249,133,16);
   border-radius: 100%;
 }
 
@@ -2673,14 +2673,7 @@ Array [
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: space-around;
-  -webkit-justify-content: space-around;
-  -ms-flex-pack: space-around;
-  justify-content: space-around;
+  margin-left: 80px;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
@@ -2697,7 +2690,7 @@ Array [
 
 .c3 {
   white-space: nowrap;
-  color: #98A2B3;
+  color: rgb(152,162,179);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2706,7 +2699,7 @@ Array [
 
 .c4 {
   margin-left: 4px;
-  color: #000000;
+  color: rgb(0,0,0);
   display: inline-block;
 }
 
@@ -2721,7 +2714,7 @@ Array [
     >
       <span
         className="c2"
-        color="#3185fc"
+        color="rgb(49, 133, 252)"
         radius={11}
       />
       <span
@@ -2743,7 +2736,7 @@ Array [
     >
       <span
         className="c5"
-        color="#ecae23"
+        color="rgb(230, 194, 32)"
         radius={11}
       />
       <span
@@ -2760,7 +2753,7 @@ Array [
     >
       <span
         className="c6"
-        color="#f98510"
+        color="rgb(249, 133, 16)"
         radius={11}
       />
       <span
@@ -2797,17 +2790,17 @@ exports[`when response has data when dragging without releasing should display S
 exports[`when response has data when setting hoverX should display tooltip 1`] = `
 Array [
   Object {
-    "color": "#3185fc",
+    "color": "rgb(49, 133, 252)",
     "text": "Avg.",
     "value": 438704.4,
   },
   Object {
-    "color": "#ecae23",
+    "color": "rgb(230, 194, 32)",
     "text": "95th",
     "value": 1557383.999999999,
   },
   Object {
-    "color": "#f98510",
+    "color": "rgb(249, 133, 16)",
     "text": "99th",
     "value": 1820377.1200000006,
   },
@@ -2826,7 +2819,7 @@ Array [
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #69707D;
+  color: rgb(105,112,125);
   cursor: initial;
   opacity: 1;
   -webkit-user-select: none;
@@ -2839,7 +2832,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #3185fc;
+  background: rgb(49,133,252);
   border-radius: 100%;
 }
 
@@ -2847,7 +2840,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #ecae23;
+  background: rgb(230,194,32);
   border-radius: 100%;
 }
 
@@ -2855,7 +2848,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #f98510;
+  background: rgb(249,133,16);
   border-radius: 100%;
 }
 
@@ -2864,19 +2857,19 @@ Array [
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  border: 1px solid #D3DAE6;
-  background: #ffffff;
+  border: 1px solid rgb(211,218,230);
+  background: rgb(255,255,255);
   border-radius: 5px;
   font-size: 14px;
-  color: #000000;
+  color: rgb(0,0,0);
 }
 
 .c1 {
-  background: #F5F7FA;
-  border-bottom: 1px solid #D3DAE6;
+  background: rgb(245,247,250);
+  border-bottom: 1px solid rgb(211,218,230);
   border-radius: 5px 5px 0 0;
   padding: 8px;
-  color: #98A2B3;
+  color: rgb(152,162,179);
 }
 
 .c2 {
@@ -2886,7 +2879,7 @@ Array [
 }
 
 .c10 {
-  color: #98A2B3;
+  color: rgb(152,162,179);
   margin: 8px;
   font-size: 12px;
 }
@@ -2908,12 +2901,12 @@ Array [
 }
 
 .c4 {
-  color: #98A2B3;
+  color: rgb(152,162,179);
   padding-bottom: 0;
 }
 
 .c7 {
-  color: #69707D;
+  color: rgb(105,112,125);
   font-size: 14px;
 }
 
@@ -3324,7 +3317,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "rgb(249, 133, 16)",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -3345,9 +3338,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3362,9 +3355,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3379,9 +3372,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3396,9 +3389,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3413,9 +3406,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3430,9 +3423,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3447,9 +3440,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3464,9 +3457,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3481,9 +3474,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3498,9 +3491,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3515,9 +3508,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3532,9 +3525,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3549,9 +3542,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3566,9 +3559,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3583,9 +3576,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3600,9 +3593,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3617,9 +3610,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3634,9 +3627,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3651,9 +3644,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3668,9 +3661,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3685,9 +3678,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3702,9 +3695,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3719,9 +3712,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3736,9 +3729,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3753,9 +3746,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3770,9 +3763,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3787,9 +3780,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3804,9 +3797,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3821,9 +3814,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3838,9 +3831,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3855,9 +3848,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "rgb(249, 133, 16)",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "rgb(249, 133, 16)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3877,7 +3870,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#ecae23",
+                  "stroke": "rgb(230, 194, 32)",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -3898,9 +3891,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3915,9 +3908,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3932,9 +3925,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3949,9 +3942,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3966,9 +3959,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -3983,9 +3976,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4000,9 +3993,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4017,9 +4010,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4034,9 +4027,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4051,9 +4044,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4068,9 +4061,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4085,9 +4078,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4102,9 +4095,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4119,9 +4112,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4136,9 +4129,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4153,9 +4146,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4170,9 +4163,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4187,9 +4180,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4204,9 +4197,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4221,9 +4214,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4238,9 +4231,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4255,9 +4248,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4272,9 +4265,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4289,9 +4282,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4306,9 +4299,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4323,9 +4316,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4340,9 +4333,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4357,9 +4350,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4374,9 +4367,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4391,9 +4384,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4408,9 +4401,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#ecae23",
+                    "fill": "rgb(230, 194, 32)",
                     "opacity": 1,
-                    "stroke": "#ecae23",
+                    "stroke": "rgb(230, 194, 32)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4430,7 +4423,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "rgb(49, 133, 252)",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -4451,9 +4444,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4468,9 +4461,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4485,9 +4478,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4502,9 +4495,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4519,9 +4512,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4536,9 +4529,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4553,9 +4546,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4570,9 +4563,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4587,9 +4580,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4604,9 +4597,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4621,9 +4614,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4638,9 +4631,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4655,9 +4648,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4672,9 +4665,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4689,9 +4682,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4706,9 +4699,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4723,9 +4716,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4740,9 +4733,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4757,9 +4750,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4774,9 +4767,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4791,9 +4784,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4808,9 +4801,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4825,9 +4818,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4842,9 +4835,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4859,9 +4852,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4876,9 +4869,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4893,9 +4886,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4910,9 +4903,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4927,9 +4920,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4944,9 +4937,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -4961,9 +4954,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "rgb(49, 133, 252)",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "rgb(49, 133, 252)",
                     "strokeWidth": 1,
                   }
                 }
@@ -5017,9 +5010,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#3185fc",
+                  "fill": "rgb(49, 133, 252)",
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "rgb(49, 133, 252)",
                   "strokeWidth": 1,
                 }
               }
@@ -5034,9 +5027,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#ecae23",
+                  "fill": "rgb(230, 194, 32)",
                   "opacity": 1,
-                  "stroke": "#ecae23",
+                  "stroke": "rgb(230, 194, 32)",
                   "strokeWidth": 1,
                 }
               }
@@ -5051,9 +5044,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#f98510",
+                  "fill": "rgb(249, 133, 16)",
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "rgb(249, 133, 16)",
                   "strokeWidth": 1,
                 }
               }
@@ -5104,7 +5097,7 @@ Array [
                 >
                   <span
                     className="c6"
-                    color="#3185fc"
+                    color="rgb(49, 133, 252)"
                     radius={8}
                   />
                   Avg.
@@ -5125,7 +5118,7 @@ Array [
                 >
                   <span
                     className="c8"
-                    color="#ecae23"
+                    color="rgb(230, 194, 32)"
                     radius={8}
                   />
                   95th
@@ -5146,7 +5139,7 @@ Array [
                 >
                   <span
                     className="c9"
-                    color="#f98510"
+                    color="rgb(249, 133, 16)"
                     radius={8}
                   />
                   99th
@@ -5678,7 +5671,7 @@ Array [
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #69707D;
+  color: rgb(105,112,125);
   cursor: pointer;
   opacity: 1;
   -webkit-user-select: none;
@@ -5691,7 +5684,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #3185fc;
+  background: rgb(49,133,252);
   border-radius: 100%;
 }
 
@@ -5699,7 +5692,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #ecae23;
+  background: rgb(230,194,32);
   border-radius: 100%;
 }
 
@@ -5707,7 +5700,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #f98510;
+  background: rgb(249,133,16);
   border-radius: 100%;
 }
 
@@ -5716,14 +5709,7 @@ Array [
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: space-around;
-  -webkit-justify-content: space-around;
-  -ms-flex-pack: space-around;
-  justify-content: space-around;
+  margin-left: 80px;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
@@ -5740,7 +5726,7 @@ Array [
 
 .c3 {
   white-space: nowrap;
-  color: #98A2B3;
+  color: rgb(152,162,179);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -5749,7 +5735,7 @@ Array [
 
 .c4 {
   margin-left: 4px;
-  color: #000000;
+  color: rgb(0,0,0);
   display: inline-block;
 }
 
@@ -5764,7 +5750,7 @@ Array [
     >
       <span
         className="c2"
-        color="#3185fc"
+        color="rgb(49, 133, 252)"
         radius={11}
       />
       <span
@@ -5786,7 +5772,7 @@ Array [
     >
       <span
         className="c5"
-        color="#ecae23"
+        color="rgb(230, 194, 32)"
         radius={11}
       />
       <span
@@ -5803,7 +5789,7 @@ Array [
     >
       <span
         className="c6"
-        color="#f98510"
+        color="rgb(249, 133, 16)"
         radius={11}
       />
       <span

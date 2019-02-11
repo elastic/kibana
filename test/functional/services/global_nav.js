@@ -21,6 +21,10 @@ export function GlobalNavProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
   return new class GlobalNav {
+    async moveMouseToLogo() {
+      await testSubjects.moveMouseTo('headerGlobalNav logo');
+    }
+
     async clickLogo() {
       return await testSubjects.click('headerGlobalNav logo');
     }

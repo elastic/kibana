@@ -24,8 +24,8 @@ import { buildQueryFromLucene } from './from_lucene';
 
 /**
  * @param indexPattern
- * @param queries - an array of query objects. Each query has a language property and a query property.
- * @param filters - an array of filter objects
+ * @param queries - a query object or array of query objects. Each query has a language property and a query property.
+ * @param filters - a filter object or array of filter objects
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  */
@@ -33,16 +33,20 @@ export function buildEsQuery(
   indexPattern,
   queries = [],
   filters = [],
-  {
-    allowLeadingWildcards = false,
-    queryStringOptions = {},
+  config = {
+    allowLeadingWildcards: false,
+    queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: false,
   }) {
+  queries = Array.isArray(queries) ? queries : [queries];
+  filters = Array.isArray(filters) ? filters : [filters];
+
   const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
 
-  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, allowLeadingWildcards);
-  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, queryStringOptions);
-  const filterQuery = buildQueryFromFilters(filters, indexPattern);
+  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards);
+  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions);
+  const filterQuery = buildQueryFromFilters(filters, indexPattern, config.ignoreFilterIfFieldNotInIndex);
 
   return {
     bool: {

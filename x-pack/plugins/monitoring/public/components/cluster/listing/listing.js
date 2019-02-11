@@ -14,15 +14,15 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiToolTip,
   EuiCallOut,
   EuiSpacer,
   EuiIcon
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
@@ -49,15 +49,14 @@ const IsAlertsSupported = (props) => {
 
   const message = alertsMeta.message || clusterMeta.message;
   return (
-    <Tooltip
-      text={message}
-      placement="bottom"
-      trigger="hover"
+    <EuiToolTip
+      content={message}
+      position="bottom"
     >
       <EuiHealth color="subdued" data-test-subj="alertIcon">
         N/A
       </EuiHealth>
-    </Tooltip>
+    </EuiToolTip>
   );
 };
 
@@ -423,45 +422,46 @@ export class Listing extends Component {
     const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
 
     return (
-      <I18nProvider>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
-              <EuiMonitoringTable
-                className="clusterTable"
-                rows={clusters}
-                columns={getColumns(
-                  angular.showLicenseExpiration,
-                  _changeCluster,
-                  _handleClickIncompatibleLicense,
-                  _handleClickInvalidLicense
-                )}
-                rowProps={item => {
-                  return {
-                    'data-test-subj': `clusterRow_${item.cluster_uuid}`
-                  };
-                }}
-                sorting={{
-                  ...sorting,
-                  sort: {
-                    ...sorting.sort,
-                    field: 'cluster_name'
-                  }
-                }}
-                pagination={pagination}
-                search={{
-                  box: {
-                    incremental: true,
-                    placeholder: angular.scope.filterText
-                  },
-                }}
-                onTableChange={onTableChange}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      </I18nProvider>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
+            <EuiMonitoringTable
+              className="clusterTable"
+              rows={clusters}
+              columns={getColumns(
+                angular.showLicenseExpiration,
+                _changeCluster,
+                _handleClickIncompatibleLicense,
+                _handleClickInvalidLicense
+              )}
+              rowProps={item => {
+                return {
+                  'data-test-subj': `clusterRow_${item.cluster_uuid}`
+                };
+              }}
+              sorting={{
+                ...sorting,
+                sort: {
+                  ...sorting.sort,
+                  field: 'cluster_name'
+                }
+              }}
+              pagination={pagination}
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: angular.scope.filterText
+                },
+              }}
+              onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['cluster_name']
+              }}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }

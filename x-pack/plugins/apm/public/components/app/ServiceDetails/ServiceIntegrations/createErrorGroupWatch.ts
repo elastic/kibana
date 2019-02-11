@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import chrome from 'ui/chrome';
 import url from 'url';
 import uuid from 'uuid';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -17,7 +18,7 @@ import {
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../../../common/constants';
+} from '../../../../../common/elasticsearch_fieldnames';
 // @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 
@@ -49,8 +50,8 @@ interface Arguments {
 
 interface Actions {
   log_error: { logging: { text: string } };
-  slack_webhook?: { [key: string]: any };
-  email?: { [key: string]: any };
+  slack_webhook?: StringMap;
+  email?: StringMap;
 }
 
 export async function createErrorGroupWatch({
@@ -84,7 +85,7 @@ export async function createErrorGroupWatch({
         errorGroupsBuckets:
           '{{#ctx.payload.aggregations.error_groups.buckets}}',
         errorLogMessage:
-          '<strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>',
+          '<strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.0.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>',
         errorCulprit:
           '{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}',
         slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',
@@ -113,7 +114,7 @@ export async function createErrorGroupWatch({
         errorGroupsBuckets:
           '{{#ctx.payload.aggregations.error_groups.buckets}}',
         errorLogMessage:
-          '>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*',
+          '>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.0.message}}{{/sample.hits.hits.0._source.error.log.message}}*',
         errorCulprit:
           '>{{#sample.hits.hits.0._source.error.culprit}}`{{sample.hits.hits.0._source.error.culprit}}`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}',
         slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',

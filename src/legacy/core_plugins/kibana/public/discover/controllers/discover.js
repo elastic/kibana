@@ -33,7 +33,7 @@ import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/query_bar';
+import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -183,6 +183,9 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
+
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
@@ -191,8 +194,6 @@ function discoverController(
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
   };
-
-  config.bindToScope($scope, 'k7design');
 
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
@@ -351,6 +352,24 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.applyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.applyFilters(filters);
+    }
+  });
+
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -475,6 +494,12 @@ function discoverController(
         $scope.$listen(timefilter, 'fetch', function () {
           $scope.fetch();
         });
+        $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
+          $scope.updateRefreshInterval();
+        });
+        $scope.$listen(timefilter, 'timeUpdate', () => {
+          $scope.updateTime();
+        });
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -488,6 +513,7 @@ function discoverController(
 
         // update data source when filters update
         $scope.$listen(queryFilter, 'update', function () {
+          $scope.filters = queryFilter.getFilters();
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
@@ -501,13 +527,8 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
-        timefilter.enableAutoRefreshSelector();
         $scope.$watch('opts.timefield', function (timefield) {
-          if (!!timefield) {
-            timefilter.enableTimeRangeSelector();
-          } else {
-            timefilter.disableTimeRangeSelector();
-          }
+          $scope.enableTimeRangeSelector = !!timefield;
         });
 
         $scope.$watch('state.interval', function () {
@@ -525,7 +546,9 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', $scope.updateQueryAndFetch);
+        $scope.$watch('state.query', (query) => {
+          $scope.updateQueryAndFetch({ query });
+        });
 
         $scope.$watchMulti([
           'rows',
@@ -643,7 +666,8 @@ function discoverController(
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
@@ -763,7 +787,15 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
           .then(resp => {
-            visualizeHandler.render({ value: resp });
+            visualizeHandler.render({
+              as: 'visualization',
+              value: {
+                visType: $scope.vis.type.name,
+                visData: resp,
+                visConfig: $scope.vis.params,
+                params: {},
+              }
+            });
           });
       }
 
@@ -829,6 +861,18 @@ function discoverController(
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
     };
+    $scope.time = timefilter.getTime();
+  };
+
+  $scope.updateRefreshInterval = function () {
+    $scope.refreshInterval = timefilter.getRefreshInterval();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   $scope.resetQuery = function () {

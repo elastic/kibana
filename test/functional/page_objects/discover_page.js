@@ -218,15 +218,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('discoverNoResults');
     }
 
-    async getNoResultsTimepicker() {
-      return await testSubjects.find('discoverNoResultsTimefilter');
-    }
-
-    hasNoResultsTimepicker() {
-      return this
-        .getNoResultsTimepicker()
-        .then(() => true)
-        .catch(() => false);
+    async hasNoResultsTimepicker() {
+      return await testSubjects.exists('discoverNoResultsTimefilter');
     }
 
     async clickFieldListItem(field) {
@@ -262,13 +255,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('.index-pattern-selection');
       await find.setValue('.ui-select-search', indexPattern + '\n');
       await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async removeAllFilters() {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('removeAllFilters');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.waitUntilUrlIncludes('filters:!()');
     }
 
     async removeHeaderColumn(name) {
