@@ -323,7 +323,7 @@ export class DynamicDllPlugin {
     this.performedCompilations++;
 
     if (!runCompilerErrors.length) {
-      return Promise.resolve();
+      return;
     }
 
     return Promise.reject(runCompilerErrors.join('\n-'));
