@@ -28,7 +28,11 @@ export async function getIntegrityHash(filepath: string): Promise<Hash | null> {
     const output = createHash('md5');
 
     await pipeline(fs.createReadStream(filepath), output);
-    return output.read().toString('hex');
+    const data = output.read();
+    if (data instanceof Buffer) {
+      return data.toString('hex');
+    }
+    return data;
   } catch (err) {
     return null;
   }
