@@ -114,6 +114,12 @@ The port in `xpack.monitoring.elasticsearch.hosts` is protocol dependent: https 
 Previously set `xpack.monitoring.elasticsearch.ssl.verify` is equal to `xpack.monitoring.elasticsearch.ssl.verificationMode: full`.
 
 [float]
+=== kibana.yml setting `xpack.monitoring.report_stats` is no longer valid
+*Details:* This deprecated setting has been removed and `xpack.xpack_main.telemetry.enabled` should be used instead.
+
+*Impact:* Users with `xpack.monitoring.report_stats` set should use `xpack.xpack_main.telemetry.enabled` instead.
+
+[float]
 === Deprecated API `/shorten` has been removed
 *Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
 
@@ -199,6 +205,22 @@ dependent on an unspecified port set to 9200, `:9200` will have to be appended t
 Previously set `elasticsearch.ssl.verify` is equal to `elasticsearch.ssl.verificationMode: full`.
 
 [float]
+=== kibana.yml setting `index_management.<any setting>` is no longer valid
+*Impact:* Users with `index_management.<any setting>` set should use `xpack.index_management.<any setting>` instead.
+
+[float]
+=== kibana.yml setting `license_management.<any setting>` is no longer valid
+*Impact:* Users with `license_management.<any setting>` set should use `xpack.license_management.<any setting>` instead.
+
+[float]
+=== kibana.yml setting `rollup.<any setting>` is no longer valid
+*Impact:* Users with `rollup.<any setting>` set should use `xpack.rollup.<any setting>` instead.
+
+[float]
+=== kibana.yml setting `upgrade_assistant.<any setting>` is no longer valid
+*Impact:* Users with `upgrade_assistant.<any setting>` set should use `xpack.upgrade_assistant.<any setting>` instead.
+
+[float]
 === Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
 *Details:* Kibana now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
 browsers like Internet Explorer 11 do not support CSP, we show them a warning message whenever they load Kibana.
@@ -206,3 +228,43 @@ browsers like Internet Explorer 11 do not support CSP, we show them a warning me
 *Impact:* Nothing needs to be done necessarily, but if you don't need to support legacy browsers like IE11, we recommend
 that you set `csp.strict: true` in your kibana.yml to block access to those browsers entirely. If your organization requires
 users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your kibana.yml.
+
+[float]
+=== Saved object structure change
+*Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
+
+Example structure before:
+```
+{
+  ...
+  "attributes": {
+    ...
+    "panelsJSON": [{
+      ...
+      "type": "visualization",
+      "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
+    }]
+  }
+}
+```
+
+Example structure after:
+```
+{
+  ...
+  "attributes": {
+    ...
+    "panelsJSON": [{
+      ...
+      "panelRefName": "panel_0"
+    }]
+  },
+  "references": [{
+    "name": "panel_0",
+    "type": "visualization",
+    "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
+  }]
+}
+```
+
+*Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.

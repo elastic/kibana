@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Deprecations } from '../../../../deprecation';
+import { Deprecations } from '../../../deprecation';
 import expect from 'expect.js';
 import index from '../index';
 import { noop } from 'lodash';
