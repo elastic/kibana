@@ -43,6 +43,7 @@ describe('TaskStore', () => {
           },
         },
         name: 'tasky',
+        include_type_name: true,
       });
     });
 
