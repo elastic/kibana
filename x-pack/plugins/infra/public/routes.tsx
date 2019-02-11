@@ -37,4 +37,4 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
   );
 };
 
-export const PageRouter = injectUICapabilities<{ history: History }>(PageRouterComponent);
+export const PageRouter = injectUICapabilities(PageRouterComponent);

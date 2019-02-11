@@ -13,10 +13,10 @@ import {
 import { UserAtSpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function infrastructureTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function logsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('infrastructure-ui', () => {
+  describe('logs-ui', () => {
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
@@ -26,24 +26,24 @@ export default function infrastructureTests({ getService }: KibanaFunctionalTest
           space.id
         );
         switch (scenario.id) {
-          // these users have a read/write view of Infra
+          // these users have a read/write view of Logs
           case 'superuser at everything_space':
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('infrastructure');
-            expect(uiCapabilities.value!.infrastructure).to.eql({
+            expect(uiCapabilities.value).to.have.property('logs');
+            expect(uiCapabilities.value!.logs).to.eql({
               show: true,
             });
             break;
-          // these users have a read only view of Infra
+          // these users have a read only view of Logs
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('infrastructure');
-            expect(uiCapabilities.value!.infrastructure).to.eql({
+            expect(uiCapabilities.value).to.have.property('logs');
+            expect(uiCapabilities.value!.logs).to.eql({
               show: true,
             });
             break;
@@ -57,8 +57,8 @@ export default function infrastructureTests({ getService }: KibanaFunctionalTest
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('infrastructure');
-            expect(uiCapabilities.value!.infrastructure).to.eql({
+            expect(uiCapabilities.value).to.have.property('logs');
+            expect(uiCapabilities.value!.logs).to.eql({
               show: false,
             });
             break;
