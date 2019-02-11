@@ -14,6 +14,7 @@ import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
+import 'uiExports/embeddableFactories';
 import 'ui/agg_types';
 
 import chrome from 'ui/chrome';
