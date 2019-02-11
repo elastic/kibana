@@ -6,6 +6,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 >
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -45,6 +46,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -120,6 +122,7 @@ exports[`Clear btns enabled when there are values 1`] = `
 >
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -159,6 +162,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -234,6 +238,7 @@ exports[`Renders list control 1`] = `
 >
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -273,6 +278,7 @@ exports[`Renders list control 1`] = `
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -348,6 +354,7 @@ exports[`Renders range control 1`] = `
 >
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
@@ -393,6 +400,7 @@ exports[`Renders range control 1`] = `
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="stretch"
+    className="icvContent"
     component="div"
     direction="row"
     gutterSize="l"
