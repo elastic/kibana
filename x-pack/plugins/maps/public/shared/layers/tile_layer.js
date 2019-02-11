@@ -34,6 +34,10 @@ export class TileLayer extends AbstractLayer {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {//data is immmutable
+      return;
+    }
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     startLoading(sourceDataId, requestToken, dataFilters);
