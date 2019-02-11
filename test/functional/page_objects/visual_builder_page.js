@@ -108,6 +108,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return variablesText;
     }
 
+    /**
+     * get all sub-tabs count for `time series`, `metric`, `top n`, `gauge`, `markdown` or `table` tab.
+     *
+     * @returns {Promise<number>}
+     * @memberof VisualBuilderPage
+     */
+    async getSubTabsCount() {
+      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
+      const tabsSelector = 'button[role="tab"]';
+      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
+
+      return elements.length;
+    }
+
+    /**
+     * switch sub-tab for visualization
+     *
+     * @param {'Data' | 'Panel options'| 'Annotations' | 'Markdown' | 'Columns'} subTab
+     * @memberof VisualBuilderPage
+     */
+    async switchSubTab(subTab) {
+      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
+      const tabsSelector = `button[role="tab"] span`;
+
+      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
+
+      elements.forEach(tab => {
+        if (tab.getVisibleText() === subTab) {
+          tab.click();
+        }
+      });
+    }
+
     async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
