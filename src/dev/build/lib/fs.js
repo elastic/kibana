@@ -28,7 +28,7 @@ import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
-import { createPromiseFromStreams, createMapStream } from '../../../utils';
+import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
 import { Extract } from 'tar';
 
