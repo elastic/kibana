@@ -50,16 +50,17 @@ exports[`apmUiEnabled 1`] = `
   />
   <EuiFlexGroup
     alignItems="stretch"
+    className="homeAddData__flexGroup"
     component="div"
     direction="row"
-    gutterSize="none"
-    justifyContent="flexStart"
-    responsive={true}
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={false}
     wrap={true}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -95,7 +96,7 @@ exports[`apmUiEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -131,7 +132,7 @@ exports[`apmUiEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -167,7 +168,7 @@ exports[`apmUiEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -347,16 +348,17 @@ exports[`isNewKibanaInstance 1`] = `
   />
   <EuiFlexGroup
     alignItems="stretch"
+    className="homeAddData__flexGroup"
     component="div"
     direction="row"
-    gutterSize="none"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={true}
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={false}
+    wrap={false}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -392,7 +394,7 @@ exports[`isNewKibanaInstance 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -428,7 +430,7 @@ exports[`isNewKibanaInstance 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -608,16 +610,17 @@ exports[`mlEnabled 1`] = `
   />
   <EuiFlexGroup
     alignItems="stretch"
+    className="homeAddData__flexGroup"
     component="div"
     direction="row"
-    gutterSize="none"
-    justifyContent="flexStart"
-    responsive={true}
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={false}
     wrap={true}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -653,7 +656,7 @@ exports[`mlEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -689,7 +692,7 @@ exports[`mlEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -725,7 +728,7 @@ exports[`mlEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -946,16 +949,17 @@ exports[`render 1`] = `
   />
   <EuiFlexGroup
     alignItems="stretch"
+    className="homeAddData__flexGroup"
     component="div"
     direction="row"
-    gutterSize="none"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={true}
+    gutterSize="l"
+    justifyContent="spaceAround"
+    responsive={false}
+    wrap={false}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -991,7 +995,7 @@ exports[`render 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
@@ -1027,7 +1031,7 @@ exports[`render 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiCard
         className="homAddData__card"
