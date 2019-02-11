@@ -9,24 +9,22 @@ import { get } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 
-const requiredFields = ['host', 'port'];
+const requiredFields = ['description', 'type'];
 const optionalFields = [
-  'scheme',
-  'path',
-  'method',
-  'headers',
-  'params',
-  'auth',
-  'body',
+  'event_type',
+  'incident_key',
+  'client',
+  'client_url',
+  'attach_payload',
+  'contexts',
   'proxy',
-  'connection_timeout',
-  'read_timeout',
-  'url'
+  'href',
+  'src',
 ];
 
 const allFields = [...requiredFields, ...optionalFields];
 
-export class WebhookAction extends BaseAction {
+export class PagerDutyAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
@@ -34,9 +32,6 @@ export class WebhookAction extends BaseAction {
     allFields.forEach((field) => {
       this.fields[field] = get(props, field);
     });
-
-    const { url, host, port, path } = this.fields;
-    this.fullPath = url ? url : host + port + path;
   }
 
   get upstreamJson() {
@@ -48,7 +43,7 @@ export class WebhookAction extends BaseAction {
 
     // If optional fields have been set, add them to the body
     result = optionalFields.reduce((acc, field) => {
-      if (this[field]) {
+      if (this.fields[field]) {
         acc[field] = this.fields[field];
       }
       return acc;
@@ -58,34 +53,28 @@ export class WebhookAction extends BaseAction {
   }
 
   get description() {
-    return i18n.translate('xpack.watcher.models.webhookAction.description', {
-      defaultMessage: 'Webhook will trigger a {method} request on {fullPath}',
+    return i18n.translate('xpack.watcher.models.pagerDutyAction.description', {
+      defaultMessage: '{description} will be sent to PagerDuty',
       values: {
-        method: this.method,
-        fullPath: this.fullPath
+        description: this.fields.description,
       }
     });
   }
 
   get simulateMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateMessage', {
-      defaultMessage: 'Sample request sent to {fullPath}',
-      values: {
-        fullPath: this.fullPath
-      }
+    return i18n.translate('xpack.watcher.models.pagerDutyAction.simulateMessage', {
+      defaultMessage: 'PagerDuty event has been sent.',
     });
   }
 
   get simulateFailMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send request to {fullPath}.',
-      values: {
-        fullPath: this.fullPath
-      }
+    return i18n.translate('xpack.watcher.models.pagerDutyAction.simulateFailMessage', {
+      defaultMessage: 'Failed to send Hipchat event.',
     });
   }
 
   static fromUpstreamJson(upstreamAction) {
-    return new WebhookAction(upstreamAction);
+    return new PagerDutyAction(upstreamAction);
   }
 }
+
