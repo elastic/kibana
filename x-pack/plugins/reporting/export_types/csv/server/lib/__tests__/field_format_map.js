@@ -6,8 +6,8 @@
 
 import expect from 'expect.js';
 
-import { FieldFormat } from '../../../../../../../../src/ui/field_formats/field_format.js';
-import { FieldFormatsService } from '../../../../../../../../src/ui/field_formats/field_formats_service.js';
+import { FieldFormat } from '../../../../../../../../src/legacy/ui/field_formats/field_format.js';
+import { FieldFormatsService } from '../../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';
 import { createBytesFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes.js';
 import { createNumberFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number.js';
 
