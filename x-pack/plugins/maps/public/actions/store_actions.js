@@ -120,7 +120,7 @@ export function setLayerErrorStatus(id, errorMessage) {
 export function toggleLayerVisible(layerId) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
-    //e,g, if a layer was invisible at start-up, it won't have any data loaded
+    //e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerList(getState()).find(layer => {
       return layerId === layer.getId();
     });
