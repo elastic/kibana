@@ -79,8 +79,8 @@ export class TooltipHandler {
     } else {
       const containerBox = this.container.getBoundingClientRect();
       anchorBounds = createRect(
-        containerBox.left + view._origin[0] + item.bounds.x1,
-        containerBox.top + view._origin[1] + item.bounds.y1,
+        containerBox.left + view._origin[0] + item.bounds.x1 + window.pageXOffset,
+        containerBox.top + view._origin[1] + item.bounds.y1 + window.pageYOffset,
         item.bounds.width(),
         item.bounds.height()
       );
