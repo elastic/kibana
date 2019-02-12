@@ -354,4 +354,14 @@ to accurately reflect their content, from `management/kibana/index` or
 
 *Impact:* References to these URLs will need to be updated.
 
+[float]
+=== Removed support for deeply nested table splits in data table visualizations
+*Details:* Previously a user was able to create multiple "split table" aggregations in one table on arbitrary levels.
+The potential for deeply nested tables posed maintenance and accessibility challenges, and was inconsistent with other
+visualizations that only allow one table split. This change does not limit the number of split rows a user can put into
+a table; it only restricts the number of split tables to one.
 
+*Impact:* To prevent breaking existing visualizations, saved objects containing nested table splits will be automatically
+migrated to contain only one split table, converting any existing split tables beyond the first to split rows. No action
+should be required as a result of this change, but be aware that users with saved data table visualizations that contain
+multiple split tables will now see those tables rendered differently.
