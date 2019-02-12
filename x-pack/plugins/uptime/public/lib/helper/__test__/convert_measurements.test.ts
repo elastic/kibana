@@ -15,4 +15,7 @@ describe('convertMicrosecondsToMilliseconds', () => {
   it('returns null for null parameter', () => {
     expect(convertMicrosecondsToMilliseconds(null)).toBeNull();
   });
+  it('returns undefined for undefined parameter', () => {
+    expect(convertMicrosecondsToMilliseconds(undefined)).toBeUndefined();
+  });
 });
