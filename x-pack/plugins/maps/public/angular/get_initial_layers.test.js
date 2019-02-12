@@ -98,10 +98,8 @@ describe('Saved object does not have layer list', () => {
       label: null,
       maxZoom: 24,
       minZoom: 0,
-      source: undefined,
       sourceDescriptor: {
-        type: 'KIBANA_TILEMAP',
-        url: 'myTileUrl',
+        type: 'KIBANA_TILEMAP'
       },
       style: {
         properties: {},
