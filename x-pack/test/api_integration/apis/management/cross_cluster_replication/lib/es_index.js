@@ -15,7 +15,7 @@ export const initElasticsearchIndicesHelpers = (es) => {
 
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
-    return es.indices.create({ index }).then(() => index);
+    return es.indices.create({ index, include_type_name: true }).then(() => index);
   };
 
   const deleteIndex = (index) => {

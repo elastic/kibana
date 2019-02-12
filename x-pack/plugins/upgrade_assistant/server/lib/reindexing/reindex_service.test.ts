@@ -724,6 +724,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
         expect(callCluster).toHaveBeenCalledWith('indices.create', {
           index: 'myIndex-reindex-0',
+          include_type_name: true,
           body: {
             // index.blocks.write should be removed from the settings for the new index.
             settings: { 'index.number_of_replicas': 7 },
