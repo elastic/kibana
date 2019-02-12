@@ -139,17 +139,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const yLabel = await y.getVisibleText();
       yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
-      // 2). find and save the y-axis pixel size (the chart height)
-      const chartAreaObj = await find.byCssSelector('rect.background');
-      const yAxisHeight = await chartAreaObj.getAttribute('height');
-      log.debug('theHeight = ' + yAxisHeight);
-      // 3). get the visWrapper__chart elements
       // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
-      const bars = await Promise.all(chartTypes.map(async (chart) => {
-        const barHeight = await chart.getAttribute('height');
+      const svg = await find.byCssSelector('div.chart > svg');
+      const $ = await svg.parseDomContent();
+      const yAxisHeight = $('rect.background').attr('height');
+      log.debug('theHeight = ' + yAxisHeight);
+      const bars = $('g > g.series > rect').toArray().map(chart => {
+        const barHeight = $(chart).attr('height');
         return Math.round(barHeight / yAxisHeight * yAxisLabel);
-      }));
+      });
 
       return bars;
     }

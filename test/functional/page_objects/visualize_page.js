@@ -803,12 +803,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
-      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
-      log.debug(`chartTypes count = ${chartTypes.length}`);
-      const chartData = await Promise.all(chartTypes.map(async chart => {
-        const barHeight = await chart.getAttribute('height');
+      const svg = await find.byCssSelector('div.chart > svg');
+      const $ = await svg.parseDomContent();
+      const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`).toArray().map(chart => {
+        const barHeight = $(chart).attr('height');
         return Math.round(barHeight * yAxisRatio);
-      }));
+      });
 
       return chartData;
     }
