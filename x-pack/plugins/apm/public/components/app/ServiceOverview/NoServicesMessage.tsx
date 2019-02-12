@@ -56,7 +56,6 @@ export function NoServicesMessage({ historicalDataFound }: Props) {
                 defaultMessage:
                   'You may also have old data that needs to be migrated.'
               })}{' '}
-              {/* TODO: Confirm pathname and hash for the Kibana Migration Assistant */}
               <KibanaLink
                 pathname="/app/kibana"
                 hash="/management/elasticsearch/upgrade_assistant"
