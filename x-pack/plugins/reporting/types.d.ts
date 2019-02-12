@@ -17,6 +17,7 @@ export interface KbnServer {
   plugins: Record<string, any>;
   route: any;
   log: any;
+  fieldFormatServiceFactory: (uiConfig: any) => any;
   savedObjects: {
     getScopedSavedObjectsClient: (
       fakeRequest: { headers: object; getBasePath: () => string }
@@ -25,6 +26,20 @@ export interface KbnServer {
   uiSettingsServiceFactory: (
     { savedObjectsClient }: { savedObjectsClient: SavedObjectClient }
   ) => UiSettings;
+}
+
+export interface ExportTypeDefinition {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentExtension: string;
+  createJobFactory: () => any;
+  executeJobFactory: () => any;
+  validLicenses: string[];
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
 export interface ConfigObject {
@@ -101,8 +116,25 @@ export interface ReportingJob {
   objects?: [any];
 }
 
+export interface JobDocPayload {
+  basePath: string;
+  headers: string;
+  objects: string;
+  title: string;
+  type: string;
+}
+
+export interface JobDocOutput {
+  content: string; // encoded content
+  contentType: string;
+  headers: any;
+  size?: number;
+  statusCode: number;
+}
+
 export interface JobDoc {
-  output: any;
   jobtype: string;
-  payload: any;
+  output: JobDocOutput;
+  payload: JobDocPayload;
+  status: string; // completed, failed, etc
 }

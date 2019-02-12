@@ -69,4 +69,3 @@ function getDocumentPayloadFn(server) {
 }
 
 export const getDocumentPayloadFactory = oncePerServer(getDocumentPayloadFn);
-
