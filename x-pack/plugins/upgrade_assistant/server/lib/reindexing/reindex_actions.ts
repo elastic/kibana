@@ -239,7 +239,10 @@ export const reindexActionsFactory = (
     },
 
     async getBooleanFieldPaths(indexName: string) {
-      const results = await callCluster('indices.getMapping', { index: indexName });
+      const results = await callCluster('indices.getMapping', {
+        index: indexName,
+        include_type_name: true,
+      });
       const mapping = getSingleMappingType(results[indexName].mappings);
 
       // It's possible an index doesn't have a mapping.
@@ -248,8 +251,7 @@ export const reindexActionsFactory = (
 
     async getFlatSettings(indexName: string) {
       const flatSettings = (await callCluster('transport.request', {
-        // TODO: set `&include_type_name=true` to false in 7.0
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
+        path: `/${encodeURIComponent(indexName)}?include_type_name=true&flat_settings=true`,
       })) as { [indexName: string]: FlatSettings };
 
       if (!flatSettings[indexName]) {

@@ -129,6 +129,7 @@ export class TaskStore {
       // check if template exists
       const templateCheck = await this.callCluster('indices.getTemplate', {
         name: templateName,
+        include_type_name: true,
         filter_path: '*.version',
       });
       // extract the existing version
