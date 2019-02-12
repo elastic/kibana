@@ -6,8 +6,7 @@
 
 import { putLicense } from '../../../lib/license';
 
-export function registerLicenseRoute(router, server) {
-  const xpackInfo = server.plugins.xpack_main.info;
+export function registerLicenseRoute(router, xpackInfo) {
   router.put('', (request) => {
     return putLicense(request, xpackInfo);
   });

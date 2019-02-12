@@ -6,8 +6,7 @@
 
 import { startBasic } from '../../../lib/start_basic';
 
-export function registerStartBasicRoute(router, server) {
-  const xpackInfo = server.plugins.xpack_main.info;
+export function registerStartBasicRoute(router, xpackInfo) {
   router.post('/start_basic', (request) => {
     return startBasic(request, xpackInfo);
   });

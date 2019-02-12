@@ -24,10 +24,11 @@ export function licenseManagement(kibana)  {
     },
     init: (server) => {
       registerLicenseChecker(server, PLUGIN.ID);
+      const xpackInfo = server.plugins.xpack_main.info;
       const router = createRouter(server, PLUGIN.ID, '/api/license');
-      registerLicenseRoute(router, server);
-      registerStartTrialRoutes(router, server);
-      registerStartBasicRoute(router, server);
+      registerLicenseRoute(router, xpackInfo);
+      registerStartTrialRoutes(router, xpackInfo);
+      registerStartBasicRoute(router, xpackInfo);
     }
   });
 }
