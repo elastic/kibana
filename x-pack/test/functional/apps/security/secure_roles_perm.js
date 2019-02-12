@@ -64,15 +64,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.login('Rashmi', 'changeme');
     });
 
-    //Verify the Access Denied message is displayed
-    it('Kibana User navigating to Monitoring gets Access Denied', async function () {
-      const expectedMessage = 'Access Denied';
-      await PageObjects.monitoring.navigateTo();
-      const actualMessage = await PageObjects.monitoring.getAccessDeniedMessage();
-      expect(actualMessage).to.be(expectedMessage);
-    });
-
-
     it('Kibana User navigating to Management gets permission denied', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
