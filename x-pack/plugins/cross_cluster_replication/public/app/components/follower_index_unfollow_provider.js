@@ -78,7 +78,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
             i18n.translate(
               'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.cancelButtonText',
               {
-                defaultMessage: "Cancel"
+                defaultMessage: 'Cancel'
               }
             )
           }
@@ -87,7 +87,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
             i18n.translate(
               'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.confirmButtonText',
               {
-                defaultMessage: "Unfollow leader"
+                defaultMessage: 'Unfollow leader'
               }
             )
           }

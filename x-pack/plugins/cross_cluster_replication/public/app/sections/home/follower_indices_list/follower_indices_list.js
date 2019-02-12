@@ -152,7 +152,7 @@ export class FollowerIndicesList extends PureComponent {
 
     if (apiError) {
       const title = i18n.translate('xpack.crossClusterReplication.followerIndexList.loadingErrorTitle', {
-        defaultMessage: "Error loading follower indices"
+        defaultMessage: 'Error loading follower indices'
       });
 
       return (

@@ -77,7 +77,7 @@ export class AutoFollowPatternEdit extends PureComponent {
     const title = i18n.translate(
       'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorTitle',
       {
-        defaultMessage: "Error loading auto-follow pattern"
+        defaultMessage: 'Error loading auto-follow pattern'
       }
     );
     const errorMessage = error.status === 404 ? {
@@ -85,7 +85,7 @@ export class AutoFollowPatternEdit extends PureComponent {
         error: i18n.translate(
           'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorMessage',
           {
-            defaultMessage: "The auto-follow pattern '{name}' does not exist.",
+            defaultMessage: `The auto-follow pattern '{name}' does not exist.`,
             values: { name }
           }
         )

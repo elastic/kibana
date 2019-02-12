@@ -156,7 +156,7 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (apiError) {
       const title = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle', {
-        defaultMessage: "Error loading auto-follow patterns"
+        defaultMessage: 'Error loading auto-follow patterns'
       });
 
       return (

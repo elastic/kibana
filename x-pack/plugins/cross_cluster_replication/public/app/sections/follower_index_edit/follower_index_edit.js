@@ -115,14 +115,14 @@ export class FollowerIndexEdit extends PureComponent {
   renderGetFollowerIndexError(error) {
     const { match: { params: { id: name } } } = this.props;
     const title = i18n.translate('xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle', {
-      defaultMessage: "Error loading follower index"
+      defaultMessage: 'Error loading follower index'
     });
     const errorMessage = error.status === 404 ? {
       data: {
         error: i18n.translate(
           'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
           {
-            defaultMessage: "The follower index '{name}' does not exist.",
+            defaultMessage: `The follower index '{name}' does not exist.`,
             values: { name }
           }
         )
@@ -158,7 +158,7 @@ export class FollowerIndexEdit extends PureComponent {
     const title = i18n.translate(
       'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
       {
-        defaultMessage: "Update follower index '{id}'?",
+        defaultMessage: `Update follower index '{id}'?`,
         values: { id: followerIndexId }
       }
     );
@@ -173,7 +173,7 @@ export class FollowerIndexEdit extends PureComponent {
             i18n.translate(
               'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
               {
-                defaultMessage: "Cancel"
+                defaultMessage: 'Cancel'
               }
             )
           }

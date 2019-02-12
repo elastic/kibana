@@ -158,7 +158,7 @@ export class AutoFollowPatternForm extends PureComponent {
       const errorMsg = i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternForm.leaderIndexPatternError.duplicateMessage',
         {
-          defaultMessage: "Duplicate leader index pattern aren't allowed."
+          defaultMessage: `Duplicate leader index pattern aren't allowed.`
         }
       );
 
@@ -439,7 +439,7 @@ export class AutoFollowPatternForm extends PureComponent {
               placeholder={i18n.translate(
                 'xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexPatternsPlaceholder',
                 {
-                  defaultMessage: "Type and then hit ENTER"
+                  defaultMessage: 'Type and then hit ENTER'
                 }
               )}
               selectedOptions={formattedLeaderIndexPatterns}

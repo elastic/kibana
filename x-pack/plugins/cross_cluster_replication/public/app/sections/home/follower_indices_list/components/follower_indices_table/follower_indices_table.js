@@ -123,7 +123,7 @@ export class FollowerIndicesTable extends PureComponent {
           const label = i18n.translate(
             'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
             {
-              defaultMessage: "Edit follower index"
+              defaultMessage: 'Edit follower index'
             }
           );
 
@@ -145,7 +145,7 @@ export class FollowerIndicesTable extends PureComponent {
           const label = i18n.translate(
             'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
             {
-              defaultMessage: "Unfollow leader index"
+              defaultMessage: 'Unfollow leader index'
             }
           );
 
@@ -170,7 +170,7 @@ export class FollowerIndicesTable extends PureComponent {
     return [{
       field: 'name',
       name: i18n.translate('xpack.crossClusterReplication.followerIndexList.table.nameColumnTitle', {
-        defaultMessage: "Name"
+        defaultMessage: 'Name'
       }),
       sortable: true,
       truncateText: false,
@@ -186,7 +186,7 @@ export class FollowerIndicesTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
         {
-          defaultMessage: "Status"
+          defaultMessage: 'Status'
         }
       ),
       truncateText: true,
@@ -213,7 +213,7 @@ export class FollowerIndicesTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
         {
-          defaultMessage: "Remote cluster"
+          defaultMessage: 'Remote cluster'
         }
       ),
       truncateText: true,
@@ -223,7 +223,7 @@ export class FollowerIndicesTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.followerIndexList.table.leaderIndexColumnTitle',
         {
-          defaultMessage: "Leader index"
+          defaultMessage: 'Leader index'
         }
       ),
       truncateText: true,
@@ -232,7 +232,7 @@ export class FollowerIndicesTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.followerIndexList.table.actionsColumnTitle',
         {
-          defaultMessage: "Actions"
+          defaultMessage: 'Actions'
         }
       ),
       actions,

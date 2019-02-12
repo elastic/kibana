@@ -21,7 +21,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
   const title = i18n.translate(
     'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
     {
-      defaultMessage: "Index name examples"
+      defaultMessage: 'Index name examples'
     }
   );
 

@@ -67,7 +67,7 @@ export class AutoFollowPatternTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternList.table.nameColumnTitle',
         {
-          defaultMessage: "Name"
+          defaultMessage: 'Name'
         }
       ),
       sortable: true,
@@ -84,7 +84,7 @@ export class AutoFollowPatternTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
         {
-          defaultMessage: "Remote cluster"
+          defaultMessage: 'Remote cluster'
         }
       ),
       truncateText: true,
@@ -94,7 +94,7 @@ export class AutoFollowPatternTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternList.table.leaderPatternsColumnTitle',
         {
-          defaultMessage: "Leader patterns"
+          defaultMessage: 'Leader patterns'
         }
       ),
       render: (leaderPatterns) => leaderPatterns.join(', '),
@@ -103,7 +103,7 @@ export class AutoFollowPatternTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternList.table.prefixColumnTitle',
         {
-          defaultMessage: "Follower index prefix"
+          defaultMessage: 'Follower index prefix'
         }
       ),
       sortable: true,
@@ -112,7 +112,7 @@ export class AutoFollowPatternTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternList.table.suffixColumnTitle',
         {
-          defaultMessage: "Follower index suffix"
+          defaultMessage: 'Follower index suffix'
         }
       ),
       sortable: true,
@@ -120,7 +120,7 @@ export class AutoFollowPatternTable extends PureComponent {
       name: i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternList.table.actionsColumnTitle',
         {
-          defaultMessage: "Actions"
+          defaultMessage: 'Actions'
         }
       ),
       actions: [

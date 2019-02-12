@@ -80,7 +80,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
             i18n.translate(
               'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
               {
-                defaultMessage: "Cancel"
+                defaultMessage: 'Cancel'
               }
             )
           }
@@ -89,7 +89,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
             i18n.translate(
               'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
               {
-                defaultMessage: "Resume replication"
+                defaultMessage: 'Resume replication'
               }
             )
           }
