@@ -32,6 +32,9 @@ import {
   getConstrainedShapesWithPreexistingAnnotations,
   getCursor,
   getDirectSelect,
+  getDragBox,
+  getDragBoxAnnotation,
+  getDragBoxSelected,
   getDraggedPrimaryShape,
   getFocusedShape,
   getGroupAction,
@@ -96,12 +99,16 @@ const transformGestures = mouseTransformGesture;
 
 const restateShapesEvent = select(getRestateShapesEvent)(primaryUpdate);
 
+const dragBox = select(getDragBox)(dragging, draggedShape, dragVector);
+
 // directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
 const directSelect = select(getDirectSelect)(primaryUpdate);
 
 const selectedShapeObjects = select(getSelectedShapeObjects)(getScene);
 
 const selectedShapesPrev = select(getSelectedShapesPrev)(getScene);
+
+const boxSelected = select(getDragBoxSelected)(dragBox, shapes);
 
 const selectionState = select(getSelectionState)(
   selectedShapesPrev,
@@ -112,6 +119,7 @@ const selectionState = select(getSelectionState)(
   metaHeld,
   multiselectModifier,
   directSelect,
+  boxSelected,
   shapes
 );
 
@@ -150,7 +158,12 @@ const alignmentGuideAnnotations = select(getAlignmentGuideAnnotations)(
 
 const hoverAnnotations = select(getHoverAnnotations)(
   configuration,
-  hoveredShape,
+  select((h, b) =>
+    h
+      .slice(0, 1)
+      .concat(b)
+      .filter((d, i, a) => a.indexOf(d) === i)
+  )(hoveredShapes, boxSelected),
   selectedPrimaryShapeIds,
   draggedShape
 );
@@ -204,6 +217,8 @@ const resizeAnnotations = select(resizeAnnotationsFunction)(configuration, group
 
 const rotationAnnotations = select(getRotationAnnotations)(configuration, grouping);
 
+const dragBoxAnnotation = select(getDragBoxAnnotation)(configuration, dragBox);
+
 const annotatedShapes = select(getAnnotatedShapes)(
   grouping,
   alignmentGuideAnnotations,
@@ -211,7 +226,8 @@ const annotatedShapes = select(getAnnotatedShapes)(
   rotationAnnotations,
   resizeAnnotations,
   rotationTooltipAnnotation,
-  adHocChildrenAnnotations
+  adHocChildrenAnnotations,
+  dragBoxAnnotation
 );
 
 const globalTransformShapes = select(cascadeProperties)(annotatedShapes);

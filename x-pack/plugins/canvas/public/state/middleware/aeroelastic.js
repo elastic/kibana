@@ -30,6 +30,8 @@ const aeroelasticConfiguration = {
   atopZ: 1000,
   depthSelect: true,
   devColor: 'magenta',
+  dragBoxAnnotationName: 'dragBoxAnnotation',
+  dragBoxZ: 1050, // above alignment guides but below the upcoming hover tooltip
   groupName: 'group',
   groupResize: true,
   guideDistance: 3,

@@ -5,7 +5,7 @@
  */
 
 import { getId } from './../../lib/get_id';
-import { landmarkPoint, shapesAt } from './geometry';
+import { landmarkPoint, shapesAt, insideAABB } from './geometry';
 
 import {
   compositeComponent,
@@ -1202,6 +1202,7 @@ export const getSelectionState = (
   metaHeld,
   multiselect,
   directSelect,
+  boxSelected,
   allShapes
 ) => {
   const uidUnchanged = uid === prev.uid;
@@ -1306,14 +1307,16 @@ export const getAdHocChildrenAnnotations = (config, { shapes }) => {
     .map(borderAnnotation(config.getAdHocChildAnnotationName, config.hoverLift));
 };
 
-export const getHoverAnnotations = (config, shape, selectedPrimaryShapeIds, draggedShape) => {
-  return shape &&
-    shape.type !== 'annotation' &&
-    selectedPrimaryShapeIds.indexOf(shape.id) === -1 &&
-    !draggedShape
-    ? [borderAnnotation(config.hoverAnnotationName, config.hoverLift)(shape)]
-    : [];
-};
+export const getHoverAnnotations = (config, shapes, selectedPrimaryShapeIds, draggedShape) =>
+  shapes
+    .filter(
+      shape =>
+        shape &&
+        shape.type !== 'annotation' &&
+        selectedPrimaryShapeIds.indexOf(shape.id) === -1 &&
+        !draggedShape
+    )
+    .map(borderAnnotation(config.hoverAnnotationName, config.hoverLift));
 
 export const getSnappedShapes = (
   config,
@@ -1376,6 +1379,39 @@ export const getRotationAnnotations = (config, { shapes, selectedShapes }) => {
     .filter(identity);
 };
 
+export const getDragBox = (dragging, draggedShape, { x0, y0, x1, y1 }) =>
+  dragging &&
+  !draggedShape && {
+    x: (x0 + x1) / 2,
+    y: (y0 + y1) / 2,
+    a: Math.abs(x1 - x0) / 2,
+    b: Math.abs(y1 - y0) / 2,
+  };
+
+export const getDragBoxSelected = (box, shapes) => {
+  if (!box) {
+    return [];
+  }
+  const filter = insideAABB(box);
+  return shapes.filter(s => s.type !== 'annotation' && filter(s.transformMatrix, s.a, s.b));
+};
+
+export const getDragBoxAnnotation = (config, box) =>
+  box
+    ? [
+        {
+          id: config.dragBoxAnnotationName,
+          type: 'annotation',
+          subtype: config.dragBoxAnnotationName,
+          interactive: false,
+          parent: null,
+          localTransformMatrix: translate(box.x, box.y, config.dragBoxZ),
+          a: box.a,
+          b: box.b,
+        },
+      ]
+    : [];
+
 export const getAnnotatedShapes = (
   { shapes },
   alignmentGuideAnnotations,
@@ -1383,7 +1419,8 @@ export const getAnnotatedShapes = (
   rotationAnnotations,
   resizeAnnotations,
   rotationTooltipAnnotation,
-  adHocChildrenAnnotations
+  adHocChildrenAnnotations,
+  dragBoxAnnotation
 ) => {
   // fixme update it to a simple concatenator, no need for enlisting the now pretty long subtype list
   const annotations = [].concat(
@@ -1392,7 +1429,8 @@ export const getAnnotatedShapes = (
     rotationAnnotations,
     resizeAnnotations,
     rotationTooltipAnnotation,
-    adHocChildrenAnnotations
+    adHocChildrenAnnotations,
+    dragBoxAnnotation
   );
   // remove preexisting annotations
   const contentShapes = shapes.filter(shape => shape.type !== 'annotation');

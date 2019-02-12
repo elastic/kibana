@@ -10,6 +10,7 @@ import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
+import { DragBoxAnnotation } from '../dragbox_annotation';
 import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
@@ -177,6 +178,8 @@ export class WorkpadPage extends PureComponent {
                 case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
                 case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
+                case 'dragBoxAnnotation':
+                  return <DragBoxAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
                 case 'resizeHandle':
