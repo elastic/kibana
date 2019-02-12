@@ -18,7 +18,7 @@ import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
 import styled, { withTheme } from 'styled-components';
 
-import { InfraMetricsErrorCodes } from '../../../server/lib/adapters/metrics/adapter_types';
+import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';

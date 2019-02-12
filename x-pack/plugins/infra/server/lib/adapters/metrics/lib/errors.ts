@@ -5,7 +5,7 @@
  */
 
 import { ApolloError } from 'apollo-server-errors';
-import { InfraMetricsErrorCodes } from '../adapter_types';
+import { InfraMetricsErrorCodes } from '../../../../../common/errors';
 
 export class InvalidNodeError extends ApolloError {
   constructor(message: string) {
