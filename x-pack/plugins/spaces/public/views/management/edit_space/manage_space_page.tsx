@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
   EuiText,
@@ -114,10 +113,10 @@ class ManageSpacePageUI extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <div className="spcManagePage">
+      <Fragment>
         <EuiPageContentBody>{content}</EuiPageContentBody>
         {this.maybeGetSecureSpacesMessage()}
-      </div>
+      </Fragment>
     );
   }
 
