@@ -62,7 +62,7 @@ Messages can contain placeholders for embedding a value of a variable. For examp
 }
 ```
 
-Mostly such placeholders have meaningful name according to the сontent.
+Mostly such placeholders have meaningful name according to the content.
 
 ### Pluralization
 
