@@ -2,12 +2,6 @@
   "type": "index",
   "value": {
     "index": ".kibana",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "1"
-      }
-    },
     "mappings": {
       "properties": {
         "config": {
@@ -17,13 +11,13 @@
               "type": "keyword"
             },
             "defaultIndex": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
+                  "ignore_above": 256,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "xPackMonitoring:showBanner": {
               "type": "boolean"
@@ -182,19 +176,13 @@
             }
           }
         },
-        "spaceId": {
-          "type": "keyword"
-        },
         "space": {
           "properties": {
-            "name": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
-                }
-              }
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
             },
             "description": {
               "type": "text"
@@ -202,13 +190,19 @@
             "initials": {
               "type": "keyword"
             },
-            "color": {
-              "type": "keyword"
-            },
-            "_reserved": {
-              "type": "boolean"
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
           }
+        },
+        "spaceId": {
+          "type": "keyword"
         },
         "timelion-sheet": {
           "dynamic": "strict",
@@ -271,13 +265,13 @@
               "type": "date"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -312,6 +306,12 @@
           }
         }
       }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
     }
   }
 }
@@ -320,13 +320,6 @@
   "type": "index",
   "value": {
     "index": ".reporting-2018.03.11",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "auto_expand_replicas": "0-1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "properties": {
         "attempts": {
@@ -350,8 +343,8 @@
         "output": {
           "properties": {
             "content": {
-              "type": "object",
-              "enabled": false
+              "enabled": false,
+              "type": "object"
             },
             "content_type": {
               "type": "keyword"
@@ -362,8 +355,8 @@
           }
         },
         "payload": {
-          "type": "object",
-          "enabled": false
+          "enabled": false,
+          "type": "object"
         },
         "priority": {
           "type": "byte"
@@ -380,6 +373,13 @@
         "timeout": {
           "type": "long"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
