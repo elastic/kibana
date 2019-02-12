@@ -50,7 +50,7 @@ less performant hardware. You might also reduce the number of replicas because
 you expect the data to be queried less frequently. To keep the index searchable 
 for a longer period, and reduce the hardware requirements, you can use the 
 {ref}/frozen-indices.html[freeze action]. Queries are slower on a frozen index because the index is 
-reloaded from the drive to RAM on demand.
+reloaded from the disk to RAM on demand.
 
 * *Delete.* The index is no longer relevant. You can define when it is safe to 
 delete it.
