@@ -84,6 +84,7 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
       layerId: layerId
     });
+    dispatch(syncDataForLayer(layerId));
   };
 }
 
