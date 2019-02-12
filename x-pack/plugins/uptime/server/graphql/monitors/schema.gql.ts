@@ -66,13 +66,13 @@ export const monitorsSchema = gql`
     y: Int
   }
 
-  "Represents a monitor's duration performance in ms at a point in time."
+  "Represents a monitor's duration performance in microseconds at a point in time."
   type MonitorDurationAreaPoint {
-    "The timeseries value for this point."
+    "The timeseries value for this point in time."
     x: UnsignedInteger!
-    "The min duration value at this point."
+    "The min duration value in microseconds at this time."
     y0: Float
-    "The max duration value at this point."
+    "The max duration value in microseconds at this point."
     y: Float
   }
 

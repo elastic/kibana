@@ -364,13 +364,13 @@ export interface MonitorChart {
   /** The maximum duration value in this chart. */
   durationMaxValue: number;
 }
-/** Represents a monitor's duration performance in ms at a point in time. */
+/** Represents a monitor's duration performance in microseconds at a point in time. */
 export interface MonitorDurationAreaPoint {
-  /** The timeseries value for this point. */
+  /** The timeseries value for this point in time. */
   x: UnsignedInteger;
-  /** The min duration value at this point. */
+  /** The min duration value in microseconds at this time. */
   y0?: number | null;
-  /** The max duration value at this point. */
+  /** The max duration value in microseconds at this point. */
   y?: number | null;
 }
 /** Represents the average monitor duration ms at a point in time. */

@@ -1889,11 +1889,11 @@
       {
         "kind": "OBJECT",
         "name": "MonitorDurationAreaPoint",
-        "description": "Represents a monitor's duration performance in ms at a point in time.",
+        "description": "Represents a monitor's duration performance in microseconds at a point in time.",
         "fields": [
           {
             "name": "x",
-            "description": "The timeseries value for this point.",
+            "description": "The timeseries value for this point in time.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1905,7 +1905,7 @@
           },
           {
             "name": "y0",
-            "description": "The min duration value at this point.",
+            "description": "The min duration value in microseconds at this time.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
@@ -1913,7 +1913,7 @@
           },
           {
             "name": "y",
-            "description": "The max duration value at this point.",
+            "description": "The max duration value in microseconds at this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,

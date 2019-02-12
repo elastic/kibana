@@ -23,6 +23,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';
+import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 
 interface PingListProps {
   loading: boolean;
@@ -90,7 +91,7 @@ export const PingList = ({
         defaultMessage: 'Duration ms',
         description: 'The "ms" in the default message is an abbreviation for milliseconds',
       }),
-      render: (duration: number) => duration / 1000,
+      render: (duration: number) => microsToMillis(duration),
       sortable: true,
     },
     {

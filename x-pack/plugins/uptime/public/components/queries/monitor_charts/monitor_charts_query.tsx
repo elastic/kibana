@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { MonitorChart } from '../../../../common/graphql/types';
+import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
 
@@ -85,7 +86,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
 
           // These limits provide domain sizes for the charts
           const checkDomainLimits = [0, statusMaxCount];
-          const durationDomainLimits = [0, durationMaxValue];
+          const durationDomainLimits = [0, microsToMillis(durationMaxValue)];
 
           return (
             <Fragment>
@@ -120,7 +121,11 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                             defaultMessage: 'Duration range',
                           }
                         )}
-                        data={durationArea}
+                        data={durationArea.map(({ x, y, y0 }) => ({
+                          x,
+                          y: microsToMillis(y),
+                          y0: microsToMillis(y0),
+                        }))}
                         curve="curveBasis"
                       />
                       <EuiLineSeries
@@ -131,7 +136,10 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                             defaultMessage: 'Mean duration',
                           }
                         )}
-                        data={durationLine}
+                        data={durationLine.map(({ x, y }) => ({
+                          x,
+                          y: microsToMillis(y),
+                        }))}
                       />
                     </EuiSeriesChart>
                   </EuiPanel>

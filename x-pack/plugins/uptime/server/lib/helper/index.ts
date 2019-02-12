@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { convertMicrosecondsToMilliseconds } from './convert_measurements';
 export { dropLatestBucket } from './drop_latest_bucket';
 export { formatEsBucketsForHistogram } from './format_es_buckets_for_histogram';
 export { getFilteredQuery } from './get_filtered_query';

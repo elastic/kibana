@@ -16,12 +16,7 @@ import {
   MonitorSeriesPoint,
   Ping,
 } from '../../../../common/graphql/types';
-import {
-  convertMicrosecondsToMilliseconds,
-  dropLatestBucket,
-  getFilteredQuery,
-  getFilteredQueryAndStatusFilter,
-} from '../../helper';
+import { dropLatestBucket, getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -99,14 +94,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       const x = get(bucket, 'key');
       const docCount = get(bucket, 'doc_count', 0);
       statusMaxCount = Math.max(docCount, statusMaxCount);
-      const convertWrapper = (property: string) =>
-        convertMicrosecondsToMilliseconds(get(bucket, property, null));
-      durationMaxValue = Math.max(durationMaxValue, convertWrapper('duration.max') || 0);
+      durationMaxValue = Math.max(durationMaxValue, get(bucket, 'duration.max', 0));
       return {
         x,
-        durationMin: convertWrapper('duration.min'),
-        durationMax: convertWrapper('duration.max'),
-        durationAvg: convertWrapper('duration.avg'),
+        durationMin: get(bucket, 'duration.min', null),
+        durationMax: get(bucket, 'duration.max', null),
+        durationAvg: get(bucket, 'duration.avg', null),
         status: formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount),
       };
     });
