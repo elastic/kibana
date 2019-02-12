@@ -21,10 +21,10 @@ import _ from 'lodash';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 
-export function buildQueryFromLucene(queries, config) {
+export function buildQueryFromLucene(queries, queryStringOptions) {
   const combinedQueries = _.map(queries, (query) => {
     const queryDsl = luceneStringToDsl(query.query);
-    return decorateQuery(queryDsl, config);
+    return decorateQuery(queryDsl, queryStringOptions);
   });
 
   return {

@@ -9,7 +9,7 @@
 // ====================================================
 
 export interface Query {
-  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
+  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source that doesn't exist doesn't error out,but returns the configured or hardcoded defaults. */
   source: InfraSource;
   /** Get a list of all infrastructure data sources */
   allSources: InfraSource[];
@@ -34,6 +34,8 @@ export interface InfraSource {
   logEntriesBetween: InfraLogEntryInterval;
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
+
+  logItem: InfraLogItem;
   /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
   map?: InfraResponse | null;
 
@@ -177,6 +179,22 @@ export interface InfraLogSummaryBucket {
   entriesCount: number;
 }
 
+export interface InfraLogItem {
+  /** The ID of the document */
+  id: string;
+  /** The index where the document was found */
+  index: string;
+  /** An array of flattened fields and values */
+  fields: InfraLogItemField[];
+}
+
+export interface InfraLogItemField {
+  /** The flattened field name */
+  field: string;
+  /** The value for the Field as a string */
+  value: string;
+}
+
 export interface InfraResponse {
   nodes: InfraNode[];
 }
@@ -197,6 +215,10 @@ export interface InfraNodeMetric {
   name: InfraMetricType;
 
   value: number;
+
+  avg: number;
+
+  max: number;
 }
 
 export interface InfraMetricData {
@@ -395,6 +417,9 @@ export interface LogSummaryBetweenInfraSourceArgs {
   /** The query to filter the log entries by */
   filterQuery?: string | null;
 }
+export interface LogItemInfraSourceArgs {
+  id: string;
+}
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
@@ -456,6 +481,7 @@ export enum InfraPathType {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
+  custom = 'custom',
 }
 
 export enum InfraMetricType {
@@ -520,6 +546,45 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace FlyoutItemQuery {
+  export type Variables = {
+    sourceId: string;
+    itemId: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logItem: LogItem;
+  };
+
+  export type LogItem = {
+    __typename?: 'InfraLogItem';
+
+    id: string;
+
+    index: string;
+
+    fields: Fields[];
+  };
+
+  export type Fields = {
+    __typename?: 'InfraLogItemField';
+
+    field: string;
+
+    value: string;
+  };
+}
 
 export namespace MetadataQuery {
   export type Variables = {
@@ -658,7 +723,32 @@ export namespace WaffleNodesQuery {
     name: InfraMetricType;
 
     value: number;
+
+    avg: number;
+
+    max: number;
   };
+}
+
+export namespace CreateSourceMutation {
+  export type Variables = {
+    sourceId: string;
+    sourceConfiguration: CreateSourceInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    createSource: CreateSource;
+  };
+
+  export type CreateSource = {
+    __typename?: 'CreateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = SourceFields.Fragment;
 }
 
 export namespace SourceQuery {
@@ -672,57 +762,28 @@ export namespace SourceQuery {
     source: Source;
   };
 
-  export type Source = {
-    __typename?: 'InfraSource';
+  export type Source = SourceFields.Fragment;
+}
 
-    id: string;
-
-    configuration: Configuration;
-
-    status: Status;
+export namespace UpdateSourceMutation {
+  export type Variables = {
+    sourceId?: string | null;
+    changes: UpdateSourceInput[];
   };
 
-  export type Configuration = {
-    __typename?: 'InfraSourceConfiguration';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
-    metricAlias: string;
-
-    logAlias: string;
-
-    fields: Fields;
+    updateSource: UpdateSource;
   };
 
-  export type Fields = {
-    __typename?: 'InfraSourceFields';
+  export type UpdateSource = {
+    __typename?: 'UpdateSourceResult';
 
-    container: string;
-
-    host: string;
-
-    pod: string;
+    source: Source;
   };
 
-  export type Status = {
-    __typename?: 'InfraSourceStatus';
-
-    indexFields: IndexFields[];
-
-    logIndicesExist: boolean;
-
-    metricIndicesExist: boolean;
-  };
-
-  export type IndexFields = {
-    __typename?: 'InfraIndexField';
-
-    name: string;
-
-    type: string;
-
-    searchable: boolean;
-
-    aggregatable: boolean;
-  };
+  export type Source = SourceFields.Fragment;
 }
 
 export namespace LogEntries {
@@ -844,6 +905,72 @@ export namespace LogSummary {
     end: number;
 
     entriesCount: number;
+  };
+}
+
+export namespace SourceFields {
+  export type Fragment = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    version?: number | null;
+
+    updatedAt?: number | null;
+
+    configuration: Configuration;
+
+    status: Status;
+  };
+
+  export type Configuration = {
+    __typename?: 'InfraSourceConfiguration';
+
+    name: string;
+
+    description: string;
+
+    metricAlias: string;
+
+    logAlias: string;
+
+    fields: Fields;
+  };
+
+  export type Fields = {
+    __typename?: 'InfraSourceFields';
+
+    container: string;
+
+    host: string;
+
+    pod: string;
+
+    tiebreaker: string;
+
+    timestamp: string;
+  };
+
+  export type Status = {
+    __typename?: 'InfraSourceStatus';
+
+    indexFields: IndexFields[];
+
+    logIndicesExist: boolean;
+
+    metricIndicesExist: boolean;
+  };
+
+  export type IndexFields = {
+    __typename?: 'InfraIndexField';
+
+    name: string;
+
+    type: string;
+
+    searchable: boolean;
+
+    aggregatable: boolean;
   };
 }
 

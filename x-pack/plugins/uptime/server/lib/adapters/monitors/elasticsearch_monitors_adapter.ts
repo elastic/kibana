@@ -331,9 +331,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string
   ): Promise<any> {
+    const MONITOR_SOURCE_ID_KEY = 'monitor.id';
+    const MONITOR_SOURCE_TCP_KEY = 'tcp.port';
+    const MONITOR_SOURCE_SCHEME_KEY = 'monitor.scheme';
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
+        _source: [MONITOR_SOURCE_ID_KEY, MONITOR_SOURCE_TCP_KEY, MONITOR_SOURCE_SCHEME_KEY],
+        size: 1000,
         query: {
           range: {
             '@timestamp': {
@@ -342,53 +347,49 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             },
           },
         },
-        aggs: {
-          id: {
-            terms: {
-              field: 'monitor.id',
-              order: {
-                _key: 'asc',
-              },
-            },
-          },
-          port: {
-            terms: {
-              field: 'tcp.port',
-              order: {
-                _key: 'asc',
-              },
-            },
-          },
-          scheme: {
-            terms: {
-              field: 'monitor.scheme',
-              order: {
-                _key: 'asc',
-              },
-            },
-          },
-          status: {
-            terms: {
-              field: 'monitor.status',
-              order: {
-                _key: 'asc',
-              },
-            },
-          },
+        collapse: {
+          field: 'monitor.id',
+        },
+        sort: {
+          '@timestamp': 'desc',
         },
       },
     };
-    const {
-      aggregations: { scheme, port, id, status },
-    } = await this.database.search(request, params);
+    const result = await this.database.search(request, params);
+    const ids: string[] = [];
+    const ports = new Set<number>();
+    const schemes = new Set<string>();
 
-    // TODO update typings
-    const getKey = (list: { buckets: any[] }) => list.buckets.map(value => value.key);
+    const hits = get(result, 'hits.hits', []);
+    hits.forEach((hit: any) => {
+      const key: string = get(hit, `_source.${MONITOR_SOURCE_ID_KEY}`);
+      const portValue: number | undefined = get(
+        hit,
+        `_source.${MONITOR_SOURCE_TCP_KEY}`,
+        undefined
+      );
+      const schemeValue: string | undefined = get(
+        hit,
+        `_source.${MONITOR_SOURCE_SCHEME_KEY}`,
+        undefined
+      );
+
+      if (key) {
+        ids.push(key);
+      }
+      if (portValue) {
+        ports.add(portValue);
+      }
+      if (schemeValue) {
+        schemes.add(schemeValue);
+      }
+    });
+
     return {
-      scheme: getKey(scheme),
-      port: getKey(port),
-      id: getKey(id),
-      status: getKey(status),
+      scheme: Array.from(schemes).sort(),
+      port: Array.from(ports).sort((a: number, b: number) => a - b),
+      id: ids.sort(),
+      status: ['up', 'down'],
     };
   }
 

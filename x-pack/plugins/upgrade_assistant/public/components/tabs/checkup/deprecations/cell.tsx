@@ -16,11 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DeleteTasksButton } from './delete_tasks_button';
 import { ReindexButton } from './reindex';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
   reindexIndexName?: string;
+  deleteIndexName?: string;
   docUrl?: string;
   headline?: string;
   healthColor?: string;
@@ -34,6 +36,7 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
   reindexIndexName,
+  deleteIndexName,
   docUrl,
   items = [],
   children,
@@ -78,6 +81,12 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
       {reindexIndexName && (
         <EuiFlexItem grow={false}>
           <ReindexButton indexName={reindexIndexName} />
+        </EuiFlexItem>
+      )}
+
+      {deleteIndexName && (
+        <EuiFlexItem grow={false}>
+          <DeleteTasksButton />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

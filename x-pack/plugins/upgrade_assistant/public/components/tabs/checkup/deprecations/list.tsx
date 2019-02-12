@@ -16,6 +16,7 @@ import { DeprecationCell } from './cell';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 
 const OLD_INDEX_MESSAGE = `Index created before ${CURRENT_MAJOR_VERSION}.0`;
+const DELETE_INDEX_MESSAGE = `.tasks index must be re-created`;
 
 const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
@@ -38,6 +39,9 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
       reindexIndexName={deprecation.message === OLD_INDEX_MESSAGE ? deprecation.index! : undefined}
+      deleteIndexName={
+        deprecation.message === DELETE_INDEX_MESSAGE ? deprecation.index! : undefined
+      }
       docUrl={deprecation.url}
       items={items}
     />
@@ -92,6 +96,7 @@ export const DeprecationList: StatelessComponent<{
       index: dep.index!,
       details: dep.details,
       reindex: dep.message === OLD_INDEX_MESSAGE,
+      delete: dep.message === DELETE_INDEX_MESSAGE,
     }));
 
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;

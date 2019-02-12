@@ -7,7 +7,9 @@
 import { Server } from 'hapi';
 
 const mockReindexService = {
+  hasRequiredPrivileges: jest.fn(),
   detectReindexWarnings: jest.fn(),
+  getIndexGroup: jest.fn(),
   createReindexOperation: jest.fn(),
   findAllInProgressOperations: jest.fn(),
   findReindexOperation: jest.fn(),
@@ -21,26 +23,24 @@ jest.mock('../lib/reindexing', () => {
   };
 });
 
-import { ReindexSavedObject, ReindexStatus, ReindexWarning } from '../../common/types';
+import { IndexGroup, ReindexSavedObject, ReindexStatus, ReindexWarning } from '../../common/types';
 import { credentialStoreFactory } from '../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
-
-// Need to require to get mock on named export to work.
-// tslint:disable:no-var-requires
-// const MigrationApis = require('../lib/es_migration_apis');
-// MigrationApis.getUpgradeAssistantStatus = jest.fn();
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
  * more thoroughly in the es_migration_apis test.
  */
-describe('reindex template API', () => {
+describe('reindex API', () => {
   const server = new Server();
   server.plugins = {
     elasticsearch: {
       getCluster: () => ({ callWithRequest: jest.fn() } as any),
     } as any,
+    xpack_main: {
+      info: {},
+    },
   } as any;
   server.config = () => ({ get: () => '' } as any);
   server.decorate('request', 'getSavedObjectsClient', () => jest.fn());
@@ -55,7 +55,9 @@ describe('reindex template API', () => {
   registerReindexIndicesRoutes(server, worker, credentialStore);
 
   beforeEach(() => {
+    mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
+    mockReindexService.getIndexGroup.mockReset();
     mockReindexService.createReindexOperation.mockReset();
     mockReindexService.findAllInProgressOperations.mockReset();
     mockReindexService.findReindexOperation.mockReset();
@@ -102,7 +104,23 @@ describe('reindex template API', () => {
 
       expect(resp.statusCode).toEqual(200);
       const data = JSON.parse(resp.payload);
-      expect(data).toEqual({ warnings: null, reindexOp: null });
+      expect(data.reindexOp).toBeNull();
+      expect(data.warnings).toBeNull();
+    });
+
+    it('returns the indexGroup for ML indices', async () => {
+      mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
+      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([]);
+      mockReindexService.getIndexGroup.mockReturnValue(IndexGroup.ml);
+
+      const resp = await server.inject({
+        method: 'GET',
+        url: `/api/upgrade_assistant/reindex/.ml-state`,
+      });
+
+      expect(resp.statusCode).toEqual(200);
+      const data = JSON.parse(resp.payload);
+      expect(data.indexGroup).toEqual(IndexGroup.ml);
     });
   });
 
@@ -177,6 +195,17 @@ describe('reindex template API', () => {
       expect(resp.statusCode).toEqual(200);
       const data = JSON.parse(resp.payload);
       expect(data).toEqual({ indexName: 'theIndex', status: ReindexStatus.inProgress });
+    });
+
+    it('returns a 403 if required privileges fails', async () => {
+      mockReindexService.hasRequiredPrivileges.mockResolvedValueOnce(false);
+
+      const resp = await server.inject({
+        method: 'POST',
+        url: '/api/upgrade_assistant/reindex/theIndex',
+      });
+
+      expect(resp.statusCode).toEqual(403);
     });
   });
 

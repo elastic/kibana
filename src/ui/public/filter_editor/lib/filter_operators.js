@@ -19,48 +19,66 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 export const FILTER_OPERATORS = [
   {
-    name: 'is',
+    name: i18n.translate('common.ui.filterEditor.operators.isLabel', {
+      defaultMessage: 'is'
+    }),
     type: 'phrase',
     negate: false,
   },
   {
-    name: 'is not',
+    name: i18n.translate('common.ui.filterEditor.operators.isNotLabel', {
+      defaultMessage: 'is not'
+    }),
     type: 'phrase',
     negate: true,
   },
   {
-    name: 'is one of',
+    name: i18n.translate('common.ui.filterEditor.operators.isOneOfLabel', {
+      defaultMessage: 'is one of'
+    }),
     type: 'phrases',
     negate: false,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
   },
   {
-    name: 'is not one of',
+    name: i18n.translate('common.ui.filterEditor.operators.isNotOneOfLabel', {
+      defaultMessage: 'is not one of'
+    }),
     type: 'phrases',
     negate: true,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
   },
   {
-    name: 'is between',
+    name: i18n.translate('common.ui.filterEditor.operators.isBetweenLabel', {
+      defaultMessage: 'is between'
+    }),
     type: 'range',
     negate: false,
     fieldTypes: ['number', 'date', 'ip'],
   },
   {
-    name: 'is not between',
+    name: i18n.translate('common.ui.filterEditor.operators.isNotBetweenLabel', {
+      defaultMessage: 'is not between'
+    }),
     type: 'range',
     negate: true,
     fieldTypes: ['number', 'date', 'ip'],
   },
   {
-    name: 'exists',
+    name: i18n.translate('common.ui.filterEditor.operators.existsLabel', {
+      defaultMessage: 'exists'
+    }),
     type: 'exists',
     negate: false,
   },
   {
-    name: 'does not exist',
+    name: i18n.translate('common.ui.filterEditor.operators.doesNotExistLabel', {
+      defaultMessage: 'does not exist'
+    }),
     type: 'exists',
     negate: true,
   },

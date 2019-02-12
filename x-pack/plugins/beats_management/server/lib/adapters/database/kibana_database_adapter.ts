@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { INDEX_NAMES } from '../../../../common/constants/index_names';
-import { beatsIndexTemplate } from '../../../utils/index_templates';
+import { get } from 'lodash';
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from './../framework/adapter_types';
 import {
@@ -51,8 +50,6 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async bulk(user: FrameworkUser, params: DatabaseBulkIndexDocumentsParams): Promise<any> {
-    await this.putTemplate();
-
     const result = await this.callWithUser(user, 'bulk', params);
     return result;
   }
@@ -61,12 +58,10 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse> {
-    await this.putTemplate();
     const result = await this.callWithUser(user, 'create', params);
     return result;
   }
   public async index<T>(user: FrameworkUser, params: DatabaseIndexDocumentParams<T>): Promise<any> {
-    await this.putTemplate();
     const result = await this.callWithUser(user, 'index', params);
     return result;
   }
@@ -78,6 +73,14 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
+  public async deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseDeleteDocumentResponse> {
+    const result = await this.callWithUser(user, 'deleteByQuery', params);
+    return result;
+  }
+
   public async search<Source>(
     user: FrameworkUser,
     params: DatabaseSearchParams
@@ -86,14 +89,65 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
-  // TODO move beats template name and body out of this bridge
-  private async putTemplate(): Promise<any> {
+  public async searchAll<Source>(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<Source>> {
+    const result = await this.callWithUser(user, 'search', {
+      scroll: '1m',
+      ...params,
+      body: {
+        size: 1000,
+        ...params.body,
+      },
+    });
+    return result;
+  }
+
+  public async putTemplate(name: string, template: any): Promise<any> {
     const result = await this.callWithUser({ kind: 'internal' }, 'indices.putTemplate', {
-      name: INDEX_NAMES.BEATS,
-      body: beatsIndexTemplate,
+      name,
+      body: template,
     });
 
     return result;
+  }
+
+  private async fetchAllFromScroll<Source>(
+    user: FrameworkUser,
+    response: DatabaseSearchResponse<Source>,
+    hits: DatabaseSearchResponse<Source>['hits']['hits'] = []
+  ): Promise<
+    Array<{
+      _index: string;
+      _type: string;
+      _id: string;
+      _score: number;
+      _source: Source;
+      _version?: number;
+      fields?: any;
+      highlight?: any;
+      inner_hits?: any;
+      sort?: string[];
+    }>
+  > {
+    const newHits = get(response, 'hits.hits', []);
+    const scrollId = get(response, '_scroll_id');
+
+    if (newHits.length > 0) {
+      hits.push(...newHits);
+
+      return this.callWithUser(user, 'scroll', {
+        body: {
+          scroll: '30s',
+          scroll_id: scrollId,
+        },
+      }).then((innerResponse: DatabaseSearchResponse<Source>) => {
+        return this.fetchAllFromScroll(user, innerResponse, hits);
+      });
+    }
+
+    return Promise.resolve(hits);
   }
 
   private callWithUser(user: FrameworkUser, esMethod: string, options: any = {}): any {

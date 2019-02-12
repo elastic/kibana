@@ -64,6 +64,7 @@ const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
   border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
   color: ${props => props.theme.eui.euiColorDarkShade};
   white-space: pre;
+  padding: 0 ${props => props.theme.eui.paddingSizes.l};
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
   ${props => (props.isHovered ? hoveredFieldStyle : '')};

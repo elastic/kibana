@@ -34,8 +34,8 @@ export const RedirectToNodeLogs = injectI18n(
     intl,
   }: RedirectToNodeLogsProps) => (
     <WithSource>
-      {({ configuredFields }) => {
-        if (!configuredFields) {
+      {({ configuration, isLoading }) => {
+        if (isLoading) {
           return (
             <LoadingPage
               message={intl.formatMessage(
@@ -51,8 +51,12 @@ export const RedirectToNodeLogs = injectI18n(
           );
         }
 
+        if (!configuration) {
+          return null;
+        }
+
         const searchString = compose(
-          replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeId}`),
+          replaceLogFilterInQueryString(`${configuration.fields[nodeType]}: ${nodeId}`),
           replaceLogPositionInQueryString(getTimeFromLocation(location))
         )('');
 

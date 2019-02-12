@@ -677,10 +677,20 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       }
 
       yMin = d3.min(combinedData, (d) => {
-        return d.lower !== undefined ? Math.min(d.value, d.lower) : d.value;
+        let metricValue = d.value;
+        if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+          // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+          metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+        }
+        return d.lower !== undefined ? Math.min(metricValue, d.lower) : metricValue;
       });
       yMax = d3.max(combinedData, (d) => {
-        return d.upper !== undefined ? Math.max(d.value, d.upper) : d.value;
+        let metricValue = d.value;
+        if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+          // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+          metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+        }
+        return d.upper !== undefined ? Math.max(metricValue, d.upper) : metricValue;
       });
 
       if (yMax === yMin) {
@@ -702,9 +712,10 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
-        // TODO needs revisting to be a more robust normalization
+        // TODO needs revisiting to be a more robust normalization
         yMax = yMax * (1 + (maxLevel + 1) / 5);
       }
+
       this.focusYScale.domain([yMin, yMax]);
 
     } else {
@@ -758,9 +769,11 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
 
     // Render circle markers for the points.
     // These are used for displaying tooltips on mouseover.
-    // Don't render dots where value=null (data gaps) or for multi-bucket anomalies.
+    // Don't render dots where value=null (data gaps, with no anomalies)
+    // or for multi-bucket anomalies.
     const dots = d3.select('.focus-chart-markers').selectAll('.metric-value')
-      .data(data.filter(d => (d.value !== null && !showMultiBucketAnomalyMarker(d))));
+      .data(data.filter(d => ((d.value !== null || typeof d.anomalyScore === 'number') &&
+        !showMultiBucketAnomalyMarker(d))));
 
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();

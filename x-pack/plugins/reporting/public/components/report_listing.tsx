@@ -25,9 +25,8 @@ import { ReportInfoButton } from './report_info_button';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -118,21 +117,23 @@ class ReportListingUi extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage>
-        <EuiPageBody restrictWidth>
-          <EuiPageContent horizontalPosition="center">
-            <EuiTitle>
-              <h1>
-                <FormattedMessage
-                  id="xpack.reporting.listing.reportsTitle"
-                  defaultMessage="Reports"
-                />
-              </h1>
-            </EuiTitle>
-            {this.renderTable()}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+        <EuiTitle>
+          <h1>
+            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
+          </h1>
+        </EuiTitle>
+        <EuiText color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.listing.reports.subtitle"
+              defaultMessage="Find reports generated in Kibana applications here"
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        {this.renderTable()}
+      </EuiPageContent>
     );
   }
 

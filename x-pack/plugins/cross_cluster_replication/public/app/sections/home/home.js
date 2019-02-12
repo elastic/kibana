@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
@@ -122,17 +121,17 @@ export const CrossClusterReplicationHome = injectI18n(
 
     render() {
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {this.getHeaderSection()}
-              {this.getUnauthorizedSection()}
-              <Switch>
-                <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
-              </Switch>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+        <EuiPageBody>
+          <EuiPageContent
+            horizontalPosition="center"
+          >
+            {this.getHeaderSection()}
+            {this.getUnauthorizedSection()}
+            <Switch>
+              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+            </Switch>
+          </EuiPageContent>
+        </EuiPageBody>
       );
     }
   }

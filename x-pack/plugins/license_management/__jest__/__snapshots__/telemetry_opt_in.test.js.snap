@@ -105,24 +105,29 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
     }
   }
 >
-  <EuiText
-    grow={true}
-    size="m"
+  <EuiSpacer
+    size="s"
   >
     <div
-      className="euiText euiText--medium"
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiTitle
+    size="s"
+    textTransform="none"
+  >
+    <h4
+      className="euiTitle euiTitle--small"
     >
-      <p>
-        <FormattedMessage
-          defaultMessage="Gold and platinum customers: help support give you better service."
-          id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
-          values={Object {}}
-        >
-          Gold and platinum customers: help support give you better service.
-        </FormattedMessage>
-      </p>
-    </div>
-  </EuiText>
+      <FormattedMessage
+        defaultMessage="Help Elastic support provide better service"
+        id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
+        values={Object {}}
+      >
+        Help Elastic support provide better service
+      </FormattedMessage>
+    </h4>
+  </EuiTitle>
   <EuiSpacer
     size="s"
   >

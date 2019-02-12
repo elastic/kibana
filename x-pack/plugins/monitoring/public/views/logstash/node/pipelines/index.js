@@ -18,7 +18,7 @@ import {
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
 
 const getPageData = ($injector) => {
@@ -72,6 +72,7 @@ uiRoutes
     controller: class extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope, i18n) {
         const kbnUrl = $injector.get('kbnUrl');
+        const config = $injector.get('config');
 
         super({
           defaultData: {},
@@ -94,7 +95,7 @@ uiRoutes
           }));
 
           this.renderReact(
-            <I18nProvider>
+            <I18nContext>
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
                 onBrush={this.onBrush}
@@ -103,13 +104,14 @@ uiRoutes
                 sorting={this.sorting}
                 pagination={this.pagination}
                 onTableChange={this.onTableChange}
+                dateFormat={config.get('dateFormat')}
                 upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
                 angular={{
                   kbnUrl,
                   scope: $scope,
                 }}
               />
-            </I18nProvider>
+            </I18nContext>
           );
         });
       }

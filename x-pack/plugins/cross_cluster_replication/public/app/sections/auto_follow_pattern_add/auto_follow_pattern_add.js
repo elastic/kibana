@@ -11,8 +11,6 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiButton,
   EuiCallOut,
@@ -122,63 +120,56 @@ export const AutoFollowPatternAdd = injectI18n(
       const { saveAutoFollowPattern, apiStatus, apiError, intl } = this.props;
 
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="ccrPageContent"
-            >
-              <AutoFollowPatternPageTitle
-                title={(
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
-                    defaultMessage="Add auto-follow pattern"
-                  />
-                )}
+        <EuiPageContent>
+          <AutoFollowPatternPageTitle
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
+                defaultMessage="Add auto-follow pattern"
               />
+            )}
+          />
 
-              <RemoteClustersProvider>
-                {({ isLoading, error, remoteClusters }) => {
-                  if (isLoading) {
-                    return (
-                      <SectionLoading>
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
-                          defaultMessage="Loading remote clusters..."
-                        />
-                      </SectionLoading>
-                    );
-                  }
-
-                  if (error) {
-                    const title = intl.formatMessage({
-                      id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersErrorTitle',
-                      defaultMessage: 'Error loading remote clusters',
-                    });
-                    return <SectionError title={title} error={error} />;
-                  }
-
-                  if (!remoteClusters.length) {
-                    return this.renderEmptyClusters();
-                  }
-
-                  if (remoteClusters.every(cluster => cluster.isConnected === false)) {
-                    return this.renderNoConnectedCluster();
-                  }
-
-                  return (
-                    <AutoFollowPatternForm
-                      apiStatus={apiStatus}
-                      apiError={apiError}
-                      remoteClusters={remoteClusters}
-                      saveAutoFollowPattern={saveAutoFollowPattern}
+          <RemoteClustersProvider>
+            {({ isLoading, error, remoteClusters }) => {
+              if (isLoading) {
+                return (
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
+                      defaultMessage="Loading remote clusters..."
                     />
-                  );
-                }}
-              </RemoteClustersProvider>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+                  </SectionLoading>
+                );
+              }
+
+              if (error) {
+                const title = intl.formatMessage({
+                  id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersErrorTitle',
+                  defaultMessage: 'Error loading remote clusters',
+                });
+                return <SectionError title={title} error={error} />;
+              }
+
+              if (!remoteClusters.length) {
+                return this.renderEmptyClusters();
+              }
+
+              if (remoteClusters.every(cluster => cluster.isConnected === false)) {
+                return this.renderNoConnectedCluster();
+              }
+
+              return (
+                <AutoFollowPatternForm
+                  apiStatus={apiStatus}
+                  apiError={apiError}
+                  remoteClusters={remoteClusters}
+                  saveAutoFollowPattern={saveAutoFollowPattern}
+                />
+              );
+            }}
+          </RemoteClustersProvider>
+        </EuiPageContent>
       );
     }
   }

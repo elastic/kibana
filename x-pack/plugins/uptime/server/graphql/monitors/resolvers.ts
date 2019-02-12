@@ -7,6 +7,7 @@
 import { UMGqlRange } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
+  FilterBar,
   GetErrorsListQueryArgs,
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
@@ -112,7 +113,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     ): Promise<Ping[]> {
       return libs.pings.getLatestMonitorDocs(req, dateRangeStart, dateRangeEnd, monitorId);
     },
-    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<any> {
+    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<FilterBar> {
       return libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
     },
     async getErrorsList(

@@ -2502,17 +2502,17 @@ main {
  * 1. Make seamless transition from ToolBar to Table header and contained Menu.
  * 1. Make seamless transition from Table to ToolBarFooter header.
  */
-.kuiControlledTable .kuiTable {
-  border-top: none;
-  /* 1 */ }
-
-.kuiControlledTable .kuiToolBarFooter {
-  border-top: none;
-  /* 2 */ }
-
-.kuiControlledTable .kuiMenu--contained {
-  border-top: none;
-  /* 1 */ }
+.kuiControlledTable {
+  background: #FFF; }
+  .kuiControlledTable .kuiTable {
+    border-top: none;
+    /* 1 */ }
+  .kuiControlledTable .kuiToolBarFooter {
+    border-top: none;
+    /* 2 */ }
+  .kuiControlledTable .kuiMenu--contained {
+    border-top: none;
+    /* 1 */ }
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.

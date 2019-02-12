@@ -165,6 +165,7 @@ export default function ({ getService }) {
         'stack_stats.kibana.plugins.kql.defaultQueryLanguage',
         'stack_stats.kibana.plugins.kql.optInCount',
         'stack_stats.kibana.plugins.kql.optOutCount',
+        'stack_stats.kibana.plugins.ml.file_data_visualizer.index_creation_count',
         'stack_stats.kibana.plugins.reporting.PNG.available',
         'stack_stats.kibana.plugins.reporting.PNG.total',
         'stack_stats.kibana.plugins.reporting._all',
@@ -208,11 +209,23 @@ export default function ({ getService }) {
         'stack_stats.kibana.plugins.spaces.available',
         'stack_stats.kibana.plugins.spaces.count',
         'stack_stats.kibana.plugins.spaces.enabled',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.features.deprecation_logging.enabled',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_open.cluster',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_open.indices',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_open.overview',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.close',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.open',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.start',
+        'stack_stats.kibana.plugins.upgrade-assistant-telemetry.ui_reindex.stop',
         'stack_stats.kibana.search.total',
         'stack_stats.kibana.timelion_sheet.total',
         'stack_stats.kibana.versions.0.count',
         'stack_stats.kibana.versions.0.version',
         'stack_stats.kibana.visualization.total',
+        "stack_stats.xpack.ccr.auto_follow_patterns_count",
+        "stack_stats.xpack.ccr.available",
+        "stack_stats.xpack.ccr.enabled",
+        "stack_stats.xpack.ccr.follower_indices_count",
         'stack_stats.xpack.graph.available',
         'stack_stats.xpack.graph.enabled',
         'stack_stats.xpack.logstash.available',
@@ -380,4 +393,3 @@ export default function ({ getService }) {
     });
   });
 }
-

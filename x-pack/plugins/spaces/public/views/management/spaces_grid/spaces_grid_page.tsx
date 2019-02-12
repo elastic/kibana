@@ -14,11 +14,10 @@ import {
   // @ts-ignore
   EuiInMemoryTable,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 // @ts-ignore
@@ -29,6 +28,7 @@ import { UserProfile } from '../../../../../xpack_main/public/services/user_prof
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
+import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
@@ -67,13 +67,11 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage restrictWidth className="spcGridPage">
-        <EuiPageBody>
-          <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-          <SecureSpaceMessage userProfile={this.props.userProfile} />
-        </EuiPageBody>
+      <div className="spcGridPage">
+        <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+        <SecureSpaceMessage userProfile={this.props.userProfile} />
         {this.getConfirmDeleteModal()}
-      </EuiPage>
+      </div>
     );
   }
 
@@ -87,18 +85,21 @@ class SpacesGridPageUI extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
-            <EuiText>
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.spacesTitle"
                   defaultMessage="Spaces"
                 />
               </h1>
+            </EuiTitle>
+            <EuiText color="subdued">
+              <p>{getSpacesFeatureDescription()}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size={'xl'} />
+        <EuiSpacer size="l" />
 
         <EuiInMemoryTable
           itemId={'id'}

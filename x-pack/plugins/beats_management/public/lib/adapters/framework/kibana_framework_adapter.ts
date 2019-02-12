@@ -45,7 +45,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
-    private readonly uiSettings: any
+    private readonly uiSettings: any,
+    public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
 
@@ -143,6 +144,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           toController === 'self'
             ? `<${this.PLUGIN_ID}><div id="${this.PLUGIN_ID}ReactRoot"></div></${this.PLUGIN_ID}>`
             : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
+                <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
                 <div id="${this.PLUGIN_ID}ReactRoot" />
                </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file

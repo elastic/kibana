@@ -17,7 +17,7 @@ function getDescription(fieldName) {
   return '<p>' +
     i18n.translate('xpack.kueryAutocomplete.filterResultsDescription', {
       defaultMessage: 'Filter results that contain {fieldName}',
-      values: { fieldName: `<span class="suggestionItem__callout">${escape(fieldName)}</span>` }
+      values: { fieldName: `<span class="kbnSuggestionItem__callout">${escape(fieldName)}</span>` }
     }) +
     '</p>';
 }

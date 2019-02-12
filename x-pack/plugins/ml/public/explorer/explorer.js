@@ -243,9 +243,11 @@ export const Explorer = injectI18n(
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
       const { selectedCells, selectedJobs } = this.state;
 
+      const bounds = timefilter.getActiveBounds();
       const timerange = getSelectionTimeRange(
         selectedCells,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        bounds,
       );
 
       if (showCharts && selectedCells !== null) {
@@ -263,9 +265,11 @@ export const Explorer = injectI18n(
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
       const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
       if (showCharts && selectedCells !== null) {
+        const bounds = timefilter.getActiveBounds();
         const timerange = getSelectionTimeRange(
           selectedCells,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
         );
         this.updateCharts(
           anomalyChartRecords, timerange.earliestMs, timerange.latestMs
@@ -276,15 +280,16 @@ export const Explorer = injectI18n(
     tableControlsListener = async () => {
       const { dateFormatTz } = this.props;
       const { selectedCells, swimlaneViewByFieldName, selectedJobs } = this.state;
-      this.setState({
-        tableData: await loadAnomaliesTableData(
-          selectedCells,
-          selectedJobs,
-          dateFormatTz,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-          swimlaneViewByFieldName
-        )
-      });
+      const bounds = timefilter.getActiveBounds();
+      const tableData = await loadAnomaliesTableData(
+        selectedCells,
+        selectedJobs,
+        dateFormatTz,
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        bounds,
+        swimlaneViewByFieldName
+      );
+      this.setState({ tableData });
     };
 
     swimlaneLimitListener = () => {
@@ -355,7 +360,7 @@ export const Explorer = injectI18n(
 
     loadOverallDataPreviousArgs = null;
     loadOverallDataPreviousData = null;
-    loadOverallData(selectedJobs, interval, showLoadingIndicator = true) {
+    loadOverallData(selectedJobs, interval, bounds, showLoadingIndicator = true) {
       return new Promise((resolve) => {
         // Loads the overall data components i.e. the overall swimlane and influencers list.
         if (selectedJobs === null) {
@@ -369,7 +374,9 @@ export const Explorer = injectI18n(
         // check if we can just return existing cached data
         const compareArgs = {
           selectedJobs,
-          intervalAsSeconds: interval.asSeconds()
+          intervalAsSeconds: interval.asSeconds(),
+          boundsMin: bounds.min.valueOf(),
+          boundsMax: bounds.max.valueOf(),
         };
 
         if (_.isEqual(compareArgs, this.loadOverallDataPreviousArgs)) {
@@ -391,7 +398,6 @@ export const Explorer = injectI18n(
 
         // Ensure the search bounds align to the bucketing interval used in the swimlane so
         // that the first and last buckets are complete.
-        const bounds = timefilter.getActiveBounds();
         const searchBounds = getBoundsRoundedToInterval(
           bounds,
           interval,
@@ -636,9 +642,11 @@ export const Explorer = injectI18n(
         ? selectedCells.lanes
         : selectedJobs.map(d => d.id);
 
+      const bounds = timefilter.getActiveBounds();
       const timerange = getSelectionTimeRange(
         selectedCells,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        bounds,
       );
 
       // Load the overall data - if the FieldFormats failed to populate
@@ -648,6 +656,7 @@ export const Explorer = injectI18n(
         await this.loadOverallData(
           selectedJobs,
           this.getSwimlaneBucketInterval(selectedJobs),
+          bounds,
           showOverallLoadingIndicator,
         )
       );
@@ -657,7 +666,9 @@ export const Explorer = injectI18n(
       const annotationsTableCompareArgs = {
         selectedCells,
         selectedJobs,
-        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        boundsMin: bounds.min.valueOf(),
+        boundsMax: bounds.max.valueOf(),
       };
 
       if (_.isEqual(annotationsTableCompareArgs, this.annotationsTablePreviousArgs)) {
@@ -667,7 +678,8 @@ export const Explorer = injectI18n(
         stateUpdate.annotationsData = this.annotationsTablePreviousData = await loadAnnotationsTableData(
           selectedCells,
           selectedJobs,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
         );
       }
 
@@ -770,6 +782,8 @@ export const Explorer = injectI18n(
         selectedJobs,
         dateFormatTz,
         interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        boundsMin: bounds.min.valueOf(),
+        boundsMax: bounds.max.valueOf(),
         swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
       };
 
@@ -782,6 +796,7 @@ export const Explorer = injectI18n(
           selectedJobs,
           dateFormatTz,
           this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
           viewBySwimlaneOptions.swimlaneViewByFieldName
         );
         this.setState({ tableData });

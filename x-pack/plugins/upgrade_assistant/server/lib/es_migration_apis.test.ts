@@ -26,7 +26,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('calls /_xpack/migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
+    await getUpgradeAssistantStatus(callWithRequest, {} as any);
     expect(callWithRequest).toHaveBeenCalledWith({}, 'transport.request', {
       path: '/_xpack/migration/deprecations',
       method: 'GET',
@@ -34,7 +34,21 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
+    const resp = await getUpgradeAssistantStatus(callWithRequest, {} as any);
     expect(resp).toMatchSnapshot();
+  });
+
+  it('returns readyForUpgrade === true when no critical issues found', async () => {
+    deprecationsResponse = {
+      cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {},
+    };
+
+    await expect(getUpgradeAssistantStatus(callWithRequest, {} as any)).resolves.toHaveProperty(
+      'readyForUpgrade',
+      true
+    );
   });
 });

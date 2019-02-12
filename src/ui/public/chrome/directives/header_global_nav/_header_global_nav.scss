@@ -15,3 +15,14 @@
     top: 65px;
   }
 }
+
+// Mobile header is smaller
+@include euiBreakpoint('xs','s') {
+  .header-global-wrapper + .app-wrapper {
+    top: 50px;
+
+    .euiFlyout {
+      top: 50px;
+    }
+  }
+}

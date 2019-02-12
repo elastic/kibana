@@ -22,30 +22,34 @@ import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 
-export function BuildESQueryProvider(config) {
+/**
+ * @param indexPattern
+ * @param queries - an array of query objects. Each query has a language property and a query property.
+ * @param filters - an array of filter objects
+ * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
+ * settings in form of { allowLeadingWildcards, queryStringOptions }
+ */
+export function buildEsQuery(
+  indexPattern,
+  queries = [],
+  filters = [],
+  {
+    allowLeadingWildcards = false,
+    queryStringOptions = {},
+  }) {
+  const validQueries = queries.filter((query) => has(query, 'query'));
+  const queriesByLanguage = groupBy(validQueries, 'language');
 
-  /**
-   *
-   * @param queries - an array of query objects. Each query has a language property and a query property.
-   * @param filters - an array of filter objects
-   */
-  function buildESQuery(indexPattern, queries = [], filters = []) {
-    const validQueries = queries.filter((query) => has(query, 'query'));
-    const queriesByLanguage = groupBy(validQueries, 'language');
+  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, allowLeadingWildcards);
+  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, queryStringOptions);
+  const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
-    const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config);
-    const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config);
-    const filterQuery = buildQueryFromFilters(filters, indexPattern, config);
-
-    return {
-      bool: {
-        must: [].concat(kueryQuery.must, luceneQuery.must, filterQuery.must),
-        filter: [].concat(kueryQuery.filter, luceneQuery.filter, filterQuery.filter),
-        should: [].concat(kueryQuery.should, luceneQuery.should, filterQuery.should),
-        must_not: [].concat(kueryQuery.must_not, luceneQuery.must_not, filterQuery.must_not),
-      }
-    };
-  }
-
-  return buildESQuery;
+  return {
+    bool: {
+      must: [].concat(kueryQuery.must, luceneQuery.must, filterQuery.must),
+      filter: [].concat(kueryQuery.filter, luceneQuery.filter, filterQuery.filter),
+      should: [].concat(kueryQuery.should, luceneQuery.should, filterQuery.should),
+      must_not: [].concat(kueryQuery.must_not, luceneQuery.must_not, filterQuery.must_not),
+    }
+  };
 }

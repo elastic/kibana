@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { DeleteTasksButton } from './delete_tasks_button';
 import { ReindexButton } from './reindex';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
@@ -16,6 +17,7 @@ const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
+  delete: boolean;
   details?: string;
 }
 
@@ -135,7 +137,7 @@ export class IndexDeprecationTableUI extends React.Component<
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    if (!indices.find(i => i.reindex)) {
+    if (!indices.find(i => i.reindex || i.delete)) {
       return null;
     }
 
@@ -143,7 +145,11 @@ export class IndexDeprecationTableUI extends React.Component<
       actions: [
         {
           render(indexDep: IndexDeprecationDetails) {
-            return <ReindexButton indexName={indexDep.index} />;
+            return indexDep.delete ? (
+              <DeleteTasksButton />
+            ) : (
+              <ReindexButton indexName={indexDep.index} />
+            );
           },
         },
       ],
