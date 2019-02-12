@@ -62,6 +62,8 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
   const component = shallowWithIntl(<DashboardListing.WrappedComponent
     find={find.bind(null, 2)}
     delete={() => {}}
+    create={() => {}}
+    edit={() => {}}
     listingLimit={1000}
     hideWriteControls={false}
   />);
@@ -73,6 +75,8 @@ describe('after fetch', () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 2)}
       delete={() => {}}
+      create={() => {}}
+      edit={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
       initialFilter="my dashboard"
@@ -90,6 +94,8 @@ describe('after fetch', () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 2)}
       delete={() => {}}
+      create={() => {}}
+      edit={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
     />);
@@ -106,6 +112,8 @@ describe('after fetch', () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 0)}
       delete={() => {}}
+      create={() => {}}
+      edit={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);
@@ -122,6 +130,8 @@ describe('after fetch', () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 0)}
       delete={() => {}}
+      create={() => {}}
+      edit={() => {}}
       listingLimit={1}
       hideWriteControls={true}
     />);
@@ -138,6 +148,8 @@ describe('after fetch', () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 2)}
       delete={() => {}}
+      create={() => {}}
+      edit={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);
