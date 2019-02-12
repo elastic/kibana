@@ -125,7 +125,7 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
+      // to re-compute the license check results for this plugin.
       xpackMainPlugin.info
         .feature(thisPlugin.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
