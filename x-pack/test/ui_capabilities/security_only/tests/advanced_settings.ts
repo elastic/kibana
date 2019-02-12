@@ -51,7 +51,6 @@ export default function advancedSettingsTests({
             });
             break;
           // these users can't do anything with Advanced Settings
-          case 'apm_user':
           case 'canvas_all':
           case 'canvas_read':
           case 'dev_tools_read':
@@ -65,9 +64,6 @@ export default function advancedSettingsTests({
           case 'maps_read':
           case 'infrastructure_read':
           case 'logs_read':
-          case 'machine_learning_admin':
-          case 'machine_learning_user':
-          case 'monitoring_user':
           case 'timelion_all':
           case 'timelion_read':
           case 'uptime_read':
@@ -81,6 +77,10 @@ export default function advancedSettingsTests({
             break;
           case 'legacy_all':
           case 'no_kibana_privileges':
+          case 'apm_user':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;

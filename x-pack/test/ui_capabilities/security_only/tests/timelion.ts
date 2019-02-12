@@ -51,7 +51,6 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
           // these users can't do anything with Timelion
           case 'advancedSettings_all':
           case 'advancedSettings_read':
-          case 'apm_user':
           case 'canvas_all':
           case 'canvas_read':
           case 'dev_tools_read':
@@ -65,9 +64,6 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
           case 'maps_read':
           case 'infrastructure_read':
           case 'logs_read':
-          case 'machine_learning_admin':
-          case 'machine_learning_user':
-          case 'monitoring_user':
           case 'uptime_read':
           case 'visualize_all':
           case 'visualize_read':
@@ -79,6 +75,10 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
             break;
           case 'legacy_all':
           case 'no_kibana_privileges':
+          case 'apm_user':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
