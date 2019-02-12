@@ -6,7 +6,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { Component } from 'react';
 import { User } from '../../../../../common/model/user';
-import { ManageAPIKeys } from '../api_keys';
 import { ChangePassword } from '../change_password';
 
 interface Props {
@@ -19,7 +18,7 @@ export class SecurityPanel extends Component<Props, {}> {
       <div>
         <EuiSpacer />
         <ChangePassword user={this.props.user} />
-        <ManageAPIKeys user={this.props.user} />
+        {/* API Key Management will eventually exist here */}
       </div>
     );
   }
