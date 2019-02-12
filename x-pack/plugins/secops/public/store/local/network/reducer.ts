@@ -6,6 +6,7 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyNetworkFilterQuery,
   setNetworkFilterQueryDraft,
@@ -16,16 +17,14 @@ import { NetworkModel } from './model';
 
 export type NetworkState = NetworkModel;
 
-export const DEFAULT_LIMIT = 10;
-
 export const initialNetworkState: NetworkState = {
   page: {
     queries: {
       topSource: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       topDestination: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
     filterQuery: null,

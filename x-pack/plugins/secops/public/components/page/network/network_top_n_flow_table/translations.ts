@@ -6,35 +6,41 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SOURCE = i18n.translate('xpack.secops.networkTopNFlowTable.sourceTitle', {
+export const SOURCE = i18n.translate('xpack.secops.networkTopNFlowTable.source.title', {
   defaultMessage: 'Top sources',
 });
 
-export const DESTINATION = i18n.translate('xpack.secops.networkTopNFlowTable.destinationTitle', {
+export const DESTINATION = i18n.translate('xpack.secops.networkTopNFlowTable.destination.title', {
   defaultMessage: 'Top destinations',
 });
 
-export const SOURCE_IP = i18n.translate('xpack.secops.networkTopNFlowTable.topSourceIp', {
-  defaultMessage: 'Source Ip',
-});
+export const SOURCE_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.source.ip.column.title',
+  {
+    defaultMessage: 'Source Ip',
+  }
+);
 
-export const DESTINATION_IP = i18n.translate('xpack.secops.networkTopNFlowTable.topDestinationIp', {
-  defaultMessage: 'Destination Ip',
-});
+export const DESTINATION_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.destination.ip.column.title',
+  {
+    defaultMessage: 'Destination Ip',
+  }
+);
 
-export const DOMAIN = i18n.translate('xpack.secops.networkTopNFlowTable.domain', {
+export const DOMAIN = i18n.translate('xpack.secops.networkTopNFlowTable.domain.column.title', {
   defaultMessage: 'Domain',
 });
 
-export const BYTES = i18n.translate('xpack.secops.networkTopNFlowTable.bytes', {
+export const BYTES = i18n.translate('xpack.secops.networkTopNFlowTable.bytes.column.title', {
   defaultMessage: 'Bytes',
 });
 
-export const PACKETS = i18n.translate('xpack.secops.networkTopNFlowTable.packets', {
+export const PACKETS = i18n.translate('xpack.secops.networkTopNFlowTable.packets.column.title', {
   defaultMessage: 'Packets',
 });
 
-export const DURATION = i18n.translate('xpack.secops.networkTopNFlowTable.duration', {
+export const DURATION = i18n.translate('xpack.secops.networkTopNFlowTable.duration.column.title', {
   defaultMessage: 'Duration',
 });
 

@@ -8,6 +8,8 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isString } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { KueryFilterQuery } from '../../store';
+
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
   indexPattern: StaticIndexPattern
@@ -27,4 +29,15 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
   }
 
   return val;
+};
+
+export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
+  if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
+    try {
+      fromKueryExpression(kqlFilterQuery.expression);
+    } catch (err) {
+      return false;
+    }
+  }
+  return true;
 };

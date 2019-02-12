@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
+import { isFromKueryExpressionValid } from '../../../lib/keury';
 import { State } from '../../reducer';
 import { GenericHostsModel, HostsType } from './model';
 
@@ -59,14 +59,5 @@ export const hostsFilterQueryDraft = () =>
 export const isHostFilterQueryDraftValid = () =>
   createSelector(
     selectHosts,
-    hosts => {
-      if (hosts.filterQueryDraft && hosts.filterQueryDraft.kind === 'kuery') {
-        try {
-          fromKueryExpression(hosts.filterQueryDraft.expression);
-        } catch (err) {
-          return false;
-        }
-      }
-      return true;
-    }
+    hosts => isFromKueryExpressionValid(hosts.filterQueryDraft)
   );

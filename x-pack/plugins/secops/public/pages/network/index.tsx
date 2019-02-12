@@ -12,11 +12,11 @@ import { NetworkComponentProps } from '../../components/link_to/redirect_to_netw
 import { Network } from './network';
 
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
-  <div>
+  <>
     <Switch>
       <Route strict exact path={match.url} component={Network} />
       {/* <Route path={`${match.url}/:ip`} component={NetworkIp} /> */}
       <Redirect from="/hosts/" to="/hosts" />
     </Switch>
-  </div>
+  </>
 ));

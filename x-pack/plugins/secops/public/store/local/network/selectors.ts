@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
+import { isFromKueryExpressionValid } from '../../../lib/keury';
 import { State } from '../../reducer';
 import { GenericNetworkModel, NetworkType } from './model';
 
@@ -47,14 +47,5 @@ export const networkFilterQueryDraft = () =>
 export const isNetworkFilterQueryDraftValid = () =>
   createSelector(
     selectNetwork,
-    network => {
-      if (network.filterQueryDraft && network.filterQueryDraft.kind === 'kuery') {
-        try {
-          fromKueryExpression(network.filterQueryDraft.expression);
-        } catch (err) {
-          return false;
-        }
-      }
-      return true;
-    }
+    network => isFromKueryExpressionValid(network.filterQueryDraft)
   );

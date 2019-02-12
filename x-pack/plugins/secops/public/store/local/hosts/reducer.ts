@@ -6,6 +6,7 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,
@@ -18,22 +19,20 @@ import { HostsModel } from './model';
 
 export type HostsState = HostsModel;
 
-export const DEFAULT_LIMIT = 10;
-
 export const initialHostsState: HostsState = {
   page: {
     queries: {
       authentications: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       hosts: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       events: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       uncommonProcesses: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
     filterQuery: null,
@@ -42,16 +41,16 @@ export const initialHostsState: HostsState = {
   details: {
     queries: {
       authentications: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       hosts: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       events: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
       uncommonProcesses: {
-        limit: DEFAULT_LIMIT,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
     filterQuery: null,

@@ -8,7 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 import { NetworkType } from './model';
 
-const actionCreator = actionCreatorFactory('x-pack/secops/local/hosts');
+const actionCreator = actionCreatorFactory('x-pack/secops/local/network');
 
 export const updateTopSourceLimit = actionCreator<{ limit: number; networkType: NetworkType }>(
   'UPDATE_TOP_SOURCE_LIMIT'

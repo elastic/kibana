@@ -109,7 +109,7 @@ const NetworkTopNFlowTableComponent = pure<NetworkTopNFlowTableProps>(
         <h3>
           {networkTopNFlowType === NetworkTopNFlowType.source && i18n.SOURCE}
           {networkTopNFlowType === NetworkTopNFlowType.destination && i18n.DESTINATION}
-          <EuiBadge color="hollow"> {totalCount}</EuiBadge>
+          <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />

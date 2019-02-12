@@ -18,7 +18,7 @@ export const KQL_PLACE_HOLDER = i18n.translate('xpack.secops.network.kqlPlaceHol
   defaultMessage: 'Search… (e.g. network.name:"foo" AND process.name:"bar")',
 });
 
-export const LETS_ADD_SOME = i18n.translate('xpack.secops.network.letsAddSome', {
+export const LETS_ADD_SOME = i18n.translate('xpack.secops.network.letsAddSome.description', {
   defaultMessage: "Let's add some!",
 });
 
