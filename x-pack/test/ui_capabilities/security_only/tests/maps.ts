@@ -49,7 +49,7 @@ export default function mapsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
-          // all other users can't do anything with Dashboard
+          // all other users can't do anything with Maps
           default:
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('maps');
