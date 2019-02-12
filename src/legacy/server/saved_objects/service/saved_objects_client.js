@@ -95,6 +95,21 @@ export class SavedObjectsClient {
   errors = errors
 
   /**
+   * ## SavedObjectsClient operations
+   *
+   * metadata about the operations which the SavedObjectsClient supports
+   */
+  static operations = [
+    'create',
+    'bulkCreate',
+    'delete',
+    'find',
+    'bulkGet',
+    'get',
+    'update',
+  ];
+
+  /**
    * Persists an object
    *
    * @param {string} type
