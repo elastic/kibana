@@ -49,7 +49,7 @@ export class TagCloudVisualization {
     this._truncated = false;
     this._tagCloud = new TagCloud(cloudContainer);
     this._tagCloud.on('select', (event) => {
-      if (!this._vis.params.bucket) {
+      if (!this._visParams.bucket) {
         return;
       }
       this._vis.API.events.filter({
@@ -74,7 +74,7 @@ export class TagCloudVisualization {
   async render(data, visParams, status) {
     if (!(status.resize || status.data || status.params)) return;
 
-    if (status.params || status.aggs) {
+    if (status.params || status.data) {
       this._updateParams(visParams);
     }
 

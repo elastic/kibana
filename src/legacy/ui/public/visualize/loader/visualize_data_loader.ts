@@ -92,7 +92,7 @@ export class VisualizeDataLoader {
 
     if (!canSkipResponseHandler) {
       this.visData = await Promise.resolve(
-        this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
+        this.responseHandler(requestHandlerResponse, visParams.dimensions)
       );
     }
 

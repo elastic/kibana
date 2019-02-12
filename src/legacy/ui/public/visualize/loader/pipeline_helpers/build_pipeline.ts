@@ -258,10 +258,10 @@ const buildVisConfig: BuildVisConfigFunction = {
     return visConfig;
   },
   metric: schemas => {
-    const visConfig = {} as any;
-    visConfig.metric.metrics = schemas.metric;
+    const visConfig = { dimensions: {} } as any;
+    visConfig.dimensions.metrics = schemas.metric;
     if (schemas.group) {
-      visConfig.metric.bucket = schemas.group[0];
+      visConfig.dimensions.bucket = schemas.group[0];
     }
     return visConfig;
   },
