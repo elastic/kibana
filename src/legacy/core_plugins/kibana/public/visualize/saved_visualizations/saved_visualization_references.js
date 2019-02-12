@@ -37,7 +37,9 @@ export function extractReferences({ attributes, references = [] }) {
     const visState = JSON.parse(updatedAttributes.visState);
     const controls = visState.params && visState.params.controls || [];
     controls.forEach((control, i) => {
-      if (!control.indexPattern) return;
+      if (!control.indexPattern) {
+        return;
+      }
       control.indexPatternRefName = `control_${i}_index_pattern`;
       updatedReferences.push({
         name: control.indexPatternRefName,
@@ -65,9 +67,11 @@ export function injectReferences(savedObject, references) {
     delete savedObject.savedSearchRefName;
   }
   if (savedObject.visState) {
-    const controls = savedObject.visState.params && savedObject.visState.params.controls || [];
+    const controls = (savedObject.visState.params && savedObject.visState.params.controls) || [];
     controls.forEach((control) => {
-      if (!control.indexPatternRefName) return;
+      if (!control.indexPatternRefName) {
+        return;
+      }
       const reference = references.find(reference => reference.name === control.indexPatternRefName);
       if (!reference) {
         throw new Error (`Could not find index pattern reference "${control.indexPatternRefName}"`);

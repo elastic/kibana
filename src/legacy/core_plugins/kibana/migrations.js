@@ -81,11 +81,18 @@ export const migrations = {
       // Migrate controls
       const visStateJSON = get(doc, 'attributes.visState');
       if (visStateJSON) {
+        let visState;
         try {
-          const visState = JSON.parse(visStateJSON);
+          visState = JSON.parse(visStateJSON);
+        } catch (e) {
+          // Let it go, the data is invalid and we'll leave it as is
+        }
+        if (visState) {
           const controls = get(visState, 'params.controls') || [];
           controls.forEach((control, i) => {
-            if (!control.indexPattern) return;
+            if (!control.indexPattern) {
+              return;
+            }
             control.indexPatternRefName = `control_${i}_index_pattern`;
             doc.references.push({
               name: control.indexPatternRefName,
@@ -95,8 +102,6 @@ export const migrations = {
             delete control.indexPattern;
           });
           doc.attributes.visState = JSON.stringify(visState);
-        } catch (e) {
-          // Let it go, the data is invalid and we'll leave it as is
         }
       }
 
