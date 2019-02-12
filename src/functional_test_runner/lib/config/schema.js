@@ -79,7 +79,7 @@ export const schema = Joi.object().keys({
 
   timeouts: Joi.object().keys({
     find: Joi.number().default(10000),
-    try: Joi.number().default(40000),
+    try: Joi.number().default(120000),
     waitFor: Joi.number().default(20000),
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
