@@ -108,8 +108,7 @@ export function map(state = INITIAL_STATE, action) {
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
     case ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE:
-      rollbackAnyTrailingTrackedLayerState(state);//do this because users can select different layers while the layer panel is open, which automatically switches the selection
-      return { ...state };
+      return rollbackAnyTrailingTrackedLayerState(state);//do this because users can select different layers while the layer panel is open, which automatically switches the selection
     case TRACK_CURRENT_LAYER_STATE:
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
@@ -365,11 +364,13 @@ function findLayerById(state, id) {
 }
 
 function rollbackAnyTrailingTrackedLayerState(state) {
+  let mutatedState = state;
   state.layerList.forEach(layer => {
     if (layer[TRACKED_LAYER_DESCRIPTOR]) {
-      rollbackTrackedLayerState(state, layer.id);
+      mutatedState = rollbackTrackedLayerState(state, layer.id);
     }
   });
+  return mutatedState;
 }
 
 function trackCurrentLayerState(state, layerId) {
@@ -384,9 +385,10 @@ function removeTrackedLayerState(state, layerId) {
     return state;
   }
 
-  const layerIndex = getLayerIndex(state.layerList, layerId);
   const copyLayer = { ...layer };
-  delete copyLayer[TRACKED_LAYER_DESCRIPTOR];//just update in place
+  delete copyLayer[TRACKED_LAYER_DESCRIPTOR];
+
+  const layerIndex = getLayerIndex(state.layerList, layerId);
   const newLayerList = [...state.layerList];
   newLayerList[layerIndex] = copyLayer;
   return {
@@ -409,7 +411,6 @@ function rollbackTrackedLayerState(state, layerId) {
   delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
 
   const layerIndex = getLayerIndex(state.layerList, layerId);
-  state.layerList[layerIndex] = rolledbackLayer;
   const newLayerList = [...state.layerList];
   newLayerList[layerIndex] = rolledbackLayer;
   return {
