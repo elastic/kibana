@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import { EsQueryParser } from '../es_query_parser';
 
 const second = 1000;
@@ -63,6 +64,29 @@ describe(`EsQueryParser time`, () => {
       .to.eql({ format: `epoch_millis`, gte: 6000, lte: 7000 }).and.to.be(obj);
   });
 
+});
+
+describe('EsQueryParser.populateData', () => {
+  let searchStub;
+  let parser;
+
+  beforeEach(() => {
+    searchStub = sinon.stub();
+    parser = new EsQueryParser({}, { search: searchStub }, undefined, undefined, 1234);
+
+    searchStub.returns(Promise.resolve([{}, {}]));
+  });
+  it('should set the timeout for each request', async () => {
+    await parser.populateData([{ url: { body: { } }, dataObject: {} }, { url: { body: {} }, dataObject: {} }]);
+    expect(searchStub.firstCall.args[0][0].body.timeout).to.eql('1234ms');
+    expect(searchStub.firstCall.args[0][1].body.timeout).to.eql('1234ms');
+  });
+
+  it('should remove possible timeout parameters on a request', async () => {
+    await parser.populateData([{ url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} }]);
+    expect(searchStub.firstCall.args[0][0].body.timeout).to.eql('1234ms');
+    expect(searchStub.firstCall.args[0][0].timeout).to.be(undefined);
+  });
 });
 
 describe(`EsQueryParser.injectQueryContextVars`, () => {
