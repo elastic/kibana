@@ -107,6 +107,7 @@ export class SavedObjectsRepository {
         updated_at: time,
         references,
       });
+      migrated.references = migrated.references.filter(ref => this._isTypeAllowed(ref.type));
 
       const raw = this._serializer.savedObjectToRaw(migrated);
 
@@ -173,6 +174,7 @@ export class SavedObjectsRepository {
         updated_at: time,
         references: object.references || [],
       });
+      migrated.references = migrated.references.filter(ref => this._isTypeAllowed(ref.type));
       const raw = this._serializer.savedObjectToRaw(migrated);
       bulkCreateParams.push(
         {
@@ -476,13 +478,14 @@ export class SavedObjectsRepository {
         }
 
         const time = doc._source.updated_at;
+        const references = (doc._source.references || []);
         return {
           id,
           type,
           ...time && { updated_at: time },
           version: encodeHitVersion(doc),
           attributes: doc._source[type],
-          references: doc._source.references || [],
+          references: references.filter(ref => this._isTypeAllowed(ref.type)),
           migrationVersion: doc._source.migrationVersion,
         };
       }).concat(unsupportedTypes)
@@ -553,8 +556,8 @@ export class SavedObjectsRepository {
     const {
       version,
       namespace,
-      references = [],
     } = options;
+    const references = (options.references || []).filter(ref => this._isTypeAllowed(ref.type));
 
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {

@@ -41,6 +41,7 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
+    'src/legacy/server/saved_objects/**/*.js',
   ],
   moduleNameMapper: {
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
