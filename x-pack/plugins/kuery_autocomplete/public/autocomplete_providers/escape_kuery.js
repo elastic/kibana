@@ -26,7 +26,10 @@ function escapeNot(string) {
   return string.replace(/not(\s+)/ig, '\\$&');
 }
 
-// See the EscapedWhitespace rule in kuery.peg
+// See the Space rule in kuery.peg
 function escapeWhitespace(string) {
-  return string.replace(/\n/g, '\\n').replace(/\t/g, '\\t');
+  return string
+    .replace(/\t/g, '\\t')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
 }
