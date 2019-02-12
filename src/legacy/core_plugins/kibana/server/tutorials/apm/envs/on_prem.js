@@ -50,6 +50,12 @@ export function onPremInstructions(apmIndexPattern) {
         title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
           defaultMessage: 'APM Server',
         }),
+        callOut: {
+          title: 'Important: Updating to 7.0 or higher',
+          children:
+            'Please make sure your APM Server is updated to 7.0 or \
+             higher. You can also migrate your 6.x data with the Migration Assistant.',
+        },
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,

@@ -70,6 +70,7 @@ const instructionVariantSchema = Joi.object({
 
 const instructionSetSchema = Joi.object({
   title: Joi.string(),
+  callOut: Joi.object(),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
   instructionVariants: Joi.array().items(instructionVariantSchema).required(),
   statusCheck: statusCheckSchema,
