@@ -307,14 +307,15 @@ export interface DocCount {
 export interface LatestMonitorsResult {
   monitors?: LatestMonitor[] | null;
 }
-
+/** Represents the latest recorded information about a monitor. */
 export interface LatestMonitor {
+  /** The ID of the monitor represented by this data. */
   id: MonitorKey;
-
+  /** Information from the latest document. */
   ping?: Ping | null;
-
+  /** Buckets of recent up count status data. */
   upSeries?: (MonitorSeriesPoint | null)[] | null;
-
+  /** Buckets of recent down count status data. */
   downSeries?: (MonitorSeriesPoint | null)[] | null;
 }
 
@@ -380,14 +381,15 @@ export interface MonitorDurationAveragePoint {
   /** The average duration ms for the monitor. */
   y?: number | null;
 }
-
+/** Represents a bucket of monitor status information. */
 export interface StatusData {
+  /** The timeseries point for this status data. */
   x: UnsignedInteger;
-
+  /** The value of up counts for this point. */
   up?: number | null;
-
+  /** The value for down counts for this point. */
   down?: number | null;
-
+  /** The total down counts for this point. */
   total?: number | null;
 }
 

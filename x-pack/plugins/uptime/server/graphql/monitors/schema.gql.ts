@@ -35,10 +35,15 @@ export const monitorsSchema = gql`
     y: Float
   }
 
+  "Represents a bucket of monitor status information."
   type StatusData {
+    "The timeseries point for this status data."
     x: UnsignedInteger!
+    "The value of up counts for this point."
     up: Int
+    "The value for down counts for this point."
     down: Int
+    "The total down counts for this point."
     total: Int
   }
 
@@ -84,10 +89,15 @@ export const monitorsSchema = gql`
     y: Float
   }
 
+  "Represents the latest recorded information about a monitor."
   type LatestMonitor {
+    "The ID of the monitor represented by this data."
     id: MonitorKey!
+    "Information from the latest document."
     ping: Ping
+    "Buckets of recent up count status data."
     upSeries: [MonitorSeriesPoint]
+    "Buckets of recent down count status data."
     downSeries: [MonitorSeriesPoint]
   }
 

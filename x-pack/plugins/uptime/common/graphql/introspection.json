@@ -1571,11 +1571,11 @@
       {
         "kind": "OBJECT",
         "name": "LatestMonitor",
-        "description": "",
+        "description": "Represents the latest recorded information about a monitor.",
         "fields": [
           {
             "name": "id",
-            "description": "",
+            "description": "The ID of the monitor represented by this data.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1587,7 +1587,7 @@
           },
           {
             "name": "ping",
-            "description": "",
+            "description": "Information from the latest document.",
             "args": [],
             "type": { "kind": "OBJECT", "name": "Ping", "ofType": null },
             "isDeprecated": false,
@@ -1595,7 +1595,7 @@
           },
           {
             "name": "upSeries",
-            "description": "",
+            "description": "Buckets of recent up count status data.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -1607,7 +1607,7 @@
           },
           {
             "name": "downSeries",
-            "description": "",
+            "description": "Buckets of recent down count status data.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -1969,11 +1969,11 @@
       {
         "kind": "OBJECT",
         "name": "StatusData",
-        "description": "",
+        "description": "Represents a bucket of monitor status information.",
         "fields": [
           {
             "name": "x",
-            "description": "",
+            "description": "The timeseries point for this status data.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1985,7 +1985,7 @@
           },
           {
             "name": "up",
-            "description": "",
+            "description": "The value of up counts for this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
@@ -1993,7 +1993,7 @@
           },
           {
             "name": "down",
-            "description": "",
+            "description": "The value for down counts for this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
@@ -2001,7 +2001,7 @@
           },
           {
             "name": "total",
-            "description": "",
+            "description": "The total down counts for this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
