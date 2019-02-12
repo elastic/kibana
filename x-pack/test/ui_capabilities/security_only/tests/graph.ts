@@ -50,7 +50,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               delete: false,
             });
             break;
-          // these users can't do anything with Discover
+          // these users can't do anything with Graph
           case 'advancedSettings_all':
           case 'advancedSettings_read':
           case 'apm_all':
