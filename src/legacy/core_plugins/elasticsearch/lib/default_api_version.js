@@ -16,11 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
-export async function emptyKibanaIndexAction({ client, log, kibanaUrl }) {
-  const stats = createStats('emptyKibanaIndex', log);
-  await deleteKibanaIndices({ client, stats });
-  await migrateKibanaIndex({ client, log, stats, kibanaUrl });
-  return stats;
-}
+export const DEFAULT_API_VERSION = 'master';
