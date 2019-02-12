@@ -12,8 +12,8 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       type="button"
     >
       <FormattedMessage
-        defaultMessage="Options"
-        id="common.ui.queryBar.optionsButtonLabel"
+        defaultMessage="Lucene"
+        id="common.ui.queryBar.luceneLanguageName"
         values={Object {}}
       />
     </EuiButtonEmpty>
@@ -141,8 +141,8 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       type="button"
     >
       <FormattedMessage
-        defaultMessage="Options"
-        id="common.ui.queryBar.optionsButtonLabel"
+        defaultMessage="KQL"
+        id="common.ui.queryBar.kqlLanguageName"
         values={Object {}}
       />
     </EuiButtonEmpty>
