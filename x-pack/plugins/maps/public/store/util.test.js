@@ -12,7 +12,7 @@ describe('store/util', () => {
 
   describe('copyPersistentState', () => {
 
-    it('should ignore state preceded by double uncerscores', async () => {
+    it('should ignore state preceded by double underscores', async () => {
       const copy = copyPersistentState({
         foo: 'bar',
         nested: {

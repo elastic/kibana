@@ -66,9 +66,6 @@ export class TOCEntry extends React.Component {
       this.props.openLayerPanel(this.props.layer.getId());
     };
 
-    const donotOpenPanel = () => {
-      closeModal();
-    };
     return (
       <EuiOverlayMask>
         <EuiModal
@@ -80,7 +77,7 @@ export class TOCEntry extends React.Component {
 
           <EuiModalFooter>
             <EuiButtonEmpty
-              onClick={donotOpenPanel}
+              onClick={closeModal}
             >
               Do not proceed
             </EuiButtonEmpty>
@@ -127,8 +124,8 @@ export class TOCEntry extends React.Component {
     const cancelModal = this._renderCancelModal();
 
     const openLayerPanelWithCheck = () => {
-      const selectedLauer = this.props.getSelectedLayerSelector();
-      if (selectedLauer && selectedLauer.getId() === this.props.layer.getId()) {
+      const selectedLayer = this.props.getSelectedLayerSelector();
+      if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
         return;
       }
       if (this.props.hasDirtyStateSelector()) {
