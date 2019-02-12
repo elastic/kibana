@@ -40,7 +40,7 @@ export const LogsPage = injectI18n(
       const { intl } = this.props;
 
       return (
-        <ColumnarPage>
+        <ColumnarPage data-test-subj="infraLogsPage">
           <Header
             breadcrumbs={[
               {

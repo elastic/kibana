@@ -89,6 +89,7 @@ export const NodeContextMenu = injectUICapabilities(
                       defaultMessage: 'View logs',
                     }),
                     href: nodeLogsUrl,
+                    'data-test-subj': 'viewLogsContentMenuItem',
                   },
                 ]
               : []),
