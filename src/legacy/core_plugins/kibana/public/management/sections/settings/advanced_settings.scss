@@ -5,6 +5,10 @@
 
   &Wrapper {
     width: 640px;
+
+    @include internetExplorerOnly() {
+      min-height: 1px;
+    }
   }
 
   &Actions {
@@ -12,8 +16,14 @@
   }
 
   &ImagePreview > img {
-    max-height: 100px;
+    max-height: 400px;
     width: auto;
     max-width: 100%;
+  }
+
+  @include internetExplorerOnly {
+    &Row {
+      min-height: 1px;
+    }
   }
 }
