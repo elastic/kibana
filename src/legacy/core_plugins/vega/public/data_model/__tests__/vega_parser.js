@@ -116,8 +116,8 @@ describe('VegaParser._parseSchema', () => {
     expect(vp.spec).to.eql({ $schema: 'https://vega.github.io/schema/vega/v3.0.json' });
     expect(vp.warnings).to.have.length(1);
   });
-  it('vega', test('https://vega.github.io/schema/vega/v3.0.json', false, 0));
-  it('vega old', test('https://vega.github.io/schema/vega/v4.0.json', false, 1));
+  it('vega', test('https://vega.github.io/schema/vega/v4.0.json', false, 0));
+  it('vega old', test('https://vega.github.io/schema/vega/v5.0.json', false, 1));
   it('vega-lite', test('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0));
   it('vega-lite old', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
 });
