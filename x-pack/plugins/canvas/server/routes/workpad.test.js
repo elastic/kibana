@@ -8,6 +8,8 @@ import Hapi from 'hapi';
 import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
 import { workpad } from './workpad';
 
+jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
+
 describe(`${CANVAS_TYPE} API`, () => {
   const savedObjectsClient = {
     get: jest.fn(),
@@ -23,6 +25,14 @@ describe(`${CANVAS_TYPE} API`, () => {
     savedObjectsClient.find.mockReset();
   });
 
+  // Mock toISOString function of all Date types
+  global.Date = class Date extends global.Date {
+    toISOString() {
+      return '2019-02-12T21:01:22.479Z';
+    }
+  };
+
+  // Setup mock server
   const mockServer = new Hapi.Server({ debug: false, port: 0 });
   mockServer.plugins = {
     elasticsearch: {
@@ -62,8 +72,22 @@ Object {
   "id": "123",
 }
 `);
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.get.mock.calls[0]).toEqual([CANVAS_TYPE, '123']);
+      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      "123",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
     });
   });
 
@@ -88,13 +112,29 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.create.mock.calls[0][0]).toEqual(CANVAS_TYPE);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('id', undefined);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('foo', true);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('@timestamp');
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('@created');
-      expect(savedObjectsClient.create.mock.calls[0][2]).toHaveProperty('id');
+      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      Object {
+        "@created": "2019-02-12T21:01:22.479Z",
+        "@timestamp": "2019-02-12T21:01:22.479Z",
+        "foo": true,
+      },
+      Object {
+        "id": "workpad-123abc",
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
     });
 
     test('returns succesful response with id in payload', async () => {
@@ -118,13 +158,29 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.create.mock.calls[0][0]).toEqual(CANVAS_TYPE);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('id', undefined);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('foo', true);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('@timestamp');
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('@created');
-      expect(savedObjectsClient.create.mock.calls[0][2]).toHaveProperty('id', '123');
+      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      Object {
+        "@created": "2019-02-12T21:01:22.479Z",
+        "@timestamp": "2019-02-12T21:01:22.479Z",
+        "foo": true,
+      },
+      Object {
+        "id": "123",
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
     });
   });
 
@@ -155,16 +211,46 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.get.mock.calls[0]).toEqual([CANVAS_TYPE, '123']);
-      expect(savedObjectsClient.create.mock.calls[0][0]).toEqual(CANVAS_TYPE);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('id', undefined);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('foo', true);
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('@timestamp');
-      expect(savedObjectsClient.create.mock.calls[0][1]).toHaveProperty('@created');
-      expect(savedObjectsClient.create.mock.calls[0][2]).toHaveProperty('id', '123');
-      expect(savedObjectsClient.create.mock.calls[0][2]).toHaveProperty('overwrite', true);
+      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      "123",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
+      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      Object {
+        "@created": "2019-02-12T21:01:22.479Z",
+        "@timestamp": "2019-02-12T21:01:22.479Z",
+        "foo": true,
+      },
+      Object {
+        "id": "123",
+        "overwrite": true,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
     });
   });
 
@@ -186,8 +272,22 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.delete.mock.calls[0]).toEqual([CANVAS_TYPE, '123']);
+      expect(savedObjectsClient.delete).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      "123",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
     });
   });
 
@@ -218,6 +318,37 @@ Object {
     Object {
       "foo": true,
       "id": "1",
+    },
+  ],
+}
+`);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "fields": Array [
+          "id",
+          "name",
+          "@created",
+          "@timestamp",
+        ],
+        "page": "2",
+        "perPage": "10",
+        "search": "abc* | abc",
+        "searchFields": Array [
+          "name",
+        ],
+        "sortField": "@timestamp",
+        "sortOrder": "desc",
+        "type": "canvas-workpad",
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
     },
   ],
 }
