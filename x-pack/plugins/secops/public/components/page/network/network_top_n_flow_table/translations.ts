@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const SOURCE = i18n.translate('xpack.secops.networkTopNFlowTable.source.title', {
-  defaultMessage: 'Top sources',
+  defaultMessage: 'Top Uni-Directional Flow Sources',
 });
 
 export const DESTINATION = i18n.translate('xpack.secops.networkTopNFlowTable.destination.title', {
-  defaultMessage: 'Top destinations',
+  defaultMessage: 'Top Uni-Directional Flow Destinations',
 });
 
 export const SOURCE_IP = i18n.translate(

@@ -96,6 +96,13 @@ export const buildQuery = ({
       query: {
         bool: {
           filter,
+          must_not: [
+            {
+              exists: {
+                field: 'destination.bytes',
+              },
+            },
+          ],
         },
       },
     },
