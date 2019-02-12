@@ -35,7 +35,11 @@ describe('setupRequest', () => {
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
       body: {
         foo: 'bar',
-        query: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
       },
       ignore_throttled: true,
       rest_total_hits_as_int: true
@@ -58,7 +62,9 @@ describe('setupRequest', () => {
     await setup.client('myType', {});
     const params = callWithRequestSpy.mock.calls[0][2];
     expect(params.body).toEqual({
-      query: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
+      query: {
+        bool: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
+      }
     });
   });
 
@@ -66,16 +72,18 @@ describe('setupRequest', () => {
     const setup = setupRequest(mockReq);
     await setup.client('myType', {
       body: {
-        query: { filter: [{ term: 'someTerm' }] }
+        query: { bool: { filter: [{ term: 'someTerm' }] } }
       }
     });
     const params = callWithRequestSpy.mock.calls[0][2];
     expect(params.body).toEqual({
       query: {
-        filter: [
-          { term: 'someTerm' },
-          { range: { 'observer.version_major': { gte: 7 } } }
-        ]
+        bool: {
+          filter: [
+            { term: 'someTerm' },
+            { range: { 'observer.version_major': { gte: 7 } } }
+          ]
+        }
       }
     });
   });

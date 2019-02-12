@@ -42,11 +42,11 @@ interface APMRequestQuery {
 function addFilterForLegacyData(params: SearchParams) {
   // ensure a filter exists
   const nextParams = merge({}, params, {
-    body: { query: { filter: [] } }
+    body: { query: { bool: { filter: [] } } }
   });
 
   // add to filter
-  nextParams.body.query.filter.push({
+  nextParams.body.query.bool.filter.push({
     range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } }
   });
 
