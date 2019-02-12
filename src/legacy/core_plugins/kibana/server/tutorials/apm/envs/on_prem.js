@@ -89,17 +89,16 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'You have correctly setup APM Server',
           }),
           error: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.errorMessage', {
-            defaultMessage: 'APM Server has still not connected to Elasticsearch',
+            defaultMessage: 'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
           }),
           esHitsCheck: {
             index: apmIndexPattern,
             query: {
               bool: {
-                filter: {
-                  exists: {
-                    field: 'observer.listening',
-                  },
-                },
+                filter: [
+                  { exists: { field: 'observer.listening' } },
+                  { range: { 'observer.version_major': { gte: 7 } } },
+                ],
               },
             },
           },
@@ -164,11 +163,9 @@ export function onPremInstructions(apmIndexPattern) {
             index: apmIndexPattern,
             query: {
               bool: {
-                should: [
-                  { term: { 'processor.name': 'error' } },
-                  { term: { 'processor.name': 'transaction' } },
-                  { term: { 'processor.name': 'metric' } },
-                  { term: { 'processor.name': 'sourcemap' } },
+                filter: [
+                  { terms: { 'processor.name': ['error', 'transaction', 'metric', 'sourcemap'] } },
+                  { range: { 'observer.version_major': { gte: 7 } } },
                 ],
               },
             },
