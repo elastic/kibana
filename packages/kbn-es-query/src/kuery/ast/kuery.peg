@@ -154,7 +154,10 @@ NotListOfValues
   / ListOfValues
 
 Value
-  = value:QuotedString {
+  = interval:RangeInterval {
+    return (field) => buildFunctionNode('range', [field, ...interval]);
+  }
+  / value:QuotedString {
     if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
@@ -178,6 +181,13 @@ And
 
 Not
   = 'not'i Space+
+
+RangeInterval
+  = start:RangeIntervalStart Space* from:(QuotedString / UnquotedLiteral) Space* ',' Space* to:(QuotedString / UnquotedLiteral) Space* end:RangeIntervalEnd {
+    const rangeStart = buildNamedArgNode(start, from);
+    const rangeEnd = buildNamedArgNode(end, to);
+    return [rangeStart, rangeEnd];
+  }
 
 Literal
   = QuotedString / UnquotedLiteral
@@ -258,13 +268,21 @@ Keyword
   = Or / And / Not
 
 SpecialCharacter
-  = [\\():<>"*]
+  = [\\():<>"*\[\],]
 
 RangeOperator
   = '<=' { return 'lte'; }
   / '>=' { return 'gte'; }
   / '<' { return 'lt'; }
   / '>' { return 'gt'; }
+
+RangeIntervalStart
+  = '(' { return 'gt'; }
+  / '[' { return 'gte'; }
+
+RangeIntervalEnd
+  = ']' { return 'lte'; }
+  / ')' { return 'lt'; }
 
 Space
   = [\ \t\r\n]
