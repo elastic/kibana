@@ -380,10 +380,21 @@ function trackCurrentLayerState(state, layerId) {
 
 function removeTrackedLayerState(state, layerId) {
   const layer = findLayerById(state,  layerId);
-  if (layer) {
-    delete layer[TRACKED_LAYER_DESCRIPTOR];//just update in place
+  if (!layer) {
+    return { ...state };
   }
-  return { ...state };
+
+  const layerIndex = getLayerIndex(state.layerList, layerId);
+  const copyLayer = { ...layer };
+  delete copyLayer[TRACKED_LAYER_DESCRIPTOR];//just update in place
+  const newLayerList = [...state.layerList];
+  newLayerList[layerIndex] = copyLayer;
+  return {
+    ...state,
+    ...{
+      layerList: newLayerList
+    }
+  };
 }
 
 function rollbackTrackedLayerState(state, layerId) {
