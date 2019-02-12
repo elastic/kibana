@@ -29,11 +29,13 @@ fi
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
+export NODE_OPTIONS="--max_old_space_size=2048"
 
 echo "-> KIBANA_DIR $KIBANA_DIR"
 echo "-> XPACK_DIR $XPACK_DIR"
 echo "-> PARENT_DIR $PARENT_DIR"
 echo "-> TEST_ES_SNAPSHOT_VERSION $TEST_ES_SNAPSHOT_VERSION"
+echo "-> NODE_OPTIONS $NODE_OPTIONS"
 
 ###
 ### download node
