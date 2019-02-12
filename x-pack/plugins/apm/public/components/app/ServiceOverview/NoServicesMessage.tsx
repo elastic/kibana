@@ -11,11 +11,12 @@ import { KibanaLink } from '../../shared/Links/KibanaLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 
 interface Props {
-  hasDataEver: boolean;
+  // any data submitted from APM agents found (not just in the given time range)
+  historicalDataFound: boolean;
 }
 
-export function NoServicesMessage({ hasDataEver }: Props) {
-  if (hasDataEver) {
+export function NoServicesMessage({ historicalDataFound }: Props) {
+  if (historicalDataFound) {
     return (
       <EuiEmptyPrompt
         title={
@@ -55,8 +56,11 @@ export function NoServicesMessage({ hasDataEver }: Props) {
                 defaultMessage:
                   'You may also have old data that needs to be migrated.'
               })}{' '}
-              {/* TODO: GET REAL URL FOR KIBANA MIGRATION ASSISTANT */}
-              <KibanaLink pathname="/app/kibana" hash="/management">
+              {/* TODO: Confirm pathname and hash for the Kibana Migration Assistant */}
+              <KibanaLink
+                pathname="/app/kibana"
+                hash="/management/elasticsearch/upgrade_assistant"
+              >
                 {i18n.translate(
                   'xpack.apm.servicesTable.MigrationAssistantLink',
                   {

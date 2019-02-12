@@ -19,6 +19,7 @@ interface Props {
 }
 
 interface State {
+  // any data submitted from APM agents found (not just in the given time range)
   historicalDataFound: boolean;
 }
 
@@ -49,7 +50,7 @@ export class ServiceOverview extends Component<Props, State> {
               items={this.props.serviceList.data}
               noItemsMessage={
                 <NoServicesMessage
-                  hasDataEver={this.state.historicalDataFound}
+                  historicalDataFound={this.state.historicalDataFound}
                 />
               }
             />
