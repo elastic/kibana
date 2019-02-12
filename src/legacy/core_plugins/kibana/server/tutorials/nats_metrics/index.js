@@ -43,7 +43,7 @@ export function natsMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Metricbeat-Nats-Dashboard',
+          id: 'Metricbeat-Nats-Dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.natsMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Nats metrics dashboard',
           }),
