@@ -115,9 +115,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
     return (
       <div className="spcManagePage">
-        <EuiPageContent className="spcManagePage__content">
-          <EuiPageContentBody>{content}</EuiPageContentBody>
-        </EuiPageContent>
+        <EuiPageContentBody>{content}</EuiPageContentBody>
         {this.maybeGetSecureSpacesMessage()}
       </div>
     );
