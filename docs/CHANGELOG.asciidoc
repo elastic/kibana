@@ -50,7 +50,7 @@ Operations::
 * Defers the optimize step in the plugin installer to server start {pull}26983[#26983]
 Platform::
 * Removes deprecated `i18n.defaultLocale` setting {pull}29325[#29325]
-* Removes previously deprecated `elasticsearch.*` settings. {pull}29496[#29496]
+* Removes previously deprecated `elasticsearch*` settings. {pull}29496[#29496]
 * Adds new "references" attribute to saved objects for relationships {pull}28199[#28199]
 Reporting::
 * Removes Phantom dependency {pull}27142[#27142]
@@ -159,7 +159,7 @@ Observability::
 * Fixes 7.x references to tcp.port {pull}29132[#29132]
 * Ports functional tests to 7.x {pull}29398[#29398]
 * Ports unit tests to master {pull}29876[#29876]
-* Adds missing loading states for filter bar and snapshot components. {pull}30122[#30122]
+* Adds missing loading states for filter bar and snapshot components {pull}30122[#30122]
 Operations::
 * Adds support for reindexing APM indices {pull}29845[#29845]
 Platform::
@@ -177,8 +177,8 @@ Rollups::
 Security::
 * Adds tests for interpreter `createSocket` {pull}29459[#29459]
 Visualizations::
-* Adds autocomplete to TSVB {pull}30158[#30158]
-* Fixes missing markdown variables {pull}28173[#28173]
+* Adds autocomplete to Time Series Visual Builder {pull}30158[#30158]
+* Fixes missing Markdown variables {pull}28173[#28173]
 * Removes filterbar for markdown visualizations {pull}30354[#30354]
 * Corrects label for OS visualization in logs sample data {pull}30249[#30249]
 
