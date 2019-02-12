@@ -78,6 +78,28 @@ export const migrations = {
         delete doc.attributes.savedSearchId;
       }
 
+      // Migrate controls
+      const visStateJSON = get(doc, 'attributes.visState');
+      if (visStateJSON) {
+        try {
+          const visState = JSON.parse(visStateJSON);
+          const controls = get(visState, 'params.controls') || [];
+          controls.forEach((control, i) => {
+            if (!control.indexPattern) return;
+            control.indexPatternRefName = `control_${i}_index_pattern`;
+            doc.references.push({
+              name: control.indexPatternRefName,
+              type: 'index-pattern',
+              id: control.indexPattern,
+            });
+            delete control.indexPattern;
+          });
+          doc.attributes.visState = JSON.stringify(visState);
+        } catch (e) {
+          // Let it go, the data is invalid and we'll leave it as is
+        }
+      }
+
       // Migrate table splits
       try {
         const visState = JSON.parse(doc.attributes.visState);
