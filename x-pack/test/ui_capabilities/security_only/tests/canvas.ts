@@ -49,7 +49,7 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
-          // ann other users can't do anything with Canvas
+          // all other users can't do anything with Canvas
           default:
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
