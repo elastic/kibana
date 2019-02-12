@@ -5,6 +5,7 @@
  */
 
 import { getMapsTelemetry } from './maps_telemetry';
+import { i18n } from '@kbn/i18n';
 
 const TELEMETRY_TASK_TYPE = 'maps_telemetry';
 
@@ -21,7 +22,14 @@ export function scheduleTask(server, taskManager) {
         state: { stats: {}, runs: 0 },
       });
     }catch(e) {
-      server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
+      server.log(['warning', 'maps'],
+        i18n.translate('xpack.maps.telemetry.scheduleError', {
+          defaultMessage: `Error scheduling telemetry task, received {message}`,
+          values: {
+            message: e.message
+          },
+        })
+      );
     }
   });
 }
@@ -29,7 +37,9 @@ export function scheduleTask(server, taskManager) {
 export function registerMapsTelemetryTask(taskManager) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Maps telemetry fetch task',
+      title: i18n.translate('xpack.maps.telemetry.taskTitle', {
+        defaultMessage: 'Maps telemetry fetch task',
+      }),
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       numWorkers: 2,
@@ -54,7 +64,14 @@ export function telemetryTaskRunner() {
         try {
           mapsTelemetry = await getMapsTelemetry(server, callCluster);
         } catch (err) {
-          server.log(['warning'], `Error loading maps telemetry: ${err}`);
+          server.log(['warning'],
+            i18n.translate('xpack.maps.telemetry.loadError', {
+              defaultMessage: `Error loading maps telemetry: {error}`,
+              values: {
+                error: err
+              }
+            })
+          );
         } finally {
           return {
             state: {
