@@ -285,6 +285,30 @@ file have been removed.
 *Impact:* Use `xpack.upgrade_assistant.<any setting>` instead.
 
 [float]
+==== `xpack.monitoring.beats.index_pattern` is no longer valid
+
+*Details:* The unsupported `xpack.monitoring.beats.index_pattern` setting in the
+`kibana.yml` file has been officially removed.
+
+*Impact:* The ability to customize this pattern is no longer supported.
+
+[float]
+==== `xpack.monitoring.cluster_alerts.index` is no longer valid
+
+*Details:* The unsupported `xpack.monitoring.cluster_alerts.index` setting in
+the `kibana.yml` file has been officially removed. 
+
+*Impact:* The ability to customize this index is no longer supported.
+
+[float]
+==== `xpack.monitoring.elasticsearch.index_pattern` is no longer valid
+
+*Details:* The unsupported `xpack.monitoring.elasticsearch.index_pattern`
+setting in the `kibana.yml` file has been officially removed.
+
+*Impact:* The ability to customize this pattern is no longer supported.
+
+[float]
 ==== `xpack.monitoring.elasticsearch.ssl.ca` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.ca` setting in the
@@ -322,6 +346,30 @@ default of 9200 was chosen. The port in `xpack.monitoring.elasticsearch.hosts`
 is protocol dependent: https ports will use 443, and http ports will use 80. If
 `xpack.monitoring.elasticsearch.url` was dependent on an unspecified port set to
 9200, append `:9200` to the url in `xpack.monitoring.elasticsearch.hosts`.
+
+[float]
+==== `xpack.monitoring.index_pattern` is no longer valid
+
+*Details:* The unsupported `xpack.monitoring.index_pattern` setting in the
+`kibana.yml` file has been officially removed.
+
+*Impact:* The ability to customize this pattern is no longer supported.
+
+[float]
+==== `xpack.monitoring.kibana.index_pattern` is no longer valid
+
+*Details:* The unsupported `xpack.monitoring.kibana.index_pattern` setting in
+the `kibana.yml` file has been officially removed.
+
+*Impact:* The ability to customize this pattern is no longer supported.
+
+[float]
+==== `xpack.monitoring.logstash.index_pattern` is no longer valid
+
+*Details:* The unsupported `xpack.monitoring.logstash.index_pattern` setting in
+the `kibana.yml` file has been officially removed.
+
+*Impact:* The ability to customize this pattern is no longer supported.
 
 [float]
 ==== `xpack.monitoring.node_resolver` is no longer valid
