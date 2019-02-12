@@ -6,8 +6,7 @@
 }
 
 .visNewVisSearchDialog {
-  min-height: 480px;
-  max-width: 810px;
+  min-height: $euiSizeL * 20;
 }
 
 .visNewVisDialog__body {
