@@ -51,8 +51,8 @@ describe('Kuery escape', function () {
   });
 
   it('should escape newlines and tabs', () => {
-    const value = 'This\nhas\tnewlines\nwith\ttabs';
-    const expected = 'This\\nhas\\tnewlines\\nwith\\ttabs';
+    const value = 'This\nhas\tnewlines\r\nwith\ttabs';
+    const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
     expect(escapeKuery(value)).to.be(expected);
   });
 });
