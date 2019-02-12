@@ -12,6 +12,7 @@ export const getInitialState = path => {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
+      isFirstLoad: true,
       canUserWrite: true,
       fullscreen: false,
       selectedElement: null,

@@ -28,8 +28,6 @@ include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
-include::settings/settings-xkb.asciidoc[]
-
 include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
