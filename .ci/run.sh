@@ -5,6 +5,12 @@ set -e
 # move to Kibana root
 cd "$(dirname "$0")/.."
 
+echo ">>>> ES"
+echo $ES
+
+echo ">>>> JOB"
+echo $JOB
+
 source src/dev/ci_setup/extract_bootstrap_cache.sh
 source src/dev/ci_setup/setup.sh
 
