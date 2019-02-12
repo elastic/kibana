@@ -23,7 +23,7 @@ import { TimeCache } from './data_model/time_cache';
 import { timefilter } from 'ui/timefilter';
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
-export function VegaRequestHandlerProvider(es, serviceSettings, config) {
+export function VegaRequestHandlerProvider(es, serviceSettings, config, esShardTimeout) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
@@ -36,7 +36,7 @@ export function VegaRequestHandlerProvider(es, serviceSettings, config) {
       timeCache.setTimeRange(timeRange);
       const esQueryConfigs = getEsQueryConfig(config);
       const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
-      const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
+      const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings, esShardTimeout);
       return vp.parseAsync();
     }
 
