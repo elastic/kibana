@@ -14,6 +14,7 @@ import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
+import { i18n } from '@kbn/i18n';
 
 export function maps(kibana) {
 
@@ -24,8 +25,12 @@ export function maps(kibana) {
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
-        title: 'Maps',
-        description: 'Map application',
+        title: i18n.translate('xpack.maps.appTitle', {
+          defaultMessage: 'Maps'
+        }),
+        description: i18n.translate('xpack.maps.appDescription', {
+          defaultMessage: 'Map application'
+        }),
         main: 'plugins/maps/index',
         icon: 'plugins/maps/icon.svg',
         euiIconType: 'gisApp',
@@ -57,11 +62,14 @@ export function maps(kibana) {
       }).default();
     },
 
-    init(server) {
+    init: function (server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
 
       if (!mapsEnabled) {
-        server.log(['info', 'maps'], 'Maps app disabled by configuration');
+        server.log(['info', 'maps'],
+          i18n.translate('xpack.maps.appDisabled', {
+            defaultMessage: 'Maps'
+          }));
         return;
       }
       initTelemetryCollection(server);
