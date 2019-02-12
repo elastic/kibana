@@ -130,13 +130,29 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         goto: null,
       };
+    case SET_LAYER_ERROR_STATUS:
+      const { layerList } = state;
+      const layerIdx = getLayerIndex(layerList, action.layerId);
+      if (layerIdx === -1) {
+        return state;
+      }
+
+      return {
+        ...state,
+        layerList: [
+          ...layerList.slice(0, layerIdx),
+          {
+            ...layerList[layerIdx],
+            __isInErrorState: true,
+            __errorMessage: action.errorMessage
+          },
+          ...layerList.slice(layerIdx + 1)
+        ]
+      };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
-    case SET_LAYER_ERROR_STATUS:
-      return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      const errorRequestResetState = resetDataRequest(state, action);
-      return setErrorStatus(errorRequestResetState, action);
+      return resetDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -268,15 +284,6 @@ export function map(state = INITIAL_STATE, action) {
     default:
       return state;
   }
-}
-
-function setErrorStatus(state, { layerId, errorMessage }) {
-  const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
-  return tmsErrorLayer
-    ? updateLayerInList(
-      updateLayerInList(state, tmsErrorLayer.id, 'isInErrorState', true),
-      tmsErrorLayer.id, 'errorMessage', errorMessage)
-    : state;
 }
 
 function findDataRequest(layerDescriptor, dataRequestAction) {
