@@ -56,6 +56,7 @@ class TableListViewUi extends React.Component {
       totalItems: 0,
       hasInitialFetchReturned: false,
       isFetchingItems: false,
+      isDeletingItems: false,
       showDeleteModal: false,
       showLimitError: false,
       filter: this.props.initialFilter,
@@ -108,6 +109,12 @@ class TableListViewUi extends React.Component {
   }
 
   deleteSelectedItems = async () => {
+    if (this.state.isDeletingItems) {
+      return;
+    }
+    this.setState({
+      isDeletingItems: true
+    });
     try {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
@@ -124,6 +131,7 @@ class TableListViewUi extends React.Component {
     }
     this.fetchItems();
     this.setState({
+      isDeletingItems: false,
       selectedIds: []
     });
     this.closeDeleteModal();
@@ -154,6 +162,21 @@ class TableListViewUi extends React.Component {
   }
 
   renderConfirmDeleteModal() {
+    let deleteButton = (
+      <FormattedMessage
+        id="kbn.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
+        defaultMessage="Delete"
+      />
+    );
+    if (this.state.isDeletingItems) {
+      deleteButton = (
+        <FormattedMessage
+          id="kbn.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
+          defaultMessage="Deleting"
+        />
+      );
+    }
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -176,12 +199,7 @@ class TableListViewUi extends React.Component {
               defaultMessage="Cancel"
             />
           }
-          confirmButtonText={
-            <FormattedMessage
-              id="kbn.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
+          confirmButtonText={deleteButton}
           defaultFocusedButton="cancel"
         >
           <p>
