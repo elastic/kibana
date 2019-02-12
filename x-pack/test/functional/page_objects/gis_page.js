@@ -12,8 +12,25 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
+  const queryBar = getService('queryBar');
 
   class GisPage {
+
+    async setAbsoluteRange(start, end) {
+      await PageObjects.timePicker.setAbsoluteRange(start, end);
+      await this.waitForLayersToLoad();
+    }
+
+    async setAndSubmitQuery(query) {
+      await queryBar.setQuery(query);
+      await queryBar.submitQuery();
+      await this.waitForLayersToLoad();
+    }
+
+    async refreshQuery() {
+      await queryBar.submitQuery();
+      await this.waitForLayersToLoad();
+    }
 
     async enterFullScreen() {
       log.debug(`enterFullScreen`);
@@ -56,6 +73,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error(`Failed to open map ${name}`);
         }
       });
+
+      await this.waitForLayersToLoad();
     }
 
     async deleteSavedMaps(search) {
@@ -137,7 +156,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
 
     async getView() {
@@ -254,7 +273,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
   }
   return new GisPage();

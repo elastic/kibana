@@ -30,7 +30,11 @@ export class CreateSourceEditor extends Component {
     if (this._isMounted) {
       this.setState(
         { url: tilemap.url },
-        () => this.props.previewTilemap(this.state.url)
+        () => {
+          if (this.state.url) {
+            this.props.previewTilemap();
+          }
+        }
       );
     }
   };
@@ -46,7 +50,7 @@ export class CreateSourceEditor extends Component {
 
   render() {
 
-    if (this.state.url === null) {
+    if (this.state.url === null) {//still loading
       return null;
     }
 

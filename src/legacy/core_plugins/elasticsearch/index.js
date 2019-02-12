@@ -24,6 +24,7 @@ import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
 import { createProxy } from './lib/create_proxy';
 import filterHeaders from './lib/filter_headers';
+import { DEFAULT_API_VERSION } from './lib/default_api_version';
 
 const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
@@ -57,7 +58,7 @@ export default function (kibana) {
         startupTimeout: Joi.number().default(5000),
         logQueries: Joi.boolean().default(false),
         ssl: sslSchema,
-        apiVersion: Joi.string().default('master'),
+        apiVersion: Joi.string().default(DEFAULT_API_VERSION),
         healthCheck: Joi.object({
           delay: Joi.number().default(2500)
         }).default(),
