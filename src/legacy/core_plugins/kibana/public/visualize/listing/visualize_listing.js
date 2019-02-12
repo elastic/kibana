@@ -53,6 +53,10 @@ export function VisualizeListingController($injector, createNewVis) {
     this.showNewVisModal = true;
   };
 
+  this.edit = (id) => {
+    kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id });
+  };
+
   this.closeNewVisModal = () => {
     this.showNewVisModal = false;
     // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
@@ -78,7 +82,11 @@ export function VisualizeListingController($injector, createNewVis) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
+
+        return {
+          total: result.total,
+          hits: result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'))
+        };
       });
   };
 
