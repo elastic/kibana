@@ -273,7 +273,7 @@ Example structure after:
 === Removed support for deeply nested table splits in data table visualizations
 *Details:* Previously a user was able to create multiple "split table" aggregations in one table on arbitrary levels.
 The potential for deeply nested tables posed maintenance and accessibility challenges, and was inconsistent with other
-visualizations which only allow one table split. This change does not limit the number of split rows a user can put into
+visualizations that only allow one table split. This change does not limit the number of split rows a user can put into
 a table; it only restricts the number of split tables to one.
 
 *Impact:* To prevent breaking existing visualizations, saved objects containing nested table splits will be automatically
