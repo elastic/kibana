@@ -381,7 +381,7 @@ function trackCurrentLayerState(state, layerId) {
 function removeTrackedLayerState(state, layerId) {
   const layer = findLayerById(state,  layerId);
   if (!layer) {
-    return { ...state };
+    return state;
   }
 
   const layerIndex = getLayerIndex(state.layerList, layerId);
@@ -391,9 +391,7 @@ function removeTrackedLayerState(state, layerId) {
   newLayerList[layerIndex] = copyLayer;
   return {
     ...state,
-    ...{
-      layerList: newLayerList
-    }
+    layerList: newLayerList
   };
 }
 
@@ -416,8 +414,6 @@ function rollbackTrackedLayerState(state, layerId) {
   newLayerList[layerIndex] = rolledbackLayer;
   return {
     ...state,
-    ...{
-      layerList: newLayerList
-    }
+    layerList: newLayerList
   };
 }
