@@ -10,7 +10,7 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   FindResponse,
   SavedObjectsClient,
-} from 'src/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
