@@ -33,7 +33,6 @@ import {
   SET_GOTO,
   CLEAR_GOTO,
   TRACK_CURRENT_LAYER_STATE,
-  ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE
 } from "../actions/store_actions";
@@ -107,8 +106,6 @@ export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
-    case ROLLBACK_ANY_TRAILING_TRACKER_LAYER_STATE:
-      return rollbackAnyTrailingTrackedLayerState(state);//do this because users can select different layers while the layer panel is open, which automatically switches the selection
     case TRACK_CURRENT_LAYER_STATE:
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
@@ -360,16 +357,6 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
 
 function findLayerById(state, id) {
   return state.layerList.find(layer => layer.id === id);
-}
-
-function rollbackAnyTrailingTrackedLayerState(state) {
-  let mutatedState = state;
-  state.layerList.forEach(layer => {
-    if (layer[TRACKED_LAYER_DESCRIPTOR]) {
-      mutatedState = rollbackTrackedLayerState(state, layer.id);
-    }
-  });
-  return mutatedState;
 }
 
 function trackCurrentLayerState(state, layerId) {
