@@ -127,8 +127,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getBarChartXTicks() {
-      const elements = await find.allByCssSelector('.x.axis.CategoryAxis-1 > .tick > text');
-      return await Promise.all(elements.map(async el => el.getVisibleText()));
+      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
+      const $ = await xAxis.parseDomContent();
+      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
     }
 
     async getBarChartData() {
