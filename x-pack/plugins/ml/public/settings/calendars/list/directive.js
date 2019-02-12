@@ -22,10 +22,9 @@ import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 
 const template = `
+  <div class="euiSpacer euiSpacer--s" />
   <ml-nav-menu name="settings" />
-  <div class="mlCalendarManagement">
-    <ml-calendars-list />
-  </div>
+  <ml-calendars-list />
 `;
 
 uiRoutes
