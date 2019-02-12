@@ -412,5 +412,12 @@ function rollbackTrackedLayerState(state, layerId) {
 
   const layerIndex = getLayerIndex(state.layerList, layerId);
   state.layerList[layerIndex] = rolledbackLayer;
-  return { ...state };
+  const newLayerList = [...state.layerList];
+  newLayerList[layerIndex] = rolledbackLayer;
+  return {
+    ...state,
+    ...{
+      layerList: newLayerList
+    }
+  };
 }
