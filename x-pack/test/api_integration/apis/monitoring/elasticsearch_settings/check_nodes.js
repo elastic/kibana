@@ -9,7 +9,9 @@ import expect from 'expect.js';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('check nodes settings', () => {
+  describe('check nodes settings', function () {
+    this.tags(['skipCloud']);
+
     it('should check node settings', async () => {
       const { body } = await supertest
         .get('/api/monitoring/v1/elasticsearch_settings/check/nodes')

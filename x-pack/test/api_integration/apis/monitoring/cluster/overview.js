@@ -11,7 +11,9 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('overview', () => {
+  describe('overview', function () {
+    this.tags(['skipCloud']);
+
     describe('with trial license clusters', () => {
       const archive = 'monitoring/singlecluster-green-gold';
       const timeRange = {
