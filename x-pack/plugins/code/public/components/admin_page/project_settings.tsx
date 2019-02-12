@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { euiSizeS } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -32,7 +32,7 @@ import { JavaIcon, TypeScriptIcon } from '../shared/icons';
 const IconContainer = styled.div`
   display: inline-block;
   position: relative;
-  top: ${euiSizeS};
+  top: ${theme.euiSizeS};
 `;
 
 const defaultConfig = {

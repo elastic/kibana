@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import Url from 'url';
 
-import { euiSize } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { DocumentSearchResult, SearchScope } from '../../../model';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
@@ -38,7 +38,7 @@ const MainContentContainer = styled.div`
 `;
 
 const CodeResultContainer = styled.div`
-  margin-top: ${euiSize};
+  margin-top: ${theme.euiSize};
 `;
 
 const RepositoryResultContainer = CodeResultContainer;

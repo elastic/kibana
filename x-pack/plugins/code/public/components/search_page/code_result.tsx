@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiTextColor } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IPosition } from 'monaco-editor';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -16,11 +16,11 @@ import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
 const OrgName = styled.span`
-  color: ${euiTextColor};
+  color: ${theme.euiTextColor};
 `;
 
 const RepoName = styled.span`
-  color: ${euiTextColor};
+  color: ${theme.euiTextColor};
   font-weight: bold;
 `;
 

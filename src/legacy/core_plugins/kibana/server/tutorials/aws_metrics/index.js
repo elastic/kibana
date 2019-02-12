@@ -40,7 +40,7 @@ export function awsMetricsSpecProvider(server, context) {
       },
     }),
     euiIconType: 'logoAWS',
-    isBeta: true,
+    isBeta: false,
     artifacts: {
       dashboards: [
         {

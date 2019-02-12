@@ -3,15 +3,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 
   // From ML
   .top { align-self: flex-start; }
   .bottom { align-self: flex-end; }
-
-  p {
-    margin-top: 15%;
-    @include euiFontSizeL;
-  }
 }
 
 // Prevent large request errors from overflowing the container

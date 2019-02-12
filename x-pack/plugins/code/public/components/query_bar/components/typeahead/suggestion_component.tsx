@@ -5,18 +5,7 @@
  */
 
 import { EuiToken, IconType } from '@elastic/eui';
-import {
-  euiCodeFontFamily,
-  euiColorDarkShade,
-  euiColorFullShade,
-  euiColorHighlight,
-  euiFontSizeS,
-  euiFontSizeXs,
-  euiSize,
-  euiSizeS,
-  euiSizeXl,
-  euiSizeXs,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { SFC } from 'react';
 import styled from 'styled-components';
 
@@ -33,10 +22,10 @@ interface Props {
 }
 
 const SuggestionItem = styled.div`
-  background: ${(props: any) => (props.active ? euiColorHighlight : 'white')};
+  background: ${(props: any) => (props.active ? theme.euiColorHighlight : 'white')};
   height: calc(48rem / 14);
-  margin: 0 ${euiSize};
-  border-radius: ${euiSizeXs} ${euiSizeXs} ${euiSizeXs} ${euiSizeXs};
+  margin: 0 ${theme.euiSize};
+  border-radius: ${theme.euiSizeXs} ${theme.euiSizeXs} ${theme.euiSizeXs} ${theme.euiSizeXs};
   cursor: pointer;
 `;
 
@@ -56,38 +45,38 @@ const SuggestionItemBase = styled.div`
 `;
 
 const SuggestionItemToken = styled(SuggestionItemBase)`
-  color: ${euiColorFullShade};
+  color: ${theme.euiColorFullShade};
   flex-grow: 0;
   flex-basis: auto;
-  width: ${euiSizeXl};
-  height: ${euiSizeXl};
+  width: ${theme.euiSizeXl};
+  height: ${theme.euiSizeXl};
   text-align: center;
   overflow: hidden;
-  padding: ${euiSizeXs};
+  padding: ${theme.euiSizeXs};
   justify-content: center;
   align-items: center;
 `;
 
 const SuggestionItemText = styled(SuggestionItemBase)`
-  color: ${euiColorFullShade};
+  color: ${theme.euiColorFullShade};
   flex-grow: 0;
   flex-basis: auto;
-  font-family: ${euiCodeFontFamily};
-  margin-right: ${euiSizeXl};
+  font-family: ${theme.euiCodeFontFamily};
+  margin-right: ${theme.euiSizeXl};
   width: auto;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: ${euiSizeXs} ${euiSizeS};
+  padding: ${theme.euiSizeXs} ${theme.euiSizeS};
   color: #111;
-  font-size: ${euiFontSizeS};
+  font-size: ${theme.euiFontSizeS};
 `;
 
 const SuggestionItemDescription = styled(SuggestionItemBase)`
-  color: ${euiColorDarkShade};
+  color: ${theme.euiColorDarkShade};
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: ${euiFontSizeXs};
-  padding: ${euiSizeXs} ${euiSizeS};
+  font-size: ${theme.euiFontSizeXs};
+  padding: ${theme.euiSizeXs} ${theme.euiSizeS};
 `;
 
 export const SuggestionComponent: SFC<Props> = props => {

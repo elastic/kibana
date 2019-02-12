@@ -3,16 +3,6 @@
   <kbn-top-nav name="visualize" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
-      <!-- Breadcrumbs. -->
-      <bread-crumbs
-        data-transclude-slot="topLeftCorner"
-        class="fullWidth"
-        page-title="getVisualizationTitle()"
-        use-links="true"
-        omit-current-page="true"
-        omit-pages="['edit']"
-      ></bread-crumbs>
-
       <!-- Search. -->
       <div
         data-transclude-slot="bottomRow"
@@ -37,25 +27,48 @@
           </a>
         </div>
 
-        <div ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar" class="fullWidth kuiVerticalRhythmSmall">
-          <query-bar
+        <div class="fullWidth kuiVerticalRhythmSmall">
+          <search-bar
             query="state.query"
+            on-query-submit="updateQueryAndFetch"
             app-name="'visualize'"
-            on-submit="updateQueryAndFetch"
-            disable-auto-focus="true"
             index-patterns="[indexPattern]"
-          ></query-bar>
+            filters="filters"
+            on-filters-updated="onFiltersUpdated"
+            show-query-bar="showQueryBar()"
+            show-filter-bar="vis.type.options.showFilterBar && chrome.getVisible()"
+            show-date-picker="enableQueryBarTimeRangeSelector"
+            date-range-from="timeRange.from"
+            date-range-to="timeRange.to"
+            is-refresh-paused="refreshInterval.pause"
+            refresh-interval="refreshInterval.value"
+            show-auto-refresh-only="showAutoRefreshOnlyInQueryBar"
+            on-refresh-change="onRefreshChange"
+            watch-depth="reference"
+          ></search-bar>
         </div>
       </div>
     </div>
   </kbn-top-nav>
 
-  <!-- Filters. -->
+  <!--
+    The top nav is hidden in embed mode but the filter bar must still be present so
+    we show the filter bar on its own here if the chrome is not visible.
+  -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar"
-    state="state"
+    ng-if="vis.type.options.showFilterBar && !chrome.getVisible()"
+    class-name="'globalFilterGroup__filterBar'"
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
     index-patterns="[indexPattern]"
   ></filter-bar>
+
+  <apply-filters-popover
+    key="applyFiltersKey"
+    filters="state.$newFilters"
+    on-cancel="onCancelApplyFilters"
+    on-submit="onApplyFilters"
+  ></apply-filters-popover>
 
   <div
     class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"

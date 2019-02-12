@@ -5,14 +5,7 @@
  */
 
 import { EuiIcon, EuiTitle, IconType } from '@elastic/eui';
-import {
-  euiColorHighlight,
-  euiSize,
-  euiSizeM,
-  euiSizeS,
-  euiSizeXs,
-  paddingSizes,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -20,7 +13,7 @@ import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
 
 const Root = styled.div`
-  padding: ${paddingSizes.m};
+  padding: ${theme.paddingSizes.m};
 `;
 
 const DirectoryNodesContainer = styled.div`
@@ -29,7 +22,7 @@ const DirectoryNodesContainer = styled.div`
 `;
 
 const NodeName = styled.span`
-  margin-left: ${euiSizeXs};
+  margin-left: ${theme.euiSizeXs};
   vertical-align: middle;
   a {
     :focus: {
@@ -44,7 +37,7 @@ const NodeName = styled.span`
 `;
 
 const Title = styled(EuiTitle)`
-  margin: ${euiSizeXs} 0 ${euiSize};
+  margin: ${theme.euiSizeXs} 0 ${theme.euiSize};
 `;
 
 const Container = styled.div`
@@ -55,9 +48,9 @@ const Container = styled.div`
 
 const DirectoryNode = styled.div`
   width: calc(200rem / 14);
-  margin: 0 ${euiSizeS} ${euiSizeM};
+  margin: 0 ${theme.euiSizeS} ${theme.euiSizeM};
   :hover {
-    background-color: ${euiColorHighlight};
+    background-color: ${theme.euiColorHighlight};
     cursor: pointer;
   }
 `;

@@ -8,7 +8,7 @@
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs } from '../utils';
+import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -20,7 +20,15 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../node_available_warning';
+import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
+import { isEqual } from 'lodash';
+
+import {
+  DEFAULT_REFRESH_INTERVAL_MS,
+  MINIMUM_REFRESH_INTERVAL_MS,
+  DELETING_JOBS_REFRESH_INTERVAL_MS,
+} from '../../../../../common/constants/jobs_list';
 
 import React, {
   Component
@@ -32,9 +40,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-const DEFAULT_REFRESH_INTERVAL_MS = 30000;
-const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+
 let jobsRefreshInterval =  null;
+let deletingJobsRefreshTimeout = null;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -49,6 +57,7 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
+      deletingJobIds: [],
     };
 
     this.updateFunctions = {};
@@ -76,6 +85,12 @@ export class JobsListView extends Component {
 
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
+
+    // check to see if we need to open the start datafeed modal
+    // after the page has rendered. This will happen if the user
+    // has just created a job in the advanced wizard and selected to
+    // start the datafeed now.
+    this.openAutoStartDatafeedModal();
   }
 
   componentWillUnmount() {
@@ -125,6 +140,13 @@ export class JobsListView extends Component {
   clearRefreshInterval() {
     this.blockRefresh = true;
     clearInterval(jobsRefreshInterval);
+  }
+
+  openAutoStartDatafeedModal() {
+    const job = checkForAutoStartDatafeed();
+    if (job !== undefined) {
+      this.showStartDatafeedModal([job]);
+    }
   }
 
   toggleRow = (jobId) => {
@@ -284,11 +306,41 @@ export class JobsListView extends Component {
           this.updateFunctions[j].setState({ job: fullJobsList[j] });
         });
 
+        jobs.forEach((job) => {
+          if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
+            this.toggleRow(job.id);
+          }
+        });
+
         this.isDoneRefreshing();
+        if (jobsSummaryList.some(j => j.deleting === true)) {
+          // if there are some jobs in a deleting state, start polling for
+          // deleting jobs so we can update the jobs list once the
+          // deleting tasks are over
+          this.checkDeletingJobTasks();
+        }
       } catch (error) {
         console.error(error);
         this.setState({ loading: false });
       }
+    }
+  }
+
+  async checkDeletingJobTasks() {
+    const { jobIds } = await ml.jobs.deletingJobTasks();
+
+    if (jobIds.length === 0 || isEqual(jobIds.sort(), this.state.deletingJobIds.sort())) {
+      this.setState({
+        deletingJobIds: jobIds,
+      });
+      this.refreshJobSummaryList(true);
+    }
+
+    if (jobIds.length > 0 && deletingJobsRefreshTimeout === null) {
+      deletingJobsRefreshTimeout = setTimeout(() => {
+        deletingJobsRefreshTimeout = null;
+        this.checkDeletingJobTasks();
+      }, DELETING_JOBS_REFRESH_INTERVAL_MS);
     }
   }
 
@@ -356,6 +408,7 @@ export class JobsListView extends Component {
         />
         <div className="job-management">
           <NodeAvailableWarning />
+          <UpgradeWarning />
           <header>
             <div className="job-buttons-container">
               <EuiFlexGroup alignItems="center">

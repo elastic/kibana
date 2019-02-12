@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { SavedObjectsSerializer } from '.';
 import { SavedObjectsSchema } from '../schema';
+import { encodeVersion } from '../version';
 
 describe('saved object conversion', () => {
   describe('#rawToSavedObject', () => {
@@ -32,6 +33,24 @@ describe('saved object conversion', () => {
         },
       });
       expect(actual).toHaveProperty('type', 'foo');
+    });
+
+    test('it copies the _source.references property to references', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      const actual = serializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
+        },
+      });
+      expect(actual).toHaveProperty('references', [
+        {
+          name: 'ref_0',
+          type: 'index-pattern',
+          id: 'pattern*',
+        },
+      ]);
     });
 
     test('if specified it copies the _source.migrationVersion property to migrationVersion', () => {
@@ -68,7 +87,8 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
-        _version: 3,
+        _seq_no: 3,
+        _primary_term: 1,
         _source: {
           type: 'hello',
           hello: {
@@ -85,7 +105,7 @@ describe('saved object conversion', () => {
       const expected = {
         id: 'world',
         type: 'hello',
-        version: 3,
+        version: encodeVersion(3, 1),
         attributes: {
           a: 'b',
           c: 'd',
@@ -95,6 +115,7 @@ describe('saved object conversion', () => {
           acl: '33.3.5',
         },
         updated_at: now,
+        references: [],
       };
       expect(expected).toEqual(actual);
     });
@@ -111,17 +132,46 @@ describe('saved object conversion', () => {
       expect(actual).not.toHaveProperty('version');
     });
 
-    test(`if specified it copies _version to version`, () => {
+    test(`if specified it encodes _seq_no and _primary_term to version`, () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
-        _version: 4,
+        _seq_no: 4,
+        _primary_term: 1,
         _source: {
           type: 'foo',
           hello: {},
         },
       });
-      expect(actual).toHaveProperty('version', 4);
+      expect(actual).toHaveProperty('version', encodeVersion(4, 1));
+    });
+
+    test(`if only _seq_no is specified it throws`, () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      expect(() =>
+        serializer.rawToSavedObject({
+          _id: 'foo:bar',
+          _seq_no: 4,
+          _source: {
+            type: 'foo',
+            hello: {},
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"_primary_term from elasticsearch must be an integer"`);
+    });
+
+    test(`if only _primary_term is throws`, () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      expect(() =>
+        serializer.rawToSavedObject({
+          _id: 'foo:bar',
+          _primary_term: 1,
+          _source: {
+            type: 'foo',
+            hello: {},
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"_seq_no from elasticsearch must be an integer"`);
     });
 
     test('if specified it copies the _source.updated_at property to updated_at', () => {
@@ -166,6 +216,7 @@ describe('saved object conversion', () => {
         attributes: {
           world: 'earth',
         },
+        references: [],
       });
     });
 
@@ -180,6 +231,7 @@ describe('saved object conversion', () => {
       expect(actual).toEqual({
         id: 'universe',
         type: 'hello',
+        references: [],
       });
     });
 
@@ -201,7 +253,8 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const raw = {
         _id: 'foo-namespace:foo:bar',
-        _version: 24,
+        _primary_term: 24,
+        _seq_no: 42,
         _source: {
           type: 'foo',
           foo: {
@@ -214,6 +267,7 @@ describe('saved object conversion', () => {
           },
           namespace: 'foo-namespace',
           updated_at: new Date(),
+          references: [],
         },
       };
 
@@ -385,6 +439,23 @@ describe('saved object conversion', () => {
       expect(actual._source).toHaveProperty('type', 'foo');
     });
 
+    test('it copies the references property to _source.references', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      const actual = serializer.savedObjectToRaw({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
+      });
+      expect(actual._source).toHaveProperty('references', [
+        {
+          name: 'ref_0',
+          type: 'index-pattern',
+          id: 'pattern*',
+        },
+      ]);
+    });
+
     test('if specified it copies the updated_at property to _source.updated_at', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const now = new Date();
@@ -434,25 +505,38 @@ describe('saved object conversion', () => {
       expect(actual._source).not.toHaveProperty('migrationVersion');
     });
 
-    test('it copies the version property to _version', () => {
+    test('it decodes the version property to _seq_no and _primary_term', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
-        version: 4,
+        version: encodeVersion(1, 2),
       } as any);
 
-      expect(actual).toHaveProperty('_version', 4);
+      expect(actual).toHaveProperty('_seq_no', 1);
+      expect(actual).toHaveProperty('_primary_term', 2);
     });
 
-    test(`if unspecified it doesn't add _version property`, () => {
+    test(`if unspecified it doesn't add _seq_no or _primary_term properties`, () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
       } as any);
 
-      expect(actual).not.toHaveProperty('_version');
+      expect(actual).not.toHaveProperty('_seq_no');
+      expect(actual).not.toHaveProperty('_primary_term');
+    });
+
+    test(`if version invalid it throws`, () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      expect(() =>
+        serializer.savedObjectToRaw({
+          type: '',
+          attributes: {},
+          version: 'foo',
+        } as any)
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid version [foo]"`);
     });
 
     test('it copies attributes to _source[type]', () => {

@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
-import { euiBorderThick, euiSizeS, paddingSizes } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -20,12 +20,12 @@ const BlameMessage = styled(EuiText)`
 `;
 
 const Avatar = styled(EuiAvatar)`
-  margin: auto ${euiSizeS} auto 0;
+  margin: auto ${theme.euiSizeS} auto 0;
 `;
 
 const Root = styled(EuiFlexGroup)<{ isFirstLine: boolean }>`
-  padding: ${paddingSizes.xs} ${paddingSizes.s};
-  border-top: ${props => (props.isFirstLine ? 'none' : euiBorderThick)};
+  padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.s};
+  border-top: ${props => (props.isFirstLine ? 'none' : theme.euiBorderThick)};
 `;
 
 export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: boolean }> {

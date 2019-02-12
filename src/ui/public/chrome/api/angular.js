@@ -70,6 +70,7 @@ export function initAngularApi(chrome, internals) {
       })
       .run(internals.capture$httpLoadingCount)
       .run(internals.$setupBreadcrumbsAutoClear)
+      .run(internals.$setupHelpExtensionAutoClear)
       .run(internals.$initNavLinksDeepWatch)
       .run(($location, $rootScope, Private, config) => {
         chrome.getFirstPathSegment = () => {

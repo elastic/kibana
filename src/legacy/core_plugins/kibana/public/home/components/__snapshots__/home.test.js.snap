@@ -35,7 +35,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -66,7 +66,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -101,12 +101,14 @@ exports[`home directories should not render directory entry when showOnHomePage 
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -173,7 +175,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -204,7 +206,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -258,12 +260,14 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -330,7 +334,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -380,7 +384,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -415,12 +419,14 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -487,7 +493,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -518,7 +524,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -553,12 +559,14 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -625,7 +633,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -656,7 +664,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -691,12 +699,14 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -763,7 +773,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -794,7 +804,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -829,150 +839,14 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.description"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer
           size="s"
-        />
-        <EuiButton
-          color="primary"
-          fill={false}
-          href="#/home/feature_directory"
-          iconSide="left"
-          type="button"
-        >
-          <FormattedMessage
-            defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.notFound.viewFullButtonLabel"
-            values={Object {}}
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPageBody>
-</EuiPage>
-`;
-
-exports[`home should not contain RecentlyAccessed panel when there is no recentlyAccessed history 1`] = `
-<EuiPage
-  className="homPage"
-  restrictWidth={false}
->
-  <EuiPageBody
-    restrictWidth={false}
-  >
-    <InjectIntl(AddDataUi)
-      apmUiEnabled={true}
-      isNewKibanaInstance={false}
-      mlEnabled={true}
-    />
-    <EuiSpacer
-      size="l"
-    />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
-        >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
-            <h3>
-              <FormattedMessage
-                defaultMessage="Visualize and Explore Data"
-                id="kbn.home.directories.visualize.nameTitle"
-                values={Object {}}
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer
-            size="m"
-          />
-          <EuiFlexGrid
-            columns={2}
-            gutterSize="l"
-            responsive={true}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="l"
-        >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
-            <h3>
-              <FormattedMessage
-                defaultMessage="Manage and Administer the Elastic Stack"
-                id="kbn.home.directories.manage.nameTitle"
-                values={Object {}}
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer
-            size="m"
-          />
-          <EuiFlexGrid
-            columns={2}
-            gutterSize="l"
-            responsive={true}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer
-      size="l"
-    />
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="center"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiText
-          grow={true}
-          size="m"
         >
           <p>
             <FormattedMessage
@@ -1012,20 +886,6 @@ exports[`home should render home component 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <RecentlyAccessed
-      recentlyAccessed={
-        Array [
-          Object {
-            "id": "1",
-            "label": "my vis",
-            "link": "link_to_my_vis",
-          },
-        ]
-      }
-    />
-    <EuiSpacer
-      size="l"
-    />
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
@@ -1053,7 +913,7 @@ exports[`home should render home component 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1084,7 +944,7 @@ exports[`home should render home component 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1119,12 +979,14 @@ exports[`home should render home component 1`] = `
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1191,7 +1053,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1222,7 +1084,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1257,12 +1119,14 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1329,7 +1193,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1360,7 +1224,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1395,12 +1259,14 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage
@@ -1474,7 +1340,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1505,7 +1371,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           paddingSize="l"
         >
           <EuiTitle
-            size="m"
+            size="s"
             textTransform="none"
           >
             <h3>
@@ -1540,12 +1406,14 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       wrap={false}
     >
       <EuiFlexItem
+        className="eui-textCenter"
         component="div"
         grow={false}
       >
         <EuiText
+          color="subdued"
           grow={true}
-          size="m"
+          size="s"
         >
           <p>
             <FormattedMessage

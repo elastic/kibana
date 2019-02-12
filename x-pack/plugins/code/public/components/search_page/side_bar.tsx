@@ -15,12 +15,7 @@ import {
   EuiTitle,
   EuiToken,
 } from '@elastic/eui';
-import {
-  euiBorderColor,
-  euiBorderWidthThin,
-  euiColorLightestShade,
-  euiSizeS,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -29,8 +24,8 @@ import { SearchScope } from '../../../model';
 import { ScopeTabs } from './scope_tabs';
 
 const SideBarContainer = styled.div`
-  background-color: ${euiColorLightestShade};
-  border-right: ${euiBorderWidthThin} solid ${euiBorderColor};
+  background-color: ${theme.euiColorLightestShade};
+  border-right: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
@@ -41,7 +36,7 @@ const FacetContainer = styled.div`
 `;
 
 const FacetTitle = styled(EuiFlexGroup)`
-  margin-top: ${euiSizeS};
+  margin-top: ${theme.euiSizeS};
 `;
 
 const FacetItem = styled(EuiFacetButton)`

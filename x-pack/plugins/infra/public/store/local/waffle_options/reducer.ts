@@ -14,12 +14,19 @@ import {
   InfraPathInput,
 } from '../../../graphql/types';
 import { InfraGroupByOptions } from '../../../lib/lib';
-import { changeCustomOptions, changeGroupBy, changeMetric, changeNodeType } from './actions';
+import {
+  changeCustomOptions,
+  changeGroupBy,
+  changeMetric,
+  changeNodeType,
+  changeView,
+} from './actions';
 
 export interface WaffleOptionsState {
   metric: InfraMetricInput;
   groupBy: InfraPathInput[];
   nodeType: InfraNodeType;
+  view: string;
   customOptions: InfraGroupByOptions[];
 }
 
@@ -27,6 +34,7 @@ export const initialWaffleOptionsState: WaffleOptionsState = {
   metric: { type: InfraMetricType.cpu },
   groupBy: [],
   nodeType: InfraNodeType.host,
+  view: 'map',
   customOptions: [],
 };
 
@@ -49,9 +57,15 @@ const currentNodeTypeReducer = reducerWithInitialState(initialWaffleOptionsState
   (current, target) => target
 );
 
+const currentViewReducer = reducerWithInitialState(initialWaffleOptionsState.view).case(
+  changeView,
+  (current, target) => target
+);
+
 export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   metric: currentMetricReducer,
   groupBy: currentGroupByReducer,
   nodeType: currentNodeTypeReducer,
+  view: currentViewReducer,
   customOptions: currentCustomOptionsReducer,
 });

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './timepicker';
+import './kbn_global_timepicker';

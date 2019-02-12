@@ -222,3 +222,6 @@ export const DocumentIndexNamePrefix = `.code-document`;
 export const DocumentIndexName = (repoUri: RepositoryUri) => {
   return `${DocumentIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };
+export const DocumentSearchIndexWithScope = (repoScope: RepositoryUri[]) => {
+  return repoScope.map((repoUri: RepositoryUri) => `${DocumentIndexName(repoUri)}*`).join(',');
+};

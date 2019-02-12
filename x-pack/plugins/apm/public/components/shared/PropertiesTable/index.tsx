@@ -6,6 +6,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
@@ -13,14 +14,7 @@ import styled from 'styled-components';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StringMap } from '../../../../typings/common';
-import {
-  colors,
-  fontSize,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import { PROPERTY_CONFIG } from './propertyConfig';
@@ -33,13 +27,13 @@ const TableInfo = styled.div`
   padding: ${px(unit)} 0 0;
   text-align: center;
   font-size: ${fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   line-height: 1.5;
 `;
 
 const TableInfoHeader = styled(TableInfo)`
   font-size: ${fontSizes.large};
-  color: ${colors.black2};
+  color: ${theme.euiColorDarkestShade};
 `;
 
 const EuiIconWithSpace = styled(EuiIcon)`
@@ -122,7 +116,7 @@ export function PropertiesTable({
   propKey,
   agentName
 }: {
-  propData?: StringMap<any>;
+  propData?: StringMap;
   propKey: string;
   agentName?: string;
 }) {

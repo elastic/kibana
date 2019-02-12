@@ -105,7 +105,6 @@ const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs
 
 const HighlightSpan = styled.span`
   display: inline-block;
-  padding: 0 ${props => props.theme.eui.euiSizeXs};
   background-color: ${props => props.theme.eui.euiColorSecondary};
   color: ${props => props.theme.eui.euiColorGhost};
   font-weight: ${props => props.theme.eui.euiFontWeightMedium};

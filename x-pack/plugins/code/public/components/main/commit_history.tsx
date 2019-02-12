@@ -12,15 +12,7 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import {
-  euiBorderColor,
-  euiBorderThick,
-  euiBorderThin,
-  euiSizeM,
-  euiSizeS,
-  euiSizeXs,
-  paddingSizes,
-} from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -31,18 +23,18 @@ import { CommitLink } from '../diff_page/commit_link';
 const COMMIT_ID_LENGTH = 8;
 
 const Dot = styled.div`
-  --dotRadius: ${euiSizeS};
+  --dotRadius: ${theme.euiSizeS};
   width: var(--dotRadius);
   height: var(--dotRadius);
   border-radius: calc(var(--dotRadius) / 2);
-  background-color: ${euiBorderColor};
+  background-color: ${theme.euiBorderColor};
   margin: auto;
 `;
 
 const CommitMessages = styled.div`
   overflow: auto;
   flex: 1;
-  padding: ${paddingSizes.m};
+  padding: ${theme.paddingSizes.m};
 `;
 
 const Header = styled.div`
@@ -52,9 +44,9 @@ const Header = styled.div`
 `;
 
 const TimeLine = styled.div`
-  border-left: ${euiBorderThick};
-  margin-left: ${euiSizeXs};
-  padding: ${paddingSizes.s} 0 ${paddingSizes.s} ${paddingSizes.m};
+  border-left: ${theme.euiBorderThick};
+  margin-left: ${theme.euiSizeXs};
+  padding: ${theme.paddingSizes.s} 0 ${theme.paddingSizes.s} ${theme.paddingSizes.m};
 `;
 
 const CommitRoot = styled(EuiPanel)`
@@ -67,7 +59,7 @@ const CommitRoot = styled(EuiPanel)`
 `;
 
 const CommitGroupContainer = styled.div`
-  margin: 0 0 ${euiSizeXs} ${euiSizeM};
+  margin: 0 0 ${theme.euiSizeXs} ${theme.euiSizeM};
 `;
 
 const CommitId = styled.div`
@@ -77,7 +69,7 @@ const CommitId = styled.div`
   margin: auto 0;
   line-height: var(--height);
   color: black;
-  border: ${euiBorderThin};
+  border: ${theme.euiBorderThin};
   text-align: center;
   flex-shrink: 0;
 `;

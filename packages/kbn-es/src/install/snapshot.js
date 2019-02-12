@@ -145,10 +145,24 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
-  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
+  const platform = os.platform();
+  let suffix = null;
+  switch (platform) {
+    case 'darwin':
+      suffix = 'darwin-x86_64.tar.gz';
+      break;
+    case 'linux':
+      suffix = 'linux-x86_64.tar.gz';
+      break;
+    case 'win32':
+      suffix = 'windows-x86_64.zip';
+      break;
+    default:
+      throw new Error(`Unsupported platform ${platform}`);
+  }
 
-  return `${basename}-SNAPSHOT.${extension}`;
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
+  return `${basename}-SNAPSHOT-${suffix}`;
 }
 
 function getUrl(fileName) {

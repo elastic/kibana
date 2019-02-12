@@ -24,6 +24,7 @@
 
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
+import { decodeVersion, encodeVersion } from '../version';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -32,7 +33,8 @@ export interface RawDoc {
   _id: string;
   _source: any;
   _type?: string;
-  _version?: number;
+  _seq_no?: number;
+  _primary_term?: number;
 }
 
 /**
@@ -44,22 +46,44 @@ export interface MigrationVersion {
 }
 
 /**
+ * A reference object to anohter saved object.
+ */
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+/**
  * A saved object type definition that allows for miscellaneous, unknown
  * properties, as current discussions around security, ACLs, etc indicate
  * that future props are likely to be added. Migrations support this
  * scenario out of the box.
  */
-export interface SavedObjectDoc {
+interface SavedObjectDoc {
   attributes: object;
   id: string;
   type: string;
   namespace?: string;
   migrationVersion?: MigrationVersion;
-  version?: number;
+  version?: string;
   updated_at?: Date;
 
   [rootProp: string]: any;
 }
+
+interface Referencable {
+  references: SavedObjectReference[];
+}
+
+/**
+ * We want to have two types, one that guarantees a "references" attribute
+ * will exist and one that allows it to be null. Since we're not migrating
+ * all the saved objects to have a "references" array, we need to support
+ * the scenarios where it may be missing (ex migrations).
+ */
+export type RawSavedObjectDoc = SavedObjectDoc & Partial<Referencable>;
+export type SanitizedSavedObjectDoc = SavedObjectDoc & Referencable;
 
 function assertNonEmptyString(value: string, name: string) {
   if (!value || typeof value !== 'string') {
@@ -94,29 +118,47 @@ export class SavedObjectsSerializer {
    *
    *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
    */
-  public rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
+  public rawToSavedObject(doc: RawDoc): SanitizedSavedObjectDoc {
+    const { _id, _source, _seq_no, _primary_term } = doc;
     const { type, namespace } = _source;
+
+    const version =
+      _seq_no != null || _primary_term != null
+        ? encodeVersion(_seq_no!, _primary_term!)
+        : undefined;
+
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       attributes: _source[type],
+      references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
-      ...(_version != null && { version: _version }),
+      ...(version && { version }),
     };
   }
 
   /**
    * Converts a document from the saved object client format to the format that is stored in elasticsearch.
    *
-   * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
+   * @param {SanitizedSavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
    */
-  public savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-    const { id, type, namespace, attributes, migrationVersion, updated_at, version } = savedObj;
+  public savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): RawDoc {
+    const {
+      id,
+      type,
+      namespace,
+      attributes,
+      migrationVersion,
+      updated_at,
+      version,
+      references,
+    } = savedObj;
     const source = {
       [type]: attributes,
       type,
+      references,
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
@@ -125,7 +167,7 @@ export class SavedObjectsSerializer {
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,
-      ...(version != null && { _version: version }),
+      ...(version != null && decodeVersion(version)),
     };
   }
 

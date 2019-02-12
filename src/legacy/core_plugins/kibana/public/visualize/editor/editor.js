@@ -23,7 +23,8 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
+import 'ui/search_bar';
+import 'ui/apply_filters';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -287,6 +288,28 @@ function VisEditor(
     return appState;
   }());
 
+  $scope.filters = queryFilter.getFilters();
+
+  $scope.onFiltersUpdated = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
+
+  $scope.onCancelApplyFilters = () => {
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.onApplyFilters = filters => {
+    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    $scope.state.$newFilters = [];
+  };
+
+  $scope.$watch('state.$newFilters', (filters = []) => {
+    if (filters.length === 1) {
+      $scope.onApplyFilters(filters);
+    }
+  });
+
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
@@ -303,6 +326,10 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
+    $scope.showQueryBar = () => {
+      return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
@@ -311,29 +338,36 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (query) => {
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
-
-    $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || i18n('kbn.visualize.topNavMenu.unsavedVisualizationTitle', {
-        defaultMessage: '{visTitle} (unsaved)',
-        values: {
-          visTitle: savedVis.title,
-        },
-      });
-    };
 
     $scope.$watchMulti([
       'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
-    ], function ([index, requiresTimePicker]) {
+      $scope.showQueryBar,
+    ], function ([index, requiresTimePicker, showQueryBar]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
-      if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-      } else {
+      if (showQueryBar) {
         timefilter.disableTimeRangeSelector();
+        timefilter.disableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = true;
+        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
+      }
+      else if (showTimeFilter) {
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
+      }
+      else {
+        timefilter.disableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+        $scope.enableQueryBarTimeRangeSelector = false;
+        $scope.showAutoRefreshOnlyInQueryBar = false;
       }
     });
 
@@ -348,11 +382,16 @@ function VisEditor(
       }
     };
 
-    timefilter.enableAutoRefreshSelector();
+    const updateRefreshInterval = () => {
+      $scope.refreshInterval = timefilter.getRefreshInterval();
+    };
+
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
+      $scope.filters = queryFilter.getFilters();
       $scope.fetch();
     });
 
@@ -385,9 +424,17 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+    timefilter.setTime(dateRange);
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
   };
 
   /**

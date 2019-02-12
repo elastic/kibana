@@ -13,16 +13,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { euiSizeL, euiSizeXxl } from '@elastic/eui/dist/eui_theme_light.json';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Root = styled.div`
-  padding: ${euiSizeXxl} 0;
+  padding: ${theme.euiSizeXxl} 0;
   margin: 0 auto;
   & > div {
-    margin-top: ${euiSizeL};
+    margin-top: ${theme.euiSizeL};
     width: 56rem;
   }
 `;

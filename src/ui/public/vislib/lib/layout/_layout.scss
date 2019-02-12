@@ -239,6 +239,7 @@
   }
 
   .chart {
+    @include euiScrollBar;
     flex: 1 1 100%;
     min-height: 0;
     min-width: 0;

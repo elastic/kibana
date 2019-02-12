@@ -7,7 +7,7 @@
 import { DetailSymbolInformation } from '@elastic/lsp-extension';
 
 import { SymbolSearchRequest, SymbolSearchResult } from '../../model';
-import { SymbolIndexNamePrefix } from '../indexer/schema';
+import { SymbolIndexNamePrefix, SymbolSearchIndexWithScope } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { AbstractSearchClient } from './abstract_search_client';
@@ -38,8 +38,13 @@ export class SymbolSearchClient extends AbstractSearchClient {
     const resultsPerPage = this.getResultsPerPage(req);
     const from = (req.page - 1) * resultsPerPage;
     const size = resultsPerPage;
+
+    const index = req.repoScope
+      ? SymbolSearchIndexWithScope(req.repoScope)
+      : `${SymbolIndexNamePrefix}*`;
+
     const rawRes = await this.client.search({
-      index: `${SymbolIndexNamePrefix}*`,
+      index,
       body: {
         from,
         size,

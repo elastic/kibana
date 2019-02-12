@@ -12,7 +12,7 @@ import {
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_DURATION
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 
 export interface IServiceListItem {
@@ -34,6 +34,7 @@ export async function getServices(
     {
       bool: {
         should: [
+          { term: { [PROCESSOR_EVENT]: 'metric' } },
           { term: { [PROCESSOR_EVENT]: 'transaction' } },
           { term: { [PROCESSOR_EVENT]: 'error' } }
         ]
@@ -56,6 +57,7 @@ export async function getServices(
 
   const params = {
     index: [
+      config.get<string>('apm_oss.metricsIndices'),
       config.get<string>('apm_oss.errorIndices'),
       config.get<string>('apm_oss.transactionIndices')
     ],

@@ -148,6 +148,7 @@ export class SavedObjectsClient {
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
+   * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
