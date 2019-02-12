@@ -8,13 +8,13 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { NoServicesMessage } from '../NoServicesMessage';
 
-describe('No Services Message', () => {
-  it('should render correctly when historical data is found', () => {
+describe('NoServicesMessage', () => {
+  it('should show only a "not found" message when historical data is found', () => {
     const wrapper = shallow(<NoServicesMessage historicalDataFound={true} />);
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should render correctly when NO historical data is found', () => {
+  it('should show a "no services installed" message, a link to the set up instructions page, a message about upgrading APM server, and a link to the migration assistant when NO historical data is found', () => {
     const wrapper = shallow(<NoServicesMessage historicalDataFound={false} />);
     expect(wrapper).toMatchSnapshot();
   });

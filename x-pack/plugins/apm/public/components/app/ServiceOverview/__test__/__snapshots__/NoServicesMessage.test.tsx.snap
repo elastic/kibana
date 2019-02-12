@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`No Services Message should render correctly when NO historical data is found 1`] = `
+exports[`NoServicesMessage should show a "no services installed" message, a link to the set up instructions page, a message about upgrading APM server, and a link to the migration assistant when NO historical data is found 1`] = `
 <EuiEmptyPrompt
   actions={
     <SetupInstructionsLink
@@ -36,7 +36,7 @@ exports[`No Services Message should render correctly when NO historical data is 
 />
 `;
 
-exports[`No Services Message should render correctly when historical data is found 1`] = `
+exports[`NoServicesMessage should show only a "not found" message when historical data is found 1`] = `
 <EuiEmptyPrompt
   iconColor="subdued"
   title={
