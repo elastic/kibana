@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { notFound } from 'boom';
+import { Request } from 'hapi';
+import { get } from 'lodash';
+// @ts-ignore
+import { cryptoFactory, oncePerServer } from '../../../server/lib';
+import { JobDocPayload, KbnServer } from '../../../types';
+import {
+  JobParams,
+  SavedObject,
+  SavedObjectServiceError,
+  TimelionPanel,
+  TsvbPanel,
+  VisState,
+} from '../types';
+import { generateCsv } from './lib/generate_csv';
+
+interface VisData {
+  title: string;
+  visType: string;
+  panel: TsvbPanel | TimelionPanel;
+}
+
+function createJobFn(server: KbnServer) {
+  const crypto = cryptoFactory(server);
+
+  return async function createJob(
+    jobParams: JobParams,
+    headers: any,
+    req: Request
+  ): Promise<JobDocPayload> {
+    const { savedObjectType, savedObjectId } = jobParams;
+    const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const client = req.getSavedObjectsClient();
+
+    const { panel, title, visType }: VisData = await Promise.resolve()
+      .then(() => client.get(savedObjectType, savedObjectId))
+      .then((savedObject: SavedObject) => {
+        const { attributes } = savedObject;
+        const { visState: visStateJSON } = attributes;
+        const { params, title: vtitle, type: vtype }: VisState = JSON.parse(visStateJSON);
+        if (!params) {
+          throw new Error('The saved object contained no panel data!');
+        }
+        return { panel: params, title: vtitle, visType: vtype };
+      })
+      .catch((err: Error) => {
+        const errPayload: SavedObjectServiceError = get(err, 'output.payload', { statusCode: 0 });
+        if (errPayload.statusCode === 404) {
+          throw notFound(errPayload.message);
+        }
+        throw new Error(`Unable to retrieve saved object! Error: ${err}`);
+      });
+
+    let csvRows: any[];
+    let type: string;
+    if (true) {
+      ({ rows: csvRows, type } = await generateCsv(req, server, visType, panel));
+    }
+
+    return {
+      title,
+      type,
+      objects: csvRows.join('\n'),
+      headers: serializedEncryptedHeaders,
+      basePath: req.getBasePath(),
+    };
+  };
+}
+
+export const createJobFactory = oncePerServer(createJobFn);

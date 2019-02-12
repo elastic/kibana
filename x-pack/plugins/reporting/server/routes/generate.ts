@@ -21,7 +21,7 @@ export function registerGenerate(
 ) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
 
-  // generate report
+  // generate csv, printable_pdf, png report
   server.route({
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',

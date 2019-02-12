@@ -9,7 +9,8 @@ export const QUEUE_DOCTYPE = 'esqueue';
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
-export const API_BASE_URL = '/api/reporting';
+export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
+export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 
 export const WHITELISTED_JOB_CONTENT_TYPES = [
   'application/json',
@@ -41,4 +42,5 @@ export const KIBANA_REPORTING_TYPE = 'reporting';
 export const PDF_JOB_TYPE = 'printable_pdf';
 export const PNG_JOB_TYPE = 'PNG';
 export const CSV_JOB_TYPE = 'csv';
+export const CSV_FROM_SAVEDOBJECT_JOB_TYPE = 'csv_from_savedobject';
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
