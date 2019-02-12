@@ -107,11 +107,11 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setLayerErrorStatus(id, errorMessage) {
+export function setLayerErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
-      layerId: id,
+      layerId,
       errorMessage,
     });
   };
@@ -318,13 +318,16 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return ({
-    type: LAYER_DATA_LOAD_ERROR,
-    layerId,
-    dataId,
-    requestToken,
-    errorMessage
-  });
+  return async (dispatch) => {
+    dispatch({
+      type: LAYER_DATA_LOAD_ERROR,
+      layerId,
+      dataId,
+      requestToken,
+    });
+
+    dispatch(setLayerErrorStatus(layerId, errorMessage));
+  };
 }
 
 export function updateSourceProp(layerId, propName, value) {
