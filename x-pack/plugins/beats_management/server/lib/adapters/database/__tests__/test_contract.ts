@@ -31,6 +31,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         id: `beat:foo`,
         ignore: [404],
         index: '.management-beats',
+        type: '_doc',
       };
       let ranWithoutError = false;
       try {
@@ -47,6 +48,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         id: `beat:foo`,
         ignore: [404],
         index: '.management-beats',
+        type: '_doc',
       };
       const response = await database.get({ kind: 'internal' }, params);
 
