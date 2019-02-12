@@ -51,10 +51,14 @@ export function onPremInstructions(config) {
           defaultMessage: 'APM Server',
         }),
         callOut: {
-          title: 'Important: Updating to 7.0 or higher',
-          children:
-            'Please make sure your APM Server is updated to 7.0 or \
-             higher. You can also migrate your 6.x data with the Migration Assistant.',
+          title: i18n.translate('kbn.server.tutorials.apm.apmServer.callOut.title', {
+            defaultMessage: 'Important: Updating to 7.0 or higher',
+          }),
+          message: i18n.translate('kbn.server.tutorials.apm.apmServer.callOut.message', {
+            defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
+            You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
+          }),
+          iconType: 'alert'
         },
         instructionVariants: [
           {

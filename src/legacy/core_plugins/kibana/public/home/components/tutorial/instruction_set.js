@@ -258,7 +258,7 @@ class InstructionSetUi extends React.Component {
       return null;
     }
 
-    return <EuiCallOut {...this.props.callOut} />;
+    return <EuiCallOut title={this.props.callOut.title} children={this.props.callOut.message} iconType={this.props.callOut.iconType} />;
   }
 
   render() {
