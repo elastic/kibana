@@ -233,7 +233,6 @@ export function map(state = INITIAL_STATE, action) {
     case UPDATE_SOURCE_PROP:
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
-      console.warn('when setting joins, must remove all corresponding datarequests as well');
       const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
@@ -388,12 +387,9 @@ function removeTrackedLayerState(state, layerId) {
   const copyLayer = { ...layer };
   delete copyLayer[TRACKED_LAYER_DESCRIPTOR];
 
-  const layerIndex = getLayerIndex(state.layerList, layerId);
-  const newLayerList = [...state.layerList];
-  newLayerList[layerIndex] = copyLayer;
   return {
     ...state,
-    layerList: newLayerList
+    layerList: replaceInLayerList(state.layerList, layerId, copyLayer)
   };
 }
 
@@ -410,11 +406,15 @@ function rollbackTrackedLayerState(state, layerId) {
   const rolledbackLayer = { ...layer, ...trackedLayerDescriptor };
   delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
 
-  const layerIndex = getLayerIndex(state.layerList, layerId);
-  const newLayerList = [...state.layerList];
-  newLayerList[layerIndex] = rolledbackLayer;
   return {
     ...state,
-    layerList: newLayerList
+    layerList: replaceInLayerList(state.layerList, layerId, rolledbackLayer)
   };
+}
+
+function replaceInLayerList(layerList, layerId, newLayerDescriptor) {
+  const layerIndex = getLayerIndex(layerList, layerId);
+  const newLayerList = [...layerList];
+  newLayerList[layerIndex] = newLayerDescriptor;
+  return newLayerList;
 }
