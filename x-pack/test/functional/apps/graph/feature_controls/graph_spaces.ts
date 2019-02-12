@@ -46,7 +46,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphSaveButton', 10000);
+        await testSubjects.existOrFail('graphSaveButton');
+      });
+
+      it('shows delete button', async () => {
+        await PageObjects.common.navigateToApp('graph', {
+          basePath: '/s/custom_space',
+        });
+        await testSubjects.existOrFail('graphDeleteButton');
       });
     });
 
