@@ -5,8 +5,9 @@
  */
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
-import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
@@ -21,7 +22,7 @@ import { Transaction } from './Transaction';
 interface Props {
   mlAvailable: boolean;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function TransactionDetailsView({ urlParams, location }: Props) {
@@ -62,33 +63,39 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       />
 
       <EuiSpacer size="l" />
-
-      <TransactionDetailsRequest
+      <WaterfallRequest
         urlParams={urlParams}
-        render={({ data: transaction }) => {
+        traceId={urlParams.traceId}
+        render={({ data: waterfall }) => {
+          const transaction = waterfall.getTransactionById(
+            urlParams.transactionId
+          );
           if (!transaction) {
             return (
               <EmptyMessage
-                heading="No transaction sample available."
-                subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
+                heading={i18n.translate(
+                  'xpack.apm.transactionDetails.noTransactionTitle',
+                  {
+                    defaultMessage: 'No transaction sample available.'
+                  }
+                )}
+                subheading={i18n.translate(
+                  'xpack.apm.transactionDetails.noTransactionDescription',
+                  {
+                    defaultMessage:
+                      'Try another time range, reset the search filter or select another bucket from the distribution histogram.'
+                  }
+                )}
               />
             );
           }
 
           return (
-            <WaterfallRequest
-              urlParams={urlParams}
+            <Transaction
+              location={location}
               transaction={transaction}
-              render={({ data: waterfall }) => {
-                return (
-                  <Transaction
-                    location={location}
-                    transaction={transaction}
-                    urlParams={urlParams}
-                    waterfall={waterfall}
-                  />
-                );
-              }}
+              urlParams={urlParams}
+              waterfall={waterfall}
             />
           );
         }}

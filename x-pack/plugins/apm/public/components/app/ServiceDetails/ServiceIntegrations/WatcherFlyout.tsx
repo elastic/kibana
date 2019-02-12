@@ -24,20 +24,23 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
-import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
+import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import { UnconnectedKibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
-import { UnconnectedKibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;
 
-const getUserTimezone = _.memoize(() => {
+const getUserTimezone = memoize(() => {
   const uiSettings = chrome.getUiSettingsClient();
   return uiSettings.get('dateFormat:tz') === 'Browser'
     ? moment.tz.guess()
@@ -56,7 +59,7 @@ const SmallInput = styled.div`
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
   onClose: () => void;
-  location: any;
+  location: Location;
   isOpen: boolean;
 }
 
@@ -210,24 +213,57 @@ export class WatcherFlyout extends Component<
 
   public addErrorToast = () => {
     toastNotifications.addWarning({
-      title: 'Watch creation failed',
-      text: <p>Make sure your user has permission to create watches.</p>
+      title: i18n.translate(
+        'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationTitle',
+        {
+          defaultMessage: 'Watch creation failed'
+        }
+      ),
+      text: (
+        <p>
+          {i18n.translate(
+            'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationText',
+            {
+              defaultMessage:
+                'Make sure your user has permission to create watches.'
+            }
+          )}
+        </p>
+      )
     });
   };
 
   public addSuccessToast = (id: string) => {
     toastNotifications.addSuccess({
-      title: 'New watch created!',
+      title: i18n.translate(
+        'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationTitle',
+        {
+          defaultMessage: 'New watch created!'
+        }
+      ),
       text: (
         <p>
-          The watch is now ready and will send error reports for{' '}
-          {this.props.urlParams.serviceName}.{' '}
+          {i18n.translate(
+            'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText',
+            {
+              defaultMessage:
+                'The watch is now ready and will send error reports for {serviceName}.',
+              values: {
+                serviceName: this.props.urlParams.serviceName
+              }
+            }
+          )}{' '}
           <UnconnectedKibanaLink
             location={this.props.location}
             pathname={'/app/kibana'}
             hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
-            View watch.
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
+              {
+                defaultMessage: 'View watch'
+              }
+            )}
           </UnconnectedKibanaLink>
         </p>
       )
@@ -251,28 +287,56 @@ export class WatcherFlyout extends Component<
       .format('hh:mm A (z)'); // Format as 12h w. tz
 
     // Generate UTC hours for Daily Report select field
-    const intervalHours = _.range(24).map(i => {
-      const hour = _.padLeft(i.toString(), 2, '0');
+    const intervalHours = range(24).map(i => {
+      const hour = padLeft(i.toString(), 2, '0');
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
     const flyoutBody = (
       <EuiText>
         <p>
-          This form will assist in creating a Watch that can notify you of error
-          occurrences from this service. To learn more about Watcher, please
-          read our{' '}
-          <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
-            documentation
-          </EuiLink>
-          .
+          <FormattedMessage
+            id="xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription"
+            defaultMessage="This form will assist in creating a Watch that can notify you of error occurrences from this service.
+              To learn more about Watcher, please read our {documentationLink}."
+            values={{
+              documentationLink: (
+                <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
+                  {i18n.translate(
+                    'xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription.documentationLinkText',
+                    {
+                      defaultMessage: 'documentation'
+                    }
+                  )}
+                </EuiLink>
+              )
+            }}
+          />
         </p>
 
         <EuiForm>
-          <h3>Condition</h3>
+          <h4>
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.conditionTitle',
+              {
+                defaultMessage: 'Condition'
+              }
+            )}
+          </h4>
           <EuiFormRow
-            label="Occurrences threshold per error group"
-            helpText="Threshold to be met for error group to be included in report."
+            label={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.occurrencesThresholdLabel',
+              {
+                defaultMessage: 'Occurrences threshold per error group'
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.occurrencesThresholdHelpText',
+              {
+                defaultMessage:
+                  'Threshold to be met for error group to be included in report.'
+              }
+            )}
             compressed
           >
             <EuiFieldNumber
@@ -282,25 +346,45 @@ export class WatcherFlyout extends Component<
               onChange={this.onChangeThreshold}
             />
           </EuiFormRow>
-
-          <h3>Trigger schedule</h3>
-
-          <p>
-            Choose the time interval for the report, when the threshold is
-            exceeded.
-          </p>
-
+          <h4>
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleTitle',
+              {
+                defaultMessage: 'Trigger schedule'
+              }
+            )}
+          </h4>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerScheduleDescription',
+              {
+                defaultMessage:
+                  'Choose the time interval for the report, when the threshold is exceeded.'
+              }
+            )}
+          </EuiText>
+          <EuiSpacer size="m" />
           <EuiRadio
             id="daily"
-            label="Daily report"
+            label={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.dailyReportRadioButtonLabel',
+              {
+                defaultMessage: 'Daily report'
+              }
+            )}
             onChange={() => this.onChangeSchedule('daily')}
             checked={this.state.schedule === 'daily'}
           />
-
           <EuiSpacer size="m" />
-
           <EuiFormRow
-            helpText={`The daily report will be sent at ${dailyTimeFormatted} / ${dailyTime12HourFormatted}.`}
+            helpText={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.dailyReportHelpText',
+              {
+                defaultMessage:
+                  'The daily report will be sent at {dailyTimeFormatted} / {dailyTime12HourFormatted}.',
+                values: { dailyTimeFormatted, dailyTime12HourFormatted }
+              }
+            )}
             compressed
           >
             <EuiSelect
@@ -310,21 +394,28 @@ export class WatcherFlyout extends Component<
               disabled={this.state.schedule !== 'daily'}
             />
           </EuiFormRow>
-
           <EuiRadio
             id="interval"
-            label="Interval"
+            label={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalRadioButtonLabel',
+              {
+                defaultMessage: 'Interval'
+              }
+            )}
             onChange={() => this.onChangeSchedule('interval')}
             checked={this.state.schedule === 'interval'}
           />
-
           <EuiSpacer size="m" />
-
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <SmallInput>
                 <EuiFormRow
-                  helpText="Time interval between reports."
+                  helpText={i18n.translate(
+                    'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalHelpText',
+                    {
+                      defaultMessage: 'Time interval between reports.'
+                    }
+                  )}
                   compressed
                 >
                   <EuiFieldNumber
@@ -345,11 +436,21 @@ export class WatcherFlyout extends Component<
                   options={[
                     {
                       value: 'm',
-                      text: 'mins'
+                      text: i18n.translate(
+                        'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalUnit.minsLabel',
+                        {
+                          defaultMessage: 'mins'
+                        }
+                      )
                     },
                     {
                       value: 'h',
-                      text: 'hrs'
+                      text: i18n.translate(
+                        'xpack.apm.serviceDetails.enableErrorReportsPanel.intervalUnit.hrsLabel',
+                        {
+                          defaultMessage: 'hrs'
+                        }
+                      )
                     }
                   ]}
                   disabled={this.state.schedule !== 'interval'}
@@ -357,30 +458,62 @@ export class WatcherFlyout extends Component<
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          <h3>Actions</h3>
-          <p>
-            Reports can be sent by email or posted to a Slack channel. Each
-            report will include the top 10 errors sorted by occurrence.
-          </p>
+          <h4>
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsTitle',
+              {
+                defaultMessage: 'Actions'
+              }
+            )}
+          </h4>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.actionsDescription',
+              {
+                defaultMessage:
+                  'Reports can be sent by email or posted to a Slack channel. Each report will include the top 10 errors sorted by occurrence.'
+              }
+            )}
+          </EuiText>
+          <EuiSpacer size="m" />
           <EuiSwitch
-            label="Send email"
+            label={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.sendEmailLabel',
+              {
+                defaultMessage: 'Send email'
+              }
+            )}
             checked={this.state.actions.email}
             onChange={() => this.onChangeAction('email')}
           />
-
           <EuiSpacer size="m" />
           {this.state.actions.email && (
             <EuiFormRow
-              label="Recipients (separated with comma)"
+              label={i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsLabel',
+                {
+                  defaultMessage: 'Recipients (separated with comma)'
+                }
+              )}
               compressed
               helpText={
                 <span>
-                  If you have not configured email, please see the{' '}
-                  <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
-                    documentation
-                  </EuiLink>
-                  .
+                  <FormattedMessage
+                    id="xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsHelpText"
+                    defaultMessage="If you have not configured email, please see the {documentationLink}."
+                    values={{
+                      documentationLink: (
+                        <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
+                          {i18n.translate(
+                            'xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsHelpText.documentationLinkText',
+                            {
+                              defaultMessage: 'documentation'
+                            }
+                          )}
+                        </EuiLink>
+                      )
+                    }}
+                  />
                 </span>
               }
             >
@@ -391,28 +524,47 @@ export class WatcherFlyout extends Component<
               />
             </EuiFormRow>
           )}
-
           <EuiSwitch
-            label="Send Slack notification"
+            label={i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.sendSlackNotificationLabel',
+              {
+                defaultMessage: 'Send Slack notification'
+              }
+            )}
             checked={this.state.actions.slack}
             onChange={() => this.onChangeAction('slack')}
           />
           <EuiSpacer size="m" />
-
           {this.state.actions.slack && (
             <EuiFormRow
-              label="Slack Webhook URL"
+              label={i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.slackWebhookURLLabel',
+                {
+                  defaultMessage: 'Slack Webhook URL'
+                }
+              )}
               compressed
               helpText={
                 <span>
-                  To get a Slack webhook, please see the{' '}
-                  <EuiLink
-                    target="_blank"
-                    href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack"
-                  >
-                    documentation
-                  </EuiLink>
-                  .
+                  <FormattedMessage
+                    id="xpack.apm.serviceDetails.enableErrorReportsPanel.slackWebhookURLHelpText"
+                    defaultMessage="To get a Slack webhook, please see the {documentationLink}."
+                    values={{
+                      documentationLink: (
+                        <EuiLink
+                          target="_blank"
+                          href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack"
+                        >
+                          {i18n.translate(
+                            'xpack.apm.serviceDetails.enableErrorReportsPanel.slackWebhookURLHelpText.documentationLinkText',
+                            {
+                              defaultMessage: 'documentation'
+                            }
+                          )}
+                        </EuiLink>
+                      )
+                    }}
+                  />
                 </span>
               }
             >
@@ -431,7 +583,14 @@ export class WatcherFlyout extends Component<
       <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>Enable error reports</h2>
+            <h2>
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.enableErrorReportsTitle',
+                {
+                  defaultMessage: 'Enable error reports'
+                }
+              )}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{flyoutBody}</EuiFlyoutBody>
@@ -441,7 +600,12 @@ export class WatcherFlyout extends Component<
             fill
             disabled={!this.state.actions.email && !this.state.actions.slack}
           >
-            Create watch
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
+              {
+                defaultMessage: 'Create watch'
+              }
+            )}
           </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>

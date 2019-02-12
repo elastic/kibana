@@ -18,7 +18,7 @@
  */
 
 import { configModel } from './dll_config_model';
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../../legacy/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
@@ -46,18 +46,18 @@ export class DllCompiler {
       dllExt: '.bundle.dll.js',
       manifestExt: '.manifest.dll.json',
       styleExt: '.style.dll.css',
-      outputPath: fromRoot('./dlls'),
+      outputPath: fromRoot('built_assets/dlls'),
       publicPath: PUBLIC_PATH_PLACEHOLDER
     };
   }
 
-  constructor(uiBundles, threadLoaderPoolConfig, log) {
+  constructor(uiBundles, threadLoaderPoolConfig, logWithMetadata) {
     this.rawDllConfig = DllCompiler.getRawDllConfig(
       uiBundles,
       uiBundles.getCacheDirectory('babel'),
       threadLoaderPoolConfig
     );
-    this.log = log || (() => null);
+    this.logWithMetadata = logWithMetadata || (() => null);
   }
 
   async init() {
@@ -182,7 +182,7 @@ export class DllCompiler {
 
   async runWebpack(config) {
     return new Promise((resolve, reject) => {
-      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
+      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
 
       webpack(config, (err, stats) => {
         // If a critical error occurs or we have
@@ -197,7 +197,7 @@ export class DllCompiler {
         }));
 
         if (webpackErrors) {
-          this.log(
+          this.logWithMetadata(
             ['fatal', 'optimize:dynamic_dll_plugin'],
             `Client vendors dll compilation failed`
           );
@@ -205,7 +205,7 @@ export class DllCompiler {
         }
 
         // Otherwise let it proceed
-        this.log(
+        this.logWithMetadata(
           ['info', 'optimize:dynamic_dll_plugin'],
           `Client vendors dll compilation finished with success`
         );

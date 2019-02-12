@@ -26,9 +26,9 @@ import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pa
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-import EMS_CATALOGUE from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest_6.6.json';
-import EMS_FILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files_6.6.json';
-import EMS_TILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles_6.6.json';
+import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
+import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -128,6 +128,13 @@ describe('RegionMapsVisualizationTests', function () {
       vis = new Vis(indexPattern, {
         type: 'region_map'
       });
+
+      vis.params.bucket = {
+        accessor: 0,
+      };
+      vis.params.metric = {
+        accessor: 1,
+      };
 
       vis.params.selectedJoinField = { 'name': 'iso2', 'description': 'Two letter abbreviation' };
       vis.params.selectedLayer = {

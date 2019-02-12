@@ -153,20 +153,12 @@ class VisualizeListingTableUi extends Component {
           src={item.type.image}
         />
       );
-    } else if (!item.type.image && !item.type.icon) {
-      icon = (
-        // Allowing legacyIcon to hold a CSS name, will be removed in 7.0
-        <span
-          aria-hidden="true"
-          className={`kuiStatusText__icon kuiIcon ${item.type.legacyIcon}`}
-        />
-      );
     } else {
       icon = (
         <EuiIcon
           className="visListingTable__typeIcon"
           aria-hidden="true"
-          type={item.icon}
+          type={item.icon || 'empty'}
           size="m"
         />
       );

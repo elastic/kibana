@@ -41,8 +41,8 @@ export function indexLifecycleManagement(kibana) {
     isEnabled(config) {
       return (
         config.get('xpack.ilm.enabled') &&
-        config.has('index_management.enabled') &&
-        config.get('index_management.enabled')
+        config.has('xpack.index_management.enabled') &&
+        config.get('xpack.index_management.enabled')
       );
     },
     init: function (server) {
@@ -53,6 +53,7 @@ export function indexLifecycleManagement(kibana) {
       registerLifecycleRoutes(server);
       registerIndexRoutes(server);
       if (
+        server.config().get('xpack.ilm.ui.enabled') &&
         server.plugins.index_management &&
         server.plugins.index_management.addIndexManagementDataEnricher
       ) {

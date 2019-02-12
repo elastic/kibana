@@ -33,7 +33,7 @@ jest.mock('../../../services/ml_api_service', () => ({
 }));
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditFilterList } from './edit_filter_list';
@@ -45,8 +45,8 @@ const props = {
 
 function prepareEditTest() {
 
-  const wrapper = shallow(
-    <EditFilterList {...props}/>
+  const wrapper = shallowWithIntl(
+    <EditFilterList.WrappedComponent {...props}/>
   );
 
   // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
@@ -63,8 +63,8 @@ function prepareEditTest() {
 describe('EditFilterList', () => {
 
   test('renders the edit page for a new filter list and updates ID', () => {
-    const wrapper = shallow(
-      <EditFilterList {...props}/>
+    const wrapper = shallowWithIntl(
+      <EditFilterList.WrappedComponent {...props}/>
     );
     expect(wrapper).toMatchSnapshot();
 

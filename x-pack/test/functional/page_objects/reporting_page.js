@@ -15,7 +15,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
+  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
 
   class ReportingPage {
     async initTests() {
@@ -152,7 +152,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
-      const isToastPresent = await testSubjects.exists('completeReportSuccess', 60000);
+      const isToastPresent = await testSubjects.exists('completeReportSuccess', {
+        timeout: 60000
+      });
       // Close toast so it doesn't obscure the UI.
       await testSubjects.click('completeReportSuccess toastCloseButton');
       return isToastPresent;
@@ -162,14 +164,14 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       log.debug('Reporting:setTimepickerInDataRange');
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
       const fromTime = '1999-09-19 06:31:44.000';
       const toTime = '1999-09-23 18:31:44.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }
 

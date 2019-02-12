@@ -17,7 +17,7 @@ export interface IHistoryTab {
   path: string;
   routePath?: string;
   name: React.ReactNode;
-  component?: React.SFC | React.ComponentClass;
+  render?: (props: RouteComponentProps) => React.ReactNode;
 }
 
 export interface HistoryTabsProps extends RouteComponentProps {
@@ -51,10 +51,10 @@ const HistoryTabsWithoutRouter = ({
       </EuiTabs>
       <EuiSpacer />
       {tabs.map(tab =>
-        tab.component ? (
+        tab.render ? (
           <Route
             path={tab.routePath || tab.path}
-            component={tab.component}
+            render={tab.render}
             key={tab.path}
           />
         ) : null

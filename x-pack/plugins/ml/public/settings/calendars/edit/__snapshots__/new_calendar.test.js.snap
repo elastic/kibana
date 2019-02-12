@@ -11,7 +11,7 @@ exports[`NewCalendar Renders new calendar form 1`] = `
     panelPaddingSize="l"
     verticalPosition="center"
   >
-    <CalendarForm
+    <InjectIntl(CalendarForm)
       calendarId=""
       canCreateCalendar={true}
       canDeleteCalendar={true}

@@ -28,7 +28,7 @@ export class Clipboard extends React.PureComponent {
 
   render() {
     return (
-      <div className="canvas_clipboard" onClick={this.onClick}>
+      <div className="canvasClipboard" onClick={this.onClick}>
         {this.props.children}
       </div>
     );

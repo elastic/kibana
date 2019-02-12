@@ -143,6 +143,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
     async _updateBaseLayer() {
 
+      const DEFAULT_EMS_BASEMAP = 'road_map';
+
       if (!this._kibanaMap) {
         return;
       }
@@ -151,13 +153,11 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       if (!this._tmsConfigured()) {
         try {
           const tmsServices = await serviceSettings.getTMSServices();
-          const firstRoadMapLayer = tmsServices.find((s) => {
-            return s.id === 'road_map';//first road map layer
-          });
-          const fallback = firstRoadMapLayer ? firstRoadMapLayer : tmsServices[0];
-          if (fallback) {
-            this._setTmsLayer(firstRoadMapLayer);
-          }
+          const userConfiguredTmsLayer = tmsServices[0];
+          const initBasemapLayer = userConfiguredTmsLayer
+            ? userConfiguredTmsLayer
+            : tmsServices.find(s => s.id === DEFAULT_EMS_BASEMAP);
+          if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
         } catch (e) {
           toastNotifications.addWarning(e.message);
           return;

@@ -6,5 +6,6 @@
 
 import { asset } from './asset';
 import { filters } from './filters';
+import { timelion } from './timelion';
 
-export const clientFunctions = [asset, filters];
+export const clientFunctions = [asset, filters, timelion];

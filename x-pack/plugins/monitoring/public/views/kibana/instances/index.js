@@ -5,27 +5,27 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
-import { find, capitalize } from 'lodash';
+import { capitalize } from 'lodash';
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { EuiMonitoringTable } from '../../../components/table';
 import { KibanaStatusIcon } from '../../../components/kibana/status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const getColumns = (kbnUrl, scope) => ([
   {
     name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
       defaultMessage: 'Name'
     }),
-    field: 'kibana.name',
+    field: 'name',
     render: (name, kibana) => (
       <EuiLink
         onClick={() => {
@@ -43,7 +43,7 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
       defaultMessage: 'Status'
     }),
-    field: 'kibana.status',
+    field: 'status',
     render: (status, kibana) => (
       <div
         title={`Instance status: ${status}`}
@@ -127,42 +127,38 @@ uiRoutes.when('/kibana/instances', {
         title: 'Kibana Instances',
         storageKey: 'kibana.instances',
         getPageData,
+        reactNodeId: 'monitoringKibanaInstancesApp',
         $scope,
         $injector
       });
 
-      const $route = $injector.get('$route');
-      this.data = $route.current.locals.pageData;
-      const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-      $scope.pageData = $route.current.locals.pageData;
-
       const kbnUrl = $injector.get('kbnUrl');
 
-      const renderReact = () => {
-        const app =  document.getElementById('monitoringKibanaInstancesApp');
-        if (!app) {
+      $scope.$watch(() => this.data, data => {
+        if (!data || !data.kibanas) {
           return;
         }
 
-        const page = (
-          <I18nProvider>
+        const dataFlattened = data.kibanas.map(item => ({
+          ...item,
+          name: item.kibana.name,
+          status: item.kibana.status,
+        }));
+
+        this.renderReact(
+          <I18nContext>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <ClusterStatus stats={$scope.pageData.clusterStatus} />
-                  <EuiSpacer size="m"/>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
                   <EuiMonitoringTable
                     className="kibanaInstancesTable"
-                    rows={this.data.kibanas}
+                    rows={dataFlattened}
                     columns={getColumns(kbnUrl, $scope)}
-                    sorting={{
-                      ...this.sorting,
-                      sort: {
-                        ...this.sorting.sort,
-                        field: 'kibana.name'
-                      }
-                    }}
+                    sorting={this.sorting}
                     pagination={this.pagination}
                     search={{
                       box: {
@@ -173,19 +169,17 @@ uiRoutes.when('/kibana/instances', {
                       },
                     }}
                     onTableChange={this.onTableChange}
+                    executeQueryOptions={{
+                      defaultFields: ['name']
+                    }}
                   />
 
                 </EuiPageContent>
               </EuiPageBody>
             </EuiPage>
-          </I18nProvider>
+          </I18nContext>
         );
-
-        render(page, app);
-      };
-
-      $scope.$watch('data', () => renderReact());
-      renderReact();
+      });
     }
   }
 });

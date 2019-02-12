@@ -9,11 +9,15 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
   />
   You can configure your agent to add contextual information about your users.
    
-  <ExternalLink
+  <EuiLink
+    color="primary"
     href="mock-url"
+    rel="noopener noreferrer"
+    target="_blank"
+    type="button"
   >
     Learn more in the documentation.
-  </ExternalLink>
+  </EuiLink>
 </styled.div>
 `;
 

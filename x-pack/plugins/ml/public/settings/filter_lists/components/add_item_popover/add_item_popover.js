@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import React, {
   Component,
 } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -28,6 +29,12 @@ import {
 
 
 export class AddItemPopover extends Component {
+  static displayName = 'AddItemPopover';
+  static propTypes = {
+    addItems: PropTypes.func.isRequired,
+    canCreateFilter: PropTypes.bool.isRequired
+  };
+
   constructor(props) {
     super(props);
 
@@ -82,7 +89,10 @@ export class AddItemPopover extends Component {
         onClick={this.onButtonClick}
         isDisabled={this.props.canCreateFilter === false}
       >
-        Add item
+        <FormattedMessage
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
+          defaultMessage="Add item"
+        />
       </EuiButton>
     );
 
@@ -98,7 +108,10 @@ export class AddItemPopover extends Component {
         >
           <EuiForm>
             <EuiFormRow
-              label="Items"
+              label={<FormattedMessage
+                id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+                defaultMessage="Items"
+              />}
             >
               <EuiTextArea
                 value={this.state.itemsText}
@@ -107,7 +120,10 @@ export class AddItemPopover extends Component {
             </EuiFormRow>
           </EuiForm>
           <EuiText size="xs">
-            Enter one item per line
+            <FormattedMessage
+              id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
+              defaultMessage="Enter one item per line"
+            />
           </EuiText>
           <EuiSpacer size="s"/>
           <EuiFlexGroup justifyContent="flexEnd">
@@ -116,7 +132,10 @@ export class AddItemPopover extends Component {
                 onClick={this.onAddButtonClick}
                 disabled={(this.state.itemsText.length === 0)}
               >
-                Add
+                <FormattedMessage
+                  id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
+                  defaultMessage="Add"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -125,8 +144,3 @@ export class AddItemPopover extends Component {
     );
   }
 }
-AddItemPopover.propTypes = {
-  addItems: PropTypes.func.isRequired,
-  canCreateFilter: PropTypes.bool.isRequired
-};
-

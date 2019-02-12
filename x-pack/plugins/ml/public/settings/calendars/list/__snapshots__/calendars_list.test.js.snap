@@ -11,7 +11,7 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
     panelPaddingSize="l"
     verticalPosition="center"
   >
-    <CalendarsListTable
+    <InjectIntl(CalendarsListTable)
       calendarsList={
         Array [
           Object {

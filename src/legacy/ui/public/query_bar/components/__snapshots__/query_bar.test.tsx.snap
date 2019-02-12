@@ -1,0 +1,304 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="kbnQueryBar"
+  component="div"
+  direction="row"
+  gutterSize="s"
+  justifyContent="flexStart"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiOutsideClickDetector
+      onOutsideClick={[Function]}
+    >
+      <div
+        aria-controls="kbnTypeahead__items"
+        aria-expanded={false}
+        aria-haspopup="true"
+        aria-owns="kbnTypeahead__items"
+        role="combobox"
+        style={
+          Object {
+            "position": "relative",
+          }
+        }
+      >
+        <form
+          name="queryBarForm"
+          role="form"
+        >
+          <div
+            role="search"
+          >
+            <div
+              className="kuiLocalSearchAssistedInput"
+            >
+              <EuiFieldText
+                aria-activedescendant=""
+                aria-autocomplete="list"
+                aria-controls="kbnTypeahead__items"
+                aria-label="Search input"
+                autoComplete="off"
+                autoFocus={false}
+                className="kuiLocalSearchAssistedInput__input"
+                compressed={false}
+                data-test-subj="queryInput"
+                fullWidth={true}
+                icon="console"
+                inputRef={[Function]}
+                isLoading={false}
+                onChange={[Function]}
+                onClick={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
+                role="textbox"
+                spellCheck={false}
+                type="text"
+                value="response:200"
+              />
+              <div
+                className="kuiLocalSearchAssistedInput__assistance"
+              >
+                <QueryLanguageSwitcher
+                  language="kuery"
+                  onSelectLanguage={[Function]}
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+        <SuggestionsComponent
+          index={null}
+          loadMore={[Function]}
+          onClick={[Function]}
+          onMouseEnter={[Function]}
+          show={false}
+          suggestions={Array []}
+        />
+      </div>
+    </EuiOutsideClickDetector>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiSuperUpdateButton
+      data-test-subj="querySubmitButton"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
+      onClick={[Function]}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`QueryBar Should pass the query language to the language switcher 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="kbnQueryBar"
+  component="div"
+  direction="row"
+  gutterSize="s"
+  justifyContent="flexStart"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiOutsideClickDetector
+      onOutsideClick={[Function]}
+    >
+      <div
+        aria-controls="kbnTypeahead__items"
+        aria-expanded={false}
+        aria-haspopup="true"
+        aria-owns="kbnTypeahead__items"
+        role="combobox"
+        style={
+          Object {
+            "position": "relative",
+          }
+        }
+      >
+        <form
+          name="queryBarForm"
+          role="form"
+        >
+          <div
+            role="search"
+          >
+            <div
+              className="kuiLocalSearchAssistedInput"
+            >
+              <EuiFieldText
+                aria-activedescendant=""
+                aria-autocomplete="list"
+                aria-controls="kbnTypeahead__items"
+                aria-label="Search input"
+                autoComplete="off"
+                autoFocus={true}
+                className="kuiLocalSearchAssistedInput__input"
+                compressed={false}
+                data-test-subj="queryInput"
+                fullWidth={true}
+                icon="console"
+                inputRef={[Function]}
+                isLoading={false}
+                onChange={[Function]}
+                onClick={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
+                role="textbox"
+                spellCheck={false}
+                type="text"
+                value="response:200"
+              />
+              <div
+                className="kuiLocalSearchAssistedInput__assistance"
+              >
+                <QueryLanguageSwitcher
+                  language="lucene"
+                  onSelectLanguage={[Function]}
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+        <SuggestionsComponent
+          index={null}
+          loadMore={[Function]}
+          onClick={[Function]}
+          onMouseEnter={[Function]}
+          show={false}
+          suggestions={Array []}
+        />
+      </div>
+    </EuiOutsideClickDetector>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiSuperUpdateButton
+      data-test-subj="querySubmitButton"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
+      onClick={[Function]}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`QueryBar Should render the given query 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="kbnQueryBar"
+  component="div"
+  direction="row"
+  gutterSize="s"
+  justifyContent="flexStart"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiOutsideClickDetector
+      onOutsideClick={[Function]}
+    >
+      <div
+        aria-controls="kbnTypeahead__items"
+        aria-expanded={false}
+        aria-haspopup="true"
+        aria-owns="kbnTypeahead__items"
+        role="combobox"
+        style={
+          Object {
+            "position": "relative",
+          }
+        }
+      >
+        <form
+          name="queryBarForm"
+          role="form"
+        >
+          <div
+            role="search"
+          >
+            <div
+              className="kuiLocalSearchAssistedInput"
+            >
+              <EuiFieldText
+                aria-activedescendant=""
+                aria-autocomplete="list"
+                aria-controls="kbnTypeahead__items"
+                aria-label="Search input"
+                autoComplete="off"
+                autoFocus={true}
+                className="kuiLocalSearchAssistedInput__input"
+                compressed={false}
+                data-test-subj="queryInput"
+                fullWidth={true}
+                icon="console"
+                inputRef={[Function]}
+                isLoading={false}
+                onChange={[Function]}
+                onClick={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
+                role="textbox"
+                spellCheck={false}
+                type="text"
+                value="response:200"
+              />
+              <div
+                className="kuiLocalSearchAssistedInput__assistance"
+              >
+                <QueryLanguageSwitcher
+                  language="kuery"
+                  onSelectLanguage={[Function]}
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+        <SuggestionsComponent
+          index={null}
+          loadMore={[Function]}
+          onClick={[Function]}
+          onMouseEnter={[Function]}
+          show={false}
+          suggestions={Array []}
+        />
+      </div>
+    </EuiOutsideClickDetector>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiSuperUpdateButton
+      data-test-subj="querySubmitButton"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
+      onClick={[Function]}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

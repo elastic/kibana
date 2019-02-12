@@ -6,12 +6,14 @@
 
 import { BucketAgg } from 'elasticsearch';
 import { ESFilter } from 'elasticsearch';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
+  PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export interface ServiceAPIResponse {
@@ -28,15 +30,8 @@ export async function getService(
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { terms: { [PROCESSOR_EVENT]: ['error', 'transaction'] } },
+    { range: rangeFilter(start, end) }
   ];
 
   if (esFilterQuery) {
@@ -76,11 +71,12 @@ export async function getService(
   }
 
   const { aggregations } = await client<void, Aggs>('search', params);
+  const buckets = idx(aggregations, _ => _.types.buckets) || [];
+  const types = buckets.map(bucket => bucket.key);
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
   return {
     serviceName,
-    types: oc(aggregations)
-      .types.buckets([])
-      .map(bucket => bucket.key),
-    agentName: oc(aggregations).agents.buckets[0].key()
+    types,
+    agentName
   };
 }

@@ -195,8 +195,13 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             <span
               className="euiScreenReaderOnly"
             >
-              Incomplete
-               Step 
+              <EuiI18n
+                default="Incomplete Step"
+                token="euiStep.incompleteStep"
+              >
+                Incomplete Step
+              </EuiI18n>
+               
             </span>
           </EuiScreenReaderOnly>
           <EuiStepNumber
@@ -524,7 +529,13 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             <span
               className="euiScreenReaderOnly"
             >
-               Step 
+              <EuiI18n
+                default="Step"
+                token="euiStep.completeStep"
+              >
+                Step
+              </EuiI18n>
+               
             </span>
           </EuiScreenReaderOnly>
           <EuiStepNumber
@@ -536,23 +547,17 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             <div
               className="euiStepNumber euiStepNumber--complete euiStep__circle"
             >
-              <EuiIcon
-                className="euiStepNumber__icon"
-                size="m"
-                title="complete"
-                type="check"
+              <EuiI18n
+                default="complete"
+                token="euiStepNumber.isComplete"
               >
-                <check
-                  className="euiIcon euiIcon--medium euiStepNumber__icon"
-                  focusable="false"
-                  height="16"
-                  style={null}
+                <EuiIcon
+                  className="euiStepNumber__icon"
+                  size="m"
                   title="complete"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                  type="check"
                 >
-                  <svg
+                  <check
                     className="euiIcon euiIcon--medium euiStepNumber__icon"
                     focusable="false"
                     height="16"
@@ -562,12 +567,24 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                     width="16"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path
-                      d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                    />
-                  </svg>
-                </check>
-              </EuiIcon>
+                    <svg
+                      className="euiIcon euiIcon--medium euiStepNumber__icon"
+                      focusable="false"
+                      height="16"
+                      style={null}
+                      title="complete"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                        fillRule="evenodd"
+                      />
+                    </svg>
+                  </check>
+                </EuiIcon>
+              </EuiI18n>
             </div>
           </EuiStepNumber>
           <EuiTitle

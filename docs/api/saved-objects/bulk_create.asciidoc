@@ -33,6 +33,9 @@ contains the following properties:
 `attributes` (required)::
   (object) The data to persist
 
+`references` (optional)::
+  (array) An array of objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. The `name` can be used in the attributes to refer to the other saved object, but never the `id`, which may be updated automatically in the future during migrations or import/export.
+
 `version` (optional)::
   (number) Enables specifying a version
 

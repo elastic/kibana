@@ -11,21 +11,20 @@ exports[`Timeline should render with data 1`] = `
   -ms-flex-align: center;
   align-items: center;
   font-size: 12px;
-  color: #69707D;
+  color: rgb(105,112,125);
   cursor: pointer;
   opacity: 1;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  padding-bottom: 15px;
 }
 
 .c1 {
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #98A2B3;
+  background: rgb(152,162,179);
   border-radius: 100%;
 }
 
@@ -49,8 +48,8 @@ exports[`Timeline should render with data 1`] = `
         <div
           style={
             Object {
-              "backgroundColor": "#ffffff",
-              "borderBottom": "1px solid #98A2B3",
+              "backgroundColor": "rgb(255, 255, 255)",
+              "borderBottom": "1px solid rgb(152, 162, 179)",
               "height": "100px",
               "position": "absolute",
               "width": "100%",
@@ -84,7 +83,7 @@ exports[`Timeline should render with data 1`] = `
                 style={
                   Object {
                     "text": Object {
-                      "fill": "#98A2B3",
+                      "fill": "rgb(152, 162, 179)",
                     },
                   }
                 }
@@ -99,7 +98,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -110,7 +109,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -124,9 +123,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -141,7 +140,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -152,7 +151,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -166,9 +165,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -183,7 +182,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -194,7 +193,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -208,9 +207,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -225,7 +224,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -236,7 +235,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -250,9 +249,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -267,7 +266,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -278,7 +277,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -292,9 +291,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -309,7 +308,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -320,7 +319,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -334,9 +333,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -351,7 +350,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -362,7 +361,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -376,9 +375,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -393,7 +392,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -404,7 +403,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -418,9 +417,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -435,7 +434,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -446,7 +445,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -460,9 +459,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -477,7 +476,7 @@ exports[`Timeline should render with data 1`] = `
                     style={
                       Object {
                         "text": Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                         },
                       }
                     }
@@ -488,7 +487,7 @@ exports[`Timeline should render with data 1`] = `
                       style={
                         Object {
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -502,9 +501,9 @@ exports[`Timeline should render with data 1`] = `
                       dy="0"
                       style={
                         Object {
-                          "fill": "#98A2B3",
+                          "fill": "rgb(152, 162, 179)",
                           "text": Object {
-                            "fill": "#98A2B3",
+                            "fill": "rgb(152, 162, 179)",
                           },
                         }
                       }
@@ -552,7 +551,7 @@ exports[`Timeline should render with data 1`] = `
                 >
                   <span
                     className="c1"
-                    color="#98A2B3"
+                    color="rgb(152, 162, 179)"
                     radius={11}
                   />
                 </div>
@@ -582,7 +581,7 @@ exports[`Timeline should render with data 1`] = `
                 >
                   <span
                     className="c1"
-                    color="#98A2B3"
+                    color="rgb(152, 162, 179)"
                     radius={11}
                   />
                 </div>
@@ -612,7 +611,7 @@ exports[`Timeline should render with data 1`] = `
                 >
                   <span
                     className="c1"
-                    color="#98A2B3"
+                    color="rgb(152, 162, 179)"
                     radius={11}
                   />
                 </div>
@@ -659,7 +658,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={0}
@@ -671,7 +670,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={90}
@@ -683,7 +682,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={180}
@@ -695,7 +694,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={270}
@@ -707,7 +706,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={360}
@@ -719,7 +718,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={450}
@@ -731,7 +730,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={540}
@@ -743,7 +742,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={630}
@@ -755,7 +754,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={720}
@@ -767,7 +766,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={810}
@@ -779,7 +778,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#F5F7FA",
+                    "stroke": "rgb(245, 247, 250)",
                   }
                 }
                 x1={900}
@@ -796,7 +795,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#98A2B3",
+                    "stroke": "rgb(152, 162, 179)",
                   }
                 }
                 x1={450}
@@ -808,7 +807,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#98A2B3",
+                    "stroke": "rgb(152, 162, 179)",
                   }
                 }
                 x1={495.00000000000006}
@@ -820,7 +819,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#98A2B3",
+                    "stroke": "rgb(152, 162, 179)",
                   }
                 }
                 x1={855}
@@ -837,7 +836,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": "#98A2B3",
+                    "stroke": undefined,
                   }
                 }
                 x1={900}

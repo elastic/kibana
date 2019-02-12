@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { management } from 'ui/management';
 // @ts-ignore
@@ -28,11 +29,12 @@ function startApp() {
   });
 
   uiModules.get('kibana').directive('upgradeAssistant', (reactDirective: any) => {
-    return reactDirective(RootComponent);
+    return reactDirective(wrapInI18nContext(RootComponent));
   });
 
   routes.when(`${BASE_PATH}/:view?`, {
-    template: '<upgrade-assistant />',
+    template:
+      '<kbn-management-app section="elasticsearch/upgrade_assistant"><upgrade-assistant /></kbn-management-app>',
   });
 }
 

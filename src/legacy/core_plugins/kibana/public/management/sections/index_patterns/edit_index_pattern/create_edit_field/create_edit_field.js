@@ -29,7 +29,7 @@ import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadc
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
@@ -47,7 +47,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
     }
 
     render(
-      <I18nProvider>
+      <I18nContext>
         <FieldEditor
           indexPattern={indexPattern}
           field={field}
@@ -59,7 +59,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
             redirectAway,
           }}
         />
-      </I18nProvider>,
+      </I18nContext>,
       node,
     );
   });
@@ -71,15 +71,15 @@ const destroyFieldEditor = () => {
 };
 
 uiRoutes
-  .when('/management/kibana/indices/:indexPatternId/field/:fieldName*', {
+  .when('/management/kibana/index_patterns/:indexPatternId/field/:fieldName*', {
     mode: 'edit',
     k7Breadcrumbs: getEditFieldBreadcrumbs
   })
-  .when('/management/kibana/indices/:indexPatternId/create-field/', {
+  .when('/management/kibana/index_patterns/:indexPatternId/create-field/', {
     mode: 'create',
     k7Breadcrumbs: getCreateFieldBreadcrumbs
   })
-  .defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
+  .defaults(/management\/kibana\/index_patterns\/[^\/]+\/(field|create-field)(\/|$)/, {
     template,
     mapBreadcrumbs($route, breadcrumbs) {
       const { indexPattern } = $route.current.locals;
@@ -97,7 +97,7 @@ uiRoutes
     resolve: {
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns.get($route.current.params.indexPatternId)
-          .catch(redirectWhenMissing('/management/kibana/indices'));
+          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
     controllerAs: 'fieldSettings',

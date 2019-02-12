@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { API_BASE_PATH } from './constants';
+import { API_BASE_PATH, NODE_SEED } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -33,7 +33,7 @@ export default function ({ getService }) {
           .send({
             name: 'test_cluster',
             seeds: [
-              'localhost:9300'
+              NODE_SEED
             ],
             skipUnavailable: true,
           })
@@ -42,7 +42,7 @@ export default function ({ getService }) {
         expect(body).to.eql({
           name: 'test_cluster',
           seeds: [
-            'localhost:9300'
+            NODE_SEED
           ],
           skipUnavailable: 'true', // ES issue #35671
           isConfiguredByNode: false,
@@ -57,7 +57,7 @@ export default function ({ getService }) {
           .send({
             name: 'test_cluster',
             seeds: [
-              'localhost:9300'
+              NODE_SEED
             ]
           })
           .expect(409);
@@ -80,7 +80,7 @@ export default function ({ getService }) {
           .send({
             skipUnavailable: false,
             seeds: [
-              'localhost:9300'
+              NODE_SEED
             ],
           })
           .expect(200);
@@ -89,7 +89,7 @@ export default function ({ getService }) {
           name: 'test_cluster',
           skipUnavailable: 'false', // ES issue #35671
           seeds: [
-            'localhost:9300'
+            NODE_SEED
           ],
           isConfiguredByNode: false,
         });
@@ -109,7 +109,7 @@ export default function ({ getService }) {
     });
 
     describe('List', () => {
-      it.skip('should return an array of remote clusters', async () => {
+      it('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
         const { body } = await supertest
@@ -120,7 +120,7 @@ export default function ({ getService }) {
           {
             name: 'test_cluster',
             seeds: [
-              '127.0.0.1:9300'
+              NODE_SEED
             ],
             isConnected: true,
             connectedNodesCount: 1,
