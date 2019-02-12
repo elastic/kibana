@@ -129,15 +129,13 @@ export const MetricDetail = withTheme(
                             >
                               {({ metrics, error, loading, refetch }) => {
                                 if (error) {
-                                  if (error.graphQLErrors) {
-                                    const invalidNodeError = error.graphQLErrors.find(
-                                      (err: GraphQLFormattedError) =>
-                                        err.code === InfraMetricsErrorCodes.invalid_node
-                                    );
+                                  const invalidNodeError = error.graphQLErrors.some(
+                                    (err: GraphQLFormattedError) =>
+                                      err.code === InfraMetricsErrorCodes.invalid_node
+                                  );
 
-                                    if (invalidNodeError) {
-                                      return <InvalidNodeError nodeName={name} />;
-                                    }
+                                  if (invalidNodeError) {
+                                    return <InvalidNodeError nodeName={name} />;
                                   }
 
                                   return <ErrorPageBody message={error.message} />;
