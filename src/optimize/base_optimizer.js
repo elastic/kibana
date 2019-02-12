@@ -326,7 +326,11 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.(png|jpg|gif|jpeg|svg)$/,
+            // HACK: This gets Canvas into the Kibana build, but opening
+            // these extensions to *all* of Kibana causes odd things to
+            // happen, like the Kibana logo failing to load properly in
+            // v6.7. We need to come up with a general way to handle this.
+            test: /\.png$|canvas.*\.(jpg|gif|jpeg|svg)$/,
             loader: ['url-loader'],
           },
           {
