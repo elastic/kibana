@@ -53,7 +53,7 @@ export function VisualizeListingController($injector, createNewVis) {
     this.showNewVisModal = true;
   };
 
-  this.edit = (id) => {
+  this.edit = ({ id }) => {
     kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id });
   };
 

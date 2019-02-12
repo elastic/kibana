@@ -70,7 +70,7 @@ uiRoutes
       $scope.find = (search) => {
         return services.dashboards.find(search, $scope.listingLimit);
       };
-      $scope.edit = (id) => {
+      $scope.edit = ({ id }) => {
         kbnUrl.redirect(createDashboardEditUrl(id));
       };
       $scope.delete = (ids) => {

@@ -24,8 +24,7 @@ import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiTitle,
-  EuiFieldSearch,
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -37,7 +36,6 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 export const EMPTY_FILTER = '';
@@ -54,16 +52,16 @@ class TableListViewUi extends React.Component {
     super(props);
 
     this.state = {
-      columns: this.getColumns(),
       items: [],
       totalItems: 0,
-      ...defaultSortOrder(this.props.initialFilter),
       hasInitialFetchReturned: false,
       isFetchingItems: false,
       showDeleteModal: false,
       showLimitError: false,
       filter: this.props.initialFilter,
       selectedIds: [],
+      sortField: 'title',
+      sortDirection: 'asc',
       page: 0,
       perPage: 20,
     };
@@ -133,75 +131,18 @@ class TableListViewUi extends React.Component {
 
   closeDeleteModal = () => {
     this.setState({ showDeleteModal: false });
-  };
+  }
 
   openDeleteModal = () => {
     this.setState({ showDeleteModal: true });
-  };
+  }
 
   setFilter(filter) {
     // If the user is searching, we want to clear the sort order so that
     // results are ordered by Elasticsearch's relevance.
     this.setState({
-      ...defaultSortOrder(filter),
-      filter,
+      filter: filter.queryText,
     }, this.fetchItems);
-  }
-
-  onTableChange = ({ page, sort = {} }) => {
-    const {
-      index: pageIndex,
-      size: pageSize,
-    } = page;
-
-    let {
-      field: sortField,
-      direction: sortDirection,
-    } = sort;
-
-    // 3rd sorting state that is not captured by sort - default order (asc by title)
-    // when switching from desc to asc for the same, non-default field - use default order,
-    // unless we have a filter, in which case, we want to use Elasticsearch's ranking order.
-    if (this.state.sortField === sortField
-      && this.state.sortDirection === 'desc'
-      && sortDirection === 'asc') {
-
-      const defaultSort = defaultSortOrder(this.state.filter);
-
-      sortField = defaultSort.sortField;
-      sortDirection = defaultSort.sortDirection;
-    }
-
-    this.setState({
-      page: pageIndex,
-      perPage: pageSize,
-      sortField,
-      sortDirection,
-    });
-  }
-
-  // server-side paging not supported - see component comment for details
-  getPageOfItems = () => {
-    // do not sort original list to preserve elasticsearch ranking order
-    const itemsCopy = this.state.items.slice();
-
-    if (this.state.sortField) {
-      itemsCopy.sort((a, b) => {
-        const fieldA = _.get(a, this.state.sortField, '');
-        const fieldB = _.get(b, this.state.sortField, '');
-        let order = 1;
-        if (this.state.sortDirection === 'desc') {
-          order = -1;
-        }
-        return order * fieldA.toLowerCase().localeCompare(fieldB.toLowerCase());
-      });
-    }
-
-    // If begin is greater than the length of the sequence, an empty array is returned.
-    const startIndex = this.state.page * this.state.perPage;
-    // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
-    const lastIndex = startIndex + this.state.perPage;
-    return itemsCopy.slice(startIndex, lastIndex);
   }
 
   hasNoItems() {
@@ -293,7 +234,7 @@ class TableListViewUi extends React.Component {
                   )
                 }}
               />
-            </p>table_list_view
+            </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
         </React.Fragment>
@@ -301,22 +242,7 @@ class TableListViewUi extends React.Component {
     }
   }
 
-  renderNoResultsMessage() {
-    if (this.state.isFetchingItems) {
-      return '';
-    }
-
-    return (
-      <FormattedMessage
-        id="kbn.table_list_view.listing.noMatchedItemsMessage"
-        defaultMessage="No {entityNamePlural} matched your search."
-        values={{ entityNamePlural: this.props.entityNamePlural }}
-      />
-    );
-  }
-
   renderNoItemsMessage() {
-
     if (this.props.noItemsFragment) {
       return (
         this.props.noItemsFragment
@@ -324,107 +250,54 @@ class TableListViewUi extends React.Component {
     } else {
       return (
         <FormattedMessage
-          id="kbn.table_list_view.listing.noMatchedItemsMessage"
-          defaultMessage="No {entityNamePlural} matched your search."
+          id="kbn.table_list_view.listing.noAvailableItemsMessage"
+          defaultMessage="No {entityNamePlural} available."
           values={{ entityNamePlural: this.props.entityNamePlural }}
         />
       );
 
     }
-
   }
 
-  renderSearchBar() {
-    const { intl } = this.props;
-    const searchFieldLabel = intl.formatMessage({
-      id: 'kbn.table_list_view.listing.searchBar.searchFieldAriaLabel',
-      defaultMessage: 'Filter {entityNamePlural}',
-      description: '"Filter" is used as a verb here, similar to "search through items".',
-    },
-    { entityNamePlural: this.props.entityNamePlural });
-    let deleteBtn;
-    if (this.state.selectedIds.length > 0) {
-      deleteBtn = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="danger"
-            onClick={this.openDeleteModal}
-            data-test-subj="deleteSelectedItems"
-            key="delete"
-          >
-            <FormattedMessage
-              id="kbn.table_list_view.listing.searchBar.deleteSelectedButtonLabel"
-              defaultMessage="Delete selected"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      );
+  renderToolsLeft() {
+    const selection = this.state.selectedIds;
+
+    if (selection.length === 0) {
+      return;
     }
 
+    const onClick = () => {
+      this.openDeleteModal();
+    };
+
     return (
-      <EuiFlexGroup>
-        {deleteBtn}
-        <EuiFlexItem grow={true}>
-          <EuiFieldSearch
-            aria-label={searchFieldLabel}
-            placeholder={intl.formatMessage({
-              id: 'kbn.table_list_view.listing.searchBar.searchFieldPlaceholder',
-              defaultMessage: 'Search…',
-            })}
-            fullWidth
-            value={this.state.filter}
-            onChange={(e) => this.setFilter(e.target.value)}
-            data-test-subj="searchFilter"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={onClick}
+      >
+        <FormattedMessage
+          id="kbn.table_list_view.listing.deleteButtonMessage"
+          defaultMessage="Delete {itemCount} {entityName}"
+          values={{
+            itemCount: selection.length,
+            entityName: (selection.length === 1) ? this.props.entityName : this.props.entityNamePlural
+          }}
+        />
+      </EuiButton>
     );
   }
 
-  getColumns() {
-    const { intl } = this.props;
-    const tableColumns = this.props.tableColumns;
-
-    if (!this.props.hideWriteControls) {
-      tableColumns.push({
-        name: intl.formatMessage({
-          id: 'kbn.table_list_view.listing.table.actionsColumnName',
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            render: (record) => {
-              return (
-                <EuiButtonIcon
-                  aria-label={intl.formatMessage(
-                    {
-                      id: 'kbn.table_list_view.listing.table.editIcon',
-                      defaultMessage: `Edit {entityName}.`,
-                    },
-                    {
-                      entityName: this.props.entityName,
-                    }
-                  )}
-                  color={'primary'}
-                  iconType={'pencil'}
-                  onClick={() => this.props.edit(record.id)}
-                />
-              );
-            }
-          }
-        ]
-      });
-    }
-    return tableColumns;
-  }
-
   renderTable() {
+    const { intl } = this.props;
+
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
       totalItemCount: this.state.items.length,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
+
     const selection = {
       onSelectionChange: (selection) => {
         this.setState({
@@ -432,6 +305,21 @@ class TableListViewUi extends React.Component {
         });
       }
     };
+
+    const actions = [{
+      name: intl.formatMessage({
+        id: 'kbn.table_list_view.listing.table.editActionName',
+        defaultMessage: 'Edit',
+      }),
+      description: intl.formatMessage({
+        id: 'kbn.table_list_view.listing.table.editActionDescription',
+        defaultMessage: 'Edit',
+      }),
+      icon: 'pencil',
+      type: 'icon',
+      onClick: this.props.edit
+    }];
+
     const sorting = {};
     if (this.state.sortField) {
       sorting.sort = {
@@ -439,19 +327,46 @@ class TableListViewUi extends React.Component {
         direction: this.state.sortDirection,
       };
     }
-    const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
+
+    const search = {
+      onChange: this.setFilter.bind(this),
+      toolsLeft: this.renderToolsLeft(),
+      box: {
+        incremental: true,
+      },
+    };
+
+    const columns = this.props.tableColumns.slice();
+    if (!this.state.hideWriteControls) {
+      columns.push({
+        name: intl.formatMessage({
+          id: 'kbn.table_list_view.listing.table.actionTitle',
+          defaultMessage: 'Actions',
+        }),
+        actions
+      });
+    }
+
+    const noItemsMessage = (
+      <FormattedMessage
+        id="kbn.table_list_view.listing.noMatchedItemsMessage"
+        defaultMessage="No {entityNamePlural} matched your search."
+        values={{ entityNamePlural: this.props.entityNamePlural }}
+      />
+    );
 
     return (
-      <EuiBasicTable
-        itemId={'id'}
-        items={items}
-        loading={this.state.isFetchingItems}
-        columns={this.state.columns}
-        selection={selection}
-        noItemsMessage={this.renderNoResultsMessage()}
+      <EuiInMemoryTable
+        itemId="id"
+        items={this.state.items}
+        columns={columns}
         pagination={pagination}
+        loading={this.state.isFetchingItems}
+        message={noItemsMessage}
+        selection={selection}
+        search={search}
         sorting={sorting}
-        onChange={this.onTableChange}
+        hasActions={!this.state.hideWriteControls}
       />
     );
   }
@@ -503,10 +418,6 @@ class TableListViewUi extends React.Component {
         <EuiSpacer size="m" />
 
         {this.renderListingLimitWarning()}
-
-        {this.renderSearchBar()}
-
-        <EuiSpacer size="m" />
 
         {this.renderTable()}
       </div>
@@ -561,21 +472,3 @@ TableListViewUi.defaultProps = {
 
 export const TableListView = injectI18n(TableListViewUi);
 
-// The table supports three sort states:
-// field-asc, field-desc, and default.
-//
-// If you click a non-default sort header three times,
-// the sort returns to the default sort, described here.
-function defaultSortOrder(filter) {
-  // If the user has searched for something, we want our
-  // default sort to be by Elasticsearch's relevance, so
-  // we clear out our overriding sort options.
-  if (filter.length > 0) {
-    return { sortField: undefined, sortDirection: undefined };
-  }
-
-  return {
-    sortField: 'title',
-    sortDirection: 'asc',
-  };
-}

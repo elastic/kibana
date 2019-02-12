@@ -165,7 +165,7 @@ class DashboardListingUi extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            onClick={() => this.props.edit(record.id)}
+            onClick={() => this.props.edit(record)}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}

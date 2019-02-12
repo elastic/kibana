@@ -85,7 +85,7 @@ class VisualizeListingTableUi extends Component {
           <span>
             {this.renderFlaskIcon(record)}
             <EuiLink
-              onClick={() => this.props.edit(record.id)}
+              onClick={() => this.props.edit(record)}
               data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
             >
               {field}
@@ -155,7 +155,7 @@ class VisualizeListingTableUi extends Component {
           }
           actions={
             <EuiButton
-              onClick={this.props.onCreateVis}
+              onClick={this.props.create}
               fill
               iconType="plusInCircle"
               data-test-subj="createVisualizationPromptButton"
