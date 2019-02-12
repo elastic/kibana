@@ -86,9 +86,9 @@ export function trackCurrentLayerState(layerId) {
 }
 
 export function rollbackToTrackedLayerStateForSelectedLayer() {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const layerId = getSelectedLayerId(getState());
-    dispatch({
+    await dispatch({
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
       layerId: layerId
     });
@@ -156,7 +156,7 @@ export function toggleLayerVisible(layerId) {
 }
 
 export function setSelectedLayer(layerId) {
-  return async dispatch => {
+  return async (dispatch) => {
     if (layerId) {
       dispatch(rollbackAnyTrailingTrackedLayerState());
       dispatch(trackCurrentLayerState(layerId));

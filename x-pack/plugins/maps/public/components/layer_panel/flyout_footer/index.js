@@ -24,12 +24,13 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     cancelLayerPanel: async () => {
       await dispatch(updateFlyout(FLYOUT_STATE.NONE));
       await dispatch(clearTemporaryLayers());
       await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
+      await dispatch(setSelectedLayer(null));
     },
     saveLayerEdits: isNewLayer => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));

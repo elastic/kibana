@@ -38,11 +38,14 @@ import {
   REMOVE_TRACKED_LAYER_STATE
 } from "../actions/store_actions";
 
-import { copyPersistentState } from './util';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
 
 const findLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
 const updateLayerInList = (state, layerId, attribute, newValue) => {
+  if (!layerId) {
+    return state;
+  }
   const { layerList } = state;
   const layerIdx = findLayerIndex(layerList, layerId);
   const updatedLayer = {
@@ -98,7 +101,7 @@ const INITIAL_STATE = {
   waitingForMapReadyLayerList: [],
 };
 
-const TRACKED_LAYER_DESCRIPTOR = '__trackedLayerDescriptor';
+
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -370,12 +373,17 @@ function trackCurrentLayerState(state, layerId) {
 
 function removeTrackedLayerState(state, layerId) {
   const layer = findLayerById(state,  layerId);
-  delete layer[TRACKED_LAYER_DESCRIPTOR];//just update in place
+  if (layer) {
+    delete layer[TRACKED_LAYER_DESCRIPTOR];//just update in place
+  }
   return { ...state };
 }
 
 function rollbackTrackedLayerState(state, layerId) {
   const layer = findLayerById(state, layerId);
+  if (!layer) {
+    return state;
+  }
   const trackedLayerDescriptor = layer[TRACKED_LAYER_DESCRIPTOR];
 
   //this assumes that any nested temp-state in the layer-descriptor (e.g. of styles), is not relevant and can be recovered easily (e.g. this is not the case for __dataRequests)

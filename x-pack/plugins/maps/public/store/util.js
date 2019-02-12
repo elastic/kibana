@@ -5,6 +5,8 @@
  */
 
 
+export const TRACKED_LAYER_DESCRIPTOR = '__trackedLayerDescriptor';
+
 export function copyPersistentState(input) {
   if (typeof input !== 'object' || input === null) {//primitive
     return input;
