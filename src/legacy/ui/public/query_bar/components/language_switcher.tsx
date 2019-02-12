@@ -51,9 +51,16 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
   };
 
   public render() {
+    const luceneLabel = (
+      <FormattedMessage id="common.ui.queryBar.luceneLanguageName" defaultMessage="Lucene" />
+    );
+    const kqlLabel = (
+      <FormattedMessage id="common.ui.queryBar.kqlLanguageName" defaultMessage="KQL" />
+    );
+
     const button = (
       <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
-        <FormattedMessage id="common.ui.queryBar.optionsButtonLabel" defaultMessage="Options" />
+        {this.props.language === 'lucene' ? luceneLabel : kqlLabel}
       </EuiButtonEmpty>
     );
 
