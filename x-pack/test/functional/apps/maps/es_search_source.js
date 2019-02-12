@@ -8,7 +8,6 @@ import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
-  const queryBar = getService('queryBar');
   const inspector = getService('inspector');
 
   describe('elasticsearch document layer', () => {
@@ -42,13 +41,11 @@ export default function ({ getPageObjects, getService }) {
 
     describe('query bar', () => {
       before(async () => {
-        await queryBar.setQuery('machine.os.raw : "win 8"');
-        await queryBar.submitQuery();
+        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
       });
 
       after(async () => {
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
+        await PageObjects.maps.setAndSubmitQuery('');
       });
 
       it('should apply query to search request', async () => {
@@ -61,7 +58,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should re-fetch query when "refresh" is clicked', async () => {
         const beforeQueryRefreshTimestamp = await getRequestTimestamp();
-        await queryBar.submitQuery();
+        await PageObjects.maps.refreshQuery();
         const afterQueryRefreshTimestamp = await getRequestTimestamp();
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
