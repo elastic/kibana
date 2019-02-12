@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const DEFAULT_API_VERSION = 'master';
+export const DEFAULT_API_VERSION = '7.0';
