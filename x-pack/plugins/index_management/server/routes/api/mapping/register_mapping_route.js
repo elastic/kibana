@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 function formatHit(hit, indexName) {
   const mapping = hit[indexName].mappings;
   return {
@@ -21,12 +21,6 @@ const handler = async (request, callWithRequest) => {
   const response = formatHit(hit, indexName);
   return response;
 };
-export function registerMappingRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/mapping/{indexName}',
-    method: 'GET',
-  });
+export function registerMappingRoute(router) {
+  router.get('mapping/{indexName}', handler);
 }

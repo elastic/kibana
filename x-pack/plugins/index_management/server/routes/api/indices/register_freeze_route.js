@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 
 const handler = async (request, callWithRequest, h) => {
   const { indices = [] } = request.payload;
@@ -16,12 +16,6 @@ const handler = async (request, callWithRequest, h) => {
   await callWithRequest('transport.request', params);
   return h.response();
 };
-export function registerFreezeRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/indices/freeze',
-    method: 'POST'
-  });
+export function registerFreezeRoute(router) {
+  router.post('indices/freeze', handler);
 }

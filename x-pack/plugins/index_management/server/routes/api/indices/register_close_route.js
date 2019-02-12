@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 
 const handler = async (request, callWithRequest, h) => {
   const indices = request.payload.indices || [];
@@ -16,12 +16,6 @@ const handler = async (request, callWithRequest, h) => {
   await callWithRequest('indices.close', params);
   return h.response();
 };
-export function registerCloseRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/indices/close',
-    method: 'POST'
-  });
+export function registerCloseRoute(router) {
+  router.post('indices/close', handler);
 }

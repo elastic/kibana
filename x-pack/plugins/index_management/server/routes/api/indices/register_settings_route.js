@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 function formatHits(hits) {
   return hits.map(hit => {
     return {
@@ -31,12 +31,6 @@ const handler = async (request, callWithRequest) => {
   const response = formatHits(hits);
   return response;
 };
-export function registerSettingsRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/indices/settings',
-    method: 'POST'
-  });
+export function registerSettingsRoute(router) {
+  router.post('indices/settings', handler);
 }

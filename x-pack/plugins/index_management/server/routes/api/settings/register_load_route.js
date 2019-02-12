@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 
 // response comes back as { [indexName]: { ... }}
 // so plucking out the embedded object
@@ -25,12 +25,6 @@ const handler = async (request, callWithRequest) => {
   const hit =  await callWithRequest('indices.getSettings', params);
   return formatHit(hit);
 };
-export function registerLoadRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/settings/{indexName}',
-    method: 'GET',
-  });
+export function registerLoadRoute(router) {
+  router.get('settings/{indexName}', handler);
 }

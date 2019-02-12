@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 
 const handler = async (request, callWithRequest, h) => {
   const indices = request.payload.indices || [];
@@ -15,12 +15,6 @@ const handler = async (request, callWithRequest, h) => {
   await callWithRequest('indices.delete', params);
   return h.response();
 };
-export function registerDeleteRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/indices/delete',
-    method: 'POST'
-  });
+export function registerDeleteRoute(router) {
+  router.post('indices/delete', handler);
 }

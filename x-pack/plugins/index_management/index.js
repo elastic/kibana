@@ -12,6 +12,8 @@ import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 import { addIndexManagementDataEnricher } from "./index_management_data";
+import { createRouter } from '../../server/lib/create_router';
+
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
@@ -25,12 +27,13 @@ export function indexManagement(kibana)  {
       ]
     },
     init: function (server) {
+      const router = createRouter(server, PLUGIN.ID, '/api/index_management/');
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
       registerLicenseChecker(server, PLUGIN.ID);
-      registerIndicesRoutes(server, PLUGIN.ID);
-      registerSettingsRoutes(server, PLUGIN.ID);
-      registerStatsRoute(server, PLUGIN.ID);
-      registerMappingRoute(server, PLUGIN.ID);
+      registerIndicesRoutes(router);
+      registerSettingsRoutes(router);
+      registerStatsRoute(router);
+      registerMappingRoute(router);
     }
   });
 }

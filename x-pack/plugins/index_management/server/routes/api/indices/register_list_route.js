@@ -3,17 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 import { fetchIndices } from '../../../lib/fetch_indices';
 const handler = async (request, callWithRequest) => {
   return fetchIndices(callWithRequest);
 };
-export function registerListRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/indices',
-    method: 'GET'
-  });
+export function registerListRoute(router) {
+  router.get('indices', handler);
 }

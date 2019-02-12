@@ -16,16 +16,16 @@ import { registerDeleteRoute } from './register_delete_route';
 import { registerFreezeRoute } from './register_freeze_route';
 import { registerUnfreezeRoute } from './register_unfreeze_route';
 
-export function registerIndicesRoutes(server, pluginId) {
-  registerClearCacheRoute(server, pluginId);
-  registerCloseRoute(server, pluginId);
-  registerFlushRoute(server, pluginId);
-  registerForcemergeRoute(server, pluginId);
-  registerListRoute(server, pluginId);
-  registerOpenRoute(server, pluginId);
-  registerRefreshRoute(server, pluginId);
-  registerReloadRoute(server, pluginId);
-  registerDeleteRoute(server, pluginId);
-  registerFreezeRoute(server, pluginId);
-  registerUnfreezeRoute(server, pluginId);
+export function registerIndicesRoutes(router) {
+  registerClearCacheRoute(router);
+  registerCloseRoute(router);
+  registerFlushRoute(router);
+  registerForcemergeRoute(router);
+  registerListRoute(router);
+  registerOpenRoute(router);
+  registerRefreshRoute(router);
+  registerReloadRoute(router);
+  registerDeleteRoute(router);
+  registerFreezeRoute(router);
+  registerUnfreezeRoute(router);
 }

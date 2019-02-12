@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerRoute } from '../../../../../../server/lib/register_route';
+
 
 function formatHit(hit, indexName) {
   const { _shards, indices } = hit;
@@ -25,12 +25,6 @@ const handler = async (request, callWithRequest) => {
 
   return response;
 };
-export function registerStatsRoute(server, pluginId) {
-  registerRoute({
-    server,
-    handler,
-    pluginId,
-    path: '/api/index_management/stats/{indexName}',
-    method: 'GET',
-  });
+export function registerStatsRoute(router) {
+  router.get('stats/{indexName}', handler);
 }
