@@ -199,8 +199,7 @@ QuotedString
   }
 
 QuotedCharacter
-  = EscapedWhitespace
-  / '\\' char:[\\"] { return char; }
+  = '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
 UnquotedLiteral
@@ -227,8 +226,7 @@ UnquotedLiteral
   }
 
 UnquotedCharacter
-  = EscapedWhitespace
-  / EscapedSpecialCharacter
+  = EscapedSpecialCharacter
   / EscapedKeyword
   / Wildcard
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
@@ -249,10 +247,6 @@ OptionalSpace
     };
   }
   / Space*
-
-EscapedWhitespace
-  = '\\n' { return '\n'; }
-  / '\\t' { return '\t'; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
