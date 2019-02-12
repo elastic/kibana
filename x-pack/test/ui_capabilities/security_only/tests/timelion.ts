@@ -44,6 +44,7 @@ export default function timelionTests({ getService }: KibanaFunctionalTestDefaul
               save: false,
             });
             break;
+          // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
