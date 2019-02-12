@@ -43,7 +43,7 @@ export function mysqlMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '66881e90-0006-11e7-bf7f-c9acc3d3e306',
+          id: '66881e90-0006-11e7-bf7f-c9acc3d3e306-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.mysqlMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'MySQL metrics dashboard',
           }),
