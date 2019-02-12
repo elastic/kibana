@@ -35,6 +35,7 @@ import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_find
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
+  onGoTo: (path: string) => void;
 }
 
 interface SearchSelectionState {
@@ -50,6 +51,7 @@ interface TabProps {
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
   public static propTypes = {
     onSearchSelected: PropTypes.func,
+    onGoTo: PropTypes.func,
   };
 
   private tabs: TabProps[] = [];
@@ -57,11 +59,20 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
   constructor(props: SearchSelectionProps) {
     super(props);
 
-    const manageSearchesBtn = (
-      <EuiButton onClick={this.manageSearches}>
+    const manageSavedSearchesBtn = (
+      <EuiButton onClick={() => this.props.onGoTo('#/management/kibana/objects')}>
         <FormattedMessage
-          id="kbn.visualize.newVisWizard.savedSearchTab.managedSavedSearchButtonLabel"
+          id="kbn.visualize.newVisWizard.savedSearchTab.manageSavedSearchesButtonLabel"
           defaultMessage="Manage saved searches"
+        />
+      </EuiButton>
+    );
+
+    const manageIndexPatternsBtn = (
+      <EuiButton onClick={() => this.props.onGoTo('#/management/kibana/index_patterns')}>
+        <FormattedMessage
+          id="kbn.visualize.newVisWizard.indexPatternTab.manageIndexPatternsButtonLabel"
+          defaultMessage="Manage index patterns"
         />
       </EuiButton>
     );
@@ -76,6 +87,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           <SavedObjectFinder
             key="visSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
+            callToActionButton={manageIndexPatternsBtn}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.indexPatternTab.notFoundLabel',
               { defaultMessage: 'No matching index patterns found.' }
@@ -93,7 +105,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
-            callToActionButton={manageSearchesBtn}
+            callToActionButton={manageSavedSearchesBtn}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.savedSearchTab.notFoundLabel',
               { defaultMessage: 'No matching saved searches found.' }
@@ -148,8 +160,4 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
       </React.Fragment>
     );
   }
-
-  private manageSearches = () => {
-    location.assign('#/management/kibana/objects?_a=(tab:searches)');
-  };
 }
