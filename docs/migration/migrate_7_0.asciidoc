@@ -338,8 +338,6 @@ the `path.data` directory when the node or instance starts.
 
 *Impact:* Use `xpack.xpack_main.telemetry.enabled` instead.
 
-*Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
-
 [float]
 ==== `management/kibana/(index|indices)` => `management/kibana/index_pattern(?s)`
 
