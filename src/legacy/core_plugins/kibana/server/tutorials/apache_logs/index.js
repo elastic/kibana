@@ -23,8 +23,8 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function apacheLogsSpecProvider(server, context) {
   const moduleName = 'apache2';
-  const geoipRequired = true;
-  const uaRequired = true;
+  const geoipRequired = false;
+  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'apacheLogs',
