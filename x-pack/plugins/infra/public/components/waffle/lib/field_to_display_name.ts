@@ -28,11 +28,11 @@ export const fieldToName = (field: string, intl: InjectedIntl) => {
       id: 'xpack.infra.groupByDisplayNames.availabilityZone',
       defaultMessage: 'Availability Zone',
     }),
-    'cloud.machine_type': intl.formatMessage({
+    'cloud.machine.type': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.machineType',
       defaultMessage: 'Machine Type',
     }),
-    'cloud.project_id': intl.formatMessage({
+    'cloud.project.id': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.projectID',
       defaultMessage: 'Project ID',
     }),
