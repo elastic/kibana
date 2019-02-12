@@ -5,6 +5,7 @@
  */
 
 import boom from 'boom';
+import { omit } from 'lodash';
 import {
   CANVAS_TYPE,
   API_ROUTE_WORKPAD,
@@ -44,7 +45,7 @@ export function workpad(server) {
     return resp;
   }
 
-  function createWorkpad(req, id) {
+  function createWorkpad(req) {
     const savedObjectsClient = req.getSavedObjectsClient();
 
     if (!req.payload) {
@@ -52,14 +53,15 @@ export function workpad(server) {
     }
 
     const now = new Date().toISOString();
+    const { id, ...payload } = req.payload;
     return savedObjectsClient.create(
       CANVAS_TYPE,
       {
-        ...req.payload,
+        ...payload,
         '@timestamp': now,
         '@created': now,
       },
-      { id: id || req.payload.id || getId('workpad') }
+      { id: id || getId('workpad') }
     );
   }
 
@@ -74,7 +76,7 @@ export function workpad(server) {
       return savedObjectsClient.create(
         CANVAS_TYPE,
         {
-          ...req.payload,
+          ...omit(req.payload, 'id'),
           '@timestamp': now,
           '@created': workpad.attributes['@created'],
         },
