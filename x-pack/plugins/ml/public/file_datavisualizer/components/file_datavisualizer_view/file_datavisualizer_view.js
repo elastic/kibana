@@ -263,9 +263,6 @@ export class FileDataVisualizerView extends Component {
         {(mode === MODE.READ) &&
           <React.Fragment>
 
-
-            {/* <EuiSpacer size="l" /> */}
-
             {(!loading && !loaded) &&
               <AboutPanel
                 onFilePickerChange={this.onFilePickerChange}

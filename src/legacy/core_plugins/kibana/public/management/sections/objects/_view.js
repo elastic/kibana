@@ -26,7 +26,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../utils';
+import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 

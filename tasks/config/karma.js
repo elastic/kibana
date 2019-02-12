@@ -171,7 +171,7 @@ module.exports = function (grunt) {
    *  a test is running in by searching for the "ready to load tests for shard X"
    *  log message.
    *
-   *  [1]: src/ui/public/test_harness/test_sharding/setup_test_sharding.js
+   *  [1]: src/legacy/ui/public/test_harness/test_sharding/setup_test_sharding.js
    */
   times(TOTAL_CI_SHARDS, i => {
     const n = i + 1;
