@@ -14,7 +14,7 @@ import {
 import { UserAtSpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function graphTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('graph', () => {
