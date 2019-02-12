@@ -44,41 +44,18 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
               save: false,
             });
             break;
-          // these users can't do anything with Canvas
-          case 'advancedSettings_all':
-          case 'advancedSettings_read':
-          case 'apm_all':
-          case 'dashboard_all':
-          case 'dashboard_read':
-          case 'dev_tools_read':
-          case 'discover_all':
-          case 'discover_read':
-          case 'graph_all':
-          case 'graph_read':
-          case 'infrastructure_read':
-          case 'logs_read':
-          case 'maps_all':
-          case 'maps_read':
-          case 'ml_all':
-          case 'monitoring_all':
-          case 'timelion_all':
-          case 'timelion_read':
-          case 'uptime_read':
-          case 'visualize_all':
-          case 'visualize_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('canvas');
-            expect(uiCapabilities.value!.canvas).to.eql({
-              save: false,
-            });
-            break;
           case 'legacy_all':
           case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
+          // ann other users can't do anything with Canvas
           default:
-            throw new UnreachableError(scenario);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('canvas');
+            expect(uiCapabilities.value!.canvas).to.eql({
+              save: false,
+            });
         }
       });
     });

@@ -59,7 +59,6 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.value!.advancedSettings).to.eql({
               save: false,
             });
-            break;
         }
       });
     });
