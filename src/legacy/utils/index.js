@@ -39,8 +39,6 @@ export {
   concatStreamProviders,
   createConcatStream,
   createIntersperseStream,
-  createJsonParseStream,
-  createJsonStringifyStream,
   createListStream,
   createPromiseFromStreams,
   createReduceStream,

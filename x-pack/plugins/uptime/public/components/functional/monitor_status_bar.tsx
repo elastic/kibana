@@ -58,8 +58,7 @@ export const MonitorStatusBar = ({ timestamp, url, duration, status }: Props) =>
       >
         <FormattedMessage
           id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
-          // TODO: this should not be computed inline
-          values={{ duration: duration ? duration / 1000 : 0 }}
+          values={{ duration: duration ? duration : 0 }}
           defaultMessage="{duration}ms"
           description="The 'ms' is an abbreviation for 'milliseconds'."
         />
