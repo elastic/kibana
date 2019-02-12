@@ -16,6 +16,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 interface ErrorResponseItems {
@@ -51,15 +52,7 @@ export async function getErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
+            { range: rangeFilter(start, end) }
           ]
         }
       },
