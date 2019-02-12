@@ -179,7 +179,7 @@ Security::
 Visualizations::
 * Adds autocomplete to Time Series Visual Builder {pull}30158[#30158]
 * Fixes missing Markdown variables {pull}28173[#28173]
-* Removes filterbar for markdown visualizations {pull}30354[#30354]
+* Removes filter bar for Markdown visualizations {pull}30354[#30354]
 * Corrects label for OS visualization in logs sample data {pull}30249[#30249]
 
 
