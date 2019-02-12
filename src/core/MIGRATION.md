@@ -4,8 +4,7 @@
   * Architectural
   * Services
   * Integrating with other plugins
-  * Legacy plugin problem areas
-  * Browser vs server
+  * Challenges to overcome with legacy plugins
 * Plan of action
   * TypeScript
   * De-angular
@@ -194,17 +193,51 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 import { PluginName, PluginStart, PluginStop } from '../../../core/server';
 import { FoobarPluginStart, FoobarPluginStop } from '../../foobar/server';
 
+interface DemoStartDependencies {
+  foobar: FoobarPluginStart
+}
+
+interface DemoStopDependencies {
+  foobar: FoobarPluginStop
+}
+
 export class Plugin {
-  public start(core: PluginStart, dependencies: Record<PluginName, unknown>) {
+  public start(core: PluginStart, dependencies: DemoStartDependencies) {
     const { foobar } = dependencies;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
   }
 
-  public stop(core: PluginStop, dependencies: Record<PluginName, unknown>) {
+  public stop(core: PluginStop, dependencies: DemoStopDependencies) {
     const { foobar } = dependencies;
     foobar.getFoo(); // throws because getFoo does not exist
     foobar.getBar(); // 'bar'
   }
 }
 ```
+
+### Challenges to overcome with legacy plugins
+
+New platform plugins have identical architecture in the browser and on the server. Legacy plugins have one architecture that they use in the browser and an entirely different architecture that they use on the server.
+
+This means that there are unique sets of challenges for migrating to the new platform depending on whether the legacy plugin code is on the server or in the browser.
+
+#### Challenges on the server
+
+The general shape/architecture of legacy server-side code is similar to the new platform architecture in one important way: most legacy server-side plugins define an `init` function where the bulk of their business logic begins, and they access both "core" and "plugin-provided" functionality through the arguments given to `init`. Rarely does legacy server-side code share stateful services via import statements.
+
+While not exactly the same, legacy plugin `init` functions behave similarly today as new platform `start` functions. There is no corresponding legacy concept of `stop`, however.
+
+Despite their similarities, server-side plugins pose a formidable challenge: legacy core and plugin functionality is retrieved from either the hapi.js `server` or `request` god objects. Worse, these objects are often passed deeply throughout entire plugins, which directly couples business logic with hapi. And the worst of it all is, these objects are mutable at any time.
+
+The key challenge to overcome with legacy server-side plugins will decoupling from hapi.
+
+#### Challenges in the browser
+
+The legacy plugin system in the browser is fundamentally incompatible with the new platform. There is no client-side plugin definition. There are no services that get passed to plugins at runtime. There really isn't even a concrete notion of "core".
+
+When a legacy browser plugin needs to access functionality from another plugin, say to register a UI section to render within another plugin, it imports a stateful (global singleton) JavaScript module and performs some sort of state mutation. Sometimes this module exists inside the plugin itself, and it gets imported via the `plugin/` webpack alias. Sometimes this module exists outside the context of plugins entirely and gets imported via the `ui/` webpack alias. Neither of these concepts exist in the new platform.
+
+Legacy browser plugins rely on the feature known as `uiExports/`, which integrates directly with our build system to ensure that plugin code is bundled together in such a way to enable that global singleton module state. There is no corresponding feature in the new platform, and in fact we intend down the line to build new platform plugins as immutable bundles that can not share state in this way.
+
+The key challenge to overcome with legacy browser-side plugins will be converting all imports from `plugin/`, `ui/`, `uiExports`, and relative imports from other plugins into a set of services that originate at runtime during plugin initialization and get passed around throughout the business logic of the plugin as function arguments.
