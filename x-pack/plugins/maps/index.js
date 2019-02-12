@@ -35,7 +35,8 @@ export function maps(kibana) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
         return {
-          isEmsEnabled: mapConfig.includeElasticMapsService
+          showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
+          isEmsEnabled: mapConfig.includeElasticMapsService,
         };
       },
       inspectorViews: [
@@ -53,6 +54,7 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        showMapsInspectorAdapter: Joi.boolean().default(false),
       }).default();
     },
 
@@ -81,14 +83,14 @@ export function maps(kibana) {
           all: {
             savedObject: {
               all: ['map'],
-              read: ['config']
+              read: ['config', 'index-pattern']
             },
-            ui: [],
+            ui: ['save'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'config']
+              read: ['map', 'config', 'index-pattern']
             },
             ui: [],
           },

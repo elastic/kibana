@@ -31,7 +31,7 @@ image:reporting/images/share-button.png["Reporting Button",link="share-button.pn
 .. If you're on Visualize or Dashboard:
   ... Select *PDF Reports*
 
-  ... Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
+  ... Dashboard only: Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
 
   ... Click the *Generate PDF* button.
 

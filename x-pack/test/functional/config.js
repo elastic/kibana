@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 
 import {
+  CanvasPageProvider,
   SecurityPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
@@ -22,7 +23,9 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  RollupPageProvider,
   UptimePageProvider,
+
 } from './page_objects';
 
 import {
@@ -54,6 +57,7 @@ import {
   GrokDebuggerProvider,
   UserMenuProvider,
   UptimeProvider,
+
 } from './services';
 
 import {
@@ -90,8 +94,10 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
+      resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/uptime')
     ],
@@ -132,12 +138,14 @@ export default async function ({ readConfigFile }) {
       spaces: SpacesServiceProvider,
       userMenu: UserMenuProvider,
       uptime: UptimeProvider,
+      rollup: RollupPageProvider,
     },
 
     // just like services, PageObjects are defined as a map of
     // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
+      canvas: CanvasPageProvider,
       security: SecurityPageProvider,
       accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,
@@ -152,6 +160,7 @@ export default async function ({ readConfigFile }) {
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
       uptime: UptimePageProvider,
+      rollup: RollupPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -169,6 +178,7 @@ export default async function ({ readConfigFile }) {
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.xpack_main.telemetry.enabled=false',
+        '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
     },
@@ -215,6 +225,10 @@ export default async function ({ readConfigFile }) {
       },
       uptime: {
         pathname: '/app/uptime',
+      },
+      rollupJob: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/rollup_jobs/'
       }
     },
 
@@ -233,4 +247,5 @@ export default async function ({ readConfigFile }) {
       rootDirectory: resolve(__dirname, '../../'),
     },
   };
+
 }

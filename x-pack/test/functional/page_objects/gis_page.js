@@ -80,6 +80,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async expectMissingSaveButton() {
+      await testSubjects.missingOrFail('mapSaveButton');
+    }
+
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
       const exists = await testSubjects.exists('mapsListingPage');

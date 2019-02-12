@@ -15,6 +15,7 @@ export default function statusPageFunctonalTests({ getService, getPageObjects }:
     after(async () => await esArchiver.unload('empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
+      await PageObjects.security.logout();
       await PageObjects.statusPage.navigateToPage();
       await PageObjects.statusPage.expectStatusPage();
     });

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { CanvasPageProvider } from './canvas_page';
 export { SecurityPageProvider } from './security_page';
 export { MonitoringPageProvider } from './monitoring_page';
 export { LogstashPageProvider } from './logstash_page';
@@ -17,4 +18,5 @@ export { InfraHomePageProvider } from './infra_home_page';
 export { GisPageProvider } from './gis_page';
 export { StatusPagePageProvider } from './status_page';
 export { UpgradeAssistantProvider } from './upgrade_assistant';
+export { RollupPageProvider } from './rollup_page';
 export { UptimePageProvider } from './uptime_page';
