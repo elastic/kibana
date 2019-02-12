@@ -40,7 +40,7 @@ export default function graphTests({ getService }: KibanaFunctionalTestDefaultPr
               delete: true,
             });
             break;
-          // these users have a read-only view of Discover
+          // these users have a read-only view of Graph
           case 'dual_privileges_read':
           case 'graph_read':
             expect(uiCapabilities.success).to.be(true);
