@@ -343,3 +343,14 @@ the `path.data` directory when the node or instance starts.
 `kibana.yml` file has been removed. 
 
 *Impact:* Use `xpack.xpack_main.telemetry.enabled` instead.
+
+[float]
+==== `management/kibana/(index|indices)` => `management/kibana/index_pattern(?s)`
+
+*Details:* Kibana management urls pertaining to index patterns have been changed
+to accurately reflect their content, from `management/kibana/index` or
+`management/kibana/indices` to `managemen/kibana/index_pattern` or
+`management/kibana/index_patterns`. 
+
+*Impact:* References to these urls will need to be updated.
+
