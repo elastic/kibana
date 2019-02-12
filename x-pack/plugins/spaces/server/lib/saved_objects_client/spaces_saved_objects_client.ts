@@ -13,7 +13,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsClient,
   UpdateOptions,
-} from 'src/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SpacesService } from '../create_spaces_service';
 

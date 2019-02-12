@@ -2,21 +2,15 @@
   "type": "index",
   "value": {
     "index": "secrepo",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "1"
-      }
-    },
     "mappings": {
       "dynamic_templates": [
         {
           "strings": {
-            "match": "*",
-            "match_mapping_type": "string",
             "mapping": {
               "type": "keyword"
-            }
+            },
+            "match": "*",
+            "match_mapping_type": "string"
           }
         }
       ],
@@ -67,13 +61,13 @@
           "type": "keyword"
         },
         "params": {
-          "type": "text",
+          "fielddata": true,
           "fields": {
             "raw": {
               "type": "keyword"
             }
           },
-          "fielddata": true
+          "type": "text"
         },
         "patch": {
           "type": "keyword"
@@ -88,14 +82,20 @@
           "type": "ip"
         },
         "url": {
-          "type": "keyword",
           "fields": {
             "parts": {
-              "type": "text",
-              "fielddata": true
+              "fielddata": true,
+              "type": "text"
             }
-          }
+          },
+          "type": "keyword"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
       }
     }
   }
