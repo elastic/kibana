@@ -40,14 +40,14 @@ import {
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
 
-const findLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
+const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
 const updateLayerInList = (state, layerId, attribute, newValue) => {
   if (!layerId) {
     return state;
   }
   const { layerList } = state;
-  const layerIdx = findLayerIndex(layerList, layerId);
+  const layerIdx = getLayerIndex(layerList, layerId);
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
@@ -64,7 +64,7 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
 
 const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
   const { layerList } = state;
-  const layerIdx = findLayerIndex(layerList, layerId);
+  const layerIdx = getLayerIndex(layerList, layerId);
   const updatedLayer = {
     ...layerList[layerIdx],
     sourceDescriptor: {
@@ -146,13 +146,29 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         goto: null,
       };
+    case SET_LAYER_ERROR_STATUS:
+      const { layerList } = state;
+      const layerIdx = getLayerIndex(layerList, action.layerId);
+      if (layerIdx === -1) {
+        return state;
+      }
+
+      return {
+        ...state,
+        layerList: [
+          ...layerList.slice(0, layerIdx),
+          {
+            ...layerList[layerIdx],
+            __isInErrorState: true,
+            __errorMessage: action.errorMessage
+          },
+          ...layerList.slice(layerIdx + 1)
+        ]
+      };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
-    case SET_LAYER_ERROR_STATUS:
-      return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      const errorRequestResetState = resetDataRequest(state, action);
-      return setErrorStatus(errorRequestResetState, action);
+      return resetDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -272,15 +288,6 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
-function setErrorStatus(state, { layerId, errorMessage }) {
-  const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
-  return tmsErrorLayer
-    ? updateLayerInList(
-      updateLayerInList(state, tmsErrorLayer.id, '__isInErrorState', true),
-      tmsErrorLayer.id, '__errorMessage', errorMessage)
-    : state;
-}
-
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
   if (!layerDescriptor.__dataRequests) {
@@ -392,7 +399,7 @@ function rollbackTrackedLayerState(state, layerId) {
   const rolledbackLayer = { ...layer, ...trackedLayerDescriptor };
   delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
 
-  const layerIndex = findLayerIndex(state.layerList, layerId);
+  const layerIndex = getLayerIndex(state.layerList, layerId);
   state.layerList[layerIndex] = rolledbackLayer;
   return { ...state };
 }
