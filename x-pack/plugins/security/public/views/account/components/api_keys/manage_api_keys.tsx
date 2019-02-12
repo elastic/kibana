@@ -10,12 +10,11 @@ import {
   // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiIcon,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { canUserChangePassword, User } from '../../../../../common/model/user';
+import React, { Component } from 'react';
+import { User } from '../../../../../common/model/user';
 
 interface Props {
   user: User;

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiDescriptionList, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { User } from '../../../../../common/model/user';
@@ -16,9 +16,9 @@ export class PersonalInfoPanel extends Component<Props, {}> {
   public render() {
     return (
       <div>
-        <h3>Personal Information</h3>
         <EuiSpacer />
         <EuiDescriptionList
+          type="column"
           textStyle="reverse"
           listItems={[
             {

@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { UserAPIClient } from 'plugins/security/lib/api';
 import React, { ChangeEvent, Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { canUserChangePassword, User } from '../../../../../common/model/user';
+import { User } from '../../../../../common/model/user';
 
 interface Props {
   user: User;
