@@ -73,12 +73,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows save button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphSaveButton', 20000);
+        await testSubjects.existOrFail('graphSaveButton');
       });
 
       it('shows delete button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphDeleteButton', 20000);
+        await testSubjects.existOrFail('graphDeleteButton');
       });
     });
 
@@ -127,13 +127,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphOpenButton', 10000);
+        await testSubjects.existOrFail('graphOpenButton');
         await testSubjects.missingOrFail('graphSaveButton');
       });
 
       it(`doesn't show delete button`, async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphOpenButton', 10000);
+        await testSubjects.existOrFail('graphOpenButton');
         await testSubjects.missingOrFail('graphSaveButton');
       });
     });
