@@ -76,20 +76,20 @@
 }
 
 .tvbTooltip__caret {
-  $temp-arrowSize: $euiSizeM;
-  width: $temp-arrowSize;
-  height: $temp-arrowSize;
+  $tempArrowSize: $euiSizeM;
+  width: $tempArrowSize;
+  height: $tempArrowSize;
   border-radius: $euiBorderRadius / 2;
   background-color: tintOrShade($euiColorFullShade, 25%, 90%);
   transform-origin: center;
   transform: rotateZ(45deg);
 
   .tvbTooltip__container--left & {
-    margin-right: (($temp-arrowSize/2) + 1px) * -1;
+    margin-right: (($tempArrowSize/2) + 1px) * -1;
   }
 
   .tvbTooltip__container--right & {
-    margin-left: (($temp-arrowSize/2) + 1px) * -1;
+    margin-left: (($tempArrowSize/2) + 1px) * -1;
   }
 }
 
