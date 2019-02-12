@@ -84,7 +84,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     }),
     euiIconType: 'apmApp',
     artifacts: artifacts,
-    onPrem: onPremInstructions(apmIndexPatternTitle),
+    onPrem: onPremInstructions(config),
     elasticCloud: createElasticCloudInstructions(config),
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPatternTitle),

@@ -39,7 +39,7 @@ import {
   createJavaAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
-export function onPremInstructions(apmIndexPattern) {
+export function onPremInstructions(config) {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
   const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
@@ -89,14 +89,15 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'You have correctly setup APM Server',
           }),
           error: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.errorMessage', {
-            defaultMessage: 'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
+            defaultMessage:
+              'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
           }),
           esHitsCheck: {
-            index: apmIndexPattern,
+            index: config.get('apm_oss.onboardingIndices'),
             query: {
               bool: {
                 filter: [
-                  { exists: { field: 'observer.listening' } },
+                  { term: { 'processor.event': 'onboarding' } },
                   { range: { 'observer.version_major': { gte: 7 } } },
                 ],
               },
@@ -160,11 +161,16 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'No data has been received from agents yet',
           }),
           esHitsCheck: {
-            index: apmIndexPattern,
+            index: [
+              config.get('apm_oss.errorIndices'),
+              config.get('apm_oss.transactionIndices'),
+              config.get('apm_oss.metricsIndices'),
+              config.get('apm_oss.sourcemapIndices'),
+            ],
             query: {
               bool: {
                 filter: [
-                  { terms: { 'processor.name': ['error', 'transaction', 'metric', 'sourcemap'] } },
+                  { terms: { 'processor.event': ['error', 'transaction', 'metric', 'sourcemap'] } },
                   { range: { 'observer.version_major': { gte: 7 } } },
                 ],
               },

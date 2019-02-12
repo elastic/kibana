@@ -51,7 +51,9 @@ const statusCheckSchema = Joi.object({
   success: Joi.string(),
   error: Joi.string(),
   esHitsCheck: Joi.object({
-    index: Joi.string().required(),
+    index: Joi.alternatives()
+      .try(Joi.string(), Joi.array().items(Joi.string()))
+      .required(),
     query: Joi.object().required(),
   }).required(),
 });
