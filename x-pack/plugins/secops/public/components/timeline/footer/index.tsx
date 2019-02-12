@@ -165,13 +165,8 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
         updatedAt: getUpdatedAt(),
       });
     }
-    if (updatedAt === null) {
-      this.setState({
-        ...this.state,
-        updatedAt: getUpdatedAt(),
-      });
-    }
-    if (prevProps.isLoading && !isLoading) {
+
+    if (updatedAt === null || (prevProps.isLoading && !isLoading)) {
       this.setState({
         ...this.state,
         updatedAt: getUpdatedAt(),
