@@ -18,9 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Serializer } from '.';
 
-export function serializeToJson(messages, formats = i18n.formats) {
-  const resultJsonObject = { formats, messages: {} };
+export const serializeToJson: Serializer = (messages, formats = i18n.formats) => {
+  const resultJsonObject = {
+    formats,
+    messages: {} as Record<string, string | { text: string; comment: string }>,
+  };
 
   for (const [mapKey, mapValue] of messages) {
     if (mapValue.description) {
@@ -31,4 +35,4 @@ export function serializeToJson(messages, formats = i18n.formats) {
   }
 
   return JSON.stringify(resultJsonObject, undefined, 2);
-}
+};

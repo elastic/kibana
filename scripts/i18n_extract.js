@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-    loadTestFile(require.resolve('./csp'));
-  });
-}
+require('../src/setup_node_env');
+require('../src/dev/run_i18n_extract');

@@ -17,21 +17,12 @@
  * under the License.
  */
 
-import chalk from 'chalk';
+import { i18n } from '@kbn/i18n';
 
-import { createFailError, run } from './run';
-import { integrateLocaleFiles } from './i18n/integrate_locale_files';
+export { serializeToJson } from './json';
+export { serializeToJson5 } from './json5';
 
-run(async ({ flags: { path }, log }) => {
-  if (!path || typeof path === 'boolean') {
-    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --path option isn't provided.`);
-  }
-
-  if (Array.isArray(path)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} --path should be specified only once`
-    );
-  }
-
-  await integrateLocaleFiles(path, log);
-});
+export type Serializer = (
+  messages: Array<[string, { message: string; description?: string }]>,
+  formats?: typeof i18n.formats
+) => string;

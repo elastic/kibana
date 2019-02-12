@@ -17,9 +17,21 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-    loadTestFile(require.resolve('./csp'));
+import { serializeToJson } from './json';
+
+describe('dev/i18n/serializers/json', () => {
+  test('should serialize default messages to JSON', () => {
+    const messages: Array<[string, { message: string; description?: string }]> = [
+      ['plugin1.message.id-1', { message: 'Message text 1 ' }],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          description: 'Message description',
+        },
+      ],
+    ];
+
+    expect(serializeToJson(messages)).toMatchSnapshot();
   });
-}
+});

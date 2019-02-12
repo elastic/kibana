@@ -21,8 +21,13 @@ import Joi from 'joi';
 import { constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
-import { fromRoot } from '../../utils';
-import { getData } from '../path';
+import {
+  fromRoot
+} from '../../utils';
+import {
+  getData
+} from '../path';
+import { DEFAULT_CSP_RULES } from '../csp';
 
 const tilemapSchema = Joi.object({
   url: Joi.string(),
@@ -86,6 +91,11 @@ export default () => Joi.object({
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
+  }).default(),
+
+  csp: Joi.object({
+    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
+    strict: Joi.boolean().default(false),
   }).default(),
 
   cpu: Joi.object({
