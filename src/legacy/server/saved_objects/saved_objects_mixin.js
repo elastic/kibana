@@ -73,7 +73,7 @@ export function savedObjectsMixin(kbnServer, server) {
     // throw an exception if an extraType is not defined.
     extraTypes.forEach(type => {
       if(!allTypes.includes(type)) {
-        throw new Error(`Missing mappings for saved objects type ${type}`);
+        throw new Error(`Missing mappings for saved objects type '${type}'`);
       }
     });
     const combinedTypes = visibleTypes.concat(extraTypes);

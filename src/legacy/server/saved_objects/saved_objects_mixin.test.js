@@ -27,7 +27,35 @@ describe('Saved Objects Mixin', () => {
   beforeEach(() => {
     mockKbnServer = {
       pluginSpecs: { some: () => { return true; } },
-      uiExports: { savedObjectSchemas: {} },
+      uiExports: {
+        savedObjectSchemas: {
+          hiddentype: {
+            hidden: true,
+          }
+        },
+        savedObjectMappings: [
+          {
+            pluginId: 'testtype',
+            properties: {
+              testtype: {
+                properties: {
+                  name: { type: 'keyword' },
+                },
+              },
+            },
+          },
+          {
+            pluginId: 'secretPlugin',
+            properties: {
+              hiddentype: {
+                properties: {
+                  secret: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        ],
+      },
     };
     mockServer = {
       log: sinon.spy(),
@@ -77,10 +105,47 @@ describe('Saved Objects Mixin', () => {
   });
 
   describe('Saved object service', () => {
-    it('should return all types', () => {
+    let service;
+
+    beforeEach(() => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.decorate.calledWithMatch(sinon.match('server'), sinon.match('savedObjects'))).toBeTruthy();
-      //TODO: add test for service.
+      for(let n = 0; n < mockServer.decorate.callCount; ++n) {
+        const decorateCall = mockServer.decorate.getCall(n);
+        if(decorateCall.calledWithMatch('server', 'savedObjects', sinon.match({}))) {
+          service = decorateCall.args[2];
+          break;
+        }
+      }
+    });
+
+    it('should return all types', () => {
+      expect(service).toBeDefined();
+      expect(service.types).toEqual(['config', 'testtype']);
+    });
+
+    const mockCallEs = sinon.spy();
+    describe('repository creation', () => {
+      it('should not allow a repository with an undefined type', () => {
+        expect(() => {
+          service.getSavedObjectsRepository(mockCallEs, ['extraType']);
+        }).toThrow(new Error('Missing mappings for saved objects type \'extraType\''));
+      });
+
+      it('should create a repository without hidden types', () => {
+        const repository = service.getSavedObjectsRepository(mockCallEs);
+        expect(repository).toBeDefined();
+        expect(repository._allowedTypes).toEqual(['config', 'testtype']);
+      });
+
+      it('should create a repository with a unique list of allowed types', () => {
+        const repository = service.getSavedObjectsRepository(mockCallEs, ['config', 'config', 'config']);
+        expect(repository._allowedTypes).toEqual(['config', 'testtype']);
+      });
+
+      it('should create a repository with extraTypes minus duplicate', () => {
+        const repository = service.getSavedObjectsRepository(mockCallEs, ['hiddentype', 'hiddentype']);
+        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'hiddentype']);
+      });
     });
   });
 });
