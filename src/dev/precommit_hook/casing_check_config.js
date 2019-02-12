@@ -194,7 +194,7 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/ml/server/client/__tests__/elasticsearch-ml.js',
   'x-pack/plugins/ml/server/client/elasticsearch-ml.js',
-  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/jquery-flot.js',
+  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
   'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/components/clusterView.js',
   'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/components/tableBody.js',
   'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/components/tableHead.js',

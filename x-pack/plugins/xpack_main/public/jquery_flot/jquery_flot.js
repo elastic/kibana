@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const $ = require('jquery');
+import $ from 'jquery';
 if (window) { window.jQuery = $; }
-require('ui/flot-charts/jquery.flot');
+import 'ui/flot-charts/jquery.flot';
 
 // load flot plugins
 // avoid the `canvas` plugin, it causes blurry fonts
-require('ui/flot-charts/jquery.flot.time');
-require('ui/flot-charts/jquery.flot.crosshair');
-require('ui/flot-charts/jquery.flot.selection');
+import 'ui/flot-charts/jquery.flot.time';
+import 'ui/flot-charts/jquery.flot.crosshair';
+import 'ui/flot-charts/jquery.flot.selection';
 
 export default $;
