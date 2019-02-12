@@ -60,7 +60,6 @@ export function savedObjectsMixin(kbnServer, server) {
 
   const migrator = new KibanaMigrator({ kbnServer });
 
-  server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
   server.decorate('server', 'kibanaMigrator', migrator);
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
