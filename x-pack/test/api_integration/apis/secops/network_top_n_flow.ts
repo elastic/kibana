@@ -6,7 +6,10 @@
 
 import expect from 'expect.js';
 import { networkTopNFlowQuery } from '../../../../plugins/secops/public/containers/network_top_n_flow/index.gql_query';
-import { GetNetworkTopNFlowQuery } from '../../../../plugins/secops/public/graphql/types';
+import {
+  GetNetworkTopNFlowQuery,
+  NetworkTopNFlowType,
+} from '../../../../plugins/secops/public/graphql/types';
 
 import { KbnTestProvider } from './types';
 
@@ -18,7 +21,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
     before(() => esArchiver.load('filebeat/default'));
     after(() => esArchiver.unload('filebeat/default'));
 
-    it('Make sure that we get NetworkTopNFlow data', () => {
+    it('Make sure that we get Source NetworkTopNFlow data', () => {
       return client
         .query<GetNetworkTopNFlowQuery.Query>({
           query: networkTopNFlowQuery,
@@ -26,48 +29,78 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: 1549936644870,
+              from: 1549677444870,
             },
+            type: NetworkTopNFlowType.source,
             pagination: {
-              limit: 1,
+              limit: 10,
               cursor: null,
             },
           },
         })
         .then(resp => {
-          const authentications = resp.data.source.NetworkTopNFlow;
-          expect(authentications.edges.length).to.be(1);
-          expect(authentications.totalCount).to.be(2);
-          expect(authentications.pageInfo.endCursor!.value).to.equal('1');
+          const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+          expect(networkTopNFlow.edges.length).to.be(10);
+          expect(networkTopNFlow.totalCount).to.be(121);
+          expect(networkTopNFlow.edges[0].node.destination).to.be(null);
+          expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
         });
     });
 
-    // it('Make sure that pagination is working in Authentications query', () => {
-    //   return client
-    //     .query<GetAuthenticationsQuery.Query>({
-    //       query: authenticationsQuery,
-    //       variables: {
-    //         sourceId: 'default',
-    //         timerange: {
-    //           interval: '12h',
-    //           to: 1546554465535,
-    //           from: 1483306065535,
-    //         },
-    //         pagination: {
-    //           limit: 2,
-    //           cursor: '1',
-    //         },
-    //       },
-    //     })
-    //     .then(resp => {
-    //       const authentications = resp.data.source.Authentications;
+    it('Make sure that we get Destination NetworkTopNFlow data', () => {
+      return client
+        .query<GetNetworkTopNFlowQuery.Query>({
+          query: networkTopNFlowQuery,
+          variables: {
+            sourceId: 'default',
+            timerange: {
+              interval: '12h',
+              to: 1549936644870,
+              from: 1549677444870,
+            },
+            type: NetworkTopNFlowType.destination,
+            pagination: {
+              limit: 10,
+              cursor: null,
+            },
+          },
+        })
+        .then(resp => {
+          const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+          expect(networkTopNFlow.edges.length).to.be(10);
+          expect(networkTopNFlow.totalCount).to.be(154);
+          expect(networkTopNFlow.edges[0].node.source).to.be(null);
+          expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+        });
+    });
 
-    //       expect(authentications.edges.length).to.be(1);
-    //       expect(authentications.totalCount).to.be(2);
-    //       expect(authentications.edges[0]!.node.lastFailure!.host!.name).to.be('siem-kibana');
-    //     });
-    // });
+    it('Make sure that pagination is working in NetworkTopNFlow query', () => {
+      return client
+        .query<GetNetworkTopNFlowQuery.Query>({
+          query: networkTopNFlowQuery,
+          variables: {
+            sourceId: 'default',
+            timerange: {
+              interval: '12h',
+              to: 1549936644870,
+              from: 1549677444870,
+            },
+            type: NetworkTopNFlowType.source,
+            pagination: {
+              limit: 20,
+              cursor: 10,
+            },
+          },
+        })
+        .then(resp => {
+          const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+
+          expect(networkTopNFlow.edges.length).to.be(10);
+          expect(networkTopNFlow.totalCount).to.be(121);
+          expect(networkTopNFlow.edges[0].node.source!.ip).to.be('151.205.0.17');
+        });
+    });
   });
 };
 

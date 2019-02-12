@@ -62,7 +62,8 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
     );
     const hasNextPage = networkTopNFlowEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
-    const edges = networkTopNFlowEdges.splice(beginning, limit);
+    const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
+
     return {
       edges,
       totalCount,

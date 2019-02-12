@@ -113,13 +113,6 @@ export const buildQuery = ({
       },
       query: {
         bool: {
-          must: {
-            match_phrase: {
-              'event.action': {
-                query: 'netflow_flow',
-              },
-            },
-          },
           filter,
         },
       },

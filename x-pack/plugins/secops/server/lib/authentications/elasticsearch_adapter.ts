@@ -53,7 +53,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
 
     const hasNextPage = authenticationEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
-    const edges = authenticationEdges.splice(beginning, limit);
+    const edges = authenticationEdges.splice(beginning, limit - beginning);
     return {
       edges,
       totalCount,
