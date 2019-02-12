@@ -95,35 +95,53 @@ class CodeProjectItem extends React.PureComponent<{
 
     const Panel = hasError ? ErrorProjectItemPanel : ProjectItemPanel;
 
+    const settingsShow =
+      status && status.state !== RepoState.CLONING && status.state !== RepoState.DELETING;
+    const settingsVisibility = settingsShow ? 'visible' : 'hidden';
+
+    const indexShow =
+      status && status.state !== RepoState.CLONING && status.state !== RepoState.DELETING;
+    const indexVisibility = indexShow ? 'visible' : 'hidden';
+
+    const deleteShow = status && status.state !== RepoState.DELETING;
+    const deleteVisibility = deleteShow ? 'visible' : 'hidden';
+
     const projectManagement = (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="none">
-          {status && status.state !== RepoState.CLONING && (
-            <EuiFlexItem grow={false}>
-              <div className="code-project-button" onClick={onClickSettings} role="button">
-                <EuiIcon type="gear" />
-                <EuiText size="xs" color="subdued">
-                  Settings
-                </EuiText>
-              </div>
-            </EuiFlexItem>
-          )}
-          {status && status.state !== RepoState.CLONING && (
-            <EuiFlexItem grow={false}>
-              <div className="code-project-button" onClick={onClickIndex} role="button">
-                <EuiIcon type="indexSettings" />
-                <EuiText size="xs" color="subdued">
-                  Index
-                </EuiText>
-              </div>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <div
+              className="code-project-button"
+              onClick={onClickSettings}
+              role="button"
+              style={{ visibility: settingsVisibility }}
+            >
+              <EuiIcon type="gear" />
+              <EuiText size="xs" color="subdued">
+                Settings
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div
+              className="code-project-button"
+              onClick={onClickIndex}
+              role="button"
+              style={{ visibility: indexVisibility }}
+            >
+              <EuiIcon type="indexSettings" />
+              <EuiText size="xs" color="subdued">
+                Index
+              </EuiText>
+            </div>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div
               className="code-project-button"
               data-test-subj="deleteRepositoryButton"
               onClick={onClickDelete}
               role="button"
+              style={{ visibility: deleteVisibility }}
             >
               <EuiIcon type="trash" color="danger" />
               <EuiText size="xs" color="subdued">
