@@ -36,18 +36,22 @@ interface State {
   changeInProgress: boolean;
 }
 
+function getInitialState(): State {
+  return {
+    shouldValidate: false,
+    showForm: false,
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    currentPasswordError: false,
+    changeInProgress: false,
+  };
+}
+
 export class ChangePassword extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      shouldValidate: false,
-      showForm: false,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-      currentPasswordError: false,
-      changeInProgress: false,
-    };
+    this.state = getInitialState();
   }
 
   public render() {
@@ -84,17 +88,9 @@ export class ChangePassword extends Component<Props, State> {
 
   private getForm = () => {
     return (
-      <EuiForm {...this.state.shouldValidate && this.validateForm()}>
+      <EuiForm>
         <EuiFormRow
-          isInvalid={this.state.currentPasswordError}
-          error={
-            this.state.currentPasswordError && (
-              <FormattedMessage
-                id="xpack.security.account.changePasswordForm.invalidPassword"
-                defaultMessage="Password is incorrect"
-              />
-            )
-          }
+          {...this.validateCurrentPassword()}
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.currentPasswordLabel"
@@ -110,6 +106,7 @@ export class ChangePassword extends Component<Props, State> {
           />
         </EuiFormRow>
         <EuiFormRow
+          {...this.validateNewPassword()}
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.newPasswordLabel"
@@ -125,6 +122,7 @@ export class ChangePassword extends Component<Props, State> {
           />
         </EuiFormRow>
         <EuiFormRow
+          {...this.validateConfirmPassword()}
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.confirmPasswordLabel"
@@ -142,12 +140,7 @@ export class ChangePassword extends Component<Props, State> {
         <EuiFormRow>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiButton
-                onClick={() => {
-                  this.setState({ showForm: false });
-                }}
-                isDisabled={this.state.changeInProgress}
-              >
+              <EuiButton onClick={this.onCancelClick} isDisabled={this.state.changeInProgress}>
                 <FormattedMessage
                   id="xpack.security.account.changePasswordForm.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -184,6 +177,10 @@ export class ChangePassword extends Component<Props, State> {
     this.setState({ confirmPassword: e.target.value });
   };
 
+  private onCancelClick = () => {
+    this.setState(getInitialState());
+  };
+
   private onChangePasswordClick = async () => {
     const { isInvalid } = this.validateForm();
 
@@ -196,9 +193,26 @@ export class ChangePassword extends Component<Props, State> {
     this.setState({ changeInProgress: true }, () => this.performPasswordChange());
   };
 
-  private validateForm = () => {
-    const { currentPassword, newPassword, confirmPassword } = this.state;
-    if (!currentPassword) {
+  private validateCurrentPassword = (shouldValidate = this.state.shouldValidate) => {
+    if (!shouldValidate) {
+      return {
+        isInvalid: false,
+      };
+    }
+
+    if (this.state.currentPasswordError) {
+      return {
+        isInvalid: true,
+        error: (
+          <FormattedMessage
+            id="xpack.security.account.changePasswordForm.invalidPassword"
+            defaultMessage="Password is incorrect"
+          />
+        ),
+      };
+    }
+
+    if (!this.state.currentPassword) {
       return {
         isInvalid: true,
         error: (
@@ -209,19 +223,16 @@ export class ChangePassword extends Component<Props, State> {
         ),
       };
     }
-    if (newPassword !== confirmPassword) {
-      return {
-        isInvalid: true,
-        error: (
-          <FormattedMessage
-            id="xpack.security.account.passwordsDoNotMatch"
-            defaultMessage="Passwords to not match"
-          />
-        ),
-      };
-    }
+
+    return {
+      isInvalid: false,
+    };
+  };
+
+  private validateNewPassword = (shouldValidate = this.state.shouldValidate) => {
+    const { newPassword } = this.state;
     const minPasswordLength = 6;
-    if (newPassword.length < minPasswordLength) {
+    if (shouldValidate && newPassword.length < minPasswordLength) {
       return {
         isInvalid: true,
         error: (
@@ -234,6 +245,42 @@ export class ChangePassword extends Component<Props, State> {
           />
         ),
       };
+    }
+
+    return {
+      isInvalid: false,
+    };
+  };
+
+  private validateConfirmPassword = (shouldValidate = this.state.shouldValidate) => {
+    const { newPassword, confirmPassword } = this.state;
+    if (shouldValidate && newPassword !== confirmPassword) {
+      return {
+        isInvalid: true,
+        error: (
+          <FormattedMessage
+            id="xpack.security.account.passwordsDoNotMatch"
+            defaultMessage="Passwords to not match"
+          />
+        ),
+      };
+    }
+
+    return {
+      isInvalid: false,
+    };
+  };
+
+  private validateForm = () => {
+    const validation = [
+      this.validateCurrentPassword(true),
+      this.validateNewPassword(true),
+      this.validateConfirmPassword(true),
+    ];
+
+    const firstFailure = validation.find(result => result.isInvalid);
+    if (firstFailure) {
+      return firstFailure;
     }
 
     return {
