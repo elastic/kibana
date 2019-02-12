@@ -28,7 +28,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         const capabilities: UICapabilities = uiCapabilities.value as UICapabilities;
 
         switch (scenario.username) {
-          // these users have a read/write view of Discover
+          // these users have a read/write view of Graph
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
