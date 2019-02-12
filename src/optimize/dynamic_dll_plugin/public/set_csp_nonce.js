@@ -18,4 +18,4 @@
  */
 
 // eslint-disable-next-line camelcase, no-undef
-__webpack_nonce__ = window.__webpack_nonce__;
+__webpack_nonce__ = window.__kbnNonce__;
