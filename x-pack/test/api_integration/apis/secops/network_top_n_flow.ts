@@ -69,7 +69,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const networkTopNFlow = resp.data.source.NetworkTopNFlow;
           expect(networkTopNFlow.edges.length).to.be(10);
-          expect(networkTopNFlow.totalCount).to.be(154);
+          expect(networkTopNFlow.totalCount).to.be(144);
           expect(networkTopNFlow.edges[0].node.source).to.be(null);
           expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
         });
@@ -98,7 +98,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
 
           expect(networkTopNFlow.edges.length).to.be(10);
           expect(networkTopNFlow.totalCount).to.be(121);
-          expect(networkTopNFlow.edges[0].node.source!.ip).to.be('151.205.0.17');
+          expect(networkTopNFlow.edges[0].node.source!.ip).to.be('151.205.0.19');
         });
     });
   });
