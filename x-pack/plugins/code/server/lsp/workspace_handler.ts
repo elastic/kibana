@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
+import { delay } from 'lodash';
 import mkdirp from 'mkdirp';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
@@ -49,18 +50,28 @@ export class WorkspaceHandler {
    * @param revision
    */
   public async openWorkspace(repositoryUri: string, revision: string) {
-    try {
-      const gitStatus = await this.objectClient.getRepositoryGitStatus(repositoryUri);
+    // Try get repository clone status with 3 retries at maximum.
+    const tryGetGitStatus = async (retryCount: number) => {
+      let gitStatus;
+      try {
+        gitStatus = await this.objectClient.getRepositoryGitStatus(repositoryUri);
+      } catch (error) {
+        throw Boom.internal(`checkout workspace on an unknown status repository`);
+      }
 
       if (
         !RepositoryUtils.hasFullyCloned(gitStatus.cloneProgress) &&
-        gitStatus.progress !== WorkerReservedProgress.COMPLETED
+        gitStatus.progress < WorkerReservedProgress.COMPLETED
       ) {
-        throw Boom.internal(`repository has not been fully cloned yet.`);
+        if (retryCount < 3) {
+          this.log.debug(`Check repository ${repositoryUri} clone status at trial ${retryCount}`);
+          return delay(tryGetGitStatus, 3000, retryCount + 1);
+        } else {
+          throw Boom.internal(`repository has not been fully cloned yet.`);
+        }
       }
-    } catch (error) {
-      throw Boom.internal(`checkout workspace on an unknown status repository`);
-    }
+    };
+    await tryGetGitStatus(0);
 
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
