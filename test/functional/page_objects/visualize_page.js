@@ -729,18 +729,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getXAxisLabels() {
-      const chartTypes = await find.allByCssSelector('.x > g');
-      async function getChartType(chart) {
-        return await chart.getVisibleText();
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      const xAxis = await find.byCssSelector('.visAxis--x.visAxis__column--bottom');
+      const $ = await xAxis.parseDomContent();
+      return $('.x > g > text').toArray().map(tick => $(tick).text().trim());
     }
 
     async getYAxisLabels() {
-      const chartTypes = await find.allByCssSelector('.y > g');
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
-      return await Promise.all(getChartTypesPromises);
+      const yAxis = await find.byCssSelector('.visAxis__column--y.visAxis__column--left');
+      const $ = await yAxis.parseDomContent();
+      return $('.y > g > text').toArray().map(tick => $(tick).text().trim());
     }
 
     /*
