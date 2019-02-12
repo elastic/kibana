@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
+import { mirrorPluginStatus } from '../mirror_plugin_status';
 import { checkLicense } from '../check_license';
-import { PLUGIN } from '../../../common/constants';
 
-export function registerLicenseChecker(server) {
+export function registerLicenseChecker(server, pluginId) {
   const xpackMainPlugin = server.plugins.xpack_main;
-  const indexManagementPlugin = server.plugins.index_management;
+  const thisPlugin = server.plugins[pluginId];
 
-  mirrorPluginStatus(xpackMainPlugin, indexManagementPlugin);
+  mirrorPluginStatus(xpackMainPlugin, thisPlugin);
   xpackMainPlugin.status.once('green', () => {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(PLUGIN.ID).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackMainPlugin.info.feature(pluginId).registerLicenseCheckResultsGenerator(checkLicense);
   });
 }
