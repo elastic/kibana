@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
         await pieChart.expectPieSliceCount(5);
       });
 
-      it('area, bar and heatmap charts', async () => {
+      it.skip('area, bar and heatmap charts', async () => {
         await dashboardExpect.seriesElementCount(3);
       });
 
