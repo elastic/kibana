@@ -76,8 +76,7 @@ class ObjectsTableUI extends Component {
   constructor(props) {
     super(props);
     this.savedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      const { find, bulk_get: bulkGet } = this.props.uiCapabilities.savedObjects[type];
-      return find && bulkGet;
+      return this.props.uiCapabilities.savedObjectsManagement[type].read;
     });
 
     this.state = {
@@ -600,7 +599,7 @@ class ObjectsTableUI extends Component {
     }));
 
     const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
-      return this.props.uiCapabilities.savedObjects[type].delete;
+      return this.props.uiCapabilities.savedObjectsManagement[type].delete;
     });
 
     return (

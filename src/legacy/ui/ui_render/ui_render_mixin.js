@@ -48,12 +48,13 @@ export function uiRenderMixin(kbnServer, server, config) {
           ...acc,
           [navLinkSpec._id]: true
         }), {}),
-        savedObjects: savedObjects.types.reduce((acc, type) => ({
+        savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
           ...acc,
-          [type]: savedObjects.SavedObjectsClient.operations.reduce((acc2, operation) => ({
-            ...acc2,
-            [operation]: true,
-          }), {})
+          [type]: {
+            delete: true,
+            edit: true,
+            read: true,
+          }
         }), {}),
       }
     };

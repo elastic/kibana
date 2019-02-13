@@ -58,8 +58,10 @@ describe('canViewInApp', () => {
 
   it('should handle index patterns', () => {
     let uiCapabilities = {
-      indexPatterns: {
-        show: true,
+      management: {
+        kibana: {
+          indices: true
+        }
       }
     };
     expect(canViewInApp(uiCapabilities, 'index-pattern')).toEqual(true);
@@ -67,8 +69,10 @@ describe('canViewInApp', () => {
     expect(canViewInApp(uiCapabilities, 'indexPatterns')).toEqual(true);
 
     uiCapabilities = {
-      indexPatterns: {
-        show: false,
+      management: {
+        kibana: {
+          indices: false
+        }
       }
     };
     expect(canViewInApp(uiCapabilities, 'index-pattern')).toEqual(false);

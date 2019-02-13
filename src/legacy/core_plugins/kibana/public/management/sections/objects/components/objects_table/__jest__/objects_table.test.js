@@ -146,22 +146,18 @@ const defaultProps = {
   canGoInApp: () => {},
   goInApp: () => {},
   uiCapabilities: {
-    savedObjects: {
+    savedObjectsManagement: {
       'index-pattern': {
-        find: true,
-        bulk_get: true,
+        read: true
       },
       visualization: {
-        find: true,
-        bulk_get: true,
+        read: true
       },
       dashboard: {
-        find: true,
-        bulk_get: true,
+        read: true
       },
       search: {
-        find: true,
-        bulk_get: true,
+        read: true
       }
     }
   },
@@ -231,22 +227,18 @@ describe('ObjectsTable', () => {
 
   it('should filter find operation based on the uiCapabilities', async () => {
     const uiCapabilities = {
-      savedObjects: {
+      savedObjectsManagement: {
         'index-pattern': {
-          find: true,
-          bulk_get: false,
+          read: false,
         },
         visualization: {
-          find: false,
-          bulk_get: true,
+          read: false,
         },
         dashboard: {
-          find: false,
-          bulk_get: false,
+          read: false,
         },
         search: {
-          find: true,
-          bulk_get: true,
+          read: true,
         }
       }
     };
@@ -415,22 +407,18 @@ describe('ObjectsTable', () => {
       const { getRelationships } = require('../../../lib/get_relationships');
 
       const uiCapabilities = {
-        savedObjects: {
+        savedObjectsManagement: {
           'index-pattern': {
-            find: true,
-            bulk_get: false,
+            read: false,
           },
           visualization: {
-            find: false,
-            bulk_get: true,
+            read: false,
           },
           dashboard: {
-            find: false,
-            bulk_get: false,
+            read: false,
           },
           search: {
-            find: true,
-            bulk_get: true,
+            read: true,
           }
         }
       };
