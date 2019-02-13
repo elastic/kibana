@@ -138,6 +138,7 @@ export class RepositoryObjectClient {
     return await this.esClient.index({
       index: RepositoryIndexName(repoUri),
       id: this.getRepositoryObjectId(reservedFieldName),
+      refresh: 'true',
       body: JSON.stringify({
         [reservedFieldName]: obj,
       }),
@@ -152,6 +153,7 @@ export class RepositoryObjectClient {
     return await this.esClient.update({
       index: RepositoryIndexName(repoUri),
       id: this.getRepositoryObjectId(reservedFieldName),
+      refresh: 'true',
       body: JSON.stringify({
         doc: {
           [reservedFieldName]: obj,
