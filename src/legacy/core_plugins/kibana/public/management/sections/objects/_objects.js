@@ -27,6 +27,7 @@ import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
+import { canViewInApp } from './lib/can_view_in_app';
 import { getInAppUrl } from './lib/get_in_app_url';
 import { I18nContext } from 'ui/i18n';
 
@@ -80,6 +81,9 @@ function updateObjectsTable($scope, $injector, i18n) {
             }
 
             return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
+          }}
+          canGoInApp={(type) => {
+            return canViewInApp(uiCapabilites, type);
           }}
           goInApp={(id, type) => {
             kbnUrl.change(getInAppUrl(id, type));

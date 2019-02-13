@@ -89,6 +89,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           Object {
             "actions": Array [
               Object {
+                "available": [Function],
                 "description": "View this saved object within Kibana",
                 "icon": "eye",
                 "name": "In app",
@@ -228,6 +229,7 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
+                "available": [Function],
                 "description": "View this saved object within Kibana",
                 "icon": "eye",
                 "name": "In app",

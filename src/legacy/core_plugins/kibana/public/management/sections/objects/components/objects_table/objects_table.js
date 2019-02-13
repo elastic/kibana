@@ -68,6 +68,7 @@ class ObjectsTableUI extends Component {
     newIndexPatternUrl: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
     getEditUrl: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
     uiCapabilities: PropTypes.object.isRequired,
   };
@@ -403,6 +404,7 @@ class ObjectsTableUI extends Component {
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
         getEditUrl={this.props.getEditUrl}
+        canGoInApp={this.props.canGoInApp}
         goInApp={this.props.goInApp}
       />
     );
@@ -628,6 +630,7 @@ class ObjectsTableUI extends Component {
           canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
           onDelete={this.onDelete}
           getEditUrl={this.props.getEditUrl}
+          canGoInApp={this.props.canGoInApp}
           goInApp={this.props.goInApp}
           pageIndex={page}
           pageSize={perPage}

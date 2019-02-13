@@ -46,6 +46,7 @@ class TableUI extends PureComponent {
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
@@ -98,6 +99,7 @@ class TableUI extends PureComponent {
       onExport,
       selectedSavedObjects,
       onTableChange,
+      canGoInApp,
       goInApp,
       getEditUrl,
       onShowRelationships,
@@ -182,6 +184,7 @@ class TableUI extends PureComponent {
               }),
             type: 'icon',
             icon: 'eye',
+            available: object => canGoInApp(object.type),
             onClick: object => goInApp(object.id, object.type),
           },
           {

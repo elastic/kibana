@@ -82,6 +82,7 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
@@ -286,6 +287,7 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
@@ -350,6 +352,7 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
@@ -459,6 +462,7 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",

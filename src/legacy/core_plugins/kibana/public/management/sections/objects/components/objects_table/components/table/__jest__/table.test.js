@@ -50,6 +50,7 @@ const defaultProps = {
   onDelete: () => {},
   onExport: () => {},
   getEditUrl: () => {},
+  canGoInApp: () => {},
   goInApp: () => {},
   pageIndex: 1,
   pageSize: 2,

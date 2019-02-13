@@ -143,6 +143,7 @@ const defaultProps = {
   kbnIndex: '',
   services: [],
   getEditUrl: () => {},
+  canGoInApp: () => {},
   goInApp: () => {},
   uiCapabilities: {
     savedObjects: {
