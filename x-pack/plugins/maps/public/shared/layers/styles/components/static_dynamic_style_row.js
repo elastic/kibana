@@ -93,7 +93,7 @@ export class StaticDynamicStyleRow extends React.Component {
   render() {
     const isDynamic = this._isDynamic();
     const dynamicTooltipContent =
-      isDynamic ? "Use static styling properties to symbolize features." : "Use property values to symbolize features.";
+      isDynamic ? 'Use static styling properties to symbolize features.' : 'Use property values to symbolize features.';
 
     return (
       <EuiFlexGroup gutterSize="s">
