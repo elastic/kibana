@@ -28,8 +28,10 @@ the index settings, mapping, and statistics.
 From the *Manage* menu, you can perform these index-level operations on either 
 a single or multiple indices:
 
-* *Close the index*. Blocks the index from read/write operations.  If
-you reopen a closed index, it goes through the normal recovery process.
+* *Close the index*. Blocks the index from read/write operations. 
+A closed index exists in the cluster, but doesn't consume resources 
+other than disk space. If you reopen a closed index, it goes through the 
+normal recovery process. 
 
 * *Force merge the index*. Reduces the number of segments in your shard by 
 merging smaller files and clearing deleted ones. Only force merge a read-only index.
