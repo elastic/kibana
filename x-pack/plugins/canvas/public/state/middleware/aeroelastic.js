@@ -24,6 +24,7 @@ import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
 
 const aeroelasticConfiguration = {
+  getAdHocChildAnnotationName: 'adHocChildAnnotation',
   adHocGroupName: 'adHocGroup',
   alignmentGuideName: 'alignmentGuide',
   atopZ: 1000,

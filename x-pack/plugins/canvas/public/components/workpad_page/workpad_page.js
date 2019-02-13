@@ -141,7 +141,8 @@ export class WorkpadPage extends PureComponent {
               switch (element.subtype) {
                 case 'alignmentGuide':
                   return <AlignmentGuide {...props} />;
-                case 'hoverAnnotation':
+                case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
+                case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
