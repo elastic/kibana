@@ -1273,30 +1273,29 @@ export const getAlignmentGuideAnnotations = (config, shapes, draggedPrimaryShape
     : [];
 };
 
-export const getHoverAnnotations = (
-  config,
-  hoveredShape,
-  selectedPrimaryShapeIds,
-  draggedShape
-) => {
-  return hoveredShape &&
-    hoveredShape.type !== 'annotation' &&
-    selectedPrimaryShapeIds.indexOf(hoveredShape.id) === -1 &&
+const borderAnnotation = (subtype, lift) => shape => ({
+  ...shape,
+  id: subtype + '_' + shape.id,
+  type: 'annotation',
+  subtype,
+  interactive: false,
+  localTransformMatrix: multiply(shape.localTransformMatrix, translate(0, 0, lift)),
+  parent: shape.parent,
+});
+
+export const getAdHocChildrenAnnotations = (config, { shapes }) => {
+  const adHocGroups = shapes.filter(s => s.subtype === config.adHocGroupName);
+  return shapes
+    .filter(s => s.type !== 'annotation' && s.parent && adHocGroups.find(p => p.id === s.parent))
+    .map(borderAnnotation(config.getAdHocChildAnnotationName, config.hoverLift));
+};
+
+export const getHoverAnnotations = (config, shape, selectedPrimaryShapeIds, draggedShape) => {
+  return shape &&
+    shape.type !== 'annotation' &&
+    selectedPrimaryShapeIds.indexOf(shape.id) === -1 &&
     !draggedShape
-    ? [
-        {
-          ...hoveredShape,
-          id: config.hoverAnnotationName + '_' + hoveredShape.id,
-          type: 'annotation',
-          subtype: config.hoverAnnotationName,
-          interactive: false,
-          localTransformMatrix: multiply(
-            hoveredShape.localTransformMatrix,
-            translate(0, 0, config.hoverLift)
-          ),
-          parent: null, // consider linking to proper parent, eg. for more regular typing (ie. all shapes have all props)
-        },
-      ]
+    ? [borderAnnotation(config.hoverAnnotationName, config.hoverLift)(shape)]
     : [];
 };
 
@@ -1366,13 +1365,15 @@ export const getAnnotatedShapes = (
   alignmentGuideAnnotations,
   hoverAnnotations,
   rotationAnnotations,
-  resizeAnnotations
+  resizeAnnotations,
+  adHocChildrenAnnotations
 ) => {
   const annotations = [].concat(
     alignmentGuideAnnotations,
     hoverAnnotations,
     rotationAnnotations,
-    resizeAnnotations
+    resizeAnnotations,
+    adHocChildrenAnnotations
   );
   // remove preexisting annotations
   const contentShapes = shapes.filter(shape => shape.type !== 'annotation');
