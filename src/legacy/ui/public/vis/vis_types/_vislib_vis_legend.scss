@@ -108,12 +108,18 @@
 }
 
 .visLegend__valueColorPicker {
-  width: $euiSizeM * 10;
+  $colorPickerDotsPerRow: 8;
+  $colorPickerWidth: $euiSizeM * 10;
+
+  width: $colorPickerWidth;
   margin: auto;
 
   .visLegend__valueColorPickerDot {
-    margin: $euiSizeXS / 2;
-    width: ($euiSizeM * 10 -  2 * 8 * ($euiSizeXS / 2)) / 8;
+    $colorPickerDotMargin: $euiSizeXS / 2;
+    $colorPickerDotWidth: $colorPickerWidth / $colorPickerDotsPerRow - 2 * $colorPickerDotMargin;
+
+    margin: $colorPickerDotMargin;
+    width: $colorPickerDotWidth;
 
     &:hover {
       transform: scale(1.4);
