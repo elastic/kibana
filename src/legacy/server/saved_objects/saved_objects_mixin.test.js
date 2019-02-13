@@ -85,6 +85,14 @@ describe('Saved Objects Mixin', () => {
     };
   });
 
+  describe('no kibana plugin', () => {
+    it('should not try to create anything', () => {
+      mockKbnServer.pluginSpecs.some = () => false;
+      savedObjectsMixin(mockKbnServer, mockServer);
+      mockServer.log.calledWithMatch(sinon.match.array, sinon.match.string);
+    });
+  });
+
   describe('Routes', () => {
     it('should create 7 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -197,9 +205,8 @@ describe('Saved Objects Mixin', () => {
       });
 
       it('should call underlining callCluster', async () => {
-        stubCallCluster.withArgs('indices.get').returns({
-          status: 404
-        });
+        stubCallCluster.withArgs('indices.get').returns({ status: 404 });
+        stubCallCluster.withArgs('indices.getAlias').returns({ status: 404 });
         stubCallCluster.withArgs('cat.templates').returns([]);
         stubConfig.withArgs('kibana.index').returns('kibana-index');
         const client = await service.getScopedSavedObjectsClient();
