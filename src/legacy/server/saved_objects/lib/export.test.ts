@@ -90,13 +90,27 @@ Array [
   },
 ]
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.find.mock.calls[0]).toEqual([
-      {
-        perPage: 500,
-        type: ['index-pattern', 'search'],
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "perPage": 500,
+        "type": Array [
+          "index-pattern",
+          "search",
+        ],
       },
-    ]);
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test('export selected types throws error when exceeding exportSizeLimit', async () => {
@@ -182,19 +196,30 @@ Array [
   },
 ]
 `);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet.mock.calls[0]).toEqual([
-      [
-        {
-          type: 'index-pattern',
-          id: '1',
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
         },
-        {
-          type: 'search',
-          id: '2',
+        Object {
+          "id": "2",
+          "type": "search",
         },
       ],
-    ]);
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test('export selected objects throws error when exceeding exportSizeLimit', async () => {

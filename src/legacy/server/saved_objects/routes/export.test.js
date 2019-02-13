@@ -86,14 +86,26 @@ describe('GET /api/saved_objects/_export', () => {
 "{\\"id\\":\\"1\\",\\"type\\":\\"search\\",\\"references\\":[]}
 {\\"id\\":\\"2\\",\\"type\\":\\"search\\",\\"references\\":[]}"
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
-    expect(savedObjectsClient.find.mock.calls[0]).toEqual([
-      {
-        type: ['search'],
-        perPage: 10000,
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "perPage": 10000,
+        "type": Array [
+          "search",
+        ],
       },
-    ]);
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test('exports by multiple types in order', async () => {
@@ -129,14 +141,27 @@ describe('GET /api/saved_objects/_export', () => {
 "{\\"id\\":\\"1\\",\\"type\\":\\"index-pattern\\",\\"references\\":[]}
 {\\"id\\":\\"2\\",\\"type\\":\\"search\\",\\"references\\":[{\\"type\\":\\"index-pattern\\",\\"id\\":\\"1\\"}]}"
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
-    expect(savedObjectsClient.find.mock.calls[0]).toEqual([
-      {
-        type: ['search', 'index-pattern'],
-        perPage: 10000,
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "perPage": 10000,
+        "type": Array [
+          "search",
+          "index-pattern",
+        ],
       },
-    ]);
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test('export by type works up to 10000 objects', async () => {
@@ -191,20 +216,30 @@ describe('GET /api/saved_objects/_export', () => {
 "{\\"id\\":\\"1\\",\\"type\\":\\"index-pattern\\",\\"references\\":[]}
 {\\"id\\":\\"2\\",\\"type\\":\\"search\\",\\"references\\":[{\\"type\\":\\"index-pattern\\",\\"id\\":\\"1\\"}]}"
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(0);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet.mock.calls[0]).toEqual([
-      [
-        {
-          type: 'search',
-          id: '2',
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "2",
+          "type": "search",
         },
-        {
-          type: 'index-pattern',
-          id: '1',
+        Object {
+          "id": "1",
+          "type": "index-pattern",
         },
       ],
-    ]);
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test('exports by objects works up to 10000 objects', async () => {
@@ -238,12 +273,21 @@ describe('GET /api/saved_objects/_export', () => {
         .join()}]`,
     };
     const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
     expect(statusCode).toBe(400);
-    /* eslint-disable max-len */
-    expect(payload).toMatchInlineSnapshot(
-      `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"child \\\\\\"objects\\\\\\" fails because [\\\\\\"objects\\\\\\" must contain less than or equal to 10000 items]\\",\\"validation\\":{\\"source\\":\\"query\\",\\"keys\\":[\\"objects\\"]}}"`
-    );
-    /* eslint-enable max-len */
+    expect(response).toMatchInlineSnapshot(`
+Object {
+  "error": "Bad Request",
+  "message": "child \\"objects\\" fails because [\\"objects\\" must contain less than or equal to 10000 items]",
+  "statusCode": 400,
+  "validation": Object {
+    "keys": Array [
+      "objects",
+    ],
+    "source": "query",
+  },
+}
+`);
   });
 
   test(`errors out when type has more than 10000 objects`, async () => {
@@ -257,18 +301,35 @@ describe('GET /api/saved_objects/_export', () => {
     });
 
     const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
 
     expect(statusCode).toBe(400);
-    expect(payload).toMatchInlineSnapshot(
-      `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"Can't export more than 10000 objects\\"}"`
-    );
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
-    expect(savedObjectsClient.find.mock.calls[0]).toEqual([
-      {
-        type: ['search'],
-        perPage: 10000,
+    expect(response).toMatchInlineSnapshot(`
+Object {
+  "error": "Bad Request",
+  "message": "Can't export more than 10000 objects",
+  "statusCode": 400,
+}
+`);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "perPage": 10000,
+        "type": Array [
+          "search",
+        ],
       },
-    ]);
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 });
