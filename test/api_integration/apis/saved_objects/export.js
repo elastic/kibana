@@ -23,33 +23,18 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  function parser(res, done) {
-    res.setEncoding('binary');
-    let data = '';
-    res.on('data', chunk => data += chunk);
-    res.on('end', () => done(null, new Buffer(data, 'binary').toString()));
-  }
-
   describe('export', () => {
     before(() => esArchiver.load('saved_objects/basic'));
     after(() => esArchiver.unload('saved_objects/basic'));
 
-    it('should return 400 exporting without type or objects passed in', async () => {
+    it('should return 200 exporting without type or objects passed in', async () => {
       await supertest
         .get('/api/saved_objects/_export')
-        .expect(400)
-        .buffer()
-        .parse(parser)
+        .expect(200)
         .then((resp) => {
-          expect(JSON.parse(resp.body)).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: '"value" must contain at least one of [type, objects]',
-            validation: {
-              source: 'query',
-              keys: ['value'],
-            },
-          });
+          expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+          const objects = resp.text.split('\n').map(JSON.parse);
+          expect(objects).to.have.length(4);
         });
     });
 
@@ -60,22 +45,18 @@ export default function ({ getService }) {
           type: ['dashboard'],
         })
         .expect(200)
-        .buffer()
-        .parse(parser)
         .then((resp) => {
           expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-          const stringifiedObjects = resp.body.split('\n');
-          expect(stringifiedObjects.length).to.be(1);
-          expect(JSON.parse(stringifiedObjects[0])).to.eql({
+          const objects = resp.text.split('\n').map(JSON.parse);
+          expect(objects).to.eql([{
             attributes: {
               description: '',
               hits: 0,
               kibanaSavedObjectMeta: {
-                // eslint-disable-next-line max-len
-                searchSourceJSON: '{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}',
+                searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
               },
-              optionsJSON: '{\"darkTheme\":false}',
-              panelsJSON: '[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"col\":1,\"row\":1,\"panelRefName\":\"panel_0\"}]',
+              optionsJSON: objects[0].attributes.optionsJSON,
+              panelsJSON: objects[0].attributes.panelsJSON,
               refreshInterval: {
                 display: 'Off',
                 pause: false,
@@ -102,7 +83,7 @@ export default function ({ getService }) {
             type: 'dashboard',
             updated_at: '2017-09-21T18:57:40.826Z',
             version: 'WzMsMV0=',
-          });
+          }]);
         });
     });
 
@@ -118,22 +99,18 @@ export default function ({ getService }) {
           ]),
         })
         .expect(200)
-        .buffer()
-        .parse(parser)
         .then((resp) => {
           expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-          const stringifiedObjects = resp.body.split('\n');
-          expect(stringifiedObjects.length).to.be(1);
-          expect(JSON.parse(stringifiedObjects[0])).to.eql({
+          const objects = resp.text.split('\n').map(JSON.parse);
+          expect(objects).to.eql([{
             attributes: {
               description: '',
               hits: 0,
               kibanaSavedObjectMeta: {
-                // eslint-disable-next-line max-len
-                searchSourceJSON: '{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}',
+                searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
               },
-              optionsJSON: '{\"darkTheme\":false}',
-              panelsJSON: '[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"col\":1,\"row\":1,\"panelRefName\":\"panel_0\"}]',
+              optionsJSON: objects[0].attributes.optionsJSON,
+              panelsJSON: objects[0].attributes.panelsJSON,
               refreshInterval: {
                 display: 'Off',
                 pause: false,
@@ -160,7 +137,7 @@ export default function ({ getService }) {
             type: 'dashboard',
             updated_at: '2017-09-21T18:57:40.826Z',
             version: 'WzMsMV0=',
-          });
+          }]);
         });
     });
   });
