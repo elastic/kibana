@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecurityPanel } from './security_panel';
+export { PersonalInfo } from './personal_info';

@@ -14,13 +14,14 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UserAPIClient } from 'plugins/security/lib/api';
 import React, { ChangeEvent, Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { User } from '../../../../../common/model/user';
+import { canUserChangePassword, User } from '../../../../../common/model/user';
 
 interface Props {
   user: User;
@@ -28,7 +29,6 @@ interface Props {
 
 interface State {
   shouldValidate: boolean;
-  showForm: boolean;
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -39,7 +39,6 @@ interface State {
 function getInitialState(): State {
   return {
     shouldValidate: false,
-    showForm: false,
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
@@ -55,12 +54,22 @@ export class ChangePassword extends Component<Props, State> {
   }
 
   public render() {
+    const canChangePassword = canUserChangePassword(this.props.user);
+
     const changePasswordTitle = (
       <FormattedMessage
         id="xpack.security.account.changePasswordTitle"
         defaultMessage="Change password"
       />
     );
+
+    if (canChangePassword) {
+      return this.getChangePasswordForm(changePasswordTitle);
+    }
+    return this.getChangePasswordUnavailable(changePasswordTitle);
+  }
+
+  private getChangePasswordForm = (changePasswordTitle: React.ReactElement<any>) => {
     return (
       <EuiDescribedFormGroup
         title={<h3>{changePasswordTitle}</h3>}
@@ -73,14 +82,31 @@ export class ChangePassword extends Component<Props, State> {
           </p>
         }
       >
-        <EuiFormRow hasEmptyLabelSpace={true}>
-          {this.state.showForm ? (
-            this.getForm()
-          ) : (
-            <EuiButtonEmpty onClick={() => this.setState({ showForm: true })}>
-              {changePasswordTitle}
-            </EuiButtonEmpty>
-          )}
+        <EuiFormRow>{this.getForm()}</EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  };
+
+  private getChangePasswordUnavailable(changePasswordTitle: React.ReactElement<any>) {
+    return (
+      <EuiDescribedFormGroup
+        title={<h3>{changePasswordTitle}</h3>}
+        description={
+          <p>
+            <FormattedMessage
+              id="xpack.security.account.changePasswordNotSupportedText"
+              defaultMessage="You cannot change the password for this account."
+            />
+          </p>
+        }
+      >
+        <EuiFormRow>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.security.account.changePasswordNotSupportedText"
+              defaultMessage="You cannot change the password for this account."
+            />
+          </EuiText>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
@@ -126,7 +152,7 @@ export class ChangePassword extends Component<Props, State> {
           label={
             <FormattedMessage
               id="xpack.security.account.changePasswordForm.confirmPasswordLabel"
-              defaultMessage="Confirm password"
+              defaultMessage="Confirm new password"
             />
           }
         >
@@ -139,15 +165,7 @@ export class ChangePassword extends Component<Props, State> {
         </EuiFormRow>
         <EuiFormRow>
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiButton onClick={this.onCancelClick} isDisabled={this.state.changeInProgress}>
-                <FormattedMessage
-                  id="xpack.security.account.changePasswordForm.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={this.onChangePasswordClick}
                 fill
@@ -155,9 +173,17 @@ export class ChangePassword extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.security.account.changePasswordForm.saveChangesButtonLabel"
-                  defaultMessage="Save changes"
+                  defaultMessage="Update"
                 />
               </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={this.onCancelClick} isDisabled={this.state.changeInProgress}>
+                <FormattedMessage
+                  id="xpack.security.account.changePasswordForm.cancelButtonLabel"
+                  defaultMessage="Reset"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
@@ -314,7 +340,6 @@ export class ChangePassword extends Component<Props, State> {
     this.setState({
       currentPasswordError: false,
       shouldValidate: false,
-      showForm: false,
     });
   };
 
