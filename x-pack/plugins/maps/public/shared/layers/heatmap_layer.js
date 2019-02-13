@@ -48,7 +48,7 @@ export class HeatmapLayer extends AbstractLayer {
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
-    const heatmapLayerId = this.getId() + '_heatmap';
+    const mbLayerId = this.getId() + '_heatmap';
 
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
@@ -58,7 +58,7 @@ export class HeatmapLayer extends AbstractLayer {
 
 
       mbMap.addLayer({
-        id: heatmapLayerId,
+        id: mbLayerId,
         type: 'heatmap',
         source: this.getId(),
         paint: {}
@@ -86,15 +86,15 @@ export class HeatmapLayer extends AbstractLayer {
       mbSourceAfter.setData(featureCollection);
     }
 
-    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     this._style.setMBPaintProperties({
       mbMap,
-      layerId: heatmapLayerId,
+      layerId: mbLayerId,
       propertyName: SCALED_PROPERTY_NAME,
-      alpha: this.getAlpha(),
       resolution: this._source.getGridResolution()
     });
-    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setPaintProperty(mbLayerId, 'heatmap-opacity', this.getAlpha());
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   async getBounds(filters) {
