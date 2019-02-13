@@ -76,5 +76,16 @@ export class PagerDutyAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new PagerDutyAction(upstreamAction);
   }
+  static typeName = i18n.translate('xpack.watcher.models.pagerdutyAction.typeName', {
+    defaultMessage: 'PagerDuty',
+  });
+  static iconClass = '';
+  static selectMessage = i18n.translate('xpack.watcher.models.pagerdutyAction.selectMessageText', {
+    defaultMessage: 'Create events in PagerDuty.',
+  });
+  static template = '<watch-hipchat-action></watch-hipchat-action>';
+  static simulatePrompt = i18n.translate('xpack.watcher.models.pagerdutyAction.simulateButtonLabel', {
+    defaultMessage: 'Create a sample event now',
+  });
 }
 

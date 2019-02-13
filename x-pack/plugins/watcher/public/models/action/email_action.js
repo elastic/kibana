@@ -72,7 +72,7 @@ export class EmailAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
     defaultMessage: 'E-mail',
   });
-  static iconClass = 'kuiIcon fa-envelope-o';
+  static iconClass = '';
   static template = '<watch-email-action></watch-email-action>';
   static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
     defaultMessage: 'Send out an e-mail from your server.',

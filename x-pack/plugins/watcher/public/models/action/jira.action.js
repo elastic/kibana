@@ -66,5 +66,16 @@ export class JiraAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new JiraAction(upstreamAction);
   }
+  static typeName = i18n.translate('xpack.watcher.models.jiraAction.typeName', {
+    defaultMessage: 'Jira',
+  });
+  static iconClass = '';
+  static selectMessage = i18n.translate('xpack.watcher.models.jiraAction.selectMessageText', {
+    defaultMessage: 'Create issues in Atlassian\’s Jira Software.',
+  });
+  static template = '<watch-logging-action></watch-logging-action>';
+  static simulatePrompt = i18n.translate('xpack.watcher.models.jiraAction.simulateButtonLabel', {
+    defaultMessage: 'Create a sample issue now',
+  });
 }
 

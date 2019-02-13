@@ -58,7 +58,7 @@ export class LoggingAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.loggingAction.typeName', {
     defaultMessage: 'Logging',
   });
-  static iconClass = 'kuiIcon fa-file-text-o';
+  static iconClass = '';
   static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
     defaultMessage: 'Add a new item to the logs.',
   });

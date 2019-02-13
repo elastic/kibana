@@ -85,4 +85,15 @@ export class IndexAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new IndexAction(upstreamAction);
   }
+  static typeName = i18n.translate('xpack.watcher.models.indexAction.typeName', {
+    defaultMessage: 'Index',
+  });
+  static iconClass = '';
+  static selectMessage = i18n.translate('xpack.watcher.models.indexAction.selectMessageText', {
+    defaultMessage: 'Index data into Elasticsearch.',
+  });
+  static template = '<watch-hipchat-action></watch-hipchat-action>';
+  static simulatePrompt = i18n.translate('xpack.watcher.models.indexAction.simulateButtonLabel', {
+    defaultMessage: 'Index sample data now',
+  });
 }

@@ -66,4 +66,16 @@ export class HipchatAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new HipchatAction(upstreamAction);
   }
+
+  static typeName = i18n.translate('xpack.watcher.models.hipchatAction.typeName', {
+    defaultMessage: 'Hipchat',
+  });
+  static iconClass = '';
+  static selectMessage = i18n.translate('xpack.watcher.models.hipchatAction.selectMessageText', {
+    defaultMessage: 'Send a message to Hipchat.',
+  });
+  static template = '<watch-hipchat-action></watch-hipchat-action>';
+  static simulatePrompt = i18n.translate('xpack.watcher.models.hipchatAction.simulateButtonLabel', {
+    defaultMessage: 'Send a sample message now',
+  });
 }

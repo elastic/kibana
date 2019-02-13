@@ -88,4 +88,15 @@ export class WebhookAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new WebhookAction(upstreamAction);
   }
+  static typeName = i18n.translate('xpack.watcher.models.webhookAction.typeName', {
+    defaultMessage: 'Webhook',
+  });
+  static iconClass = '';
+  static selectMessage = i18n.translate('xpack.watcher.models.webhookAction.selectMessageText', {
+    defaultMessage: 'Send a request to any web service.',
+  });
+  static template = '<watch-hipchat-action></watch-hipchat-action>';
+  static simulatePrompt = i18n.translate('xpack.watcher.models.webhookAction.simulateButtonLabel', {
+    defaultMessage: 'Send a sample request now',
+  });
 }
