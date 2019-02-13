@@ -36,6 +36,13 @@ export const initServerWithKibana = (server: KibanaServer) => {
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     privileges: {
+      all: {
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: [],
+      },
       read: {
         savedObject: {
           all: [],
