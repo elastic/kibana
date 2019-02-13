@@ -40,6 +40,7 @@ function updateObjectsTable($scope, $injector, i18n) {
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
+  const uiCapabilites = chrome.getInjected('uiCapabilities');
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
@@ -64,6 +65,7 @@ function updateObjectsTable($scope, $injector, i18n) {
           perPageConfig={config.get('savedObjects:perPage')}
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
+          uiCapabilities={uiCapabilites}
           getEditUrl={(id, type) => {
             if (type === 'index-pattern' || type === 'indexPatterns') {
               return kbnUrl.eval(`#/management/kibana/index_patterns/${id}`);

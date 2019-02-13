@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
+import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
 
@@ -144,6 +144,26 @@ const defaultProps = {
   services: [],
   getEditUrl: () => {},
   goInApp: () => {},
+  uiCapabilities: {
+    savedObjects: {
+      'index-pattern': {
+        find: true,
+        bulkGet: true,
+      },
+      visualization: {
+        find: true,
+        bulkGet: true,
+      },
+      dashboard: {
+        find: true,
+        bulkGet: true,
+      },
+      search: {
+        find: true,
+        bulkGet: true,
+      }
+    }
+  }
 };
 
 let addDangerMock;
@@ -200,6 +220,45 @@ describe('ObjectsTable', () => {
     component.update();
 
     expect(addDangerMock).toHaveBeenCalled();
+  });
+
+  it('should filter find operation based on the uiCapabilities', async () => {
+    const uiCapabilities = {
+      savedObjects: {
+        'index-pattern': {
+          find: true,
+          bulkGet: false,
+        },
+        visualization: {
+          find: false,
+          bulkGet: true,
+        },
+        dashboard: {
+          find: false,
+          bulkGet: false,
+        },
+        search: {
+          find: true,
+          bulkGet: true,
+        }
+      }
+    };
+    const customizedProps = { ...defaultProps, uiCapabilities };
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...customizedProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(defaultProps.savedObjectsClient.find).toHaveBeenCalledWith(expect.objectContaining({
+      type: ['search']
+    }));
   });
 
   describe('export', () => {
@@ -282,7 +341,7 @@ describe('ObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(scanAllTypes).toHaveBeenCalledWith(defaultProps.$http, INCLUDED_TYPES);
+      expect(scanAllTypes).toHaveBeenCalledWith(defaultProps.$http, POSSIBLE_TYPES);
       expect(saveToFile).toHaveBeenCalledWith(JSON.stringify(allSavedObjects, null, 2));
     });
   });

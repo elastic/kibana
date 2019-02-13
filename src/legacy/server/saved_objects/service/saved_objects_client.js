@@ -101,10 +101,10 @@ export class SavedObjectsClient {
    */
   static operations = [
     'create',
-    'bulkCreate',
+    'bulk_create',
     'delete',
     'find',
-    'bulkGet',
+    'bulk_get',
     'get',
     'update',
   ];
