@@ -13,7 +13,7 @@ import {
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function devToolsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('dev_tools', () => {

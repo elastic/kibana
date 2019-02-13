@@ -10,7 +10,7 @@ import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function devToolsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('dev_tools', () => {
