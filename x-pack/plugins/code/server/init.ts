@@ -5,6 +5,7 @@
  */
 
 import { Server } from 'hapi';
+import { checkRepos } from './check_repos';
 import { CodeNodeClient, CodeNodeInfo } from './code_node_client';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
@@ -220,7 +221,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     updateScheduler.start();
     indexScheduler.start();
   }
-
+  // check code node repos on disk
+  await checkRepos(cloneWorker, esClient, serverOptions, log);
   // Add server routes and initialize the plugin here
   repositoryRoute(
     server,
