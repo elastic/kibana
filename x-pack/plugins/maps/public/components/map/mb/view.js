@@ -185,7 +185,9 @@ export class MBMapContainer extends React.Component {
         new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
         new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),
       );
-      this._mbMap.fitBounds(lnLatBounds);
+      //maxZoom ensure we're not zooming in too far on single points or small shapes
+      //the padding is to avoid too tight of a fit around edges
+      this._mbMap.fitBounds(lnLatBounds, { maxZoom: 18, padding: 16 });
     } else if (goto.center) {
       this._mbMap.setZoom(goto.center.zoom);
       this._mbMap.setCenter({
