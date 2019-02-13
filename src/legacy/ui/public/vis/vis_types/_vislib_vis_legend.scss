@@ -94,11 +94,17 @@
 
 .visLegend__valueTitle--full {
   word-break: break-all;
+  overflow: hidden;
 }
 
 .visLegend__valueDetails {
+  background-color: $euiColorEmptyShade;
   border-bottom: 1px solid $euiColorLightShade;
-  padding-bottom: $euiSizeXS;
+  margin-top: $euiSizeXS;
+
+  .visLib--legend-top & {
+    position: absolute;
+  }
 }
 
 .visLegend__valueColorPicker {
@@ -107,6 +113,7 @@
 
   .visLegend__valueColorPickerDot {
     margin: $euiSizeXS / 2;
+    width: ($euiSizeM * 10 -  2 * 8 * ($euiSizeXS / 2)) / 8;
 
     &:hover {
       transform: scale(1.4);
