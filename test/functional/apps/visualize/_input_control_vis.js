@@ -43,9 +43,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
-
     it('should not have inspector enabled', async function () {
       await inspector.expectIsNotEnabled();
+    });
+
+    it('should show the default index pattern when clicking "Add filter"', async () => {
+      await testSubjects.click('addFilter');
+      const fields = await filterBar.getFilterEditorFields();
+      await testSubjects.click('cancelSaveFilter');
+      expect(fields.includes(FIELD_NAME)).to.be(true);
     });
 
     describe('updateFiltersOnChange is false', () => {
