@@ -79,33 +79,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await el.getVisibleText();
     }
 
-    async clickMarkdownData() {
-      await testSubjects.click('markdownDataBtn');
-    }
-
     /**
      *
      * getting all markdown variables list which located on `table` section
      *
-     * **Note**: if `table` not have variables, return `No variables available for the selected data metrics.`
-     * @returns {Promise<string[] | string>}
+     * **Note**: if `table` not have variables, use `getMarkdownTableNoVariables` method instead
+     * @see {getMarkdownTableNoVariables}
+     * @returns {Promise<string[]>}
      * @memberof VisualBuilderPage
      */
     async getMarkdownTableVariables() {
-      const noVariablesSelector = '.euiTitle.euiTitle--xxsmall.tvbMarkdownEditor__noVariables';
-      const variablesListSelector = 'div.tvbMarkdownEditor__variables table > tbody';
-
-      const noVariables = await find.descendantExistsByCssSelector(noVariablesSelector);
-
-      if (!noVariables) {
-        const text = await (await find.byCssSelector(noVariablesSelector)).getVisibleText();
-        log.debug(`markdown table variable is: ${text}`);
-        return text;
+      const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
+      const variablesSelector = 'tbody td';
+      const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
+      if (!exists) {
+        log.debug('variable list is empty');
+        return [];
       }
-      const variables = await find.allByCssSelector(`${variablesListSelector} td`);
+      const variables = testTableVariables.findAllByCssSelector(variablesSelector);
       const variablesText = Promise.all(variables.map(variable => variable.getVisibleText()));
       log.debug(`markdown table variables is: ${variablesText}`);
       return variablesText;
+    }
+
+    /**
+     * return variable table message, if `table` is empty it will be fail
+     *
+     * **Note:** if `table` have variables, use `getMarkdownTableVariables` method instead
+     * @see {@link VisualBuilderPage#getMarkdownTableVariables}
+     * @returns
+     * @memberof VisualBuilderPage
+     */
+    async getMarkdownTableNoVariables() {
+      return await testSubjects.getVisibleText('tvbMarkdownEditor__noVariables');
     }
 
     /**
@@ -114,31 +120,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
      * @returns {Promise<number>}
      * @memberof VisualBuilderPage
      */
-    async getSubTabsCount() {
-      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
-      const tabsSelector = 'button[role="tab"]';
-      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
-
-      return elements.length;
+    async getSubTabs() {
+      return await find.allByCssSelector('[data-test-subj$="-subtab"]');
     }
 
     /**
-     * switch sub-tab for visualization
+     * switch markdown sub-tab for visualization
      *
-     * @param {'Data' | 'Panel options'| 'Annotations' | 'Markdown' | 'Columns'} subTab
+     * @param {'data' | 'options'| 'markdown'} subTab
      * @memberof VisualBuilderPage
      */
-    async switchSubTab(subTab) {
-      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
-      const tabsSelector = `button[role="tab"] span`;
-
-      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
-
-      elements.forEach(tab => {
-        if (tab.getVisibleText() === subTab) {
-          tab.click();
-        }
-      });
+    async markdownSwitchSubTab(subTab) {
+      const element = await testSubjects.find(`${subTab}-subtab`);
+      await element.click();
     }
 
     async clickSeriesOption(nth = 0) {
