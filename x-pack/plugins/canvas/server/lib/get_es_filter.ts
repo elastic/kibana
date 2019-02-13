@@ -10,14 +10,14 @@
   filter is the abstracted canvas filter.
 */
 
-import { Filter } from './filters';
+import { GenericFilter } from './filters';
 import * as filters from './filters';
 
 interface FilterTypes {
   [key: string]: any;
 }
 
-export function getESFilter(filter: Filter) {
+export function getESFilter(filter: GenericFilter) {
   if (!(filters as FilterTypes)[filter.type]) {
     throw new Error(`Unknown filter type: ${filter.type}`);
   }

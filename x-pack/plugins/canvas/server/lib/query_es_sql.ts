@@ -4,28 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { map, zipObject } from 'lodash';
+import { CallCluster } from '../../../../../src/legacy/core_plugins/elasticsearch';
 import { buildBoolArray } from './build_bool_array';
+import { GenericFilter } from './filters';
 import { normalizeType } from './normalize_type';
 import { sanitizeName } from './sanitize_name';
 
-type ElasticsearchClient = any;
-type QueryObject = any;
-type FilterObject = any;
-
-interface QueryOptions {
+interface QueryParams {
   count: number;
-  query: QueryObject;
-  filter: FilterObject;
-}
-
-interface ElasticsearchClientResponse {
-  columns: any[];
-  rows: any[];
+  query: string;
+  filter: GenericFilter[];
 }
 
 export const queryEsSQL = (
-  elasticsearchClient: ElasticsearchClient,
-  { count, query, filter }: QueryOptions
+  elasticsearchClient: CallCluster,
+  { count, query, filter }: QueryParams
 ) =>
   elasticsearchClient('transport.request', {
     path: '/_sql?format=json',
@@ -41,7 +34,7 @@ export const queryEsSQL = (
       },
     },
   })
-    .then((res: ElasticsearchClientResponse) => {
+    .then((res: { columns: Array<{ name: string; type: string }>; rows: any[] }) => {
       const columns = res.columns.map(({ name, type }) => {
         return { name: sanitizeName(name), type: normalizeType(type) };
       });
