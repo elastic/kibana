@@ -14,14 +14,13 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UserAPIClient } from 'plugins/security/lib/api';
 import React, { ChangeEvent, Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { canUserChangePassword, User } from '../../../../../common/model/user';
+import { UserAPIClient } from '../../../../lib/api';
 
 interface Props {
   user: User;
@@ -100,14 +99,7 @@ export class ChangePassword extends Component<Props, State> {
           </p>
         }
       >
-        <EuiFormRow>
-          <EuiText>
-            <FormattedMessage
-              id="xpack.security.account.changePasswordNotSupportedText"
-              defaultMessage="You cannot change the password for this account."
-            />
-          </EuiText>
-        </EuiFormRow>
+        <div />
       </EuiDescribedFormGroup>
     );
   }
@@ -125,6 +117,7 @@ export class ChangePassword extends Component<Props, State> {
           }
         >
           <EuiFieldText
+            data-test-subj="currentPassword"
             type="password"
             value={this.state.currentPassword}
             onChange={this.onCurrentPasswordChange}
@@ -141,6 +134,7 @@ export class ChangePassword extends Component<Props, State> {
           }
         >
           <EuiFieldText
+            data-test-subj="newPassword"
             type="password"
             value={this.state.newPassword}
             onChange={this.onNewPasswordChange}
@@ -157,6 +151,7 @@ export class ChangePassword extends Component<Props, State> {
           }
         >
           <EuiFieldText
+            data-test-subj="confirmNewPassword"
             type="password"
             value={this.state.confirmPassword}
             onChange={this.onConfirmPasswordChange}

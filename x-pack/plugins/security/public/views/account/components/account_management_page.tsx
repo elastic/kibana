@@ -31,7 +31,7 @@ export class AccountManagementPage extends Component<Props, {}> {
       <EuiPage>
         <EuiPageBody restrictWidth>
           <EuiPanel>
-            <EuiText>
+            <EuiText data-test-subj={'userDisplayName'}>
               <h1>{getUserDisplayName(this.props.user)}</h1>
             </EuiText>
 

@@ -38,10 +38,12 @@ export const PersonalInfo = (props: Props) => {
     >
       <EuiFormRow>
         <EuiText>
-          <p>
-            <strong title="username">{props.user.username}</strong>
+          <div>
+            <strong title="username" data-test-subj="username">
+              {props.user.username}
+            </strong>
             <EuiSpacer size="s" />
-            <strong title="password">
+            <strong title="email" data-test-subj="email">
               {props.user.email || (
                 <FormattedMessage
                   id="xpack.security.account.noEmailAddress"
@@ -49,7 +51,7 @@ export const PersonalInfo = (props: Props) => {
                 />
               )}
             </strong>
-          </p>
+          </div>
         </EuiText>
       </EuiFormRow>
     </EuiDescribedFormGroup>
