@@ -28,6 +28,10 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
   class TimePickerPage {
 
+    async timePickerExists() {
+      return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+    }
+
     formatDateToAbsoluteTimeString(date) {
       // toISOString returns dates in format 'YYYY-MM-DDTHH:mm:ss.sssZ'
       // Need to replace T with space and remove timezone

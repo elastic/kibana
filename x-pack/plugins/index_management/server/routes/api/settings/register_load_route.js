@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 // response comes back as { [indexName]: { ... }}
 // so plucking out the embedded object
@@ -16,7 +12,8 @@ function formatHit(hit) {
   return hit[key];
 }
 
-async function fetchSettings(callWithRequest, indexName) {
+const handler = async (request, callWithRequest) => {
+  const { indexName } = request.params;
   const params = {
     expandWildcards: 'none',
     flatSettings: false,
@@ -25,34 +22,9 @@ async function fetchSettings(callWithRequest, indexName) {
     index: indexName,
   };
 
-  return await callWithRequest('indices.getSettings', params);
-}
-
-export function registerLoadRoute(server) {
-  const isEsError = isEsErrorFactory(server);
-  const licensePreRouting = licensePreRoutingFactory(server);
-
-  server.route({
-    path: '/api/index_management/settings/{indexName}',
-    method: 'GET',
-    handler: async (request) => {
-      const callWithRequest = callWithRequestFactory(server, request);
-      const { indexName } = request.params;
-      try {
-        const hit = await fetchSettings(callWithRequest, indexName);
-        const response = formatHit(hit);
-
-        return response;
-      } catch (err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-
-        throw wrapUnknownError(err);
-      }
-    },
-    config: {
-      pre: [ licensePreRouting ]
-    }
-  });
+  const hit =  await callWithRequest('indices.getSettings', params);
+  return formatHit(hit);
+};
+export function registerLoadRoute(router) {
+  router.get('settings/{indexName}', handler);
 }

@@ -95,8 +95,6 @@ const INITIAL_STATE = {
 };
 
 export function map(state = INITIAL_STATE, action) {
-  window._state = state;
-  //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case SET_MOUSE_COORDINATES:
       return {
@@ -130,13 +128,29 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         goto: null,
       };
+    case SET_LAYER_ERROR_STATUS:
+      const { layerList } = state;
+      const layerIdx = getLayerIndex(layerList, action.layerId);
+      if (layerIdx === -1) {
+        return state;
+      }
+
+      return {
+        ...state,
+        layerList: [
+          ...layerList.slice(0, layerIdx),
+          {
+            ...layerList[layerIdx],
+            __isInErrorState: true,
+            __errorMessage: action.errorMessage
+          },
+          ...layerList.slice(layerIdx + 1)
+        ]
+      };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
-    case SET_LAYER_ERROR_STATUS:
-      return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      const errorRequestResetState = resetDataRequest(state, action);
-      return setErrorStatus(errorRequestResetState, action);
+      return resetDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -251,41 +265,32 @@ export function map(state = INITIAL_STATE, action) {
       const styleLayerId = action.layerId;
       const styleLayerIdx = getLayerIndex(state.layerList, styleLayerId);
       const layerStyle = state.layerList[styleLayerIdx].style;
-      const layerPrevStyle = layerStyle.previousStyle || layerStyle;
+      const layerPrevStyle = layerStyle.__previousStyle || layerStyle;
       return updateLayerInList(state, styleLayerId, 'style',
-        { ...action.style, previousStyle: { ...layerPrevStyle } });
+        { ...action.style, __previousStyle: { ...layerPrevStyle } });
     case PROMOTE_TEMPORARY_STYLES:
       const stylePromoteIdx = getLayerIndex(state.layerList, state.selectedLayerId);
       const styleToSet = {
         ...state.layerList[stylePromoteIdx].style,
-        previousStyle: null
+        __previousStyle: null
       };
       return updateLayerInList(state, state.selectedLayerId, 'style', styleToSet);
     case CLEAR_TEMPORARY_STYLES:
       const styleClearIdx = getLayerIndex(state.layerList, state.selectedLayerId);
-      const prevStyleToLoad = state.layerList[styleClearIdx].style.previousStyle || state.layerList[styleClearIdx].style || {};
+      const prevStyleToLoad = state.layerList[styleClearIdx].style.__previousStyle || state.layerList[styleClearIdx].style || {};
       return updateLayerInList(state, state.selectedLayerId, 'style', prevStyleToLoad);
     default:
       return state;
   }
 }
 
-function setErrorStatus(state, { layerId, errorMessage }) {
-  const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
-  return tmsErrorLayer
-    ? updateLayerInList(
-      updateLayerInList(state, tmsErrorLayer.id, 'isInErrorState', true),
-      tmsErrorLayer.id, 'errorMessage', errorMessage)
-    : state;
-}
-
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
-  if (!layerDescriptor.dataRequests) {
+  if (!layerDescriptor.__dataRequests) {
     return;
   }
 
-  return layerDescriptor.dataRequests.find(dataRequest => {
+  return layerDescriptor.__dataRequests.find(dataRequest => {
     return dataRequest.dataId === dataRequestAction.dataId;
   });
 }
@@ -299,9 +304,9 @@ function updateWithDataRequest(state, action) {
     dataRequest = {
       dataId: action.dataId
     };
-    layerRequestingData.dataRequests = [
-      ...(layerRequestingData.dataRequests
-        ? layerRequestingData.dataRequests : []), dataRequest ];
+    layerRequestingData.__dataRequests = [
+      ...(layerRequestingData.__dataRequests
+        ? layerRequestingData.__dataRequests : []), dataRequest ];
   }
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
