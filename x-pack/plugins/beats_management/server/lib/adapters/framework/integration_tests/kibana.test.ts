@@ -10,6 +10,7 @@ import { camelCase } from 'lodash';
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 // @ts-ignore
 import { TestKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
+import { CONFIG_PREFIX } from '../../../../../common/constants/plugin';
 import { PLUGIN } from './../../../../../common/constants/plugin';
 import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
 import { contractTests } from './test_contract';
@@ -26,6 +27,10 @@ contractTests('Kibana  Framework Adapter', {
     await servers.stop();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(camelCase(PLUGIN.ID), servers.kbnServer.server);
+    return new KibanaBackendFrameworkAdapter(
+      camelCase(PLUGIN.ID),
+      servers.kbnServer.server,
+      CONFIG_PREFIX
+    );
   },
 });
