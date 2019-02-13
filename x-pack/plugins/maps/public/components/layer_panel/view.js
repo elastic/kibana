@@ -10,6 +10,7 @@ import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
+import _ from 'lodash';
 
 import {
   EuiButtonIcon,
@@ -35,11 +36,16 @@ export class LayerPanel  extends React.Component {
         displayName: '',
         immutableSourceProps: [],
         hasLoadedSourcePropsForLayer: false,
+        styleUpdated: false,
+        style: nextProps.styleProperties,
         prevId: nextId,
       };
     }
-
-    return null;
+    return {
+      styleUpdated: prevState.styleUpdated
+        ? prevState.styleUpdated
+        : !_.isEqual(nextProps.styleProperties, prevState.style)
+    };
   }
 
   state = {}
@@ -161,7 +167,7 @@ export class LayerPanel  extends React.Component {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter/>
+          <FlyoutFooter activateSave={this.state.styleUpdated}/>
         </EuiFlyoutFooter>
       </EuiFlexGroup>
     );

@@ -12,8 +12,10 @@ import {
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
+  const selectedLayer = getSelectedLayer(state);
   return {
-    selectedLayer: getSelectedLayer(state)
+    selectedLayer,
+    styleProperties: selectedLayer.getCurrentStyle().getProperties()
   };
 }
 

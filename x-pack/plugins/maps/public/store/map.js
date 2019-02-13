@@ -33,7 +33,8 @@ import {
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
   SET_GOTO,
-  CLEAR_GOTO, CLEAR_TRANSIENT_LAYER,
+  CLEAR_GOTO,
+  CLEAR_TRANSIENT_LAYER,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
