@@ -31,8 +31,4 @@ export class TileStyle extends AbstractStyle {
   static getDisplayName() {
     return 'Tile style';
   }
-
-  setMBPaintProperties({ alpha, mbMap, layerId }) {
-    mbMap.setPaintProperty(layerId, 'raster-opacity', alpha);
-  }
 }
