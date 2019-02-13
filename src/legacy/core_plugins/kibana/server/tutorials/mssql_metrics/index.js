@@ -44,7 +44,7 @@ export function mssqlMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'a2ead240-18bb-11e9-9836-f37dedd3b411',
+          id: 'a2ead240-18bb-11e9-9836-f37dedd3b411-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.mssqlMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Microsoft SQL Server metrics dashboard',
           }),

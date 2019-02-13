@@ -23,8 +23,6 @@ import {
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
-  PROMOTE_TEMPORARY_STYLES,
-  CLEAR_TEMPORARY_STYLES,
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
@@ -35,13 +33,21 @@ import {
   SET_GOTO,
   CLEAR_GOTO,
   CLEAR_TRANSIENT_LAYER,
+  TRACK_CURRENT_LAYER_STATE,
+  ROLLBACK_TO_TRACKED_LAYER_STATE,
+  REMOVE_TRACKED_LAYER_STATE
 } from "../actions/store_actions";
+
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
-const updateLayerInList = (state, id, attribute, newValue) => {
+const updateLayerInList = (state, layerId, attribute, newValue) => {
+  if (!layerId) {
+    return state;
+  }
   const { layerList } = state;
-  const layerIdx = getLayerIndex(layerList, id);
+  const layerIdx = getLayerIndex(layerList, layerId);
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
@@ -96,8 +102,16 @@ const INITIAL_STATE = {
   waitingForMapReadyLayerList: [],
 };
 
+
+
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    case REMOVE_TRACKED_LAYER_STATE:
+      return removeTrackedLayerState(state, action.layerId);
+    case TRACK_CURRENT_LAYER_STATE:
+      return trackCurrentLayerState(state, action.layerId);
+    case ROLLBACK_TO_TRACKED_LAYER_STATE:
+      return rollbackTrackedLayerState(state, action.layerId);
     case SET_MOUSE_COORDINATES:
       return {
         ...state,
@@ -223,7 +237,6 @@ export function map(state = INITIAL_STATE, action) {
     case UPDATE_SOURCE_PROP:
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
-      console.warn('when setting joins, must remove all corresponding datarequests as well');
       const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
@@ -263,22 +276,8 @@ export function map(state = INITIAL_STATE, action) {
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
       const styleLayerId = action.layerId;
-      const styleLayerIdx = getLayerIndex(state.layerList, styleLayerId);
-      const layerStyle = state.layerList[styleLayerIdx].style;
-      const layerPrevStyle = layerStyle.__previousStyle || layerStyle;
       return updateLayerInList(state, styleLayerId, 'style',
-        { ...action.style, __previousStyle: { ...layerPrevStyle } });
-    case PROMOTE_TEMPORARY_STYLES:
-      const stylePromoteIdx = getLayerIndex(state.layerList, state.selectedLayerId);
-      const styleToSet = {
-        ...state.layerList[stylePromoteIdx].style,
-        __previousStyle: null
-      };
-      return updateLayerInList(state, state.selectedLayerId, 'style', styleToSet);
-    case CLEAR_TEMPORARY_STYLES:
-      const styleClearIdx = getLayerIndex(state.layerList, state.selectedLayerId);
-      const prevStyleToLoad = state.layerList[styleClearIdx].style.__previousStyle || state.layerList[styleClearIdx].style || {};
-      return updateLayerInList(state, state.selectedLayerId, 'style', prevStyleToLoad);
+        { ...action.style });
     default:
       return state;
   }
@@ -358,4 +357,51 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
 
 function findLayerById(state, id) {
   return state.layerList.find(layer => layer.id === id);
+}
+
+function trackCurrentLayerState(state, layerId) {
+  const layer = findLayerById(state, layerId);
+  const layerCopy = copyPersistentState(layer);
+  return updateLayerInList(state, layerId, TRACKED_LAYER_DESCRIPTOR, layerCopy);
+}
+
+function removeTrackedLayerState(state, layerId) {
+  const layer = findLayerById(state,  layerId);
+  if (!layer) {
+    return state;
+  }
+
+  const copyLayer = { ...layer };
+  delete copyLayer[TRACKED_LAYER_DESCRIPTOR];
+
+  return {
+    ...state,
+    layerList: replaceInLayerList(state.layerList, layerId, copyLayer)
+  };
+}
+
+function rollbackTrackedLayerState(state, layerId) {
+  const layer = findLayerById(state, layerId);
+  if (!layer) {
+    return state;
+  }
+  const trackedLayerDescriptor = layer[TRACKED_LAYER_DESCRIPTOR];
+
+  //this assumes that any nested temp-state in the layer-descriptor (e.g. of styles), is not relevant and can be recovered easily (e.g. this is not the case for __dataRequests)
+  //That assumption is true in the context of this app, but not generalizable.
+  //consider rewriting copyPersistentState to only strip the first level of temp state.
+  const rolledbackLayer = { ...layer, ...trackedLayerDescriptor };
+  delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
+
+  return {
+    ...state,
+    layerList: replaceInLayerList(state.layerList, layerId, rolledbackLayer)
+  };
+}
+
+function replaceInLayerList(layerList, layerId, newLayerDescriptor) {
+  const layerIndex = getLayerIndex(layerList, layerId);
+  const newLayerList = [...layerList];
+  newLayerList[layerIndex] = newLayerDescriptor;
+  return newLayerList;
 }

@@ -7,19 +7,25 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { promoteTemporaryStyles, clearTemporaryStyles, clearTransientLayer,
-  setSelectedLayer, removeSelectedLayer } from '../../../actions/store_actions';
+import {
+  clearTransientLayer,
+  setSelectedLayer,
+  removeSelectedLayer,
+  rollbackToTrackedLayerStateForSelectedLayer,
+  removeTrackedLayerStateForSelectedLayer
+} from '../../../actions/store_actions';
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    cancelLayerPanel: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(clearTemporaryStyles());
-      dispatch(clearTransientLayer());
+    cancelLayerPanel: async () => {
+      await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(clearTransientLayer());
+      await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
+      await dispatch(setSelectedLayer(null));
     },
     saveLayerEdits: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(promoteTemporaryStyles());
+      dispatch(removeTrackedLayerStateForSelectedLayer());
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {

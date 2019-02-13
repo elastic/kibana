@@ -15,6 +15,8 @@ import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
 
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
+
 function createLayerInstance(layerDescriptor) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor);
   const style = createStyleInstance(layerDescriptor.style);
@@ -63,7 +65,7 @@ export const getMapReady = ({ map }) => map && map.ready;
 
 export const getGoto = ({ map }) => map && map.goto;
 
-const getSelectedLayerId = ({ map }) => {
+export const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 
@@ -106,8 +108,6 @@ export const getQuery = ({ map }) => map.mapState.query;
 export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
-
-export const getMetadata = ({ config }) => config && config.meta;
 
 export const getDataFilters = createSelector(
   getMapExtent,
@@ -161,3 +161,11 @@ export const getUniqueIndexPatternIds = createSelector(
     return _.uniq(indexPatternIds);
   }
 );
+
+export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
+  return layerListRaw.some(layerDescriptor => {
+    const currentState = copyPersistentState(layerDescriptor);
+    const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
+    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
+  });
+});
