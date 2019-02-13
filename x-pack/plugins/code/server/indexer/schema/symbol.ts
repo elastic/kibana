@@ -41,7 +41,6 @@ export const SymbolAnalysisSettings = {
       qname_path_hierarchy_analyzer: {
         type: 'custom',
         tokenizer: 'qname_path_hierarchy_tokenizer',
-        filter: ['lowercase'],
       },
     },
     tokenizer: {
