@@ -126,15 +126,15 @@ exports[`render full suggestions component 1`] = `
         className="reactSuggestionTypeahead"
       >
         <div
-          className="typeahead"
+          className="kbnTypeahead"
         >
           <div
-            className="typeahead-popover"
+            className="kbnTypeahead__popover"
           >
             <div
-              className="typeahead-items"
+              className="kbnTypeahead__items"
               data-test-subj="codeTypeaheadList-symbol"
-              id="typeahead-items"
+              id="kbnTypeahead__items"
               key="symbol-suggestions"
               onScroll={[Function]}
               role="listbox"
@@ -332,9 +332,9 @@ exports[`render full suggestions component 1`] = `
               </Component>
             </div>
             <div
-              className="typeahead-items"
+              className="kbnTypeahead__items"
               data-test-subj="codeTypeaheadList-file"
-              id="typeahead-items"
+              id="kbnTypeahead__items"
               key="file-suggestions"
               onScroll={[Function]}
               role="listbox"
@@ -478,9 +478,9 @@ exports[`render full suggestions component 1`] = `
               </Component>
             </div>
             <div
-              className="typeahead-items"
+              className="kbnTypeahead__items"
               data-test-subj="codeTypeaheadList-repository"
-              id="typeahead-items"
+              id="kbnTypeahead__items"
               key="repository-suggestions"
               onScroll={[Function]}
               role="listbox"
