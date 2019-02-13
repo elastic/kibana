@@ -203,7 +203,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                     </EuiFlexItem>
                   </EuiFlexGroup>
 
-                  <div style={{ maxWidth: 1150, overflow: 'scroll' }}>
+                  <div className="eui-textBreakAll">
                     <EuiSpacer size="m" />
                     <EuiCodeBlock language="sh">{`$ ${cmdText}`}</EuiCodeBlock>
                   </div>
