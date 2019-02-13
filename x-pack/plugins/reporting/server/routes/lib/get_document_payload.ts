@@ -23,12 +23,14 @@ function getDocumentPayloadFn(server: any) {
 
   function getCompleted(output: any, jobType: string, title: any) {
     const exportType = exportTypesRegistry.get((item: any) => item.jobType === jobType);
+    const filename = `${title || 'report'}.${exportType.jobContentExtension}`;
+
     return {
       statusCode: 200,
       content: encodeContent(output.content, exportType),
       contentType: output.content_type,
       headers: {
-        'Content-Disposition': contentDisposition(title || 'report', { type: 'inline' }),
+        'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
       },
     };
   }
