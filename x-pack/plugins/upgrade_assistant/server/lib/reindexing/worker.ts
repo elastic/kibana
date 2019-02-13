@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CallCluster, CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
-import { Request, Server } from 'src/server/kbn_server';
-import { SavedObjectsClient } from 'src/server/saved_objects';
+import { Request, Server } from 'src/legacy/server/kbn_server';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 
 import moment = require('moment');
 import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
@@ -54,8 +54,6 @@ export class ReindexWorker {
     if (ReindexWorker.workerSingleton) {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
-
-    this.apmIndexPatterns = apmIndexPatterns;
 
     this.reindexService = reindexServiceFactory(
       this.callWithInternalUser,

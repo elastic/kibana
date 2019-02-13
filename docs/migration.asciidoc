@@ -6,6 +6,8 @@
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
 
+* <<breaking-changes-7.0,Breaking changes in 7.0>>
+
 See also <<release-highlights>> and <<release-notes>>. 
 --
 

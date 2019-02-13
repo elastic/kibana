@@ -64,7 +64,7 @@ function checkout_sibling {
 
     function checkout_clone_target {
       pick_clone_target
-      if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
+      if [[ $cloneBranch = "7.x"  && $cloneAuthor = "elastic" ]]; then
         export TEST_ES_FROM=snapshot
       fi
 

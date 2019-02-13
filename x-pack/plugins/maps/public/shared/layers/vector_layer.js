@@ -30,7 +30,6 @@ export class VectorLayer extends AbstractLayer {
   static popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false,
-    className: 'euiPanel euiPanel--shadow',
   });
 
   static tooltipContainer = document.createElement('div');
@@ -65,10 +64,6 @@ export class VectorLayer extends AbstractLayer {
     this._joins.forEach(joinSource => {
       joinSource.destroy();
     });
-  }
-
-  isJoinable() {
-    return true;
   }
 
   getJoins() {
@@ -256,8 +251,7 @@ export class VectorLayer extends AbstractLayer {
         propertiesMap: propertiesMap,
       };
     } catch(e) {
-      console.error(e);
-      onLoadError(sourceDataId, requestToken, e.medium);
+      onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
         shouldJoin: false,
         join: join
@@ -327,9 +321,10 @@ export class VectorLayer extends AbstractLayer {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return false;
     }
-    if (!sourceResult.featureCollection) {
+    if (!sourceResult.featureCollection || !joinState.propertiesMap) {
       return false;
     }
+
     joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
@@ -337,7 +332,6 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _performJoins(sourceResult, joinStates) {
-
     const hasJoined = joinStates.map(joinState => {
       return this._joinToFeatureCollection(sourceResult, joinState);
     });

@@ -20,7 +20,7 @@
 import gulpBabel from 'gulp-babel';
 import vfs from 'vinyl-fs';
 
-import { createPromiseFromStreams } from '../../../utils';
+import { createPromiseFromStreams } from '../../../legacy/utils';
 
 export const TranspileBabelTask = {
   description: 'Transpiling sources with babel',
