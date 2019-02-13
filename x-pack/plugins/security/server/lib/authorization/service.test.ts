@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { createAuthorizationService } from './service';
+// @ts-ignore
+import { getClient } from '../../../../../server/lib/get_client_shield';
 import { actionsFactory } from './actions';
-import { privilegesFactory } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
-import { getClient } from '../../../../../server/lib/get_client_shield';
 import { authorizationModeFactory } from './mode';
+import { privilegesFactory } from './privileges';
+import { createAuthorizationService } from './service';
 
 jest.mock('./check_privileges', () => ({
   checkPrivilegesWithRequestFactory: jest.fn(),
@@ -29,7 +29,7 @@ jest.mock('./actions', () => ({
 }));
 
 jest.mock('./privileges', () => ({
-  privilegesFactory: jest.fn()
+  privilegesFactory: jest.fn(),
 }));
 
 jest.mock('./mode', () => ({
@@ -38,7 +38,7 @@ jest.mock('./mode', () => ({
 
 const createMockConfig = (settings = {}) => {
   const mockConfig = {
-    get: jest.fn()
+    get: jest.fn(),
   };
 
   mockConfig.get.mockImplementation(key => settings[key]);
@@ -49,7 +49,7 @@ const createMockConfig = (settings = {}) => {
 test(`returns exposed services`, () => {
   const kibanaIndex = '.a-kibana-index';
   const mockConfig = createMockConfig({
-    'kibana.index': kibanaIndex
+    'kibana.index': kibanaIndex,
   });
   const mockServer = {
     expose: jest.fn(),
@@ -63,14 +63,16 @@ test(`returns exposed services`, () => {
   const mockCheckPrivilegesWithRequest = Symbol();
   checkPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
   const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
-  checkPrivilegesDynamicallyWithRequestFactory.mockReturnValue(mockCheckPrivilegesDynamicallyWithRequest);
+  checkPrivilegesDynamicallyWithRequestFactory.mockReturnValue(
+    mockCheckPrivilegesDynamicallyWithRequest
+  );
   const mockActions = Symbol();
   actionsFactory.mockReturnValue(mockActions);
-  mockConfig.get.mock;
+  // mockConfig.get.mock;
   const mockXpackInfoFeature = Symbol();
   const mockFeatures = Symbol();
   const mockXpackMainPlugin = {
-    getFeatures: () => mockFeatures
+    getFeatures: () => mockFeatures,
   };
   const mockPrivilegesService = Symbol();
   privilegesFactory.mockReturnValue(mockPrivilegesService);
@@ -78,17 +80,27 @@ test(`returns exposed services`, () => {
   authorizationModeFactory.mockReturnValue(mockAuthorizationMode);
   const mockSpaces = Symbol();
 
-  const authorization = createAuthorizationService(mockServer, mockXpackInfoFeature, mockXpackMainPlugin, mockSpaces);
+  const authorization = createAuthorizationService(
+    mockServer,
+    mockXpackInfoFeature,
+    mockXpackMainPlugin,
+    mockSpaces
+  );
 
   const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
-  expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
-  expect(checkPrivilegesDynamicallyWithRequestFactory).toHaveBeenCalledWith(mockCheckPrivilegesWithRequest, mockSpaces);
-  expect(privilegesFactory).toHaveBeenCalledWith(mockActions, mockXpackMainPlugin);
-  expect(authorizationModeFactory).toHaveBeenCalledWith(
-    mockXpackInfoFeature,
+  expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(
+    mockActions,
+    application,
+    mockShieldClient
   );
+  expect(checkPrivilegesDynamicallyWithRequestFactory).toHaveBeenCalledWith(
+    mockCheckPrivilegesWithRequest,
+    mockSpaces
+  );
+  expect(privilegesFactory).toHaveBeenCalledWith(mockActions, mockXpackMainPlugin);
+  expect(authorizationModeFactory).toHaveBeenCalledWith(mockXpackInfoFeature);
 
   expect(authorization).toEqual({
     actions: mockActions,

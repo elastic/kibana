@@ -7,11 +7,13 @@
 import 'hapi';
 
 import { CloudPlugin } from 'x-pack/plugins/cloud';
+import { SecurityPlugin } from 'x-pack/plugins/security/security';
 import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 
 declare module 'hapi' {
   interface PluginProperties {
     cloud: CloudPlugin;
+    security: SecurityPlugin;
     xpack_main: XPackMainPlugin;
   }
 }

@@ -6,13 +6,13 @@
 
 import { authorizationModeFactory } from './mode';
 
-const createMockXpackInfoFeature = (allowRbac) => {
+const createMockXpackInfoFeature = allowRbac => {
   return {
     getLicenseCheckResults() {
       return {
-        allowRbac
+        allowRbac,
       };
-    }
+    },
   };
 };
 

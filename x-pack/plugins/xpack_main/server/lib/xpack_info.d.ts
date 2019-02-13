@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 import { XPackInfoLicense } from './xpack_info_license';
 
-interface XPackFeature {
+export interface XPackFeature {
   isAvailable(): boolean;
   isEnabled(): boolean;
   registerLicenseCheckResultsGenerator(generator: (xpackInfo: XPackInfo) => void): void;

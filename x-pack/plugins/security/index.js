@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { resolve } from 'path';
+import { initSecurityRequestInterceptors } from './server/lib/request_interceptors';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
@@ -205,6 +205,8 @@ export const security = (kibana) => new kibana.Plugin({
     initLogoutView(server);
     initLoggedOutView(server);
 
+    initSecurityRequestInterceptors(server);
+
     server.injectUiAppVars('login', () => {
 
       const { showLogin, loginMessage, allowLogin, layout = 'form' } = xpackInfo.feature(plugin.id).getLicenseCheckResults() || {};
@@ -217,50 +219,6 @@ export const security = (kibana) => new kibana.Plugin({
           layout,
         }
       };
-    });
-
-
-    server.ext('onPostAuth', async function (req, h) {
-      const path = req.path;
-
-      const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
-
-      // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbac()) {
-        return h.continue;
-      }
-
-      const checkPrivileges = checkPrivilegesDynamicallyWithRequest(req);
-
-      // Enforce app restrictions
-      if (path.startsWith('/app/')) {
-        const appId = path.split('/', 3)[2];
-        const appAction = actions.app.get(appId);
-
-        const checkPrivilegesResponse = await checkPrivileges(appAction);
-        if (!checkPrivilegesResponse.hasAllRequested) {
-          return Boom.notFound();
-        }
-      }
-
-      // Enforce API restrictions for associated applications
-      if (path.startsWith('/api/')) {
-        const { tags = [] } = req.route.settings;
-
-        const actionTags = tags.filter(tag => tag.startsWith('access:'));
-
-        if (actionTags.length > 0) {
-          const feature = path.split('/', 3)[2];
-          const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
-
-          const checkPrivilegesResponse = await checkPrivileges(apiActions);
-          if (!checkPrivilegesResponse.hasAllRequested) {
-            return Boom.notFound();
-          }
-        }
-      }
-
-      return h.continue;
     });
   }
 });
