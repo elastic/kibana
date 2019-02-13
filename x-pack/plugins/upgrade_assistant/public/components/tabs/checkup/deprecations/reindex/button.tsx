@@ -94,6 +94,12 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'pause';
           buttonContent = 'Paused';
+        case ReindexStatus.cancelled:
+          buttonProps.color = 'danger';
+          buttonProps.iconSide = 'left';
+          buttonProps.iconType = 'cross';
+          buttonContent = 'Cancelled';
+          break;
       }
     }
 
@@ -107,6 +113,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
             closeFlyout={this.closeFlyout}
             reindexState={reindexState}
             startReindex={this.startReindex}
+            cancelReindex={this.cancelReindex}
           />
         )}
       </Fragment>
@@ -142,6 +149,11 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     }
 
     await this.service.startReindex();
+  };
+
+  private cancelReindex = async () => {
+    this.sendUIReindexTelemetryInfo('stop');
+    await this.service.cancelReindex();
   };
 
   private showFlyout = () => {

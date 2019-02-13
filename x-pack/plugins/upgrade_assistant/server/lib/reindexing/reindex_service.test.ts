@@ -6,6 +6,10 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
+import {
   IndexGroup,
   ReindexOperation,
   ReindexSavedObject,
@@ -86,7 +90,7 @@ describe('reindexService', () => {
           cluster: ['manage'],
           index: [
             {
-              names: [`anIndex*`],
+              names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
               privileges: ['all'],
             },
             {
@@ -109,7 +113,37 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_ml'],
           index: [
             {
-              names: [`.ml-anomalies*`],
+              names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('includes checking for permissions on the baseName which could be an alias', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      const hasRequired = await service.hasRequiredPrivileges(
+        `reindexed-v${PREV_MAJOR_VERSION}-anIndex`
+      );
+      expect(hasRequired).toBe(true);
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names: [
+                `reindexed-v${PREV_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
+                'anIndex',
+              ],
               privileges: ['all'],
             },
             {
@@ -132,7 +166,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_watcher'],
           index: [
             {
-              names: [`.watches*`],
+              names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
               privileges: ['all'],
             },
             {
@@ -198,6 +232,22 @@ describe('reindexService', () => {
       expect(actions.deleteReindexOp).toHaveBeenCalledWith({
         id: 1,
         attributes: { status: ReindexStatus.failed },
+      });
+    });
+
+    it('deletes existing operation if it was cancelled', async () => {
+      callCluster.mockResolvedValueOnce(true); // indices.exist
+      actions.findReindexOperations.mockResolvedValueOnce({
+        saved_objects: [{ id: 1, attributes: { status: ReindexStatus.cancelled } }],
+        total: 1,
+      });
+      actions.deleteReindexOp.mockResolvedValueOnce();
+      actions.createReindexOp.mockResolvedValueOnce();
+
+      await service.createReindexOperation('myIndex');
+      expect(actions.deleteReindexOp).toHaveBeenCalledWith({
+        id: 1,
+        attributes: { status: ReindexStatus.cancelled },
       });
     });
 
@@ -289,7 +339,7 @@ describe('reindexService', () => {
       findSpy.mockRestore();
     });
 
-    it('throws in reindex operation does not exist', async () => {
+    it('throws if reindex operation does not exist', async () => {
       const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
       await expect(service.pauseReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.updateReindexOp).not.toHaveBeenCalled();
@@ -341,10 +391,64 @@ describe('reindexService', () => {
       findSpy.mockRestore();
     });
 
-    it('throws in reindex operation does not exist', async () => {
+    it('throws if reindex operation does not exist', async () => {
       const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
       await expect(service.resumeReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.updateReindexOp).not.toHaveBeenCalled();
+      findSpy.mockRestore();
+    });
+  });
+
+  describe('cancelReindexing', () => {
+    it('cancels the reindex task', async () => {
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
+        id: '2',
+        attributes: {
+          indexName: 'myIndex',
+          status: ReindexStatus.inProgress,
+          lastCompletedStep: ReindexStep.reindexStarted,
+          reindexTaskId: '999333',
+        },
+      });
+      callCluster.mockResolvedValueOnce(true);
+
+      await service.cancelReindexing('myIndex');
+      expect(callCluster).toHaveBeenCalledWith('tasks.cancel', { taskId: '999333' });
+      findSpy.mockRestore();
+    });
+
+    it('throws if reindexOp status is not inProgress', async () => {
+      const reindexOp = {
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.failed, reindexTaskId: '999333' },
+      } as ReindexSavedObject;
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+
+      await expect(service.cancelReindexing('myIndex')).rejects.toThrow();
+      expect(callCluster).not.toHaveBeenCalledWith('tasks.cancel', { taskId: '999333' });
+      findSpy.mockRestore();
+    });
+
+    it('throws if reindexOp lastCompletedStep is not reindexStarted', async () => {
+      const reindexOp = {
+        id: '2',
+        attributes: {
+          indexName: 'myIndex',
+          status: ReindexStatus.inProgress,
+          lastCompletedStep: ReindexStep.reindexCompleted,
+          reindexTaskId: '999333',
+        },
+      } as ReindexSavedObject;
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+
+      await expect(service.cancelReindexing('myIndex')).rejects.toThrow();
+      expect(callCluster).not.toHaveBeenCalledWith('tasks.cancel', { taskId: '999333' });
+      findSpy.mockRestore();
+    });
+
+    it('throws if reindex operation does not exist', async () => {
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
+      await expect(service.cancelReindexing('myIndex')).rejects.toThrow();
       findSpy.mockRestore();
     });
   });
@@ -758,6 +862,26 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.errorMessage).not.toBeNull();
         });
       });
+
+      describe('reindex task is cancelled', () => {
+        it('deletes tsk, updates status to cancelled', async () => {
+          callCluster
+            .mockResolvedValueOnce({
+              completed: true,
+              task: { status: { created: 100, total: 100, canceled: 'by user request' } },
+            })
+            .mockResolvedValue({ result: 'deleted' });
+
+          const updatedOp = await service.processNextStep(reindexOp);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.cancelled);
+          expect(callCluster).toHaveBeenCalledWith('delete', {
+            index: '.tasks',
+            type: 'task',
+            id: 'xyz',
+          });
+        });
+      });
     });
 
     describe('reindexCompleted', () => {
@@ -847,7 +971,6 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(
             ReindexStep.indexGroupServicesStarted
           );
-          expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
           expect(callCluster).not.toHaveBeenCalled();
         });
 
@@ -949,7 +1072,6 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(
             ReindexStep.indexGroupServicesStarted
           );
-          expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
           expect(callCluster).not.toHaveBeenCalled();
         });
 
@@ -1038,6 +1160,21 @@ describe('reindexService', () => {
             method: 'POST',
           });
         });
+      });
+    });
+
+    describe('indexGroupServicesStarted', () => {
+      const reindexOp = {
+        id: '1',
+        attributes: {
+          ...defaultAttributes,
+          lastCompletedStep: ReindexStep.indexGroupServicesStarted,
+        },
+      } as ReindexSavedObject;
+
+      it('sets to completed', async () => {
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
       });
     });
   });

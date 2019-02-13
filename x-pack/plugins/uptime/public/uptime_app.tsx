@@ -21,6 +21,8 @@ import {
   // @ts-ignore missing typings for EuiSuperDatePicker
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
@@ -31,8 +33,22 @@ import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 
+interface UptimeAppColors {
+  danger: string;
+  primary: string;
+  secondary: string;
+}
+
 // TODO: these props are global to this app, we should put them in a context
 export interface UptimeCommonProps {
+  autorefreshIsPaused: boolean;
+  autorefreshInterval: number;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  colors: UptimeAppColors;
+}
+
+export interface UptimePersistedState {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
   dateRangeStart: string;
@@ -40,22 +56,24 @@ export interface UptimeCommonProps {
 }
 
 export interface UptimeAppProps {
-  isUsingK7Design: boolean;
-  updateBreadcrumbs: UMUpdateBreadcrumbs;
-  kibanaBreadcrumbs: UMBreadcrumb[];
-  routerBasename: string;
+  darkMode: boolean;
   graphQLClient: UMGraphQLClient;
   initialDateRangeStart: string;
   initialDateRangeEnd: string;
   initialAutorefreshInterval: number;
   initialAutorefreshIsPaused: boolean;
-  persistState(state: UptimeCommonProps): void;
+  isUsingK7Design: boolean;
+  kibanaBreadcrumbs: UMBreadcrumb[];
+  routerBasename: string;
+  updateBreadcrumbs: UMUpdateBreadcrumbs;
+  persistState(state: UptimePersistedState): void;
 }
 
 interface UptimeAppState {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
   breadcrumbs: UMBreadcrumb[];
+  colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
 }
@@ -77,13 +95,14 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     super(props);
 
     const {
-      isUsingK7Design,
-      kibanaBreadcrumbs,
-      updateBreadcrumbs,
+      darkMode,
       initialAutorefreshIsPaused: autorefreshIsPaused,
       initialAutorefreshInterval: autorefreshInterval,
       initialDateRangeStart: dateRangeStart,
       initialDateRangeEnd: dateRangeEnd,
+      isUsingK7Design,
+      kibanaBreadcrumbs,
+      updateBreadcrumbs,
     } = props;
 
     let initialBreadcrumbs: UMBreadcrumb[];
@@ -96,10 +115,26 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       initialBreadcrumbs = [overviewBreadcrumb];
     }
 
+    let colors: UptimeAppColors;
+    if (darkMode) {
+      colors = {
+        primary: euiDarkVars.euiColorVis1,
+        secondary: euiDarkVars.euiColorVis0,
+        danger: euiDarkVars.euiColorVis9,
+      };
+    } else {
+      colors = {
+        primary: euiLightVars.euiColorVis1,
+        secondary: euiLightVars.euiColorVis0,
+        danger: euiLightVars.euiColorVis9,
+      };
+    }
+
     this.state = {
       autorefreshIsPaused,
       autorefreshInterval,
       breadcrumbs: initialBreadcrumbs,
+      colors,
       dateRangeStart,
       dateRangeEnd,
     };

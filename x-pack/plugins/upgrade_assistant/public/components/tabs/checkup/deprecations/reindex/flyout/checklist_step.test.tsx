@@ -20,6 +20,7 @@ describe('ChecklistFlyout', () => {
     confirmInputValue: 'CONFIRM',
     onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
+    cancelReindex: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
       lastCompletedStep: undefined,

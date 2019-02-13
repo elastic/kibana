@@ -233,6 +233,7 @@ describe('TaskManagerRunner', () => {
           sequenceNumber: 32,
           primaryTerm: 32,
           runAt: new Date(),
+          scheduledAt: new Date(),
           attempts: 0,
           params: {},
           scope: ['reporting'],

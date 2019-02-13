@@ -5,8 +5,19 @@
  */
 
 import { flow, omit } from 'lodash';
+import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
 import { FlatSettings, MappingProperties, TypeMapping } from './types';
+
+export interface ParsedIndexName {
+  cleanIndexName: string;
+  baseName: string;
+  newIndexName: string;
+  cleanBaseName: string;
+}
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -17,6 +28,31 @@ export const transformFlatSettings = (flatSettings: FlatSettings) => {
   const mappings = transformMappings(flatSettings.mappings);
 
   return { settings, mappings };
+};
+
+/**
+ * Parses an index name
+ * @param indexName
+ */
+export const parseIndexName = (indexName: string): ParsedIndexName => {
+  const matches = indexName.match(/^([\.])?(.*)$/) || [];
+  const internal = matches[1] || '';
+  const baseName = matches[2];
+
+  const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
+
+  // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
+  // avoid conflicts with index patterns/templates/etc
+  const reindexedMatcher = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
+
+  const cleanBaseName = baseName.replace(reindexedMatcher, '');
+
+  return {
+    cleanIndexName: `${internal}${cleanBaseName}`,
+    baseName,
+    cleanBaseName,
+    newIndexName: `${internal}${currentVersion}-${cleanBaseName}`,
+  };
 };
 
 /**

@@ -5,12 +5,14 @@
  */
 
 import { GRID_RESOLUTION } from '../grid_resolution';
+import { AbstractStyle } from './abstract_style';
 
-export class HeatmapStyle {
+export class HeatmapStyle extends AbstractStyle {
 
   static type = 'HEATMAP';
 
   constructor(styleDescriptor = {}) {
+    super();
     this._descriptor = HeatmapStyle.createDescriptor(
       styleDescriptor.refinement,
       styleDescriptor.properties
@@ -39,7 +41,7 @@ export class HeatmapStyle {
     return null;
   }
 
-  setMBPaintProperties({ alpha, mbMap, layerId, propertyName, resolution }) {
+  setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {
     let radius;
     if (resolution === GRID_RESOLUTION.COARSE) {
       radius = 64;
@@ -55,7 +57,6 @@ export class HeatmapStyle {
       type: 'identity',
       property: propertyName
     });
-    mbMap.setPaintProperty(layerId, 'heatmap-opacity', alpha);
   }
 
 }

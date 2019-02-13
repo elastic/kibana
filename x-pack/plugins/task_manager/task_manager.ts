@@ -53,11 +53,15 @@ export class TaskManager {
 
     const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
 
+    /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
+     * to initialize, and can change after startup */
     const store = new TaskStore({
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
       index: config.get('xpack.task_manager.index'),
       maxAttempts: config.get('xpack.task_manager.max_attempts'),
       supportedTypes: Object.keys(this.definitions),
+      logger,
+      getKibanaUuid: () => config.get('server.uuid'),
     });
     const pool = new TaskPool({
       logger,
@@ -94,7 +98,8 @@ export class TaskManager {
             this.isInitialized = true;
           })
           .catch((err: Error) => {
-            logger.warning(err.message);
+            // FIXME: check the type of error to make sure it's actually an ES error
+            logger.warning(`PollError ${err.message}`);
 
             // rety again to initialize store and poller, using the timing of
             // task_manager's configurable poll interval

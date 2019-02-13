@@ -15,7 +15,7 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { getReindexWarnings, transformFlatSettings } from './index_settings';
+import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
@@ -77,6 +77,15 @@ export interface ReindexService {
    * @param indexName
    */
   resumeReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+
+  /**
+   * Cancel an in-progress reindex operation for a given index. Only allowed when the
+   * reindex operation is in the ReindexStep.reindexStarted step. Relies on the ReindexWorker
+   * to continue processing the reindex operation to detect that the Reindex Task in ES has been
+   * cancelled.
+   * @param indexName
+   */
+  cancelReindexing(indexName: string): Promise<ReindexSavedObject>;
 }
 
 export const reindexServiceFactory = (
@@ -171,7 +180,14 @@ export const reindexServiceFactory = (
   };
 
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
-    // Set back to writable if we ever got past this point.
+    // Cancel reindex task if it was started but not completed
+    if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
+      await callCluster('tasks.cancel', {
+        taskId: reindexOp.attributes.reindexTaskId,
+      }).catch(e => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+    }
+
+    // Set index back to writable if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await callCluster('indices.putSettings', {
         index: reindexOp.attributes.indexName,
@@ -179,10 +195,19 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Stop consumers if we ever got past this point.
+    if (
+      reindexOp.attributes.lastCompletedStep >= ReindexStep.newIndexCreated &&
+      reindexOp.attributes.lastCompletedStep < ReindexStep.aliasCreated
+    ) {
+      await callCluster('indices.delete', { index: reindexOp.attributes.newIndexName });
+    }
+
+    // Resume consumers if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexGroupServicesStopped) {
       await resumeIndexGroupServices(reindexOp);
     }
+
+    return reindexOp;
   };
 
   // ------ Functions used to process the state machine
@@ -361,8 +386,24 @@ export const reindexServiceFactory = (
       waitForCompletion: false,
     });
 
-    if (taskResponse.completed) {
+    if (!taskResponse.completed) {
+      // Updated the percent complete
+      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
+      return actions.updateReindexOp(reindexOp, {
+        reindexTaskPercComplete: perc,
+      });
+    } else if (taskResponse.task.status.canceled === 'by user request') {
+      // Set the status to cancelled
+      reindexOp = await actions.updateReindexOp(reindexOp, {
+        status: ReindexStatus.cancelled,
+      });
+
+      // Do any other cleanup work necessary
+      reindexOp = await cleanupChanges(reindexOp);
+    } else {
+      // Check that it reindexed all documents
       const { count } = await callCluster('count', { index: reindexOp.attributes.indexName });
+
       if (taskResponse.task.status.created < count) {
         if (taskResponse.response.failures && taskResponse.response.failures.length > 0) {
           const failureExample = JSON.stringify(taskResponse.response.failures[0]);
@@ -372,28 +413,25 @@ export const reindexServiceFactory = (
         }
       }
 
-      // Delete the task from ES .tasks index
-      const deleteTaskResp = await callCluster('delete', {
-        index: '.tasks',
-        type: 'task',
-        id: taskId,
-      });
-
-      if (deleteTaskResp.result !== 'deleted') {
-        throw Boom.badImplementation(`Could not delete reindexing task ${taskId}`);
-      }
-
       // Update the status
-      return actions.updateReindexOp(reindexOp, {
+      reindexOp = await actions.updateReindexOp(reindexOp, {
         lastCompletedStep: ReindexStep.reindexCompleted,
         reindexTaskPercComplete: 1,
       });
-    } else {
-      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
-      return actions.updateReindexOp(reindexOp, {
-        reindexTaskPercComplete: perc,
-      });
     }
+
+    // Delete the task from ES .tasks index
+    const deleteTaskResp = await callCluster('delete', {
+      index: '.tasks',
+      type: 'task',
+      id: taskId,
+    });
+
+    if (deleteTaskResp.result !== 'deleted') {
+      throw Boom.badImplementation(`Could not delete reindexing task ${taskId}`);
+    }
+
+    return reindexOp;
   };
 
   /**
@@ -437,11 +475,10 @@ export const reindexServiceFactory = (
       await startWatcher();
     }
 
-    // Only change the status if we're still in-progress (this function is also called when the reindex fails)
+    // Only change the status if we're still in-progress (this function is also called when the reindex fails or is cancelled)
     if (reindexOp.attributes.status === ReindexStatus.inProgress) {
       return actions.updateReindexOp(reindexOp, {
         lastCompletedStep: ReindexStep.indexGroupServicesStarted,
-        status: ReindexStatus.completed,
       });
     } else {
       return reindexOp;
@@ -458,12 +495,21 @@ export const reindexServiceFactory = (
         return true;
       }
 
+      const index = parseIndexName(indexName);
+      const names = [indexName, index.newIndexName];
+
+      // if we have re-indexed this in the past, there will be an
+      // underlying alias we will also need to update.
+      if (index.cleanIndexName !== indexName) {
+        names.push(index.cleanIndexName);
+      }
+
       // Otherwise, query for required privileges for this index.
       const body = {
         cluster: ['manage'],
         index: [
           {
-            names: [`${indexName}*`],
+            names,
             privileges: ['all'],
           },
           {
@@ -516,8 +562,11 @@ export const reindexServiceFactory = (
       const existingReindexOps = await actions.findReindexOperations(indexName);
       if (existingReindexOps.total !== 0) {
         const existingOp = existingReindexOps.saved_objects[0];
-        if (existingOp.attributes.status === ReindexStatus.failed) {
-          // Delete the existing one if it failed to give a chance to retry.
+        if (
+          existingOp.attributes.status === ReindexStatus.failed ||
+          existingOp.attributes.status === ReindexStatus.cancelled
+        ) {
+          // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
         } else {
           throw Boom.badImplementation(`A reindex operation already in-progress for ${indexName}`);
@@ -567,6 +616,10 @@ export const reindexServiceFactory = (
             case ReindexStep.aliasCreated:
               lockedReindexOp = await resumeIndexGroupServices(lockedReindexOp);
               break;
+            case ReindexStep.indexGroupServicesStarted:
+              lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
+                status: ReindexStatus.completed,
+              });
             default:
               break;
           }
@@ -578,7 +631,7 @@ export const reindexServiceFactory = (
           });
 
           // Cleanup any changes, ignoring any errors.
-          await cleanupChanges(lockedReindexOp).catch(e => undefined);
+          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(e => lockedReindexOp);
         }
 
         return lockedReindexOp;
@@ -621,6 +674,28 @@ export const reindexServiceFactory = (
 
         return actions.updateReindexOp(op, { status: ReindexStatus.inProgress });
       });
+    },
+
+    async cancelReindexing(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw new Error(`No reindex operation found for index ${indexName}`);
+      } else if (reindexOp.attributes.status !== ReindexStatus.inProgress) {
+        throw new Error(`Reindex operation is not in progress`);
+      } else if (reindexOp.attributes.lastCompletedStep !== ReindexStep.reindexStarted) {
+        throw new Error(`Reindex operation is not current waiting for reindex task to complete`);
+      }
+
+      const resp = await callCluster('tasks.cancel', {
+        taskId: reindexOp.attributes.reindexTaskId,
+      });
+
+      if (resp.node_failures && resp.node_failures.length > 0) {
+        throw new Error(`Could not cancel reindex.`);
+      }
+
+      return reindexOp;
     },
   };
 };

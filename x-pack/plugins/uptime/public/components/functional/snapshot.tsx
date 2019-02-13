@@ -15,10 +15,6 @@ import {
   // @ts-ignore missing type
   EuiPanel,
   // @ts-ignore missing type
-  EuiSeriesChart,
-  // @ts-ignore missing type
-  EuiSeriesChartUtils,
-  // @ts-ignore missing type
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
@@ -29,12 +25,20 @@ import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { SnapshotHistogram } from './snapshot_histogram';
 
 interface SnapshotProps {
+  danger: string;
+  primary: string;
   snapshot: SnapshotType;
+  windowWidth: number;
 }
 
-export const Snapshot = ({ snapshot: { up, down, total, histogram } }: SnapshotProps) => (
+export const Snapshot = ({
+  danger,
+  snapshot: { up, down, total, histogram },
+  primary,
+  windowWidth,
+}: SnapshotProps) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="xl">
-    <EuiFlexItem>
+    <EuiFlexItem grow={4}>
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -85,7 +89,7 @@ export const Snapshot = ({ snapshot: { up, down, total, histogram } }: SnapshotP
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
-    <EuiFlexItem style={{ paddingTop: '12px' }}>
+    <EuiFlexItem grow={8} style={{ paddingTop: '12px', paddingRight: '12px' }}>
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -95,8 +99,15 @@ export const Snapshot = ({ snapshot: { up, down, total, histogram } }: SnapshotP
         </h5>
       </EuiTitle>
       {/* TODO: this is a UI hack that should be replaced */}
-      <EuiPanel paddingSize="s">
-        {histogram && <SnapshotHistogram histogram={histogram} />}
+      <EuiPanel paddingSize="s" style={{ maxHeight: '137px' }}>
+        {histogram && (
+          <SnapshotHistogram
+            dangerColor={danger}
+            histogram={histogram}
+            primaryColor={primary}
+            windowWidth={windowWidth}
+          />
+        )}
         {!histogram && (
           <EuiEmptyPrompt
             title={

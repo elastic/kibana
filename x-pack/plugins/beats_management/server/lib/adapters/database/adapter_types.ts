@@ -36,6 +36,7 @@ export interface DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<T>>;
+  putTemplate(name: string, template: any): Promise<any>;
 }
 
 export interface DatabaseKbnESCluster {

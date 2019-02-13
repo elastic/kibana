@@ -15,7 +15,7 @@
 import $ from 'jquery';
 import moment from 'moment-timezone';
 
-import '../components/annotations_table';
+import '../components/annotations/annotations_table';
 import '../components/anomalies_table';
 import '../components/controls';
 import '../components/job_select_list';

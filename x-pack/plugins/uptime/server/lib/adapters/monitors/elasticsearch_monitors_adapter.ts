@@ -7,6 +7,7 @@
 import { get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { ErrorListItem } from '../../../../common/graphql/types';
+import { getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -148,7 +149,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filter?: string | null
   ): Promise<any> {
-    const { statusFilter, query } = this.getFilteredQueryAndStatusFilter(
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filter
@@ -157,8 +158,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query,
+        size: 0,
         aggs: {
-          hosts: {
+          ids: {
             composite: {
               sources: [
                 {
@@ -168,14 +170,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                     },
                   },
                 },
-                {
-                  port: {
-                    terms: {
-                      field: 'tcp.port',
-                    },
-                  },
-                },
               ],
+              size: 10000,
             },
             aggs: {
               latest: {
@@ -193,36 +189,34 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    // TODO: this doesn't solve the issue of HB being down
-    const res = await this.database.search(request, params);
-    const hostBuckets = get(res, 'aggregations.hosts.buckets', []);
-    const monitorStatuses = hostBuckets.map(bucket => {
-      const latest = get(bucket, 'latest.hits.hits', []);
-      return latest.reduce(
-        (acc, doc) => {
-          const status = get(doc, '_source.monitor.status', null);
-          if (statusFilter && statusFilter !== status) {
-            return acc;
-          }
+
+    let up: number = 0;
+    let down: number = 0;
+    let searchAfter: any = null;
+
+    do {
+      if (searchAfter) {
+        set(params, 'body.aggs.ids.composite.after', searchAfter);
+      }
+
+      const queryResult = await this.database.search(request, params);
+      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
+
+      idBuckets.forEach(bucket => {
+        // We only get the latest doc
+        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
+        if (!statusFilter || (statusFilter && statusFilter === status)) {
           if (status === 'up') {
-            acc.up += 1;
+            up++;
           } else {
-            acc.down += 1;
+            down++;
           }
-          return acc;
-        },
-        { up: 0, down: 0 }
-      );
-    });
-    const { up, down } = monitorStatuses.reduce(
-      (acc, status) => {
-        acc.up += status.up || 0;
-        acc.down += status.down || 0;
-        return acc;
-      },
-      // @ts-ignore TODO update typings and remove this comment
-      { up: 0, down: 0 }
-    );
+        }
+      });
+
+      searchAfter = get(queryResult, 'aggregations.ids.after_key');
+    } while (searchAfter);
+
     return { up, down, total: up + down };
   }
 
@@ -232,7 +226,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
-    const { statusFilter, query } = this.getFilteredQueryAndStatusFilter(
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filters
@@ -260,6 +254,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   },
                 },
               ],
+              size: 50,
             },
             aggs: {
               latest: {
@@ -475,44 +470,5 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }
     );
     return errorsList;
-  }
-
-  private getMonitorsListFilteredQuery(filters: any): string | undefined {
-    const must = get(filters, 'bool.must', []);
-    if (must && must.length) {
-      const statusFilter = filters.bool.must.filter(
-        (filter: any) => filter.match['monitor.status']
-      );
-      if (statusFilter.length) {
-        return statusFilter[0].match['monitor.status'].query;
-      }
-    }
-  }
-
-  private getFilteredQueryAndStatusFilter(
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ) {
-    let statusFilter: string | undefined;
-    let filterObject: any;
-    if (filters) {
-      filterObject = JSON.parse(filters);
-      statusFilter = this.getMonitorsListFilteredQuery(filterObject);
-    }
-    let nonStatusFiters;
-    if (statusFilter && filters) {
-      nonStatusFiters = {
-        bool: {
-          must: filterObject.bool.must.filter((filter: any) => !filter.match['monitor.status']),
-        },
-      };
-    }
-    return {
-      query: statusFilter
-        ? nonStatusFiters
-        : getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
-      statusFilter,
-    };
   }
 }

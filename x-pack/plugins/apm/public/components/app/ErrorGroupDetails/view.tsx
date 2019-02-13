@@ -10,13 +10,13 @@ import { Location } from 'history';
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_LOG_MESSAGE
 } from '../../../../common/constants';
-import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';

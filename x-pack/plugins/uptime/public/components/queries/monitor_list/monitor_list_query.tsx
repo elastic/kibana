@@ -22,6 +22,7 @@ type Props = MonitorListProps & UptimeCommonProps;
 export const MonitorListQuery = ({
   autorefreshInterval,
   autorefreshIsPaused,
+  colors: { primary, danger },
   dateRangeStart,
   dateRangeEnd,
   filters,
@@ -39,7 +40,14 @@ export const MonitorListQuery = ({
         });
       }
       const monitors: LatestMonitor[] | undefined = get(data, 'monitorStatus.monitors', undefined);
-      return <MonitorList loading={loading} monitors={monitors || []} />;
+      return (
+        <MonitorList
+          dangerColor={danger}
+          loading={loading}
+          monitors={monitors || []}
+          primaryColor={primary}
+        />
+      );
     }}
   </Query>
 );

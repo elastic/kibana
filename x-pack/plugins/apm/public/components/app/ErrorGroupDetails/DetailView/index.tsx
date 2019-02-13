@@ -22,6 +22,7 @@ import {
   ERROR_EXC_STACKTRACE,
   ERROR_LOG_STACKTRACE
 } from 'x-pack/plugins/apm/common/constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import {
@@ -29,7 +30,7 @@ import {
   history,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/public/constants';
+import { STATUS } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
@@ -43,7 +44,6 @@ import {
   TRANSACTION_ID,
   USER_ID
 } from '../../../../../common/constants';
-import { STATUS } from '../../../../constants';
 import {
   borderRadius,
   colors,

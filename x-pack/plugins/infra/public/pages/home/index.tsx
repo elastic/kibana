@@ -41,6 +41,15 @@ export const HomePage = injectI18n(
             appendSections={
               <InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/infrastructure" />
             }
+            breadcrumbs={[
+              {
+                href: '#/',
+                text: intl.formatMessage({
+                  id: 'xpack.infra.header.infrastructureTitle',
+                  defaultMessage: 'Infrastructure',
+                }),
+              },
+            ]}
           />
           <SourceConfigurationFlyout />
           <WithSource>

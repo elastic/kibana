@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
-import { findBooleanFields, getReindexWarnings, transformFlatSettings } from './index_settings';
+import {
+  findBooleanFields,
+  getReindexWarnings,
+  parseIndexName,
+  transformFlatSettings,
+} from './index_settings';
 
 describe('transformFlatSettings', () => {
   it('does not blow up for empty mappings', () => {
@@ -149,6 +158,48 @@ describe('transformFlatSettings', () => {
       mappings: {
         myType: {},
       },
+    });
+  });
+});
+
+describe('parseIndexName', () => {
+  it('parses internal indices', () => {
+    expect(parseIndexName('.watches').baseName).toBe('watches');
+  });
+
+  it('parses non-internal indices', () => {
+    expect(parseIndexName('myIndex').baseName).toBe('myIndex');
+  });
+
+  it('excludes appended v5 reindexing string from newIndexName', () => {
+    expect(parseIndexName('myIndex-reindexed-v5')).toEqual({
+      baseName: 'myIndex-reindexed-v5',
+      cleanBaseName: 'myIndex',
+      cleanIndexName: 'myIndex',
+      newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+    });
+
+    expect(parseIndexName('.myInternalIndex-reindexed-v5')).toEqual({
+      baseName: 'myInternalIndex-reindexed-v5',
+      cleanBaseName: 'myInternalIndex',
+      cleanIndexName: '.myInternalIndex',
+      newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`,
+    });
+  });
+
+  it('replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION} in newIndexName', () => {
+    expect(parseIndexName(`myIndex-reindexed-v${PREV_MAJOR_VERSION}`)).toEqual({
+      baseName: `myIndex-reindexed-v${PREV_MAJOR_VERSION}`,
+      cleanBaseName: 'myIndex',
+      cleanIndexName: 'myIndex',
+      newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+    });
+
+    expect(parseIndexName(`.myInternalIndex-reindexed-v${PREV_MAJOR_VERSION}`)).toEqual({
+      baseName: `myInternalIndex-reindexed-v${PREV_MAJOR_VERSION}`,
+      cleanBaseName: 'myInternalIndex',
+      cleanIndexName: '.myInternalIndex',
+      newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`,
     });
   });
 });

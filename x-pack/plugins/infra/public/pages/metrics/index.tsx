@@ -101,7 +101,16 @@ export const MetricDetail = withTheme(
                     nodeId={nodeId}
                   >
                     {({ name, filteredLayouts, loading: metadataLoading }) => {
-                      const breadcrumbs = [{ text: name }];
+                      const breadcrumbs = [
+                        {
+                          href: '#/',
+                          text: intl.formatMessage({
+                            id: 'xpack.infra.header.infrastructureTitle',
+                            defaultMessage: 'Infrastructure',
+                          }),
+                        },
+                        { text: name },
+                      ];
                       return (
                         <ColumnarPage>
                           <Header
@@ -166,6 +175,8 @@ export const MetricDetail = withTheme(
                                                   }
                                                   refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
+                                                  isLiveStreaming={isAutoReloading}
+                                                  stopLiveStreaming={stopMetricsAutoReload}
                                                 />
                                               </EuiPageContentWithRelative>
                                             </EuiPageBody>

@@ -7,7 +7,6 @@ import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionProps,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -166,20 +165,6 @@ export const PingList = (props: PingListProps) => {
                 selectedOptions={[props.selectedOption]}
                 options={props.statusOptions}
                 onChange={props.selectedOptionChanged}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.uptime.pingList.maxSearchSizeLabel', {
-                defaultMessage: 'Max Search Size',
-              })}
-            >
-              <EuiFieldNumber
-                defaultValue={props.maxSearchSize.toString()}
-                min={0}
-                max={10000} // 10k is the max default size in ES, and a good max sane size for this page
-                onBlur={props.searchSizeOnBlur}
               />
             </EuiFormRow>
           </EuiFlexItem>

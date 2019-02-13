@@ -165,6 +165,14 @@ export default function ({ getService }) {
         'stack_stats.kibana.plugins.kql.defaultQueryLanguage',
         'stack_stats.kibana.plugins.kql.optInCount',
         'stack_stats.kibana.plugins.kql.optOutCount',
+        'stack_stats.kibana.plugins.maps.attributesPerMap.dataSourcesCount.avg',
+        'stack_stats.kibana.plugins.maps.attributesPerMap.dataSourcesCount.max',
+        'stack_stats.kibana.plugins.maps.attributesPerMap.dataSourcesCount.min',
+        'stack_stats.kibana.plugins.maps.attributesPerMap.layersCount.avg',
+        'stack_stats.kibana.plugins.maps.attributesPerMap.layersCount.max',
+        'stack_stats.kibana.plugins.maps.attributesPerMap.layersCount.min',
+        'stack_stats.kibana.plugins.maps.mapsTotalCount',
+        'stack_stats.kibana.plugins.maps.timeCaptured',
         'stack_stats.kibana.plugins.ml.file_data_visualizer.index_creation_count',
         'stack_stats.kibana.plugins.reporting.PNG.available',
         'stack_stats.kibana.plugins.reporting.PNG.total',
@@ -375,6 +383,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.apm.services_per_agent).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
+      expect(stats.stack_stats.kibana.plugins.maps.attributesPerMap).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.spaces.available).to.be(true);

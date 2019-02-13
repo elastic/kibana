@@ -14,7 +14,7 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 import { merge } from 'lodash';
 
 async function getIndexTemplate(callWithRequest, templateName) {
-  const response = await callWithRequest('indices.getTemplate', { name: templateName });
+  const response = await callWithRequest('indices.getTemplate', { name: templateName, include_type_name: true });
   return response[templateName];
 }
 

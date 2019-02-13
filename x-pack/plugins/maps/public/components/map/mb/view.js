@@ -53,7 +53,9 @@ export class MBMapContainer extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._checker.destroy();
+    if (this._checker) {
+      this._checker.destroy();
+    }
     if (this._mbMap) {
       this._mbMap.remove();
       this._mbMap = null;
@@ -64,6 +66,10 @@ export class MBMapContainer extends React.Component {
   async _initializeMap() {
 
     this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
+
+    if (!this._isMounted) {
+      return;
+    }
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -203,17 +209,13 @@ export class MBMapContainer extends React.Component {
 
     removeOrphanedSourcesAndLayers(this._mbMap, layerList);
     layerList.forEach(layer => {
-      if (!layer.hasErrors()) {
-        Promise.resolve(layer.syncLayerWithMB(this._mbMap))
-          .catch(({ message }) =>
-            this.props.setLayerErrorStatus(layer.getId(), message));
-      }
+      layer.syncLayerWithMB(this._mbMap);
     });
     syncLayerOrder(this._mbMap, layerList);
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady) {
+    if (!this.props.isMapReady || !inspectorAdapters.map) {
       return;
     }
 

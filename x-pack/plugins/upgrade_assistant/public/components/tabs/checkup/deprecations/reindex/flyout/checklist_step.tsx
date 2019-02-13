@@ -44,16 +44,9 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex }) => {
-  const {
-    loadingState,
-    status,
-    reindexTaskPercComplete,
-    lastCompletedStep,
-    errorMessage,
-    hasRequiredPrivileges,
-    indexGroup,
-  } = reindexState;
+  cancelReindex: () => void;
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
   return (
@@ -87,13 +80,7 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
         <EuiTitle size="xs">
           <h3>Reindexing process</h3>
         </EuiTitle>
-        <ReindexProgress
-          indexGroup={indexGroup}
-          lastCompletedStep={lastCompletedStep}
-          reindexStatus={status}
-          reindexTaskPercComplete={reindexTaskPercComplete}
-          errorMessage={errorMessage}
-        />
+        <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

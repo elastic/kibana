@@ -105,52 +105,32 @@ export function timeseriesFetcher({
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter
-        }
-      },
+      query: { bool: { filter } },
       aggs: {
         response_times: {
           date_histogram: {
             field: '@timestamp',
             interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: {
-              min: start,
-              max: end
-            }
+            extended_bounds: { min: start, max: end }
           },
           aggs: {
-            avg: {
-              avg: { field: TRANSACTION_DURATION }
-            },
+            avg: { avg: { field: TRANSACTION_DURATION } },
             pct: {
-              percentiles: {
-                field: TRANSACTION_DURATION,
-                percents: [95, 99]
-              }
+              percentiles: { field: TRANSACTION_DURATION, percents: [95, 99] }
             }
           }
         },
-        overall_avg_duration: {
-          avg: { field: TRANSACTION_DURATION }
-        },
+        overall_avg_duration: { avg: { field: TRANSACTION_DURATION } },
         transaction_results: {
-          terms: {
-            field: TRANSACTION_RESULT,
-            missing: 'transaction_result_missing'
-          },
+          terms: { field: TRANSACTION_RESULT, missing: '' },
           aggs: {
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
                 interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end
-                }
+                extended_bounds: { min: start, max: end }
               }
             }
           }

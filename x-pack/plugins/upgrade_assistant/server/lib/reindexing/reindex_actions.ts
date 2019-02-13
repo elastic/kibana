@@ -12,10 +12,6 @@ import {
   SavedObjectsClient,
 } from 'src/server/saved_objects/service/saved_objects_client';
 import {
-  CURRENT_MAJOR_VERSION,
-  PREV_MAJOR_VERSION,
-} from 'x-pack/plugins/upgrade_assistant/common/version';
-import {
   IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
@@ -23,7 +19,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { findBooleanFields, getSingleMappingType } from './index_settings';
+import { findBooleanFields, getSingleMappingType, parseIndexName } from './index_settings';
 import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
@@ -127,22 +123,6 @@ export const reindexActionsFactory = (
   callCluster: CallCluster
 ): ReindexActions => {
   // ----- Internal functions
-  /**
-   * Generates a new index name for the new index. Iterates until it finds an index
-   * that doesn't already exist.
-   * @param indexName
-   */
-  const getNewIndexName = (indexName: string) => {
-    const prevVersionSuffix = `-reindexed-v${PREV_MAJOR_VERSION}`;
-    const currentVersionSuffix = `-reindexed-v${CURRENT_MAJOR_VERSION}`;
-
-    if (indexName.endsWith(prevVersionSuffix)) {
-      return indexName.replace(new RegExp(`${prevVersionSuffix}$`), currentVersionSuffix);
-    } else {
-      return `${indexName}${currentVersionSuffix}`;
-    }
-  };
-
   const isLocked = (reindexOp: ReindexSavedObject) => {
     if (reindexOp.attributes.locked) {
       const now = moment();
@@ -183,7 +163,7 @@ export const reindexActionsFactory = (
     async createReindexOp(indexName: string) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: getNewIndexName(indexName),
+        newIndexName: parseIndexName(indexName).newIndexName,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -259,7 +239,10 @@ export const reindexActionsFactory = (
     },
 
     async getBooleanFieldPaths(indexName: string) {
-      const results = await callCluster('indices.getMapping', { index: indexName });
+      const results = await callCluster('indices.getMapping', {
+        index: indexName,
+        include_type_name: true,
+      });
       const mapping = getSingleMappingType(results[indexName].mappings);
 
       // It's possible an index doesn't have a mapping.
@@ -268,8 +251,7 @@ export const reindexActionsFactory = (
 
     async getFlatSettings(indexName: string) {
       const flatSettings = (await callCluster('transport.request', {
-        // TODO: set `&include_type_name=true` to false in 7.0
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
+        path: `/${encodeURIComponent(indexName)}?include_type_name=true&flat_settings=true`,
       })) as { [indexName: string]: FlatSettings };
 
       if (!flatSettings[indexName]) {

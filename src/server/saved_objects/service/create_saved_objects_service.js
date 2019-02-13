@@ -38,6 +38,7 @@ export function createSavedObjectsService(server, schema, serializer, migrator) 
       const index = server.config().get('kibana.index');
       await adminCluster.callWithInternalUser('indices.putTemplate', {
         name: `kibana_index_template:${index}`,
+        include_type_name: true,
         body: {
           template: index,
           settings: {

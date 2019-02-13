@@ -19,7 +19,7 @@ import {
   EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { configBlockSchemas } from '../../../../common/config_schemas';
 import { translateConfigSchema } from '../../../../common/config_schemas_translations_map';
@@ -27,7 +27,6 @@ import { ConfigurationBlock } from '../../../../common/domain_types';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {
-  intl: InjectedIntl;
   configBlock?: ConfigurationBlock;
   onClose(): any;
   onSave?(config: ConfigurationBlock): any;
@@ -63,51 +62,38 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
     }));
   };
   public render() {
-    const { intl } = this.props;
     const thisConfigSchema = this.schema.find(s => this.state.configBlock.type === s.id);
 
     if (!thisConfigSchema) {
-      return (
-        <FormattedMessage
-          id="xpack.beatsManagement.tagConfig.invalidSchema"
-          defaultMessage="Error: This config is invalid, it is not supported by Beats and should be removed"
-        />
-      );
+      return i18n.translate('xpack.beatsManagement.tagConfig.invalidSchema', {
+        defaultMessage:
+          'Error: This config is invalid, it is not supported by Beats and should be removed',
+      });
     }
     return (
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2>
-              {this.editMode ? (
-                this.props.onSave ? (
-                  <FormattedMessage
-                    id="xpack.beatsManagement.tagConfig.editConfigurationTitle"
-                    defaultMessage="Edit configuration block"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.beatsManagement.tagConfig.viewConfigurationTitle"
-                    defaultMessage="View configuration block"
-                  />
-                )
-              ) : (
-                <FormattedMessage
-                  id="xpack.beatsManagement.tagConfig.addConfigurationTitle"
-                  defaultMessage="Add configuration block"
-                />
-              )}
+              {this.editMode
+                ? this.props.onSave
+                  ? i18n.translate('xpack.beatsManagement.tagConfig.editConfigurationTitle', {
+                      defaultMessage: 'Edit configuration block',
+                    })
+                  : i18n.translate('xpack.beatsManagement.tagConfig.viewConfigurationTitle"', {
+                      defaultMessage: 'View configuration block',
+                    })
+                : i18n.translate('xpack.beatsManagement.tagConfig.addConfigurationTitle"', {
+                    defaultMessage: 'Add configuration block',
+                  })}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.beatsManagement.tagConfig.typeLabel"
-                defaultMessage="Type"
-              />
-            }
+            label={i18n.translate('xpack.beatsManagement.tagConfig.typeLabel', {
+              defaultMessage: 'Type',
+            })}
           >
             <EuiSelect
               options={this.schema.map(s => ({ value: s.id, text: s.name }))}
@@ -117,31 +103,29 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
             />
           </EuiFormRow>
           <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.beatsManagement.tagConfig.descriptionLabel"
-                defaultMessage="Description"
-              />
-            }
+            label={i18n.translate('xpack.beatsManagement.tagConfig.descriptionLabel', {
+              defaultMessage: 'Description',
+            })}
           >
             <EuiFieldText
               value={this.state.configBlock.description}
               disabled={!this.props.onSave}
               onChange={this.onValueChange('description')}
-              placeholder={intl.formatMessage({
-                id: 'xpack.beatsManagement.tagConfig.descriptionPlaceholder',
-                defaultMessage: 'Description (optional)',
-              })}
+              placeholder={i18n.translate(
+                'xpack.beatsManagement.tagConfig.descriptionPlaceholder',
+                {
+                  defaultMessage: 'Description (optional)',
+                }
+              )}
             />
           </EuiFormRow>
           <h3>
-            <FormattedMessage
-              id="xpack.beatsManagement.tagConfig.configurationTypeText"
-              defaultMessage="{configType} configuration"
-              values={{
+            {i18n.translate('xpack.beatsManagement.tagConfig.configurationTypeText', {
+              defaultMessage: '{configType} configuration',
+              values: {
                 configType: thisConfigSchema ? thisConfigSchema.name : 'Unknown',
-              }}
-            />
+              },
+            })}
           </h3>
           <EuiHorizontalRule />
 
@@ -170,10 +154,9 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={this.props.onClose}>
-                <FormattedMessage
-                  id="xpack.beatsManagement.tagConfig.closeButtonLabel"
-                  defaultMessage="Close"
-                />
+                {i18n.translate('xpack.beatsManagement.tagConfig.closeButtonLabel', {
+                  defaultMessage: 'Close',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             {this.props.onSave && (
@@ -182,15 +165,14 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
                   disabled={!this.state.valid}
                   fill
                   onClick={() => {
-                    if (this.form.current && this.form.current.getWrappedInstance()) {
-                      this.form.current.getWrappedInstance().submit();
+                    if (this.form.current) {
+                      this.form.current.submit();
                     }
                   }}
                 >
-                  <FormattedMessage
-                    id="xpack.beatsManagement.tagConfig.saveButtonLabel"
-                    defaultMessage="Save"
-                  />
+                  {i18n.translate('xpack.beatsManagement.tagConfig.saveButtonLabel', {
+                    defaultMessage: 'Save',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             )}
@@ -201,4 +183,4 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
   }
 }
 
-export const ConfigView = injectI18n(ConfigViewUi);
+export const ConfigView = ConfigViewUi;

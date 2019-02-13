@@ -163,7 +163,14 @@ describe('MonitorList component', () => {
 
   it('renders a monitor list without errors', () => {
     const { monitors } = monitorResult;
-    const component = shallowWithIntl(<MonitorList loading={false} monitors={monitors || []} />);
+    const component = shallowWithIntl(
+      <MonitorList
+        dangerColor="danger"
+        loading={false}
+        monitors={monitors || []}
+        primaryColor="primary"
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 });

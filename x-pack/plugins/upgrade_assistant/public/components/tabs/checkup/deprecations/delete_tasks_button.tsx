@@ -126,8 +126,8 @@ export class DeleteTasksButton extends React.Component<{}, DeleteButtonState> {
             <EuiText grow={false}>
               <p>
                 This index contains the results of long-running tasks in Elasticsearch. To upgrade,
-                you will need to delete this index. If you still to access this old information you
-                should{' '}
+                you will need to delete this index. If you still need to access this old information
+                you should{' '}
                 <EuiLink href={BACKUP_CONSOLE_LINK} target="_blank">
                   reindex into a backup index
                 </EuiLink>{' '}
