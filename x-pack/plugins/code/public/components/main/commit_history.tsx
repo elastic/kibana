@@ -34,20 +34,6 @@ const Header = styled.div`
   justify-content: space-between;
 `;
 
-const CommitRoot = styled(EuiPanel)`
-  &:not(:first-child):not(:last-child) {
-    border-top: none;
-    border-radius: 0;
-  }
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
-const CommitGroupContainer = styled.div`
-  margin: 0 0 ${theme.euiSizeXs} ${theme.euiSizeM};
-`;
-
 const CommitId = styled.div`
   height: calc(20rem / 14);
   margin: auto 0;
