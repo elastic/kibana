@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { InjectedIntlProps } from 'react-intl';
 import chrome from 'ui/chrome';
 
 import {
@@ -32,7 +31,7 @@ import {
   EuiTableCriteria,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { SavedObjectAttributes } from '../../../../server/saved_objects';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
@@ -52,7 +51,7 @@ interface SavedObjectFinderUIState {
   sortDirection?: Direction;
 }
 
-interface SavedObjectFinderUIProps extends InjectedIntlProps {
+interface BaseSavedObjectFinder {
   callToActionButton?: React.ReactNode;
   onChoose?: (
     id: SavedObject<SavedObjectAttributes>['id'],
@@ -62,13 +61,20 @@ interface SavedObjectFinderUIProps extends InjectedIntlProps {
   noItemsMessage?: React.ReactNode;
   savedObjectType: 'visualization' | 'search' | 'index-pattern';
   visTypes?: VisTypesRegistryProvider;
-  initialPageSize?: 5 | 10 | 15;
 }
 
-class SavedObjectFinderUI extends React.Component<
-  SavedObjectFinderUIProps,
-  SavedObjectFinderUIState
-> {
+interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
+  initialPageSize?: undefined;
+  fixedPageSize: number;
+}
+
+interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
+  initialPageSize?: 5 | 10 | 15;
+  fixedPageSize?: undefined;
+}
+type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
+
+class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObjectFinderUIState> {
   public static propTypes = {
     callToActionButton: PropTypes.node,
     onChoose: PropTypes.func,
@@ -76,7 +82,7 @@ class SavedObjectFinderUI extends React.Component<
     noItemsMessage: PropTypes.node,
     savedObjectType: PropTypes.oneOf(['visualization', 'search', 'index-pattern']).isRequired,
     visTypes: PropTypes.object,
-    initialPageSize: PropTypes.number,
+    pagination: PropTypes.object,
   };
 
   private isComponentMounted: boolean = false;
@@ -135,7 +141,7 @@ class SavedObjectFinderUI extends React.Component<
       items: [],
       isFetchingItems: false,
       page: 0,
-      perPage: props.initialPageSize || 15,
+      perPage: props.initialPageSize || props.fixedPageSize || 15,
       filter: '',
     };
   }
@@ -225,8 +231,7 @@ class SavedObjectFinderUI extends React.Component<
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder={this.props.intl.formatMessage({
-              id: 'common.ui.savedObjects.finder.searchPlaceholder',
+            placeholder={i18n.translate('common.ui.savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
             fullWidth
@@ -255,6 +260,7 @@ class SavedObjectFinderUI extends React.Component<
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
       totalItemCount: this.state.items.length,
+      hidePerPageOptions: Boolean(this.props.fixedPageSize),
       pageSizeOptions: [5, 10, 15],
     };
     // TODO there should be a Type in EUI for that, replace if it exists
@@ -268,8 +274,7 @@ class SavedObjectFinderUI extends React.Component<
     const tableColumns = [
       {
         field: 'title',
-        name: this.props.intl.formatMessage({
-          id: 'common.ui.savedObjects.finder.titleLabel',
+        name: i18n.translate('common.ui.savedObjects.finder.titleLabel', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -313,4 +318,4 @@ class SavedObjectFinderUI extends React.Component<
   }
 }
 
-export const SavedObjectFinder = injectI18n(SavedObjectFinderUI);
+export { SavedObjectFinder };

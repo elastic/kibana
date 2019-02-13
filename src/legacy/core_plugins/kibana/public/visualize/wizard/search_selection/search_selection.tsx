@@ -18,7 +18,6 @@
  */
 
 import {
-  EuiButton,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -28,14 +27,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
-  onGoTo: (path: string) => void;
 }
 
 interface SearchSelectionState {
@@ -49,33 +46,11 @@ interface TabProps {
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
-  public static propTypes = {
-    onSearchSelected: PropTypes.func,
-    onGoTo: PropTypes.func,
-  };
-
   private tabs: TabProps[] = [];
+  private fixedPageSize: number = 8;
 
   constructor(props: SearchSelectionProps) {
     super(props);
-
-    const manageSavedSearchesBtn = (
-      <EuiButton onClick={() => this.props.onGoTo('#/management/kibana/objects')}>
-        <FormattedMessage
-          id="kbn.visualize.newVisWizard.savedSearchTab.manageSavedSearchesButtonLabel"
-          defaultMessage="Manage saved searches"
-        />
-      </EuiButton>
-    );
-
-    const manageIndexPatternsBtn = (
-      <EuiButton onClick={() => this.props.onGoTo('#/management/kibana/index_patterns')}>
-        <FormattedMessage
-          id="kbn.visualize.newVisWizard.indexPatternTab.manageIndexPatternsButtonLabel"
-          defaultMessage="Manage index patterns"
-        />
-      </EuiButton>
-    );
 
     this.tabs = [
       {
@@ -87,12 +62,12 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           <SavedObjectFinder
             key="visSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
-            callToActionButton={manageIndexPatternsBtn}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.indexPatternTab.notFoundLabel',
               { defaultMessage: 'No matching index patterns found.' }
             )}
             savedObjectType="index-pattern"
+            fixedPageSize={this.fixedPageSize}
           />
         ),
       },
@@ -105,12 +80,12 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
-            callToActionButton={manageSavedSearchesBtn}
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.savedSearchTab.notFoundLabel',
               { defaultMessage: 'No matching saved searches found.' }
             )}
             savedObjectType="search"
+            fixedPageSize={this.fixedPageSize}
           />
         ),
       },

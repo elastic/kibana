@@ -66,7 +66,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     const selectionModal = this.state.showSearchVisModal ? (
       <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
-        <SearchSelection onSearchSelected={this.onSearchSelected} onGoTo={this.onGoTo} />
+        <SearchSelection onSearchSelected={this.onSearchSelected} />
       </EuiModal>
     ) : (
       <EuiModal onClose={this.onCloseModal} maxWidth={'100vw'} className="visNewVisDialog">
@@ -94,13 +94,15 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       });
     } else {
       const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
-      this.onGoTo(`${baseUrl}${params.join('&')}`);
+      this.props.onClose();
+      location.assign(`${baseUrl}${params.join('&')}`);
     }
   };
 
   private onSearchSelected = (searchId: string, searchType: string) => {
+    this.props.onClose();
+
     if (!this.state.visType) {
-      this.props.onClose();
       return;
     }
 
@@ -109,14 +111,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
       ...this.props.editorParams!,
     ];
-    this.onGoTo(`${baseUrl}${params.join('&')}`);
-  };
-
-  private onGoTo = (path: string) => {
-    this.props.onClose();
-    if (path) {
-      location.assign(path);
-    }
+    location.assign(`${baseUrl}${params.join('&')}`);
   };
 }
 
