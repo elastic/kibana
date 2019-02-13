@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('skipCloud', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
         it('should have a nodes table with correct rows with default sorting', async () => {

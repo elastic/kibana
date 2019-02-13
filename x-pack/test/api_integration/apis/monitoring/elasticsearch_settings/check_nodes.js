@@ -10,6 +10,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('check nodes settings', function () {
+    // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
     it('should check node settings', async () => {

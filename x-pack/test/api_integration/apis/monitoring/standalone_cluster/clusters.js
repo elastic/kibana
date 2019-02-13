@@ -12,6 +12,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('clusters', function () {
+    // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
     const archive = 'monitoring/standalone_cluster';

@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('cluster row content', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
         it('non-primary basic cluster shows NA for everything', async () => {
@@ -114,6 +115,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('cluster row actions', function () {
+        // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
         it('clicking the non-primary basic cluster shows a toast message', async () => {
