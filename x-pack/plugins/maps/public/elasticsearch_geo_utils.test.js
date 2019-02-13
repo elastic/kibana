@@ -12,6 +12,8 @@ import {
   convertMapExtentToPolygon,
 } from './elasticsearch_geo_utils';
 
+import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+
 const geoFieldName = 'location';
 const mapExtent = {
   maxLat: 39,
@@ -24,9 +26,7 @@ const flattenHitMock = hit => {
   const properties = {};
   for (const fieldName in hit._source) {
     if (hit._source.hasOwnProperty(fieldName)) {
-      if (fieldName !== geoFieldName) {
-        properties[fieldName] = hit._source[fieldName];
-      }
+      properties[fieldName] = hit._source[fieldName];
     }
   }
   return properties;
@@ -127,6 +127,69 @@ describe('hitsToGeoJson', () => {
         myField: 8
       },
       type: 'Feature',
+    });
+  });
+
+  describe('dot in geoFieldName', () => {
+    const configMock = {
+      get: (key) => {
+        if (key === 'metaFields') {
+          return [];
+        }
+        throw new Error(`Unexpected config key: ${key}`);
+      },
+      watch: () => {}
+    };
+    const flattenHitWrapper = IndexPatternsFlattenHitProvider(configMock); // eslint-disable-line new-cap
+    const indexPatternMock = {
+      fields: {
+        byName: {
+          ['my.location']: {
+            type: 'geo_point'
+          }
+        }
+      }
+    };
+    const indexPatternFlattenHit = flattenHitWrapper(indexPatternMock);
+
+    it('Should handle geoField being an object', () => {
+      const hits = [
+        {
+          _source: {
+            my: {
+              location: { lat: 20, lon: 100 },
+            }
+          }
+        }
+      ];
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      expect(geojson.features[0]).toEqual({
+        geometry: {
+          coordinates: [100, 20],
+          type: 'Point',
+        },
+        properties: {},
+        type: 'Feature',
+      });
+    });
+
+    it('Should handle geoField containing dot in the name', () => {
+      const hits = [
+        {
+          _source: {
+            ['my.location']: { lat: 20, lon: 100 },
+          }
+        }
+      ];
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      expect(geojson.features[0]).toEqual({
+        geometry: {
+          coordinates: [100, 20],
+          type: 'Point',
+        },
+        properties: {},
+        type: 'Feature',
+      });
     });
   });
 });
