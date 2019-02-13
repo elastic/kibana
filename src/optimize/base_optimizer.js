@@ -356,7 +356,7 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.(png|jpg|gif|jpeg|svg)$/,
+            test: /\.(png|jpg|gif|jpeg)$/,
             loader: ['url-loader'],
           },
           {
