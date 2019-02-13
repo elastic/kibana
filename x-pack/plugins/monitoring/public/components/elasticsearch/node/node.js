@@ -15,12 +15,14 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
+import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 
 export const Node = ({
   nodeSummary,
   metrics,
+  logs,
   scope,
   kbnUrl,
   ...props
@@ -53,9 +55,15 @@ export const Node = ({
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-          <EuiSpacer size="m"/>
-          <ShardAllocation scope={scope} kbnUrl={kbnUrl}/>
         </EuiPageContent>
+        <EuiSpacer size="m"/>
+        <EuiPanel>
+          <Logs logs={logs} />
+        </EuiPanel>
+        <EuiSpacer size="m"/>
+        <EuiPanel>
+          <ShardAllocation scope={scope} kbnUrl={kbnUrl}/>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

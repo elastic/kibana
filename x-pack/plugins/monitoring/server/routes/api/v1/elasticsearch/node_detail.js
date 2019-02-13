@@ -14,6 +14,7 @@ import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -71,6 +72,7 @@ export function esNodeRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, cluster, { includeIndices: true, includeNodes: true });
         const nodeSummary = await getNodeSummary(req, esIndexPattern, clusterState, shardStats, { clusterUuid, nodeUuid, start, end });
         const metrics = await getMetrics(req, esIndexPattern, metricSet, [{ term: { 'source_node.uuid': nodeUuid } }]);
+        const logs = await getLogs(req, 'filebeat-*', { clusterUuid, nodeUuid, start, end });
 
         let shardAllocation;
         if (!isAdvanced) {
@@ -95,6 +97,7 @@ export function esNodeRoute(server) {
         return {
           nodeSummary,
           metrics,
+          logs,
           ...shardAllocation
         };
       } catch (err) {
