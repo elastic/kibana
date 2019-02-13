@@ -54,7 +54,8 @@ export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
 export const combineQueries = (
   dataProviders: DataProvider[],
   indexPattern: StaticIndexPattern,
-  kqlQuery: string
+  kqlQuery: string,
+  kqlMode: string
 ): { filterQuery: string } | null => {
   if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return null;
@@ -67,7 +68,8 @@ export const combineQueries = (
       filterQuery: convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders), indexPattern),
     };
   }
-  const postpend = (q: string) => `${!isEmpty(q) ? ` or (${q})` : ''}`;
+  const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
+  const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
   const globalQuery = `${buildGlobalQuery(dataProviders)}${postpend(kqlQuery)}`;
 
   return {

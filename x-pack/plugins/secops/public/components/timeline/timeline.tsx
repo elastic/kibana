@@ -12,12 +12,13 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { Note } from '../../lib/note';
+import { timelineModel } from '../../store';
 import { AutoSizer } from '../auto_sizer';
 import { AddNoteToEvent, UpdateNote } from '../notes/helpers';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
-import { RowRenderer } from './body/renderers';
 import { ColumnRenderer } from './body/renderers';
+import { RowRenderer } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
@@ -59,6 +60,7 @@ interface Props {
   indexPattern: StaticIndexPattern;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
+  kqlMode: timelineModel.KqlMode;
   kqlQuery: string;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
@@ -94,6 +96,7 @@ export const Timeline = pure<Props>(
     indexPattern,
     itemsPerPage,
     itemsPerPageOptions,
+    kqlMode,
     kqlQuery,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
@@ -113,7 +116,7 @@ export const Timeline = pure<Props>(
     sort,
     updateNote,
   }) => {
-    const combinedQueries = combineQueries(dataProviders, indexPattern, kqlQuery);
+    const combinedQueries = combineQueries(dataProviders, indexPattern, kqlQuery, kqlMode);
     return (
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { height: timelineHeaderHeight = 0, width = 0 } }) => (

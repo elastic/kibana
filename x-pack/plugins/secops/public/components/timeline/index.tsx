@@ -54,6 +54,7 @@ interface StateReduxProps {
   headers?: ColumnHeader[];
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
+  kqlMode: timelineModel.KqlMode;
   kqlQueryExpression: string;
   pageCount?: number;
   pinnedEventIds?: { [eventId: string]: boolean };
@@ -150,6 +151,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       id,
       itemsPerPage,
       itemsPerPageOptions,
+      kqlMode,
       kqlQueryExpression,
       pinnedEventIds,
       range,
@@ -173,6 +175,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             indexPattern={indexPattern}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
+            kqlMode={kqlMode}
             kqlQuery={kqlQueryExpression}
             onChangeDataProviderKqlQuery={this.onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={this.onChangeDroppableAndProvider}
@@ -268,6 +271,7 @@ const makeMapStateToProps = () => {
       eventIdToNoteIds,
       itemsPerPage,
       itemsPerPageOptions,
+      kqlMode,
       pinnedEventIds,
       sort,
       show,
@@ -280,6 +284,7 @@ const makeMapStateToProps = () => {
       id,
       itemsPerPage,
       itemsPerPageOptions,
+      kqlMode,
       kqlQueryExpression,
       eventIdToNoteIds,
       getNotesByIds: getNotesByIds(state),
