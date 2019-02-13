@@ -304,7 +304,7 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '123',
         }],
       });
@@ -319,7 +319,7 @@ describe('SavedObjectsRepository', () => {
         },
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '123',
         }],
       });
@@ -340,7 +340,7 @@ describe('SavedObjectsRepository', () => {
       migrator.migrateDocument = (doc) => {
         doc.attributes.title = doc.attributes.title + '!!';
         doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'config', id: '123' }];
+        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
         return doc;
       };
 
@@ -356,7 +356,7 @@ describe('SavedObjectsRepository', () => {
           migrationVersion: { foo: '2.3.4' },
           type: 'index-pattern',
           updated_at: '2017-08-14T15:49:14.886Z',
-          references: [{ name: 'search_0', type: 'config', id: '123' }],
+          references: [{ name: 'search_0', type: 'search', id: '123' }],
         },
       });
     });
@@ -483,18 +483,8 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns({ items: [] });
 
       await savedObjectsRepository.bulkCreate([
-        {
-          type: 'config',
-          id: 'one',
-          attributes: { title: 'Test One' },
-          references: [{ name: 'ref_0', type: 'index-pattern', id: '1' }]
-        },
-        {
-          type: 'index-pattern',
-          id: 'two',
-          attributes: { title: 'Test Two' },
-          references: [{ name: 'ref_0', type: 'index-pattern', id: '2' }]
-        },
+        { type: 'config', id: 'one', attributes: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' }, references: [{ name: 'ref_0', type: 'test', id: '2' }] },
       ]);
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -504,18 +494,13 @@ describe('SavedObjectsRepository', () => {
 
       expect(bulkCalls[0][1].body).toEqual([
         { create: { _type: '_doc', _id: 'config:one' } },
-        {
-          type: 'config',
-          ...mockTimestampFields,
-          config: { title: 'Test One' },
-          references: [{ name: 'ref_0', type: 'index-pattern', id: '1' }]
-        },
+        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
         { create: { _type: '_doc', _id: 'index-pattern:two' } },
         {
           type: 'index-pattern',
           ...mockTimestampFields,
           'index-pattern': { title: 'Test Two' },
-          references: [{ name: 'ref_0', type: 'index-pattern', id: '2' }],
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
         },
       ]);
 
@@ -547,7 +532,7 @@ describe('SavedObjectsRepository', () => {
       migrator.migrateDocument = (doc) => {
         doc.attributes.title = doc.attributes.title + '!!';
         doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'index-pattern', id: '123' }];
+        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
         return doc;
       };
 
@@ -564,7 +549,7 @@ describe('SavedObjectsRepository', () => {
             ...mockTimestampFields,
             config: { title: 'Test One!!' },
             migrationVersion: { foo: '2.3.4' },
-            references: [{ name: 'search_0', type: 'index-pattern', id: '123' }],
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
           { create: { _type: '_doc', _id: 'index-pattern:two' } },
           {
@@ -572,7 +557,7 @@ describe('SavedObjectsRepository', () => {
             ...mockTimestampFields,
             'index-pattern': { title: 'Test Two!!' },
             migrationVersion: { foo: '2.3.4' },
-            references: [{ name: 'search_0', type: 'index-pattern', id: '123' }],
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
         ]
       }));
@@ -587,7 +572,7 @@ describe('SavedObjectsRepository', () => {
             attributes: {
               title: 'Test One!!',
             },
-            references: [{ name: 'search_0', type: 'index-pattern', id: '123' }],
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
           {
             id: 'two',
@@ -597,7 +582,7 @@ describe('SavedObjectsRepository', () => {
             attributes: {
               title: 'Test Two!!',
             },
-            references: [{ name: 'search_0', type: 'index-pattern', id: '123' }],
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
         ],
       });
@@ -1356,7 +1341,7 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '1',
         }],
       });
@@ -1368,7 +1353,7 @@ describe('SavedObjectsRepository', () => {
         attributes,
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '1',
         }],
       });
@@ -1401,7 +1386,7 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '1',
         }],
       });
@@ -1416,7 +1401,7 @@ describe('SavedObjectsRepository', () => {
             'index-pattern': { title: 'Testing' },
             references: [{
               name: 'ref_0',
-              type: 'config',
+              type: 'test',
               id: '1',
             }],
           },
@@ -1435,7 +1420,7 @@ describe('SavedObjectsRepository', () => {
       }, {
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '1',
         }],
       });
@@ -1450,7 +1435,7 @@ describe('SavedObjectsRepository', () => {
             'index-pattern': { title: 'Testing' },
             references: [{
               name: 'ref_0',
-              type: 'config',
+              type: 'test',
               id: '1',
             }],
           },
@@ -1470,7 +1455,7 @@ describe('SavedObjectsRepository', () => {
         namespace: 'foo-namespace',
         references: [{
           name: 'ref_0',
-          type: 'config',
+          type: 'test',
           id: '1',
         }],
       });
@@ -1485,7 +1470,7 @@ describe('SavedObjectsRepository', () => {
             'globaltype': { name: 'bar' },
             references: [{
               name: 'ref_0',
-              type: 'config',
+              type: 'test',
               id: '1',
             }],
           },
