@@ -11,6 +11,7 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
+import { COLORS } from '@elastic/eui/src/components/icon/icon';
 
 const Root = styled.div`
   padding: ${theme.paddingSizes.m};
@@ -70,12 +71,12 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     [FileTreeItemType.Submodule]: 'submodule',
   };
   const nodes = props.nodes.map(n => (
-    <DirectoryNode key={n.path}>
+    <div className="code-directory__node" key={n.path}>
       <Link to={props.getUrl(n.path!)} data-test-subj={`codeFileExplorerNode-${n.name}`}>
-        <EuiIcon type={typeIconMap[n.type]} color="black" />
+        <EuiIcon type={typeIconMap[n.type]} color="ghost" />
         <NodeName>{n.name}</NodeName>
       </Link>
-    </DirectoryNode>
+    </div>
   ));
   return (
     <Container>
