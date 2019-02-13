@@ -18,7 +18,7 @@ export const KQL_PLACE_HOLDER = i18n.translate('xpack.secops.hosts.kqlPlaceHolde
   defaultMessage: 'Search… (e.g. host.name:"foo" AND process.name:"bar")',
 });
 
-export const LETS_ADD_SOME = i18n.translate('xpack.secops.hosts.letsAddSome', {
+export const LETS_ADD_SOME = i18n.translate('xpack.secops.hosts.letsAddSome.description', {
   defaultMessage: "Let's add some!",
 });
 

@@ -6,6 +6,7 @@
 
 export { inputsModel } from './inputs';
 export { hostsModel } from './hosts';
+export { networkModel } from './network';
 export { timelineModel } from './timeline';
 
 export interface KueryFilterQuery {

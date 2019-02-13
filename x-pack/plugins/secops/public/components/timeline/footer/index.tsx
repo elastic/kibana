@@ -49,6 +49,7 @@ interface FooterProps {
 interface FooterState {
   isPopoverOpen: boolean;
   paginationLoading: boolean;
+  updatedAt: number | null;
 }
 
 /** The height of the footer, exported for use in height calculations */
@@ -151,15 +152,24 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
   public readonly state = {
     isPopoverOpen: false,
     paginationLoading: false,
+    updatedAt: null,
   };
 
   public componentDidUpdate(prevProps: FooterProps) {
-    const { paginationLoading } = this.state;
-    const { isLoading } = this.props;
+    const { paginationLoading, updatedAt } = this.state;
+    const { isLoading, getUpdatedAt } = this.props;
     if (paginationLoading && prevProps.isLoading && !isLoading) {
       this.setState({
         ...this.state,
         paginationLoading: false,
+        updatedAt: getUpdatedAt(),
+      });
+    }
+
+    if (updatedAt === null || (prevProps.isLoading && !isLoading)) {
+      this.setState({
+        ...this.state,
+        updatedAt: getUpdatedAt(),
       });
     }
   }
@@ -237,7 +247,10 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LastUpdatedAt updatedAt={getUpdatedAt()} short={shortLastUpdated(width)} />
+                <LastUpdatedAt
+                  updatedAt={this.state.updatedAt || getUpdatedAt()}
+                  short={shortLastUpdated(width)}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </FooterContainer>

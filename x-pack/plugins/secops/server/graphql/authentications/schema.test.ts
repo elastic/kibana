@@ -10,7 +10,7 @@ import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import { rootSchema } from '../../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
-import { eventsSchema } from '../events';
+import { ecsSchema } from '../ecs';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import { getAuthenticationsQueryMock, mockAuthenticationsData } from './authentications.mock';
@@ -101,7 +101,7 @@ describe('Test Source Schema', () => {
     sharedSchema,
     sourcesSchema,
     sourceStatusSchema,
-    eventsSchema,
+    ecsSchema,
     authenticationsSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });

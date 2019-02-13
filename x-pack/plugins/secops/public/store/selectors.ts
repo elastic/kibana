@@ -10,5 +10,6 @@ export {
   globalTimeRangeSelector,
   globalPolicySelector,
   hostsSelectors,
+  networkSelectors,
   timelineSelectors,
 } from './local';

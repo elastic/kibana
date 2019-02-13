@@ -19,6 +19,9 @@ export const sourceQuery = gql`
         auditbeatIndicesExist
         auditbeatAliasExists
         auditbeatIndices
+        filebeatIndicesExist
+        filebeatAliasExists
+        filebeatIndices
         indexFields(indexTypes: $indexTypes) {
           name
           searchable

@@ -41,7 +41,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     );
     const hasNextPage = uncommonProcessesEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
-    const edges = uncommonProcessesEdges.splice(beginning, limit);
+    const edges = uncommonProcessesEdges.splice(beginning, limit - beginning);
     return {
       edges,
       totalCount,

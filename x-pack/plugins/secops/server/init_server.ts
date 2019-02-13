@@ -10,6 +10,7 @@ import { createMocks, schemas } from './graphql';
 import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createEventsResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
+import { createNetworkTopNFlowResolvers } from './graphql/network_top_n_flow';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
@@ -33,6 +34,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createEventsResolvers(libs) as IResolvers,
       createHostsResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
+      createNetworkTopNFlowResolvers(libs) as IResolvers,
       createWhoAmIResolvers() as IResolvers,
     ],
     typeDefs: schemas,

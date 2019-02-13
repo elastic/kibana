@@ -5,17 +5,18 @@
  */
 
 import React from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
-import { Pane, Pane1FlexContent, PaneScrollContainer } from '../../components/page';
-import { Placeholders } from '../../components/visualization_placeholder';
+import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { Network } from './network';
 
-export const Network = pure(() => (
-  <Pane data-test-subj="pane">
-    <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-      <Pane1FlexContent>
-        <Placeholders count={10} myRoute="Network" />
-      </Pane1FlexContent>
-    </PaneScrollContainer>
-  </Pane>
+export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
+  <>
+    <Switch>
+      <Route strict exact path={match.url} component={Network} />
+      {/* <Route path={`${match.url}/:ip`} component={NetworkIp} /> */}
+      <Redirect from="/hosts/" to="/hosts" />
+    </Switch>
+  </>
 ));

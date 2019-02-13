@@ -23,7 +23,7 @@ type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
   FetchMoreOptions<TData, TVariables>;
 
 // tslint:disable-next-line:no-any
-type PromiseAppoloQueryResult = Promise<ApolloQueryResult<any>>;
+type PromiseApolloQueryResult = Promise<ApolloQueryResult<any>>;
 
 export class QueryTemplate<
   T extends QueryTemplateProps,
@@ -33,7 +33,7 @@ export class QueryTemplate<
 > extends React.PureComponent<T, TData, TVariables> {
   private fetchMore!: (
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
-  ) => PromiseAppoloQueryResult;
+  ) => PromiseApolloQueryResult;
 
   private fetchMoreOptions!: (
     newCursor: string,
@@ -45,7 +45,7 @@ export class QueryTemplate<
   }
 
   public setFetchMore = (
-    val: (fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>) => PromiseAppoloQueryResult
+    val: (fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>) => PromiseApolloQueryResult
   ) => {
     this.fetchMore = val;
   };

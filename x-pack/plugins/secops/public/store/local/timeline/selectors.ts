@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
 import { createSelector } from 'reselect';
 
+import { isFromKueryExpressionValid } from '../../../lib/keury';
 import { State } from '../../reducer';
 import { timelineDefaults, TimelineModel } from './model';
 import { TimelineById } from './reducer';
@@ -45,18 +45,8 @@ export const getKqlFilterQueryDraftSelector = () =>
 export const isFilterQueryDraftValidSelector = () =>
   createSelector(
     selectTimeline,
-    timeline => {
-      if (
-        timeline &&
-        timeline.kqlQuery.filterQueryDraft &&
-        timeline.kqlQuery.filterQueryDraft.kind === 'kuery'
-      ) {
-        try {
-          fromKueryExpression(timeline.kqlQuery.filterQueryDraft.expression);
-        } catch (err) {
-          return false;
-        }
-      }
-      return true;
-    }
+    timeline =>
+      timeline &&
+      timeline.kqlQuery &&
+      isFromKueryExpressionValid(timeline.kqlQuery.filterQueryDraft)
   );

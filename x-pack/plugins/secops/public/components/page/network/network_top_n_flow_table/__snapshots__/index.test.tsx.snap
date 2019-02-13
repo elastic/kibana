@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default Authentication table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "8.8.8.8",
+        },
+        "node": Object {
+          "destination": null,
+          "event": Object {
+            "duration": 84712891000000,
+          },
+          "network": Object {
+            "bytes": 3826633497,
+            "packets": 4185805,
+          },
+          "source": Object {
+            "domain": "test.domain.com",
+            "ip": "8.8.8.8",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "9.9.9.9",
+        },
+        "node": Object {
+          "destination": null,
+          "event": Object {
+            "duration": 602171000000,
+          },
+          "network": Object {
+            "bytes": 325909849,
+            "packets": 221494,
+          },
+          "source": Object {
+            "domain": "test.domain.net",
+            "ip": "9.9.9.9",
+          },
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  networkTopNFlowType="source"
+  nextCursor="10"
+  startDate={1546965070707}
+  totalCount={524}
+  type="page"
+/>
+`;

@@ -28,8 +28,8 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType, KpiItem } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
+import { PageContent, PageContentBody } from '../styles';
 import { HostsKql } from './kql';
-import { PageContent, PageContentBody } from './styles';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
