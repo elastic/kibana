@@ -31,6 +31,7 @@ export interface FetchFileResponse {
   lang?: string;
   isImage?: boolean;
   isUnsupported?: boolean;
+  isOversize?: boolean;
   url?: string;
 }
 

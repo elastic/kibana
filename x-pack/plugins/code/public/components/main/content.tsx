@@ -295,13 +295,22 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url, isUnsupported } = file;
+        const { lang: fileLanguage, content: fileContent, url, isUnsupported, isOversize } = file;
         if (isUnsupported) {
           return (
             <UnsupportedFile
               icon={<UnsupportedFileIcon />}
               title={<h2>Unsupported File</h2>}
               content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
+            />
+          );
+        }
+        if (isOversize) {
+          return (
+            <UnsupportedFile
+              icon={<UnsupportedFileIcon />}
+              title={<h2>File is too big</h2>}
+              content="Sorry about that, but we can’t show files that are this big right now."
             />
           );
         }
