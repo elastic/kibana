@@ -82,6 +82,7 @@ Kibana App::
 Machine Learning::
 * Updates HTTP access modules for ECS {pull}29383[#29383]
 * Updates auditbeat modules for ECS {pull}29934[#29934]
+* Removes non ECS apache, nginx and auditbeat data recognizer modules {pull}30537[#30537]
 Observability::
 * Converts monitor sparklines to histogram {pull}28502[#28502]
 * Adds crosshair sync for monitor page charts {pull}28631[#28631]
@@ -101,6 +102,8 @@ Security::
 * Introduces content security policy (CSP) {pull}29545[#29545]
 * Warns legacy browsers that do not support content security policy {pull}29957[#29957]
 * Adds content security policy strict mode {pull}29856[#29856]
+Visualizations::
+* Adds a timeout so that Vega respects `elasticsearch.shardTimeout` setting {pull}30482[#30482]
 
 
 [float]
@@ -113,16 +116,22 @@ APM::
 * Adds span subtype and action to Span Flyout {pull}30041[#30041]
 * Updates head title and fixes breadcrumb string issues {pull}29960[#29960]
 * Adds fixes for `service.name` scripted field {pull}28488[#28488]
+* Updates APM index pattern {pull}30837[#30837]
+* Updates APM reindex script {pull}30761[#30761]
+* Sets Index Pattern version as string {pull}30789[#30789]
 Canvas::
 * Removes WebSockets from Canvas expressions interpreter {pull}29792[#29792]
 * Optimizes Canvas REST calls via batching {pull}29847[#29847]
 * Adds datetime as a date identifier {pull}29537[#29537]
+* Switches sample web logs fonts to 48px {pull}30747[#30747]
+* Fixes related to K7 design {pull}30833[#30833]
 Design::
 * Updates dashboard design {pull}29896[#29896]
 * Adjusts side navigation interaction {pull}29978[#29978]
 Elasticsearch UI::
 * Triggers full load when encountering 403 for index list reload {pull}28243[#28243]
 * Updates xpack console specs {pull}29506[#29506]
+* Fixes API integration test for follower indices {pull}30260[#30260]
 Geo::
 * Fixes panel cut off in K7 design {pull}29209[#29209]
 * Removes left-over geohash grid code {pull}30312[#30312]
@@ -140,12 +149,17 @@ pipeline data loader {pull}29873[#29873]
 * Toggles between Expression Pipeline & Visualize Data loader {pull}29874[#29874]
 * Fixes every app that was wrapping `query` in an array unnecessarily {pull}27636[#27636]
 * Fixes build issue and reintroduces new filter bar {pull}29752[#29752]
+* Adds index pattern URL change notes {pull}30779[#30779]
+* Fixes visualization filters to ignore invalid entries {pull}30633[#30633]
+* Expands add panels flyout and increases default rows per page {pull}30508[#30508]
 Machine Learning::
 * Removes use of types in datafeeds  {pull}27572[#27572]
 * Fixes metric select double caret {pull}30357[#30357]
 * Removes old angular based start datafeed modal {pull}30392[#30392]
 * Handles removal of backend ml.enabled node attribute {pull}27604[#27604]
 * Edits labels in the Apache and Nginx ECS data recognizer modules {pull}29935[#29935]
+* Fixes for K7 compatibility {pull}30536[#30536]
+* Fixes broken label style in advanced wizard {pull}30847[#30847]
 * Adds ml-ui team to .github/CODEOWNERS {pull}29810[#29810]
 Management::
 * Removes grunt sterilize - its been replaced by `kbn clean` {pull}27825[#27825]
@@ -159,11 +173,17 @@ Monitoring::
 * Removes old index patterns that are not expected in 7.0.0 onwards {pull}27915[#27915]
 * Removes deprecated `xpack.monitoring.report_stats` setting {pull}30017[#30017]
 * Fixes monitoring tests to work with mapping changes {pull}29188[#29188]
+* Removes type filter helper {pull}30887[#30887]
+Operations::
+* Removes svg from url-loader, as it conflicts with other loaders {pull}30888[#30888]
+* Uses apiVersion from es plugin in x-pack {pull}30853[#30853]
+* Clones saved object document before migrating to prevent accidental mutations {pull}30475[#30475]
 Observability::
 * Fixes 7.x references to tcp.port {pull}29132[#29132]
 * Ports functional tests to 7.x {pull}29398[#29398]
 * Ports unit tests to master {pull}29876[#29876]
 * Adds missing loading states for filter bar and snapshot components {pull}30122[#30122]
+* Removes double-format for duration value {pull}30664[#30664]
 Platform::
 * Moves the table vis migration to {kib} plugin {pull}29478[#29478]
 * Allows passing a default operator to use on saved object client find operations {pull}29339[#29339]
@@ -174,6 +194,9 @@ Platform::
 * Adds typings for saved object client {pull}29951[#29951]
 * Uses `lastSubUrl` when appropriate {pull}28735[#28735]
 * Removes es _xpack endpoint usage {pull}29465[#29465]
+* Adds typings for the `saved_object_finder` react component {pull}30067[#30067]
+Reporting::
+* Refactors routes files and helpers {pull}30111[#30111]
 Rollups::
 * Removes duplicate rendered sections {pull}28566[#28566]
 Security::
