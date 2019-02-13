@@ -17,6 +17,7 @@ import {
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
 } from '../selectors/map_selectors';
+import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const ADD_TRANSIENT_LAYER = 'ADD_TRANSIENT_LAYER';
@@ -26,7 +27,6 @@ export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
-export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
@@ -156,6 +156,13 @@ export function addTransientLayer(layerId, layerDescriptor) {
 export function clearTransientLayer() {
   return {
     type: CLEAR_TRANSIENT_LAYER
+  };
+}
+
+export function saveWorkspace() {
+  return async dispatch => {
+    await dispatch(setSelectedLayer(null));
+    await dispatch(updateFlyout(FLYOUT_STATE.NONE));
   };
 }
 
