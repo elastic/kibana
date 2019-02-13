@@ -162,7 +162,8 @@ export default function (kibana) {
               save: true
             },
             visualize: {
-              showWriteControls: true
+              show: true,
+              save: true
             },
             dashboard: {
               createNew: true,

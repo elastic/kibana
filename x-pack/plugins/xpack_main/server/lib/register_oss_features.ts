@@ -48,14 +48,14 @@ const kibanaFeatures: Feature[] = [
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['showWriteControls'],
+        ui: ['show', 'save'],
       },
       read: {
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'search', 'visualization'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   },
@@ -110,6 +110,14 @@ const kibanaFeatures: Feature[] = [
     app: ['kibana'],
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
+      all: {
+        api: ['console/execute'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: [],
+      },
       read: {
         api: ['console/execute'],
         savedObject: {
