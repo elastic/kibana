@@ -5,10 +5,10 @@
  */
 
 import boom from 'boom';
-import { oncePerServer } from './once_per_server';
-import { jobsQueryFactory } from './jobs_query';
+import { oncePerServer } from '../../lib/once_per_server';
+import { jobsQueryFactory } from '../../lib/jobs_query';
+import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { getDocumentPayloadFactory } from './get_document_payload';
-import { WHITELISTED_JOB_CONTENT_TYPES } from '../../common/constants';
 
 function jobResponseHandlerFn(server) {
   const jobsQuery = jobsQueryFactory(server);

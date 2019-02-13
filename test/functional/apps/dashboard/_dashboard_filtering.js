@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe.skip('dashboard filtering', async () => {
+  describe('dashboard filtering', async () => {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
         await pieChart.expectPieSliceCount(5);
       });
 
-      it.skip('area, bar and heatmap charts', async () => {
+      it('area, bar and heatmap charts', async () => {
         await dashboardExpect.seriesElementCount(3);
       });
 

@@ -18,6 +18,7 @@
  */
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+import cheerio from 'cheerio';
 
 export class LeadfootElementWrapper {
   constructor(leadfootElement, leadfoot, fixedHeaderHeight) {
@@ -338,5 +339,19 @@ export class LeadfootElementWrapper {
    */
   async scrollIntoViewIfNecessary() {
     await this._leadfoot.execute(scrollIntoViewIfNecessary, [this._leadfootElement, this._fixedHeaderHeight]);
+  }
+
+  /**
+   * Gets element innerHTML and wrap it up with cheerio
+   *
+   * @nonstandard
+   * @return {Promise<void>}
+   */
+  async parseDomContent() {
+    const htmlContent = await this.getProperty('innerHTML');
+    return cheerio.load(htmlContent, {
+      normalizeWhitespace: true,
+      xmlMode: true
+    });
   }
 }
