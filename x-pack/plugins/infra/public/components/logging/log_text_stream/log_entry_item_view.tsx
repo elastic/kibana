@@ -125,6 +125,7 @@ const LogTextStreamIconDiv = styled<IconProps, 'div'>('div')`
       : 'transparent'};
   text-align: center;
   user-select: none;
+  font-size: 0.9em;
 `;
 
 const LogTextStreamLogEntryItemDiv = styled.div`

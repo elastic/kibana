@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { oncePerServer } from './once_per_server';
+import { oncePerServer } from '../../lib/once_per_server';
 
 function reportingFeaturePreRoutingFn(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
