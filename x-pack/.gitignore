@@ -6,7 +6,6 @@
 /test/functional/apps/reporting/reports/session
 /plugins/reporting/.chromium/
 /plugins/reporting/.phantom/
-/.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*
 !/plugins/infra/**/target

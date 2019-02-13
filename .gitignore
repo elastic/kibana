@@ -1,5 +1,3 @@
-.aws-config.json
-.signing-config.json
 .ackrc
 /.es
 .DS_Store
