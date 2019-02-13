@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { transformMatrix3d } from './types';
+
 // converts a transform matrix to a CSS string
-const matrixToCSS = transformMatrix =>
+export const matrixToCSS = (transformMatrix: transformMatrix3d): string =>
   transformMatrix ? 'matrix3d(' + transformMatrix.join(',') + ')' : 'translate3d(0,0,0)';
 
 // converts to string, and adds `px` if non-zero
-const px = value => (value === 0 ? '0' : value + 'px');
-
-module.exports = {
-  matrixToCSS,
-  px,
-};
+export const px = (value: number): string => (value === 0 ? '0' : value + 'px');
