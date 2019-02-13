@@ -27,6 +27,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { VisType } from 'ui/vis';
@@ -123,7 +124,11 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            {this.props.visType.title}
+            <FormattedMessage
+              id="kbn.visualize.newVisWizard.newVisTypeHeaderTitle"
+              defaultMessage="New {visTypeName}"
+              values={{ visTypeName: this.props.visType.title }}
+            />
             <EuiButtonIcon
               color="primary"
               onClick={this.props.goBack}
