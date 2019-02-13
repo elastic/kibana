@@ -21,36 +21,6 @@ enum Tabs {
   structure = 'structure',
 }
 
-const Container = styled.div`
-  width: calc(256rem / 14);
-  border-right: ${theme.euiBorderThin};
-  display: flex;
-  flex-direction: column;
-  & > div {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    & > div:first-child {
-      flex-shrink: 0;
-      flex-grow: 0;
-    }
-    & > div:not(:first-child) {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      flex-shrink: 1;
-    }
-  }
-`;
-
-const FileTreeContainer = styled.div`
-  flex-grow: 1;
-  flex-shrink: 1;
-  overflow: auto;
-  padding: ${theme.paddingSizes.l} ${theme.paddingSizes.m};
-  background-color: ${theme.euiColorLightestShade};
-`;
-
 class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {
   public get sideTab(): Tabs {
     const { search } = this.props.location;
@@ -68,9 +38,9 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
         id: Tabs.file,
         name: 'File',
         content: (
-          <FileTreeContainer>
+          <div className="code-file-tree-container">
             <FileTree />
-          </FileTreeContainer>
+          </div>
         ),
         isSelected: Tabs.file === this.sideTab,
         'data-test-subj': 'codeFileTreeTab',
@@ -95,7 +65,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
 
   public render() {
     return (
-      <Container>
+      <div className="code-navigation__sidebar">
         <EuiTabbedContent
           tabs={this.tabs}
           initialSelectedTab={this.tabs.find(t => t.id === this.sideTab)}
@@ -107,7 +77,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
           help="Toggle tree and symbol view in sidebar"
           onPress={this.toggleTab}
         />
-      </Container>
+      </div>
     );
   }
   private toggleTab = () => {
