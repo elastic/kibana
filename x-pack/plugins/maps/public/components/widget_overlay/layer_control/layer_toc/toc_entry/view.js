@@ -9,15 +9,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer
+  EuiSpacer,
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
 
 export class TOCEntry extends React.Component {
 
   state = {
-    displayName: null
-  }
+    displayName: null,
+    shouldShowModal: false
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -42,6 +49,51 @@ export class TOCEntry extends React.Component {
   componentDidUpdate() {
     this._updateDisplayName();
   }
+
+  _renderCancelModal() {
+    if (!this.state.shouldShowModal) {
+      return null;
+    }
+
+    const closeModal = () => {
+      this.setState({
+        shouldShowModal: false
+      });
+    };
+
+    const openPanel = () => {
+      closeModal();
+      this.props.openLayerPanel(this.props.layer.getId());
+    };
+
+    return (
+      <EuiOverlayMask>
+        <EuiModal
+          onClose={closeModal}
+        >
+          <EuiModalBody>
+            There are unsaved changes to your layer. Are you sure you want to proceed?
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              onClick={closeModal}
+            >
+              Do not proceed
+            </EuiButtonEmpty>
+
+            <EuiButton
+              onClick={openPanel}
+              fill
+            >
+              Proceed and discard changes
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+    );
+  }
+
 
   render() {
 
@@ -69,12 +121,29 @@ export class TOCEntry extends React.Component {
       );
     }
 
+    const cancelModal = this._renderCancelModal();
+
+    const openLayerPanelWithCheck = () => {
+      const selectedLayer = this.props.getSelectedLayerSelector();
+      if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
+        return;
+      }
+      if (this.props.hasDirtyStateSelector()) {
+        this.setState({
+          shouldShowModal: true
+        });
+      } else {
+        openLayerPanel(layer.getId());
+      }
+    };
+
     return (
       <div
         className="mapTocEntry"
         id={layer.getId()}
         data-layerid={layer.getId()}
       >
+        {cancelModal}
         <EuiFlexGroup
           gutterSize="none"
           alignItems="center"
@@ -89,7 +158,7 @@ export class TOCEntry extends React.Component {
           </EuiFlexItem>
           <EuiFlexItem>
             <button
-              onClick={() => openLayerPanel(layer.getId())}
+              onClick={openLayerPanelWithCheck}
               data-test-subj={`mapOpenLayerButton${this.state.displayName}`}
             >
               <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
