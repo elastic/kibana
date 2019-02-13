@@ -52,6 +52,8 @@ Platform::
 * Removes deprecated `i18n.defaultLocale` setting {pull}29325[#29325]
 * Removes previously deprecated `elasticsearch*` settings. {pull}29496[#29496]
 * Adds new "references" attribute to saved objects for relationships {pull}28199[#28199]
+Querying & Filtering::
+* Makes KQL the default query language for new searches {pull}27092[#27092]
 Reporting::
 * Removes Phantom dependency {pull}27142[#27142]
 Security::
@@ -75,10 +77,12 @@ Visualizations::
 [float]
 [[enhancement-7.0.0-beta1]]
 === Enhancements
+Canvas::
+* Removes WebSockets from Canvas expressions interpreter {pull}29792[#29792]
+* Optimizes Canvas REST calls via batching {pull}29847[#29847]
 Kibana App::
 * Replaces Angular timepicker with EuiSuperDatePicker {pull}29204[#29204]
 * Upgrades Kibana to Elasticsearch 7.0 {pull}29184[#29184]
-* Visualizes renderer to support Canvas visualizations {pull}29170[#29170]
 Machine Learning::
 * Updates HTTP access modules for ECS {pull}29383[#29383]
 * Updates auditbeat modules for ECS {pull}29934[#29934]
@@ -92,8 +96,6 @@ Platform::
 * Adds help menu item to header {pull}29664[#29664]
 * Implements global dark theme {pull}28445[#28445]
 * Removes support for the K6 navigation style {pull}29565[#29565]
-Querying & Filtering::
-* Makes KQL the default query language for new searches {pull}27092[#27092]
 Reporting::
 * In the Visualization Editor, removes the "Optimize for printing" option when 
 exporting the visualization as PNG or PDF. The single visualization will automatically 
@@ -120,8 +122,6 @@ APM::
 * Updates APM reindex script {pull}30761[#30761]
 * Sets Index Pattern version as string {pull}30789[#30789]
 Canvas::
-* Removes WebSockets from Canvas expressions interpreter {pull}29792[#29792]
-* Optimizes Canvas REST calls via batching {pull}29847[#29847]
 * Adds datetime as a date identifier {pull}29537[#29537]
 * Switches sample web logs fonts to 48px {pull}30747[#30747]
 * Fixes related to K7 design {pull}30833[#30833]
