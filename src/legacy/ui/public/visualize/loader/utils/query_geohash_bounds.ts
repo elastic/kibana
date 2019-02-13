@@ -87,7 +87,7 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
       return get(esResp, 'aggregations.1.bounds');
     } catch (error) {
       toastNotifications.addDanger({
-        title: i18n.translate('tileMap.coordinateMapsVisualization.unableToGetBoundErrorTitle', {
+        title: i18n.translate('common.ui.visualize.queryGeohashBounds.unableToGetBoundErrorTitle', {
           defaultMessage: 'Unable to get bounds',
         }),
         text: `${error.message}`,
