@@ -11,9 +11,8 @@ exports[`Service Overview -> View should render when historical data is found 1`
 exports[`Service Overview -> View should render when historical data is found 2`] = `
 Object {
   "items": Array [],
-  "noItemsMessage": <EmptyMessage
-    heading="No services were found"
-    subheading={null}
+  "noItemsMessage": <NoServicesMessage
+    historicalDataFound={true}
   />,
 }
 `;
@@ -29,13 +28,8 @@ exports[`Service Overview -> View should render when historical data is not foun
 exports[`Service Overview -> View should render when historical data is not found 2`] = `
 Object {
   "items": Array [],
-  "noItemsMessage": <EmptyMessage
-    heading="Looks like you don't have any services with APM installed. Let's add some!"
-    subheading={
-      <SetupInstructionsLink
-        buttonFill={true}
-      />
-    }
+  "noItemsMessage": <NoServicesMessage
+    historicalDataFound={false}
   />,
 }
 `;
