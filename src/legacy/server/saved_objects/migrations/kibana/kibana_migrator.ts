@@ -96,7 +96,7 @@ export class KibanaMigrator {
       documentMigrator: this.documentMigrator,
       index: config.get('kibana.index'),
       log: this.log,
-      mappingProperties: this.getActiveMappings(),
+      mappingProperties: this.mappingProperties,
       pollInterval: config.get('migrations.pollInterval'),
       scrollDuration: config.get('migrations.scrollDuration'),
       serializer: this.serializer,
@@ -108,6 +108,7 @@ export class KibanaMigrator {
 
   private kbnServer: KbnServer;
   private documentMigrator: VersionedTransformer;
+  private mappingProperties: MappingProperties;
   private log: LogFn;
   private serializer: SavedObjectsSerializer;
 
@@ -123,6 +124,7 @@ export class KibanaMigrator {
     this.serializer = new SavedObjectsSerializer(
       new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
     );
+    this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
     this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: kbnServer.version,
@@ -139,9 +141,7 @@ export class KibanaMigrator {
    * @memberof KibanaMigrator
    */
   public getActiveMappings() {
-    return buildActiveMappings({
-      properties: mergeProperties(this.kbnServer.uiExports.savedObjectMappings || []),
-    });
+    return buildActiveMappings({ properties: this.mappingProperties });
   }
 
   /**
