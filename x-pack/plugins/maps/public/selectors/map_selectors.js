@@ -67,6 +67,10 @@ const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 
+export const getTransientLayerId = ({ map }) => {
+  return (!map.transientLayerId || !map.layerList) ? null : map.transientLayerId;
+};
+
 export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
 export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
@@ -90,10 +94,8 @@ export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {
     // This will evolve as color options are expanded
-    if (!layer.temporary) {
-      const color = _.get(layer, 'style.properties.fillColor.options.color');
-      if (color) accu.push(color);
-    }
+    const color = _.get(layer, 'style.properties.fillColor.options.color');
+    if (color) accu.push(color);
     return accu;
   }, []);
 };

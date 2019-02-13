@@ -8,42 +8,37 @@ import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE }
   from '../../store/ui';
-import { getTemporaryLayers } from "../../selectors/map_selectors";
 import {
-  addLayer,
   removeLayer,
-  clearTemporaryLayers,
-  setSelectedLayer,
-  promoteTemporaryLayers,
+  addTransientLayer,
+  clearTransientLayer,
 } from "../../actions/store_actions";
-import _ from 'lodash';
+import { getSelectedLayer } from "../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
-
-  function isLoading() {
-    const tmp = getTemporaryLayers(state);
-    return tmp.some((layer) => layer.isLayerLoading());
-  }
+  const selectedLayer = getSelectedLayer(state);
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    layerLoading: isLoading(),
-    temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
+    hasLayerSelected: !!selectedLayer,
+    isLoading: selectedLayer && selectedLayer.isLayerLoading()
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeFlyout: () => {
+    closeFlyout: layerId => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(clearTemporaryLayers());
+      dispatch(clearTransientLayer());
+      dispatch(removeLayer(layerId));
     },
-    previewLayer: (layer) => {
-      dispatch(addLayer(layer.toLayerDescriptor()));
+    previewLayer: layer => {
+      dispatch(
+        addTransientLayer(layer.getId(), layer.toLayerDescriptor())
+      );
     },
     removeLayer: id => dispatch(removeLayer(id)),
-    saveLayerShowSettings: id => {
-      dispatch(promoteTemporaryLayers());
-      dispatch(setSelectedLayer(id));
+    showSettings: () => {
+      dispatch(clearTransientLayer());
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
   };

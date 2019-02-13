@@ -15,9 +15,11 @@ import {
   getSelectedLayer,
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
+  getTransientLayerId,
 } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
+export const ADD_TRANSIENT_LAYER = 'ADD_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
 export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
@@ -40,6 +42,7 @@ export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
+export const CLEAR_TRANSIENT_LAYER = 'CLEAR_TRANSIENT_LAYER';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
@@ -88,7 +91,7 @@ export function replaceLayerList(newLayerList) {
 
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
-    dispatch(clearTemporaryLayers());
+    dispatch(clearTransientLayer());
 
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
@@ -125,9 +128,34 @@ export function toggleLayerVisible(layerId) {
 }
 
 export function setSelectedLayer(layerId) {
+  return (dispatch, getState) => {
+    const transientLayerId = getTransientLayerId(getState());
+    if (transientLayerId) {
+      dispatch(clearTransientLayer());
+      dispatch(removeLayer(transientLayerId));
+    }
+
+    dispatch({
+      type: SET_SELECTED_LAYER,
+      selectedLayerId: layerId
+    });
+  };
+}
+
+export function addTransientLayer(layerId, layerDescriptor) {
+  return async dispatch => {
+    await dispatch(addLayer(layerDescriptor));
+    await dispatch(setSelectedLayer(layerId));
+    dispatch({
+      type: ADD_TRANSIENT_LAYER,
+      transientLayerId: layerId,
+    });
+  };
+}
+
+export function clearTransientLayer() {
   return {
-    type: SET_SELECTED_LAYER,
-    selectedLayerId: layerId
+    type: CLEAR_TRANSIENT_LAYER
   };
 }
 
@@ -153,16 +181,6 @@ export function promoteTemporaryLayers() {
 export function clearTemporaryStyles() {
   return {
     type: CLEAR_TEMPORARY_STYLES
-  };
-}
-
-export function clearTemporaryLayers() {
-  return (dispatch, getState) => {
-    getLayerListRaw(getState()).forEach(({ temporary, id }) => {
-      if (temporary) {
-        dispatch(removeLayer(id));
-      }
-    });
   };
 }
 

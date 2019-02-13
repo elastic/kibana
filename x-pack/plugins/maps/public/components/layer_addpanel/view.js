@@ -28,13 +28,20 @@ export class AddLayerPanel extends Component {
 
     this.state = {
       sourceType: null,
+      isLoading: false,
+      hasLayerSelected: false,
+    };
+  }
+
+  static getDerivedStateFromProps(props) {
+    return {
+      isLoading: props.isLoading,
+      hasLayerSelected: props.hasLayerSelected
     };
   }
 
   _previewLayer = (source) => {
-    this.layer = source.createDefaultLayer({
-      temporary: true,
-    });
+    this.layer = source.createDefaultLayer();
     this.props.previewLayer(this.layer);
   };
 
@@ -55,17 +62,17 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const { layerLoading, temporaryLayers, saveLayerShowSettings } = this.props;
+    const { showSettings } = this.props;
+    const { hasLayerSelected, isLoading } = this.state;
     return (
       <EuiButton
-        disabled={!temporaryLayers || layerLoading}
-        isLoading={layerLoading}
+        disabled={!hasLayerSelected}
+        isLoading={hasLayerSelected && isLoading}
         iconSide="right"
         iconType={'sortRight'}
         onClick={() => {
-          const layerId = this.layer.getId();
           this.layer = null;
-          return saveLayerShowSettings(layerId);
+          showSettings();
         }}
         fill
       >
@@ -164,7 +171,11 @@ export class AddLayerPanel extends Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={this.props.closeFlyout}
+                onClick={() => {
+                  if (this.layer) {
+                    this.props.closeFlyout(this.layer.getId());
+                  }
+                }}
                 flush="left"
               >
                 Cancel
