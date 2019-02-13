@@ -80,11 +80,7 @@ export class TileLayer extends AbstractLayer {
   _setTileLayerProperties(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._style && this._style.setMBPaintProperties({
-      alpha: this.getAlpha(),
-      mbMap,
-      layerId: mbLayerId,
-    });
+    mbMap.setPaintProperty(mbLayerId, 'raster-opacity', this.getAlpha());
   }
 
   getLayerTypeIconName() {
