@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function normalizeType(type) {
+export function normalizeType(type: string) {
   const normalTypes = {
     string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
     number: [
@@ -24,10 +24,11 @@ export function normalizeType(type) {
     null: ['null'],
   };
 
-  const normalizedType = Object.keys(normalTypes).find(t => normalTypes[t].includes(type));
-
-  if (normalizedType) {
-    return normalizedType;
+  for (const [normalizedType, inputTypes] of Object.entries(normalTypes)) {
+    if (inputTypes.includes(type)) {
+      return normalizedType;
+    }
   }
+
   throw new Error(`Canvas does not yet support type: ${type}`);
 }

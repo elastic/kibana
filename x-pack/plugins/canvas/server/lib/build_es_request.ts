@@ -6,7 +6,7 @@
 
 import { buildBoolArray } from './build_bool_array';
 
-export function buildESRequest(esRequest, canvasQuery) {
+export function buildESRequest(esRequest: any, canvasQuery: any) {
   if (canvasQuery.size) {
     esRequest = { ...esRequest, size: canvasQuery.size };
   }

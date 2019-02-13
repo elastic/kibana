@@ -5,16 +5,34 @@
  */
 import { map, zipObject } from 'lodash';
 import { buildBoolArray } from './build_bool_array';
-import { sanitizeName } from './sanitize_name';
 import { normalizeType } from './normalize_type';
+import { sanitizeName } from './sanitize_name';
 
-export const queryEsSQL = (elasticsearchClient, { count, query, filter }) =>
+type ElasticsearchClient = any;
+type QueryObject = any;
+type FilterObject = any;
+
+interface QueryOptions {
+  count: number;
+  query: QueryObject;
+  filter: FilterObject;
+}
+
+interface ElasticsearchClientResponse {
+  columns: any[];
+  rows: any[];
+}
+
+export const queryEsSQL = (
+  elasticsearchClient: ElasticsearchClient,
+  { count, query, filter }: QueryOptions
+) =>
   elasticsearchClient('transport.request', {
     path: '/_sql?format=json',
     method: 'POST',
     body: {
       fetch_size: count,
-      query: query,
+      query,
       client_id: 'canvas',
       filter: {
         bool: {
@@ -23,7 +41,7 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter }) =>
       },
     },
   })
-    .then(res => {
+    .then((res: ElasticsearchClientResponse) => {
       const columns = res.columns.map(({ name, type }) => {
         return { name: sanitizeName(name), type: normalizeType(type) };
       });
@@ -35,7 +53,7 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter }) =>
         rows,
       };
     })
-    .catch(e => {
+    .catch((e: Error) => {
       if (e.message.indexOf('parsing_exception') > -1) {
         throw new Error(
           `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${

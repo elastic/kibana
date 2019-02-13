@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function sanitizeName(name) {
+export function sanitizeName(name: string) {
   // blacklisted characters
   const blacklist = ['(', ')'];
   const pattern = blacklist.map(v => escapeRegExp(v)).join('|');
@@ -12,6 +12,6 @@ export function sanitizeName(name) {
   return name.replace(regex, '_');
 }
 
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

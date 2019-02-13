@@ -10,16 +10,20 @@
   filter is the abstracted canvas filter.
 */
 
-/*eslint import/namespace: ['error', { allowComputed: true }]*/
+import { ExactlyFilter, LuceneQueryStringFilter, TimeFilter } from './filters';
 import * as filters from './filters';
 
-export function getESFilter(filter) {
-  if (!filters[filter.type]) {
+interface FilterTypes {
+  [key: string]: any;
+}
+
+export function getESFilter(filter: TimeFilter | ExactlyFilter | LuceneQueryStringFilter) {
+  if (!(filters as FilterTypes)[filter.type]) {
     throw new Error(`Unknown filter type: ${filter.type}`);
   }
 
   try {
-    return filters[filter.type](filter);
+    return (filters as FilterTypes)[filter.type](filter);
   } catch (e) {
     throw new Error(`Could not create elasticsearch filter from ${filter.type}`);
   }
