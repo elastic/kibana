@@ -153,7 +153,7 @@ Example structure after:
 [float]
 ==== `elasticsearch.ssl.ca` is no longer valid
 
-*Details:* The deprecated `elasticsearch.ssl.ca` setting in the `kibana.yml` 
+*Details:* The deprecated `elasticsearch.ssl.ca` setting in the `kibana.yml`
 file has been removed.
 
 *Impact:* Use `elasticsearch.ssl.certificateAuthorities` instead.
@@ -173,14 +173,14 @@ file has been removed.
 file has been removed.
 
 *Impact:* Use `elasticsearch.ssl.verificationMode` instead. If you set
-`elasticsearch.ssl.verify` to `true`, that is equal to setting 
+`elasticsearch.ssl.verify` to `true`, that is equal to setting
 `elasticsearch.ssl.verificationMode` to `full`.
 
 [float]
 ==== `elasticsearch.url` is no longer valid
 
 *Details:* The deprecated `elasticsearch.url` setting in the `kibana.yml` file
-has been removed. 
+has been removed.
 
 *Impact:* Use `elasticsearch.hosts` instead. In prior versions of Kibana, if no
 port was specified in `elasticsearch.url`, a default of 9200 was chosen. The
@@ -217,11 +217,11 @@ file have been removed.
 ==== `logging.useUTC` is no longer valid
 
 *Details:* The deprecated `logging.useUTC` setting in the `kibana.yml` file has
-been removed. 
+been removed.
 
 *Impact:* If `logging.useUTC` was set to `true` (its default value), the
 timezone id was `UTC`. Use `logging.timezone` instead. Any timezone can now be
-specified by canonical id. 
+specified by canonical id.
 
 [float]
 ==== `regionmap` is no longer valid
@@ -296,7 +296,7 @@ file have been removed.
 ==== `xpack.monitoring.cluster_alerts.index` is no longer valid
 
 *Details:* The unsupported `xpack.monitoring.cluster_alerts.index` setting in
-the `kibana.yml` file has been officially removed. 
+the `kibana.yml` file has been officially removed.
 
 *Impact:* The ability to customize this index is no longer supported.
 
@@ -312,7 +312,7 @@ setting in the `kibana.yml` file has been officially removed.
 ==== `xpack.monitoring.elasticsearch.ssl.ca` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.ca` setting in the
-`kibana.yml` file has been removed. 
+`kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.ssl.certificateAuthorities` instead.
 
@@ -320,7 +320,7 @@ setting in the `kibana.yml` file has been officially removed.
 ==== `xpack.monitoring.elasticsearch.ssl.cert` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.cert` setting in
-the `kibana.yml` file has been removed. 
+the `kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.ssl.certificate` instead.
 
@@ -328,7 +328,7 @@ the `kibana.yml` file has been removed.
 ==== `xpack.monitoring.elasticsearch.ssl.verify` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.verify` setting in
-the `kibana.yml` file has been removed. 
+the `kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.ssl.verificationMode` instead. If
 you previously set `xpack.monitoring.elasticsearch.ssl.verify` to `true`, it is
@@ -338,7 +338,7 @@ equal to setting `xpack.monitoring.elasticsearch.ssl.verificationMode` to `full`
 ==== `xpack.monitoring.elasticsearch.url` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.elasticsearch.url` setting in the
-`kibana.yml` file has been removed. 
+`kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.monitoring.elasticsearch.hosts` instead. In prior versions
 of Kibana, if no port was specified in `xpack.monitoring.elasticsearch.url` a
@@ -388,7 +388,7 @@ the `path.data` directory when the node or instance starts.
 ==== `xpack.monitoring.report_stats` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.report_stats` setting in the
-`kibana.yml` file has been removed. 
+`kibana.yml` file has been removed.
 
 *Impact:* Use `xpack.xpack_main.telemetry.enabled` instead.
 
@@ -413,3 +413,9 @@ a table; it only restricts the number of split tables to one.
 migrated to contain only one split table, converting any existing split tables beyond the first to split rows. No action
 should be required as a result of this change, but be aware that users with saved data table visualizations that contain
 multiple split tables will now see those tables rendered differently.
+
+[float]
+=== Imported Kibana dashboards might require small grid layout adjustments due to design changes
+*Details:* Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
+
+*Impact:* Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
