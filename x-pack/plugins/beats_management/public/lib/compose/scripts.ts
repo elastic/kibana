@@ -36,7 +36,6 @@ export function compose(basePath: string): FrontendLibs {
     new TestingFrameworkAdapter(
       {
         basePath,
-        k7Design: false,
         license: {
           type: 'gold',
           expired: false,

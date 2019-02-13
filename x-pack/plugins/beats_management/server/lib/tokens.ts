@@ -7,7 +7,6 @@ import { randomBytes, timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import { chunk } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { CMServerLibs } from './types';
@@ -103,7 +102,7 @@ export class CMTokensDomain {
 
     const tokenData = {
       created: moment().toJSON(),
-      randomHash: this.createRandomHash(),
+      randomHash: randomBytes(26).toString(),
     };
 
     return signToken(tokenData, enrollmentTokenSecret);
@@ -119,11 +118,18 @@ export class CMTokensDomain {
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
+    const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
 
     while (tokens.length < numTokens) {
+      const tokenData = {
+        created: moment().toJSON(),
+        expires: enrollmentTokenExpiration,
+        randomHash: randomBytes(26).toString(),
+      };
+
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: this.createRandomHash(),
+        token: signToken(tokenData, enrollmentTokenSecret),
       });
     }
 
@@ -132,15 +138,5 @@ export class CMTokensDomain {
     );
 
     return tokens.map(token => token.token);
-  }
-
-  private createRandomHash() {
-    return uuid
-      .v4({
-        rng: () => {
-          return [...randomBytes(16)];
-        },
-      })
-      .replace(/-/g, '');
   }
 }
