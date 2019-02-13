@@ -10,8 +10,6 @@ import { toCSS } from '../../lib/aeroelastic';
 
 export const HoverAnnotation = ({ transformMatrix, text }) => {
   const newStyle = {
-    width: 0,
-    height: 0,
     transform: `${toCSS(transformMatrix)} translate(1em, -1em)`,
   };
   return (

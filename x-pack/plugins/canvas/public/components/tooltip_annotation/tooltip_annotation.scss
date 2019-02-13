@@ -1,6 +1,8 @@
+@import '@elastic/eui/src/components/tool_tip/mixins';
+
 .tooltipAnnotation {
+  @include euiToolTipStyle($size: 's');
   position: absolute;
-  background: none;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;
   outline: none;
