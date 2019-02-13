@@ -151,7 +151,7 @@ pipeline data loader {pull}29873[#29873]
 * Fixes build issue and reintroduces new filter bar {pull}29752[#29752]
 * Adds index pattern URL change notes {pull}30779[#30779]
 * Fixes visualization filters to ignore invalid entries {pull}30633[#30633]
-* Expands add panels flyout and increases default rows per page {pull}30508[#30508]
+* Expands the size of add panels flyout and increases default rows per page {pull}30508[#30508]
 Machine Learning::
 * Removes use of types in datafeeds  {pull}27572[#27572]
 * Fixes metric select double caret {pull}30357[#30357]
@@ -195,6 +195,7 @@ Platform::
 * Uses `lastSubUrl` when appropriate {pull}28735[#28735]
 * Removes es _xpack endpoint usage {pull}29465[#29465]
 * Adds typings for the `saved_object_finder` react component {pull}30067[#30067]
+* Fixes the confirm overwrite modal of saved objects to handle large titles {pull}28590[#28590]
 Reporting::
 * Refactors routes files and helpers {pull}30111[#30111]
 Rollups::
