@@ -209,11 +209,7 @@ export class MBMapContainer extends React.Component {
 
     removeOrphanedSourcesAndLayers(this._mbMap, layerList);
     layerList.forEach(layer => {
-      if (!layer.hasErrors()) {
-        Promise.resolve(layer.syncLayerWithMB(this._mbMap))
-          .catch(({ message }) =>
-            this.props.setLayerErrorStatus(layer.getId(), message));
-      }
+      layer.syncLayerWithMB(this._mbMap);
     });
     syncLayerOrder(this._mbMap, layerList);
   };
