@@ -42,6 +42,7 @@ export class ElementShareContainer extends React.PureComponent {
       } // without this, crazy fast forward/backward paging leads to an error
       const ev = new CustomEvent('renderComplete');
       this.sharedItemRef.dispatchEvent(ev);
+      this.props.incrementRenderCount();
 
       // if the element is finished before reporting is listening for then
       // renderComplete event, the report never completes. to get around that

@@ -10,6 +10,7 @@ import { Sidebar } from '../../../components/sidebar';
 import { Toolbar } from '../../../components/toolbar';
 import { Workpad } from '../../../components/workpad';
 import { WorkpadHeader } from '../../../components/workpad_header';
+import { WorkpadProgress } from './workpad_progress';
 
 export class WorkpadApp extends React.PureComponent {
   static propTypes = {
@@ -18,15 +19,35 @@ export class WorkpadApp extends React.PureComponent {
     initializeWorkpad: PropTypes.func.isRequired,
   };
 
+  state = { renderedElementCount: 0 };
+
   componentDidMount() {
     this.props.initializeWorkpad();
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.workpad.id !== this.props.workpad.id) {
+      this.props.resetRenderCount();
+    }
+  }
+
+  renderedElementCount = 0;
+
+  incrementRenderCount = () => {
+    this.renderedElementCount += 1;
+    console.log(this.renderedElementCount);
+  };
+
+  resetRenderCount = () => {
+    this.renderedElementCount = 0;
+  };
+
   render() {
-    const { isWriteable, deselectElement } = this.props;
+    const { isWriteable, deselectElement, inFlight, totalElementCount } = this.props;
 
     return (
       <div className="canvasLayout">
+        {inFlight && <WorkpadProgress value={this.renderedElementCount} max={totalElementCount} />}
         <div className="canvasLayout__rows">
           <div className="canvasLayout__cols">
             <div className="canvasLayout__stage">
@@ -37,7 +58,7 @@ export class WorkpadApp extends React.PureComponent {
               <div className="canvasLayout__stageContent" onMouseDown={deselectElement}>
                 {/* NOTE: canvasWorkpadContainer is used for exporting */}
                 <div className="canvasWorkpadContainer canvasLayout__stageContentOverflow">
-                  <Workpad />
+                  <Workpad incrementRenderCount={this.incrementRenderCount} />
                 </div>
               </div>
             </div>

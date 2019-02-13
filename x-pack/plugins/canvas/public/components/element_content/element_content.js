@@ -42,7 +42,7 @@ const branches = [
 export const ElementContent = compose(
   pure,
   ...branches
-)(({ renderable, renderFunction, size, handlers }) => {
+)(({ renderable, renderFunction, size, handlers, incrementRenderCount }) => {
   const { getFilter, setFilter, done, onComplete } = handlers;
 
   return Style.it(
@@ -57,6 +57,7 @@ export const ElementContent = compose(
         className="canvasElement__content"
         onComplete={onComplete}
         functionName={renderFunction.name}
+        incrementRenderCount={incrementRenderCount}
       >
         <RenderWithFn
           name={renderFunction.name}

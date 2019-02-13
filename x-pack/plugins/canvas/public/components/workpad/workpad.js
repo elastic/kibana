@@ -28,6 +28,7 @@ export const Workpad = props => {
     nextPage,
     previousPage,
     isFullscreen,
+    incrementRenderCount,
   } = props;
 
   const { height, width } = workpad;
@@ -112,6 +113,7 @@ export const Workpad = props => {
                     isSelected={i + 1 === selectedPageNumber}
                     animation={getAnimation(i + 1)}
                     onAnimationEnd={onTransitionEnd}
+                    incrementRenderCount={incrementRenderCount}
                   />
                 ))}
                 <div

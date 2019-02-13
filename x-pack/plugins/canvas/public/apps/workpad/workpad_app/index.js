@@ -9,7 +9,8 @@ import { compose, branch, renderComponent } from 'recompose';
 import { initializeWorkpad } from '../../../state/actions/workpad';
 import { selectElement } from '../../../state/actions/transient';
 import { canUserWrite, getAppReady } from '../../../state/selectors/app';
-import { getWorkpad, isWriteable } from '../../../state/selectors/workpad';
+import { getWorkpad, isWriteable, getAllElements } from '../../../state/selectors/workpad';
+import { getInFlight } from '../../../state/selectors/resolved_args';
 import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
 
@@ -20,6 +21,8 @@ const mapStateToProps = state => {
     isWriteable: isWriteable(state) && canUserWrite(state),
     appReady: typeof appReady === 'object' ? appReady : { ready: appReady },
     workpad: getWorkpad(state),
+    totalElementCount: getAllElements(state).length,
+    inFlight: getInFlight(state),
   };
 };
 

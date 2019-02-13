@@ -36,11 +36,16 @@ export class ElementWrapper extends React.PureComponent {
       return null;
     }
 
-    const { renderable, transformMatrix, width, height, state } = this.props;
+    const { renderable, transformMatrix, width, height, state, incrementRenderCount } = this.props;
 
     return (
       <Positionable transformMatrix={transformMatrix} width={width} height={height}>
-        <ElementContent renderable={renderable} state={state} handlers={this.state.handlers} />
+        <ElementContent
+          renderable={renderable}
+          state={state}
+          handlers={this.state.handlers}
+          incrementRenderCount={incrementRenderCount}
+        />
       </Positionable>
     );
   }

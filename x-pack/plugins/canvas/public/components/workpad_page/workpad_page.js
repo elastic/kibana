@@ -75,6 +75,7 @@ export class WorkpadPage extends PureComponent {
       copyElements,
       cutElements,
       pasteElements,
+      incrementRenderCount,
     } = this.props;
 
     const keyHandler = action => {
@@ -154,7 +155,13 @@ export class WorkpadPage extends PureComponent {
                   return [];
               }
             } else if (element.type !== 'group') {
-              return <ElementWrapper key={element.id} element={element} />;
+              return (
+                <ElementWrapper
+                  key={element.id}
+                  element={element}
+                  incrementRenderCount={incrementRenderCount}
+                />
+              );
             }
           })
           .filter(element => !!element)}
