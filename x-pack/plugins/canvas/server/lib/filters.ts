@@ -6,21 +6,25 @@
 
 // TODO: This could be pluggable
 
-export interface TimeFilter {
-  type: string;
+export interface Filter {
+  type: 'time' | 'exactly' | 'luceneQueryString';
+}
+
+export interface TimeFilter extends Filter {
+  type: 'time';
   column: string;
   from: string;
   to: string;
 }
 
-export interface ExactlyFilter {
-  type: string;
+export interface ExactlyFilter extends Filter {
+  type: 'exactly';
   column: string;
   value: string;
 }
 
-export interface LuceneQueryStringFilter {
-  type: string;
+export interface LuceneQueryStringFilter extends Filter {
+  type: 'luceneQueryString';
   query: string;
 }
 

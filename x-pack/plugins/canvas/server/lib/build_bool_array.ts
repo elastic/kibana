@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExactlyFilter, LuceneQueryStringFilter, TimeFilter } from './filters';
+import { Filter } from './filters';
 import { getESFilter } from './get_es_filter';
 
 const compact = (arr: boolean[]) => (Array.isArray(arr) ? arr.filter(val => Boolean(val)) : []);
 
-export function buildBoolArray(canvasQueryFilterArray: any[]) {
+export function buildBoolArray(canvasQueryFilterArray: Filter[]) {
   return compact(
-    canvasQueryFilterArray.map((clause: TimeFilter | ExactlyFilter | LuceneQueryStringFilter) => {
+    canvasQueryFilterArray.map((clause: Filter) => {
       try {
         return getESFilter(clause);
       } catch (e) {

@@ -10,14 +10,14 @@
   filter is the abstracted canvas filter.
 */
 
-import { ExactlyFilter, LuceneQueryStringFilter, TimeFilter } from './filters';
+import { Filter } from './filters';
 import * as filters from './filters';
 
 interface FilterTypes {
   [key: string]: any;
 }
 
-export function getESFilter(filter: TimeFilter | ExactlyFilter | LuceneQueryStringFilter) {
+export function getESFilter(filter: Filter) {
   if (!(filters as FilterTypes)[filter.type]) {
     throw new Error(`Unknown filter type: ${filter.type}`);
   }
