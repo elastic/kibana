@@ -13,6 +13,13 @@ cd "x-pack";
 yarn gulp prepare;
 cd -;
 
+# download chromedriver
+chromedriverVersion=2.42
+mkdir -p ".chromedriver/$chromedriverVersion"
+cd ".chromedriver/$chromedriverVersion"
+wget https://chromedriver.storage.googleapis.com/$chromedriverVersion/chromedriver_linux64.zip
+cd -
+
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
@@ -22,4 +29,5 @@ tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
   x-pack/plugins/*/node_modules \
   x-pack/plugins/reporting/.chromium \
   test/plugin_functional/plugins/*/node_modules \
-  .es;
+  .es \
+  .chromedriver;
