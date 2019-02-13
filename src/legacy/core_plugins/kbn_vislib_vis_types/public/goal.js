@@ -60,12 +60,12 @@ export default function GoalVisType(Private, i18n) {
           scale: {
             show: false,
             labels: false,
-            color: '#69707d33',
+            color: 'rgba(105,112,125,0.2)',
             width: 2
           },
           type: 'meter',
           style: {
-            bgFill: '#69707d33',
+            bgFill: 'rgba(105,112,125,0.2)',
             bgColor: false,
             labelColor: false,
             subText: '',
