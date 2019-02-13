@@ -4,8 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as mockFs from './__mocks__/fs';
-jest.mock('fs', () => mockFs);
+import { Readable } from 'stream';
+
+jest.mock('fs', () => ({
+  createReadStream(filepath: string): Readable {
+    if (filepath === 'ERROR') {
+      throw new Error('MOCK ERROR - Invalid Path');
+    }
+    const readableStream = new Readable();
+    const streamData = filepath.split('');
+    let cursor = 0;
+
+    readableStream._read = function(size) {
+      const current = streamData[cursor++];
+      if (typeof current === 'undefined') {
+        return this.push(null);
+      }
+      this.push(current);
+    };
+
+    return readableStream;
+  },
+}));
 
 import { getIntegrityHash, getIntegrityHashes } from './file_integrity';
 

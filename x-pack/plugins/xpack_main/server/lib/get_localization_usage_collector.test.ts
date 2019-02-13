@@ -4,7 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createI18nLoaderMock } from './__mocks__/i18n_loader';
+interface TranslationsMock {
+  [title: string]: string;
+}
+
+const createI18nLoaderMock = (translations: TranslationsMock) => {
+  return {
+    getTranslationsByLocale() {
+      return {
+        messages: translations,
+      };
+    },
+  };
+};
+
 import { getTranslationCount } from './get_localization_usage_collector';
 
 describe('getTranslationCount', () => {
