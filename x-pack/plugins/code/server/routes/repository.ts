@@ -158,7 +158,8 @@ export function repositoryRoute(
         try {
           indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
         } catch (error) {
-          log.error(`Get repository index status ${repoUri} error: ${error}`);
+          // index status won't exist if during clone, so suppress the error log to debug level.
+          log.debug(`Get repository index status ${repoUri} error: ${error}`);
         }
 
         let deleteStatus = null;

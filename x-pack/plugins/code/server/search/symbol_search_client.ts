@@ -59,6 +59,15 @@ export class SymbolSearchClient extends AbstractSearchClient {
                   },
                 },
               },
+              // Boost the exact match for qname.
+              {
+                term: {
+                  qname: {
+                    value: req.query,
+                    boost: 10.0,
+                  },
+                },
+              },
               {
                 prefix: {
                   'symbolInformation.name': {
@@ -67,6 +76,7 @@ export class SymbolSearchClient extends AbstractSearchClient {
                   },
                 },
               },
+              // Boost the exact match for symbol name.
               {
                 term: {
                   'symbolInformation.name': {
