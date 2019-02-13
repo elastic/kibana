@@ -68,8 +68,8 @@ async function attemptToCreateCommand(log, browserType) {
 
   const session = await buildDriverInstance(browserType);
 
-  if (throttleOption === 'true' && browserType === 'chrome')  { //Only chrome supports this option.
-    log.debug(session);
+  if (throttleOption === 'true' && browserType === 'chrome') { //Only chrome supports this option.
+    log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
     session.setNetworkConditions({
       offline: false,
       latency: 100, // Additional latency (ms).
