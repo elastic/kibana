@@ -37,10 +37,6 @@ export class EMSTMSSource extends AbstractTMSSource {
     return <EMSTMSCreateSourceEditor onChange={onChange}/>;
   }
 
-  constructor(descriptor) {
-    super(descriptor);
-  }
-
   async getImmutableProperties() {
     return [
       { label: 'Data source', value: EMSTMSSource.title },

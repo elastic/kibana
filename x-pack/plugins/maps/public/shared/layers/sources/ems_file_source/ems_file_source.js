@@ -34,10 +34,6 @@ export class EMSFileSource extends AbstractVectorSource {
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
   }
 
-  constructor(descriptor) {
-    super(descriptor);
-  }
-
   async _getEmsVectorFileMeta() {
     const emsFiles = await getEmsVectorFilesMeta();
     const meta = emsFiles.find((source => source.id === this._descriptor.id));

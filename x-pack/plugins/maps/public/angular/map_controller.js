@@ -27,9 +27,10 @@ import {
   FLYOUT_STATE
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../store/non_serializable_kibana_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
-import { inspectorAdapters, indexPatternService } from '../kibana_services';
+import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
@@ -47,8 +48,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   const savedMap = $scope.map = $route.current.locals.map;
   let unsubscribe;
-
-  inspectorAdapters.requests.reset();
 
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
     if (diff.includes('time')) {
@@ -253,6 +252,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     description: 'Open Inspector',
     testId: 'openInspectorButton',
     run() {
+      const inspectorAdapters = getInspectorAdapters(getStore().getState());
       Inspector.open(inspectorAdapters, {});
     }
   }, {

@@ -77,15 +77,11 @@ export class WMSSource extends AbstractTMSSource {
 
 class WMSEditor extends  React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      serviceUrl: '',
-      layers: '',
-      styles: ''
-    };
+  state = {
+    serviceUrl: '',
+    layers: '',
+    styles: ''
   }
-
 
   _previewIfPossible() {
     if (this.state.serviceUrl && this.state.layers) {

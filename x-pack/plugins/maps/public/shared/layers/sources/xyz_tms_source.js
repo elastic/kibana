@@ -70,12 +70,9 @@ export class XYZTMSSource extends AbstractTMSSource {
 
 class XYZTMSEditor extends  React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      tmsInput: '',
-      tmsCanPreview: false
-    };
+  state = {
+    tmsInput: '',
+    tmsCanPreview: false
   }
 
   _handleTMSInputChange(e) {
