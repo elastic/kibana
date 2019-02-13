@@ -187,7 +187,7 @@ export class MBMapContainer extends React.Component {
       );
       //maxZoom ensure we're not zooming in too far on single points or small shapes
       //the padding is to avoid too tight of a fit around edges
-      this._mbMap.fitBounds(lnLatBounds, { maxZoom: 18, padding: 16 });
+      this._mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
     } else if (goto.center) {
       this._mbMap.setZoom(goto.center.zoom);
       this._mbMap.setCenter({
