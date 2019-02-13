@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -20,6 +21,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Role } from '../../../../../common/model/role';
+import { isRoleEnabled } from '../../../../lib/role';
 import { RolesApi } from '../../../../lib/roles_api';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
@@ -74,7 +76,7 @@ class RolesGridPageUI extends Component<Props, State> {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.security.management.roles.rolesTitle"
+                  id="xpack.security.management.roles.roleTitle"
                   defaultMessage="Roles"
                 />
               </h2>
@@ -83,7 +85,7 @@ class RolesGridPageUI extends Component<Props, State> {
           <EuiPageContentHeaderSection>
             <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref()}>
               <FormattedMessage
-                id="xpack.security.management.roles.createNewRoleButtonLabel"
+                id="xpack.security.management.roles.createRoleButtonLabel"
                 defaultMessage="Create new role"
               />
             </EuiButton>
@@ -156,11 +158,26 @@ class RolesGridPageUI extends Component<Props, State> {
       }),
       sortable: true,
       truncateText: true,
-      render: (name: string) => {
+      render: (name: string, record: Role) => {
         return (
-          <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref(name)}>
-            {name}
-          </EuiLink>
+          <span>
+            <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref(name)}>
+              {name}
+            </EuiLink>
+            {!isRoleEnabled(record) && (
+              <EuiIconTip
+                type="alert"
+                size="xs"
+                color="warning"
+                title={
+                  <FormattedMessage
+                    id="xpack.security.management.roles.disabledTooltip"
+                    defaultMessage="This role is currently disabled. You may only view or delete it."
+                  />
+                }
+              />
+            )}
+          </span>
         );
       },
     },
@@ -237,7 +254,7 @@ class RolesGridPageUI extends Component<Props, State> {
         onClick={() => this.setState({ showDeleteConfirmation: true })}
       >
         <FormattedMessage
-          id="xpack.security.management.role.deleteRolesButtonLabel"
+          id="xpack.security.management.roles.deleteSelectedRolesButtonLabel"
           defaultMessage="Delete {numSelected} role{numSelected, plural, one { } other {s}}"
           values={{
             numSelected,

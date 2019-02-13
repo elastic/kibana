@@ -22,7 +22,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
             >
               <FormattedMessage
                 defaultMessage="You do not have permission to manage roles."
-                id="xpack.security.management.roles.permissionDeniedToManageRolesDescription"
+                id="xpack.security.management.roles.noPermissionToManageRolesDescription"
                 values={Object {}}
               />
             </p>
@@ -124,7 +124,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="You do not have permission to manage roles."
-                        id="xpack.security.management.roles.permissionDeniedToManageRolesDescription"
+                        id="xpack.security.management.roles.noPermissionToManageRolesDescription"
                         values={Object {}}
                       >
                         You do not have permission to manage roles.

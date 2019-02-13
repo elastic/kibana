@@ -55,21 +55,14 @@ class ConfirmDeleteUI extends Component<Props, {}> {
   public render() {
     const { rolesToDelete, onCancel, intl } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
-    const title = moreThanOne
-      ? intl.formatMessage(
-          {
-            id: 'xpack.security.management.roles.confirmDelete.deleteMultipleRolesTitle',
-            defaultMessage: 'Delete {roleLength} users',
-          },
-          { roleLength: rolesToDelete.length }
-        )
-      : intl.formatMessage(
-          {
-            id: 'xpack.security.management.roles.confirmDelete.deleteOneRoleTitle',
-            defaultMessage: 'Delete role {roleName}',
-          },
-          { roleName: rolesToDelete[0] }
-        );
+    const title = intl.formatMessage(
+      {
+        id: 'xpack.security.management.roles.deleteRoleTitle',
+        defaultMessage: 'Delete role{value, plural, one {{roleName}} other {s}}',
+      },
+      { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` }
+    );
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -81,7 +74,7 @@ class ConfirmDeleteUI extends Component<Props, {}> {
             defaultMessage: 'Cancel',
           })}
           confirmButtonText={intl.formatMessage({
-            id: 'xpack.security.management.roles.confirmDelete.confirmButtonLabel',
+            id: 'xpack.security.management.roles.deleteRoleConfirmButtonLabel',
             defaultMessage: 'Delete',
           })}
           buttonColor="danger"
@@ -104,7 +97,7 @@ class ConfirmDeleteUI extends Component<Props, {}> {
             ) : null}
             <p>
               <FormattedMessage
-                id="xpack.security.management.roles.confirmDelete.removingRolesWarningMessage"
+                id="xpack.security.management.roles.deletingRolesWarningMessage"
                 defaultMessage="This operation cannot be undone."
               />
             </p>

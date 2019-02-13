@@ -22,7 +22,7 @@ export const PermissionDenied = () => (
       body={
         <p data-test-subj="permissionDeniedMessage">
           <FormattedMessage
-            id="xpack.security.management.roles.permissionDeniedToManageRolesDescription"
+            id="xpack.security.management.roles.noPermissionToManageRolesDescription"
             defaultMessage="You do not have permission to manage roles."
           />
         </p>
