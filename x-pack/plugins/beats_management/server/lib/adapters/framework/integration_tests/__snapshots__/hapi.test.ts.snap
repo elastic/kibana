@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Hapi Framework Adapter Should get settings from Kibana: defaultUserRoles 1`] = `undefined`;
+
+exports[`Hapi Framework Adapter Should get settings from Kibana: encryptionKey 1`] = `"something_who_cares"`;
+
+exports[`Hapi Framework Adapter Should get settings from Kibana: enrollmentTokensTtlInSeconds 1`] = `600`;

@@ -39,6 +39,11 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     mirrorPluginStatus(xpackMainPlugin, thisPlugin);
 
+    // @ts-ignore
+    if (xpackMainPlugin.status.state === 'green') {
+      this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
+    }
+
     xpackMainPlugin.status.on('green', () => {
       this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
       // Register a function that is called whenever the xpack info changes,
@@ -52,8 +57,16 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void) {
     switch (event) {
       case 'xpack.status.green':
+        // @ts-ignore
+        if (this.server.plugins.xpack_main.status.state === 'green') {
+          return cb();
+        }
         this.server.plugins.xpack_main.status.on('green', cb);
       case 'elasticsearch.status.green':
+        // @ts-ignore
+        if (this.server.plugins.elasticsearch.status.state === 'green') {
+          return cb();
+        }
         this.server.plugins.elasticsearch.status.on('green', cb);
     }
   }

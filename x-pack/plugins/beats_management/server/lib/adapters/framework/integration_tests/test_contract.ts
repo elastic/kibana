@@ -20,10 +20,46 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       frameworkAdapter = config.adapterSetup();
     });
 
-    it('Should have tests here', () => {
-      expect(frameworkAdapter).toHaveProperty('server');
-      expect(frameworkAdapter.server).toHaveProperty('plugins');
-      expect(frameworkAdapter.server.plugins).toHaveProperty('security');
+    it('Should intalize adapter without error', () => {
+      expect(() => {
+        config.adapterSetup();
+      }).not.toThrow();
+    });
+
+    it('Should fire event on xpack green', done => {
+      frameworkAdapter.on('xpack.status.green', () => {
+        done();
+      });
+    });
+
+    it('Should fire event on elasticsearch green', done => {
+      frameworkAdapter.on('elasticsearch.status.green', () => {
+        done();
+      });
+    });
+
+    it('Should get settings from Kibana', () => {
+      expect(frameworkAdapter.getSetting('xpack.beats.encryptionKey')).toMatchSnapshot(
+        'encryptionKey'
+      );
+      expect(
+        frameworkAdapter.getSetting('xpack.beats.enrollmentTokensTtlInSeconds')
+      ).toMatchSnapshot('enrollmentTokensTtlInSeconds');
+
+      expect(frameworkAdapter.getSetting('xpack.beats.defaultUserRoles')).toMatchSnapshot(
+        'defaultUserRoles'
+      );
+    });
+
+    it('Should log output without throwing errors', () => {
+      // TODO we should realy be testing for this to work
+      expect(() => {
+        frameworkAdapter.log('test');
+      }).not.toThrow();
+    });
+
+    it('Should have xpack info', () => {
+      expect(frameworkAdapter.info).not.toEqual(null);
     });
   });
 };

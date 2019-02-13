@@ -5,16 +5,15 @@
  */
 // file.skip
 
-import { camelCase } from 'lodash';
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 import { TestKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
-import { CONFIG_PREFIX } from '../../../../../common/constants/plugin';
-import { PLUGIN } from './../../../../../common/constants/plugin';
-import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
+import { DatabaseKbnESPlugin } from '../../database/adapter_types';
+import { KibanaDatabaseAdapter } from '../../database/kibana_database_adapter';
+import { ElasticsearchBeatsAdapter } from '../elasticsearch_beats_adapter';
 import { contractTests } from './test_contract';
 
 let servers: any;
-contractTests('Kibana  Framework Adapter', {
+contractTests('Beats Elasticsearch Adapter', {
   async before() {
     servers = await kbnTestServer.startTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -25,10 +24,8 @@ contractTests('Kibana  Framework Adapter', {
     await servers.stop();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(
-      camelCase(PLUGIN.ID),
-      servers.kbnServer.server,
-      CONFIG_PREFIX
-    );
+    const database = new KibanaDatabaseAdapter(servers.kbnServer.server.plugins
+      .elasticsearch as DatabaseKbnESPlugin);
+    return new ElasticsearchBeatsAdapter(database);
   },
 });

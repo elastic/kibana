@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Kibana  Framework Adapter Should get settings from Kibana: defaultUserRoles 1`] = `
+Array [
+  "superuser",
+]
+`;
+
+exports[`Kibana  Framework Adapter Should get settings from Kibana: encryptionKey 1`] = `"xpack_beats_default_encryptionKey"`;
+
+exports[`Kibana  Framework Adapter Should get settings from Kibana: enrollmentTokensTtlInSeconds 1`] = `600`;
