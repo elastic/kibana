@@ -42,7 +42,7 @@
   }
 }
 
-.code-file-tree-container {
+.code-file-tree__container {
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
@@ -61,5 +61,64 @@
   &:hover {
     background-color: rgba($euiColorGhost, .10);
     cursor: pointer;
+  }
+}
+.code-timeline {
+  border-left: $euiBorderThick;
+  margin-left: $euiSizeXS;
+  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+}
+
+.code-timeline__marker {
+  width: $euiSizeS;
+  height: $euiSizeS;
+  border-radius: $euiSizeS / 2;
+  background-color: $euiBorderColor;
+  margin: auto;
+}
+
+.code-timeline__commit-container {
+  margin: 0 0 $euiSizeXS $euiSizeM;
+  .euiPanel:not(:first-of-type), .euiPanel:not(:last-of-type) {
+    border-radius: 0;
+  }
+}
+
+.euiPanel.code-timeline__commit--root {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  &:not(:first-child) {
+    border-top: none;
+  }
+  &:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+  &:first-child {
+    border-radius: $euiSizeXS $euiSizeXS 0 0;
+  }
+  &:last-child {
+    border-radius: 0 0 $euiSizeXS $euiSizeXS;
+  }
+  &:only-child{
+    border-radius: $euiSizeXS
+  }
+}
+
+.code-top-bar__container {
+  box-sizing: content-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: $euiSizeS;
+  min-height: 80px;
+  border-bottom: $euiBorderThin;
+  nav {
+    a {
+      display: inline;
+    }
+    div {
+      vertical-align: baseline;
+    }
   }
 }

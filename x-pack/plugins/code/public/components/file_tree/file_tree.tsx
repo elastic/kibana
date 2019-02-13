@@ -97,7 +97,7 @@ export class CodeFileTree extends React.Component<Props> {
             ) : (
               <FolderClosedTriangle onClick={onFolderClick} />
             )}
-            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
+            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} color="subdued" />
             <DirectoryNode>{`${node.name}/`}</DirectoryNode>
           </div>
         );
@@ -110,7 +110,7 @@ export class CodeFileTree extends React.Component<Props> {
             className={classes(className, 'code-file-tree-file')}
             role="button"
           >
-            <EuiIcon type="submodule" />
+            <EuiIcon type="submodule" color="subdued" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
         );
@@ -123,7 +123,7 @@ export class CodeFileTree extends React.Component<Props> {
             className={classes(className, 'code-file-tree-file')}
             role="button"
           >
-            <EuiIcon type="symlink" />
+            <EuiIcon type="symlink" color="subdued" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
         );
@@ -136,7 +136,7 @@ export class CodeFileTree extends React.Component<Props> {
             className={classes(className, 'code-file-tree-file')}
             role="button"
           >
-            <EuiIcon type="document" />
+            <EuiIcon type="document" color="subdued" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
         );

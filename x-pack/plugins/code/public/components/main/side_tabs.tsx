@@ -38,7 +38,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
         id: Tabs.file,
         name: 'File',
         content: (
-          <div className="code-file-tree-container">
+          <div className="code-file-tree__container">
             <FileTree />
           </div>
         ),
