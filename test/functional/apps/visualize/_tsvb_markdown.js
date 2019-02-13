@@ -21,7 +21,6 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const find = getService('find');
   const { visualBuilder, timePicker } = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
@@ -34,12 +33,9 @@ export default function ({ getService, getPageObjects }) {
         await timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
 
-      it('should be render all markdown components', async () => {
-        const table = await find.byCssSelector('table.table');
-        const isExisting = find.exists(table);
-        const tabsCount = await visualBuilder.getSubTabsCount();
-        expect(tabsCount).to.be(3);
-        expect(isExisting).to.be.ok();
+      it('should render all markdown components', async () => {
+        const tabs = await visualBuilder.getSubTabs();
+        expect(tabs.length).to.be(3);
       });
 
       it('should allow printing raw timestamp of data', async () => {
@@ -56,9 +52,14 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('6');
       });
 
-      it('should be show empty table variables', async () => {
+      // must be fail after fix: https://github.com/elastic/kibana/issues/30625
+      it('should show empty table variables', async () => {
         const variables = await visualBuilder.getMarkdownTableVariables();
-        expect(variables).to.be('No variables available for the selected data metrics.');
+        expect(Array.isArray(variables)).to.be.ok();
+        expect(variables).to.be.empty();
+
+        const noVariables = await visualBuilder.getMarkdownTableNoVariables();
+        expect(noVariables).to.be.contain('No variables available for the selected data metrics');
       });
 
       it('should render html as plain text', async () => {
@@ -71,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
       it('should render mustache list', async () => {
         const list =
           `{{#each _all}}
-- {{ data.formatted.[0] }} {{ data.raw.[0] }}
+{{ data.formatted.[0] }} {{ data.raw.[0] }}
 {{/each}}`;
 
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
