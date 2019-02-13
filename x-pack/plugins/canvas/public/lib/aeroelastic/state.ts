@@ -4,47 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { shallowEqual } = require('./functional');
+import {
+  ActionId,
+  ChangeCallbackFunction,
+  Meta,
+  NodeFunction,
+  NodeResult,
+  Payload,
+  TypeName,
+  UpdaterFunction,
+} from './types';
 
-/**
- * PoC action dispatch
- */
+export const shallowEqual = (a: any, b: any): boolean => {
+  if (a === b) {
+    return true;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+};
 
-const makeUid = () => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
+const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
-const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs) => {
+export const selectReduce = (fun: NodeFunction, previousValue: NodeResult): NodeFunction => (
+  ...inputs: NodeFunction[]
+): NodeResult => {
   // last-value memoizing version of this single line function:
   // (fun, previousValue) => (...inputs) => state => previousValue = fun(previousValue, ...inputs.map(input => input(state)))
-  let argumentValues = [];
+  let argumentValues = [] as NodeResult[];
   let value = previousValue;
   let prevValue = previousValue;
-  let mappedValue;
-  return state => {
+  return (state: NodeResult) => {
     if (
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state)))) &&
       value === prevValue
     ) {
-      return mappedValue;
+      return value;
     }
 
     prevValue = value;
     value = fun(prevValue, ...argumentValues);
-    if (logFun) {
-      logFun(value, argumentValues);
-    }
-    mappedValue = mapFun(value);
-    return mappedValue;
+    return value;
   };
 };
 
-const select = (fun, logFun) => (...inputs) => {
+export const select = (fun: NodeFunction): NodeFunction => (
+  ...inputs: NodeFunction[]
+): NodeResult => {
   // last-value memoizing version of this single line function:
   // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
-  let argumentValues = [];
-  let value;
-  let actionId;
-  return state => {
-    const lastActionId = state.primaryUpdate.payload.uid;
+  let argumentValues = [] as NodeResult[];
+  let value: NodeResult;
+  let actionId: ActionId;
+  return (state: NodeResult) => {
+    const lastActionId: ActionId = state.primaryUpdate.payload.uid;
     if (
       actionId === lastActionId ||
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
@@ -54,21 +73,20 @@ const select = (fun, logFun) => (...inputs) => {
 
     value = fun(...argumentValues);
     actionId = lastActionId;
-    if (logFun) {
-      logFun(value, argumentValues);
-    }
     return value;
   };
 };
 
-const createStore = (initialState, onChangeCallback = () => {}) => {
+export const createStore = (initialState: NodeResult, onChangeCallback: ChangeCallbackFunction) => {
   let currentState = initialState;
-  let updater = state => state; // default: no side effect
+  let updater: UpdaterFunction = (state: NodeResult): NodeResult => state; // default: no side effect
   const getCurrentState = () => currentState;
   // const setCurrentState = newState => (currentState = newState);
-  const setUpdater = updaterFunction => (updater = updaterFunction);
+  const setUpdater = (updaterFunction: UpdaterFunction) => {
+    updater = updaterFunction;
+  };
 
-  const commit = (type, payload, meta = {}) => {
+  const commit = (type: TypeName, payload: Payload, meta: Meta = { silent: false }) => {
     currentState = updater({
       ...currentState,
       primaryUpdate: {
@@ -81,14 +99,7 @@ const createStore = (initialState, onChangeCallback = () => {}) => {
     }
   };
 
-  const dispatch = (type, payload) => setTimeout(() => commit(type, payload));
+  const dispatch = (type: TypeName, payload: Payload) => commit(type, payload);
 
   return { getCurrentState, setUpdater, commit, dispatch };
-};
-
-module.exports = {
-  createStore,
-  select,
-  selectReduce,
-  makeUid,
 };
