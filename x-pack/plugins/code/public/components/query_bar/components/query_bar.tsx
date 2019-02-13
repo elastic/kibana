@@ -186,7 +186,7 @@ export class CodeQueryBar extends Component<Props, State> {
 
     const res = await Promise.all(
       this.props.suggestionProviders.map((provider: SuggestionsProvider) => {
-        return provider.getSuggestions(query.toLowerCase(), this.props.searchScope);
+        return provider.getSuggestions(query, this.props.searchScope);
       })
     );
 
