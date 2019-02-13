@@ -28,7 +28,7 @@ export class CodeNodeClient {
   }
 
   public async createNodeInfo(info: CodeNodeInfo): Promise<CodeNodeInfo> {
-    await this.objectsClient.create(CODE_NODE_TYPE, info, { id: CODE_NODE_ID });
+    await this.objectsClient.create(CODE_NODE_TYPE, info, { id: CODE_NODE_ID, refresh: true });
     return (await this.getCodeNodeInfo()) as CodeNodeInfo;
   }
 
