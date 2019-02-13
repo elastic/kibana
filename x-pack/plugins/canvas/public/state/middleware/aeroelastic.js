@@ -8,7 +8,6 @@ import { shallowEqual } from 'recompose';
 import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import { arrayToMap, identity } from '../../lib/aeroelastic/functional';
-import defaultConfiguration from '../../lib/aeroelastic/config';
 import {
   addElement,
   removeElements,
@@ -24,7 +23,38 @@ import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
 
-const isGroupId = id => id.startsWith(defaultConfiguration.groupName);
+const aeroelasticConfiguration = {
+  adHocGroupName: 'adHocGroup',
+  alignmentGuideName: 'alignmentGuide',
+  atopZ: 1000,
+  depthSelect: true,
+  devColor: 'magenta',
+  groupName: 'group',
+  groupResize: true,
+  guideDistance: 3,
+  hoverAnnotationName: 'hoverAnnotation',
+  hoverLift: 100,
+  intraGroupManipulation: false,
+  intraGroupSnapOnly: false,
+  minimumElementSize: 0,
+  persistentGroupName: 'persistentGroup',
+  resizeAnnotationConnectorOffset: 0,
+  resizeAnnotationOffset: 0,
+  resizeAnnotationOffsetZ: 0.1, // causes resize markers to be slightly above the shape plane
+  resizeAnnotationSize: 10,
+  resizeConnectorName: 'resizeConnector',
+  resizeHandleName: 'resizeHandle',
+  rotateAnnotationOffset: 12,
+  rotateSnapInPixels: 10,
+  rotationEpsilon: 0.001,
+  rotationHandleName: 'rotationHandle',
+  rotationHandleSize: 14,
+  shortcuts: false,
+  singleSelect: false,
+  snapConstraint: true,
+};
+
+const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
 
 /**
  * elementToShape
@@ -229,7 +259,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
         shapeAdditions: [],
         primaryUpdate: null,
         currentScene: { shapes: [] },
-        configuration: defaultConfiguration,
+        configuration: aeroelasticConfiguration,
       },
       onChangeCallback,
       page
