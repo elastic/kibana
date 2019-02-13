@@ -35,13 +35,15 @@ export const createExportRoute = (prereqs) => ({
             .single()
             .optional(),
           objects: Joi.array()
-            .max(EXPORT_SIZE_LIMIT)
             .items({
               type: Joi.string().required(),
               id: Joi.string().required(),
             })
+            .max(EXPORT_SIZE_LIMIT)
             .optional(),
         })
+        // TODO: Remove below requirement
+        .or('type', 'objects')
         .default(),
     },
     async handler(request, h) {
