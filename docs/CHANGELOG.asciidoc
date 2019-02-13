@@ -85,6 +85,8 @@ Machine Learning::
 Observability::
 * Converts monitor sparklines to histogram {pull}28502[#28502]
 * Adds crosshair sync for monitor page charts {pull}28631[#28631]
+Operations::
+* Adds support for reindexing APM indices {pull}29845[#29845]
 Platform::
 * Adds help menu item to header {pull}29664[#29664]
 * Implements global dark theme {pull}28445[#28445]
@@ -94,9 +96,11 @@ Querying & Filtering::
 Reporting::
 * In the Visualization Editor, removes the "Optimize for printing" option when 
 exporting the visualization as PNG or PDF. The single visualization will automatically 
-be optimized for printing. {pull}30456[#30456]
+be optimized for printing {pull}30456[#30456]
 Security::
-* Warns legacy browsers that do not support Content Security Policy {pull}29957[#29957]
+* Introduces content security policy (CSP) {pull}29545[#29545]
+* Warns legacy browsers that do not support content security policy {pull}29957[#29957]
+* Adds content security policy strict mode {pull}29856[#29856]
 
 
 [float]
@@ -160,8 +164,6 @@ Observability::
 * Ports functional tests to 7.x {pull}29398[#29398]
 * Ports unit tests to master {pull}29876[#29876]
 * Adds missing loading states for filter bar and snapshot components {pull}30122[#30122]
-Operations::
-* Adds support for reindexing APM indices {pull}29845[#29845]
 Platform::
 * Moves the table vis migration to {kib} plugin {pull}29478[#29478]
 * Allows passing a default operator to use on saved object client find operations {pull}29339[#29339]
