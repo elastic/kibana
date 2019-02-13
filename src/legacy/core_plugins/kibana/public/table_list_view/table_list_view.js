@@ -293,6 +293,7 @@ class TableListViewUi extends React.Component {
         color="danger"
         iconType="trash"
         onClick={onClick}
+        data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage
           id="kbn.table_list_view.listing.deleteButtonMessage"
@@ -349,6 +350,7 @@ class TableListViewUi extends React.Component {
     const search = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
+      defaultQuery: this.state.filter,
       box: {
         incremental: true,
       },

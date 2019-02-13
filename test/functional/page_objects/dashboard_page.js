@@ -254,7 +254,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickDeleteSelectedDashboards() {
-      await testSubjects.click('deleteSelectedDashboards');
+      await testSubjects.click('deleteSelectedItems');
     }
 
     async isOptionsOpen() {
@@ -427,7 +427,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await find.allByLinkText(dashName);
+      const links = await testSubjects.findAll(`dashboardListingTitleLink-${dashName.replace(/ /g, '-')}`);
       return links.length;
     }
 
