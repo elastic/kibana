@@ -24,10 +24,10 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor = ({ onPreviewSource }) => {
+  static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
     const onSelect = (layerConfig) => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(layerConfig);
-      const source = new KibanaRegionmapSource(sourceDescriptor);
+      const source = new KibanaRegionmapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 

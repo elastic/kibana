@@ -28,10 +28,10 @@ export class XYZTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({  onPreviewSource }) {
+  static renderEditor({  onPreviewSource, inspectorAdapters }) {
     const previewTMS = (urlTemplate) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);
-      const source = new XYZTMSSource(sourceDescriptor);
+      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
     return (<XYZTMSEditor previewTMS={previewTMS} />);

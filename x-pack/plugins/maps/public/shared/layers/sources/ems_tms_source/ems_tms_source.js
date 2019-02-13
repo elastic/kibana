@@ -25,12 +25,12 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
       const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
-      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsTMSSource);
     };
 
