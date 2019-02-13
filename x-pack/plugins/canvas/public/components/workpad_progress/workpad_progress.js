@@ -8,11 +8,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 
-export const WorkpadProgress = ({ value, max, ...rest }) => (
-  <EuiPortal>
-    <EuiProgress value={value} max={max} position="fixed" {...rest} />
-  </EuiPortal>
-);
+export const WorkpadProgress = ({ inFlight, ...rest }) =>
+  inFlight && (
+    <EuiPortal>
+      <EuiProgress position="fixed" {...rest} />
+    </EuiPortal>
+  );
 
 WorkpadProgress.propTypes = {
   value: PropTypes.number.isRequired,

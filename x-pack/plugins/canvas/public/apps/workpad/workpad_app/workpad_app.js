@@ -10,7 +10,7 @@ import { Sidebar } from '../../../components/sidebar';
 import { Toolbar } from '../../../components/toolbar';
 import { Workpad } from '../../../components/workpad';
 import { WorkpadHeader } from '../../../components/workpad_header';
-import { WorkpadProgress } from './workpad_progress';
+import { WorkpadProgress } from '../../../components/workpad_progress';
 
 export class WorkpadApp extends React.PureComponent {
   static propTypes = {
@@ -27,7 +27,7 @@ export class WorkpadApp extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.workpad.id !== this.props.workpad.id) {
-      this.props.resetRenderCount();
+      this.resetRenderCount();
     }
   }
 
@@ -43,11 +43,11 @@ export class WorkpadApp extends React.PureComponent {
   };
 
   render() {
-    const { isWriteable, deselectElement, inFlight, totalElementCount } = this.props;
+    const { isWriteable, deselectElement, totalElementCount } = this.props;
 
     return (
       <div className="canvasLayout">
-        {inFlight && <WorkpadProgress value={this.renderedElementCount} max={totalElementCount} />}
+        <WorkpadProgress value={this.renderedElementCount} max={totalElementCount} />
         <div className="canvasLayout__rows">
           <div className="canvasLayout__cols">
             <div className="canvasLayout__stage">
