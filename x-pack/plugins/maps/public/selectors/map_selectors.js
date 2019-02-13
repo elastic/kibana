@@ -107,8 +107,6 @@ export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
 
-export const getMetadata = ({ config }) => config && config.meta;
-
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
