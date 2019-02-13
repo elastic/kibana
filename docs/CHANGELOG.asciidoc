@@ -13,10 +13,209 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.0.0-beta1>>
 * <<release-notes-7.0.0-alpha2>>
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.0.0-beta1]]
+== {kib} 7.0.0-beta1
+
+coming[7.0.0-beta1]
+
+[float]
+[[breaking-7.0.0-beta1]]
+=== Breaking changes
+
+For more details about breaking changes in this release, see 
+<<breaking-changes-7.0, Breaking changes in 7.0>>.
+
+Design::
+* Removes references to K6 EUI, using the default UI theme in its place {pull}29152[#29152]
+Geo::
+* Removes the deprecated `regionmap` and `tilemap` kibana.yml configurations. 
+Removes the backwards compatibility logic that checked for duplicative settings 
+`map.regionmap` and `map.tilemap`. {pull}28609[#28609]
+Monitoring::
+* Refactors index patterns from configurable to constants {pull}29528[#29528]
+Management::
+* Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and 
+Upgrade Assistant {pull}30149[#30149]
+* Removes nested table splits from table visualization {pull}26057[#26057]
+* Standardizes use of `index_pattern` in UI code and URLs, replacing `indices` 
+and `index`  {pull}29151[#29151] and {pull}29481[#29481]
+* Removes app-specific dark mode options and replaces with a global dark mode uiSetting {pull}29017[#29017]
+Operations::
+* Defers the optimize step in the plugin installer to server start {pull}26983[#26983]
+Platform::
+* Removes deprecated `i18n.defaultLocale` setting {pull}29325[#29325]
+* Removes previously deprecated `elasticsearch*` settings. {pull}29496[#29496]
+* Adds new "references" attribute to saved objects for relationships {pull}28199[#28199]
+Querying & Filtering::
+* Makes KQL the default query language for new searches {pull}27092[#27092]
+Reporting::
+* Removes Phantom dependency {pull}27142[#27142]
+Security::
+* Removes deprecated SSL settings {pull}28622[#28622]
+* Removes legacy fallback {pull}29107[#29107]
+Visualizations::
+* Removes Timelion from the app switcher by default {pull}30131[#30131]
+
+
+[float]
+[[deprecation-7.0.0-beta1]]
+=== Deprecations
+Machine Learning::
+* Updates REST endpoint calls to remove _xpack {pull}28069[#28069]
+Visualizations::
+* Removes old visualize wizard URL {pull}28982[#28982]
+* Removes legacy response handler {pull}28985[#28985]
+* Removes `legacyIcon` from visualizations {pull}28981[#28981]
+
+
+[float]
+[[enhancement-7.0.0-beta1]]
+=== Enhancements
+Canvas::
+* Removes WebSockets from Canvas expressions interpreter {pull}29792[#29792]
+* Optimizes Canvas REST calls via batching {pull}29847[#29847]
+Kibana App::
+* Replaces Angular timepicker with EuiSuperDatePicker {pull}29204[#29204]
+* Upgrades Kibana to Elasticsearch 7.0 {pull}29184[#29184]
+Machine Learning::
+* Updates HTTP access modules for ECS {pull}29383[#29383]
+* Updates auditbeat modules for ECS {pull}29934[#29934]
+* Removes non ECS apache, nginx and auditbeat data recognizer modules {pull}30537[#30537]
+Observability::
+* Converts monitor sparklines to histogram {pull}28502[#28502]
+* Adds crosshair sync for monitor page charts {pull}28631[#28631]
+Operations::
+* Adds support for reindexing APM indices {pull}29845[#29845]
+Platform::
+* Adds help menu item to header {pull}29664[#29664]
+* Implements global dark theme {pull}28445[#28445]
+* Removes support for the K6 navigation style {pull}29565[#29565]
+Reporting::
+* In the Visualization Editor, removes the "Optimize for printing" option when 
+exporting the visualization as PNG or PDF. The single visualization will automatically 
+be optimized for printing {pull}30456[#30456]
+Security::
+* Introduces content security policy (CSP) {pull}29545[#29545]
+* Warns legacy browsers that do not support content security policy {pull}29957[#29957]
+* Adds content security policy strict mode {pull}29856[#29856]
+Visualizations::
+* Adds a timeout so that Vega respects `elasticsearch.shardTimeout` setting {pull}30482[#30482]
+
+
+[float]
+[[bug-7.0.0-beta1]]
+=== Bug fixes
+APM::
+* Uses form label for Transaction type selector {pull}28322[#28322]
+* Fixes icon for View trace button {pull}28908[#28908]
+* Shows metric-only services in service overview {pull}30397[#30397]
+* Adds span subtype and action to Span Flyout {pull}30041[#30041]
+* Updates head title and fixes breadcrumb string issues {pull}29960[#29960]
+* Adds fixes for `service.name` scripted field {pull}28488[#28488]
+* Updates APM index pattern {pull}30837[#30837]
+* Updates APM reindex script {pull}30761[#30761]
+* Sets Index Pattern version as string {pull}30789[#30789]
+Canvas::
+* Adds datetime as a date identifier {pull}29537[#29537]
+* Switches sample web logs fonts to 48px {pull}30747[#30747]
+* Fixes related to K7 design {pull}30833[#30833]
+Design::
+* Updates dashboard design {pull}29896[#29896]
+* Adjusts side navigation interaction {pull}29978[#29978]
+Elasticsearch UI::
+* Triggers full load when encountering 403 for index list reload {pull}28243[#28243]
+* Updates xpack console specs {pull}29506[#29506]
+* Fixes API integration test for follower indices {pull}30260[#30260]
+Geo::
+* Fixes panel cut off in K7 design {pull}29209[#29209]
+* Removes left-over geohash grid code {pull}30312[#30312]
+* Uses geo-tile aggregation instead of geohash precision {pull}29776[#29776]
+Infrastructure UI::
+* Adapts settings ui to saved object version type change {pull}30082[#30082]
+Kibana App:: 
+* Fixes gauge filters {pull}30057[#30057]
+* Fixes fieldformatter calls in pipeline helper {pull}29842[#29842]
+* Adds pipeline field formatting {pull}28746[#28746]
+* Removes `kibana_table` pipeline type {pull}28979[#28979]
+* Moves renderers registry to OSS {pull}28986[#28986]
+* Prepares for cut over to the visualize data loader from the current expression 
+pipeline data loader {pull}29873[#29873]
+* Toggles between Expression Pipeline & Visualize Data loader {pull}29874[#29874]
+* Fixes every app that was wrapping `query` in an array unnecessarily {pull}27636[#27636]
+* Fixes build issue and reintroduces new filter bar {pull}29752[#29752]
+* Adds index pattern URL change notes {pull}30779[#30779]
+* Fixes visualization filters to ignore invalid entries {pull}30633[#30633]
+* Expands the size of add panels flyout and increases default rows per page {pull}30508[#30508]
+Machine Learning::
+* Removes use of types in datafeeds  {pull}27572[#27572]
+* Fixes metric select double caret {pull}30357[#30357]
+* Removes old angular based start datafeed modal {pull}30392[#30392]
+* Handles removal of backend ml.enabled node attribute {pull}27604[#27604]
+* Edits labels in the Apache and Nginx ECS data recognizer modules {pull}29935[#29935]
+* Fixes for K7 compatibility {pull}30536[#30536]
+* Fixes broken label style in advanced wizard {pull}30847[#30847]
+* Adds ml-ui team to .github/CODEOWNERS {pull}29810[#29810]
+Management::
+* Removes grunt sterilize - its been replaced by `kbn clean` {pull}27825[#27825]
+* Makes Index management table more responsive {pull}28882[#28882]
+Monitoring::
+* Stops using the normalized derivative value {pull}27416[#27416]
+* Updates the title in the left nav to Stack Monitoring {pull}28102[#28102]
+* Prepares the Monitoring UI codebase for the incoming changes to `hits.total` {pull}26442[#26442]
+* Updates browser title to Stack Monitoring {pull}29638[#29638]
+* Fixes Monitoring design {pull}29479[#29479]
+* Removes old index patterns that are not expected in 7.0.0 onwards {pull}27915[#27915]
+* Removes deprecated `xpack.monitoring.report_stats` setting {pull}30017[#30017]
+* Fixes monitoring tests to work with mapping changes {pull}29188[#29188]
+* Removes type filter helper {pull}30887[#30887]
+Operations::
+* Removes svg from url-loader, as it conflicts with other loaders {pull}30888[#30888]
+* Uses apiVersion from es plugin in x-pack {pull}30853[#30853]
+* Clones saved object document before migrating to prevent accidental mutations {pull}30475[#30475]
+Observability::
+* Fixes 7.x references to tcp.port {pull}29132[#29132]
+* Ports functional tests to 7.x {pull}29398[#29398]
+* Ports unit tests to master {pull}29876[#29876]
+* Adds missing loading states for filter bar and snapshot components {pull}30122[#30122]
+* Removes double-format for duration value {pull}30664[#30664]
+Platform::
+* Moves the table vis migration to {kib} plugin {pull}29478[#29478]
+* Allows passing a default operator to use on saved object client find operations {pull}29339[#29339]
+* Fixes saved object repository `bulkCreate` to return migrated references and attributes {pull}29754[#29754]
+* Adds missing saved object reference handling for searchSourceJSON filter attribute {pull}29840[#29840]
+* Excludes `migrationVersion` and references from `getRootPropertiesObjects` result {pull}30081[#30081]
+* Removes dependency on doc versions {pull}29906[#29906]
+* Adds typings for saved object client {pull}29951[#29951]
+* Uses `lastSubUrl` when appropriate {pull}28735[#28735]
+* Removes es _xpack endpoint usage {pull}29465[#29465]
+* Adds typings for the `saved_object_finder` react component {pull}30067[#30067]
+* Fixes the confirm overwrite modal of saved objects to handle large titles {pull}28590[#28590]
+Reporting::
+* Refactors routes files and helpers {pull}30111[#30111]
+Rollups::
+* Removes duplicate rendered sections {pull}28566[#28566]
+Security::
+* Adds tests for interpreter `createSocket` {pull}29459[#29459]
+Visualizations::
+* Adds autocomplete to Time Series Visual Builder {pull}30158[#30158]
+* Fixes missing Markdown variables {pull}28173[#28173]
+* Removes filter bar for Markdown visualizations {pull}30354[#30354]
+* Corrects label for OS visualization in logs sample data {pull}30249[#30249]
+
+
+
+
+
+
+
+
+
 
 
 [[release-notes-7.0.0-alpha2]]
