@@ -148,52 +148,63 @@ export class SavedObjectsRepository {
     } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
-    const unsupportedTypes = [];
-    objects = objects.filter((object) => {
+
+    let requestIndexCounter = 0;
+    const expectedResults = objects.map((object) => {
       if(!this._isTypeAllowed(object.type)) {
-        unsupportedTypes.push({
-          id: object.id,
-          type: object.type,
-          error: errors.createUnsupportedTypeError(object.type).output.payload,
-        });
-        return false;
+        return {
+          response: {
+            id: object.id,
+            type: object.type,
+            error: errors.createUnsupportedTypeError(object.type).output.payload,
+          }
+        };
       }
 
-      return true;
-    });
-
-    const rawObjectsToCreate = objects.map((object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
-      const migrated = this._migrator.migrateDocument({
-        id: object.id,
-        type: object.type,
-        attributes: object.attributes,
-        migrationVersion: object.migrationVersion,
-        namespace,
-        updated_at: time,
-        references: object.references || [],
-      });
-      const raw = this._serializer.savedObjectToRaw(migrated);
+      const expectedResult = {
+        esRequestIndex: requestIndexCounter++,
+        requestedId: object.id,
+        rawMigratedDoc: this._serializer.savedObjectToRaw(
+          this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            namespace,
+            updated_at: time,
+            references: object.references || [],
+          })
+        ),
+      };
+
       bulkCreateParams.push(
         {
           [method]: {
-            _id: raw._id,
+            _id: expectedResult.rawMigratedDoc._id,
             _type: this._type,
           },
         },
-        raw._source,
+        expectedResult.rawMigratedDoc._source,
       );
-      return raw;
+
+      return expectedResult;
     });
 
-    const { items } = await this._writeToCluster('bulk', {
+    const esResponse = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
       body: bulkCreateParams,
     });
 
     return {
-      saved_objects: items.map((response, i) => {
+      saved_objects: expectedResults.map(expectedResult => {
+        if(expectedResult.response) {
+          return expectedResult.response;
+        }
+
+        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult;
+        const response = esResponse.items[esRequestIndex];
         const {
           error,
           _id: responseId,
@@ -202,16 +213,14 @@ export class SavedObjectsRepository {
         } = Object.values(response)[0];
 
         const {
-          id = responseId,
-        } = objects[i];
-        const {
           _source: {
             type,
             [type]: attributes,
             references = [],
           },
-        } = rawObjectsToCreate[i];
+        } = rawMigratedDoc;
 
+        const id = requestedId || responseId;
         if (error) {
           if (error.type === 'version_conflict_engine_exception') {
             return {
@@ -237,7 +246,7 @@ export class SavedObjectsRepository {
           attributes,
           references,
         };
-      }).concat(unsupportedTypes)
+      }),
     };
   }
 

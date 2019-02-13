@@ -469,7 +469,12 @@ describe('SavedObjectsRepository', () => {
   describe('#bulkCreate', () => {
     it('waits until migrations are complete before proceeding', async () => {
       migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'index-pattern:two', _primary_term: 1, _seq_no: 1 } },
+        ]
+      });
 
       await expect(savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -480,7 +485,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('formats Elasticsearch request', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
+        ]
+      });
 
       await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
@@ -589,7 +599,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [{ create: { type: 'foo', id: 'bar', _primary_term: 1, _seq_no: 1 } }]
+      });
 
       await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
       sinon.assert.calledOnce(callAdminCluster);
@@ -709,7 +721,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          { create: { _type: '_doc', _id: 'foo-namespace:config:one', _primary_term: 1, _seq_no: 2 } },
+          { create: { _type: '_doc', _id: 'foo-namespace:index-pattern:two', _primary_term: 1, _seq_no: 2 } }
+        ]
+      });
       await savedObjectsRepository.bulkCreate(
         [
           { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -744,7 +761,24 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns(
+        Promise.resolve({
+          errors: false,
+          items: [{
+            create: {
+              _type: '_doc',
+              _id: 'config:one',
+              ...mockVersionProps
+            }
+          }, {
+            create: {
+              _type: '_doc',
+              _id: 'index-pattern:two',
+              ...mockVersionProps
+            }
+          }]
+        })
+      );
       await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
@@ -762,7 +796,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [{ create: { _type: '_doc', _id: 'globaltype:one', _primary_term: 1, _seq_no: 2 } }]
+      });
       await savedObjectsRepository.bulkCreate(
         [
           { type: 'globaltype', id: 'one', attributes: { title: 'Test One' } },
@@ -779,6 +815,10 @@ describe('SavedObjectsRepository', () => {
         ]
       }));
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('should return objects in the same order regardless of type', () => {
+
     });
   });
 
