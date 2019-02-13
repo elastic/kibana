@@ -69,6 +69,9 @@ export function savedObjectsMixin(kbnServer, server) {
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
   const createRepository = (callCluster, extraTypes = []) => {
+    if(typeof callCluster !== 'function') {
+      throw new TypeError('Repository requires a "callCluster" function to be provided.');
+    }
     // throw an exception if an extraType is not defined.
     extraTypes.forEach(type => {
       if(!allTypes.includes(type)) {

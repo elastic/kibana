@@ -146,6 +146,12 @@ describe('Saved Objects Mixin', () => {
         const repository = service.getSavedObjectsRepository(mockCallEs, ['hiddentype', 'hiddentype']);
         expect(repository._allowedTypes).toEqual(['config', 'testtype', 'hiddentype']);
       });
+
+      it('should not allow a repository without a callCluster function', () => {
+        expect(() => {
+          service.getSavedObjectsRepository({});
+        }).toThrow(new Error('Repository requires a "callCluster" function to be provided.'));
+      });
     });
   });
 });
