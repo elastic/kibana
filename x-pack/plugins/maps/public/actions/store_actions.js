@@ -118,10 +118,25 @@ export function setLayerErrorStatus(layerId, errorMessage) {
 }
 
 export function toggleLayerVisible(layerId) {
-  return {
-    type: TOGGLE_LAYER_VISIBLE,
-    layerId
+  return async (dispatch, getState) => {
+    //if the current-state is invisible, we also want to sync data
+    //e.g. if a layer was invisible at start-up, it won't have any data loaded
+    const layer = getLayerList(getState()).find(layer => {
+      return layerId === layer.getId();
+    });
+    if (!layer) {
+      return;
+    }
+    const makeVisible = !layer.isVisible();
+    await dispatch({
+      type: TOGGLE_LAYER_VISIBLE,
+      layerId
+    });
+    if (makeVisible) {
+      dispatch(syncDataForLayer(layerId));
+    }
   };
+
 }
 
 export function setSelectedLayer(layerId) {
