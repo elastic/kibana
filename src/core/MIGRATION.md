@@ -74,11 +74,11 @@ export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public start(core: PluginStart, dependencies: Record<PluginName, unknown>) {
+  public start(core: PluginStart) {
     // called when plugin is started up, aka when Kibana is loaded
   }
 
-  public stop(core: PluginStop, dependencies: Record<PluginName, unknown>) {
+  public stop(core: PluginStop) {
     // called when plugin is torn down, aka window.onbeforeunload
   }
 }
@@ -104,11 +104,11 @@ export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public start(core: PluginStart, dependencies: Record<PluginName, unknown>) {
+  public start(core: PluginStart) {
     // called when plugin is started up during Kibana's startup sequence
   }
 
-  public stop(core: PluginStop, dependencies: Record<PluginName, unknown>) {
+  public stop(core: PluginStop) {
     // called when plugin is torn down during Kibana's shutdown sequence
   }
 }
@@ -126,7 +126,7 @@ For example, the core `UiSettings` service exposes a function `get` to all plugi
 import { PluginName, PluginStart } from '../../../core/public';
 
 export class Plugin {
-  public start(core: PluginStart, dependencies: Record<PluginName, unknown>) {
+  public start(core: PluginStart) {
     core.uiSettings.get('courier:maxShardsBeforeCryTime');
   }
 }
@@ -145,16 +145,11 @@ Anything returned from `start` or `stop` will act as the interface, and while no
 **foobar plugin.ts:**
 
 ```ts
-export interface FoobarPluginStart {
-  getFoo(): string
-}
-
-export interface FoobarPluginStop {
-  getBar(): string
-}
+export type FoobarPluginStart = ReturnType<Plugin['start']>;
+export type FoobarPluginStop = ReturnType<Plugin['stop']>;
 
 export class Plugin {
-  public start(): FoobarPluginStart {
+  public start() {
     return {
       getFoo() {
         return 'foo';
@@ -162,7 +157,7 @@ export class Plugin {
     };
   }
 
-  public stop(): FoobarPluginStop {
+  public stop() {
     getBar() {
       return 'bar';
     }
