@@ -9,6 +9,7 @@ import { getSnapshotQueryString } from '../../../../../plugins/uptime/public/com
 import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
 import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
+import snapshotEmpty from './fixtures/snapshot_empty';
 
 export default function ({ getService }) {
   describe('snapshot query', () => {
@@ -70,6 +71,24 @@ export default function ({ getService }) {
       expect(data).to.eql(snapshotFilteredByUp);
     });
 
+    it('returns null histogram data when no data present', async () => {
+      const getSnapshotQuery = {
+        operationName: 'Snapshot',
+        query: getSnapshotQueryString,
+        variables: {
+          dateRangeStart: 1227800782000,
+          dateRangeEnd: 1227950582000,
+          filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
+        },
+      };
+      const {
+        body: { data },
+      } = await supertest
+        .post('/api/uptime/graphql')
+        .set('kbn-xsrf', 'foo')
+        .send({ ...getSnapshotQuery });
+      expect(data).to.eql(snapshotEmpty);
+    });
     // TODO: test for host, port, etc.
   });
 }

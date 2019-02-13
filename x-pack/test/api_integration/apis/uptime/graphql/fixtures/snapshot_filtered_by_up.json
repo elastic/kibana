@@ -4,123 +4,18 @@
     "down": 0,
     "total": 8,
     "histogram": [
-      {
-        "monitorId": "tcp-tcp@localhost:9200",
-        "data": [
-          { "upCount": 271, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 300, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 26, "downCount": null, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
-          { "upCount": 110, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@https://www.elastic.co",
-        "data": [
-          { "upCount": 90, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 100, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 8, "downCount": null, "x": 1547851620000, "x0": 1547851320000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@http://localhost:12349/",
-        "data": [
-          { "upCount": 54, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 54, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
-          { "upCount": 26, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@http://www.google.com/",
-        "data": [
-          { "upCount": 54, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
-          { "upCount": 8, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@https://www.github.com/",
-        "data": [
-          { "upCount": 54, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
-          { "upCount": 7, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@https://www.google.com/",
-        "data": [
-          { "upCount": 54, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 60, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
-          { "upCount": 7, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@https://news.google.com/",
-        "data": [
-          { "upCount": 4, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 1, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@https://www.wikipedia.org/",
-        "data": [
-          { "upCount": 4, "downCount": null, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": 5, "downCount": null, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": 1, "downCount": null, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      }
+      { "upCount": 8, "downCount": 0, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
+      { "upCount": 8, "downCount": 0, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
+      { "upCount": 6, "downCount": 0, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
+      { "upCount": 0, "downCount": 0, "x": 1547851920000, "x0": 1547851620000, "y": 1 },
+      { "upCount": 0, "downCount": 0, "x": 1547852220000, "x0": 1547851920000, "y": 1 },
+      { "upCount": 0, "downCount": 0, "x": 1547852520000, "x0": 1547852220000, "y": 1 }
     ]
   }
 }

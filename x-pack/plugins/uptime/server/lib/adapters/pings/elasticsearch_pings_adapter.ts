@@ -7,36 +7,10 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
-import { DatabaseAdapter } from '../database';
+import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
+import { formatEsBucketsForHistogram, getFilterFromMust } from '../../helper';
+import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
-
-const getFilteredQuery = (
-  dateRangeStart: string,
-  dateRangeEnd: string,
-  filters?: string | null
-) => {
-  let filtersObj;
-  // TODO: handle bad JSON gracefully
-  filtersObj = filters ? JSON.parse(filters) : undefined;
-  let query = { ...filtersObj };
-  const rangeSection = {
-    range: {
-      '@timestamp': {
-        gte: dateRangeStart,
-        lte: dateRangeEnd,
-      },
-    },
-  };
-  if (get(query, 'bool.must', undefined)) {
-    query.bool.must.push({
-      ...rangeSection,
-    });
-  } else {
-    query = { ...rangeSection };
-  }
-  return query;
-};
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -163,11 +137,12 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null
-  ): Promise<HistogramSeries[] | null> {
+  ): Promise<HistogramDataPoint[]> {
+    const query = getFilterFromMust(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
+        query,
         aggs: {
           timeseries: {
             auto_date_histogram: {
@@ -175,16 +150,24 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
               buckets: 50,
             },
             aggs: {
-              by_id: {
-                terms: {
-                  field: 'monitor.id',
+              down: {
+                filter: {
+                  term: {
+                    'monitor.status': 'down',
+                  },
                 },
                 aggs: {
-                  status: {
-                    terms: {
-                      field: 'monitor.status',
+                  bucket_count: {
+                    cardinality: {
+                      field: 'monitor.id',
                     },
                   },
+                },
+              },
+              bucket_total: {
+                cardinality: {
+                  field: 'monitor.id',
+                  precision_threshold: 20000,
                 },
               },
             },
@@ -192,57 +175,22 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
-    const {
-      aggregations: {
-        timeseries: { buckets },
-      },
-    } = await this.database.search(request, params);
 
-    if (buckets.length === 0) {
-      return null;
-    }
-    const defaultBucketSize = Math.abs(buckets[0].key - buckets[1].key);
-    const ret: Array<{ monitorId: string; data: any[] }> = [];
-    const upsertHash = (key: string, value: object) => {
-      const fa = ret.find(f => f.monitorId === key);
-      if (fa) {
-        fa.data.push(value);
-      } else {
-        ret.push({ monitorId: key, data: [value] });
-      }
-    };
-    buckets.forEach((bucket: any, index: number, array: any[]) => {
-      const nextPoint = array[index + 1];
-      let bucketSize = 0;
-      if (nextPoint) {
-        bucketSize = Math.abs(nextPoint.key - bucket.key);
-      } else {
-        bucketSize = defaultBucketSize;
-      }
-      const { buckets: idBuckets } = bucket.by_id;
-      idBuckets.forEach(
-        ({ key: monitorId, status }: { key: string; status: { buckets: any[] } }) => {
-          let upCount = null;
-          let downCount = null;
-          status.buckets.forEach(({ key, doc_count }: { key: string; doc_count: number }) => {
-            if (key === 'up') {
-              upCount = doc_count;
-            } else if (key === 'down') {
-              downCount = doc_count;
-            }
-          });
-          upsertHash(monitorId, {
-            upCount,
-            downCount,
-            x: bucket.key + bucketSize,
-            x0: bucket.key,
-            y: 1,
-          });
-        }
-      );
+    const result = await this.database.search(request, params);
+    const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
+    const mappedBuckets = buckets.map(bucket => {
+      const key: number = get(bucket, 'key');
+      const total: number = get(bucket, 'bucket_total.value');
+      const downCount: number = get(bucket, 'down.bucket_count.value');
+      return {
+        key,
+        downCount,
+        upCount: total - downCount,
+        y: 1,
+      };
     });
 
-    return ret;
+    return formatEsBucketsForHistogram(mappedBuckets);
   }
 
   public async getDocCount(request: any): Promise<DocCount> {

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { Snapshot as SnapshotType } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { Snapshot, SnapshotLoading } from '../../functional';
 import { getSnapshotQuery } from './get_snapshot';
@@ -63,7 +64,7 @@ export class SnapshotQuery extends React.Component<Props, SnapshotQueryState> {
               defaultMessage: 'Error {message}',
             });
           }
-          const { snapshot } = data;
+          const { snapshot }: { snapshot: SnapshotType } = data;
 
           return (
             <Snapshot
