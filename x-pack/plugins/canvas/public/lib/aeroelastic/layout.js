@@ -25,6 +25,7 @@ import {
   cascadeProperties,
   configuration,
   draggingShape,
+  getAdHocChildrenAnnotations,
   getAlignmentGuideAnnotations,
   getAlterSnapGesture,
   getAnnotatedShapes,
@@ -188,6 +189,8 @@ const groupedSelectedPrimaryShapeIds = select(getGroupedSelectedPrimaryShapeIds)
   groupedSelectedShapes
 );
 
+const adHocChildrenAnnotations = select(getAdHocChildrenAnnotations)(configuration, grouping);
+
 const resizeAnnotations = select(resizeAnnotationsFunction)(configuration, grouping);
 
 const rotationAnnotations = select(getRotationAnnotations)(configuration, grouping);
@@ -197,7 +200,8 @@ const annotatedShapes = select(getAnnotatedShapes)(
   alignmentGuideAnnotations,
   hoverAnnotations,
   rotationAnnotations,
-  resizeAnnotations
+  resizeAnnotations,
+  adHocChildrenAnnotations
 );
 
 const globalTransformShapes = select(cascadeProperties)(annotatedShapes);
