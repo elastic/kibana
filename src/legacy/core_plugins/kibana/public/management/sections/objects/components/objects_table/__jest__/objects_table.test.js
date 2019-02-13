@@ -407,7 +407,48 @@ describe('ObjectsTable', () => {
       component.update();
 
       await component.instance().getRelationships('search', '1');
-      expect(getRelationships).toHaveBeenCalledWith('search', '1', defaultProps.$http, defaultProps.basePath);
+      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
+    });
+
+    it('should fetch relationships filtered based on the uiCapabilities', async () => {
+      const { getRelationships } = require('../../../lib/get_relationships');
+
+      const uiCapabilities = {
+        savedObjects: {
+          'index-pattern': {
+            find: true,
+            bulk_get: false,
+          },
+          visualization: {
+            find: false,
+            bulk_get: true,
+          },
+          dashboard: {
+            find: false,
+            bulk_get: false,
+          },
+          search: {
+            find: true,
+            bulk_get: true,
+          }
+        }
+      };
+      const customizedProps = { ...defaultProps, uiCapabilities };
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...customizedProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().getRelationships('search', '1');
+      const savedObjectTypes = ['search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
     });
 
     it('should show the flyout', async () => {

@@ -368,6 +368,7 @@ class ObjectsTableUI extends Component {
     return await getRelationships(
       type,
       id,
+      this.savedObjectTypes,
       this.props.$http,
       this.props.basePath
     );
