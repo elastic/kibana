@@ -15,6 +15,8 @@ export interface KbnServer {
   info: { protocol: string };
   config: () => ConfigObject;
   plugins: Record<string, any>;
+  route: any;
+  log: any;
   savedObjects: {
     getScopedSavedObjectsClient: (
       fakeRequest: { headers: object; getBasePath: () => string }
@@ -88,6 +90,7 @@ export interface ConditionalHeadersConditions {
 export interface CryptoFactory {
   decrypt: (headers?: Record<string, string>) => string;
 }
+
 export interface ReportingJob {
   headers?: Record<string, string>;
   basePath?: string;
@@ -96,4 +99,10 @@ export interface ReportingJob {
   forceNow?: string;
   timeRange?: any;
   objects?: [any];
+}
+
+export interface JobDoc {
+  output: any;
+  jobtype: string;
+  payload: any;
 }
