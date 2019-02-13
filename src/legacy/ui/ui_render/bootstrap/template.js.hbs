@@ -60,7 +60,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       var dom = document.createElement('script');
 
       dom.setAttribute('async', '');
-      dom.setAttribute('nonce', window.__webpack_nonce__);
+      dom.setAttribute('nonce', window.__kbnNonce__);
       dom.addEventListener('error', failure);
       dom.setAttribute('src', file);
       dom.addEventListener('load', next);
