@@ -19,17 +19,17 @@ import _ from 'lodash';
 export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   const features = [];
   hits.forEach(hit => {
-    const value = _.get(hit, `_source[${geoFieldName}]`);
+    const properties = flattenHit(hit);
+
     let geometries;
     if (geoFieldType === 'geo_point') {
-      geometries = geoPointToGeometry(value);
+      geometries = geoPointToGeometry(properties[geoFieldName]);
     } else if (geoFieldType === 'geo_shape') {
-      geometries = geoShapeToGeometry(value);
+      geometries = geoShapeToGeometry(properties[geoFieldName]);
     } else {
       throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
     }
 
-    const properties = flattenHit(hit);
     // don't include geometry field value in properties
     delete properties[geoFieldName];
 
