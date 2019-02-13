@@ -18,7 +18,11 @@ function recognize(callWithRequest, indexPatternTitle) {
 
 function getModule(callWithRequest, moduleId) {
   const dr = new DataRecognizer(callWithRequest);
-  return dr.getModule(moduleId);
+  if (moduleId === undefined) {
+    return dr.listModules();
+  } else {
+    return dr.getModule(moduleId);
+  }
 }
 
 function saveModuleItems(
@@ -71,6 +75,19 @@ export function dataRecognizer(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const moduleId = request.params.moduleId;
       return getModule(callWithRequest, moduleId)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/api/ml/modules/list_modules',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      return getModule(callWithRequest)
         .catch(resp => wrapError(resp));
     },
     config: {

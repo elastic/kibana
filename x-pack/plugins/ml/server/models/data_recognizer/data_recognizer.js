@@ -150,6 +150,20 @@ export class DataRecognizer {
     return (resp.hits.total !== 0);
   }
 
+  async listModules() {
+    const manifestFiles = await this.loadManifestFiles();
+    // return manifestFiles.map(({ json }) => (
+    //   {
+    //     id: json.id,
+    //     title: json.title,
+    //     description: json.description,
+    //     type: json.type,
+    //     defaultIndexPattern: json.defaultIndexPattern,
+    //   }
+    // ));
+    return manifestFiles.map(({ json }) => json);
+  }
+
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
