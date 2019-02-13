@@ -46,7 +46,7 @@ export function iisLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '4278ad30-fe16-11e7-a3b0-d13028918f9f',
+          id: '4278ad30-fe16-11e7-a3b0-d13028918f9f-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.iisLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'IIS logs dashboard',
           }),
