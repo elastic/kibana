@@ -42,6 +42,7 @@ class TableUI extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
+    canDeleteSavedObjectTypes: PropTypes.array.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
@@ -216,6 +217,10 @@ class TableUI extends PureComponent {
       );
     }
 
+    const unableToDeleteSavedObjectTypes = selectedSavedObjects
+      .map(({ type }) => type)
+      .filter(type => !this.props.canDeleteSavedObjectTypes.includes(type));
+
     return (
       <Fragment>
         <EuiSearchBar
@@ -228,7 +233,13 @@ class TableUI extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0}
+              isDisabled={
+                selectedSavedObjects.length === 0 ||
+                unableToDeleteSavedObjectTypes.length > 0
+              }
+              title={
+                unableToDeleteSavedObjectTypes.length > 0 ? `Unable to delete ${unableToDeleteSavedObjectTypes.join(', ')}` : undefined
+              }
             >
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.table.deleteButtonLabel"

@@ -148,22 +148,28 @@ const defaultProps = {
     savedObjects: {
       'index-pattern': {
         find: true,
-        bulkGet: true,
+        bulk_get: true,
       },
       visualization: {
         find: true,
-        bulkGet: true,
+        bulk_get: true,
       },
       dashboard: {
         find: true,
-        bulkGet: true,
+        bulk_get: true,
       },
       search: {
         find: true,
-        bulkGet: true,
+        bulk_get: true,
       }
     }
-  }
+  },
+  canDeleteSavedObjectTypes: [
+    'index-pattern',
+    'visualization',
+    'dashboard',
+    'search'
+  ]
 };
 
 let addDangerMock;
@@ -227,19 +233,19 @@ describe('ObjectsTable', () => {
       savedObjects: {
         'index-pattern': {
           find: true,
-          bulkGet: false,
+          bulk_get: false,
         },
         visualization: {
           find: false,
-          bulkGet: true,
+          bulk_get: true,
         },
         dashboard: {
           find: false,
-          bulkGet: false,
+          bulk_get: false,
         },
         search: {
           find: true,
-          bulkGet: true,
+          bulk_get: true,
         }
       }
     };

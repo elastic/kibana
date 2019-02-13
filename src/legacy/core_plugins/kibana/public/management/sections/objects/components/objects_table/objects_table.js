@@ -596,6 +596,10 @@ class ObjectsTableUI extends Component {
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
 
+    const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
+      return this.props.uiCapabilities.savedObjects[type].delete;
+    });
+
     return (
       <EuiPageContent
         horizontalPosition="center"
@@ -621,6 +625,7 @@ class ObjectsTableUI extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
+          canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
           onDelete={this.onDelete}
           getEditUrl={this.props.getEditUrl}
           goInApp={this.props.goInApp}
