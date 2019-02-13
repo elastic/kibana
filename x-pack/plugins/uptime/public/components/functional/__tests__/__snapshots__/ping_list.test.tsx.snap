@@ -402,10 +402,6 @@ exports[`PingList component renders unsorted list of many monitors without error
             "field": "http.response.status_code",
             "name": "Response code",
           },
-          Object {
-            "field": "http.response.status_code",
-            "name": "Response code",
-          },
         ]
       }
       executeQueryOptions={Object {}}
