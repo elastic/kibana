@@ -385,6 +385,7 @@ class TableListViewUi extends React.Component {
         search={search}
         sorting={sorting}
         hasActions={!this.state.hideWriteControls}
+        data-test-subj="itemsInMemTable"
       />
     );
   }
@@ -404,7 +405,8 @@ class TableListViewUi extends React.Component {
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={this.props.create}
-            data-test-subj="newItemLink"
+            data-test-subj="newItemButton"
+            iconType="plusInCircle"
             fill
           >
             <FormattedMessage
@@ -456,7 +458,11 @@ class TableListViewUi extends React.Component {
 
   render() {
     return (
-      <EuiPage data-test-subj="itemsListLandingPage" className="itemListing__page" restrictWidth>
+      <EuiPage
+        data-test-subj={this.props.entityName + 'LandingPage'}
+        className="itemListing__page"
+        restrictWidth
+      >
         <EuiPageBody>
           {this.renderPageContent()}
         </EuiPageBody>

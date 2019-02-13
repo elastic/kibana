@@ -46,7 +46,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');
-      await testSubjects.click('createNewVis');
+      await testSubjects.click('newItemButton');
       await this.waitForVisualizationSelectPage();
     }
 
