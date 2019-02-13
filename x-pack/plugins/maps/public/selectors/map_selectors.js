@@ -67,9 +67,7 @@ const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 
-export const getTransientLayerId = ({ map }) => {
-  return (!map.transientLayerId || !map.layerList) ? null : map.transientLayerId;
-};
+export const getTransientLayerId = ({ map }) => map.__transientLayerId;
 
 export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
@@ -163,5 +161,3 @@ export const getUniqueIndexPatternIds = createSelector(
     return _.uniq(indexPatternIds);
   }
 );
-
-export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));

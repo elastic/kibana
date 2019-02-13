@@ -90,7 +90,7 @@ const INITIAL_STATE = {
     refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
-  transientLayerId: null,
+  __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
 };
@@ -212,9 +212,9 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
     case ADD_TRANSIENT_LAYER:
       const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
-      return { ...state, transientLayerId: transientMatch ? action.transientLayerId : null };
+      return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case CLEAR_TRANSIENT_LAYER:
-      return { ...state, transientLayerId: INITIAL_STATE.transientLayerId };
+      return { ...state, __transientLayerId: INITIAL_STATE.__transientLayerId };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case UPDATE_LAYER_PROP:

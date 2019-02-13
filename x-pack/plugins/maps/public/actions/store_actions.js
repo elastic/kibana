@@ -179,12 +179,6 @@ export function promoteTemporaryStyles() {
   };
 }
 
-export function promoteTemporaryLayers() {
-  return {
-    type: PROMOTE_TEMPORARY_LAYERS
-  };
-}
-
 export function clearTemporaryStyles() {
   return {
     type: CLEAR_TEMPORARY_STYLES
