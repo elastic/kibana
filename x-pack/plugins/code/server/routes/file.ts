@@ -20,6 +20,8 @@ import { ServerOptions } from '../server_options';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
 
+const TEXT_FILE_LIMIT = 1024 * 1024; // 1mb
+
 export function fileRoute(server: hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
@@ -89,9 +91,11 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
             const lines = extractLines(blob.content(), fromLine, toLine);
             const lang = await detectLanguage(path, lines);
             return h.response(lines).type(`text/${lang || 'plain'}`);
-          } else {
+          } else if (blob.content().length <= TEXT_FILE_LIMIT) {
             const lang = await detectLanguage(path, blob.content());
             return h.response(blob.content()).type(`text/${lang || 'plain'}`);
+          } else {
+            return h.response('').type(`text/big`);
           }
         }
       } catch (e) {

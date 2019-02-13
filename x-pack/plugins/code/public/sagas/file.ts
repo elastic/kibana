@@ -200,6 +200,13 @@ export async function requestFile(
 
     if (contentType && contentType.startsWith('text/')) {
       const lang = contentType.split(';')[0].substring('text/'.length);
+      if (lang === 'big') {
+        return {
+          payload,
+          content: '',
+          isOversize: true,
+        };
+      }
       return {
         payload,
         lang,
