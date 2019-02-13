@@ -334,6 +334,31 @@ describe('onPostAuthRequestInterceptor', () => {
         })
       );
     });
+
+    test('allows navigation to apps that are not registered, even if marked as disabled in the space', async () => {
+      const spaces = [
+        {
+          id: 'a-space',
+          type: 'space',
+          attributes: {
+            name: 'a space',
+            disabledFeatures: ['unregistered-app'] as any,
+          },
+        },
+      ];
+
+      const response = await request('/s/a-space/app/unregistered-app', spaces);
+
+      expect(response.statusCode).toEqual(200);
+
+      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: headers.authorization,
+          }),
+        })
+      );
+    });
   });
 
   describe('with multiple available spaces', () => {
