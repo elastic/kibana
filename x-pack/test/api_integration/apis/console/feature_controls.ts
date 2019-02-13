@@ -145,12 +145,12 @@ export default function securityTests({ getService }: KibanaFunctionalTestDefaul
     });
 
     describe('spaces', () => {
-      // the following tests create a user_1 which has dev_tools all access to space_1 to no access to space_2
+      // the following tests create a user_1 which has dev_tools all access to space_1 and dashboard access to space_2
       const space1Id = 'space_1';
       const user1 = {
-        username: 'space_1_dev_tools',
-        roleName: 'space_1_dev_tools',
-        password: 'space_1_dev_tools-password',
+        username: 'user_1',
+        roleName: 'user_1',
+        password: 'user_1-password',
       };
 
       const space2Id = 'space_2';
@@ -168,6 +168,12 @@ export default function securityTests({ getService }: KibanaFunctionalTestDefaul
                 dev_tools: ['all'],
               },
               spaces: [space1Id],
+            },
+            {
+              feature: {
+                dashboard: ['all'],
+              },
+              spaces: [space2Id],
             },
           ],
         });
@@ -190,7 +196,7 @@ export default function securityTests({ getService }: KibanaFunctionalTestDefaul
         await security.user.delete(user1.username);
       });
 
-      it('user_1 can access space_1', async () => {
+      it('user_1 can access dev_tools in space_1', async () => {
         await supertest
           .post(`/s/${space1Id}/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
           .auth(user1.username, user1.password)
@@ -199,7 +205,7 @@ export default function securityTests({ getService }: KibanaFunctionalTestDefaul
           .expect(200);
       });
 
-      it(`user_1 can't access space_2`, async () => {
+      it(`user_1 can't access dev_tools in space_2`, async () => {
         await supertest
           .post(`/s/${space2Id}/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
           .auth(user1.username, user1.password)
