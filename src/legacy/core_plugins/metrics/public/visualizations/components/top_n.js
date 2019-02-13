@@ -19,6 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { EuiToolTip } from '@elastic/eui';
 import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
@@ -32,7 +33,7 @@ class TopN extends Component {
     };
   }
 
-  renderRow(maxValue) {
+  renderRow(maxValue, labelWidth) {
     return item => {
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
@@ -59,14 +60,21 @@ class TopN extends Component {
           onClick={this.handleClick({ lastValue, ...item })}
           style={styles.row}
         >
-          <td width="1*" className="tvbVisTopN__label">{ item.label }</td>
+          <td width={`${labelWidth}%`} className="tvbVisTopN__label">
+            <EuiToolTip
+              position="right"
+              content={item.label}
+            >
+              <span>{ item.label }</span>
+            </EuiToolTip>
+          </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div
               className="tvbVisTopN__innerBar"
               style={styles.innerBar}
             />
           </td>
-          <td width="1*" className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">{ value }</td>
+          <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">{ value }</td>
         </tr>
       );
     };
@@ -79,7 +87,8 @@ class TopN extends Component {
       return lastValue > max ? lastValue : max;
     }, 0);
 
-    const rows = this.props.series.map(this.renderRow(maxValue));
+    const labelWidth = Math.min(Math.max(...this.props.series.map(e => String(e.label).length)), 20);
+    const rows = this.props.series.map(this.renderRow(maxValue, labelWidth));
     let className = 'tvbVisTopN';
     if (this.props.reversed) {
       className += ' tvbVisTopN--reversed';

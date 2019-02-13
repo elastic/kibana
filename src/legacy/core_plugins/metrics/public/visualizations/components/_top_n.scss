@@ -11,6 +11,17 @@
   }
 }
 
+.tvbVisTopN__table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.tvbVisTopN__table tr > td:nth-child(1) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .tvbVisTopN__value {
   text-align: right;
   white-space: nowrap;
@@ -19,11 +30,16 @@
   color: $tvbValueColor;
   padding: $euiSizeXS;
   padding-bottom: 0;
+  width: 3%;
 }
 
 .tvbVisTopN__label {
   color: $tvbTextColor;
   padding: $euiSizeXS 0;
+}
+
+.tvbVisTopN__label span {
+  width: 100%;
 }
 
 .tvbVisTopN__bar {
