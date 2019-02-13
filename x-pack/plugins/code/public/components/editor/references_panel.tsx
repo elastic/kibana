@@ -83,7 +83,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
           <h3>{this.props.title}</h3>
         </EuiTitle>
 
-        <div className="code-auto-overflow">{body}</div>
+        <div className="code-auto-overflow-y">{body}</div>
       </EuiPanel>
     );
   }

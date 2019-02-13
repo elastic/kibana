@@ -7,6 +7,11 @@
   overflow: auto;
 }
 
+.code-auto-overflow-y {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .code-no-overflow {
   overflow: hidden;
 }
