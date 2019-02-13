@@ -293,7 +293,7 @@ class HeaderUI extends Component<Props, State> {
               <EuiHorizontalRule margin="none" />
               <EuiListGroup data-test-subj="appsMenu">
                 {navLinks.map(navLink =>
-                  navLink.hidden || !uiCapabilities.navLinks[navLink.id] ? null : (
+                  navLink.hidden || uiCapabilities.navLinks[navLink.id] === false ? null : (
                     <EuiListGroupItem
                       key={navLink.id}
                       label={navLink.title}
