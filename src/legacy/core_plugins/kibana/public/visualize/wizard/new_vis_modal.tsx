@@ -64,22 +64,31 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       return null;
     }
 
-    const selectionModal = this.state.showSearchVisModal ? (
-      <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
-        <SearchSelection onSearchSelected={this.onSearchSelected} />
-      </EuiModal>
-    ) : (
-      <EuiModal onClose={this.onCloseModal} maxWidth={'100vw'} className="visNewVisDialog">
-        <TypeSelection
-          showExperimental={this.isLabsEnabled}
-          onVisTypeSelected={this.onVisTypeSelected}
-          visTypesRegistry={this.props.visTypesRegistry}
-        />
-      </EuiModal>
-    );
+    const selectionModal =
+      this.state.showSearchVisModal && this.state.visType ? (
+        <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
+          <SearchSelection
+            onSearchSelected={this.onSearchSelected}
+            visType={this.state.visType}
+            goBack={this.goToTypeSelection}
+          />
+        </EuiModal>
+      ) : (
+        <EuiModal onClose={this.onCloseModal} maxWidth={'100vw'} className="visNewVisDialog">
+          <TypeSelection
+            showExperimental={this.isLabsEnabled}
+            onVisTypeSelected={this.onVisTypeSelected}
+            visTypesRegistry={this.props.visTypesRegistry}
+          />
+        </EuiModal>
+      );
 
     return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
   }
+
+  private goToTypeSelection = () => {
+    this.setState({ showSearchVisModal: false, visType: undefined });
+  };
 
   private onCloseModal = () => {
     this.setState({ showSearchVisModal: false });

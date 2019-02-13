@@ -134,7 +134,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
     }
   }, 300);
 
-  constructor(props: SavedObjectFinderUIProps) {
+  constructor(props: SavedObjectFinderProps) {
     super(props);
 
     this.state = {

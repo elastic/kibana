@@ -7,6 +7,10 @@
 
 .visNewVisSearchDialog {
   min-height: $euiSizeL * 20;
+
+  & .superscriptButton {
+    vertical-align: super;
+  }
 }
 
 .visNewVisDialog__body {
