@@ -20,7 +20,7 @@
 import tickFormatter from '../../lib/tick_formatter';
 import TopN from '../../../visualizations/components/top_n';
 import getLastValue from '../../../../common/get_last_value';
-import { isItReverse } from '../../../../common/set_is_reversed';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 import replaceVars from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -81,7 +81,7 @@ function TopNVisualization(props) {
 
   const params = {
     series: series,
-    reversed: isItReverse(panelBackgroundColor),
+    reversed: isBackgroundInverted(panelBackgroundColor),
   };
 
   if (model.drilldown_url) {

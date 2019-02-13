@@ -41,7 +41,7 @@ class Annotation extends Component {
     });
     return (
       <div>
-        <div className={`tvbTooltip__timestamp`}>{ moment(timestamp).format('lll') }</div>
+        <div className="tvbTooltip__timestamp">{ moment(timestamp).format('lll') }</div>
         { messages }
       </div>
     );

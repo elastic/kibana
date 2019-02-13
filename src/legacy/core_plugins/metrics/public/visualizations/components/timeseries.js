@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import getLastValue from '../../../common/get_last_value';
-import { isItReverse } from '../../../common/set_is_reversed';
+import { isBackgroundInverted } from '../../../common/set_is_reversed';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
@@ -128,7 +128,7 @@ class Timeseries extends Component {
 
   render() {
     const classes = classNames('tvbVisTimeSeries', {
-      'tvbVisTimeSeries--reversed': isItReverse(this.props.backgroundColor),
+      'tvbVisTimeSeries--reversed': isBackgroundInverted(this.props.backgroundColor),
     });
 
     const styles = reactcss({
