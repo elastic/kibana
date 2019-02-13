@@ -356,7 +356,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/ml/**/*'],
       rules: {
-        quotes: 'error',
         'no-shadow': 'error',
       },
     },
