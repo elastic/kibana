@@ -114,7 +114,10 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   };
   aggregations?: Aggregations;
   hits: {
-    total: number;
+    total: {
+      value: number;
+      relation: string;
+    };
     hits: Hit[];
   };
 }

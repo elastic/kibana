@@ -9,7 +9,6 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
 
   const PageObjects = getPageObjects(['maps']);
-  const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
@@ -114,14 +113,12 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
-          await queryBar.setQuery('machine.os.raw : "win 8"');
-          await queryBar.submitQuery();
+          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           await PageObjects.maps.setView(0, 0, 0);
         });
 
         after(async () => {
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
+          await PageObjects.maps.setAndSubmitQuery('');
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
@@ -189,14 +186,12 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
+          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           await PageObjects.maps.setView(0, 0, 0);
-          await queryBar.setQuery('machine.os.raw : "win 8"');
-          await queryBar.submitQuery();
         });
 
         after(async () => {
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
+          await PageObjects.maps.setAndSubmitQuery('');
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
