@@ -25,6 +25,17 @@ import {
   DashboardAddPanel,
 } from './add_panel';
 
+jest.mock('ui/chrome',
+  () => ({
+    getInjected(injected) {
+      if (injected === 'uiCapabilities') {
+        return {
+          visualize: { show: true, save: true },
+        };
+      }
+    }
+  }), { virtual: true });
+
 jest.mock('ui/notify',
   () => ({
     toastNotifications: {
