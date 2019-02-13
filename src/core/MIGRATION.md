@@ -236,3 +236,35 @@ When a legacy browser plugin needs to access functionality from another plugin, 
 Legacy browser plugins rely on the feature known as `uiExports/`, which integrates directly with our build system to ensure that plugin code is bundled together in such a way to enable that global singleton module state. There is no corresponding feature in the new platform, and in fact we intend down the line to build new platform plugins as immutable bundles that can not share state in this way.
 
 The key challenge to overcome with legacy browser-side plugins will be converting all imports from `plugin/`, `ui/`, `uiExports`, and relative imports from other plugins into a set of services that originate at runtime during plugin initialization and get passed around throughout the business logic of the plugin as function arguments.
+
+### Plan of action
+
+In order to move a legacy plugin to the new plugin system, the challenges on the server and in the browser must be addressed. Fortunately, **the hardest problems can be solved in legacy plugins today** without consuming the new platform at all.
+
+At a high level, the bulk of the migration work can be broken down into two phases.
+
+First, refactor the plugin's architecture to isolate the legacy behaviors mentioned in the "Challenges to overcome with legacy plugins" section above. In practice, this involves moving all of the legacy imports and hapi god object references out of the business logic of your plugin and into a legacy _shim_.
+
+Second, update the consuming code of core services within the plugin to that of the new platform. This can be done in the legacy world, though it is dependent on the relevant services actually existing.
+
+Once those two things are done, the effort involved in actually updating your plugin to execute in the new plugin system is tiny and non-disruptive.
+
+Before you do any of that, there are two other things that will make all steps of this process a great deal easier and less risky: switch to TypeScript, and remove your dependencies on angular.
+
+#### TypeScript
+
+The new platform does not _require_ plugins to be built with TypeScript, but all subsequent steps of this plan of action are more straightforward and carry a great deal less risk if the code is already converted to TypeScript.
+
+TypeScript is a superset of JavaScript, so if your goal is the least possible effort, you can move to TypeScript with very few code changes mostly by adding `any` types all over the place. This isn't really any better than regular JavaScript, but simply having your code to `.ts` files means you can at least take advantage of the types that are exported from core and other plugins. This bare minimum approach won't help you much for the architectural shifts, but it could be a great help to you in reliably switching over to new platform services.
+
+### De-angular
+
+Angular is not a thing in the new platform. Hopefully your plugin began moving away from angular long ago, but if not, you're in a tight spot.
+
+If your plugin is registering some sort of global behavior that technically crosses application boundaries, then you have no choice but to get rid of angular. In this case, you're probably best off dealing with this before proceeding with the rest of action plan.
+
+If your plugin is using angular only in the context of its own application, then removing angular is likely not a definitive requirement for moving to the new platform. In this case, you will need to refactor your plugin to initialize an entirely standalone angular module that serves your application. You will need to create custom wrappers for any of the angular services you previously relied on (including those through `Private()`) inside your own plugin.
+
+At this poing, keeping angular around is not the recommended approach. If you feel you must do it, then talk to the platform team directly and we can help you craft a plan.
+
+We recommend that _all_ plugins treat moving away from angular as a top-most priority if they haven't done so already.
