@@ -60,7 +60,7 @@ const cleanFilter = function (filter) {
   return _.omit(filter, ['meta', '$state']);
 };
 
-export function buildQueryFromFilters(filters = [], indexPattern, { queryStringOptions, ignoreFilterIfFieldNotInIndex }) {
+export function buildQueryFromFilters(filters = [], indexPattern, { queryStringOptions, ignoreFilterIfFieldNotInIndex } = {}) {
   _.each(filters, function (filter) {
     if (filter.query) {
       decorateQuery(filter.query, queryStringOptions);
