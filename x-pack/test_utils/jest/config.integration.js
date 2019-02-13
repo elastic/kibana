@@ -8,7 +8,6 @@ import config from './config';
 
 export default {
   ...config,
-  testEnvironment: 'node',
   testMatch: [
     '**/integration_tests/**/*.test.js',
     '**/integration_tests/**/*.test.ts',
