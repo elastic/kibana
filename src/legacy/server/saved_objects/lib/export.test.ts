@@ -41,10 +41,6 @@ describe('getExportDocuments', () => {
     savedObjectsClient.update.mockReset();
   });
 
-  test(`exports no documents when type and objects isn't passed in`, async () => {
-    expect(await getExportDocuments({ savedObjectsClient, exportSizeLimit: 1 })).toEqual([]);
-  });
-
   test('exports selected types and sorts them', async () => {
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 2,
@@ -69,7 +65,7 @@ describe('getExportDocuments', () => {
     const response = await getExportDocuments({
       savedObjectsClient,
       exportSizeLimit: 500,
-      type: ['index-pattern', 'search'],
+      types: ['index-pattern', 'search'],
     });
     expect(response).toMatchInlineSnapshot(`
 Array [
@@ -138,7 +134,7 @@ Array [
       getExportDocuments({
         savedObjectsClient,
         exportSizeLimit: 1,
-        type: ['index-pattern', 'search'],
+        types: ['index-pattern', 'search'],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
   });
@@ -166,6 +162,7 @@ Array [
     const response = await getExportDocuments({
       exportSizeLimit: 10000,
       savedObjectsClient,
+      types: ['index-pattern', 'search'],
       objects: [
         {
           type: 'index-pattern',
@@ -226,6 +223,7 @@ Array [
     const exportOpts = {
       exportSizeLimit: 1,
       savedObjectsClient,
+      types: ['index-pattern', 'search'],
       objects: [
         {
           type: 'index-pattern',
@@ -240,6 +238,62 @@ Array [
     await expect(getExportDocuments(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't export more than 1 objects"`
     );
+  });
+
+  test('filters objects by type when "type" and "objects" is passed in', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
+    const response = await getExportDocuments({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      types: ['index-pattern'],
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+      ],
+    });
+    expect(response).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "references": Array [],
+    "type": "index-pattern",
+  },
+]
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 });
 

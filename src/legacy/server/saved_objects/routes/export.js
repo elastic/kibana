@@ -42,14 +42,13 @@ export const createExportRoute = (prereqs) => ({
             .max(EXPORT_SIZE_LIMIT)
             .optional(),
         })
-        // TODO: Remove below requirement
-        .or('type', 'objects')
         .default(),
     },
     async handler(request, h) {
       const { savedObjectsClient } = request.pre;
+      const types = request.query.type || request.server.savedObjects.types.filter(type => type !== 'space');
       const docsToExport = await getExportDocuments({
-        type: request.query.type,
+        types,
         objects: request.query.objects,
         savedObjectsClient,
         exportSizeLimit: EXPORT_SIZE_LIMIT,

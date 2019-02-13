@@ -52,10 +52,73 @@ describe('GET /api/saved_objects/_export', () => {
       method: 'GET',
       url: '/api/saved_objects/_export',
     };
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'search',
+          references: [
+            {
+              type: 'index-pattern',
+              id: '2',
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
 
     const { payload, statusCode } = await server.inject(request);
+    const objects = payload.split('\n').map(JSON.parse);
+
     expect(statusCode).toBe(200);
-    expect(payload).toEqual('');
+    expect(objects).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "2",
+    "references": Array [],
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "1",
+    "references": Array [
+      Object {
+        "id": "2",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
+  },
+]
+`);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "perPage": 10000,
+        "type": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "dashboard",
+        ],
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test('exports by single type', async () => {
@@ -80,11 +143,22 @@ describe('GET /api/saved_objects/_export', () => {
     });
 
     const { payload, statusCode } = await server.inject(request);
+    const objects = payload.split('\n').map(JSON.parse);
 
     expect(statusCode).toBe(200);
-    expect(payload).toMatchInlineSnapshot(`
-"{\\"id\\":\\"1\\",\\"type\\":\\"search\\",\\"references\\":[]}
-{\\"id\\":\\"2\\",\\"type\\":\\"search\\",\\"references\\":[]}"
+    expect(objects).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "references": Array [],
+    "type": "search",
+  },
+  Object {
+    "id": "2",
+    "references": Array [],
+    "type": "search",
+  },
+]
 `);
     expect(savedObjectsClient.find).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -135,11 +209,27 @@ describe('GET /api/saved_objects/_export', () => {
     });
 
     const { payload, statusCode } = await server.inject(request);
+    const objects = payload.split('\n').map(JSON.parse);
 
     expect(statusCode).toBe(200);
-    expect(payload).toMatchInlineSnapshot(`
-"{\\"id\\":\\"1\\",\\"type\\":\\"index-pattern\\",\\"references\\":[]}
-{\\"id\\":\\"2\\",\\"type\\":\\"search\\",\\"references\\":[{\\"type\\":\\"index-pattern\\",\\"id\\":\\"1\\"}]}"
+    expect(objects).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "references": Array [],
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "2",
+    "references": Array [
+      Object {
+        "id": "1",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
+  },
+]
 `);
     expect(savedObjectsClient.find).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -210,11 +300,27 @@ describe('GET /api/saved_objects/_export', () => {
     });
 
     const { payload, statusCode } = await server.inject(request);
+    const objects = payload.split('\n').map(JSON.parse);
 
     expect(statusCode).toBe(200);
-    expect(payload).toMatchInlineSnapshot(`
-"{\\"id\\":\\"1\\",\\"type\\":\\"index-pattern\\",\\"references\\":[]}
-{\\"id\\":\\"2\\",\\"type\\":\\"search\\",\\"references\\":[{\\"type\\":\\"index-pattern\\",\\"id\\":\\"1\\"}]}"
+    expect(objects).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "references": Array [],
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "2",
+    "references": Array [
+      Object {
+        "id": "1",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
+  },
+]
 `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
 [MockFunction] {

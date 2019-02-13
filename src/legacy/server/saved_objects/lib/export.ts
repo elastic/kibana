@@ -26,27 +26,28 @@ interface ObjectToExport {
 }
 
 interface ExportDocumentOptions {
-  type?: string | string[];
+  types: string[];
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
 }
 
 export async function getExportDocuments({
-  type,
+  types,
   objects,
   savedObjectsClient,
   exportSizeLimit,
 }: ExportDocumentOptions) {
   let docsToExport: SavedObject[] = [];
   if (objects) {
+    objects = objects.filter(obj => types.includes(obj.type));
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
     ({ saved_objects: docsToExport } = await savedObjectsClient.bulkGet(objects));
-  } else if (type) {
+  } else {
     const findResponse = await savedObjectsClient.find({
-      type,
+      type: types,
       perPage: exportSizeLimit,
     });
     if (findResponse.total > exportSizeLimit) {

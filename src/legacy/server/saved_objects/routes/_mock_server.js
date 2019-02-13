@@ -40,6 +40,9 @@ export function MockServer(config = defaultConfig) {
       }
     };
   };
+  server.decorate('server', 'savedObjects', ({
+    types: ['index-pattern', 'search', 'visualization', 'dashboard'],
+  }));
 
   return server;
 }
