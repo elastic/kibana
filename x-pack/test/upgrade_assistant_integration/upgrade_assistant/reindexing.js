@@ -39,9 +39,9 @@ export default function ({ getService }) {
         refresh: true,
         body: {
           query: {
-            "simple_query_string": {
+            'simple_query_string': {
               query: REINDEX_OP_TYPE,
-              fields: ["type"]
+              fields: ['type']
             }
           }
         }
