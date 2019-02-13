@@ -167,6 +167,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should allow printing raw value of data', async () => {
         await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
       });

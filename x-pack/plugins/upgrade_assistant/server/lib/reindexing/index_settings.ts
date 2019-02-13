@@ -10,7 +10,6 @@ import {
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
-import { isLegacyApmIndex } from '../apm';
 import { FlatSettings } from './types';
 
 export interface ParsedIndexName {
@@ -60,16 +59,10 @@ export const parseIndexName = (indexName: string): ParsedIndexName => {
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (
-  flatSettings: FlatSettings,
-  apmIndexPatterns: string[] = []
-): ReindexWarning[] => {
-  const indexName = flatSettings.settings['index.provided_name'];
-  const apmReindexWarning = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
-
-  const warnings = [[ReindexWarning.apmReindex, apmReindexWarning]] as Array<
-    [ReindexWarning, boolean]
-  >;
+export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
+  const warnings = [
+    // No warnings yet for 8.0 -> 9.0
+  ] as Array<[ReindexWarning, boolean]>;
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
 };

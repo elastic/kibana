@@ -22,6 +22,7 @@ import { getVisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
+import { uiCapabilities } from 'ui/capabilities';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
 import { getIndexPattern } from 'ui/embeddable/get_index_pattern';
 import { SavedVisualizations } from '../types';
@@ -59,6 +60,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   ) {
     const visId = panelMetadata.id;
     const editUrl = this.getEditPath(visId);
+    const editable: boolean = uiCapabilities.visualize.save as boolean;
 
     const loader = await getVisualizeLoader();
     const savedObject = await this.savedVisualizations.get(visId);
@@ -73,6 +75,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
       editUrl,
+      editable,
       loader,
       indexPattern,
     });

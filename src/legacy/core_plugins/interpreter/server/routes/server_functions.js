@@ -51,7 +51,7 @@ function runServerFunctions(server) {
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
-                context: Joi.object().default({}),
+                context: Joi.object().allow(null).default({}),
               }),
           ).required(),
         }).required(),
@@ -88,7 +88,7 @@ function getServerFunctions(server) {
     method: 'GET',
     path: `${API_ROUTE}/fns`,
     handler() {
-      return server.plugins.interpreter.serverFunctions.toJS();
+      return server.plugins.interpreter.registries().serverFunctions.toJS();
     },
   });
 }
@@ -101,10 +101,11 @@ function getServerFunctions(server) {
  * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
  */
 async function runFunction(server, handlers, fnCall) {
+  const registries = server.plugins.interpreter.registries();
   const { functionName, args, context } = fnCall;
-  const types = server.plugins.interpreter.types.toJS();
+  const types = registries.types.toJS();
   const { deserialize } = serializeProvider(types);
-  const fnDef = server.plugins.interpreter.serverFunctions.toJS()[functionName];
+  const fnDef = registries.serverFunctions.toJS()[functionName];
 
   if (!fnDef) {
     throw Boom.notFound(`Function "${functionName}" could not be found.`);

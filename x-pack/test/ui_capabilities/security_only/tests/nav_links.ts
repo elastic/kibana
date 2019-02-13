@@ -94,6 +94,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('maps', 'management')
             );
             break;
+          case 'infrastructure_all':
           case 'infrastructure_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
@@ -101,6 +102,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('infrastructure', 'management')
             );
             break;
+          case 'logs_all':
           case 'logs_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
@@ -128,6 +130,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('timelion', 'management')
             );
             break;
+          case 'uptime_all':
           case 'uptime_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
