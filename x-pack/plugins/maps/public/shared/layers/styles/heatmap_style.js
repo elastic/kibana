@@ -41,7 +41,7 @@ export class HeatmapStyle extends AbstractStyle {
     return null;
   }
 
-  setMBPaintProperties({ alpha, mbMap, layerId, propertyName, resolution }) {
+  setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {
     let radius;
     if (resolution === GRID_RESOLUTION.COARSE) {
       radius = 128;
@@ -57,7 +57,6 @@ export class HeatmapStyle extends AbstractStyle {
       type: 'identity',
       property: propertyName
     });
-    mbMap.setPaintProperty(layerId, 'heatmap-opacity', alpha);
   }
 
 }
