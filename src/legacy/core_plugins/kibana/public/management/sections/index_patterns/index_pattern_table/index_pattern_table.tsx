@@ -24,6 +24,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -87,10 +88,10 @@ export class IndexPatternTable extends React.Component<Props, State> {
         {this.state.showFlyout && (
           <CreateIndexPatternPrompt onClose={() => this.setState({ showFlyout: false })} />
         )}
-        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem>
                 <EuiText>
                   <h2>
                     <FormattedMessage
@@ -105,30 +106,21 @@ export class IndexPatternTable extends React.Component<Props, State> {
                   iconSize="l"
                   iconType="questionInCircle"
                   onClick={() => this.setState({ showFlyout: true })}
+                  aria-label="Help"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <CreateButton options={this.props.indexPatternCreationOptions}>
-                  <FormattedMessage
-                    id="kbn.management.indexPatternTable.createBtn"
-                    defaultMessage="Create index pattern"
-                  />
-                </CreateButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="kbn.management.indexPatternTable.subtitle"
-                  defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
-                  Kibana."
-                />
-              </p>
-            </EuiText>
+          <EuiFlexItem grow={false}>
+            <CreateButton options={this.props.indexPatternCreationOptions}>
+              <FormattedMessage
+                id="kbn.management.indexPatternTable.createBtn"
+                defaultMessage="Create index pattern"
+              />
+            </CreateButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer />
         <EuiInMemoryTable
           itemId="id"
           isSelectable={false}
