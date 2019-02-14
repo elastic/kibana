@@ -43,14 +43,6 @@ module.exports = (_baseConfig, _env, config) => {
     ],
   });
 
-  // config.module.rules.push({
-  //   test: /\.(ts|tsx)$/,
-  //   use: [
-  //     require.resolve('ts-loader'),
-  //     require.resolve('react-docgen-typescript-loader'),
-  //   ],
-  // });
-
   config.module.rules.push({
     test: /\.tsx?$/,
     use: [

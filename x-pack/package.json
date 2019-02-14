@@ -121,7 +121,6 @@
     "sass-resources-loader": "^2.0.0",
     "simple-git": "1.37.0",
     "sinon": "^5.0.7",
-    "storybook-addon-jsx": "^5.4.0",
     "supertest": "^3.1.0",
     "supertest-as-promised": "^4.0.2",
     "tmp": "0.0.31",
