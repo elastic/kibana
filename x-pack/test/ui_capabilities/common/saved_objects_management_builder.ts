@@ -4,28 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const allSavedObjectTypes = [
-  'config',
-  'telemetry',
-  'graph-workspace',
-  'ml-telemetry',
-  'apm-telemetry',
-  'map',
-  'maps-telemetry',
-  'canvas-workpad',
-  'infrastructure-ui-source',
-  'upgrade-assistant-reindex-operation',
-  'upgrade-assistant-telemetry',
-  'index-pattern',
-  'visualization',
-  'search',
-  'dashboard',
-  'url',
-  'server',
-  'kql-telemetry',
-  'timelion-sheet',
-];
-
+// tslint:disable:max-classes-per-file
 class SavedObjectsTypeUICapabilitiesGroup {
   public all = ['delete', 'edit', 'read'];
   public read = ['read'];
@@ -45,9 +24,36 @@ const coerceToArray = <T>(itemOrItemsOrNil: T | T[] | undefined): T[] => {
   return Array.isArray(itemOrItemsOrNil) ? itemOrItemsOrNil : [itemOrItemsOrNil];
 };
 
-export const savedObjectsManagementBuilder = {
-  all(group: keyof SavedObjectsTypeUICapabilitiesGroup) {
-    return allSavedObjectTypes.reduce(
+export class SavedObjectsManagementBuilder {
+  private allSavedObjectTypes: string[];
+
+  constructor(spacesEnabled: boolean) {
+    this.allSavedObjectTypes = [
+      ...(spacesEnabled ? ['space'] : []),
+      'config',
+      'telemetry',
+      'graph-workspace',
+      'ml-telemetry',
+      'apm-telemetry',
+      'map',
+      'maps-telemetry',
+      'canvas-workpad',
+      'infrastructure-ui-source',
+      'upgrade-assistant-reindex-operation',
+      'upgrade-assistant-telemetry',
+      'index-pattern',
+      'visualization',
+      'search',
+      'dashboard',
+      'url',
+      'server',
+      'kql-telemetry',
+      'timelion-sheet',
+    ];
+  }
+
+  public all(group: keyof SavedObjectsTypeUICapabilitiesGroup) {
+    return this.allSavedObjectTypes.reduce(
       (acc, savedObjectType) => ({
         ...acc,
         [savedObjectType]: savedObjectsTypeUICapabilitiesGroup[group].reduce(
@@ -60,11 +66,12 @@ export const savedObjectsManagementBuilder = {
       }),
       {}
     );
-  },
-  only(parameters: OnlyParameters): Record<string, boolean> {
+  }
+
+  public only(parameters: OnlyParameters): Record<string, boolean> {
     const readTypes = coerceToArray(parameters.read);
     const allTypes = coerceToArray(parameters.all);
-    return allSavedObjectTypes.reduce(
+    return this.allSavedObjectTypes.reduce(
       (acc, savedObjectType) => ({
         ...acc,
         [savedObjectType]: savedObjectsTypeUICapabilitiesGroup.all.reduce(
@@ -81,5 +88,5 @@ export const savedObjectsManagementBuilder = {
       }),
       {}
     );
-  },
-};
+  }
+}

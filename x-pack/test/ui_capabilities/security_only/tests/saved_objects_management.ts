@@ -6,15 +6,19 @@
 
 import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { savedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
+import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
 } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
+const savedObjectsManagementBuilder = new SavedObjectsManagementBuilder(false);
+
 // tslint:disable:no-default-export
-export default function savedObjectsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function savedObjectsManagementTests({
+  getService,
+}: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('savedObjectsManagement', () => {
