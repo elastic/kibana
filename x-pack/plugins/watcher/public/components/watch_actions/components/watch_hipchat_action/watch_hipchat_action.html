@@ -1,0 +1,72 @@
+<div class="kuiFormSection">
+  <label
+    for="{{watchHipchatAction.makeId('account')}}"
+    class="kuiFormLabel"
+    i18n-id="xpack.watcher.watchActions.hipchat.hipchatAccountLabel"
+    i18n-default-message="Hipchat account to use"
+  ></label>
+  <input
+    type="text"
+    id="{{watchHipchatAction.makeId('account')}}"
+    name="account"
+    class="kuiTextInput fullWidth"
+    ng-model="watchHipchatAction.account"
+    required
+    input-focus
+  >
+  <div
+    id="{{watchHipchatAction.makeId(['account', 'required'])}}"
+    xpack-aria-describes="{{watchHipchatAction.makeId('account')}}"
+    class="kuiInputNote kuiInputNote--danger"
+    ng-if="watchHipchatAction.isValidationMessageVisible('account', 'required')"
+    i18n-id="xpack.watcher.watchActions.hipchat.hipchatAccountIsRequiredValidationMessage"
+    i18n-default-message="Hipchat account is required."
+  ></div>
+</div>
+<div class="kuiFormSection">
+  <label
+    for="{{watchHipchatAction.makeId('subject')}}"
+    class="kuiFormLabel"
+    i18n-id="xpack.watcher.watchActions.hipchat.subjectLabel"
+    i18n-default-message="Subject"
+  ></label>
+  <input
+    type="text"
+    id="{{watchHipchatAction.makeId('subject')}}"
+    name="subject"
+    class="kuiTextInput fullWidth"
+    ng-model="watchHipchatAction.action.subject"
+    required
+  >
+  <div
+    id="{{watchHipchatAction.makeId(['subject', 'required'])}}"
+    xpack-aria-describes="{{watchHipchatAction.makeId('subject')}}"
+    class="kuiInputNote kuiInputNote--danger"
+    ng-if="watchHipchatAction.isValidationMessageVisible('subject', 'required')"
+    i18n-id="xpack.watcher.watchActions.hipchat.subjectIsRequiredValidationMessage"
+    i18n-default-message="Subject is required."
+  ></div>
+</div>
+<div class="kuiFormSection">
+  <label
+    for="{{watchHipchatAction.makeId('body')}}"
+    class="kuiFormLabel"
+    i18n-id="xpack.watcher.watchActions.hipchat.bodyLabel"
+    i18n-default-message="Body"
+  ></label>
+  <textarea
+    id="{{watchHipchatAction.makeId('body')}}"
+    name="body"
+    class="kuiTextArea fullWidth"
+    ng-model="watchHipchatAction.action.body"
+    required
+  ></textarea>
+  <div
+    id="{{watchHipchatAction.makeId(['body', 'required'])}}"
+    xpack-aria-describes="{{watchHipchatAction.makeId('body')}}"
+    class="kuiInputNote kuiInputNote--danger"
+    ng-if="watchHipchatAction.isValidationMessageVisible('body', 'required')"
+    i18n-id="xpack.watcher.watchActions.hipchat.bodyIsRequiredValidationMessage"
+    i18n-default-message="Body is required."
+  ></div>
+</div>
