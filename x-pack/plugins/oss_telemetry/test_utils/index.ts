@@ -54,4 +54,5 @@ export const getMockKbnServer = (
     },
   },
   config: () => ({ get: () => '' }),
+  log: () => undefined,
 });

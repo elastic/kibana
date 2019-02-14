@@ -36,9 +36,6 @@ export default function PointSeriesVisType(Private, i18n) {
         type: 'histogram',
         grid: {
           categoryLines: false,
-          style: {
-            color: '#eee'
-          }
         },
         categoryAxes: [
           {
