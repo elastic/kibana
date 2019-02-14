@@ -29,7 +29,7 @@ export function createGenerateCsv(logger) {
     if (!builder.tryAppend(header)) {
       return {
         content: '',
-        maxSizeReached: true
+        maxSizeReached: true,
       };
     }
 

@@ -21,6 +21,7 @@ import { resolve } from 'path';
 
 import fieldsRoutes from './server/routes/fields';
 import visDataRoutes from './server/routes/vis';
+import { getTableData } from './server/lib/vis_data/get_table_data';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -45,6 +46,9 @@ export default function (kibana) {
     init(server) {
       fieldsRoutes(server);
       visDataRoutes(server);
+
+      // expose thefunction  function getTableData
+      server.expose('getTableData', getTableData);
     }
 
 
