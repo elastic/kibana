@@ -5,7 +5,7 @@
  */
 
 import { spawn } from 'child_process';
-import chmodr from 'chmodr';
+import { chmodSync } from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -116,7 +116,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
         log.error('Unable to find platform for this os');
     }
 
-    chmodr.sync(path.dirname(javaPath), 0o755);
+    chmodSync(path.dirname(javaPath), '755');
 
     const p = spawn(
       javaPath,

@@ -105,9 +105,21 @@ export const Directory = withRouter((props: Props) => {
   const { resource, org, repo, revision } = props.match.params;
   const getUrl = (pathType: PathTypes) => (path: string) =>
     `/${resource}/${org}/${repo}/${pathType}/${revision}/${path}`;
-  const fileList = <DirectoryNodes nodes={files} title="Files" getUrl={getUrl(PathTypes.blob)} />;
+  const fileList = (
+    <DirectoryNodes
+      nodes={files}
+      title="Files"
+      type={FileTreeItemType.File}
+      getUrl={getUrl(PathTypes.blob)}
+    />
+  );
   const folderList = (
-    <DirectoryNodes nodes={folders} title="Directories" getUrl={getUrl(PathTypes.tree)} />
+    <DirectoryNodes
+      nodes={folders}
+      title="Directories"
+      type={FileTreeItemType.Directory}
+      getUrl={getUrl(PathTypes.tree)}
+    />
   );
   return (
     <Root>
