@@ -31,7 +31,7 @@ export const LatestMinorBanner: React.StatelessComponent = () => (
         values={{
           breakingChangesDocButton: (
             <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes.html"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/breaking-changes-7.0.html"
               target="_blank"
             >
               <FormattedMessage
