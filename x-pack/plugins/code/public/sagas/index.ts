@@ -32,7 +32,7 @@ import { watchDocumentSearch, watchRepositorySearch, watchSearchRouteChange } fr
 import { watchRootRoute } from './setup';
 import { watchRepoCloneSuccess, watchRepoDeleteFinished } from './status';
 import { watchLoadStructure } from './structure';
-import { watchLoadUserConfig } from './user';
+import { watchLoadUserProfile } from './user';
 
 export function* rootSaga() {
   yield fork(watchRootRoute);
@@ -52,7 +52,7 @@ export function* rootSaga() {
   yield fork(watchInitRepoCmd);
   yield fork(watchGotoRepo);
   yield fork(watchLoadRepo);
-  yield fork(watchLoadUserConfig);
+  yield fork(watchLoadUserProfile);
   yield fork(watchSearchRouteChange);
   yield fork(watchAdminRouteChange);
   yield fork(watchMainRouteChange);

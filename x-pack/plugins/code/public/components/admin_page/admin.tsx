@@ -144,7 +144,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
   repositoryLoading: state.repository.loading,
-  isAdmin: state.userConfig.isAdmin,
+  isAdmin: state.userProfile.isCodeAdmin,
 });
 
 export const Admin = withRouter(connect(mapStateToProps)(AdminPage));

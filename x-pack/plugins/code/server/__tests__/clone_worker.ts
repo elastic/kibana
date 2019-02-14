@@ -46,7 +46,6 @@ const options = {
   lspRequestTimeoutMs: 5 * 60, // timeout a request over 30s
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
-  isAdmin: true, // If we show the admin buttons
   disableScheduler: true, // Temp option to disable all schedulers.
 };
 

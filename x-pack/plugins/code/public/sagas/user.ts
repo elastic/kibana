@@ -8,24 +8,24 @@ import { Action } from 'redux-actions';
 import { kfetch } from 'ui/kfetch';
 
 import { call, put, takeEvery } from 'redux-saga/effects';
-import { loadUserConfig, loadUserConfigFailed, loadUserConfigSuccess } from '../actions';
+import { loadUserProfile, loadUserProfileFailed, loadUserProfileSuccess } from '../actions';
 
-function requestUserConfig() {
+function requestUserProfile() {
   return kfetch({
-    pathname: `../api/code/user/config`,
+    pathname: `../api/security/v1/me`,
     method: 'get',
   });
 }
 
-function* handleLoadUserConfig(action: Action<any>) {
+function* handleLoadUserProfile(_: Action<any>) {
   try {
-    const data = yield call(requestUserConfig);
-    yield put(loadUserConfigSuccess(data));
+    const data = yield call(requestUserProfile);
+    yield put(loadUserProfileSuccess(data));
   } catch (err) {
-    yield put(loadUserConfigFailed(err));
+    yield put(loadUserProfileFailed(err));
   }
 }
 
-export function* watchLoadUserConfig() {
-  yield takeEvery(String(loadUserConfig), handleLoadUserConfig);
+export function* watchLoadUserProfile() {
+  yield takeEvery(String(loadUserProfile), handleLoadUserProfile);
 }

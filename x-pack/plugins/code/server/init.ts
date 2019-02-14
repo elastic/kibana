@@ -25,7 +25,6 @@ import { repositoryRoute } from './routes/repository';
 import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from './routes/search';
 import { setupRoute } from './routes/setup';
 import { socketRoute } from './routes/socket';
-import { userRoute } from './routes/user';
 import { workspaceRoute } from './routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './scheduler';
 import { enableSecurity } from './security';
@@ -237,7 +236,6 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   workspaceRoute(server, serverOptions);
   symbolByQnameRoute(server, log);
   socketRoute(server, socketService, log);
-  userRoute(server, serverOptions);
   installRoute(server, socketService, lspService, installManager, serverOptions);
   lspRoute(server, lspService, serverOptions);
   setupRoute(server);
