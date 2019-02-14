@@ -44,7 +44,7 @@ uiModules.get('apps/management')
   .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -134,6 +134,10 @@ uiModules.get('apps/management')
             });
           }
         };
+
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement[service.type];
+        $scope.canEdit = canEdit;
+        $scope.canDelete = canDelete;
 
         $scope.notFound = $routeParams.notFound;
 
