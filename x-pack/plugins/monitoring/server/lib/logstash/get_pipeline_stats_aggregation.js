@@ -141,6 +141,7 @@ function fetchPipelineTimeseriesStats(query, logstashIndexPattern, pipelineId, v
     }
   };
 
+  console.log(JSON.stringify(params.body));
   return callWithRequest(req, 'search', params);
 }
 
@@ -161,6 +162,15 @@ export async function getPipelineStatsAggregation(callWithRequest, req, logstash
       }
     }
   ];
+
+  if (timeseriesInterval <= 10) {
+    timeseriesInterval = 30;
+  }
+
+  console.log({ start, end, version, timeseriesInterval });
+  start = version.lastSeen - (timeseriesInterval * 1000);
+  end = version.lastSeen;
+  console.log({ start, end });
 
   const query = createQuery({
     type: 'logstash_stats',

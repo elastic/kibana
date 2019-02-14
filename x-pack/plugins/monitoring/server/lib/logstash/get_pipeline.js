@@ -148,7 +148,8 @@ export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipe
 
   const [ stateDocument, statsAggregation ] = await Promise.all([
     getPipelineStateDocument(callWithRequest, req, lsIndexPattern, options),
-    getPipelineStatsAggregation(callWithRequest, req, lsIndexPattern, timeseriesInterval, options)
+    getPipelineStatsAggregation(callWithRequest, req, lsIndexPattern, timeseriesInterval, options),
+    // getPipelineStatsAggregationLatest(callWithRequest, req, lsIndexPattern, timeseriesInterval, options)
   ]);
 
   if (stateDocument === null) {
