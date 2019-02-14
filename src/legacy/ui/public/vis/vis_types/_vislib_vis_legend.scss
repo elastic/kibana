@@ -2,10 +2,6 @@
 
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
-$visLegendWidth: 150px;
-$visColorPickerWidth: $euiSizeM * 10;
-$visLegendLineHeight: $euiSize;
-
 .visLegend__toggle {
   border-radius: $euiBorderRadius;
   position: absolute;
@@ -32,9 +28,10 @@ $visLegendLineHeight: $euiSize;
   display: flex;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
 }
 
-.visLib--legend-left {
+.visLib--legend-left{
   .visLegend__list {
     margin-bottom: $euiSizeL;
   }
@@ -46,32 +43,21 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-/**
- * 1. Position the .visLegend__valueDetails absolutely against the legend item
- * 2. Make sure the .visLegend__valueDetails is visible outside the list bounds
- * 3. Make sure the currently selected item is top most in z level
- */
-
 .visLegend__list {
   @include euiScrollBar;
-  display: flex;
-  line-height: $visvisLegendLineHeight;
-  width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
+  line-height: $euiSize;
+  width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
-  flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
 
   .visLib--legend-top &,
   .visLib--legend-bottom & {
     width: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    overflow: visible; /* 2 */
+    overflow-y: hidden;
 
     .visLegend__value {
-      flex-grow: 0;
-      max-width: $visLegendWidth;
+      display: inline-block;
     }
   }
 
@@ -84,11 +70,9 @@ $visLegendLineHeight: $euiSize;
   cursor: pointer;
   padding: $euiSizeXS;
   display: flex;
-  flex-shrink: 0;
-  position: relative; /* 1 */
 
   > * {
-    max-width: 100%; // Needed for truncation (dom element has no class)
+    max-width: 100%;
   }
 
   &.disabled {
@@ -97,7 +81,6 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__valueTitle {
-  @include euiTextTruncate; // ALWAYS truncate
   color: $visTextColor;
 
   &:hover {
@@ -105,42 +88,25 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-.visLegend__valueTitle--full ~ .visLegend__valueDetails {
-  z-index: 2; /* 3 */
+.visLegend__valueTitle--truncate {
+  @include euiTextTruncate;
+}
+
+.visLegend__valueTitle--full {
+  word-break: break-all;
 }
 
 .visLegend__valueDetails {
-  background-color: $euiColorEmptyShade;
-
-  .visLib--legend-left &,
-  .visLib--legend-right & {
-    margin-top: $euiSizeXS;
-    border-bottom: 1px solid $euiColorLightShade;
-  }
-
-  .visLib--legend-top &,
-  .visLib--legend-bottom & {
-    @include euiBottomShadowMedium;
-    position: absolute; /* 1 */
-    border-radius: $euiBorderRadius;
-  }
-
-  .visLib--legend-bottom & {
-    bottom: $visLegendLineHeight + $euiSizeXS;
-  }
+  border-bottom: 1px solid $euiColorLightShade;
+  padding-bottom: $euiSizeXS;
 }
 
 .visLegend__valueColorPicker {
-  width: $visColorPickerWidth;
+  width: $euiSizeM * 10;
   margin: auto;
 
   .visLegend__valueColorPickerDot {
-    $colorPickerDotsPerRow: 8;
-    $colorPickerDotMargin: $euiSizeXS / 2;
-    $colorPickerDotWidth: $visColorPickerWidth / $colorPickerDotsPerRow - 2 * $colorPickerDotMargin;
-
-    margin: $colorPickerDotMargin;
-    width: $colorPickerDotWidth;
+    margin: $euiSizeXS / 2;
 
     &:hover {
       transform: scale(1.4);
