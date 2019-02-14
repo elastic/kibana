@@ -36,7 +36,8 @@ import {
   MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_SHRINK_ENABLED,
-  PHASE_FREEZE_ENABLED
+  PHASE_FREEZE_ENABLED,
+  PHASE_INDEX_PRIORITY
 } from '../constants';
 import { filterItems, sortTable } from '../../services';
 
@@ -198,6 +199,9 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     if (actions.freeze) {
       policy[PHASE_FREEZE_ENABLED] = true;
     }
+    if (actions.set_priority) {
+      policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
+    }
   }
   return policy;
 };
@@ -285,6 +289,11 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.freeze = {};
   } else {
     delete esPhase.actions.freeze;
+  }
+  if (isNumber(phase[PHASE_INDEX_PRIORITY])) {
+    esPhase.actions.set_priority = {
+      priority: phase[PHASE_INDEX_PRIORITY]
+    };
   }
   return esPhase;
 };

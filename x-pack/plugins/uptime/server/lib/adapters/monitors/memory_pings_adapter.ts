@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ping } from '../../../../common/graphql/types';
+import { MonitorPageTitle, Ping } from '../../../../common/graphql/types';
 import { UMMonitorsAdapter } from './adapter_types';
 
 export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
@@ -14,7 +14,7 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     this.monitorsDB = monitorsDB;
   }
 
-  public async getLatestMonitors(
+  public async getMonitors(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
@@ -39,8 +39,6 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    downCount: number,
-    windowSize: number,
     filters?: string | null
   ): Promise<any> {
     throw new Error('Method not implemented.');
@@ -55,6 +53,13 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
+  public async getMonitorPageTitle(
+    request: any,
+    monitorId: string
+  ): Promise<MonitorPageTitle | null> {
     throw new Error('Method not implemented.');
   }
 }

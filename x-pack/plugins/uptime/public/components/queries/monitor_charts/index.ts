@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorCharts } from './monitor_charts';
+export { MonitorChartsQuery } from './monitor_charts_query';

@@ -24,7 +24,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { Label } from './label';
 import { FeedbackMessage } from './feedback_message';
 
@@ -35,10 +35,15 @@ export class TagCloudVisualization {
   constructor(node, vis) {
     this._containerNode = node;
 
+    const cloudRelativeContainer = document.createElement('div');
+    cloudRelativeContainer.classList.add('tgcVis');
+    cloudRelativeContainer.setAttribute('style', 'position: relative');
     const cloudContainer = document.createElement('div');
     cloudContainer.classList.add('tgcVis');
     cloudContainer.setAttribute('data-test-subj', 'tagCloudVisualization');
-    this._containerNode.appendChild(cloudContainer);
+    this._containerNode.classList.add('visChart--vertical');
+    cloudRelativeContainer.appendChild(cloudContainer);
+    this._containerNode.appendChild(cloudRelativeContainer);
 
     this._vis = vis;
     this._truncated = false;
@@ -57,7 +62,7 @@ export class TagCloudVisualization {
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
-    render(<I18nProvider><FeedbackMessage ref={this._feedbackMessage} /></I18nProvider>, this._feedbackNode);
+    render(<I18nContext><FeedbackMessage ref={this._feedbackMessage} /></I18nContext>, this._feedbackNode);
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);
@@ -73,7 +78,7 @@ export class TagCloudVisualization {
       this._updateParams();
     }
 
-    if (status.data) {
+    if (status.data || status.params) {
       this._updateData(data);
     }
 
@@ -115,10 +120,11 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucketFormatter = this._vis.params.bucket ? getFormat(this._vis.params.bucket.format) : null;
-    const hasTags = data.columns.length === 2;
-    const tagColumn = hasTags ? data.columns[0].id : -1;
-    const metricColumn = data.columns[hasTags ? 1 : 0].id;
+    const bucket = this._vis.params.bucket;
+    const metric = this._vis.params.metric;
+    const bucketFormatter = bucket ? getFormat(bucket.format) : null;
+    const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
+    const metricColumn = data.columns[metric.accessor].id;
     const tags = data.rows.map((row, rowIndex) => {
       const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
       const metric = row[metricColumn];

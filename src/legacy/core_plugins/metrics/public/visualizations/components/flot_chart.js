@@ -250,8 +250,10 @@ class FlotChart extends Component {
 
     if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       this.rendered = true;
-      this.plot = $.plot(this.target, [], this.getOptions(this.props));
+      const { series } = this.props;
+      const data = this.calculateData(series, this.props.show);
 
+      this.plot = $.plot(this.target, data, this.getOptions(this.props));
       this.handleDraw(this.plot);
 
       _.defer(() => this.handleResize());

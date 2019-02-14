@@ -66,7 +66,7 @@ const HeaderUi = ({
     </EuiTitle>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <EuiTextColor color="subdued">
               <FormattedMessage

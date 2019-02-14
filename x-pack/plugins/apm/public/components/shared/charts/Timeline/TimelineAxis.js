@@ -11,8 +11,9 @@ import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
-import { colors, px } from '../../../../style/variables';
+import { px } from '../../../../style/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 // Remove any tick that is too close to traceRootDuration
 const getXAxisTickValues = (tickValues, traceRootDuration) => {
@@ -42,8 +43,8 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
           <div
             style={{
               position: 'absolute',
-              backgroundColor: colors.white,
-              borderBottom: `1px solid ${colors.gray3}`,
+              backgroundColor: theme.euiColorEmptyShade,
+              borderBottom: `1px solid ${theme.euiColorMediumShade}`,
               height: px(margins.top),
               zIndex: 2,
               width: '100%',
@@ -69,7 +70,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 tickFormat={tickFormat}
                 tickPadding={20}
                 style={{
-                  text: { fill: colors.gray3 }
+                  text: { fill: theme.euiColorMediumShade }
                 }}
               />
 

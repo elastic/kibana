@@ -58,12 +58,16 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     expect(resp.body).to.eql({
       id: resp.body.id,
+      migrationVersion: {
+        visualization: '7.0.0',
+      },
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
-      version: 1,
+      version: resp.body.version,
       attributes: {
         title: 'My favorite vis',
       },
+      references: [],
     });
 
     const expectedSpacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}:`;
@@ -71,7 +75,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace was or wasn't specified
     const { _source } = await es.get({
       id: `${expectedSpacePrefix}${spaceAwareType}:${resp.body.id}`,
-      type: 'doc',
+      type: '_doc',
       index: '.kibana',
     });
 
@@ -100,16 +104,17 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       id: resp.body.id,
       type: notSpaceAwareType,
       updated_at: resp.body.updated_at,
-      version: 1,
+      version: resp.body.version,
       attributes: {
         name: `Can't be contained to a space`,
       },
+      references: [],
     });
 
     // query ES directory to ensure namespace wasn't specified
     const { _source } = await es.get({
       id: `${notSpaceAwareType}:${resp.body.id}`,
-      type: 'doc',
+      type: '_doc',
       index: '.kibana',
     });
 

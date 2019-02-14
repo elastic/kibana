@@ -6,8 +6,8 @@
 
 
 import 'ngreact';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('apps/ml', ['react']);
@@ -22,7 +22,11 @@ import { FileDataVisualizerPage } from './file_datavisualizer';
 
 import uiRoutes from 'ui/routes';
 
-const template = '<ml-nav-menu name="datavisualizer" /><file-datavisualizer-page />';
+const template = `
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="datavisualizer" />
+  <file-datavisualizer-page />
+`;
 
 uiRoutes
   .when('/filedatavisualizer/?', {
@@ -42,5 +46,5 @@ module.directive('fileDatavisualizerPage', function ($injector) {
   const indexPatterns = $injector.get('indexPatterns');
   const kibanaConfig = $injector.get('config');
 
-  return reactDirective(injectI18nProvider(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
+  return reactDirective(wrapInI18nContext(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
 });

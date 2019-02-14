@@ -20,6 +20,7 @@
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
+import { fromRoot } from '../legacy/utils';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -41,7 +42,8 @@ export default async (kbnServer, server, config) => {
   server.route(createBundlesRoute({
     regularBundlesPath: uiBundles.getWorkingDir(),
     dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-    basePublicPath: config.get('server.basePath')
+    basePublicPath: config.get('server.basePath'),
+    builtCssPath: fromRoot('built_assets/css'),
   }));
 
   // in prod, only bundle when something is missing or invalid

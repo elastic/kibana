@@ -9,14 +9,13 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {
   const transactionId = transaction.transaction.id;
-  const traceId =
-    transaction.version === 'v2' ? transaction.trace.id : undefined;
+  const traceId = transaction.trace.id;
 
   let query = `${PROCESSOR_EVENT}:"transaction" AND ${TRANSACTION_ID}:"${transactionId}"`;
   if (traceId) {

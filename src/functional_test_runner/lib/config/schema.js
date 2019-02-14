@@ -79,7 +79,7 @@ export const schema = Joi.object().keys({
 
   timeouts: Joi.object().keys({
     find: Joi.number().default(10000),
-    try: Joi.number().default(40000),
+    try: Joi.number().default(120000),
     waitFor: Joi.number().default(20000),
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
@@ -106,7 +106,7 @@ export const schema = Joi.object().keys({
     grep: Joi.string(),
     invert: Joi.boolean().default(false),
     slow: Joi.number().default(30000),
-    timeout: Joi.number().default(INSPECTING ? Infinity : 180000),
+    timeout: Joi.number().default(INSPECTING ? Infinity : 360000),
     ui: Joi.string().default('bdd'),
   }).default(),
 
@@ -139,6 +139,7 @@ export const schema = Joi.object().keys({
     license: Joi.string().default('oss'),
     from: Joi.string().default('snapshot'),
     serverArgs: Joi.array(),
+    dataArchive: Joi.string(),
   }).default(),
 
   kbnTestServer: Joi.object().keys({

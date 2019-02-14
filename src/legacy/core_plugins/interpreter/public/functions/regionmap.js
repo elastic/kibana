@@ -24,7 +24,7 @@ export const regionmap = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.regionmap.help', {
@@ -44,10 +44,8 @@ export const regionmap = () => ({
       as: 'visualization',
       value: {
         visData: context,
-        visConfig: {
-          type: 'region_map',
-          params: visConfigParams,
-        },
+        visType: 'region_map',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

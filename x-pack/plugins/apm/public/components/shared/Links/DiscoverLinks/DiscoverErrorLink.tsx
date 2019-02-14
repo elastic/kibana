@@ -8,12 +8,12 @@ import React from 'react';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {
-  const serviceName = error.context.service.name;
+  const serviceName = error.service.name;
   const groupId = error.error.grouping_key;
   let query = `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"`;
   if (kuery) {

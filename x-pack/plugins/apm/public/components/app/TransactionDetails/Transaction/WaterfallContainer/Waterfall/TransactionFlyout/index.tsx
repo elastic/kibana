@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
@@ -28,14 +28,14 @@ import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
   location: Location;
   urlParams: IUrlParams;
-  waterfall: IWaterfall;
+  errorCount: number;
+  traceRootDuration?: number;
 }
 
 const ResponsiveFlyout = styled(EuiFlyout)`
@@ -63,13 +63,8 @@ function DroppedSpansWarning({
 }: {
   transactionDoc: Transaction;
 }) {
-  const dropped: number = get(
-    transactionDoc,
-    'transaction.span_count.dropped.total',
-    0
-  );
-
-  if (dropped === 0) {
+  const dropped = idx(transactionDoc, _ => _.transaction.span_count.dropped);
+  if (!dropped) {
     return null;
   }
 
@@ -103,7 +98,8 @@ export function TransactionFlyout({
   onClose,
   location,
   urlParams,
-  waterfall
+  errorCount,
+  traceRootDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -139,8 +135,9 @@ export function TransactionFlyout({
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
           <StickyTransactionProperties
+            errorCount={errorCount}
             transaction={transactionDoc}
-            totalDuration={waterfall.traceRootDuration}
+            totalDuration={traceRootDuration}
           />
           <EuiHorizontalRule />
           <DroppedSpansWarning transactionDoc={transactionDoc} />

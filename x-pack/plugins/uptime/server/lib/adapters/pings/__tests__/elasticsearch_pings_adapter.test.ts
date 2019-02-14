@@ -68,12 +68,11 @@ describe('ElasticsearchPingsAdapter class', () => {
     beforeEach(() => {
       getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetAllParams = {
-        index: 'heartbeat*',
+        index: 'heartbeat-8*',
         body: {
           query: {
             bool: {
               filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
-              must: [],
             },
           },
           sort: [{ '@timestamp': { order: 'asc' } }],
@@ -132,7 +131,7 @@ describe('ElasticsearchPingsAdapter class', () => {
       await adapter.getAll(serverRequest, 'now-1h', 'now', 'testmonitorid');
       delete expectedGetAllParams.body.size;
       delete expectedGetAllParams.body.sort;
-      expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.id': 'testmonitorid' } });
+      expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.id': 'testmonitorid' } });
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
@@ -141,7 +140,7 @@ describe('ElasticsearchPingsAdapter class', () => {
       await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, 'down');
       delete expectedGetAllParams.body.size;
       delete expectedGetAllParams.body.sort;
-      expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.status': 'down' } });
+      expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.status': 'down' } });
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
   });
@@ -152,7 +151,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     beforeEach(() => {
       getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetLatestSearchParams = {
-        index: 'heartbeat*',
+        index: 'heartbeat-8*',
         body: {
           query: {
             bool: {
@@ -165,8 +164,6 @@ describe('ElasticsearchPingsAdapter class', () => {
                     },
                   },
                 },
-              ],
-              must: [
                 {
                   term: { 'monitor.id': 'testmonitor' },
                 },
@@ -177,16 +174,21 @@ describe('ElasticsearchPingsAdapter class', () => {
             by_id: {
               terms: {
                 field: 'monitor.id',
+                size: 1000,
               },
               aggs: {
                 latest: {
                   top_hits: {
                     size: 1,
+                    sort: {
+                      '@timestamp': { order: 'desc' },
+                    },
                   },
                 },
               },
             },
           },
+          size: 0,
         },
       };
       mockEsSearchResult = {

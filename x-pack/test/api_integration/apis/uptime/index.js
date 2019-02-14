@@ -15,5 +15,6 @@ export default function ({ getService, loadTestFile }) {
       }));
 
     loadTestFile(require.resolve('./get_all_pings'));
+    loadTestFile(require.resolve('./graphql'));
   });
 }

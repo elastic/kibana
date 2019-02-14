@@ -58,12 +58,12 @@ Array [
             "filter": Array [
               Object {
                 "term": Object {
-                  "context.service.name": "test-service",
+                  "service.name": "test-service",
                 },
               },
               Object {
                 "term": Object {
-                  "processor.name": "metric",
+                  "processor.event": "metric",
                 },
               },
               Object {

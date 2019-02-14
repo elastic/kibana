@@ -15,7 +15,8 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
-import 'plugins/ml/components/annotations_table';
+import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
+import 'plugins/ml/components/annotations/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
@@ -54,6 +55,7 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
+import { annotationsRefresh$ } from '../services/annotations_service';
 
 
 import chrome from 'ui/chrome';
@@ -573,10 +575,12 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Store forecast ID in the appState.
       $scope.appState.mlTimeSeriesExplorer.forecastId = forecastId;
 
-      // Set the zoom to show backwards from the end of the forecast range.
+      // Set the zoom to centre on the start of the forecast range, depending
+      // on the time range of the forecast and data.
       const earliestDataDate = _.first($scope.contextChartData).date;
-      const zoomLatestMs = resp.latest;
-      const zoomEarliestMs = Math.max(earliestDataDate.getTime(), zoomLatestMs - $scope.autoZoomDuration);
+      const zoomLatestMs = Math.min(earliest + ($scope.autoZoomDuration / 2), latest.valueOf());
+      const zoomEarliestMs = Math.max(zoomLatestMs - $scope.autoZoomDuration, earliestDataDate.getTime());
+
       const zoomState = {
         from: moment(zoomEarliestMs).toISOString(),
         to: moment(zoomLatestMs).toISOString()
@@ -588,9 +592,11 @@ module.controller('MlTimeSeriesExplorerController', function (
       // Ensure the forecast data will be shown if hidden previously.
       $scope.showForecast = true;
 
+
       if (earliest.isBefore(bounds.min) || latest.isAfter(bounds.max)) {
         const earliestMs = Math.min(earliest.valueOf(), bounds.min.valueOf());
         const latestMs = Math.max(latest.valueOf(), bounds.max.valueOf());
+
         timefilter.setTime({
           from: moment(earliestMs).toISOString(),
           to: moment(latestMs).toISOString()
@@ -648,11 +654,13 @@ module.controller('MlTimeSeriesExplorerController', function (
   mlSelectIntervalService.state.watch(tableControlsListener);
   mlSelectSeverityService.state.watch(tableControlsListener);
 
+  const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
     mlSelectIntervalService.state.unwatch(tableControlsListener);
     mlSelectSeverityService.state.unwatch(tableControlsListener);
+    annotationsRefreshSub.unsubscribe();
   });
 
   // Listen for changes to job selection.
@@ -677,6 +685,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
 
     const defaultRange = calculateDefaultFocusRange();
+
     if ((selection.from.getTime() !== defaultRange[0].getTime() || selection.to.getTime() !== defaultRange[1].getTime()) &&
       (isNaN(Date.parse(selection.from)) === false && isNaN(Date.parse(selection.to)) === false)) {
       const zoomState = { from: selection.from.toISOString(), to: selection.to.toISOString() };
@@ -905,18 +914,34 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   function calculateDefaultFocusRange() {
-    // Returns the range that shows the most recent data at bucket span granularity.
+
     $scope.autoZoomDuration = getAutoZoomDuration();
+    const isForecastData = $scope.contextForecastData !== undefined && $scope.contextForecastData.length > 0;
 
-    const combinedData = $scope.contextForecastData === undefined ?
+    const combinedData = (isForecastData === false) ?
       $scope.contextChartData : $scope.contextChartData.concat($scope.contextForecastData);
-
     const earliestDataDate = _.first(combinedData).date;
     const latestDataDate = _.last(combinedData).date;
-    const latestMsToLoad = latestDataDate.getTime() + $scope.contextAggregationInterval.asMilliseconds();
-    const earliestMsToLoad = Math.max(earliestDataDate.getTime(), latestMsToLoad - $scope.autoZoomDuration);
 
-    return [new Date(earliestMsToLoad), new Date(latestMsToLoad)];
+    let rangeEarliestMs;
+    let rangeLatestMs;
+
+    if (isForecastData === true) {
+      // Return a range centred on the start of the forecast range, depending
+      // on the time range of the forecast and data.
+      const earliestForecastDataDate = _.first($scope.contextForecastData).date;
+      const latestForecastDataDate = _.last($scope.contextForecastData).date;
+
+      rangeLatestMs = Math.min(earliestForecastDataDate.getTime() + ($scope.autoZoomDuration / 2), latestForecastDataDate.getTime());
+      rangeEarliestMs = Math.max(rangeLatestMs - $scope.autoZoomDuration, earliestDataDate.getTime());
+    } else {
+      // Returns the range that shows the most recent data at bucket span granularity.
+      rangeLatestMs = latestDataDate.getTime() + $scope.contextAggregationInterval.asMilliseconds();
+      rangeEarliestMs = Math.max(earliestDataDate.getTime(), rangeLatestMs - $scope.autoZoomDuration);
+    }
+
+    return [new Date(rangeEarliestMs), new Date(rangeLatestMs)];
+
   }
 
   function calculateAggregationInterval(bounds, bucketsTarget) {
@@ -987,5 +1012,4 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   $scope.initializeVis();
-
 });

@@ -35,7 +35,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Start datafeed'
       }),
       icon: 'play',
-      enabled: () => (canStartStopDatafeed),
+      enabled: (item) => (item.deleting !== true && canStartStopDatafeed),
       available: (item) => (isStartable([item])),
       onClick: (item) => {
         showStartDatafeedModal([item]);
@@ -49,7 +49,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Stop datafeed'
       }),
       icon: 'stop',
-      enabled: () => (canStartStopDatafeed),
+      enabled: (item) => (item.deleting !== true && canStartStopDatafeed),
       available: (item) => (isStoppable([item])),
       onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
@@ -63,7 +63,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Close job'
       }),
       icon: 'cross',
-      enabled: () => (canCloseJob),
+      enabled: (item) => (item.deleting !== true && canCloseJob),
       available: (item) => (isClosable([item])),
       onClick: (item) => {
         closeJobs([item], refreshJobs);
@@ -87,7 +87,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
           return indexPatternNames.some(ipName => ipName === dfiName);
         });
 
-        return canCreateJob && jobIndicesAvailable;
+        return (item.deleting !== true && canCreateJob && jobIndicesAvailable);
       },
       onClick: (item) => {
         cloneJob(item.id);
@@ -101,7 +101,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Edit job'
       }),
       icon: 'pencil',
-      enabled: () => (canUpdateJob && canUpdateDatafeed),
+      enabled: (item) => (item.deleting !== true && canUpdateJob && canUpdateDatafeed),
       onClick: (item) => {
         showEditJobFlyout(item);
         closeMenu();
@@ -115,7 +115,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       }),
       icon: 'trash',
       color: 'danger',
-      enabled: () => (canDeleteJob),
+      enabled: () => canDeleteJob,
       onClick: (item) => {
         showDeleteJobModal([item]);
         closeMenu();

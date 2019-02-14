@@ -6,19 +6,23 @@
 
 import gql from 'graphql-tag';
 
-export const getErrorListQuery = gql`
-  query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
-    errorList: getErrorsList(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-      filters: $filters
-    ) {
-      latestMessage
-      monitorId
-      type
-      count
-      statusCode
-      timestamp
-    }
+export const getErrorListQueryString = `
+query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
+  errorList: getErrorsList(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+    filters: $filters
+  ) {
+    latestMessage
+    monitorId
+    type
+    count
+    statusCode
+    timestamp
   }
+}
+`;
+
+export const getErrorListQuery = gql`
+  ${getErrorListQueryString}
 `;

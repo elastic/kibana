@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const DEFAULT_LINES_TO_SAMPLE = 1000;
 
 export const overrideDefaults = {
   timestampFormat: undefined,
@@ -16,4 +17,5 @@ export const overrideDefaults = {
   columnNames: undefined,
   shouldTrimFields: undefined,
   grokPattern: undefined,
+  linesToSample: undefined,
 };

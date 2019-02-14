@@ -1,12 +1,17 @@
-// These are hacks that were near ML's root. Unsure if they still need to be here.
-.tab-jobs,
-.edit-job-modal,
-.create-watch-modal {
+.tab-datavisualizer_index_select,
+.tab-timeseriesexplorer,
+.tab-explorer,
+.tab-jobs {
+  // Make all page background white until More of the pages use EuiPage to wrap in panel-like components
+  background-color: $euiColorEmptyShade;
+}
+
+.tab-jobs {
   label {
     display: inline-block;
   }
 
-  .validation-error {
+   .validation-error {
     margin-top: $euiSizeXS;
   }
 }
@@ -37,6 +42,12 @@
     .ui-select-placeholder {
       color: $euiColorDarkShade;
     }
+  }
+
+  .btn {
+    border: 1px solid $euiColorLightShade;
+    background-color: $euiColorEmptyShade;
+    color: $euiColorDarkestShade;
   }
  }
 
