@@ -11,25 +11,18 @@ export class HeatmapStyle extends AbstractStyle {
 
   static type = 'HEATMAP';
 
-  constructor(styleDescriptor = {}) {
+  constructor() {
     super();
-    this._descriptor = HeatmapStyle.createDescriptor(
-      styleDescriptor.refinement,
-      styleDescriptor.properties
-    );
+    this._descriptor = HeatmapStyle.createDescriptor();
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === HeatmapStyle;
   }
 
-  static createDescriptor(refinement, properties = {}) {
+  static createDescriptor() {
     return {
       type: HeatmapStyle.type,
-      refinement: refinement || 'coarse',
-      properties: {
-        ...properties
-      }
     };
   }
 
@@ -50,7 +43,7 @@ export class HeatmapStyle extends AbstractStyle {
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
     } else {
-      throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
+      throw new Error(`Resolution param not recognized: ${this._descriptor.refinement}`);
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
     mbMap.setPaintProperty(layerId, 'heatmap-weight', {
