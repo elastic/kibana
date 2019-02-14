@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { select, selectReduce } from './state';
+import { select } from './state';
 import { getScene } from './layout_functions';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
@@ -124,8 +124,8 @@ export const mouseIsDown = select(({ mouseIsDown }, next) =>
   next ? next.event === 'mouseDown' : mouseIsDown
 )(gestureStatePrev, mouseButtonEvent);
 
-const mouseButtonState = selectReduce(
-  ({ buttonState, downX, downY }, mouseNowDown, { x, y }) => {
+const mouseButtonState = select(
+  ({ mouseButtonState: { buttonState, downX, downY } }, mouseNowDown, { x, y }) => {
     const movedAlready = x !== downX || y !== downY;
     const newButtonState = mouseButtonStateTransitions(buttonState, mouseNowDown, movedAlready);
     return {
@@ -133,9 +133,8 @@ const mouseButtonState = selectReduce(
       downX: newButtonState === 'downed' ? x : downX,
       downY: newButtonState === 'downed' ? y : downY,
     };
-  },
-  { buttonState: 'up', downX: null, downY: null }
-)(mouseIsDown, cursorPosition);
+  }
+)(gestureStatePrev, mouseIsDown, cursorPosition);
 
 export const mouseDowned = select(state => state.buttonState === 'downed')(mouseButtonState);
 
@@ -153,8 +152,8 @@ export const actionEvent = select(action =>
   action.type === 'actionEvent' ? action.payload : null
 )(primaryUpdate);
 
-export const gestureState = select((cursor, mouseIsDown) => ({
+export const gestureState = select((cursor, mouseIsDown, mouseButtonState) => ({
   cursor,
   mouseIsDown,
   mouseButtonState,
-}))(cursorPosition, mouseIsDown);
+}))(cursorPosition, mouseIsDown, mouseButtonState);
