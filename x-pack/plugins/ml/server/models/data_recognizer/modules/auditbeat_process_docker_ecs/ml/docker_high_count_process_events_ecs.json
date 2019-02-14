@@ -3,10 +3,10 @@
   "description": "Auditbeat: Detect unusual increases in process execution rates in docker containers (ECS)",
   "groups": ["auditd"],
   "analysis_config": {
-    "bucket_span": "10m",
+    "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "high_non_zero_count partition container.name",
+        "detector_description": "High process rate in docker containers",
         "function": "high_count",
         "partition_field_name": "container.name"
       }

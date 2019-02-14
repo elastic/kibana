@@ -32,7 +32,7 @@ export function getQueryWithIndexPattern(
 
 interface Props {
   query: QueryParamsDecoded;
-  children: (query: QueryParamsDecoded) => ReactElement<any>;
+  children: (query: QueryParamsDecoded) => ReactElement<unknown>;
 }
 
 interface State {

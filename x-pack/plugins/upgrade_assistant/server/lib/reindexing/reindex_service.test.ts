@@ -6,6 +6,10 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
+import {
   IndexGroup,
   ReindexOperation,
   ReindexSavedObject,
@@ -84,7 +88,7 @@ describe('reindexService', () => {
           cluster: ['manage'],
           index: [
             {
-              names: [`anIndex*`],
+              names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
               privileges: ['all'],
             },
             {
@@ -107,7 +111,37 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_ml'],
           index: [
             {
-              names: [`.ml-anomalies*`],
+              names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('includes checking for permissions on the baseName which could be an alias', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      const hasRequired = await service.hasRequiredPrivileges(
+        `reindexed-v${PREV_MAJOR_VERSION}-anIndex`
+      );
+      expect(hasRequired).toBe(true);
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names: [
+                `reindexed-v${PREV_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
+                'anIndex',
+              ],
               privileges: ['all'],
             },
             {
@@ -130,7 +164,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_watcher'],
           index: [
             {
-              names: [`.watches*`],
+              names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
               privileges: ['all'],
             },
             {
@@ -145,14 +179,17 @@ describe('reindexService', () => {
 
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
+      const indexName = 'myIndex';
       actions.getFlatSettings.mockResolvedValueOnce({
-        settings: {},
+        settings: {
+          'index.provided_name': indexName,
+        },
         mappings: {
           properties: { https: { type: 'boolean' } },
         },
       });
 
-      const reindexWarnings = await service.detectReindexWarnings('myIndex');
+      const reindexWarnings = await service.detectReindexWarnings(indexName);
       expect(reindexWarnings).toEqual([]);
     });
 
@@ -726,6 +763,13 @@ describe('reindexService', () => {
         id: '1',
         attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.newIndexCreated },
       } as ReindexSavedObject;
+
+      beforeEach(() => {
+        actions.getFlatSettings.mockResolvedValueOnce({
+          settings: {},
+          mappings: {},
+        });
+      });
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
         callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex

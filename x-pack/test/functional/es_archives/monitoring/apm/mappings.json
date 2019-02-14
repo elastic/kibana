@@ -1,0 +1,17 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".monitoring-beats-6-2018.08.31",
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

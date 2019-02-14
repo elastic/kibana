@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { initializeInterpreter, FUNCTIONS_URL } from './interpreter';
+import { FUNCTIONS_URL } from './consts';
+import { initializeInterpreter } from './interpreter';
 
 jest.mock('../common/interpreter/interpret', () => ({
   interpreterProvider: () => () => ({}),
@@ -42,10 +43,23 @@ describe('kbn-interpreter/interpreter', () => {
   });
 
   it('registers client-side functions that pass through to the server', async () => {
-    const kfetch = jest.fn(async () => ({
-      hello: { name: 'hello' },
-      world: { name: 'world' },
-    }));
+    const kfetch = jest.fn(async ({ method }) => {
+      if (method === 'POST') {
+        return {
+          results: [{
+            id: 1,
+            result: {
+              hello: 'world',
+            },
+          }],
+        };
+      }
+
+      return {
+        hello: { name: 'hello' },
+        world: { name: 'world' },
+      };
+    });
 
     const register = jest.fn();
 
@@ -63,12 +77,21 @@ describe('kbn-interpreter/interpreter', () => {
     const context = {};
     const args = { quote: 'All we have to decide is what to do with the time that is given us.' };
 
-    await hello.fn(context, args);
+    const result = await hello.fn(context, args);
+
+    expect(result).toEqual({ hello: 'world' });
 
     expect(kfetch).toHaveBeenCalledWith({
-      pathname: `${FUNCTIONS_URL}/hello`,
+      pathname: FUNCTIONS_URL,
       method: 'POST',
-      body: JSON.stringify({ args, context }),
+      body: JSON.stringify({
+        functions: [{
+          id: 1,
+          functionName: 'hello',
+          args,
+          context,
+        }]
+      }),
     });
   });
 

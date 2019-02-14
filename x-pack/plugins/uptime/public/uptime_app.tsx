@@ -23,11 +23,10 @@ import {
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
@@ -136,7 +135,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   public render() {
     const { routerBasename, graphQLClient } = this.props;
     return (
-      <I18nContext>
+      <I18nProvider>
         <Router basename={routerBasename}>
           <ApolloProvider client={graphQLClient}>
             <EuiPage className="app-wrapper-panel">
@@ -150,7 +149,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         defaultMessage: 'Go to Uptime home page',
                       })}
                       href="#/"
-                      iconType="heartbeatApp"
+                      iconType="uptimeApp"
                       iconTitle={i18n.translate('xpack.uptime.appHeader.uptimeLogoTitle', {
                         defaultMessage: 'Uptime',
                       })}
@@ -250,7 +249,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             </EuiPage>
           </ApolloProvider>
         </Router>
-      </I18nContext>
+      </I18nProvider>
     );
   }
 
