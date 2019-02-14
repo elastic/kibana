@@ -307,7 +307,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
-      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await testSubjects.click(`savedObjectTitle${indexPattern}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
