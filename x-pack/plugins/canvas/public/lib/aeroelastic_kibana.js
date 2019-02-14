@@ -22,7 +22,6 @@ export const aeroelastic = {
     stores.set(page, state.createStore(initialState, onChangeCallback));
 
     const updateScene = state.select((nextScene, primaryUpdate) => ({
-      shapeAdditions: nextScene.shapes,
       primaryUpdate,
       currentScene: nextScene,
       configuration: nextScene.configuration,
