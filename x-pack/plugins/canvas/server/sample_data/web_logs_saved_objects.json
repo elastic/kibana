@@ -4,10 +4,11 @@
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T12:41:57.071Z",
     "version": 1,
-    "migrationVersion": {},
+    "migrationVersion": {
+      "canvas-workpad": "7.0.0"
+    },
     "attributes": {
       "name": "[Logs] Web Traffic",
-      "id": "workpad-5563cc40-5760-4afe-bf33-9da72fac53b7",
       "width": 1280,
       "height": 720,
       "page": 0,
