@@ -41,21 +41,13 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   function getInitialDefaultInjectedVars() {
     const navLinkSpecs = server.getUiNavLinks();
-    const { savedObjects } = server;
+
     return {
       uiCapabilities: {
         navLinks: navLinkSpecs.reduce((acc, navLinkSpec) => ({
           ...acc,
           [navLinkSpec._id]: true
-        }), {}),
-        savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
-          ...acc,
-          [type]: {
-            delete: true,
-            edit: true,
-            read: true,
-          }
-        }), {}),
+        }), {})
       }
     };
   }
