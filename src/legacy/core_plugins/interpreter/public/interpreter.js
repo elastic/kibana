@@ -17,33 +17,21 @@
  * under the License.
  */
 
-
-import { initializeInterpreter, loadBrowserRegistries } from '@kbn/interpreter/public';
+import { initializeInterpreter, registries } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
-import chrome from 'ui/chrome';
-import { functionsRegistry } from './functions_registry';
-import { typesRegistry } from './types_registry';
-
-const basePath = chrome.getInjected('serverBasePath');
-
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
 
 let _resolve;
 let _interpreterPromise;
 
 const initialize = async () => {
-  await loadBrowserRegistries(types, basePath);
-  initializeInterpreter(kfetch, typesRegistry, functionsRegistry).then(interpreter => {
+  initializeInterpreter(kfetch, registries.types, registries.browserFunctions).then(interpreter => {
     _resolve({ interpreter });
   });
 };
 
 export const getInterpreter = async () => {
   if (!_interpreterPromise) {
-    _interpreterPromise = new Promise(resolve => _resolve = resolve);
+    _interpreterPromise = new Promise(resolve => (_resolve = resolve));
     initialize();
   }
   return await _interpreterPromise;

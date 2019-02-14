@@ -251,8 +251,9 @@ OptionalSpace
   / Space*
 
 EscapedWhitespace
-  = '\\n' { return '\n'; }
-  / '\\t' { return '\t'; }
+  = '\\t' { return '\t'; }
+  / '\\r' { return '\t'; }
+  / '\\n' { return '\n'; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
