@@ -1388,12 +1388,13 @@ export const getDragBox = (dragging, draggedShape, { x0, y0, x1, y1 }) =>
     b: Math.abs(y1 - y0) / 2,
   };
 
-export const getDragBoxSelected = (box, shapes) => {
-  if (!box) {
+export const getDragBoxHovered = (box, shapes) => {
+  if (box) {
+    const inside = insideAABB(box);
+    return shapes.filter(s => s.type !== 'annotation' && inside(s.transformMatrix, s.a, s.b));
+  } else {
     return [];
   }
-  const filter = insideAABB(box);
-  return shapes.filter(s => s.type !== 'annotation' && filter(s.transformMatrix, s.a, s.b));
 };
 
 export const getDragBoxAnnotation = (config, box) =>
