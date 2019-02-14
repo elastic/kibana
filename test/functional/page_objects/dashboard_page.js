@@ -53,7 +53,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': defaultIndex,
-        'telemetry:optIn': false
       });
       await this.selectDefaultIndex(defaultIndex);
       await kibanaServer.uiSettings.disableToastAutohide();

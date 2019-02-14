@@ -10,9 +10,17 @@ import { TOCEntry } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
 import { fitToLayerExtent, setSelectedLayer, toggleLayerVisible } from '../../../../../actions/store_actions';
 
+import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
+
 function mapStateToProps(state = {}) {
   return {
-    zoom: _.get(state, 'map.mapState.zoom', 0)
+    zoom: _.get(state, 'map.mapState.zoom', 0),
+    getSelectedLayerSelector: () => {
+      return getSelectedLayer(state);
+    },
+    hasDirtyStateSelector: () => {
+      return hasDirtyState(state);
+    }
   };
 }
 
