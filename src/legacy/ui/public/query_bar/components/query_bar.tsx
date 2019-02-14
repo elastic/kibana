@@ -668,7 +668,7 @@ export class QueryBarUI extends Component<Props, State> {
       });
 
     return (
-      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
+      <EuiFlexItem grow={false} className="kbnQueryBar__datePickerWrapper">
         <EuiSuperDatePicker
           start={this.state.dateRangeFrom}
           end={this.state.dateRangeTo}
