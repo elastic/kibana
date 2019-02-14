@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { UICapabilities } from '../../../core/public/ui_capabilities';
+import { UICapabilities } from '../../../../core/public/ui_capabilities';
 
 uiRoutes.addSetupWork((uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any) => {
   const route = get($route, 'current.$$route') as any;
