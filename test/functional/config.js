@@ -34,6 +34,7 @@ import {
   TimelionPageProvider,
   SharePageProvider,
   TimePickerPageProvider,
+  ErrorPageProvider,
 } from './page_objects';
 
 import {
@@ -96,6 +97,7 @@ export default async function ({ readConfigFile }) {
       timelion: TimelionPageProvider,
       share: SharePageProvider,
       timePicker: TimePickerPageProvider,
+      error: ErrorPageProvider
     },
     services: {
       es: commonConfig.get('services.es'),
