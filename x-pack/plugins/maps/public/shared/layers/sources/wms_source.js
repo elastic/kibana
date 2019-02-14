@@ -14,6 +14,7 @@ import {
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 
 export class WMSSource extends AbstractTMSSource {
 
@@ -46,10 +47,14 @@ export class WMSSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: WMSSource.title },
-      { label: 'Url', value: this._descriptor.serviceUrl },
-      { label: 'Layers', value: this._descriptor.layers },
-      { label: 'Styles', value: this._descriptor.styles },
+      { label: getDataSourceLabel(), value: WMSSource.title },
+      { label: getUrlLabel(), value: this._descriptor.serviceUrl },
+      { label: i18n.translate('xpack.maps.source.wms.layersLabel', {
+        defaultMessage: 'Layers'
+      }), value: this._descriptor.layers },
+      { label: i18n.translate('xpack.maps.source.wms.stylesLabel', {
+        defaultMessage: 'Styles'
+      }), value: this._descriptor.styles },
     ];
   }
 

@@ -14,6 +14,7 @@ import {
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 
 export class XYZTMSSource extends AbstractTMSSource {
 
@@ -44,8 +45,8 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: XYZTMSSource.title },
-      { label: 'Url', value: this._descriptor.urlTemplate },
+      { label: getDataSourceLabel(), value: XYZTMSSource.title },
+      { label: getUrlLabel(), value: this._descriptor.urlTemplate },
     ];
   }
 

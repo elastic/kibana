@@ -11,3 +11,16 @@ export function getAppTitle() {
     defaultMessage: 'Maps'
   });
 }
+
+
+export function getDataSourceLabel() {
+  return i18n.translate('xpack.maps.source.common.dataSourceLabel', {
+    defaultMessage: 'Data source'
+  });
+}
+
+export function getUrlLabel() {
+  return i18n.translate('xpack.maps.source.common.urlLabel', {
+    defaultMessage: 'Url'
+  });
+}
