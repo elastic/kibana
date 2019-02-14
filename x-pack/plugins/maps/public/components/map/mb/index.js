@@ -15,7 +15,7 @@ import {
   clearGoto,
   setLayerErrorStatus,
 } from '../../../actions/store_actions';
-import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
+import { getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

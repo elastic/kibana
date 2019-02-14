@@ -14,7 +14,7 @@ export default function ({ getService }) {
     after(async () => {
       // turn off collection
       const disableCollection = {
-        "persistent":
+        'persistent':
         {
           xpack: {
             monitoring: {
