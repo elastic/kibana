@@ -16,9 +16,8 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    if (stores.has(page)) {
-      throw new Error('Only a single aeroelastic store per page should exist');
-    }
+    // if due to a rare race condition, there's a preexisting store for a page, it's OK to just supersede it as
+    // the stale one just gets garbage collected (stores have only inert data and need no `destroy` calls etc.)
 
     stores.set(page, state.createStore(initialState, onChangeCallback));
 
