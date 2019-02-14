@@ -54,12 +54,15 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           case 'canvas_read':
           case 'dashboard_all':
           case 'dashboard_read':
+          case 'dev_tools_all':
           case 'dev_tools_read':
           case 'discover_all':
           case 'discover_read':
           case 'graph_all':
           case 'graph_read':
+          case 'infrastructure_all':
           case 'infrastructure_read':
+          case 'logs_all':
           case 'logs_read':
           case 'maps_all':
           case 'maps_read':
@@ -67,6 +70,7 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
+          case 'uptime_all':
           case 'uptime_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('visualize');
