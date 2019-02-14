@@ -15,20 +15,8 @@ import {
   UpdaterFunction,
 } from './types';
 
-export const shallowEqual = (a: any, b: any): boolean => {
-  if (a === b) {
-    return true;
-  }
-  if (a.length !== b.length) {
-    return false;
-  }
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-  return true;
-};
+const shallowArrayEqual = (a: any, b: any): boolean =>
+  a.length === b.length && a.every((v: any, i: number) => v === b[i]);
 
 const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
@@ -44,7 +32,7 @@ export const select = (fun: NodeFunction): NodeFunction => (
     const lastActionId: ActionId = state.primaryUpdate.payload.uid;
     if (
       actionId === lastActionId ||
-      shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
+      shallowArrayEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
     ) {
       return value;
     }
