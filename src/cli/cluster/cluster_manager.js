@@ -181,6 +181,7 @@ export default class ClusterManager {
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
         ...extraIgnores,
+        'plugins/java_languageserver'
       ],
     });
 
