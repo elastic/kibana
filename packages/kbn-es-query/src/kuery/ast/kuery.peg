@@ -254,6 +254,7 @@ EscapedWhitespace
   = '\\t' { return '\t'; }
   / '\\r' { return '\t'; }
   / '\\n' { return '\n'; }
+  / '\\ ' { return '\\ '; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
