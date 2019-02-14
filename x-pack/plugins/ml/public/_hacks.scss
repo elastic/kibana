@@ -6,6 +6,16 @@
   background-color: $euiColorEmptyShade;
 }
 
+.tab-jobs {
+  label {
+    display: inline-block;
+  }
+
+   .validation-error {
+    margin-top: $euiSizeXS;
+  }
+}
+
 // ML specific bootstrap hacks
 .button-wrapper {
   display: inline;
