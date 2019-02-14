@@ -91,44 +91,20 @@ export const SearchOrFilter = pure<Props>(
         </ModeFlexItem>
         <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
           <EuiToolTip content={modes[kqlMode].kqlBarTooltip}>
-            <>
-              {kqlMode === 'filter' && (
-                <EuiSearchBar
-                  data-test-subj="timeline-search-bar"
-                  box={{
-                    placeholder: modes[kqlMode].placeholder,
-                    incremental: false,
-                    schema: {
-                      flags: [],
-                      fields: {},
-                    },
-                  }}
-                  query=""
-                  // TODO: this handler is NOT being called by `EuiSearchBar`, which causes the query entered by the user to disappear
-                  // we might have to use onSearch
-                  onChange={({ queryText }: { queryText: string }) =>
-                    // tslint:disable-next-line:no-console
-                    console.log('I will be doing filter at one point')
-                  }
+            <KueryAutocompletion indexPattern={indexPattern}>
+              {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                <AutocompleteField
+                  isLoadingSuggestions={isLoadingSuggestions}
+                  isValid={isFilterQueryDraftValid}
+                  loadSuggestions={loadSuggestions}
+                  onChange={setKqlFilterQueryDraft}
+                  onSubmit={applyKqlFilterQuery}
+                  placeholder={i18n.SEARCH_KQL_PLACEHOLDER}
+                  suggestions={suggestions}
+                  value={filterQueryDraft ? filterQueryDraft.expression : ''}
                 />
               )}
-              {kqlMode === 'search' && (
-                <KueryAutocompletion indexPattern={indexPattern}>
-                  {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                    <AutocompleteField
-                      isLoadingSuggestions={isLoadingSuggestions}
-                      isValid={isFilterQueryDraftValid}
-                      loadSuggestions={loadSuggestions}
-                      onChange={setKqlFilterQueryDraft}
-                      onSubmit={applyKqlFilterQuery}
-                      placeholder={i18n.SEARCH_KQL_PLACEHOLDER}
-                      suggestions={suggestions}
-                      value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                    />
-                  )}
-                </KueryAutocompletion>
-              )}
-            </>
+            </KueryAutocompletion>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

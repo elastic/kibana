@@ -50,29 +50,47 @@ describe('Build KQL Query', () => {
 
 describe('Combined Queries', () => {
   test('No Data Provider & No kqlQuery', () => {
-    expect(combineQueries([], mockIndexPattern, '')).toBeNull();
+    expect(combineQueries([], mockIndexPattern, '', 'search')).toBeNull();
   });
 
   test('Only Data Provider', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
-    const { filterQuery } = combineQueries(dataProviders, mockIndexPattern, '')!;
+    const { filterQuery } = combineQueries(dataProviders, mockIndexPattern, '', 'search')!;
     expect(filterQuery).toEqual(
       '{"bool":{"filter":[{"bool":{"should":[{"match":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}'
     );
   });
 
-  test('Only KQL query', () => {
-    const { filterQuery } = combineQueries([], mockIndexPattern, 'host.name: "host-1"')!;
+  test('Only KQL search/filter query', () => {
+    const { filterQuery } = combineQueries([], mockIndexPattern, 'host.name: "host-1"', 'search')!;
     expect(filterQuery).toEqual(
       '{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}'
     );
   });
 
-  test('Data Provider & KQL query', () => {
+  test('Data Provider & KQL search query', () => {
     const dataProviders = mockDataProviders.slice(0, 1);
-    const { filterQuery } = combineQueries(dataProviders, mockIndexPattern, 'host.name: "host-1"')!;
+    const { filterQuery } = combineQueries(
+      dataProviders,
+      mockIndexPattern,
+      'host.name: "host-1"',
+      'search'
+    )!;
     expect(filterQuery).toEqual(
       '{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}'
+    );
+  });
+
+  test('Data Provider & KQL filter query', () => {
+    const dataProviders = mockDataProviders.slice(0, 1);
+    const { filterQuery } = combineQueries(
+      dataProviders,
+      mockIndexPattern,
+      'host.name: "host-1"',
+      'filter'
+    )!;
+    expect(filterQuery).toEqual(
+      '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}'
     );
   });
 });
