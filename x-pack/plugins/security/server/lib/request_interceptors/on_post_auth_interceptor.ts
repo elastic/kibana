@@ -11,14 +11,18 @@ interface KbnServer extends Server {
   getHiddenUiAppById: (appId: string) => any;
 }
 
-export function initSecurityOnPostAuthRequestInterceptor(server: KbnServer) {
-  const features = server.plugins.xpack_main.getFeatures();
-  const allApplications: string[] = uniq(flatten(map(features, feature => feature.app)));
+let allApplications: string[] | null = null;
 
+export function initSecurityOnPostAuthRequestInterceptor(server: KbnServer) {
   server.ext('onPostAuth', async function onPostAuthSecurityInterceptor(
     req: Request,
     h: ResponseToolkit
   ) {
+    if (!allApplications) {
+      const features = server.plugins.xpack_main.getFeatures();
+      allApplications = uniq(flatten(map(features, feature => feature.app)));
+    }
+
     const path = req.path;
 
     const {
