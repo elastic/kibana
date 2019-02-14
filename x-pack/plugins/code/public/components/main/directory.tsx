@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiTitle, IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTitle, IconType } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -74,7 +74,11 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     <div className="code-directory__node" key={n.path}>
       <Link to={props.getUrl(n.path!)} data-test-subj={`codeFileExplorerNode-${n.name}`}>
         <EuiIcon type={typeIconMap[n.type]} color="subdued" />
-        <NodeName>{n.name}</NodeName>
+        <NodeName>
+          <EuiText size="s" style={{ display: 'inline-block' }}>
+            {n.name}
+          </EuiText>
+        </NodeName>
       </Link>
     </div>
   ));
