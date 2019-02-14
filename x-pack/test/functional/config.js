@@ -6,7 +6,7 @@
 
 /* eslint-disable kibana-custom/no-default-export */
 
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 
 import {
   CanvasPageProvider,
@@ -96,8 +96,10 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/infra'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
+      resolve(__dirname, './apps/registered_application'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
+      resolve(__dirname, './apps/unregistered_application'),
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
@@ -181,6 +183,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+        `--plugin-path=${join(__dirname, 'fixtures', 'functional_tests_plugin')}`,
       ],
     },
     uiSettings: {
@@ -223,6 +226,12 @@ export default async function ({ readConfigFile }) {
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
+      },
+      unregisteredApp: {
+        pathname: '/app/unregisteredApp',
+      },
+      registeredApp: {
+        pathname: '/app/registeredApp',
       },
       uptime: {
         pathname: '/app/uptime',
