@@ -34,9 +34,6 @@ export default function PointSeriesVisType(Private, i18n) {
         type: 'area',
         grid: {
           categoryLines: false,
-          style: {
-            color: '#eee'
-          }
         },
         categoryAxes: [
           {
