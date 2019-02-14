@@ -33,16 +33,17 @@ export function buildEsQuery(
   indexPattern,
   queries = [],
   filters = [],
-  {
-    allowLeadingWildcards = false,
-    queryStringOptions = {},
+  config = {
+    allowLeadingWildcards: false,
+    queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: false,
   }) {
   const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
 
-  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, allowLeadingWildcards);
-  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, queryStringOptions);
-  const filterQuery = buildQueryFromFilters(filters, indexPattern);
+  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards);
+  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions);
+  const filterQuery = buildQueryFromFilters(filters, indexPattern, config);
 
   return {
     bool: {
