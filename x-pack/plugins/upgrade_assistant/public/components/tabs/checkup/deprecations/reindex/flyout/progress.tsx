@@ -64,7 +64,7 @@ const ReindexProgressBar: React.StatelessComponent<{
     case LoadingState.Success:
       cancelText = (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledgLabel"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
           defaultMessage="Cancelled"
         />
       );

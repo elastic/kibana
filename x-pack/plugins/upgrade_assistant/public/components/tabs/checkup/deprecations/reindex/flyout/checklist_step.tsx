@@ -36,7 +36,7 @@ const buttonLabel = (status?: ReindexStatus) => {
     case ReindexStatus.inProgress:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.inProgressLabel"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
@@ -57,7 +57,7 @@ const buttonLabel = (status?: ReindexStatus) => {
     default:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.startLabel"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
           defaultMessage="Run reindex"
         />
       );
@@ -110,7 +110,7 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeWarningCallout.title"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index"
                 />
               }

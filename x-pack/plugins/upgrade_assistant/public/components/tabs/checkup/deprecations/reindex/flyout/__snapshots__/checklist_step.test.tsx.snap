@@ -108,7 +108,7 @@ exports[`ChecklistFlyout renders 1`] = `
         >
           <FormattedMessage
             defaultMessage="Run reindex"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.startLabel"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
             values={Object {}}
           />
         </EuiButton>
