@@ -30,7 +30,9 @@ app.directive('actionTypeSelect', function ($injector) {
 
         this.loadActionTypes()
           .then(actionTypes => {
-            this.actionTypes = actionTypes;
+            this.actionTypes = actionTypes.filter((actionType) => {
+              return actionType.typeName !== 'Action';
+            });
           });
       }
 
