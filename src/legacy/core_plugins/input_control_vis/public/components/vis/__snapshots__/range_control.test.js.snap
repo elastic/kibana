@@ -32,11 +32,11 @@ exports[`renders RangeControl 1`] = `
     ticks={
       Array [
         Object {
-          "label": "0",
+          "label": 0,
           "value": 0,
         },
         Object {
-          "label": "100",
+          "label": 100,
           "value": 100,
         },
       ]

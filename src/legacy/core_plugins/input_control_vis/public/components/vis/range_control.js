@@ -24,6 +24,27 @@ import { FormRow } from './form_row';
 import { injectI18n } from '@kbn/i18n/react';
 import { ValidatedDualRange } from 'ui/validated_range';
 
+
+function roundWithPrecision(value, decimalPlaces, roundFunction) {
+  if (decimalPlaces <= 0) {
+    return roundFunction(value);
+  }
+
+  let results = value;
+  results = results * Math.pow(10, decimalPlaces);
+  results = roundFunction(results);
+  results = results / Math.pow(10, decimalPlaces);
+  return results;
+}
+
+export function ceilWithPrecision(value, decimalPlaces) {
+  return roundWithPrecision(value, decimalPlaces, Math.ceil);
+}
+
+export function floorWithPrecision(value, decimalPlaces) {
+  return roundWithPrecision(value, decimalPlaces, Math.floor);
+}
+
 class RangeControlUi extends Component {
   state = {};
 
@@ -50,14 +71,7 @@ class RangeControlUi extends Component {
     this.props.stageFilter(this.props.controlIndex, controlValue);
   }, 200);
 
-  formatLabel = (value) => {
-    let formatedValue = value;
-    const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces');
-    if (decimalPlaces !== null && decimalPlaces >= 0) {
-      formatedValue = value.toFixed(decimalPlaces);
-    }
-    return formatedValue;
-  };
+
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
@@ -69,16 +83,20 @@ class RangeControlUi extends Component {
       );
     }
 
+    const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);
+    const min = floorWithPrecision(this.props.control.min, decimalPlaces);
+    const max = ceilWithPrecision(this.props.control.max, decimalPlaces);
+
     const ticks = [
-      { value: this.props.control.min, label: this.formatLabel(this.props.control.min) },
-      { value: this.props.control.max, label: this.formatLabel(this.props.control.max) }
+      { value: min, label: min },
+      { value: max, label: max }
     ];
 
     return (
       <ValidatedDualRange
         id={this.props.control.id}
-        min={this.props.control.min}
-        max={this.props.control.max}
+        min={min}
+        max={max}
         value={this.state.value}
         onChange={this.onChangeComplete}
         showInput

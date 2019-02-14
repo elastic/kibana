@@ -37,7 +37,7 @@ export function isRangeValid(value, min, max, formatMessage) {
     });
   }
 
-  if (lowerValue < min || upperValue > max) {
+  if ((isLowerValueValid && lowerValue < min) || (isUpperValueValid && upperValue > max)) {
     isValid = false;
     errorMessage = formatMessage({
       id: 'common.ui.dualRangeControl.outsideOfRangeErrorMessage',

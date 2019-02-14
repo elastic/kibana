@@ -22,6 +22,8 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   RangeControl,
+  ceilWithPrecision,
+  floorWithPrecision,
 } from './range_control';
 
 const control = {
@@ -71,4 +73,14 @@ test('disabled', () => {
     stageFilter={() => {}}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
+test('ceilWithPrecision', () => {
+  expect(ceilWithPrecision(999.133, 0)).toBe(1000);
+  expect(ceilWithPrecision(999.133, 2)).toBe(999.14);
+});
+
+test('floorWithPrecision', () => {
+  expect(floorWithPrecision(100.777, 0)).toBe(100);
+  expect(floorWithPrecision(100.777, 2)).toBe(100.77);
 });
