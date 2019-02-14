@@ -21,9 +21,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await browser.setWindowSize(1600, 1000);
 
       await esArchiver.load(archive);
-      await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-      });
+      await kibanaServer.uiSettings.replace({});
 
       await PageObjects.monitoring.navigateTo();
       await noData.isOnNoDataPage();

@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize']);
   const defaultSettings = {
-    'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
   };
 
