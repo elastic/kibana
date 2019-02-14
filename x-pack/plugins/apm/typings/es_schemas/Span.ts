@@ -39,6 +39,15 @@ export interface Span extends APMDoc {
     subtype: string;
     sync: boolean;
     type: string;
+    http?: {
+      url: {
+        original: string;
+      };
+    };
+    db?: {
+      statement: string;
+      type?: string;
+    };
   };
   transaction: { id: string };
 }

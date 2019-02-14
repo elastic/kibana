@@ -38,7 +38,7 @@ const DatabaseStatement = styled.div`
 `;
 
 interface Props {
-  dbContext?: NonNullable<Span['context']>['db'];
+  dbContext?: NonNullable<Span['span']>['db'];
 }
 
 export function DatabaseContext({ dbContext }: Props) {

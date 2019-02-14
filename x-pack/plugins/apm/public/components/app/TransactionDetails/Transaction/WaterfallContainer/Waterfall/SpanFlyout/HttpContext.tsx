@@ -16,6 +16,7 @@ import {
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 
 const ContextUrl = styled.div`
@@ -27,11 +28,13 @@ const ContextUrl = styled.div`
 `;
 
 interface Props {
-  httpContext: NonNullable<Span['context']>['http'];
+  httpContext: NonNullable<Span['span']>['http'];
 }
 
 export function HttpContext({ httpContext }: Props) {
-  if (!httpContext || !httpContext.url) {
+  const url = idx(httpContext, _ => _.url.original);
+
+  if (!url) {
     return null;
   }
 
@@ -41,7 +44,7 @@ export function HttpContext({ httpContext }: Props) {
         <h3>HTTP URL</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <ContextUrl>{httpContext.url}</ContextUrl>
+      <ContextUrl>{url}</ContextUrl>
       <EuiSpacer size="l" />
     </Fragment>
   );
