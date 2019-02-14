@@ -30,7 +30,10 @@ export function initRoutes(server, licenseUid) {
     handler: async (request) => {
 
       if (!request.query.id) {
-        server.log('warning', 'Must supply id parameters to retrieve EMS file');
+        server.log('warning',
+          i18n.translate('xpack.maps.server.missingEMSId', {
+            defaultMessage: 'Must supply id parameters to retrieve EMS file'
+          }));
         return null;
       }
 
