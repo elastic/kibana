@@ -29,7 +29,7 @@ import { requestInstallLanguageServer } from '../../actions/language_server';
 import { RootState } from '../../reducers';
 import { JavaIcon, TypeScriptIcon } from '../shared/icons';
 const JAVA_URL =
-  'https://artifacts.elastic.co/downloads/kibana-plugins/https://github.com/elastic/java-langserver/releases/download/1.0.0-SNAPSHOT/java_languageserver-1.0.0-SNAPSHO';
+  'https://download.elasticsearch.org/code/java-langserver/snapshot/java_languageserver-1.0.0-SNAPSHOT-darwin.zip';
 
 const LanguageServerState = styled(EuiTextColor)`
   color: ${props => props.color};
@@ -171,40 +171,40 @@ const LanguageServerInstruction = (props: {
   close: () => void;
 }) => {
   return (
-    <React.Fragment> {
-    props.show && (
-      <EuiOverlayMask>
-        <EuiModal onClose={props.close}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>Install Instruction</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText grow={false}>
-              <h3>Download</h3>
-              <p>
-                Download {props.name} language server plugin from
-                <EuiLink href={props.url}> here.</EuiLink>
-              </p>
-              <h3>Install</h3>
-              <p>
-                Stop your kibana code node. Install it using kibana-plugin command.
-                <pre>
-                  <code>bin/kibana-plugin install file://path/to/plugin.zip</code>
-                </pre>
-              </p>
-            </EuiText>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton onClick={props.close} fill>
-              Close
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
-    )
-    }
+    <React.Fragment>
+      {' '}
+      {props.show && (
+        <EuiOverlayMask>
+          <EuiModal onClose={props.close}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>Install Instruction</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
+              <EuiText grow={false}>
+                <h3>Download</h3>
+                <p>
+                  Download {props.name} language server plugin from
+                  <EuiLink href={props.url}> here.</EuiLink>
+                </p>
+                <h3>Install</h3>
+                <p>
+                  Stop your kibana code node. Install it using kibana-plugin command.
+                  <pre>
+                    <code>bin/kibana-plugin install {JAVA_URL}</code>
+                  </pre>
+                </p>
+              </EuiText>
+            </EuiModalBody>
+            <EuiModalFooter>
+              <EuiButton onClick={props.close} fill>
+                Close
+              </EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        </EuiOverlayMask>
+      )}
     </React.Fragment>
-  )
+  );
 };
 
 const mapStateToProps = (state: RootState) => ({

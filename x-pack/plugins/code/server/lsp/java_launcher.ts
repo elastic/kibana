@@ -98,7 +98,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     // detect platform
     switch (getOsPlatform()) {
       case 'darwin':
-        javaHomePath = `${findJDK('darwin')}/Contents/Home`;
+        javaHomePath = `${findJDK('osx')}/Contents/Home`;
         javaPath = `${javaHomePath}/bin/java`;
         break;
       case 'win32':
