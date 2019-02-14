@@ -107,8 +107,8 @@ hash -r
 ###
 ### use the chromedriver cache if it exists
 ###
-if [ -f "$dir/.chromedriver/2.42/chromedriver_linux64.zip" ]; then
-  export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/2.42/chromedriver_linux64.zip"
+if [ -x "$dir/.chromedriver/master/chromedriver" ]; then
+  export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver"
   export CHROMEDRIVER_SKIP_DOWNLOAD=true
 fi
 
