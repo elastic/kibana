@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
     'dashboard',
     'header',
     'settings',
+    'timePicker',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
@@ -35,7 +36,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows the timepicker', async () => {
-        const timePickerExists = await testSubjects.exists('superDatePickerApplyTimeButton');
+        const timePickerExists = await PageObjects.timePicker.timePickerExists();
         expect(timePickerExists).to.be(true);
       });
 
