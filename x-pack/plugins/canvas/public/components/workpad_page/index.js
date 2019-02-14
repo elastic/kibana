@@ -205,6 +205,7 @@ export const WorkpadPage = compose(
           }
         },
         // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
+        // Note: these layer actions only work when a single element is selected
         bringForward: () =>
           selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], 1),
         bringToFront: () =>
