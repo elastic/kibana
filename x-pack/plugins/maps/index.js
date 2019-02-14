@@ -15,25 +15,25 @@ import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
 import { i18n } from '@kbn/i18n';
+import {  APP_ID, APP_ICON } from './common/constants';
+import { getAppTitle } from './common/i18n_getters';
 
 export function maps(kibana) {
 
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
-    id: 'maps',
+    id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
-        title: i18n.translate('xpack.maps.appTitle', {
-          defaultMessage: 'Maps'
-        }),
+        title: getAppTitle(),
         description: i18n.translate('xpack.maps.appDescription', {
           defaultMessage: 'Map application'
         }),
         main: 'plugins/maps/index',
         icon: 'plugins/maps/icon.svg',
-        euiIconType: 'gisApp',
+        euiIconType: APP_ICON,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
