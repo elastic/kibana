@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_INDEX_NAME = '.management-beats';
+import { pure } from 'recompose';
+import { HoverAnnotation as Component } from './tooltip_annotation';
+
+export const TooltipAnnotation = pure(Component);

@@ -141,6 +141,7 @@ export default async function ({ readConfigFile }) {
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
         'telemetry:optIn': false
       },
     },
