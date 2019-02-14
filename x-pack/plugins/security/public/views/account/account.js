@@ -9,7 +9,7 @@ import template from './account.html';
 import '../../services/shield_user';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { AccountManagementPage } from './components/account_management_page';
+import { AccountManagementPage } from './components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
