@@ -36,10 +36,10 @@ export async function getDataSources() {
   return loadingMetaPromise;
 }
 
+/**
+ * Should only call this after verifying `isMetadataLoaded` equals true
+ */
 export function getDataSourcesSync() {
-  if (!isLoaded) {
-    throw new Error('Metadata is not loaded yet. Use isMetadataLoaded first before calling this function.');
-  }
   return meta;
 }
 
