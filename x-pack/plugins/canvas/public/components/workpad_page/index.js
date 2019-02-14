@@ -111,6 +111,7 @@ export const WorkpadPage = compose(
           ),
         ];
       };
+
       const selectedPrimaryShapeObjects = selectedPrimaryShapes.map(id =>
         shapes.find(s => s.id === id)
       );
@@ -204,10 +205,14 @@ export const WorkpadPage = compose(
           }
         },
         // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
-        bringForward: () => elementLayer(page.id, selectedElements[0], 1),
-        bringToFront: () => elementLayer(page.id, selectedElements[0], Infinity),
-        sendBackward: () => elementLayer(page.id, selectedElements[0], -1),
-        sendToBack: () => elementLayer(page.id, selectedElements[0], -Infinity),
+        bringForward: () =>
+          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], 1),
+        bringToFront: () =>
+          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], Infinity),
+        sendBackward: () =>
+          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], -1),
+        sendToBack: () =>
+          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], -Infinity),
       };
     }
   ), // Updates states; needs to have both local and global
