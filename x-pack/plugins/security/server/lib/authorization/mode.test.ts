@@ -6,8 +6,11 @@
 
 import { authorizationModeFactory } from './mode';
 
-const createMockXpackInfoFeature = allowRbac => {
+const createMockXpackInfoFeature = (allowRbac: boolean) => {
   return {
+    isEnabled: jest.fn(),
+    isAvailable: jest.fn(),
+    registerLicenseCheckResultsGenerator: jest.fn(),
     getLicenseCheckResults() {
       return {
         allowRbac,

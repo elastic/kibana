@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 // @ts-ignore
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { actionsFactory } from './actions';
@@ -36,12 +37,12 @@ jest.mock('./mode', () => ({
   authorizationModeFactory: jest.fn(),
 }));
 
-const createMockConfig = (settings = {}) => {
+const createMockConfig = (settings: Record<string, any> = {}) => {
   const mockConfig = {
     get: jest.fn(),
   };
 
-  mockConfig.get.mockImplementation(key => settings[key]);
+  mockConfig.get.mockImplementation((key: string) => settings[key]);
 
   return mockConfig;
 };
@@ -61,13 +62,13 @@ test(`returns exposed services`, () => {
   const mockShieldClient = Symbol();
   getClient.mockReturnValue(mockShieldClient);
   const mockCheckPrivilegesWithRequest = Symbol();
-  checkPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
+  (checkPrivilegesWithRequestFactory as jest.Mock).mockReturnValue(mockCheckPrivilegesWithRequest);
   const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
-  checkPrivilegesDynamicallyWithRequestFactory.mockReturnValue(
+  (checkPrivilegesDynamicallyWithRequestFactory as jest.Mock).mockReturnValue(
     mockCheckPrivilegesDynamicallyWithRequest
   );
   const mockActions = Symbol();
-  actionsFactory.mockReturnValue(mockActions);
+  (actionsFactory as jest.Mock).mockReturnValue(mockActions);
   // mockConfig.get.mock;
   const mockXpackInfoFeature = Symbol();
   const mockFeatures = Symbol();
@@ -75,15 +76,15 @@ test(`returns exposed services`, () => {
     getFeatures: () => mockFeatures,
   };
   const mockPrivilegesService = Symbol();
-  privilegesFactory.mockReturnValue(mockPrivilegesService);
+  (privilegesFactory as jest.Mock).mockReturnValue(mockPrivilegesService);
   const mockAuthorizationMode = Symbol();
-  authorizationModeFactory.mockReturnValue(mockAuthorizationMode);
+  (authorizationModeFactory as jest.Mock).mockReturnValue(mockAuthorizationMode);
   const mockSpaces = Symbol();
 
   const authorization = createAuthorizationService(
-    mockServer,
-    mockXpackInfoFeature,
-    mockXpackMainPlugin,
+    mockServer as any,
+    mockXpackInfoFeature as any,
+    mockXpackMainPlugin as any,
     mockSpaces
   );
 
