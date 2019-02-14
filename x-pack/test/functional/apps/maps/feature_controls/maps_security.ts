@@ -68,7 +68,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Maps', 'Management']);
+        expect(navLinks).to.eql(['Maps', 'Unregistered App', 'Management']);
       });
 
       it(`allows a map to be created`, async () => {
@@ -121,7 +121,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Maps', 'Management']);
+        expect(navLinks).to.eql(['Maps', 'Unregistered App', 'Management']);
       });
 
       it(`does not allow a map to be created`, async () => {
@@ -175,7 +175,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        expect(navLinks).to.eql(['Discover', 'Unregistered App', 'Management']);
       });
 
       it(`returns a 404`, async () => {

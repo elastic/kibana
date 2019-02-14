@@ -70,7 +70,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Visualize', 'Management']);
+        expect(navLinks).to.eql(['Visualize', 'Unregistered App', 'Management']);
       });
 
       it(`allows a visualization to be created`, async () => {
@@ -128,7 +128,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Visualize', 'Management']);
+        expect(navLinks).to.eql(['Visualize', 'Unregistered App', 'Management']);
       });
 
       it(`does not allow a visualization to be created`, async () => {

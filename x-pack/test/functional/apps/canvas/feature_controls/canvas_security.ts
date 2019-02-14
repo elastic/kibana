@@ -68,7 +68,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        expect(navLinks).to.eql(['Canvas', 'Unregistered App', 'Management']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -142,7 +142,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        expect(navLinks).to.eql(['Canvas', 'Unregistered App', 'Management']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {

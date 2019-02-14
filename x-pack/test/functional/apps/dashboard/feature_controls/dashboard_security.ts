@@ -206,7 +206,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Dashboard', 'Management']);
+        expect(navLinks).to.eql(['Dashboard', 'Unregistered App', 'Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
