@@ -15,7 +15,7 @@ import {
   clearGoto,
   setLayerErrorStatus,
 } from '../../../actions/store_actions';
-import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
+import { getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../store/non_serializable_kibana_instances';
 
 function mapStateToProps(state = {}) {

@@ -41,7 +41,7 @@ class Annotation extends Component {
     });
     return (
       <div>
-        <div className={`tvbVisAnnotation__timestamp`}>{ moment(timestamp).format('lll') }</div>
+        <div className="tvbTooltip__timestamp">{ moment(timestamp).format('lll') }</div>
         { messages }
       </div>
     );
@@ -81,7 +81,6 @@ Annotation.propTypes = {
   icon: PropTypes.string,
   color: PropTypes.string,
   plot: PropTypes.object,
-  reversed: PropTypes.bool
 };
 
 export default Annotation;
