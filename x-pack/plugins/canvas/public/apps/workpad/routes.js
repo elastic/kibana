@@ -42,7 +42,8 @@ export const routes = [
         path: '/:id(/page/:page)',
         action: (dispatch, getState) => async ({ params, router }) => {
           // load workpad if given a new id via url param
-          const currentWorkpad = getWorkpad(getState());
+          const state = getState();
+          const currentWorkpad = getWorkpad(state);
           if (params.id !== currentWorkpad.id) {
             try {
               const fetchedWorkpad = await workpadService.get(params.id);
