@@ -146,6 +146,19 @@ Example structure after:
 
 *Impact:* The dark mode setting for Dashboards and Maps will be ignored and the global setting will be used instead.
 
+
+[float]
+=== KQL is now the default query language in the global search bar
+*Details:* Language enhancements that were introduced in 6.3 on an opt-in basis are now turned on by default. This
+is considered a breaking change because the enhancements include a simplifed syntax that has some small incompatibilities
+with the old Lucene syntax. 
+
+*Impact:* Users simply need to familiarize themselves with the new syntax. Existing saved searches, visualizations, and dashboards
+that use the old Lucene syntax will continue to work, but users should consider migrating them to KQL to enjoy the other benefits
+that come along with it. For the time being, individual users can still opt-out of KQL under the options menu in the query bar
+and admins can still change the global default using the `search:queryLanguage` advanced setting.
+
+
 [float]
 [[breaking_70_setting_changes]]
 === Settings changes
