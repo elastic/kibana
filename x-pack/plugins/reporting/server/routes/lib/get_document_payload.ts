@@ -7,7 +7,7 @@
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 // @ts-ignore
-import { oncePerServer } from './once_per_server';
+import { oncePerServer } from '../../lib/once_per_server';
 
 function getDocumentPayloadFn(server: any) {
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
