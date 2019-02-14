@@ -10,13 +10,27 @@ import { RepositoryUri } from '../../../model';
 export const SymbolSchema = {
   qname: {
     type: 'text',
-    analyzer: 'qname_path_hierarchy_analyzer',
+    analyzer: 'qname_path_hierarchy_case_sensitive_analyzer',
+    fields: {
+      // Create a 'lowercased' field to match query in lowercased mode.
+      lowercased: {
+        type: 'text',
+        analyzer: 'qname_path_hierarchy_case_insensitive_analyzer',
+      },
+    },
   },
   symbolInformation: {
     properties: {
       name: {
         type: 'text',
-        analyzer: 'qname_path_hierarchy_analyzer',
+        analyzer: 'qname_path_hierarchy_case_sensitive_analyzer',
+        fields: {
+          // Create a 'lowercased' field to match query in lowercased mode.
+          lowercased: {
+            type: 'text',
+            analyzer: 'qname_path_hierarchy_case_insensitive_analyzer',
+          },
+        },
       },
       kind: {
         type: 'integer',
@@ -38,9 +52,14 @@ export const SymbolSchema = {
 export const SymbolAnalysisSettings = {
   analysis: {
     analyzer: {
-      qname_path_hierarchy_analyzer: {
+      qname_path_hierarchy_case_sensitive_analyzer: {
         type: 'custom',
         tokenizer: 'qname_path_hierarchy_tokenizer',
+      },
+      qname_path_hierarchy_case_insensitive_analyzer: {
+        type: 'custom',
+        tokenizer: 'qname_path_hierarchy_tokenizer',
+        filter: ['lowercase'],
       },
     },
     tokenizer: {
