@@ -75,19 +75,18 @@ export default function spaceSelectorFunctonalTests({
           hash: sampleDataHash,
           basePath: `/s/${spaceId}`,
         });
-        await PageObjects.home.addSampleDataSet('flights');
+        await PageObjects.home.addSampleDataSet('logs');
       });
 
       after(async () => {
+        // No need to remove the same sample data in both spaces, the index
+        // data will be removed in the first call. By feature limitation,
+        // the created saved objects in the second space will be broken but removed
+        // when we call esArchiver.unload('spaces').
         await PageObjects.common.navigateToApp('home', {
           hash: sampleDataHash,
         });
         await PageObjects.home.removeSampleDataSet('logs');
-        await PageObjects.common.navigateToApp('home', {
-          hash: sampleDataHash,
-          basePath: `/s/${spaceId}`,
-        });
-        await PageObjects.home.removeSampleDataSet('flights');
         await PageObjects.security.logout();
         await esArchiver.unload('spaces/selector');
       });
@@ -102,7 +101,7 @@ export default function spaceSelectorFunctonalTests({
           await PageObjects.common.navigateToApp('dashboard', {
             basePath: `/s/${spaceId}`,
           });
-          await expectDashboardRenders('[Flights] Global Flight Dashboard');
+          await expectDashboardRenders('[Logs] Web Traffic');
         });
       });
     });

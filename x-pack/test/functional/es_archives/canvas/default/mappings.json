@@ -1,13 +1,11 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana_1",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "1"
+    "aliases": {
+      ".kibana": {
       }
     },
+    "index": ".kibana_1",
     "mappings": {
       "dynamic": "strict",
       "properties": {
@@ -21,16 +19,16 @@
               "type": "date"
             },
             "id": {
-              "type": "text",
-              "index": false
+              "index": false,
+              "type": "text"
             },
             "name": {
-              "type": "text",
               "fields": {
                 "keyword": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -170,8 +168,8 @@
           }
         },
         "migrationVersion": {
-          "type": "object",
-          "dynamic": "true"
+          "dynamic": "true",
+          "type": "object"
         },
         "namespace": {
           "type": "keyword"
@@ -230,13 +228,13 @@
               "type": "keyword"
             },
             "name": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -306,13 +304,13 @@
               "type": "date"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -347,8 +345,11 @@
         }
       }
     },
-    "aliases": {
-      ".kibana": {}
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
     }
   }
 }
