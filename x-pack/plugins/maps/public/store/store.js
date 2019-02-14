@@ -15,15 +15,12 @@ const rootReducer = combineReducers({
 });
 
 const enhancers = [ applyMiddleware(thunk) ];
-window.__REDUX_DEVTOOLS_EXTENSION
-  && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
 export function createMapStore() {
   const storeConfig = {};
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   return createStore(
     rootReducer,
     storeConfig,
-    composeEnhancers(...enhancers)
+    compose(...enhancers)
   );
 }
