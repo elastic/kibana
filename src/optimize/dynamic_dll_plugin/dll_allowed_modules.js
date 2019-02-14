@@ -31,3 +31,7 @@ export function notInNodeModulesOrWebpackShims(checkPath) {
 export function inPluginNodeModules(checkPath) {
   return checkPath.match(/[\/\\]plugins.*[\/\\]node_modules/);
 }
+
+export function inDllPluginPublic(checkPath) {
+  return checkPath.includes(`${path.sep}dynamic_dll_plugin/public${path.sep}`);
+}

@@ -18,7 +18,7 @@
  */
 
 import { configModel } from './dll_config_model';
-import { notInNodeModulesOrWebpackShims, notInNodeModules } from './dll_allowed_modules';
+import { notInNodeModulesOrWebpackShims, notInNodeModules, inDllPluginPublic } from './dll_allowed_modules';
 import { fromRoot } from '../../legacy/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
@@ -234,6 +234,12 @@ export class DllCompiler {
           // ignore if this module represents the
           // dll entry file
           if (module.resource === this.getEntryPath()) {
+            return;
+          }
+
+          // ignore if this module is part of the
+          // files inside dynamic dll plugin public folder
+          if (inDllPluginPublic(module.resource)) {
             return;
           }
 
