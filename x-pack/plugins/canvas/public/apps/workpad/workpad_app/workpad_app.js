@@ -38,7 +38,6 @@ export class WorkpadApp extends React.PureComponent {
   incrementRenderCount = () => {
     this.renderedElementCount += 1;
     this.setState({ renderedElementCount: this.renderedElementCount });
-    console.log(this.renderedElementCount);
   };
 
   resetRenderCount = () => {
