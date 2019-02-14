@@ -120,10 +120,9 @@ export const mouseButton = select(next => {
   }
 })(mouseButtonEvent);
 
-export const mouseIsDown = selectReduce(
-  (previous, next) => (next ? next.event === 'mouseDown' : previous),
-  false
-)(mouseButtonEvent);
+export const mouseIsDown = select(({ mouseIsDown }, next) =>
+  next ? next.event === 'mouseDown' : mouseIsDown
+)(gestureStatePrev, mouseButtonEvent);
 
 const mouseButtonState = selectReduce(
   ({ buttonState, downX, downY }, mouseNowDown, { x, y }) => {
@@ -154,8 +153,8 @@ export const actionEvent = select(action =>
   action.type === 'actionEvent' ? action.payload : null
 )(primaryUpdate);
 
-export const gestureState = select(cursor => ({
+export const gestureState = select((cursor, mouseIsDown) => ({
   cursor,
   mouseIsDown,
   mouseButtonState,
-}))(cursorPosition);
+}))(cursorPosition, mouseIsDown);
