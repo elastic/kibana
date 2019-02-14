@@ -3,16 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-// @ts-ignore
-import { getClient } from '../../../../../server/lib/get_client_shield';
-import { actionsFactory } from './actions';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
-import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
-import { authorizationModeFactory } from './mode';
-import { privilegesFactory } from './privileges';
-import { createAuthorizationService } from './service';
-
 jest.mock('./check_privileges', () => ({
   checkPrivilegesWithRequestFactory: jest.fn(),
 }));
@@ -36,6 +26,15 @@ jest.mock('./privileges', () => ({
 jest.mock('./mode', () => ({
   authorizationModeFactory: jest.fn(),
 }));
+
+// @ts-ignore
+import { getClient } from '../../../../../server/lib/get_client_shield';
+import { actionsFactory } from './actions';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
+import { authorizationModeFactory } from './mode';
+import { privilegesFactory } from './privileges';
+import { createAuthorizationService } from './service';
 
 const createMockConfig = (settings: Record<string, any> = {}) => {
   const mockConfig = {
