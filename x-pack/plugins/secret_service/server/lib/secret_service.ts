@@ -5,7 +5,7 @@
  */
 
 import crypto from 'crypto';
-import { SavedObjectsClient } from 'src/server/saved_objects';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 // @ts-ignore
 import { AuditLogger } from '../../../server/lib/audit_logger';
 import { buildCrypt } from './crypt_keeper';

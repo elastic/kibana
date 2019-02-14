@@ -5,7 +5,7 @@
  */
 
 import crypto from 'crypto';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
@@ -33,12 +33,12 @@ export const secretService = (kibana: any) => {
       }).default();
     },
 
-    configKey: 'xpack.secret_service.secret',
-
     init(server: any) {
-      const keystore: any = new server.Keystore(server.config().get('path.data'));
-
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
+
+      const configKey = 'xpack.secret_service.secret';
+      const filePath = join(server.config().get('path.data'), 'kibana.keystore');
+      const keystore: any = new server.Keystore(filePath);
 
       if (!keystore.exists()) {
         keystore.reset();
@@ -46,8 +46,8 @@ export const secretService = (kibana: any) => {
         warn(`Keystore missing, new keystore created ${keystore.path}`);
       }
 
-      if (!keystore.has(this.configKey)) {
-        keystore.add(this.configKey, crypto.randomBytes(128).toString('hex'));
+      if (!keystore.has(configKey)) {
+        keystore.add(configKey, crypto.randomBytes(128).toString('hex'));
         warn('Missing key - one has been auto-generated for use.');
         keystore.save();
       }
@@ -60,7 +60,7 @@ export const secretService = (kibana: any) => {
       const auditor = new AuditLogger(server, this.id);
       server.expose(
         'secretService',
-        new SecretService(so, 'secretType', keystore.get(this.configKey), auditor)
+        new SecretService(so, 'secretType', keystore.get(configKey), auditor)
       );
     },
   });
