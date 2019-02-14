@@ -129,6 +129,9 @@
           },
           "name": {
             "type": "keyword"
+          },
+          "last_updated": {
+            "type": "date"
           }
         }
       }

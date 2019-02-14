@@ -1,3 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Beats Elasticsearch Adapter Should get beat: get-beat 1`] = `null`;
+exports[`Beats Elasticsearch Adapter Should get beat: get-beat 1`] = `
+Object {
+  "access_token": "3helu3huh34klh5k3l4uh",
+  "active": true,
+  "enrollment_token": "wekruhw4lglu",
+  "host_ip": "192.168.1.1",
+  "host_name": "localhost",
+  "id": "something",
+  "last_updated": 1550025030,
+  "tags": Array [],
+  "type": "filebeat",
+}
+`;
+
+exports[`Beats Elasticsearch Adapter Should insert beat: insert-beat 1`] = `Promise {}`;
+
+exports[`Beats Elasticsearch Adapter Should re-insert beat without error: insert-beat 1`] = `undefined`;
+
+exports[`Beats Elasticsearch Adapter Should re-insert beat without error: insert-beat 2`] = `undefined`;

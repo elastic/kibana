@@ -12,6 +12,9 @@ export const TestKbnServerConfig = {
   kbn: {
     plugins: { paths: [resolve(__dirname, '../../node_modules/x-pack')] },
     xpack: {
+      oss_telemetry: {
+        enabled: false,
+      },
       monitoring: {
         tests: {
           cloud_detector: {

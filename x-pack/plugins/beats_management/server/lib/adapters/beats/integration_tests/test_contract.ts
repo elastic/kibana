@@ -10,7 +10,7 @@ import { ElasticsearchBeatsAdapter } from '../elasticsearch_beats_adapter';
 interface ContractConfig {
   before(): Promise<void>;
   after(): Promise<void>;
-  adapterSetup(): ElasticsearchBeatsAdapter;
+  adapterSetup(): Promise<ElasticsearchBeatsAdapter>;
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
@@ -19,29 +19,66 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     beforeAll(config.before);
     afterAll(config.after);
     beforeEach(async () => {
-      adapter = config.adapterSetup();
+      adapter = await config.adapterSetup();
     });
 
-    it('Should insert beat', () => {
-      expect.assertions(1);
-      return expect(
-        adapter.insert(internalUser, {
-          id: 'something',
-          type: 'filebeat',
-          access_token: '3helu3huh34klh5k3l4uh',
-          enrollment_token: 'wekruhw4lglu',
-          active: true,
-          host_ip: '192.168.1.1',
-          host_name: 'localhost',
-          tags: [],
-          last_updated: 1550025030,
-        })
-      ).resolves.toMatchSnapshot('insert-beat');
+    it('Should insert beat', async () => {
+      const result = adapter.insert(internalUser, {
+        id: 'something',
+        type: 'filebeat',
+        access_token: '3helu3huh34klh5k3l4uh',
+        enrollment_token: 'wekruhw4lglu',
+        active: true,
+        host_ip: '192.168.1.1',
+        host_name: 'localhost',
+        tags: [],
+        last_updated: 1550025030,
+      });
+      expect(result).toMatchSnapshot('insert-beat');
     });
 
-    it('Should get beat', () => {
-      expect.assertions(1);
-      return expect(adapter.get(internalUser, 'something')).resolves.toMatchSnapshot('get-beat');
+    it('Should re-insert beat without error', async () => {
+      let result = await adapter.insert(internalUser, {
+        id: 'something',
+        type: 'filebeat',
+        access_token: '3helu3huh34klh5k3l4uh',
+        enrollment_token: 'wekruhw4lglu',
+        active: true,
+        host_ip: '192.168.1.1',
+        host_name: 'localhost',
+        tags: [],
+        last_updated: 1550025030,
+      });
+      expect(result).toMatchSnapshot('insert-beat');
+
+      result = await adapter.insert(internalUser, {
+        id: 'something',
+        type: 'filebeat',
+        access_token: '3helu3huh34klh5k3l4uh',
+        enrollment_token: 'wekruhw4lglu',
+        active: true,
+        host_ip: '192.168.1.1',
+        host_name: 'localhost',
+        tags: [],
+        last_updated: 1550025030,
+      });
+      expect(result).toMatchSnapshot('insert-beat');
+    });
+
+    it('Should get beat', async () => {
+      await adapter.insert(internalUser, {
+        id: 'something',
+        type: 'filebeat',
+        access_token: '3helu3huh34klh5k3l4uh',
+        enrollment_token: 'wekruhw4lglu',
+        active: true,
+        host_ip: '192.168.1.1',
+        host_name: 'localhost',
+        tags: [],
+        last_updated: 1550025030,
+      });
+      const result = await adapter.get(internalUser, 'something');
+      expect(result).toMatchSnapshot('get-beat');
     });
   });
 };
