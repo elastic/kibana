@@ -1,14 +1,9 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "auto_expand_replicas": "0-1",
-        "number_of_replicas": "0"
-      }
+    "aliases": {
     },
+    "index": ".kibana",
     "mappings": {
       "dynamic": "strict",
       "properties": {
@@ -19,43 +14,15 @@
               "type": "keyword"
             },
             "defaultIndex": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
+                  "ignore_above": 256,
+                  "type": "keyword"
                 }
-              }
-            }
-          }
-        },
-        "space": {
-          "properties": {
-            "name": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
-                }
-              }
-            },
-            "description": {
+              },
               "type": "text"
-            },
-            "initials": {
-              "type": "keyword"
-            },
-            "color": {
-              "type": "keyword"
-            },
-            "_reserved": {
-              "type": "boolean"
             }
           }
-        },
-        "namespace": {
-          "type": "keyword"
         },
         "dashboard": {
           "properties": {
@@ -168,6 +135,9 @@
             }
           }
         },
+        "namespace": {
+          "type": "keyword"
+        },
         "search": {
           "properties": {
             "columns": {
@@ -201,6 +171,31 @@
           "properties": {
             "uuid": {
               "type": "keyword"
+            }
+          }
+        },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
           }
         },
@@ -263,13 +258,13 @@
               "type": "date"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -304,6 +299,12 @@
         }
       }
     },
-    "aliases": {}
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
   }
 }
