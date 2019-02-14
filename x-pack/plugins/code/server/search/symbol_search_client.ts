@@ -51,36 +51,72 @@ export class SymbolSearchClient extends AbstractSearchClient {
         query: {
           bool: {
             should: [
+              // Boost more for case sensitive prefix query.
               {
                 prefix: {
                   qname: {
                     value: req.query,
+                    boost: 2.0,
+                  },
+                },
+              },
+              // Boost less for lowercased prefix query.
+              {
+                prefix: {
+                  'qname.lowercased': {
+                    // prefix query does not apply analyzer for query. so manually lowercase the query in here.
+                    value: req.query.toLowerCase(),
                     boost: 1.0,
                   },
                 },
               },
-              // Boost the exact match for qname.
+              // Boost the exact match with case sensitive query the most.
               {
                 term: {
                   qname: {
                     value: req.query,
+                    boost: 20.0,
+                  },
+                },
+              },
+              {
+                term: {
+                  'qname.lowercased': {
+                    // term query does not apply analyzer for query either. so manually lowercase the query in here.
+                    value: req.query.toLowerCase(),
                     boost: 10.0,
                   },
                 },
               },
+              // The same applies for `symbolInformation.name` feild.
               {
                 prefix: {
                   'symbolInformation.name': {
                     value: req.query,
+                    boost: 2.0,
+                  },
+                },
+              },
+              {
+                prefix: {
+                  'symbolInformation.name.lowercased': {
+                    value: req.query.toLowerCase(),
                     boost: 1.0,
                   },
                 },
               },
-              // Boost the exact match for symbol name.
               {
                 term: {
                   'symbolInformation.name': {
                     value: req.query,
+                    boost: 20.0,
+                  },
+                },
+              },
+              {
+                term: {
+                  'symbolInformation.name.lowercased': {
+                    value: req.query.toLowerCase(),
                     boost: 10.0,
                   },
                 },

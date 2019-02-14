@@ -84,7 +84,12 @@ export const SuggestionComponent: SFC<Props> = props => {
 
   // An util function to help highlight the substring which matches the query.
   const renderMatchingText = (text: string) => {
-    const index = text.toLowerCase().indexOf(props.query.toLowerCase());
+    // Match the text with query in case sensitive mode first.
+    let index = text.indexOf(props.query);
+    if (index < 0) {
+      // Fall back with case insensitive mode first.
+      index = text.toLowerCase().indexOf(props.query.toLowerCase());
+    }
     if (index >= 0) {
       const prefix = text.substring(0, index);
       const highlight = text.substring(index, index + props.query.length);
