@@ -19,12 +19,12 @@ jest.mock('../vector_layer', () => {});
 
 
 const leftJoin = new LeftInnerJoin({
-  leftField: "iso2",
+  leftField: 'iso2',
   right: {
-    id: "d3625663-5b34-4d50-a784-0d743f676a0c",
-    indexPatternId: "90943e30-9a47-11e8-b64d-95841ca0b247",
-    indexPatternTitle: "kibana_sample_data_logs",
-    term: "geo.dest",
+    id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
+    indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+    indexPatternTitle: 'kibana_sample_data_logs',
+    term: 'geo.dest',
   }
 });
 
@@ -36,7 +36,7 @@ describe('joinPropertiesToFeatureCollection', () => {
       features: [
         {
           properties: {
-            iso2: "CN",
+            iso2: 'CN',
           }
         }
       ]
@@ -46,7 +46,7 @@ describe('joinPropertiesToFeatureCollection', () => {
 
     leftJoin.joinPropertiesToFeatureCollection(featureCollection, propertiesMap);
     expect(featureCollection.features[0].properties).toEqual({
-      iso2: "CN",
+      iso2: 'CN',
       [COUNT_PROPERTY_NAME]: 61,
     });
   });
@@ -56,7 +56,7 @@ describe('joinPropertiesToFeatureCollection', () => {
       features: [
         {
           properties: {
-            iso2: "CN",
+            iso2: 'CN',
             [COUNT_PROPERTY_NAME]: 61,
             [`__kbn__scaled(${COUNT_PROPERTY_NAME})`]: 1,
           }
@@ -67,7 +67,7 @@ describe('joinPropertiesToFeatureCollection', () => {
 
     leftJoin.joinPropertiesToFeatureCollection(featureCollection, propertiesMap);
     expect(featureCollection.features[0].properties).toEqual({
-      iso2: "CN",
+      iso2: 'CN',
     });
   });
 });
