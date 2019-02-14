@@ -34,6 +34,10 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  const migrator = new KibanaMigrator({ kbnServer });
+
+  server.decorate('server', 'kibanaMigrator', migrator);
+
   const warn = (message) => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
@@ -57,10 +61,6 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
-
-  const migrator = new KibanaMigrator({ kbnServer });
-
-  server.decorate('server', 'kibanaMigrator', migrator);
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
