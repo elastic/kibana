@@ -157,15 +157,8 @@ export const fetchAllRenderables = createThunk(
 
     dispatch(args.inFlightActive());
 
-    function fetchElementsOnPages(pages) {
-      const elements = [];
-      pages.forEach(page => {
-        page.elements.forEach(element => {
-          elements.push(element);
-        });
-      });
-
-      const renderablePromises = elements.map(element => {
+    function fetchElementsOnPage(page) {
+      const renderablePromises = page.elements.map(element => {
         const ast = element.ast || safeElementFromExpression(element.expression);
         const argumentPath = [element.id, 'expressionRenderable'];
 
@@ -183,10 +176,10 @@ export const fetchAllRenderables = createThunk(
     }
 
     if (onlyActivePage) {
-      fetchElementsOnPages([currentPage]).then(() => dispatch(args.inFlightComplete()));
+      fetchElementsOnPage(currentPage).then(() => dispatch(args.inFlightComplete()));
     } else {
-      fetchElementsOnPages([currentPage])
-        .then(() => fetchElementsOnPages(otherPages))
+      fetchElementsOnPage(currentPage)
+        .then(() => Promise.all(otherPages.map(page => fetchElementsOnPage(page))))
         .then(() => dispatch(args.inFlightComplete()));
     }
   }
