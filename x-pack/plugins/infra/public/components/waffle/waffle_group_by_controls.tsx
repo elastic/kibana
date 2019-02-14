@@ -48,14 +48,14 @@ const getOptions = (
       [InfraNodeType.container]: [
         'host.name',
         'cloud.availability_zone',
-        'cloud.machine_type',
-        'cloud.project_id',
+        'cloud.machine.type',
+        'cloud.project.id',
         'cloud.provider',
       ].map(mapFieldToOption),
       [InfraNodeType.host]: [
         'cloud.availability_zone',
-        'cloud.machine_type',
-        'cloud.project_id',
+        'cloud.machine.type',
+        'cloud.project.id',
         'cloud.provider',
       ].map(mapFieldToOption),
     };
