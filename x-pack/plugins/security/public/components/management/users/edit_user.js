@@ -446,7 +446,7 @@ class EditUserUI extends Component {
                     !isNewUser && !reserved
                       ? intl.formatMessage({
                         id: 'xpack.security.management.users.editUser.changingUserNameAfterCreationDescription',
-                        defaultMessage: 'Username\'s cannot be changed after creation.'
+                        defaultMessage: `Usernames can't be changed after creation.`
                       })
                       : null
                   }
