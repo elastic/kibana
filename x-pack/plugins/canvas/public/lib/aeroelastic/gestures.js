@@ -34,7 +34,6 @@ const gestureStatePrev = select(
         x: 0,
         y: 0,
       },
-      mouseButton: { down: false, uid: null },
       mouseIsDown: false,
       mouseButtonState: { buttonState: 'up', downX: null, downY: null },
     }
@@ -109,17 +108,17 @@ const mouseButtonStateTransitions = (state, mouseNowDown, movedAlready) => {
   }
 };
 
-export const mouseButton = select(({ mouseButton }, next) => {
+export const mouseButton = select(next => {
   if (!next) {
-    return mouseButton;
+    return { down: false, uid: null };
   }
   const { event, uid } = next;
   if (event === 'mouseDown') {
     return { down: true, uid };
   } else {
-    return event === 'mouseUp' ? { down: false, uid } : mouseButton;
+    return event === 'mouseUp' ? { down: false, uid } : { down: false, uid: null };
   }
-})(gestureStatePrev, mouseButtonEvent);
+})(mouseButtonEvent);
 
 export const mouseIsDown = selectReduce(
   (previous, next) => (next ? next.event === 'mouseDown' : previous),
@@ -157,7 +156,6 @@ export const actionEvent = select(action =>
 
 export const gestureState = select(cursor => ({
   cursor,
-  mouseButton,
   mouseIsDown,
   mouseButtonState,
 }))(cursorPosition);
