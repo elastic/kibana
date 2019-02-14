@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem } from '../../common/types';
 import { SymbolWithMembers } from '../../reducers/symbol';
-import { history } from '../../utils/url';
 import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
 const Root = styled(EuiSideNav)`
@@ -45,10 +45,6 @@ const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
   }
 };
 export class CodeSymbolTree extends React.PureComponent<Props> {
-  public getClickHandler = (url: string) => () => {
-    history.push(url);
-  };
-
   public getStructureTreeItemRenderer = (
     location: Location,
     name: string,
@@ -70,15 +66,18 @@ export class CodeSymbolTree extends React.PureComponent<Props> {
           ) : (
             <FolderClosedTriangle onClick={() => this.props.openSymbolPath(path)} />
           ))}
-        {/*
+        <EuiFlexItem grow={1}>
+          <Link to={`${RepositoryUtils.locationToUrl(location)}?tab=structure`}>
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              {/*
                 // @ts-ignore */}
-        <Token iconType={tokenType} />
-        <EuiText
-          data-test-subj={`codeStructureTreeNode-${name}`}
-          onClick={this.getClickHandler(`${RepositoryUtils.locationToUrl(location)}?tab=structure`)}
-        >
-          <strong>{name}</strong>
-        </EuiText>
+              <Token iconType={tokenType} />
+              <EuiText data-test-subj={`codeStructureTreeNode-${name}`}>
+                <strong>{name}</strong>
+              </EuiText>
+            </EuiFlexGroup>
+          </Link>
+        </EuiFlexItem>
       </Symbol>
     );
   };

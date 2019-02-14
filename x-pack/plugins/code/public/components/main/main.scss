@@ -24,3 +24,9 @@
 .code-auto-margin {
   margin: auto;
 }
+
+.code-link {
+  &:focus {
+    box-shadow: none;
+  }
+}
