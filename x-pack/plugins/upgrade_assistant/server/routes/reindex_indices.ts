@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsClient } from 'src/server/saved_objects';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ReindexStatus } from '../../common/types';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 import { CredentialStore } from '../lib/reindexing/credential_store';
