@@ -82,15 +82,33 @@ export class JavaLauncher implements ILanguageServerLauncher {
       log.error('cannot find executable jar for JavaLsp');
     }
 
+    function findJDK(platform: string) {
+      const JDKFound = glob.sync(`**/jdks/*${platform}/jdk-*`, {
+        cwd: installationPath,
+      });
+      if (!JDKFound.length) {
+        log.error('cannot find executable JDK');
+      }
+      return JDKFound;
+    }
+
     let config = './config_mac/';
+    let javaPath = '';
+    let javaHomePath = '';
     // detect platform
     switch (getOsPlatform()) {
       case 'darwin':
+        javaHomePath = `${findJDK('darwin')}/Contents/Home`;
+        javaPath = `${javaHomePath}/bin/java`;
         break;
       case 'win32':
+        javaHomePath = `${findJDK('windows')}`;
+        javaPath = `${javaHomePath}/bin/java.exe`;
         config = './config_win/';
         break;
       case 'linux':
+        javaHomePath = `${findJDK('linux')}`;
+        javaPath = `${javaHomePath}/bin/java`;
         config = './config_linux/';
         break;
       default:
@@ -98,9 +116,10 @@ export class JavaLauncher implements ILanguageServerLauncher {
     }
     process.env.CLIENT_HOST = '127.0.0.1';
     process.env.CLIENT_PORT = port.toString();
+    process.env.JAVA_HOME = javaHomePath;
 
     const p = spawn(
-      'java',
+      javaPath,
       [
         '-Declipse.application=org.elastic.jdt.ls.core.id1',
         '-Dosgi.bundles.defaultStartLevel=4',
