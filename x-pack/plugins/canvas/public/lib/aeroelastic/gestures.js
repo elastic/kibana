@@ -37,6 +37,13 @@ const gestureStatePrev = select(
     }
 )(getScene);
 
+export const gestureEnd = select(
+  action =>
+    action &&
+    (action.type === 'actionEvent' ||
+      (action.type === 'mouseEvent' && action.payload.event === 'mouseUp'))
+)(primaryUpdate);
+
 /**
  * Gestures - derived selectors for transient state
  */
@@ -62,37 +69,6 @@ export const cursorPosition = select(({ cursor }, position) => position || curso
   gestureStatePrev,
   rawCursorPosition
 );
-
-export const gestureState = select(cursor => ({
-  cursor,
-}))(cursorPosition);
-
-export const mouseButton = selectReduce(
-  (prev, next) => {
-    if (!next) {
-      return prev;
-    }
-    const { event, uid } = next;
-    if (event === 'mouseDown') {
-      return { down: true, uid };
-    } else {
-      return event === 'mouseUp' ? { down: false, uid } : prev;
-    }
-  },
-  { down: false, uid: null }
-)(mouseButtonEvent);
-
-export const mouseIsDown = selectReduce(
-  (previous, next) => (next ? next.event === 'mouseDown' : previous),
-  false
-)(mouseButtonEvent);
-
-export const gestureEnd = select(
-  action =>
-    action &&
-    (action.type === 'actionEvent' ||
-      (action.type === 'mouseEvent' && action.payload.event === 'mouseUp'))
-)(primaryUpdate);
 
 /**
  * mouseButtonStateTransitions
@@ -130,6 +106,26 @@ const mouseButtonStateTransitions = (state, mouseNowDown, movedAlready) => {
   }
 };
 
+export const mouseButton = selectReduce(
+  (prev, next) => {
+    if (!next) {
+      return prev;
+    }
+    const { event, uid } = next;
+    if (event === 'mouseDown') {
+      return { down: true, uid };
+    } else {
+      return event === 'mouseUp' ? { down: false, uid } : prev;
+    }
+  },
+  { down: false, uid: null }
+)(mouseButtonEvent);
+
+export const mouseIsDown = selectReduce(
+  (previous, next) => (next ? next.event === 'mouseDown' : previous),
+  false
+)(mouseButtonEvent);
+
 const mouseButtonState = selectReduce(
   ({ buttonState, downX, downY }, mouseNowDown, { x, y }) => {
     const movedAlready = x !== downX || y !== downY;
@@ -158,3 +154,7 @@ export const dragVector = select(({ buttonState, downX, downY }, { x, y }) => ({
 export const actionEvent = select(action =>
   action.type === 'actionEvent' ? action.payload : null
 )(primaryUpdate);
+
+export const gestureState = select(cursor => ({
+  cursor,
+}))(cursorPosition);
