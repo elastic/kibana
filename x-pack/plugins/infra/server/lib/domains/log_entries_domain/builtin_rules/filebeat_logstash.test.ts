@@ -4,12 +4,98 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { builtinRules } from '.';
 import { compileFormattingRules } from '../message';
-import { filebeatLogstashRules } from './filebeat_logstash';
 
-const { format } = compileFormattingRules(filebeatLogstashRules);
+const { format } = compileFormattingRules(builtinRules);
 
 describe('Filebeat Rules', () => {
+  describe('in ECS format', () => {
+    test('logstash log', () => {
+      const flattenedDocument = {
+        '@timestamp': '2017-10-23T14:20:12.046Z',
+        'ecs.version': '1.0.0-beta2',
+        'event.dataset': 'logstash.log',
+        'event.module': 'logstash',
+        'fileset.name': 'log',
+        'input.type': 'log',
+        'log.level': 'INFO',
+        'log.offset': 0,
+        'logstash.log.module': 'logstash.modules.scaffold',
+        message:
+          'Initializing module {:module_name=>"fb_apache", :directory=>"/usr/share/logstash/modules/fb_apache/configuration"}',
+        'service.type': 'logstash',
+      };
+
+      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "constant": "[",
+  },
+  Object {
+    "field": "log.level",
+    "highlights": Array [],
+    "value": "INFO",
+  },
+  Object {
+    "constant": "] ",
+  },
+  Object {
+    "field": "message",
+    "highlights": Array [],
+    "value": "Initializing module {:module_name=>\\"fb_apache\\", :directory=>\\"/usr/share/logstash/modules/fb_apache/configuration\\"}",
+  },
+]
+`);
+    });
+
+    test('logstash slowlog', () => {
+      const flattenedDocument = {
+        '@timestamp': '2017-10-30T09:57:58.243Z',
+        'ecs.version': '1.0.0-beta2',
+        'event.dataset': 'logstash.slowlog',
+        'event.duration': 3027675106,
+        'event.module': 'logstash',
+        'fileset.name': 'slowlog',
+        'input.type': 'log',
+        'log.level': 'WARN',
+        'log.offset': 0,
+        'logstash.slowlog': {
+          event:
+            '"{\\"@version\\":\\"1\\",\\"@timestamp\\":\\"2017-10-30T13:57:55.130Z\\",\\"host\\":\\"sashimi\\",\\"sequence\\":0,\\"message\\":\\"Hello world!\\"}"',
+          module: 'slowlog.logstash.filters.sleep',
+          plugin_name: 'sleep',
+          plugin_params:
+            '{"time"=>3, "id"=>"e4e12a4e3082615c5427079bf4250dbfa338ebac10f8ea9912d7b98a14f56b8c"}',
+          plugin_type: 'filters',
+          took_in_millis: 3027,
+        },
+        'service.type': 'logstash',
+      };
+
+      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "constant": "[Logstash][",
+  },
+  Object {
+    "field": "log.level",
+    "highlights": Array [],
+    "value": "WARN",
+  },
+  Object {
+    "constant": "] ",
+  },
+  Object {
+    "field": "logstash.slowlog",
+    "highlights": Array [],
+    "value": "{\\"event\\":\\"\\\\\\"{\\\\\\\\\\\\\\"@version\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"1\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"@timestamp\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"2017-10-30T13:57:55.130Z\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"host\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"sashimi\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"sequence\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\"message\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"Hello world!\\\\\\\\\\\\\\"}\\\\\\"\\",\\"module\\":\\"slowlog.logstash.filters.sleep\\",\\"plugin_name\\":\\"sleep\\",\\"plugin_params\\":\\"{\\\\\\"time\\\\\\"=>3, \\\\\\"id\\\\\\"=>\\\\\\"e4e12a4e3082615c5427079bf4250dbfa338ebac10f8ea9912d7b98a14f56b8c\\\\\\"}\\",\\"plugin_type\\":\\"filters\\",\\"took_in_millis\\":3027}",
+  },
+]
+`);
+    });
+  });
+
   describe('in pre-ECS format', () => {
     test('logstash log', () => {
       const flattenedDocument = {
