@@ -5,12 +5,14 @@
  */
 
 import { GRID_RESOLUTION } from '../grid_resolution';
+import { AbstractStyle } from './abstract_style';
 
-export class HeatmapStyle {
+export class HeatmapStyle extends AbstractStyle {
 
   static type = 'HEATMAP';
 
   constructor(styleDescriptor = {}) {
+    super();
     this._descriptor = HeatmapStyle.createDescriptor(
       styleDescriptor.refinement,
       styleDescriptor.properties
@@ -39,14 +41,14 @@ export class HeatmapStyle {
     return null;
   }
 
-  setMBPaintProperties({ alpha, mbMap, layerId, propertyName, resolution }) {
+  setMBPaintProperties({ mbMap, layerId, propertyName, resolution }) {
     let radius;
     if (resolution === GRID_RESOLUTION.COARSE) {
-      radius = 64;
+      radius = 128;
     } else if (resolution === GRID_RESOLUTION.FINE) {
-      radius = 32;
+      radius = 64;
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
-      radius = 16;
+      radius = 32;
     } else {
       throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
     }
@@ -55,7 +57,6 @@ export class HeatmapStyle {
       type: 'identity',
       property: propertyName
     });
-    mbMap.setPaintProperty(layerId, 'heatmap-opacity', alpha);
   }
 
 }

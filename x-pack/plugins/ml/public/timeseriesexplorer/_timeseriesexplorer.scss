@@ -94,6 +94,7 @@
       fill: none;
       stroke: $euiBorderColor;
       shape-rendering: crispEdges;
+      pointer-events: none;
     }
 
     .axis text {

@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }) {
       await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
       await dashboardExpect.docTableFieldCount(150);
 
-      await PageObjects.header.setQuickTime('Today');
+      // Set to time range with no data
+      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
       await dashboardExpect.docTableFieldCount(0);
     });
   });

@@ -12,8 +12,51 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
+  const queryBar = getService('queryBar');
 
   class GisPage {
+
+    async setAbsoluteRange(start, end) {
+      await PageObjects.timePicker.setAbsoluteRange(start, end);
+      await this.waitForLayersToLoad();
+    }
+
+    async setAndSubmitQuery(query) {
+      await queryBar.setQuery(query);
+      await queryBar.submitQuery();
+      await this.waitForLayersToLoad();
+    }
+
+    async refreshQuery() {
+      await queryBar.submitQuery();
+      await this.waitForLayersToLoad();
+    }
+
+    async enterFullScreen() {
+      log.debug(`enterFullScreen`);
+      await testSubjects.click('mapsFullScreenMode');
+      await retry.try(async () => {
+        await testSubjects.exists('exitFullScreenModeLogo');
+      });
+      await this.waitForLayersToLoad();
+    }
+
+    // TODO combine with dashboard full screen into a service
+    async existFullScreen() {
+      log.debug(`existFullScreen`);
+      const isFullScreen = await testSubjects.exists('exitFullScreenModeLogo');
+      if (isFullScreen) {
+        await testSubjects.click('exitFullScreenModeLogo');
+      }
+    }
+
+    async waitForLayersToLoad() {
+      log.debug('Wait for layers to load');
+      const tableOfContents = await testSubjects.find('mapLayerTOC');
+      await retry.try(async () => {
+        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+      });
+    }
 
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
@@ -30,6 +73,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error(`Failed to open map ${name}`);
         }
       });
+
+      await this.waitForLayersToLoad();
     }
 
     async deleteSavedMaps(search) {
@@ -111,7 +156,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
 
     async getView() {
@@ -122,6 +167,20 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const zoom = await testSubjects.getAttribute('zoomInput', 'value');
       await testSubjects.click('toggleSetViewVisibilityButton');
       return { lat, lon, zoom };
+    }
+
+    async toggleLayerVisibility(layerName) {
+      log.debug(`Toggle layer visibility, layer: ${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('layerVisibilityToggleButton');
+    }
+
+    async openLayerTocActionsPanel(layerName) {
+      const cleanLayerName = layerName.split(' ').join('');
+      const isOpen = await testSubjects.exists(`layerTocActionsPanel${cleanLayerName}`);
+      if (!isOpen) {
+        await testSubjects.click(`layerTocActionsPanelToggleButton${cleanLayerName}`);
+      }
     }
 
     async openLayerPanel(layerName) {
@@ -214,7 +273,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
   }
   return new GisPage();

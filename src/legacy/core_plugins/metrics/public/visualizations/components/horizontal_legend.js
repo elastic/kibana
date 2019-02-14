@@ -48,6 +48,7 @@ const HorizontalLegend = injectI18n(function (props) {
         iconSize="s"
         onClick={props.onClick}
         aria-label={props.intl.formatMessage({ id: 'tsvb.horizontalLegend.toggleChartAriaLabel', defaultMessage: 'Toggle chart legend' })}
+        title={props.intl.formatMessage({ id: 'tsvb.horizontalLegend.toggleChartAriaLabel', defaultMessage: 'Toggle chart legend' })}
         aria-expanded={!!props.showLegend}
         aria-controls={htmlId('legend')}
       />

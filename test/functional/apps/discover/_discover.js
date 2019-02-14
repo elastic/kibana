@@ -18,7 +18,6 @@
  */
 
 import expect from 'expect.js';
-import moment from 'moment';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -27,17 +26,14 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize', 'timePicker']);
   const defaultSettings = {
-    'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
   };
 
   describe('discover app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
-    const fromTimeString = 'September 19th 2015, 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
-    const toTimeString = 'September 23rd 2015, 18:31:44.000';
 
     before(async function () {
       // delete .kibana index and update configDoc
@@ -50,18 +46,16 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      log.debug('setAbsoluteRange');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-
-        const expectedTimeString = `${fromTimeString} to ${toTimeString}`;
-        expect(actualTimeString).to.be(expectedTimeString);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
+        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -121,8 +115,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-
-        const expectedTimeString = `${fromTimeString} - ${toTimeString}`;
+        const expectedTimeString = `Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
@@ -146,30 +139,29 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when a bar is clicked', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickHistogramBar(0);
         await PageObjects.visualize.waitForVisualization();
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Sep 20, 2015 @ 00:00:00.000');
+        expect(time.end).to.be('Sep 20, 2015 @ 03:00:00.000');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
-        const newFromTime = await PageObjects.header.getFromTime();
-        const newToTime = await PageObjects.header.getToTime();
 
-        const newDurationHours = moment.duration(moment(newToTime) - moment(newFromTime)).asHours();
+        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         if (newDurationHours < 1 || newDurationHours >= 5) {
           throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
         }
       });
 
       it('should show correct initial chart interval of Auto', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
@@ -177,6 +169,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data for chart interval Hourly', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.setChartInterval('Hourly');
 
         const expectedBarChartData = [
@@ -391,7 +384,7 @@ export default function ({ getService, getPageObjects }) {
 
       before(() => {
         log.debug('setAbsoluteRangeForAnotherQuery');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       });
 
       it('should show "no results"', async () => {
@@ -402,17 +395,6 @@ export default function ({ getService, getPageObjects }) {
       it('should suggest a new time range is picked', async () => {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
-      });
-
-      it('should have a link that opens and closes the time picker', async function () {
-        const noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
-        expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
-
-        await noResultsTimepickerLink.click();
-        expect(await PageObjects.header.isTimepickerOpen()).to.be(true);
-
-        await noResultsTimepickerLink.click();
-        expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
       });
     });
 
@@ -453,7 +435,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [
           '2015-09-19 17:00',

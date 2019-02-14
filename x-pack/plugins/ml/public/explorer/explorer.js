@@ -23,7 +23,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { AnnotationsTable } from '../components/annotations_table';
+import { annotationsRefresh$ } from '../services/annotations_service';
+import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
+import { AnnotationsTable } from '../components/annotations/annotations_table';
 import {
   ExplorerNoInfluencersFound,
   ExplorerNoJobsFound,
@@ -303,6 +305,8 @@ export const Explorer = injectI18n(
       this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
     };
 
+    annotationsRefreshSub = null;
+
     componentDidMount() {
       this._isMounted = true;
       mlExplorerDashboardService.explorer.watch(this.dashboardListener);
@@ -311,6 +315,12 @@ export const Explorer = injectI18n(
       mlSelectSeverityService.state.watch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.watch(this.tableControlsListener);
       mlSelectSeverityService.state.watch(this.tableControlsListener);
+      this.annotationsRefreshSub = annotationsRefresh$.subscribe(() => {
+        // clear the annotations cache and trigger an update
+        this.annotationsTablePreviousArgs = null;
+        this.annotationsTablePreviousData = null;
+        this.updateExplorer();
+      });
     }
 
     componentWillUnmount() {
@@ -321,6 +331,7 @@ export const Explorer = injectI18n(
       mlSelectSeverityService.state.unwatch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.unwatch(this.tableControlsListener);
       mlSelectSeverityService.state.unwatch(this.tableControlsListener);
+      this.annotationsRefreshSub.unsubscribe();
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
@@ -390,8 +401,6 @@ export const Explorer = injectI18n(
           return;
         }
 
-        this.loadOverallDataPreviousArgs = compareArgs;
-
         if (showLoadingIndicator) {
           this.setState({ hasResults: false, loading: true });
         }
@@ -431,6 +440,7 @@ export const Explorer = injectI18n(
             searchBounds,
             interval.asSeconds(),
           );
+          this.loadOverallDataPreviousArgs = compareArgs;
           this.loadOverallDataPreviousData = overallSwimlaneData;
 
           console.log('Explorer overall swimlane data set:', overallSwimlaneData);
@@ -609,7 +619,7 @@ export const Explorer = injectI18n(
     anomaliesTablePreviousData = null;
     annotationsTablePreviousArgs = null;
     annotationsTablePreviousData = null;
-    async updateExplorer(stateUpdate, showOverallLoadingIndicator = true) {
+    async updateExplorer(stateUpdate = {}, showOverallLoadingIndicator = true) {
       const {
         noInfluencersConfigured,
         noJobsFound,
@@ -1067,8 +1077,8 @@ export const Explorer = injectI18n(
                   drillDown={true}
                   numberBadge={false}
                 />
-                <br />
-                <br />
+                <AnnotationFlyout />
+                <EuiSpacer size="l" />
               </React.Fragment>
             )}
 

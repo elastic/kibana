@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class TileStyle {
+import { AbstractStyle } from './abstract_style';
+
+export class TileStyle extends AbstractStyle {
 
   static type = 'TILE';
 
   constructor(styleDescriptor = {}) {
+    super();
     this._descriptor = TileStyle.createDescriptor(styleDescriptor.properties);
   }
 
@@ -27,9 +30,5 @@ export class TileStyle {
 
   static getDisplayName() {
     return 'Tile style';
-  }
-
-  setMBPaintProperties({ alpha, mbMap, layerId }) {
-    mbMap.setPaintProperty(layerId, 'raster-opacity', alpha);
   }
 }

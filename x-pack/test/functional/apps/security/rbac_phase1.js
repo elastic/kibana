@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectFail(vizName1);
       await PageObjects.security.logout();

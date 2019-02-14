@@ -11,7 +11,7 @@
 
     &:before,
     &:after {
-      content: " ";
+      content: '';
       display: table;
     }
 
@@ -29,7 +29,7 @@
 
       &.visible {
         display: block;
-        opacity: 0.5;
+        opacity: .5;
         z-index: -1;
       }
     }

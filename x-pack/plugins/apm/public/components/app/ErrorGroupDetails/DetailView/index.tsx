@@ -24,7 +24,7 @@ import {
   TRANSACTION_ID,
   URL_FULL,
   USER_ID
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
@@ -133,7 +133,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         defaultMessage: 'Handled'
       }),
       val:
-        String(idx(error, _ => _.error.exception.handled)) ||
+        String(idx(error, _ => _.error.exception[0].handled)) ||
         NOT_AVAILABLE_LABEL,
       width: '25%'
     },
@@ -266,8 +266,8 @@ export function TabContent({
 }) {
   const codeLanguage = error.service.name;
   const agentName = error.agent.name;
-  const excStackframes = idx(error, _ => _.error.exception.stacktrace);
-  const logStackframes = idx(error, _ => _.error.exception.stacktrace);
+  const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
 
   switch (currentTab.key) {
     case logStacktraceTab.key:

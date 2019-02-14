@@ -231,18 +231,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
-    async setFromTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
-    }
-
-    async setToTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
-    }
-
     async addInputControl() {
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -741,18 +729,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getXAxisLabels() {
-      const chartTypes = await find.allByCssSelector('.x > g');
-      async function getChartType(chart) {
-        return await chart.getVisibleText();
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      const xAxis = await find.byCssSelector('.visAxis--x.visAxis__column--bottom');
+      const $ = await xAxis.parseDomContent();
+      return $('.x > g > text').toArray().map(tick => $(tick).text().trim());
     }
 
     async getYAxisLabels() {
-      const chartTypes = await find.allByCssSelector('.y > g');
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
-      return await Promise.all(getChartTypesPromises);
+      const yAxis = await find.byCssSelector('.visAxis__column--y.visAxis__column--left');
+      const $ = await yAxis.parseDomContent();
+      return $('.y > g > text').toArray().map(tick => $(tick).text().trim());
     }
 
     /*
@@ -815,12 +800,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
-      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
-      log.debug(`chartTypes count = ${chartTypes.length}`);
-      const chartData = await Promise.all(chartTypes.map(async chart => {
-        const barHeight = await chart.getAttribute('height');
+      const svg = await find.byCssSelector('div.chart > svg');
+      const $ = await svg.parseDomContent();
+      const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`).toArray().map(chart => {
+        const barHeight = $(chart).attr('height');
         return Math.round(barHeight * yAxisRatio);
-      }));
+      });
 
       return chartData;
     }
