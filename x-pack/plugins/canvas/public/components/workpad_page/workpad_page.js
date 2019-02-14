@@ -10,6 +10,7 @@ import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
+import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
@@ -136,6 +137,7 @@ export class WorkpadPage extends PureComponent {
                 transformMatrix: element.transformMatrix,
                 width: element.width,
                 height: element.height,
+                text: element.text,
               };
 
               switch (element.subtype) {
@@ -150,6 +152,8 @@ export class WorkpadPage extends PureComponent {
                   return <BorderResizeHandle {...props} />;
                 case 'resizeConnector':
                   return <BorderConnection {...props} />;
+                case 'rotationTooltip':
+                  return <TooltipAnnotation {...props} />;
                 default:
                   return [];
               }

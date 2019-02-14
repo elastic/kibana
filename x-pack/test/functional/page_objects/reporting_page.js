@@ -24,7 +24,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
       await esArchiver.load('historic');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
