@@ -21,8 +21,6 @@ export class WorkpadApp extends React.PureComponent {
     isFullscreen: PropTypes.bool.isRequired,
   };
 
-  state = { renderedElementCount: 0 };
-
   componentDidMount() {
     this.props.initializeWorkpad();
   }
@@ -37,12 +35,10 @@ export class WorkpadApp extends React.PureComponent {
 
   incrementRenderCount = () => {
     this.renderedElementCount += 1;
-    this.setState({ renderedElementCount: this.renderedElementCount });
   };
 
   resetRenderCount = () => {
     this.renderedElementCount = 0;
-    this.setState({ renderedElementCount: 0 });
   };
 
   render() {
@@ -51,7 +47,7 @@ export class WorkpadApp extends React.PureComponent {
     return (
       <div className="canvasLayout">
         {inFlight && !isFullscreen && (
-          <WorkpadProgress value={this.state.renderedElementCount} max={totalElementCount} />
+          <WorkpadProgress value={this.renderedElementCount} max={totalElementCount} />
         )}
         <div className="canvasLayout__rows">
           <div className="canvasLayout__cols">
