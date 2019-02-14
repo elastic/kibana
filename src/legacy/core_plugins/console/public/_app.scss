@@ -48,7 +48,7 @@
 }
 
 .conApp__resizer {
-  @include kibanaResizer;
+  @include kbnResizer;
 }
 
 // SASSTODO: This component seems to not be used anymore?

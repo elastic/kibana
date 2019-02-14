@@ -22,23 +22,32 @@ import chrome from '../../../ui/public/chrome';
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 /**
- * Checks to see if the current theme is dark in luminosity
+ * Returns true if the color that is passed has low luminosity
+ */
+const isColorDark = (c) => {
+  return color(c).luminosity() < 0.45;
+};
+
+/**
+ * Checks to see if the `currentTheme` is dark in luminosity.
+ * Defaults to checking `theme:darkMode`.
  */
 export const isThemeDark = (currentTheme) => {
   let themeIsDark = currentTheme || IS_DARK_THEME;
 
   // If passing a string, check the luminosity
   if (typeof currentTheme === 'string') {
-    themeIsDark = color(currentTheme).luminosity() < 0.45;
+    themeIsDark = isColorDark(currentTheme);
   }
 
   return themeIsDark;
 };
 
 /**
- * Checks to find if the ultimate background color is dark
+ * Checks to find if the ultimate `backgroundColor` is dark.
+ * Defaults to returning if the `currentTheme` is dark.
  */
-export const isItDark = (backgroundColor, currentTheme) => {
+export const isBackgroundDark = (backgroundColor, currentTheme) => {
   const themeIsDark = isThemeDark(currentTheme);
 
   // If a background color doesn't exist or it inherits, pass back if it's a darktheme
@@ -47,22 +56,16 @@ export const isItDark = (backgroundColor, currentTheme) => {
   }
 
   // Otherwise return if the background color has low luminosity
-  return color(backgroundColor).luminosity() < 0.45;
+  return isColorDark(backgroundColor);
 };
 
 /**
- * Checks to see if the first parameter (backgroundColor) is the the same
- * lightness spectrum as the second parameter (currentTheme).
+ * Checks to see if `backgroundColor` is the the same lightness spectrum as `currentTheme`.
  */
-export const isItReverse = (backgroundColor, currentTheme) => {
-  const backgroundIsDark = isItDark(backgroundColor, currentTheme);
+export const isBackgroundInverted = (backgroundColor, currentTheme) => {
+  const backgroundIsDark = isBackgroundDark(backgroundColor, currentTheme);
   const themeIsDark = isThemeDark(currentTheme);
-
-  if ((backgroundIsDark && !themeIsDark) || (!backgroundIsDark && themeIsDark)) {
-    return true;
-  } else {
-    return false;
-  }
+  return backgroundIsDark !== themeIsDark;
 };
 
 

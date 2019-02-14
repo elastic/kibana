@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
-import { isItReverse } from '../../../../common/set_is_reversed';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 import _ from 'lodash';
 import Markdown from 'react-markdown';
 import replaceVars from '../../lib/replace_vars';
@@ -58,7 +58,7 @@ function MarkdownVisualization(props) {
     }
 
     const markdownClasses = classNames('kbnMarkdown__body', {
-      'kbnMarkdown__body--reversed': isItReverse(panelBackgroundColor),
+      'kbnMarkdown__body--reversed': isBackgroundInverted(panelBackgroundColor),
     });
 
     const contentClasses = classNames('tvbMarkdown__content',

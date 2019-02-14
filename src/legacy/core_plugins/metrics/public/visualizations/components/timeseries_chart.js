@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { isItReverse, isItDark } from '../../../common/set_is_reversed';
+import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import FlotChart from './flot_chart';
@@ -171,7 +171,7 @@ class TimeseriesChart extends Component {
       onDraw: this.handleDraw,
       options: this.props.options,
       plothover: this.props.plothover,
-      reversed: isItDark(this.props.backgroundColor),
+      reversed: isBackgroundDark(this.props.backgroundColor),
       series: this.props.series,
       annotations: this.props.annotations,
       showGrid: this.props.showGrid,
@@ -183,7 +183,7 @@ class TimeseriesChart extends Component {
 
     const annotations = this.state.annotations.map(this.renderAnnotations);
     const axisLabelClass = classNames('tvbVisTimeSeries__axisLabel', {
-      'tvbVisTimeSeries__axisLabel--reversed': isItReverse(this.props.backgroundColor),
+      'tvbVisTimeSeries__axisLabel--reversed': isBackgroundInverted(this.props.backgroundColor),
     });
 
     return (

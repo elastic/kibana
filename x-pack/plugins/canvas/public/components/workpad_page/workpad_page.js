@@ -10,6 +10,7 @@ import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
+import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
@@ -136,12 +137,14 @@ export class WorkpadPage extends PureComponent {
                 transformMatrix: element.transformMatrix,
                 width: element.width,
                 height: element.height,
+                text: element.text,
               };
 
               switch (element.subtype) {
                 case 'alignmentGuide':
                   return <AlignmentGuide {...props} />;
-                case 'hoverAnnotation':
+                case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
+                case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
@@ -149,6 +152,8 @@ export class WorkpadPage extends PureComponent {
                   return <BorderResizeHandle {...props} />;
                 case 'resizeConnector':
                   return <BorderConnection {...props} />;
+                case 'rotationTooltip':
+                  return <TooltipAnnotation {...props} />;
                 default:
                   return [];
               }

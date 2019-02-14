@@ -24,7 +24,7 @@ import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Metric from '../../../visualizations/components/metric';
 import getLastValue from '../../../../common/get_last_value';
-import { isItReverse } from '../../../../common/set_is_reversed';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -66,7 +66,7 @@ function MetricVisualization(props) {
   const params = {
     metric: series[0],
     additionalLabel: props.additionalLabel,
-    reversed: isItReverse(panelBackgroundColor),
+    reversed: isBackgroundInverted(panelBackgroundColor),
   };
 
   if (series[1]) {

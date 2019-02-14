@@ -21,7 +21,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { isItReverse, isItDark } from '../../../common/set_is_reversed';
+import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
 import getLastValue from '../../../common/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import GaugeVis from './gauge_vis';
@@ -99,7 +99,7 @@ class Gauge extends Component {
 
     const gaugeProps = {
       value,
-      reversed: isItDark(this.props.backgroundColor),
+      reversed: isBackgroundDark(this.props.backgroundColor),
       gaugeLine: this.props.gaugeLine,
       innerLine: this.props.innerLine,
       innerColor: this.props.innerColor,
@@ -164,7 +164,7 @@ class Gauge extends Component {
     const classes = classNames({
       'tvbVisHalfGauge': type === 'half',
       'tvbVisCircleGauge': type === 'circle',
-      'tvbVisGauge--reversed': isItReverse(this.props.backgroundColor),
+      'tvbVisGauge--reversed': isBackgroundInverted(this.props.backgroundColor),
     });
 
     return (
