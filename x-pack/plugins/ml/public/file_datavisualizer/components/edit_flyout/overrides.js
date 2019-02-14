@@ -131,7 +131,7 @@ export class Overrides extends Component {
 
   onFormatChange = ([opt]) => {
     const format = opt ? opt.label : '';
-    this.setOverride({ format: format.label });
+    this.setOverride({ format });
   }
 
   onTimestampFormatChange = ([opt]) => {
