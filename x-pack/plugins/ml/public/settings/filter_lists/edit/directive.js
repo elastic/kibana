@@ -9,45 +9,44 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { I18nContext } from 'ui/i18n';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { getCreateFilterListBreadcrumbs, getEditFilterListBreadcrumbs } from '../../breadcrumbs';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
+import { EditFilterList } from './edit_filter_list';
 
 import uiRoutes from 'ui/routes';
 
 const template = `
-  <ml-nav-menu name="settings"></ml-nav-menu>
-  <div class="ml-filter-lists">
-    <ml-edit-filter-list></ml-edit-filter-list>
-  </div>
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="settings" />
+  <ml-edit-filter-list />
 `;
 
 uiRoutes
   .when('/settings/filter_lists/new_filter_list', {
     template,
+    k7Breadcrumbs: getCreateFilterListBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   })
   .when('/settings/filter_lists/edit_filter_list/:filterId', {
     template,
+    k7Breadcrumbs: getEditFilterListBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   });
-
-
-import { EditFilterList } from './edit_filter_list';
 
 module.directive('mlEditFilterList', function ($route) {
   return {
@@ -56,11 +55,15 @@ module.directive('mlEditFilterList', function ($route) {
     scope: {},
     link: function (scope, element) {
       const props = {
-        filterId: $route.current.params.filterId
+        filterId: $route.current.params.filterId,
+        canCreateFilter: checkPermission('canCreateFilter'),
+        canDeleteFilter: checkPermission('canDeleteFilter'),
       };
 
       ReactDOM.render(
-        React.createElement(EditFilterList, props),
+        <I18nContext>
+          {React.createElement(EditFilterList, props)}
+        </I18nContext>,
         element[0]
       );
     }

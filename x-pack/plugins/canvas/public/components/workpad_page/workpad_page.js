@@ -6,9 +6,11 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
+import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
@@ -43,6 +45,9 @@ export class WorkpadPage extends PureComponent {
     onMouseUp: PropTypes.func,
     onAnimationEnd: PropTypes.func,
     resetHandler: PropTypes.func,
+    copyElements: PropTypes.func,
+    cutElements: PropTypes.func,
+    pasteElements: PropTypes.func,
   };
 
   componentWillUnmount() {
@@ -61,17 +66,37 @@ export class WorkpadPage extends PureComponent {
       isEditable,
       onDoubleClick,
       onKeyDown,
+      onKeyPress,
       onKeyUp,
       onMouseDown,
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
+      onWheel,
+      copyElements,
+      cutElements,
+      pasteElements,
     } = this.props;
+
+    const keyHandler = action => {
+      switch (action) {
+        case 'COPY':
+          copyElements();
+          break;
+        case 'CUT':
+          cutElements();
+          break;
+        case 'PASTE':
+          pasteElements();
+          break;
+      }
+    };
 
     return (
       <div
         key={page.id}
         id={page.id}
+        data-test-subj="canvasWorkpadPage"
         className={`canvasPage ${className} ${isEditable ? 'canvasPage--isEditable' : ''}`}
         data-shared-items-container
         style={{
@@ -85,27 +110,41 @@ export class WorkpadPage extends PureComponent {
         onMouseUp={onMouseUp}
         onMouseDown={onMouseDown}
         onKeyDown={onKeyDown}
+        onKeyPress={onKeyPress}
         onKeyUp={onKeyUp}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
+        onWheel={onWheel}
         tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
+        {isEditable && (
+          <Shortcuts
+            name="ELEMENT"
+            handler={keyHandler}
+            targetNodeSelector={`#${page.id}`}
+            global
+          />
+        )}
         {elements
           .map(element => {
             if (element.type === 'annotation') {
-              if (!isEditable) return;
+              if (!isEditable) {
+                return;
+              }
               const props = {
                 key: element.id,
                 type: element.type,
                 transformMatrix: element.transformMatrix,
                 width: element.width,
                 height: element.height,
+                text: element.text,
               };
 
               switch (element.subtype) {
                 case 'alignmentGuide':
                   return <AlignmentGuide {...props} />;
-                case 'hoverAnnotation':
+                case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
+                case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
@@ -113,10 +152,12 @@ export class WorkpadPage extends PureComponent {
                   return <BorderResizeHandle {...props} />;
                 case 'resizeConnector':
                   return <BorderConnection {...props} />;
+                case 'rotationTooltip':
+                  return <TooltipAnnotation {...props} />;
                 default:
                   return [];
               }
-            } else if (element.subtype !== 'adHocGroup') {
+            } else if (element.type !== 'group') {
               return <ElementWrapper key={element.id} element={element} />;
             }
           })

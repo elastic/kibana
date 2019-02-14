@@ -28,8 +28,6 @@ include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
-include::settings/settings-xkb.asciidoc[]
-
 include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
@@ -43,6 +41,10 @@ include::timelion.asciidoc[]
 include::canvas.asciidoc[]
 
 include::ml/index.asciidoc[]
+
+include::infrastructure/index.asciidoc[]
+
+include::logs/index.asciidoc[]
 
 include::apm/index.asciidoc[]
 

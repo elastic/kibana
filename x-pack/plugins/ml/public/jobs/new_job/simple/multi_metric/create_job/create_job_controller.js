@@ -7,18 +7,20 @@
 
 
 import _ from 'lodash';
+import 'angular-ui-select';
 
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { getCreateMultiMetricJobBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
@@ -30,7 +32,7 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider,
   focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
@@ -39,7 +41,6 @@ import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prep
 import { MultiMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
@@ -47,6 +48,7 @@ import { timefilter } from 'ui/timefilter';
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
     template,
+    k7Breadcrumbs: getCreateMultiMetricJobBreadcrumbs,
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
@@ -54,7 +56,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -64,10 +65,10 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
-    $route,
     $timeout,
     Private,
-    AppState) {
+    AppState,
+    i18n) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
@@ -109,17 +110,32 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
     const pageTitle = (savedSearch.id !== undefined) ?
-      `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
+      i18n('xpack.ml.newJob.simple.multiMetric.savedSearchPageTitle', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: savedSearch.title }
+      }) :
+      i18n('xpack.ml.newJob.simple.multiMetric.indexPatternPageTitle', {
+        defaultMessage: 'index pattern {indexPatternTitle}',
+        values: { indexPatternTitle: indexPattern.title }
+      });
+
+    $scope.analysisStoppingLabel = i18n('xpack.ml.newJob.simple.multiMetric.analysisStoppingLabel', {
+      defaultMessage: 'Analysis stopping'
+    });
+    $scope.stopAnalysisLabel = i18n('xpack.ml.newJob.simple.multiMetric.stopAnalysisLabel', {
+      defaultMessage: 'Stop analysis'
+    });
 
     $scope.ui = {
       indexPattern,
@@ -137,34 +153,54 @@ module
       timeFields: [],
       splitText: '',
       intervals: [{
-        title: 'Auto',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.autoTitle', {
+          defaultMessage: 'Auto'
+        }),
         value: 'auto',
       }, {
-        title: 'Millisecond',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.millisecondTitle', {
+          defaultMessage: 'Millisecond'
+        }),
         value: 'ms'
       }, {
-        title: 'Second',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.secondTitle', {
+          defaultMessage: 'Second'
+        }),
         value: 's'
       }, {
-        title: 'Minute',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.minuteTitle', {
+          defaultMessage: 'Minute'
+        }),
         value: 'm'
       }, {
-        title: 'Hourly',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.hourlyTitle', {
+          defaultMessage: 'Hourly'
+        }),
         value: 'h'
       }, {
-        title: 'Daily',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.dailyTitle', {
+          defaultMessage: 'Daily'
+        }),
         value: 'd'
       }, {
-        title: 'Weekly',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.weeklyTitle', {
+          defaultMessage: 'Weekly'
+        }),
         value: 'w'
       }, {
-        title: 'Monthly',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.monthlyTitle', {
+          defaultMessage: 'Monthly'
+        }),
         value: 'M'
       }, {
-        title: 'Yearly',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.yearlyTitle', {
+          defaultMessage: 'Yearly'
+        }),
         value: 'y'
       }, {
-        title: 'Custom',
+        title: i18n('xpack.ml.newJob.simple.multiMetric.intervals.customTitle', {
+          defaultMessage: 'Custom'
+        }),
         value: 'custom'
       }],
       eventRateChartHeight: 100,
@@ -199,6 +235,7 @@ module
       query,
       filters,
       combinedQuery,
+      usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
       description: '',
       jobGroups: [],
@@ -222,7 +259,10 @@ module
       if (splitField !== undefined) {
         $scope.addDefaultFieldsToInfluencerList();
 
-        $scope.ui.splitText = 'Data split by ' + splitField.name;
+        $scope.ui.splitText = i18n('xpack.ml.newJob.simple.multiMetric.dataSplitByLabel', {
+          defaultMessage: 'Data split by {splitFieldName}',
+          values: { splitFieldName: splitField.name }
+        });
 
         chartDataUtils.getSplitFields($scope.formConfig, $scope.formConfig.splitField.name, 10)
           .then((resp) => {
@@ -276,7 +316,7 @@ module
 
     function initAgg() {
       _.each($scope.ui.aggTypeOptions, (agg) => {
-        if (agg.title === 'Mean') {
+        if (agg.mlName === 'mean') {
           $scope.formConfig.agg.type = agg;
         }
       });
@@ -310,13 +350,13 @@ module
 
       mlMultiMetricJobService.clearChartData();
 
-      // $scope.chartStates.eventRate = CHART_STATE.LOADING;
       setFieldsChartStates(CHART_STATE.LOADING);
 
       if (Object.keys($scope.formConfig.fields).length) {
         $scope.ui.showFieldCharts = true;
         mlMultiMetricJobService.getLineChartResults($scope.formConfig, thisLoadTimestamp)
           .then((resp) => {
+            $scope.$applyAsync();
             loadDocCountData(resp.detectors);
           })
           .catch((resp) => {
@@ -324,6 +364,7 @@ module
             _.each($scope.formConfig.fields, (field, id) => {
               $scope.chartStates.fields[id] = CHART_STATE.NO_RESULTS;
             });
+            $scope.$applyAsync();
           });
       } else {
         $scope.ui.showFieldCharts = false;
@@ -341,13 +382,16 @@ module
 
               $scope.chartData.lastLoadTimestamp = null;
               chartDataUtils.updateChartMargin($scope.chartData);
-              $scope.$broadcast('render');
               $scope.chartStates.eventRate = (resp.totalResults) ? CHART_STATE.LOADED : CHART_STATE.NO_RESULTS;
+              $scope.$broadcast('render');
             }
           })
           .catch((resp) => {
             $scope.chartStates.eventRate = CHART_STATE.NO_RESULTS;
             msgs.error(resp.message);
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       }
     };
@@ -356,6 +400,7 @@ module
       _.each($scope.chartStates.fields, (chart, key) => {
         $scope.chartStates.fields[key] = state;
       });
+      $scope.$applyAsync();
     }
 
     function showSparseDataCheckbox() {
@@ -452,17 +497,31 @@ module
                 saveNewDatafeed(job, true);
               })
               .catch((resp) => {
-                msgs.error('Could not open job: ', resp);
-                msgs.error('Job created, creating datafeed anyway');
+                msgs.error(
+                  i18n('xpack.ml.newJob.simple.multiMetric.couldNotOpenJobErrorMessage', {
+                    defaultMessage: 'Could not open job:'
+                  }),
+                  resp
+                );
+                msgs.error(
+                  i18n('xpack.ml.newJob.simple.multiMetric.jobCreatedAndDatafeedCreatingAnywayErrorMessage', {
+                    defaultMessage: 'Job created, creating datafeed anyway'
+                  })
+                );
                 // if open failed, still attempt to create the datafeed
                 // as it may have failed because we've hit the limit of open jobs
                 saveNewDatafeed(job, false);
               });
-
           })
           .catch((resp) => {
             // save failed
-            msgs.error('Save failed: ', resp.resp);
+            msgs.error(
+              i18n('xpack.ml.newJob.simple.multiMetric.saveFailedErrorMessage', {
+                defaultMessage: 'Save failed:'
+              }),
+              resp.resp
+            );
+            $scope.$applyAsync();
           });
       } else {
         // show the advanced section as the model memory limit is invalid
@@ -477,7 +536,6 @@ module
       function saveNewDatafeed(job, startDatafeedAfterSave) {
         mlJobService.saveNewDatafeed(job.datafeed_config, job.job_id)
           .then(() => {
-
             if (startDatafeedAfterSave) {
               mlMultiMetricJobService.startDatafeed($scope.formConfig)
                 .then(() => {
@@ -505,12 +563,28 @@ module
                 })
                 .catch((resp) => {
                   // datafeed failed
-                  msgs.error('Could not start datafeed: ', resp);
+                  msgs.error(
+                    i18n('xpack.ml.newJob.simple.multiMetric.couldNotStartDatafeedErrorMessage', {
+                      defaultMessage: 'Could not start datafeed:'
+                    }),
+                    resp
+                  );
+                })
+                .then(() => {
+                  $scope.$applyAsync();
                 });
+            } else {
+              $scope.$applyAsync();
             }
           })
           .catch((resp) => {
-            msgs.error('Save datafeed failed: ', resp);
+            msgs.error(
+              i18n('xpack.ml.newJob.simple.multiMetric.saveDatafeedFailedErrorMessage', {
+                defaultMessage: 'Save datafeed failed:',
+              }),
+              resp
+            );
+            $scope.$applyAsync();
           });
       }
     };
@@ -531,6 +605,7 @@ module
           .then((state) => {
             if (state === 'stopped') {
               console.log('Stopping poll because datafeed state is: ' + state);
+              $scope.$applyAsync();
               $scope.$broadcast('render-results');
               forceStop = true;
             }
@@ -577,6 +652,7 @@ module
       // fade the bar chart once we have results
         toggleSwimlaneVisibility();
       }
+      $scope.$applyAsync();
       $scope.$broadcast('render-results');
     }
 
@@ -628,7 +704,11 @@ module
     $scope.stopJob = function () {
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
-      mlMultiMetricJobService.stopDatafeed($scope.formConfig);
+      mlMultiMetricJobService.stopDatafeed($scope.formConfig)
+        .catch(() => {})
+        .then(() => {
+          $scope.$applyAsync();
+        });
     };
 
     $scope.moveToAdvancedJobCreation = function () {
@@ -636,12 +716,13 @@ module
       moveToAdvancedJobCreation(job);
     };
 
+    let lastEstimatedModelMemoryLimit = null;
     $scope.setModelMemoryLimit = function () {
       const formConfig = $scope.formConfig;
       ml.calculateModelMemoryLimit({
         indexPattern: formConfig.indexPattern.title,
         splitFieldName: formConfig.splitField.name,
-        query: formConfig.query,
+        query: formConfig.combinedQuery,
         fieldNames: Object.keys(formConfig.fields),
         influencerNames: formConfig.influencerFields.map(f => f.name),
         timeFieldName: formConfig.timeField,
@@ -649,10 +730,32 @@ module
         latestMs: formConfig.end
       })
         .then((resp) => {
-          formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          // To avoid overwriting a possible custom set model memory limit,
+          // it only gets set to the estimation if the current limit is either
+          // the default value or the value of the previous estimation.
+          // That's our best guess if the value hasn't been customized.
+          // It doesn't get it if the user intentionally for whatever reason (re)set
+          // the value to either the default or pervious estimate.
+          // Because the string based limit could contain e.g. MB/Mb/mb
+          // all strings get lower cased for comparison.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
+          if (
+            currentModelMemoryLimit === defaultModelMemoryLimit ||
+            currentModelMemoryLimit === lastEstimatedModelMemoryLimit
+          ) {
+            formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          }
+          lastEstimatedModelMemoryLimit = resp.modelMemoryLimit.toLowerCase();
         })
         .catch(() => {
-          formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          // To avoid overwriting a possible custom set model memory limit,
+          // the limit is reset to the default only if the current limit matches
+          // the previous estimated limit.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          if (currentModelMemoryLimit === lastEstimatedModelMemoryLimit) {
+            formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          }
         });
     };
 

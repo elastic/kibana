@@ -16,13 +16,20 @@ import {
 } from '@elastic/eui';
 
 import makeId from '@elastic/eui/lib/components/form/form_row/make_id';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+// This service will be populated by the corresponding angularjs based one.
+export const mlCheckboxShowChartsService = {
+  intialized: false,
+  state: null
+};
 
 class CheckboxShowCharts extends Component {
   constructor(props) {
     super(props);
 
     // Restore the checked setting from the state.
-    this.mlCheckboxShowChartsService = this.props.mlCheckboxShowChartsService;
+    this.mlCheckboxShowChartsService = mlCheckboxShowChartsService;
     const showCharts = this.mlCheckboxShowChartsService.state.get('showCharts');
 
     this.state = {
@@ -44,7 +51,10 @@ class CheckboxShowCharts extends Component {
     return (
       <EuiCheckbox
         id={makeId()}
-        label="Show charts"
+        label={<FormattedMessage
+          id="xpack.ml.controls.checkboxShowCharts.showChartsCheckboxLabel"
+          defaultMessage="Show charts"
+        />}
         checked={this.state.checked}
         onChange={this.onChange}
       />

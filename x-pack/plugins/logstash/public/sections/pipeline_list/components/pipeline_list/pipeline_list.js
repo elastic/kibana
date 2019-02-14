@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { toastNotifications } from 'ui/notify';
+import { I18nContext } from 'ui/i18n';
 import { PipelineList } from '../../../../components/pipeline_list';
 import 'plugins/logstash/services/pipelines';
 import 'plugins/logstash/services/license';
@@ -33,19 +34,21 @@ app.directive('pipelineList', function ($injector) {
       const clonePipeline = id =>
         scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit?clone`));
       render(
-        <PipelineList
-          clonePipeline={clonePipeline}
-          clusterService={clusterService}
-          isReadOnly={licenseService.isReadOnly}
-          isForbidden={true}
-          isLoading={false}
-          licenseService={licenseService}
-          monitoringService={monitoringService}
-          openPipeline={openPipeline}
-          createPipeline={createPipeline}
-          pipelinesService={pipelinesService}
-          toastNotifications={toastNotifications}
-        />,
+        <I18nContext>
+          <PipelineList
+            clonePipeline={clonePipeline}
+            clusterService={clusterService}
+            isReadOnly={licenseService.isReadOnly}
+            isForbidden={true}
+            isLoading={false}
+            licenseService={licenseService}
+            monitoringService={monitoringService}
+            openPipeline={openPipeline}
+            createPipeline={createPipeline}
+            pipelinesService={pipelinesService}
+            toastNotifications={toastNotifications}
+          />
+        </I18nContext>,
         el[0]
       );
     },

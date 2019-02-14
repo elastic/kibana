@@ -17,8 +17,8 @@
  * under the License.
  */
 
-jest.mock('../../../../server/config');
-jest.mock('../../../../server/logging');
+jest.mock('../../../../legacy/server/config');
+jest.mock('../../../../legacy/server/logging');
 
 import { LogLevel } from '../../logging/log_level';
 import { LegacyLoggingServer } from './legacy_logging_server';
@@ -87,7 +87,7 @@ Object {
 Object {
   "data": "some-message",
   "tags": Array [
-    "trace",
+    "debug",
     "some-context",
     "sub-context",
     "important",

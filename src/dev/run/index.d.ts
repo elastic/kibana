@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export function createFailError(msg: string, exitCode: number): Error;
+import { ToolingLog } from '@kbn/dev-utils';
+
+export function createFailError(msg: string, exitCode?: number): Error;
+export function run(
+  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
+): Promise<void>;

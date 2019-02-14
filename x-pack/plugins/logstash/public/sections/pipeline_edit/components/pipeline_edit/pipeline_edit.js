@@ -9,6 +9,7 @@ import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { Notifier, toastNotifications } from 'ui/notify';
+import { I18nContext } from 'ui/i18n';
 import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
@@ -36,19 +37,21 @@ app.directive('pipelineEdit', function ($injector) {
         : null;
 
       render(
-        <PipelineEditor
-          kbnUrl={kbnUrl}
-          close={close}
-          open={open}
-          isNewPipeline={isEmpty(scope.pipeline.id)}
-          username={userResource ? userResource.username : null}
-          pipeline={scope.pipeline}
-          pipelineService={pipelineService}
-          routeService={$route}
-          toastNotifications={toastNotifications}
-          licenseService={licenseService}
-          notifier={new Notifier({ location: 'Logstash' })}
-        />,
+        <I18nContext>
+          <PipelineEditor
+            kbnUrl={kbnUrl}
+            close={close}
+            open={open}
+            isNewPipeline={isEmpty(scope.pipeline.id)}
+            username={userResource ? userResource.username : null}
+            pipeline={scope.pipeline}
+            pipelineService={pipelineService}
+            routeService={$route}
+            toastNotifications={toastNotifications}
+            licenseService={licenseService}
+            notifier={new Notifier({ location: 'Logstash' })}
+          />
+        </I18nContext>,
         el[0]
       );
     },

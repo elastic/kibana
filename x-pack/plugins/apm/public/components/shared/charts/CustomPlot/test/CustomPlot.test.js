@@ -18,6 +18,10 @@ import {
   getEmptySerie
 } from '../../../../../store/selectors/chartSelectors';
 
+function getXValueByIndex(index) {
+  return responseWithData.responseTimes.avg[index].x;
+}
+
 describe('when response has data', () => {
   let wrapper;
   let onHover;
@@ -26,7 +30,6 @@ describe('when response has data', () => {
 
   beforeEach(() => {
     const series = getResponseTimeSeries(responseWithData);
-
     onHover = jest.fn();
     onMouseLeave = jest.fn();
     onSelectionEnd = jest.fn();
@@ -166,7 +169,7 @@ describe('when response has data', () => {
     });
 
     it('should call onHover', () => {
-      expect(onHover).toHaveBeenCalledWith(responseWithData.dates[index]);
+      expect(onHover).toHaveBeenCalledWith(getXValueByIndex(index));
     });
   });
 
@@ -178,9 +181,9 @@ describe('when response has data', () => {
       });
 
       // Simulate hovering over multiple buckets
-      wrapper.setProps({ hoverX: responseWithData.dates[13] });
-      wrapper.setProps({ hoverX: responseWithData.dates[14] });
-      wrapper.setProps({ hoverX: responseWithData.dates[15] });
+      wrapper.setProps({ hoverX: getXValueByIndex(13) });
+      wrapper.setProps({ hoverX: getXValueByIndex(14) });
+      wrapper.setProps({ hoverX: getXValueByIndex(15) });
     });
 
     it('should display tooltip', () => {
@@ -240,8 +243,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(20)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {
@@ -262,8 +265,8 @@ describe('when response has data', () => {
       wrapper
         .find('.rv-voronoi__cell')
         .at(10)
-        .simulate('mouseOver')
-        .simulate('mouseUp');
+        .simulate('mouseOver');
+      document.body.dispatchEvent(new Event('mouseup'));
     });
 
     it('should call onSelectionEnd', () => {

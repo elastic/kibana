@@ -14,7 +14,6 @@ import 'ui-bootstrap';
 import 'ui/persisted_log';
 import 'ui/autoload/all';
 
-import 'plugins/ml/styles/main.less';
 import 'plugins/ml/access_denied';
 import 'plugins/ml/factories/listener_factory';
 import 'plugins/ml/factories/state_factory';

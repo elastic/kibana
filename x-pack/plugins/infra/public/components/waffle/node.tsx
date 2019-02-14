@@ -5,11 +5,13 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraTimerangeInput } from 'x-pack/plugins/infra/common/graphql/types';
+
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+import { InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -36,10 +38,17 @@ export class Node extends React.PureComponent<Props, State> {
     const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
     const { isPopoverOpen } = this.state;
     const { metric } = node;
-    const valueMode = squareSize > 110;
+    const valueMode = squareSize > 70;
+    const ellipsisMode = squareSize > 30;
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);
     const value = formatter(rawValue);
+    const newTimerange = {
+      ...timeRange,
+      from: moment(timeRange.to)
+        .subtract(1, 'hour')
+        .valueOf(),
+    };
     return (
       <NodeContextMenu
         node={node}
@@ -47,7 +56,7 @@ export class Node extends React.PureComponent<Props, State> {
         isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
         options={options}
-        timeRange={timeRange}
+        timeRange={newTimerange}
       >
         <EuiToolTip position="top" content={`${node.name} | ${value}`}>
           <NodeContainer
@@ -56,11 +65,17 @@ export class Node extends React.PureComponent<Props, State> {
           >
             <SquareOuter color={color}>
               <SquareInner color={color}>
-                {valueMode && (
+                {valueMode ? (
                   <ValueInner>
                     <Label color={color}>{node.name}</Label>
                     <Value color={color}>{value}</Value>
                   </ValueInner>
+                ) : (
+                  ellipsisMode && (
+                    <ValueInner>
+                      <Label color={color}>...</Label>
+                    </ValueInner>
+                  )
                 )}
               </SquareInner>
             </SquareOuter>
@@ -75,7 +90,9 @@ export class Node extends React.PureComponent<Props, State> {
   };
 
   private closePopover = () => {
-    this.setState({ isPopoverOpen: false });
+    if (this.state.isPopoverOpen) {
+      this.setState({ isPopoverOpen: false });
+    }
   };
 }
 

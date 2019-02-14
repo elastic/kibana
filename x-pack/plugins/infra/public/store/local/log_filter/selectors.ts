@@ -6,11 +6,15 @@
 
 import { createSelector } from 'reselect';
 
-import { fromKueryExpression } from 'ui/kuery';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { LogFilterState } from './reducer';
 
-export const selectLogFilterQuery = (state: LogFilterState) => state.filterQuery;
+export const selectLogFilterQuery = (state: LogFilterState) =>
+  state.filterQuery ? state.filterQuery.query : null;
+
+export const selectLogFilterQueryAsJson = (state: LogFilterState) =>
+  state.filterQuery ? state.filterQuery.serializedQuery : null;
 
 export const selectLogFilterQueryDraft = (state: LogFilterState) => state.filterQueryDraft;
 

@@ -17,7 +17,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import '../styles/main.less';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { detectorToString } from 'plugins/ml/util/string_utils';
 

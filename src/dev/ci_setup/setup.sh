@@ -26,6 +26,14 @@ else
   exit 1
 fi
 
+export KIBANA_DIR="$dir"
+export XPACK_DIR="$KIBANA_DIR/x-pack"
+export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
+
+echo "-> KIBANA_DIR $KIBANA_DIR"
+echo "-> XPACK_DIR $XPACK_DIR"
+echo "-> PARENT_DIR $PARENT_DIR"
+echo "-> TEST_ES_SNAPSHOT_VERSION $TEST_ES_SNAPSHOT_VERSION"
 
 ###
 ### download node
@@ -85,6 +93,11 @@ yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yar
 npm install -g yarn@^${yarnVersion}
 
 ###
+### setup yarn offline cache
+###
+yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
+
+###
 ### "install" yarn into this shell
 ###
 yarnGlobalDir="$(yarn global bin)"
@@ -95,7 +108,7 @@ hash -r
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn kbn bootstrap
+yarn kbn bootstrap --prefer-offline
 
 ###
 ### verify no git modifications

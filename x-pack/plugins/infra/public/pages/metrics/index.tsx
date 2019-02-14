@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 
 import {
   EuiHideFor,
@@ -12,26 +11,30 @@ import {
   EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
-  EuiShowFor,
-  EuiSideNav,
   EuiTitle,
 } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { GraphQLFormattedError } from 'graphql';
+import React from 'react';
 import styled, { withTheme } from 'styled-components';
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+
+import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
+import { InvalidNodeError } from '../../components/metrics/invalid_node';
+import { MetricsSideNav } from '../../components/metrics/side_nav';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { WithCapabilities } from '../../containers/capabilities/with_capabilites';
+import { SourceConfigurationFlyout } from '../../components/source_configuration';
+import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
-import { WithOptions } from '../../containers/with_options';
+import { WithSource } from '../../containers/with_source';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
@@ -53,32 +56,38 @@ interface Props {
       node: string;
     };
   };
+  intl: InjectedIntl;
 }
 
-class MetricDetailPage extends React.PureComponent<Props> {
-  public readonly state = {
-    isSideNavOpenOnMobile: false,
-  };
+export const MetricDetail = withTheme(
+  injectI18n(
+    class extends React.PureComponent<Props> {
+      public static displayName = 'MetricDetailPage';
 
-  public render() {
-    const nodeName = this.props.match.params.node;
-    const nodeType = this.props.match.params.type as InfraNodeType;
-    const layoutCreator = layoutCreators[nodeType];
-    if (!layoutCreator) {
-      return <Error message={`"${nodeType}" is not a valid node type`} />;
-    }
-    const layouts = layoutCreator(this.props.theme);
-    const breadcrumbs = [{ text: nodeName }];
+      public render() {
+        const { intl } = this.props;
+        const nodeId = this.props.match.params.node;
+        const nodeType = this.props.match.params.type as InfraNodeType;
+        const layoutCreator = layoutCreators[nodeType];
+        if (!layoutCreator) {
+          return (
+            <Error
+              message={intl.formatMessage(
+                {
+                  id: 'xpack.infra.metricDetailPage.invalidNodeTypeErrorMessage',
+                  defaultMessage: '{nodeType} is not a valid node type',
+                },
+                {
+                  nodeType: `"${nodeType}"`,
+                }
+              )}
+            />
+          );
+        }
+        const layouts = layoutCreator(this.props.theme);
 
-    return (
-      <ColumnarPage>
-        <Header
-          appendSections={<InfrastructureBetaBadgeHeaderSection />}
-          breadcrumbs={breadcrumbs}
-        />
-        <WithMetricsTimeUrlState />
-        <DetailPageContent>
-          <WithOptions>
+        return (
+          <WithSource>
             {({ sourceId }) => (
               <WithMetricsTime resetOnUnmount>
                 {({
@@ -88,138 +97,129 @@ class MetricDetailPage extends React.PureComponent<Props> {
                   startMetricsAutoReload,
                   stopMetricsAutoReload,
                 }) => (
-                  <WithCapabilities
+                  <WithMetadata
                     layouts={layouts}
                     sourceId={sourceId}
                     nodeType={nodeType}
-                    nodeId={nodeName}
+                    nodeId={nodeId}
                   >
-                    {({ filteredLayouts }) => {
+                    {({ name, filteredLayouts, loading: metadataLoading }) => {
+                      const breadcrumbs = [
+                        {
+                          href: '#/',
+                          text: intl.formatMessage({
+                            id: 'xpack.infra.header.infrastructureTitle',
+                            defaultMessage: 'Infrastructure',
+                          }),
+                        },
+                        { text: name },
+                      ];
                       return (
-                        <WithMetrics
-                          layouts={filteredLayouts}
-                          sourceId={sourceId}
-                          timerange={currentTimeRange as InfraTimerangeInput}
-                          nodeType={nodeType}
-                          nodeId={nodeName}
-                        >
-                          {({ metrics, error, loading }) => {
-                            if (error) {
-                              return <ErrorPageBody message={error} />;
-                            }
-                            const sideNav = filteredLayouts.map(item => {
-                              return {
-                                name: item.label,
-                                id: item.id,
-                                items: item.sections.map(section => ({
-                                  id: section.id as string,
-                                  name: section.label,
-                                  onClick: this.handleClick(section),
-                                })),
-                              };
-                            });
-                            return (
-                              <EuiPage style={{ flex: '1 0 auto' }}>
-                                <EuiPageSideBar>
-                                  <EuiHideFor sizes={['xs', 's']}>
-                                    <EuiSideNavContainer>
-                                      <EuiSideNav items={sideNav} />
-                                    </EuiSideNavContainer>
-                                  </EuiHideFor>
-                                  <EuiShowFor sizes={['xs', 's']}>
-                                    <EuiSideNav
-                                      items={sideNav}
-                                      mobileTitle={nodeName}
-                                      toggleOpenOnMobile={this.toggleOpenOnMobile}
-                                      isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+                        <ColumnarPage>
+                          <Header breadcrumbs={breadcrumbs} />
+                          <SourceConfigurationFlyout />
+                          <WithMetricsTimeUrlState />
+                          <DetailPageContent>
+                            <WithMetrics
+                              layouts={filteredLayouts}
+                              sourceId={sourceId}
+                              timerange={currentTimeRange as InfraTimerangeInput}
+                              nodeType={nodeType}
+                              nodeId={nodeId}
+                            >
+                              {({ metrics, error, loading, refetch }) => {
+                                if (error) {
+                                  const invalidNodeError = error.graphQLErrors.some(
+                                    (err: GraphQLFormattedError) =>
+                                      err.code === InfraMetricsErrorCodes.invalid_node
+                                  );
+
+                                  if (invalidNodeError) {
+                                    return <InvalidNodeError nodeName={name} />;
+                                  }
+
+                                  return <ErrorPageBody message={error.message} />;
+                                }
+                                return (
+                                  <EuiPage style={{ flex: '1 0 auto' }}>
+                                    <MetricsSideNav
+                                      layouts={filteredLayouts}
+                                      loading={metadataLoading}
+                                      nodeName={name}
+                                      handleClick={this.handleClick}
                                     />
-                                  </EuiShowFor>
-                                </EuiPageSideBar>
-                                <AutoSizer content={false} bounds detectAnyWindowResize>
-                                  {({ measureRef, bounds: { width = 0 } }) => {
-                                    return (
-                                      <MetricsDetailsPageColumn innerRef={measureRef}>
-                                        <EuiPageBody style={{ width: `${width}px` }}>
-                                          <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                            <EuiPageHeaderSection style={{ width: '100%' }}>
-                                              <MetricsTitleTimeRangeContainer>
-                                                <EuiHideFor sizes={['xs', 's']}>
-                                                  <EuiTitle size="m">
-                                                    <h1>{nodeName}</h1>
-                                                  </EuiTitle>
-                                                </EuiHideFor>
-                                                <MetricsTimeControls
-                                                  currentTimeRange={currentTimeRange}
-                                                  isLiveStreaming={isAutoReloading}
+                                    <AutoSizer content={false} bounds detectAnyWindowResize>
+                                      {({ measureRef, bounds: { width = 0 } }) => {
+                                        return (
+                                          <MetricsDetailsPageColumn innerRef={measureRef}>
+                                            <EuiPageBody style={{ width: `${width}px` }}>
+                                              <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                                <EuiPageHeaderSection style={{ width: '100%' }}>
+                                                  <MetricsTitleTimeRangeContainer>
+                                                    <EuiHideFor sizes={['xs', 's']}>
+                                                      <EuiTitle size="m">
+                                                        <h1>{name}</h1>
+                                                      </EuiTitle>
+                                                    </EuiHideFor>
+                                                    <MetricsTimeControls
+                                                      currentTimeRange={currentTimeRange}
+                                                      isLiveStreaming={isAutoReloading}
+                                                      onChangeRangeTime={setRangeTime}
+                                                      startLiveStreaming={startMetricsAutoReload}
+                                                      stopLiveStreaming={stopMetricsAutoReload}
+                                                    />
+                                                  </MetricsTitleTimeRangeContainer>
+                                                </EuiPageHeaderSection>
+                                              </EuiPageHeader>
+
+                                              <EuiPageContentWithRelative>
+                                                <Metrics
+                                                  label={name}
+                                                  nodeId={nodeId}
+                                                  layouts={filteredLayouts}
+                                                  metrics={metrics}
+                                                  loading={
+                                                    metrics.length > 0 && isAutoReloading
+                                                      ? false
+                                                      : loading
+                                                  }
+                                                  refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
-                                                  startLiveStreaming={startMetricsAutoReload}
+                                                  isLiveStreaming={isAutoReloading}
                                                   stopLiveStreaming={stopMetricsAutoReload}
                                                 />
-                                              </MetricsTitleTimeRangeContainer>
-                                            </EuiPageHeaderSection>
-                                          </EuiPageHeader>
-
-                                          <EuiPageContentWithRelative>
-                                            <Metrics
-                                              nodeName={nodeName}
-                                              layouts={filteredLayouts}
-                                              metrics={metrics}
-                                              loading={
-                                                metrics.length > 0 && isAutoReloading
-                                                  ? false
-                                                  : loading
-                                              }
-                                              onChangeRangeTime={setRangeTime}
-                                            />
-                                          </EuiPageContentWithRelative>
-                                        </EuiPageBody>
-                                      </MetricsDetailsPageColumn>
-                                    );
-                                  }}
-                                </AutoSizer>
-                              </EuiPage>
-                            );
-                          }}
-                        </WithMetrics>
+                                              </EuiPageContentWithRelative>
+                                            </EuiPageBody>
+                                          </MetricsDetailsPageColumn>
+                                        );
+                                      }}
+                                    </AutoSizer>
+                                  </EuiPage>
+                                );
+                              }}
+                            </WithMetrics>
+                          </DetailPageContent>
+                        </ColumnarPage>
                       );
                     }}
-                  </WithCapabilities>
+                  </WithMetadata>
                 )}
               </WithMetricsTime>
             )}
-          </WithOptions>
-        </DetailPageContent>
-      </ColumnarPage>
-    );
-  }
+          </WithSource>
+        );
+      }
 
-  private handleClick = (section: InfraMetricLayoutSection) => () => {
-    const id = section.linkToId || section.id;
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView();
+      private handleClick = (section: InfraMetricLayoutSection) => () => {
+        const id = section.linkToId || section.id;
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView();
+        }
+      };
     }
-  };
-
-  private toggleOpenOnMobile = () => {
-    this.setState({
-      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
-    });
-  };
-}
-
-export const MetricDetail = withTheme(MetricDetailPage);
-
-const EuiSideNavContainer = styled.div`
-  position: fixed;
-  z-index: 1;
-  height: 88vh;
-  background-color: #f5f5f5;
-  padding-left: 16px;
-  margin-left: -16px;
-  overflow-y: auto;
-  overflow-x: hidden;
-`;
+  )
+);
 
 const MetricsDetailsPageColumn = styled.div`
   flex: 1 0 0%;

@@ -7,4 +7,3 @@
 
 import './edit';
 import './list';
-import './styles/main.less';

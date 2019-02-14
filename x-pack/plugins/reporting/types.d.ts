@@ -3,12 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+interface UiSettings {
+  get: (value: string) => string;
+}
+
+type SavedObjectClient = any;
+
+// these types shoud be in core kibana and are only here temporarily
 export interface KbnServer {
+  info: { protocol: string };
   config: () => ConfigObject;
+  plugins: Record<string, any>;
+  route: any;
+  log: any;
+  savedObjects: {
+    getScopedSavedObjectsClient: (
+      fakeRequest: { headers: object; getBasePath: () => string }
+    ) => SavedObjectClient;
+  };
+  uiSettingsServiceFactory: (
+    { savedObjectsClient }: { savedObjectsClient: SavedObjectClient }
+  ) => UiSettings;
 }
 
 export interface ConfigObject {
-  get: (path: string) => any;
+  get: (path?: string) => any;
 }
 
 export interface Size {
@@ -20,6 +40,7 @@ export interface Logger {
   debug: (message: string) => void;
   error: (message: string) => void;
   warning: (message: string) => void;
+  clone: (tags: string[]) => Logger;
 }
 
 export interface ViewZoomWidthHeight {
@@ -64,4 +85,24 @@ export interface ConditionalHeadersConditions {
   hostname: string;
   port: number;
   basePath: string;
+}
+
+export interface CryptoFactory {
+  decrypt: (headers?: Record<string, string>) => string;
+}
+
+export interface ReportingJob {
+  headers?: Record<string, string>;
+  basePath?: string;
+  urls?: string[];
+  relativeUrl?: string;
+  forceNow?: string;
+  timeRange?: any;
+  objects?: [any];
+}
+
+export interface JobDoc {
+  output: any;
+  jobtype: string;
+  payload: any;
 }

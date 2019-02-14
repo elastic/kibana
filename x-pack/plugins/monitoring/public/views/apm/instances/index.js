@@ -10,7 +10,8 @@ import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
-import { MonitoringViewBaseTableController } from '../../base_table_controller';
+import { MonitoringViewBaseEuiTableController } from '../..';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -20,8 +21,8 @@ uiRoutes.when('/apm/instances', {
       return routeInit();
     },
   },
-  controller: class extends MonitoringViewBaseTableController {
-    constructor($injector, $scope) {
+  controller: class extends MonitoringViewBaseEuiTableController {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
@@ -29,7 +30,12 @@ uiRoutes.when('/apm/instances', {
       });
 
       super({
-        title: 'APM - Instances',
+        title: i18n('xpack.monitoring.apm.instances.routeTitle', {
+          defaultMessage: '{apm} - Instances',
+          values: {
+            apm: 'APM'
+          }
+        }),
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
         defaultData: {},
@@ -45,24 +51,22 @@ uiRoutes.when('/apm/instances', {
 
     renderReact(data) {
       const {
-        pageIndex,
-        filterText,
-        sortKey,
-        sortOrder,
-        onNewState,
+        pagination,
+        sorting,
+        onTableChange,
       } = this;
 
       const component = (
-        <ApmServerInstances
-          apms={{
-            pageIndex,
-            filterText,
-            sortKey,
-            sortOrder,
-            onNewState,
-            data,
-          }}
-        />
+        <I18nContext>
+          <ApmServerInstances
+            apms={{
+              pagination,
+              sorting,
+              onTableChange,
+              data,
+            }}
+          />
+        </I18nContext>
       );
       super.renderReact(component);
     }

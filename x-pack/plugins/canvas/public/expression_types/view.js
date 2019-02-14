@@ -5,7 +5,7 @@
  */
 
 import { pick } from 'lodash';
-import { Registry } from '../../common/lib/registry';
+import { Registry } from '@kbn/interpreter/common';
 import { FunctionForm } from './function_form';
 
 export class View extends FunctionForm {
@@ -22,8 +22,9 @@ export class View extends FunctionForm {
 
     this.modelArgs = this.modelArgs || [];
 
-    if (!Array.isArray(this.modelArgs))
+    if (!Array.isArray(this.modelArgs)) {
       throw new Error(`${this.name} element is invalid, modelArgs must be an array`);
+    }
   }
 }
 

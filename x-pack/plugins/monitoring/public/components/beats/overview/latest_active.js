@@ -9,14 +9,18 @@ import PropTypes from 'prop-types';
 import {
   EuiBasicTable
 } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function LatestActive({ latestActive }) {
+function LatestActiveUi({ latestActive, intl }) {
   const rangeMap = {
-    'last1m': 'Last 1 minute',
-    'last5m': 'Last 5 minutes',
-    'last20m': 'Last 20 minutes',
-    'last1h': 'Last 1 hour',
-    'last1d': 'Last 1 day',
+    'last1m':
+      intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last1MinuteLabel', defaultMessage: 'Last 1 minute' }),
+    'last5m':
+      intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last5MinutesLabel', defaultMessage: 'Last 5 minutes' }),
+    'last20m':
+      intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last20MinutesLabel', defaultMessage: 'Last 20 minutes' }),
+    'last1h': intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last1HourLabel', defaultMessage: 'Last 1 hour' }),
+    'last1d': intl.formatMessage({ id: 'xpack.monitoring.beats.overview.latestActive.last1DayLabel', defaultMessage: 'Last 1 day' }),
   };
 
   const activity = latestActive.map(({ range, count }) => ({
@@ -42,9 +46,11 @@ export function LatestActive({ latestActive }) {
   );
 }
 
-LatestActive.propTypes = {
+LatestActiveUi.propTypes = {
   latestActive: PropTypes.arrayOf(PropTypes.shape({
     range: PropTypes.string.isRequired,
     count: PropTypes.number.isRequired,
   })).isRequired
 };
+
+export const LatestActive = injectI18n(LatestActiveUi);

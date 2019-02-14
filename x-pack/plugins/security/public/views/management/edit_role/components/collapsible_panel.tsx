@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
 interface Props {
@@ -55,7 +56,19 @@ export class CollapsiblePanel extends Component<Props, State> {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink onClick={this.toggleCollapsed}>{this.state.collapsed ? 'show' : 'hide'}</EuiLink>
+          <EuiLink onClick={this.toggleCollapsed}>
+            {this.state.collapsed ? (
+              <FormattedMessage
+                id="xpack.security.management.editRole.collapsiblePanel.showLinkText"
+                defaultMessage="show"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.security.management.editRole.collapsiblePanel.hideLinkText"
+                defaultMessage="hide"
+              />
+            )}
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

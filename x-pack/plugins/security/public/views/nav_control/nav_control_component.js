@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -44,15 +45,21 @@ export class SecurityNavControl extends Component {
   };
 
   render() {
-    const { user, route } = this.props;
+    const { user, editProfileUrl, logoutUrl } = this.props;
     const name = user.full_name || user.username || '';
     const button = (
       <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
-        aria-label="Account menu"
+        aria-label={
+          <FormattedMessage
+            id="xpack.security.navControlComponent.accountMenuAriaLabel"
+            defaultMessage="Account menu"
+          />
+        }
         onClick={this.onMenuButtonClick}
+        data-test-subj="userMenuButton"
       >
         <EuiAvatar name={name} size="s" />
       </EuiHeaderSectionItemButton>
@@ -69,7 +76,7 @@ export class SecurityNavControl extends Component {
         closePopover={this.closeMenu}
         panelPaddingSize="none"
       >
-        <div style={{ width: 320 }}>
+        <div style={{ width: 320 }} data-test-subj="userMenu">
           <EuiFlexGroup gutterSize="m" className="euiHeaderProfile" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiAvatar name={name} size="xl" />
@@ -86,11 +93,21 @@ export class SecurityNavControl extends Component {
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
-                      <EuiLink href={route}>Edit profile</EuiLink>
+                      <EuiLink href={editProfileUrl} data-test-subj="profileLink">
+                        <FormattedMessage
+                          id="xpack.security.navControlComponent.editProfileLinkText"
+                          defaultMessage="Edit profile"
+                        />
+                      </EuiLink>
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiLink href="/logout">Log out</EuiLink>
+                      <EuiLink href={logoutUrl} data-test-subj="logoutLink">
+                        <FormattedMessage
+                          id="xpack.security.navControlComponent.logoutLinkText"
+                          defaultMessage="Log out"
+                        />
+                      </EuiLink>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

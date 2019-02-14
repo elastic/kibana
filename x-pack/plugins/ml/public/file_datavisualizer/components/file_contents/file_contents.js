@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -25,10 +26,23 @@ export function FileContents({ data, format, numberOfLines }) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <h3>File contents</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.fileContents.fileContentsTitle"
+            defaultMessage="File contents"
+          />
+        </h3>
       </EuiTitle>
 
-      <div>First {numberOfLines} line{(numberOfLines > 1) ? 's' : ''}</div>
+      <div>
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription"
+          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
+          values={{
+            numberOfLines: numberOfLines,
+          }}
+        />
+      </div>
 
       <EuiSpacer size="s" />
 

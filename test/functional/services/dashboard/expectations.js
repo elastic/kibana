@@ -28,13 +28,6 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
 
   return new class DashboardExpect {
-    async pieSliceCount(expectedCount) {
-      log.debug(`DashboardExpect.expectPieSliceCount(${expectedCount})`);
-      await retry.try(async () => {
-        const slicesCount = await PageObjects.dashboard.getPieSliceCount();
-        expect(slicesCount).to.be(expectedCount);
-      });
-    }
 
     async panelCount(expectedCount) {
       log.debug(`DashboardExpect.panelCount(${expectedCount})`);
@@ -68,10 +61,12 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       });
     }
 
-    async fieldSuggestionIndexPatterns(expectedIndexPatterns) {
-      log.debug(`DashboardExpect.fieldSuggestionIndexPatterns(${expectedIndexPatterns})`);
-      const indexPatterns = await filterBar.getFilterFieldIndexPatterns();
-      expect(indexPatterns).to.eql(expectedIndexPatterns);
+    async fieldSuggestions(expectedFields) {
+      log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
+      const fields = await filterBar.getFilterEditorFields();
+      expectedFields.forEach(expectedField => {
+        expect(fields).to.contain(expectedField);
+      });
     }
 
     async legendValuesToExist(legendValues) {
@@ -250,7 +245,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async tsvbTableCellCount(expectedCount) {
       log.debug(`DashboardExpect.tsvbTableCellCount(${expectedCount})`);
       await retry.try(async () => {
-        const tableCells = await find.allByCssSelector('.tsvb-table__value');
+        const tableCells = await testSubjects.findAll('tvbTableVis__value');
         expect(tableCells.length).to.be(expectedCount);
       });
     }

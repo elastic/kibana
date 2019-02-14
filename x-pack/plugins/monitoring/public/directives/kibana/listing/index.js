@@ -22,15 +22,49 @@ import {
 import {
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
 const columns = [
-  { title: 'Name', sortKey: 'kibana.name', sortOrder: SORT_ASCENDING },
-  { title: 'Status', sortKey: 'kibana.status' },
-  { title: 'Load Average', sortKey: 'os.load.1m' },
-  { title: 'Memory Size', sortKey: 'process.memory.resident_set_size_in_bytes' },
-  { title: 'Requests', sortKey: 'requests.total' },
-  { title: 'Response Times', sortKey: 'response_times.average' }
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
+      defaultMessage: 'Name'
+    }),
+    sortKey: 'kibana.name',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
+      defaultMessage: 'Status'
+    }),
+    sortKey: 'kibana.status'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.loadAverageColumnTitle', {
+      defaultMessage: 'Load Average'
+    }),
+    sortKey: 'os.load.1m'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.memorySizeColumnTitle', {
+      defaultMessage: 'Memory Size'
+    }),
+    sortKey: 'process.memory.resident_set_size_in_bytes'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.requestsColumnTitle', {
+      defaultMessage: 'Requests'
+    }),
+    sortKey: 'requests.total'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.responseTimeColumnTitle', {
+      defaultMessage: 'Response Times'
+    }),
+    sortKey: 'response_times.average'
+  },
 ];
 const instanceRowFactory = (scope, kbnUrl) => {
   const goToInstance = uuid => {
@@ -39,7 +73,7 @@ const instanceRowFactory = (scope, kbnUrl) => {
     });
   };
 
-  return function KibanaRow(props) {
+  return injectI18n(function KibanaRow(props) {
     return (
       <KuiTableRow>
         <KuiTableRowCell>
@@ -54,9 +88,25 @@ const instanceRowFactory = (scope, kbnUrl) => {
           <div className="monTableCell__transportAddress">{ get(props, 'kibana.transport_address') }</div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div title={`Instance status: ${props.kibana.status}`} className="monTableCell__status">
+          <div
+            className="monTableCell__status"
+            title={
+              props.intl.formatMessage({
+                id: 'xpack.monitoring.kibana.listing.instanceStatusTitle',
+                defaultMessage: 'Instance status: {kibanaStatus}'
+              }, {
+                kibanaStatus: props.kibana.status
+              }
+              )
+            }
+          >
             <KibanaStatusIcon status={props.kibana.status} availability={props.availability} />&nbsp;
-            { !props.availability ? 'Offline' : capitalize(props.kibana.status) }
+            { !props.availability ? (
+              <FormattedMessage
+                id="xpack.monitoring.kibana.listing.instanceStatus.offlineLabel"
+                defaultMessage="Offline"
+              />
+            ) : capitalize(props.kibana.status) }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
@@ -84,11 +134,11 @@ const instanceRowFactory = (scope, kbnUrl) => {
         </KuiTableRowCell>
       </KuiTableRow>
     );
-  };
+  });
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringKibanaListing', kbnUrl => {
+uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
   return {
     restrict: 'E',
     scope: {
@@ -100,22 +150,27 @@ uiModule.directive('monitoringKibanaListing', kbnUrl => {
       onNewState: '=',
     },
     link(scope, $el) {
+      const filterInstancesPlaceholder = i18n('xpack.monitoring.kibana.listing.filterInstancesPlaceholder', {
+        defaultMessage: 'Filter Instances…'
+      });
 
       scope.$watch('instances', (instances = []) => {
         const kibanasTable = (
-          <MonitoringTable
-            className="kibanaInstancesTable"
-            rows={instances}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Instances..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={instanceRowFactory(scope, kbnUrl)}
-          />
+          <I18nContext>
+            <MonitoringTable
+              className="kibanaInstancesTable"
+              rows={instances}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder={filterInstancesPlaceholder}
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={instanceRowFactory(scope, kbnUrl)}
+            />
+          </I18nContext>
         );
         render(kibanasTable, $el[0]);
       });

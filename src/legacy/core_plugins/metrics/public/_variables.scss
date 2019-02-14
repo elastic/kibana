@@ -1,0 +1,11 @@
+$tvbLineColor: transparentize($euiColorFullShade,0.8);
+$tvbLineColorReversed: transparentize($euiColorEmptyShade,0.6);
+
+$tvbTextColor: transparentize($euiColorFullShade,0.6);
+$tvbTextColorReversed: transparentize($euiColorEmptyShade,0.4);
+
+$tvbValueColor: transparentize($euiColorFullShade,0.3);
+$tvbValueColorReversed: transparentize($euiColorEmptyShade,0.2);
+
+$tvbHoverBackgroundColor: transparentize($euiColorFullShade,0.9);
+$tvbHoverBackgroundColorReversed: transparentize($euiColorEmptyShade,0.9);

@@ -26,8 +26,18 @@ export const getFields = (index = '_all') => {
 };
 
 export const getIndices = () => {
-  return fetch
-    .get(`${apiPath}/es_indices`)
-    .then(({ data: indices }) => indices)
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  return savedObjectsClient
+    .find({
+      type: 'index-pattern',
+      fields: ['title'],
+      search_fields: ['title'],
+      perPage: 1000,
+    })
+    .then(resp => {
+      return resp.savedObjects.map(savedObject => {
+        return savedObject.attributes.title;
+      });
+    })
     .catch(err => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
 };

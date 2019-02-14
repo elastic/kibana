@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ImpactedSpacesFlyout> renders without crashing 1`] = `
-<React.Fragment>
+<Fragment>
   <div
     className="showImpactedSpaces"
   >
@@ -10,8 +10,12 @@ exports[`<ImpactedSpacesFlyout> renders without crashing 1`] = `
       onClick={[Function]}
       type="button"
     >
-      View summary of spaces privileges
+      <FormattedMessage
+        defaultMessage="View summary of spaces privileges"
+        id="xpack.security.management.editRoles.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
+        values={Object {}}
+      />
     </EuiLink>
   </div>
-</React.Fragment>
+</Fragment>
 `;

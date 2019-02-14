@@ -18,8 +18,10 @@
  */
 
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
-const PKG_VERSION = require('../../package.json').version;
+const { version } = require('../../package.json');
+const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -72,6 +74,13 @@ module.exports = function (grunt) {
       ]
     },
 
+    sasslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/sasslint')
+      ]
+    },
+
     // used by the test tasks
     //    runs the check_file_casing script to ensure filenames use correct casing
     checkFileCasing: {
@@ -106,6 +115,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/i18n_check'),
+        '--ignore-missing',
       ]
     },
 
@@ -188,7 +198,7 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -200,7 +210,7 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
         '--',
         '--server.maxPayloadBytes=1648576',
       ],
@@ -219,18 +229,9 @@ module.exports = function (grunt) {
       ],
     },
 
-    functionalTestsRelease: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
+    ...getFunctionalTestGroupRunConfigs({
+      esFrom,
+      kibanaInstallDir: KIBANA_INSTALL_DIR
+    })
   };
 };

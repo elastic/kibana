@@ -17,14 +17,17 @@ describe('ML - Index Or Search Controller', () => {
   it('Initialize Index Or Search Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlNewJobStepIndexOrSearch', {
-        $route: {
-          current: {
-            locals: {}
-          }
-        },
-        $scope: scope
-      });
+
+      expect(() => {
+        $controller('MlNewJobStepIndexOrSearch', {
+          $route: {
+            current: {
+              locals: {}
+            }
+          },
+          $scope: scope
+        });
+      }).to.not.throwError();
 
       expect(scope.indexPatterns).to.eql([]);
       done();

@@ -4,22 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-function EmptyMessage({
-  heading = 'No data found.',
-  subheading = 'Try another time range or reset the search filter.',
+interface Props {
+  heading?: string;
+  subheading?: EuiEmptyPromptProps['body'];
+  hideSubheading?: boolean;
+}
+
+const EmptyMessage: React.SFC<Props> = ({
+  heading = i18n.translate('xpack.apm.emptyMessage.noDataFoundLabel', {
+    defaultMessage: 'No data found.'
+  }),
+  subheading = i18n.translate('xpack.apm.emptyMessage.noDataFoundDescription', {
+    defaultMessage: 'Try another time range or reset the search filter.'
+  }),
   hideSubheading = false
-}) {
+}) => {
   return (
     <EuiEmptyPrompt
       titleSize="s"
-      title={<div>{heading || 'No data found.'}</div>}
+      title={<div>{heading}</div>}
       body={!hideSubheading && subheading}
     />
   );
-}
+};
 
-// tslint:disable-next-line:no-default-export
-export default EmptyMessage;
+export { EmptyMessage };

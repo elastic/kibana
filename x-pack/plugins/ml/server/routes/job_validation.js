@@ -85,9 +85,7 @@ export function jobValidationRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       return validateCardinality(callWithRequest, request.payload)
         .then(reply)
-        .catch((resp) => {
-          reply(wrapError(resp));
-        });
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

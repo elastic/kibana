@@ -37,8 +37,10 @@ export class ElementShareContainer extends React.PureComponent {
     // dispatches a custom DOM event on the container when the element is complete
     onComplete(() => {
       clearTimeout(this.timeout);
-      if (!this.sharedItemRef) return; // without this, crazy fast forward/backward paging leads to an error
-      const ev = new Event('renderComplete');
+      if (!this.sharedItemRef) {
+        return;
+      } // without this, crazy fast forward/backward paging leads to an error
+      const ev = new CustomEvent('renderComplete');
       this.sharedItemRef.dispatchEvent(ev);
 
       // if the element is finished before reporting is listening for then
@@ -46,7 +48,7 @@ export class ElementShareContainer extends React.PureComponent {
       // issue, track the completed state locally and set the
       // [data-render-complete] value accordingly.
       // this is similar to renderComplete directive in Kibana,
-      // see: src/ui/public/render_complete/directive.js
+      // see: src/legacy/ui/public/render_complete/directive.js
       this.setState({ renderComplete: true });
     });
   }

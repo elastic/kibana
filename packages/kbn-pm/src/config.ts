@@ -33,6 +33,17 @@ export function getProjectPaths(rootPath: string, options: IProjectPathOptions) 
 
   const projectPaths = [rootPath, resolve(rootPath, 'packages/*')];
 
+  // This is needed in order to install the dependencies for the declared
+  // plugin functional used in the selenium functional tests.
+  // As we are now using the webpack dll for the client vendors dependencies
+  // when we run the plugin functional tests against the distributable
+  // dependencies used by such plugins like @eui, react and react-dom can't
+  // be loaded from the dll as the context is different from the one declared
+  // into the webpack dll reference plugin.
+  // In anyway, have a plugin declaring their own dependencies is the
+  // correct and the expect behavior.
+  projectPaths.push(resolve(rootPath, 'test/plugin_functional/plugins/*'));
+
   if (!ossOnly) {
     projectPaths.push(resolve(rootPath, 'x-pack'));
     projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));

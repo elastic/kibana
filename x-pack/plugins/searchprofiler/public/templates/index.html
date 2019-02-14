@@ -18,26 +18,31 @@
         </tabset>
 
         <!-- License error notice -->
-        <div class="kuiNotice" ng-hide="!licenseEnabled">
+        <div class="euiCallout euiCallOut--warning" ng-hide="licenseEnabled">
           <h2
             class="kuiTitle kuiVerticalRhythmSmall"
             i18n-id="xpack.searchProfiler.licenseErrorMessageTitle"
             i18n-default-message="{warningIcon} License error"
-            i18n-values="{ warningIcon: '<span class=\'kuiIcon fa-warning kuiIcon--error\'></span>' }"
+            i18n-values="{ html_warningIcon: '<span class=\'kuiIcon fa-warning kuiIcon--error\'></span>' }"
           ></h2>
 
           <p
             class="kuiText kuiVerticalRhythmSmall"
             i18n-id="xpack.searchProfiler.licenseErrorMessageDescription"
             i18n-default-message="The Profiler Visualization requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
-            i18n-values="{ licenseTypeList: '<code>' + trialLicense + '</code>, <code>' + basicLicense + '</code>, <code>' + goldLicense + '</code>', platinumLicenseType: '<code>' + platinumLicense + '</code>' }"
+            i18n-values="{
+              html_licenseTypeList: '<code>' + trialLicense + '</code>, <code>' + basicLicense + '</code>, <code>' + goldLicense + '</code>',
+              html_platinumLicenseType: '<code>' + platinumLicense + '</code>',
+            }"
           ></p>
 
           <p
             class="kuiText kuiVerticalRhythmSmall"
             i18n-id="xpack.searchProfiler.registerLicenseDescription"
             i18n-default-message="Please {registerLicenseLink} to continue using the Search Profiler"
-            i18n-values="{ registerLicenseLink: '<a class=\'kuiLink\' href=\'https://www.elastic.co/subscriptions\' rel=\'noopener noreferrer\'>' + registerLicenseLinkLabel + '</a>' }"
+            i18n-values="{
+              html_registerLicenseLink: '<a class=\'kuiLink\' href=\'https://www.elastic.co/subscriptions\' rel=\'noopener noreferrer\'>' + registerLicenseLinkLabel + '</a>',
+            }"
           ></p>
         </div>
       </div>

@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
+import { timefilter } from 'ui/timefilter';
 
 export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
+
   return (
-    <div className="file-datavisualizer-container">
-      <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
-    </div>
+    <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
   );
 }

@@ -4,48 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oc } from 'ts-optchain';
-import { TermsAggsBucket } from 'x-pack/plugins/apm/typings/elasticsearch';
+import { BucketAgg } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
+  PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceResponse {
-  service_name: string;
+export interface ServiceAPIResponse {
+  serviceName: string;
   types: string[];
-  agent_name?: string;
+  agentName?: string;
 }
 
 export async function getService(
   serviceName: string,
   setup: Setup
-): Promise<ServiceResponse> {
+): Promise<ServiceAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
+
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { terms: { [PROCESSOR_EVENT]: ['error', 'transaction'] } },
+    { range: rangeFilter(start, end) }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
 
   const params = {
     index: [
-      config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.errorIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {
@@ -59,25 +61,22 @@ export async function getService(
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
-
   interface Aggs {
     types: {
-      buckets: TermsAggsBucket[];
+      buckets: BucketAgg[];
     };
     agents: {
-      buckets: TermsAggsBucket[];
+      buckets: BucketAgg[];
     };
   }
 
-  const resp = await client('search', params);
-  const aggs: Aggs = resp.aggregations;
-
+  const { aggregations } = await client<void, Aggs>('search', params);
+  const buckets = idx(aggregations, _ => _.types.buckets) || [];
+  const types = buckets.map(bucket => bucket.key);
+  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
   return {
-    service_name: serviceName,
-    types: aggs.types.buckets.map(bucket => bucket.key),
-    agent_name: oc(aggs).agents.buckets[0].key()
+    serviceName,
+    types,
+    agentName
   };
 }

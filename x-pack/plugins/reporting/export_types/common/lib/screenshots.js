@@ -8,8 +8,9 @@ import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
 import getPort from 'get-port';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { LevelLogger } from '../../../server/lib/level_logger';
+import { i18n } from '@kbn/i18n';
 
 const fsp = {
   readFile: promisify(fs.readFile, fs)
@@ -59,9 +60,18 @@ export function screenshotsObservableFactory(server) {
     await browser.waitForSelector(`${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`);
   };
 
-  const waitForNotFoundError = async (browser) => {
-    await browser.waitForSelector(`.toast.alert.alert-danger`);
-    throw new Error('Reporting subject could not be loaded to take a screenshot.');
+  const checkForToastMessage = async (browser, layout) => {
+    await browser.waitForSelector(layout.selectors.toastHeader, { silent: true });
+    const toastHeaderText = await browser.evaluate({
+      fn: function (selector) {
+        const nodeList = document.querySelectorAll(selector);
+        return nodeList.item(0).innerText;
+      },
+      args: [layout.selectors.toastHeader],
+    });
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.screenshots.unexpectedErrorMessage', {
+      defaultMessage: 'Encountered an unexpected message on the page: {toastHeaderText}', values: { toastHeaderText }
+    }));
   };
 
   const getNumberOfItems = async (browser, layout) => {
@@ -250,7 +260,6 @@ export function screenshotsObservableFactory(server) {
           logger.debug(line, ['browserConsole']);
         });
 
-
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
@@ -266,7 +275,7 @@ export function screenshotsObservableFactory(server) {
           mergeMap(
             browser => Rx.race(
               Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(waitForNotFoundError(browser))
+              Rx.from(checkForToastMessage(browser, layout))
             ),
             browser => browser
           ),
@@ -320,3 +329,4 @@ export function screenshotsObservableFactory(server) {
     );
   };
 }
+

@@ -64,5 +64,5 @@ const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string =>
   messageSegment.__typename === 'InfraLogMessageFieldSegment'
     ? messageSegment.value
     : messageSegment.__typename === 'InfraLogMessageConstantSegment'
-      ? messageSegment.constant
-      : 'failed to format message';
+    ? messageSegment.constant
+    : 'failed to format message';

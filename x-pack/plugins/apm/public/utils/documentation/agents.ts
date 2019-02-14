@@ -6,16 +6,12 @@
 
 const AGENT_URL_ROOT = 'https://www.elastic.co/guide/en/apm/agent';
 
-// TODO: currently unused but should be added to timeline view
-export const APM_AGENT_DROPPED_SPANS_DOCS = {
-  nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#transaction-max-spans`,
-  python: `${AGENT_URL_ROOT}/python/2.x/configuration.html#config-transaction-max-spans`
-};
+interface AgentNamedValues {
+  [agentName: string]: string;
+}
 
 const APM_AGENT_FEATURE_DOCS: {
-  [featureName: string]: {
-    [agentName: string]: string;
-  };
+  [featureName: string]: AgentNamedValues;
 } = {
   user: {
     java: `${AGENT_URL_ROOT}/java/0.7/public-api.html#api-transaction-set-user`,

@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getBaseBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
 import { HomeApp } from './home_app';
 
 export const routes = [
   {
     name: 'home',
     path: '/',
+    action: () => () => {
+      setBreadcrumb([getBaseBreadcrumb()]);
+    },
     meta: {
       component: HomeApp,
     },

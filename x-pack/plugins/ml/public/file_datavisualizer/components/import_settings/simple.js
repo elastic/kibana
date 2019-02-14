@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -13,23 +13,32 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-export function SimpleSettings({
+export const SimpleSettings = injectI18n(function ({
   index,
   initialized,
   onIndexChange,
   createIndexPattern,
   onCreateIndexPatternChange,
   indexNameError,
+  intl,
 }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Index name"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.simpleImportSettings.indexNameFormRowLabel"
+            defaultMessage="Index name"
+          />
+        }
         isInvalid={indexNameError !== ''}
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder="index name"
+          placeholder={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder',
+            defaultMessage: 'index name'
+          })}
           value={index}
           disabled={(initialized === true)}
           onChange={onIndexChange}
@@ -39,11 +48,16 @@ export function SimpleSettings({
 
       <EuiCheckbox
         id="createIndexPattern"
-        label="Create index pattern"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.simpleImportSettings.createIndexPatternLabel"
+            defaultMessage="Create index pattern"
+          />
+        }
         checked={(createIndexPattern === true)}
         disabled={(initialized === true)}
         onChange={onCreateIndexPatternChange}
       />
     </React.Fragment>
   );
-}
+});

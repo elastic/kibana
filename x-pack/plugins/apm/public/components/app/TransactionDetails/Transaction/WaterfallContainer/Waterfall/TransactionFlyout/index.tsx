@@ -5,31 +5,92 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLink,
   EuiPortal,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
+import styled from 'styled-components';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { DiscoverTransactionLink } from '../../../ActionMenu';
+import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  location: any; // TODO: import location type from react router or history types?
+  location: Location;
   urlParams: IUrlParams;
-  waterfall: IWaterfall;
+  errorCount: number;
+  traceRootDuration?: number;
+}
+
+const ResponsiveFlyout = styled(EuiFlyout)`
+  width: 100%;
+
+  @media (min-width: 800px) {
+    width: 90%;
+  }
+
+  @media (min-width: 1000px) {
+    width: 70%;
+  }
+
+  @media (min-width: 1400px) {
+    width: 50%;
+  }
+
+  @media (min-width: 2000px) {
+    width: 35%;
+  }
+`;
+
+function DroppedSpansWarning({
+  transactionDoc
+}: {
+  transactionDoc: Transaction;
+}) {
+  const dropped = idx(transactionDoc, _ => _.transaction.span_count.dropped);
+  if (!dropped) {
+    return null;
+  }
+
+  return (
+    <React.Fragment>
+      <EuiCallOut size="s">
+        {i18n.translate(
+          'xpack.apm.transactionDetails.transFlyout.callout.agentDroppedSpansMessage',
+          {
+            defaultMessage:
+              'The APM agent that reported this transaction dropped {dropped} spans or more based on its configuration.',
+            values: { dropped }
+          }
+        )}{' '}
+        <EuiLink href={DROPPED_SPANS_DOCS} target="_blank">
+          {i18n.translate(
+            'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
+            {
+              defaultMessage: 'Learn more about dropped spans.'
+            }
+          )}
+        </EuiLink>
+      </EuiCallOut>
+      <EuiHorizontalRule />
+    </React.Fragment>
+  );
 }
 
 export function TransactionFlyout({
@@ -37,7 +98,8 @@ export function TransactionFlyout({
   onClose,
   location,
   urlParams,
-  waterfall
+  errorCount,
+  traceRootDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -45,21 +107,27 @@ export function TransactionFlyout({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} ownFocus={true} maxWidth={false}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h4>Transaction details</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
+                    {
+                      defaultMessage: 'Transaction details'
+                    }
+                  )}
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverTransactionLink transaction={transactionDoc}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  View transaction in Discover
-                </EuiButtonEmpty>
-              </DiscoverTransactionLink>
+              <TransactionActionMenu
+                transaction={transactionDoc}
+                location={location}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -67,17 +135,19 @@ export function TransactionFlyout({
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
           <StickyTransactionProperties
+            errorCount={errorCount}
             transaction={transactionDoc}
-            totalDuration={waterfall.traceRootDuration}
+            totalDuration={traceRootDuration}
           />
           <EuiHorizontalRule />
+          <DroppedSpansWarning transactionDoc={transactionDoc} />
           <TransactionPropertiesTableForFlyout
             transaction={transactionDoc}
             location={location}
             urlParams={urlParams}
           />
         </EuiFlyoutBody>
-      </EuiFlyout>
+      </ResponsiveFlyout>
     </EuiPortal>
   );
 }

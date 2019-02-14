@@ -6,12 +6,14 @@
 
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
+import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { gotoPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
-import { setCanUserWrite } from '../../state/actions/transient';
+import { isFirstLoad } from '../../state/selectors/app';
+import { setCanUserWrite, setFirstLoad } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -32,7 +34,9 @@ export const routes = [
             notify.error(err, { title: `Couldn't create workpad` });
             // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
             // https://github.com/elastic/kibana/issues/20277
-            if (err.response.status === 403) dispatch(setCanUserWrite(false));
+            if (err.response && err.response.status === 403) {
+              dispatch(setCanUserWrite(false));
+            }
             router.redirectTo('home');
           }
         },
@@ -45,7 +49,9 @@ export const routes = [
         path: '/:id(/page/:page)',
         action: (dispatch, getState) => async ({ params, router }) => {
           // load workpad if given a new id via url param
-          const currentWorkpad = getWorkpad(getState());
+          const state = getState();
+          const currentWorkpad = getWorkpad(state);
+          const firstLoad = isFirstLoad(state);
           if (params.id !== currentWorkpad.id) {
             try {
               const fetchedWorkpad = await workpadService.get(params.id);
@@ -57,9 +63,14 @@ export const routes = [
               // tests if user has permissions to write to workpads
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
-              workpadService.update(params.id, fetchedWorkpad).catch(err => {
-                if (err.response.status === 403) dispatch(setCanUserWrite(false));
-              });
+              if (firstLoad) {
+                workpadService.update(params.id, fetchedWorkpad).catch(err => {
+                  if (err.response && err.response.status === 403) {
+                    dispatch(setCanUserWrite(false));
+                  }
+                });
+                dispatch(setFirstLoad(false));
+              }
             } catch (err) {
               notify.error(err, { title: `Couldn't load workpad with ID` });
               return router.redirectTo('home');
@@ -71,12 +82,18 @@ export const routes = [
           const pageNumber = parseInt(params.page, 10);
 
           // no page provided, append current page to url
-          if (isNaN(pageNumber))
+          if (isNaN(pageNumber)) {
             return router.redirectTo('loadWorkpad', { id: workpad.id, page: workpad.page + 1 });
+          }
 
           // set the active page using the number provided in the url
           const pageIndex = pageNumber - 1;
-          if (pageIndex !== workpad.page) dispatch(gotoPage(pageIndex));
+          if (pageIndex !== workpad.page) {
+            dispatch(gotoPage(pageIndex));
+          }
+
+          // update the application's breadcrumb
+          setBreadcrumb([getBaseBreadcrumb(), getWorkpadBreadcrumb(workpad)]);
         },
         meta: {
           component: WorkpadApp,

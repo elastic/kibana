@@ -4,50 +4,74 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { InfraNodeType } from 'x-pack/plugins/infra/common/graphql/types';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { WithSource } from '../../containers/with_source';
+import { InfraNodeType } from '../../graphql/types';
 import { getTimeFromLocation } from './query_params';
 
-type RedirectToNodeLogsProps = RouteComponentProps<{
-  nodeName: string;
+type RedirectToNodeLogsType = RouteComponentProps<{
+  nodeId: string;
   nodeType: InfraNodeType;
 }>;
 
-export const RedirectToNodeLogs = ({
-  match: {
-    params: { nodeName, nodeType },
-  },
-  location,
-}: RedirectToNodeLogsProps) => (
-  <WithSource>
-    {({ configuredFields }) => {
-      if (!configuredFields) {
-        return <LoadingPage message={`Loading ${nodeType} logs`} />;
-      }
+interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
+  intl: InjectedIntl;
+}
 
-      const searchString = compose(
-        replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeName}`),
-        replaceLogPositionInQueryString(getTimeFromLocation(location))
-      )('');
+export const RedirectToNodeLogs = injectI18n(
+  ({
+    match: {
+      params: { nodeId, nodeType },
+    },
+    location,
+    intl,
+  }: RedirectToNodeLogsProps) => (
+    <WithSource>
+      {({ configuration, isLoading }) => {
+        if (isLoading) {
+          return (
+            <LoadingPage
+              message={intl.formatMessage(
+                {
+                  id: 'xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage',
+                  defaultMessage: 'Loading {nodeType} logs',
+                },
+                {
+                  nodeType,
+                }
+              )}
+            />
+          );
+        }
 
-      return <Redirect to={`/logs?${searchString}`} />;
-    }}
-  </WithSource>
+        if (!configuration) {
+          return null;
+        }
+
+        const searchString = compose(
+          replaceLogFilterInQueryString(`${configuration.fields[nodeType]}: ${nodeId}`),
+          replaceLogPositionInQueryString(getTimeFromLocation(location))
+        )('');
+
+        return <Redirect to={`/logs?${searchString}`} />;
+      }}
+    </WithSource>
+  )
 );
 
 export const getNodeLogsUrl = ({
-  nodeName,
+  nodeId,
   nodeType,
   time,
 }: {
-  nodeName: string;
+  nodeId: string;
   nodeType: InfraNodeType;
   time?: number;
-}) => [`#/link-to/${nodeType}-logs/`, nodeName, ...(time ? [`?time=${time}`] : [])].join('');
+}) => [`#/link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');

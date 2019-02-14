@@ -9,7 +9,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{id}"
+      "_watcher/watch/{id}"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-put-watch.html"
   }

@@ -4,74 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { get } from 'lodash';
 import {
   PARENT_ID,
   PROCESSOR_EVENT,
-  TRACE_ID
-} from '../../../common/constants';
-import { Transaction } from '../../../typings/Transaction';
-import { ITransactionGroup } from '../../../typings/TransactionGroup';
+  TRANSACTION_SAMPLED
+} from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
-import {
-  ITransactionGroupBucket,
-  prepareTransactionGroups,
-  TRANSACTION_GROUP_AGGREGATES
-} from '../helpers/transaction_group_query';
+import { getTransactionGroups } from '../transaction_groups';
+import { ITransactionGroup } from '../transaction_groups/transform';
 
-export async function getTopTraces(setup: Setup): Promise<ITransactionGroup[]> {
-  const { start, end, esFilterQuery, client, config } = setup;
+export type TraceListAPIResponse = ITransactionGroup[];
 
-  const params = {
-    index: config.get('apm_oss.transactionIndices'),
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          must: {
-            // this criterion safeguards against data that lacks a transaction
-            // parent ID but still is not a "trace" by way of not having a
-            // trace ID (e.g. old data before parent ID was implemented, etc)
-            exists: {
-              field: TRACE_ID
-            }
-          },
-          must_not: {
-            // no parent ID alongside a trace ID means this transaction is a
-            // "root" transaction, i.e. a trace
-            exists: {
-              field: PARENT_ID
-            }
-          },
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } }
-          ]
-        }
-      },
-      aggs: TRANSACTION_GROUP_AGGREGATES
+export async function getTopTraces(
+  setup: Setup
+): Promise<TraceListAPIResponse> {
+  const { start, end } = setup;
+
+  const bodyQuery = {
+    bool: {
+      // no parent ID means this transaction is a "root" transaction, i.e. a trace
+      must_not: { exists: { field: PARENT_ID } },
+      filter: [
+        { range: rangeFilter(start, end) },
+        { term: { [PROCESSOR_EVENT]: 'transaction' } }
+      ],
+      should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
-
-  const response: SearchResponse<Transaction> = await client('search', params);
-  const buckets: ITransactionGroupBucket[] = get(
-    response.aggregations,
-    'transactions.buckets',
-    []
-  );
-
-  return prepareTransactionGroups({ buckets, start, end });
+  return getTransactionGroups(setup, bodyQuery);
 }

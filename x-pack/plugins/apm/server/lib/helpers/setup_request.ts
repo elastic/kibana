@@ -5,37 +5,31 @@
  */
 
 /* tslint:disable no-console */
-import { SearchParams, SearchResponse } from 'elasticsearch';
-import { Request } from 'hapi';
+import {
+  AggregationSearchResponse,
+  ESFilter,
+  SearchParams
+} from 'elasticsearch';
+import { Legacy } from 'kibana';
+import { merge } from 'lodash';
 import moment from 'moment';
+import { OBSERVER_VERSION_MAJOR } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 
-function decodeEsQuery(esQuery?: string): object {
+function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
-interface KibanaConfig {
-  get: (key: string) => any;
-}
+export type ESClient = <T = void, U = void>(
+  type: string,
+  params: SearchParams
+) => Promise<AggregationSearchResponse<T, U>>;
 
-// Extend the defaults with the plugins and server methods we need.
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-  }
-
-  interface Server {
-    config: () => KibanaConfig;
-  }
-}
-
-type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
-
-export interface Setup<T = any> {
+export interface Setup {
   start: number;
   end: number;
-  esFilterQuery: any;
-  client: Client<T>;
-  config: KibanaConfig;
+  esFilterQuery?: ESFilter;
+  client: ESClient;
+  config: Legacy.KibanaConfig;
 }
 
 interface APMRequestQuery {
@@ -45,23 +39,48 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-export function setupRequest(req: Request) {
+function addFilterForLegacyData(params: SearchParams) {
+  // ensure a filter exists
+  const nextParams = merge({}, params, {
+    body: { query: { bool: { filter: [] } } }
+  });
+
+  // add to filter
+  nextParams.body.query.bool.filter.push({
+    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } }
+  });
+
+  return nextParams;
+}
+
+export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
+  const uiSettings = req.getUiSettingsService();
 
-  function client<T>(type: string, params: SearchParams): SearchResponse<T> {
+  const client: ESClient = async (type, params) => {
+    const includeFrozen = await uiSettings.get('search:includeFrozen');
+
+    const nextParams = {
+      ...addFilterForLegacyData(params), // filter out pre-7.0 data
+      ignore_throttled: !includeFrozen, // whether to query frozen indices or not
+      rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    };
+
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
+      console.log('includeFrozen: ', includeFrozen);
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
           query
         )}`
       );
-      console.log(`GET ${params.index}/_search`);
-      console.log(JSON.stringify(params.body, null, 4));
+      console.log(`GET ${nextParams.index}/_search`);
+      console.log(JSON.stringify(nextParams.body, null, 4));
     }
-    return cluster.callWithRequest(req, type, params);
-  }
+
+    return cluster.callWithRequest(req, type, nextParams);
+  };
 
   return {
     start: moment.utc(query.start).valueOf(),

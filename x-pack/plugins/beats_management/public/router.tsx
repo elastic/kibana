@@ -4,86 +4,128 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { Header } from './components/layouts/header';
-import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
-import { FrontendLibs } from './lib/lib';
-import { BeatDetailsPage } from './pages/beat';
-import { EnforceSecurityPage } from './pages/enforce_security';
-import { InvalidLicensePage } from './pages/invalid_license';
-import { MainPages } from './pages/main';
-import { NoAccessPage } from './pages/no_access';
-import { TagPage } from './pages/tag';
+import { get } from 'lodash';
+import React, { Component } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { Loading } from './components/loading';
+import { ChildRoutes } from './components/navigation/child_routes';
+import { BeatsContainer } from './containers/beats';
+import { TagsContainer } from './containers/tags';
+import { URLStateProps, WithURLState } from './containers/with_url_state';
+import { FrontendLibs } from './lib/types';
+import { routeMap } from './pages/index';
 
-export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
-  return (
-    <HashRouter basename="/management/beats_management">
-      <div>
-        <BreadcrumbConsumer>
-          {({ breadcrumbs }) => (
-            <Header
-              breadcrumbs={[
-                {
-                  href: '#/management',
-                  text: 'Management',
-                },
-                {
-                  href: '#/management/beats_management',
-                  text: 'Beats',
-                },
-                ...breadcrumbs,
-              ]}
+interface RouterProps {
+  libs: FrontendLibs;
+  tagsContainer: TagsContainer;
+  beatsContainer: BeatsContainer;
+}
+interface RouterState {
+  loading: boolean;
+}
+
+export class AppRouter extends Component<RouterProps, RouterState> {
+  constructor(props: RouterProps) {
+    super(props);
+    this.state = {
+      loading: true,
+    };
+  }
+
+  public async componentWillMount() {
+    if (this.state.loading === true) {
+      try {
+        await this.props.beatsContainer.reload();
+        await this.props.tagsContainer.reload();
+      } catch (e) {
+        // TODO in a furture version we will better manage this "error" in a returned arg
+      }
+
+      this.setState({
+        loading: false,
+      });
+    }
+  }
+
+  public render() {
+    if (this.state.loading === true) {
+      return <Loading />;
+    }
+
+    const countOfEverything =
+      this.props.beatsContainer.state.list.length + this.props.tagsContainer.state.list.length;
+
+    return (
+      <React.Fragment>
+        {/* Redirects mapping */}
+        <Switch>
+          {/* License check (UI displays when license exists but is expired) */}
+          {get(this.props.libs.framework.info, 'license.expired', true) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/invalid_license" />
+                ) : null
+              }
             />
           )}
-        </BreadcrumbConsumer>
-        <Switch>
-          {libs.framework.licenseExpired() && <Route render={() => <InvalidLicensePage />} />}
-          {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
-          {!libs.framework.getCurrentUser() ||
-            (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-              !libs.framework
-                .getDefaultUserRoles()
-                .some(r => libs.framework.getCurrentUser().roles.includes(r)) && (
-                <Route render={() => <NoAccessPage />} />
-              ))}
-          <Route
-            path="/"
-            exact={true}
-            render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
-          />
-          <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
-          <RouteWithBreadcrumb
-            title={params => {
-              return `Beats: ${params.beatId}`;
-            }}
-            parentBreadcrumbs={[
-              {
-                text: 'Beats List',
-                href: '#/management/beats_management/overview/beats',
-              },
-            ]}
-            path="/beat/:beatId"
-            render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
-          />
-          <RouteWithBreadcrumb
-            title={params => {
-              if (params.action === 'create') {
-                return 'Create Tag';
+
+          {/* Ensure security is eanabled for elastic and kibana */}
+          {!get(this.props.libs.framework.info, 'security.enabled', true) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/enforce_security" />
+                ) : null
               }
-              return `Tag: ${params.tagid}`;
-            }}
-            parentBreadcrumbs={[
-              {
-                text: 'Tags List',
-                href: '#/management/beats_management/overview/tags',
-              },
-            ]}
-            path="/tag/:action/:tagid?"
-            render={(props: any) => <TagPage {...props} libs={libs} />}
-          />
+            />
+          )}
+
+          {/* Make sure the user has correct permissions */}
+          {!this.props.libs.framework.currentUserHasOneOfRoles(
+            ['beats_admin'].concat(this.props.libs.framework.info.settings.defaultUserRoles)
+          ) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/no_access" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* If there are no beats or tags yet, redirect to the walkthrough */}
+          {countOfEverything === 0 && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/walkthrough') ? (
+                  <Redirect to="/walkthrough/initial" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
+          <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_beats" />} />
         </Switch>
-      </div>
-    </HashRouter>
-  );
-};
+
+        {/* Render routes from the FS */}
+        <WithURLState>
+          {(URLProps: URLStateProps) => (
+            <ChildRoutes
+              routes={routeMap}
+              {...URLProps}
+              {...{
+                libs: this.props.libs,
+                containers: {
+                  beats: this.props.beatsContainer,
+                  tags: this.props.tagsContainer,
+                },
+              }}
+            />
+          )}
+        </WithURLState>
+      </React.Fragment>
+    );
+  }
+}

@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }) {
   return {
     ...functionalConfig,
     junit: {
-      reportName: 'X-Pack Chromium API Reporting Tests',
+      reportName: 'X-Pack Chromium Functional Reporting Tests',
     },
     testFiles: [require.resolve('../functional')],
     kbnTestServer: {

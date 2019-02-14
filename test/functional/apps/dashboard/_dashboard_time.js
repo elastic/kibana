@@ -25,8 +25,8 @@ const fromTime = '2015-09-19 06:31:44.000';
 const toTime = '2015-09-23 18:31:44.000';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['dashboard', 'header']);
-  const remote = getService('remote');
+  const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
+  const browser = getService('browser');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -46,64 +46,48 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('Does not set the time picker on open', async () => {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-        const fromTimeNext = await PageObjects.header.getFromTime();
-        const toTimeNext = await PageObjects.header.getToTime();
-        expect(fromTimeNext).to.equal(fromTime);
-        expect(toTimeNext).to.equal(toTime);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
+        expect(time.end).to.equal('Sep 23, 2015 @ 18:31:44.000');
       });
     });
 
     describe('dashboard with stored timed', async function () {
-      it('is saved with quick time', async function () {
+      it('is saved with time', async function () {
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.header.setQuickTime('Today');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
-      it('sets quick time on open', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      it('sets time on open', async function () {
+        await PageObjects.timePicker.setAbsoluteRange('2019-01-01 00:00:00.000', '2019-01-02 00:00:00.000');
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-        const prettyPrint = await PageObjects.header.getPrettyDuration();
-        expect(prettyPrint).to.equal('Today');
-      });
-
-      it('is saved with absolute time', async function () {
-        await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-      });
-
-      it('sets absolute time on open', async function () {
-        await PageObjects.header.setQuickTime('Today');
-
-        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-
-        const fromTimeNext = await PageObjects.header.getFromTime();
-        const toTimeNext = await PageObjects.header.getToTime();
-        expect(fromTimeNext).to.equal(fromTime);
-        expect(toTimeNext).to.equal(toTime);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
+        expect(time.end).to.equal('Sep 23, 2015 @ 18:31:44.000');
       });
 
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
       // However, if the URL also contains time in the global state, then the global state
       // time should take precedence.
       it('should be overwritten by global state', async function () {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,mode:quick,to:now))`;
-        await remote.get(urlWithGlobalTime, false);
-        const prettyPrint = await PageObjects.header.getPrettyDuration();
-        expect(prettyPrint).to.equal('Last 1 hour');
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,to:now))`;
+        await browser.get(urlWithGlobalTime, false);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal('~ an hour ago');
+        expect(time.end).to.equal('now');
       });
     });
 
@@ -115,12 +99,13 @@ export default function ({ getPageObjects, getService }) {
       it('preserved during navigation', async function () {
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-        await PageObjects.header.setQuickTime('Today');
+        await PageObjects.timePicker.setAbsoluteRange('2019-01-01 00:00:00.000', '2019-01-02 00:00:00.000');
         await PageObjects.header.clickVisualize();
         await PageObjects.header.clickDashboard();
 
-        const prettyPrint = await PageObjects.header.getPrettyDuration();
-        expect(prettyPrint).to.equal('Today');
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal('Jan 1, 2019 @ 00:00:00.000');
+        expect(time.end).to.equal('Jan 2, 2019 @ 00:00:00.000');
       });
     });
   });

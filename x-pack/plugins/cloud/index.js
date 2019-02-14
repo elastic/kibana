@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export const cloud = (kibana) => {
+export const cloud = kibana => {
   return new kibana.Plugin({
     id: 'cloud',
     configPrefix: 'xpack.cloud',
@@ -15,16 +14,30 @@ export const cloud = (kibana) => {
       injectDefaultVars(server, options) {
         return {
           isCloudEnabled: !!options.id,
-          cloudId: options.id,
+          cloudId: options.id
         };
-      }
+      },
     },
 
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         id: Joi.string(),
+        apm: Joi.object({
+          url: Joi.string(),
+          secret_token: Joi.string(),
+          ui: Joi.object({
+            url: Joi.string(),
+          }).default(),
+        }).default(),
       }).default();
     },
+
+    init(server) {
+      const config = server.config().get(`xpack.cloud`);
+      server.expose('config', {
+        isCloudEnabled: !!config.id
+      });
+    }
   });
 };

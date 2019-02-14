@@ -1,5 +1,5 @@
 // Import the EUI global scope so we can use EUI constants
-@import 'ui/public/styles/_styling_constants';
+@import 'src/legacy/ui/public/styles/_styling_constants';
 
 // Temporary hacks
 @import 'hacks';
@@ -20,4 +20,4 @@
 @import 'components/table/index';
 @import 'components/logstash/pipeline_viewer/views/index';
 @import 'directives/chart/index';
-@import 'directives/elasticsearch/shard_allocation/index';
+@import 'components/elasticsearch/shard_allocation/index';

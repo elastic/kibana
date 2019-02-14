@@ -13,6 +13,10 @@ const createMockAuditLogger = () => {
   };
 };
 
+const createMockDebugLogger = () => {
+  return jest.fn();
+};
+
 const createMockAuthorization = () => {
   const mockCheckPrivilegesAtSpace = jest.fn();
   const mockCheckPrivilegesAtSpaces = jest.fn();
@@ -29,7 +33,7 @@ const createMockAuthorization = () => {
       globally: mockCheckPrivilegesGlobally,
     })),
     mode: {
-      useRbacForRequest: jest.fn(),
+      useRbac: jest.fn(),
     },
   };
 
@@ -91,6 +95,7 @@ describe('#getAll', () => {
   describe('authorization is null', () => {
     test(`finds spaces using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         find: jest.fn(),
@@ -106,6 +111,7 @@ describe('#getAll', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         mockConfig,
@@ -126,11 +132,12 @@ describe('#getAll', () => {
     });
   });
 
-  describe(`authorization.mode.useRbacForRequest returns false`, () => {
+  describe(`authorization.mode.useRbac returns false`, () => {
     test(`finds spaces using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         find: jest.fn().mockReturnValue({
           saved_objects: savedObjects,
@@ -144,6 +151,7 @@ describe('#getAll', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         mockConfig,
@@ -159,18 +167,19 @@ describe('#getAll', () => {
         perPage: maxSpaces,
         sortField: 'name.keyword',
       });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
   });
 
-  describe('useRbacForRequest is true', () => {
+  describe('useRbac is true', () => {
     test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesAtSpaces } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesAtSpaces.mockReturnValue({
         username,
         spacePrivileges: {
@@ -195,6 +204,7 @@ describe('#getAll', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         mockConfig,
@@ -209,7 +219,7 @@ describe('#getAll', () => {
         perPage: maxSpaces,
         sortField: 'name.keyword',
       });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
         savedObjects.map(savedObject => savedObject.id),
@@ -222,8 +232,9 @@ describe('#getAll', () => {
     test(`returns spaces that the user is authorized for`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesAtSpaces } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesAtSpaces.mockReturnValue({
         username,
         spacePrivileges: {
@@ -248,6 +259,7 @@ describe('#getAll', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         mockConfig,
@@ -263,7 +275,7 @@ describe('#getAll', () => {
         perPage: maxSpaces,
         sortField: 'name.keyword',
       });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
         savedObjects.map(savedObject => savedObject.id),
@@ -281,11 +293,13 @@ describe('#canEnumerateSpaces', () => {
   describe(`authorization is null`, () => {
     test(`returns true`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const request = Symbol();
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         null,
         null,
@@ -300,15 +314,17 @@ describe('#canEnumerateSpaces', () => {
     });
   });
 
-  describe(`authorization.mode.useRbacForRequest is false`, () => {
+  describe(`authorization.mode.useRbac is false`, () => {
     test(`returns true`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const request = Symbol();
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -323,12 +339,13 @@ describe('#canEnumerateSpaces', () => {
     });
   });
 
-  describe('useRbacForRequest is true', () => {
+  describe('useRbac is true', () => {
     test(`returns false if user is not authorized to enumerate spaces`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: false,
@@ -337,6 +354,7 @@ describe('#canEnumerateSpaces', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -359,8 +377,9 @@ describe('#canEnumerateSpaces', () => {
     test(`returns true if user is authorized to enumerate spaces`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: true,
@@ -369,6 +388,7 @@ describe('#canEnumerateSpaces', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -410,6 +430,7 @@ describe('#get', () => {
   describe(`authorization is null`, () => {
     test(`gets space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(savedObject),
@@ -418,6 +439,7 @@ describe('#get', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         null,
@@ -434,11 +456,12 @@ describe('#get', () => {
     });
   });
 
-  describe(`authorization.mode.useRbacForRequest returns false`, () => {
+  describe(`authorization.mode.useRbac returns false`, () => {
     test(`gets space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(savedObject),
       };
@@ -446,6 +469,7 @@ describe('#get', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
@@ -456,19 +480,20 @@ describe('#get', () => {
       const actualSpace = await client.get(id);
 
       expect(actualSpace).toEqual(expectedSpace);
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
   });
 
-  describe('useRbacForRequest is true', () => {
+  describe('useRbac is true', () => {
     test(`throws Boom.forbidden if the user isn't authorized at space`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesAtSpace } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesAtSpace.mockReturnValue({
         username,
         hasAllRequested: false,
@@ -477,6 +502,7 @@ describe('#get', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -498,8 +524,9 @@ describe('#get', () => {
     test(`returns space using internalRepository if the user is authorized at space`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesAtSpace } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesAtSpace.mockReturnValue({
         username,
         hasAllRequested: true,
@@ -511,6 +538,7 @@ describe('#get', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -570,6 +598,7 @@ describe('#create', () => {
     test(`creates space using callWithRequestRepository when we're under the max`, async () => {
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         create: jest.fn().mockReturnValue(savedObject),
@@ -584,6 +613,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         mockConfig,
@@ -609,6 +639,7 @@ describe('#create', () => {
     test(`throws bad request when we are at the maximum number of spaces`, async () => {
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         create: jest.fn().mockReturnValue(savedObject),
@@ -623,6 +654,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         mockConfig,
@@ -643,12 +675,13 @@ describe('#create', () => {
     });
   });
 
-  describe(`authorization.mode.useRbacForRequest returns false`, () => {
+  describe(`authorization.mode.useRbac returns false`, () => {
     test(`creates space using callWithRequestRepository when we're under the max`, async () => {
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         create: jest.fn().mockReturnValue(savedObject),
         find: jest.fn().mockReturnValue({
@@ -662,6 +695,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         mockConfig,
@@ -672,7 +706,7 @@ describe('#create', () => {
       const actualSpace = await client.create(spaceToCreate);
 
       expect(actualSpace).toEqual(expectedReturnedSpace);
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
         type: 'space',
         page: 1,
@@ -688,8 +722,9 @@ describe('#create', () => {
     test(`throws bad request when we're at the maximum number of spaces`, async () => {
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         create: jest.fn().mockReturnValue(savedObject),
         find: jest.fn().mockReturnValue({
@@ -703,6 +738,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         mockConfig,
@@ -712,7 +748,7 @@ describe('#create', () => {
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
         type: 'space',
         page: 1,
@@ -724,12 +760,13 @@ describe('#create', () => {
     });
   });
 
-  describe('useRbacForRequest is true', () => {
+  describe('useRbac is true', () => {
     test(`throws Boom.forbidden if the user isn't authorized at space`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: false,
@@ -738,6 +775,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -747,7 +785,7 @@ describe('#create', () => {
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -760,8 +798,9 @@ describe('#create', () => {
       const username = Symbol();
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: true,
@@ -779,6 +818,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         mockConfig,
@@ -797,7 +837,7 @@ describe('#create', () => {
       expect(mockInternalRepository.create).toHaveBeenCalledWith('space', attributes, {
         id,
       });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -810,8 +850,9 @@ describe('#create', () => {
       const username = Symbol();
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: true,
@@ -829,6 +870,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         mockConfig,
@@ -844,7 +886,7 @@ describe('#create', () => {
         perPage: 0,
       });
       expect(mockInternalRepository.create).not.toHaveBeenCalled();
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -891,6 +933,7 @@ describe('#update', () => {
   describe(`authorization is null`, () => {
     test(`updates space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         update: jest.fn(),
@@ -900,6 +943,7 @@ describe('#update', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         null,
@@ -916,11 +960,12 @@ describe('#update', () => {
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
   });
-  describe(`authorization.mode.useRbacForRequest returns false`, () => {
+  describe(`authorization.mode.useRbac returns false`, () => {
     test(`updates space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         update: jest.fn(),
         get: jest.fn().mockReturnValue(savedObject),
@@ -929,6 +974,7 @@ describe('#update', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
@@ -939,7 +985,7 @@ describe('#update', () => {
       const actualSpace = await client.update(id, spaceToUpdate);
 
       expect(actualSpace).toEqual(expectedReturnedSpace);
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
@@ -947,20 +993,22 @@ describe('#update', () => {
     });
   });
 
-  describe('useRbacForRequest is true', () => {
+  describe('useRbac is true', () => {
     test(`throws Boom.forbidden when user isn't authorized at space`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockCheckPrivilegesGlobally.mockReturnValue({
         hasAllRequested: false,
         username,
       });
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       const request = Symbol();
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -970,7 +1018,7 @@ describe('#update', () => {
       const id = savedObject.id;
       await expect(client.update(id, spaceToUpdate)).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -982,12 +1030,13 @@ describe('#update', () => {
     test(`updates space using internalRepository if user is authorized`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockCheckPrivilegesGlobally.mockReturnValue({
         hasAllRequested: true,
         username,
       });
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       const mockInternalRepository = {
         update: jest.fn(),
         get: jest.fn().mockReturnValue(savedObject),
@@ -996,6 +1045,7 @@ describe('#update', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -1006,7 +1056,7 @@ describe('#update', () => {
       const actualSpace = await client.update(id, spaceToUpdate);
 
       expect(actualSpace).toEqual(expectedReturnedSpace);
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -1044,6 +1094,7 @@ describe('#delete', () => {
   describe(`authorization is null`, () => {
     test(`throws bad request when the space is reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(reservedSavedObject),
@@ -1052,6 +1103,7 @@ describe('#delete', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         null,
@@ -1068,6 +1120,7 @@ describe('#delete', () => {
 
     test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
@@ -1079,6 +1132,7 @@ describe('#delete', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
         null,
@@ -1096,11 +1150,12 @@ describe('#delete', () => {
     });
   });
 
-  describe(`authorization.mode.useRbacForRequest returns false`, () => {
+  describe(`authorization.mode.useRbac returns false`, () => {
     test(`throws bad request when the space is reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(reservedSavedObject),
       };
@@ -1108,6 +1163,7 @@ describe('#delete', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
@@ -1117,7 +1173,7 @@ describe('#delete', () => {
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -1125,8 +1181,9 @@ describe('#delete', () => {
 
     test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      mockAuthorization.mode.useRbac.mockReturnValue(false);
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
@@ -1137,6 +1194,7 @@ describe('#delete', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
@@ -1146,7 +1204,7 @@ describe('#delete', () => {
 
       await client.delete(id);
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
@@ -1155,12 +1213,13 @@ describe('#delete', () => {
     });
   });
 
-  describe('authorization.mode.useRbacForRequest returns true', () => {
+  describe('authorization.mode.useRbac returns true', () => {
     test(`throws Boom.forbidden if the user isn't authorized`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: false,
@@ -1168,6 +1227,7 @@ describe('#delete', () => {
       const request = Symbol();
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -1177,7 +1237,7 @@ describe('#delete', () => {
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -1189,8 +1249,9 @@ describe('#delete', () => {
     test(`throws bad request if the user is authorized but the space is reserved`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: true,
@@ -1201,6 +1262,7 @@ describe('#delete', () => {
       const request = Symbol();
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -1210,7 +1272,7 @@ describe('#delete', () => {
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces
@@ -1223,8 +1285,9 @@ describe('#delete', () => {
     test(`deletes space using internalRepository if the user is authorized and the space isn't reserved`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
+      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockAuthorization.mode.useRbac.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
         username,
         hasAllRequested: true,
@@ -1238,6 +1301,7 @@ describe('#delete', () => {
       const request = Symbol();
       const client = new SpacesClient(
         mockAuditLogger as any,
+        mockDebugLogger,
         mockAuthorization,
         null,
         null,
@@ -1247,7 +1311,7 @@ describe('#delete', () => {
 
       await client.delete(id);
 
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbac).toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
         mockAuthorization.actions.manageSpaces

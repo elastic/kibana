@@ -11,6 +11,7 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
+import { i18n } from '@kbn/i18n';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -49,7 +50,9 @@ export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(`Jobs failed to start`, error);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.startJobErrorMessage', {
+        defaultMessage: 'Jobs failed to start'
+      }), error);
       finish();
     });
 }
@@ -64,7 +67,9 @@ export function stopDatafeeds(jobs, finish = () => {}) {
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(`Jobs failed to stop`, error);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.stopJobErrorMessage', {
+        defaultMessage: 'Jobs failed to stop'
+      }), error);
       finish();
     });
 }
@@ -87,30 +92,54 @@ function showResults(resp, action) {
   let actionText = '';
   let actionTextPT = '';
   if (action === DATAFEED_STATE.STARTED) {
-    actionText = 'start';
-    actionTextPT = 'started';
+    actionText = i18n.translate('xpack.ml.jobsList.startActionStatusText', {
+      defaultMessage: 'start'
+    });
+    actionTextPT = i18n.translate('xpack.ml.jobsList.startedActionStatusText', {
+      defaultMessage: 'started'
+    });
   } else if (action === DATAFEED_STATE.STOPPED) {
-    actionText = 'stop';
-    actionTextPT = 'stopped';
+    actionText = i18n.translate('xpack.ml.jobsList.stopActionStatusText', {
+      defaultMessage: 'stop'
+    });
+    actionTextPT = i18n.translate('xpack.ml.jobsList.stoppedActionStatusText', {
+      defaultMessage: 'stopped'
+    });
   } else if (action === DATAFEED_STATE.DELETED) {
-    actionText = 'delete';
-    actionTextPT = 'deleted';
+    actionText = i18n.translate('xpack.ml.jobsList.deleteActionStatusText', {
+      defaultMessage: 'delete'
+    });
+    actionTextPT = i18n.translate('xpack.ml.jobsList.deletedActionStatusText', {
+      defaultMessage: 'deleted'
+    });
   } else if (action === JOB_STATE.CLOSED) {
-    actionText = 'close';
-    actionTextPT = 'closed';
+    actionText = i18n.translate('xpack.ml.jobsList.closeActionStatusText', {
+      defaultMessage: 'close'
+    });
+    actionTextPT = i18n.translate('xpack.ml.jobsList.closedActionStatusText', {
+      defaultMessage: 'closed'
+    });
   }
 
-
-  if (successes.length > 1) {
-    toastNotifications.addSuccess(`${successes.length} jobs ${actionTextPT} successfully`);
-  } else if (successes.length === 1) {
-    toastNotifications.addSuccess(`${successes[0]} ${actionTextPT} successfully`);
-  }
+  toastNotifications.addSuccess(i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
+    defaultMessage: '{successesJobsCount, plural, one{{successJob}} other{# jobs}} {actionTextPT} successfully',
+    values: {
+      successesJobsCount: successes.length,
+      successJob: successes[0],
+      actionTextPT
+    }
+  }));
 
   if (failures.length > 0) {
     failures.forEach((f) => {
       mlMessageBarService.notify.error(f.result.error);
-      toastNotifications.addDanger(`${f.id} failed to ${actionText}`);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.actionFailedNotificationMessage', {
+        defaultMessage: '{failureId} failed to {actionText}',
+        values: {
+          failureId: f.id,
+          actionText
+        }
+      }));
     });
   }
 }
@@ -123,7 +152,10 @@ export function cloneJob(jobId) {
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(`Could not clone ${jobId}. Job could not be found`);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
+        defaultMessage: 'Could not clone {jobId}. Job could not be found',
+        values: { jobId }
+      }));
     });
 }
 
@@ -136,7 +168,9 @@ export function closeJobs(jobs, finish = () => {}) {
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(`Jobs failed to close`, error);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
+        defaultMessage: 'Jobs failed to close',
+      }), error);
       finish();
     });
 }
@@ -145,12 +179,14 @@ export function deleteJobs(jobs, finish = () => {}) {
   const jobIds = jobs.map(j => j.id);
   mlJobService.deleteJobs(jobIds)
   	.then((resp) => {
-      showResults(resp, DATAFEED_STATE.DELETED);
+      showResults(resp, JOB_STATE.DELETED);
       finish();
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
-      toastNotifications.addDanger(`Jobs failed to delete`, error);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.jobsList.deleteJobErrorMessage', {
+        defaultMessage: 'Jobs failed to delete',
+      }), error);
       finish();
     });
 }
@@ -213,6 +249,24 @@ export function filterJobs(jobs, clauses) {
     }
   });
   return filteredJobs;
+}
+
+// check to see if a job has been stored in mlJobService.currentJob
+// if it has, return an object with the minimum properties needed for the
+// start datafeed modal.
+export function checkForAutoStartDatafeed() {
+  const job = mlJobService.currentJob;
+  if (job !== undefined) {
+    mlJobService.currentJob = undefined;
+    const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+    const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
+    return {
+      id: job.job_id,
+      hasDatafeed,
+      latestTimestampSortValue: 0,
+      datafeedId,
+    };
+  }
 }
 
 function stringMatch(str, substr) {

@@ -8,6 +8,7 @@
 
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { i18n } from '@kbn/i18n';
 
 let indexPatternCache = [];
 let fullIndexPatterns = [];
@@ -21,7 +22,7 @@ export function loadIndexPatterns(Private, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
-    fields: ['title', 'type'],
+    fields: ['id', 'title', 'type', 'fields'],
     perPage: 10000
   }).then((response) => {
     indexPatternCache = response.savedObjects;
@@ -91,8 +92,13 @@ export function timeBasedIndexCheck(indexPattern, showNotification = false) {
   if (indexPattern.isTimeBased() === false) {
     if (showNotification) {
       toastNotifications.addWarning({
-        title: `The index pattern ${indexPattern.title} is not based on a time series`,
-        text: 'Anomaly detection only runs over time-based indices',
+        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
+          values: { indexPatternTitle: indexPattern.title }
+        }),
+        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
+          defaultMessage: 'Anomaly detection only runs over time-based indices'
+        }),
       });
     }
     return false;

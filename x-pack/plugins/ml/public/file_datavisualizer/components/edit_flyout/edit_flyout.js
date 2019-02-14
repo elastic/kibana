@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
   Component,
 } from 'react';
@@ -28,6 +29,9 @@ export class EditFlyout extends Component {
     super(props);
 
     this.applyOverrides = () => {};
+    this.state = {
+      overridesValid: true
+    };
   }
 
   applyAndClose = () => {
@@ -41,10 +45,14 @@ export class EditFlyout extends Component {
   unsetApplyOverrides = () => {
     this.applyOverrides = () => {};
   }
+  setOverridesValid = (overridesValid) => {
+    this.setState({ overridesValid });
+  }
 
   render() {
-    const { isFlyoutVisible, closeEditFlyout } = this.props;
     const {
+      isFlyoutVisible,
+      closeEditFlyout,
       setOverrides,
       overrides,
       originalSettings,
@@ -63,7 +71,10 @@ export class EditFlyout extends Component {
             <EuiFlyoutHeader>
               <EuiTitle>
                 <h2>
-                  Override settings
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrideSettingsTitle"
+                    defaultMessage="Override settings"
+                  />
                 </h2>
               </EuiTitle>
             </EuiFlyoutHeader>
@@ -74,6 +85,7 @@ export class EditFlyout extends Component {
                 overrides={overrides}
                 originalSettings={originalSettings}
                 setApplyOverrides={this.setApplyOverrides}
+                setOverridesValid={this.setOverridesValid}
                 fields={fields}
               />
 
@@ -92,16 +104,22 @@ export class EditFlyout extends Component {
                     onClick={closeEditFlyout}
                     flush="left"
                   >
-                    Close
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.editFlyout.closeOverrideSettingsButtonLabel"
+                      defaultMessage="Close"
+                    />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={this.applyAndClose}
+                    isDisabled={(this.state.overridesValid === false)}
                     fill
-                    // isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                   >
-                    Apply
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.editFlyout.applyOverrideSettingsButtonLabel"
+                      defaultMessage="Apply"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

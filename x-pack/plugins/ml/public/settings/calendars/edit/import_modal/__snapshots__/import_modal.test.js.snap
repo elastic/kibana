@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportModal Renders import modal 1`] = `
+<Fragment>
+  <EuiModal
+    maxWidth={true}
+    onClose={[MockFunction]}
+  >
+    <EuiModalHeader>
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="column"
+        gutterSize="none"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              defaultMessage="Import events"
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
+              values={Object {}}
+            />
+          </EuiModalHeaderTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Import events from an ICS file."
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="column"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiFilePicker
+            compressed={true}
+            disabled={false}
+            initialPromptText="Select or drag and drop a file"
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        disabled={true}
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Import"
+          id="xpack.ml.calendarsEdit.eventsTable.importButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        onClick={[MockFunction]}
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiModalFooter>
+  </EuiModal>
+</Fragment>
+`;

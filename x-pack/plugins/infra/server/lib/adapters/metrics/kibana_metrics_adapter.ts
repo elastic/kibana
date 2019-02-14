@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
-import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../../common/graphql/types';
+
+import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
+import { InvalidNodeError } from './lib/errors';
 import { metricModels } from './models';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -27,10 +30,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
       [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
     };
-    const indexPattern = [
-      options.sourceConfiguration.metricAlias,
-      options.sourceConfiguration.logAlias,
-    ];
+    const indexPattern = `${options.sourceConfiguration.metricAlias},${
+      options.sourceConfiguration.logAlias
+    }`;
     const timeField = options.sourceConfiguration.fields.timestamp;
     const interval = options.timerange.interval;
     const nodeField = fields[options.nodeType];
@@ -44,7 +46,14 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
     if (!validNode) {
-      throw new Error(`${options.nodeId} does not exist.`);
+      throw new InvalidNodeError(
+        i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
+          defaultMessage: '{nodeId} does not exist.',
+          values: {
+            nodeId: options.nodeId,
+          },
+        })
+      );
     }
 
     const requests = options.metrics.map(metricId => {
@@ -59,7 +68,14 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           return metricIds.map((id: string) => {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
             if (!infraMetricId) {
-              throw new Error(`${id} is not a valid InfraMetric`);
+              throw new Error(
+                i18n.translate('xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage', {
+                  defaultMessage: '{id} is not a valid InfraMetric',
+                  values: {
+                    id,
+                  },
+                })
+              );
             }
             const panel = result[infraMetricId];
             return {

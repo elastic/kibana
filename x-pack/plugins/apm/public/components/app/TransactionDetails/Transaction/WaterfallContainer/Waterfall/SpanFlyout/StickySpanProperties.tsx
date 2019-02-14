@@ -4,28 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// tslint:disable-next-line  no-var-requires
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-
-import { first } from 'lodash';
-import { Span } from '../../../../../../../../typings/Span';
+import {
+  SPAN_ACTION,
+  SPAN_DURATION,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
-// @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
-function getSpanLabel(type: string) {
+function formatType(type: string) {
   switch (type) {
     case 'db':
       return 'DB';
     case 'hard-navigation':
-      return 'Navigation timing';
+      return i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
+        {
+          defaultMessage: 'Navigation timing'
+        }
+      );
     default:
       return type;
   }
 }
 
-function getPrimaryType(type: string) {
-  return first(type.split('.'));
+function formatSubtype(subtype: string) {
+  switch (subtype) {
+    case 'mysql':
+      return 'MySQL';
+    default:
+      return subtype;
+  }
+}
+
+function getSpanTypes(span: Span) {
+  const { type, subtype, action } = span.span;
+
+  const [primaryType, subtypeFromType, actionFromType] = type.split('.'); // This is to support 6.x data
+
+  return {
+    spanType: formatType(primaryType),
+    spanSubtype: formatSubtype(subtype || subtypeFromType),
+    spanAction: action || actionFromType
+  };
 }
 
 interface Props {
@@ -40,35 +67,84 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
 
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
-  const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
-
+  const { spanType, spanSubtype, spanAction } = getSpanTypes(span);
   const stickyProperties = [
     {
-      label: 'Name',
-      fieldName: 'span.name',
-      val: spanName || 'N/A',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.nameLabel',
+        {
+          defaultMessage: 'Name'
+        }
+      ),
+      fieldName: SPAN_NAME,
+      val: spanName || NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '50%'
     },
     {
-      fieldName: 'span.type',
-      label: 'Type',
-      val: spanTypeLabel,
-      truncated: true,
-      widht: '50%'
-    },
-    {
-      fieldName: 'span.duration.us',
-      label: 'Duration',
+      fieldName: SPAN_DURATION,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.durationLabel',
+        {
+          defaultMessage: 'Duration'
+        }
+      ),
       val: asMillis(spanDuration),
       width: '50%'
     },
     {
-      label: '% of transaction',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.percentOfTransactionLabel',
+        {
+          defaultMessage: '% of transaction'
+        }
+      ),
       val: asPercent(spanDuration, totalDuration),
       width: '50%'
+    },
+    {
+      fieldName: SPAN_TYPE,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.typeLabel',
+        {
+          defaultMessage: 'Type'
+        }
+      ),
+      val: spanType,
+      truncated: true,
+      width: '15%'
     }
   ];
+
+  if (spanSubtype) {
+    stickyProperties.push({
+      fieldName: SPAN_SUBTYPE,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.subtypeLabel',
+        {
+          defaultMessage: 'Subtype'
+        }
+      ),
+      val: spanSubtype,
+      truncated: true,
+      width: '15%'
+    });
+  }
+
+  if (spanAction) {
+    stickyProperties.push({
+      fieldName: SPAN_ACTION,
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.actionLabel',
+        {
+          defaultMessage: 'Action'
+        }
+      ),
+      val: spanAction,
+      truncated: true,
+      width: '15%'
+    });
+  }
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }

@@ -5,81 +5,105 @@
  */
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 
 interface Props {
   options: InfraWaffleMapOptions;
   timeRange: InfraTimerangeInput;
+  children: any;
   node: InfraWaffleMapNode;
   nodeType: InfraNodeType;
   isPopoverOpen: boolean;
   closePopover: () => void;
+  intl: InjectedIntl;
 }
 
-export const NodeContextMenu: React.SFC<Props> = ({
-  options,
-  timeRange,
-  children,
-  node,
-  isPopoverOpen,
-  closePopover,
-  nodeType,
-}) => {
-  const nodeName = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
-  const nodeLogsUrl = nodeName
-    ? getNodeLogsUrl({
-        nodeType,
-        nodeName,
-        time: timeRange.to,
-      })
-    : undefined;
-  const nodeDetailUrl = nodeName
-    ? getNodeDetailUrl({
-        nodeType,
-        nodeName,
-        from: timeRange.from,
-        to: timeRange.to,
-      })
-    : undefined;
+export const NodeContextMenu = injectI18n(
+  ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl }: Props) => {
+    // Due to the changing nature of the fields between APM and this UI,
+    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
+    // #26620 for the details for these fields.
+    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
+    const APM_FIELDS = {
+      [InfraNodeType.host]: 'context.system.hostname',
+      [InfraNodeType.container]: 'container.id',
+      [InfraNodeType.pod]: 'kubernetes.pod.uid',
+    };
 
-  const panels: EuiContextMenuPanelDescriptor[] = [
-    {
-      id: 0,
-      title: '',
-      items: [
-        ...(nodeLogsUrl
-          ? [
-              {
-                name: `View logs`,
-                href: nodeLogsUrl,
-              },
-            ]
-          : []),
-        ...(nodeDetailUrl
-          ? [
-              {
-                name: `View metrics`,
-                href: nodeDetailUrl,
-              },
-            ]
-          : []),
-      ],
-    },
-  ];
+    const nodeLogsUrl = node.id
+      ? getNodeLogsUrl({
+          nodeType,
+          nodeId: node.id,
+          time: timeRange.to,
+        })
+      : undefined;
+    const nodeDetailUrl = node.id
+      ? getNodeDetailUrl({
+          nodeType,
+          nodeId: node.id,
+          from: timeRange.from,
+          to: timeRange.to,
+        })
+      : undefined;
 
-  return (
-    <EuiPopover
-      closePopover={closePopover}
-      id={`${node.id}-popover`}
-      isOpen={isPopoverOpen}
-      button={children}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
-  );
-};
+    const apmTracesUrl = {
+      name: intl.formatMessage(
+        {
+          id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+          defaultMessage: 'View {nodeType} APM traces',
+        },
+        { nodeType }
+      ),
+      href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+    };
+
+    const panels: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: '',
+        items: [
+          ...(nodeLogsUrl
+            ? [
+                {
+                  name: intl.formatMessage({
+                    id: 'xpack.infra.nodeContextMenu.viewLogsName',
+                    defaultMessage: 'View logs',
+                  }),
+                  href: nodeLogsUrl,
+                },
+              ]
+            : []),
+          ...(nodeDetailUrl
+            ? [
+                {
+                  name: intl.formatMessage({
+                    id: 'xpack.infra.nodeContextMenu.viewMetricsName',
+                    defaultMessage: 'View metrics',
+                  }),
+                  href: nodeDetailUrl,
+                },
+              ]
+            : []),
+          ...[apmTracesUrl],
+        ],
+      },
+    ];
+
+    return (
+      <EuiPopover
+        closePopover={closePopover}
+        id={`${node.pathId}-popover`}
+        isOpen={isPopoverOpen}
+        button={children}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+    );
+  }
+);

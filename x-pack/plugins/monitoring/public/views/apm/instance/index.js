@@ -19,6 +19,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
 import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
@@ -30,7 +31,7 @@ uiRoutes.when('/apm/instances/:uuid', {
   },
 
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const title = $injector.get('title');
       const globalState = $injector.get('globalState');
@@ -39,7 +40,12 @@ uiRoutes.when('/apm/instances/:uuid', {
       });
 
       super({
-        title: `APM - Instance`,
+        title: i18n('xpack.monitoring.apm.instance.routeTitle', {
+          defaultMessage: '{apm} - Instance',
+          values: {
+            apm: 'APM'
+          }
+        }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},
         reactNodeId: 'apmInstanceReact',
@@ -63,11 +69,13 @@ uiRoutes.when('/apm/instances/:uuid', {
 
     renderReact(data, onBrush) {
       const component = (
-        <ApmServerInstance
-          summary={data.apmSummary || {}}
-          metrics={data.metrics || {}}
-          onBrush={onBrush}
-        />
+        <I18nContext>
+          <ApmServerInstance
+            summary={data.apmSummary || {}}
+            metrics={data.metrics || {}}
+            onBrush={onBrush}
+          />
+        </I18nContext>
       );
       super.renderReact(component);
     }

@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -40,8 +41,11 @@ export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMe
     const { isShown } = this.state;
 
     const menuButton = (
-      <EuiButtonEmpty color="text" iconType="gear" onClick={this.toggleVisibility} size="xs">
-        Customize
+      <EuiButtonEmpty color="text" iconType="eye" onClick={this.toggleVisibility} size="xs">
+        <FormattedMessage
+          id="xpack.infra.logs.customizeLogs.customizeButtonLabel"
+          defaultMessage="Customize"
+        />
       </EuiButtonEmpty>
     );
 

@@ -5,17 +5,14 @@
 <titleabbrev>Configuring monitoring</titleabbrev>
 ++++
 
-If you enable the Elastic {monitor-features} in your cluster, you can 
-optionally collect metrics about {kib}:
+If you enable the {monitor-features} in your cluster, there are two methods to 
+collect metrics about {kib}:
 
 * <<monitoring-kibana>>
 * <<monitoring-metricbeat>>
 
-
-You can also use {kib} to visualize 
-monitoring data from across the {stack}:
-
-* <<monitoring-data>>
+You can also use {kib} to 
+<<monitoring-data,visualize monitoring data from across the {stack}>>.
 
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
@@ -23,4 +20,3 @@ To learn about monitoring in general, see
 include::monitoring-kibana.asciidoc[]
 include::monitoring-metricbeat.asciidoc[]
 include::viewing-metrics.asciidoc[]
-include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]

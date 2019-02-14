@@ -27,22 +27,32 @@
  * in one of the known plugin locations (kibana/plugins/* or kibana-extra/*):
  *
  * ```ts
- * import { KibanaPlugin } from '../../kibana';
+ * import { Logger, PluginInitializerContext, PluginStartContext } from '../../kibana';
  *
  * export interface SomePluginContract {
  *   setValue: (val: string) => void;
  * }
  *
- * class SomePlugin extends KibanaPlugin<SomePluginContract> {
- *   start(core) {
- *     let value = 'Hello World!';
+ * class Plugin {
+ *   private readonly log: Logger;
  *
- *     const router = core.http.createAndRegisterRouter('/some-path');
- *     router.get('/some-value', (req, res) => res.ok(value));
+ *   constructor(private readonly initializerContext: PluginInitializerContext) {
+ *     this.log = initializerContext.logger.get();
+ *   }
  *
- *     return { setValue: (val: string) => { value = val; } };
+ *   start(startContext: PluginStartContext, deps: Record<string, any>) {
+ *    this.log.info('Hello from plugin!');
+ *
+ *    let value = 'Hello World!';
+ *
+ *    const router = startContext.http.createAndRegisterRouter('/some-path');
+ *    router.get('/some-value', (req, res) => res.ok(value));
+ *
+ *    return { setValue: (val: string) => { value = val; } };
  *   }
  * }
+ *
+ * export plugin = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext));
  * ```
  *
  * **NOTE:** If the code is not needed in plugins, we can add a `at_internal` JSDoc
@@ -51,3 +61,4 @@
  */
 
 export { Logger, LoggerFactory } from './core/server/logging';
+export { PluginInitializerContext, PluginName, PluginStartContext } from './core/server/plugins';

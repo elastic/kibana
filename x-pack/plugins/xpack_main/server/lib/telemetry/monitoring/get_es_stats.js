@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../monitoring/common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
@@ -30,7 +31,7 @@ export function getElasticsearchStats(server, callCluster, clusterUuids) {
 export function fetchElasticsearchStats(server, callCluster, clusterUuids) {
   const config = server.config();
   const params = {
-    index: config.get('xpack.monitoring.elasticsearch.index_pattern'),
+    index: INDEX_PATTERN_ELASTICSEARCH,
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [
