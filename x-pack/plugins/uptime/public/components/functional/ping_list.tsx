@@ -110,29 +110,18 @@ const columns = [
         message
       ),
   },
+  {
+    field: 'http.response.status_code',
+    name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+      defaultMessage: 'Response code',
+    }),
+  },
 ];
 
 export const PingList = (props: PingListProps) => {
   const pings: Ping[] | undefined = get(props, 'pingResults.pings');
   const total = get(props, 'pingResults.total');
   const { loading } = props;
-
-  if (pings) {
-    const hasStatus = pings.reduce(
-      (hasHttpStatus: boolean, currentPing: Ping) =>
-        hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
-      false
-    );
-
-    if (hasStatus) {
-      columns.push({
-        field: 'http.response.status_code',
-        name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-          defaultMessage: 'Response code',
-        }),
-      });
-    }
-  }
 
   return (
     <Fragment>
