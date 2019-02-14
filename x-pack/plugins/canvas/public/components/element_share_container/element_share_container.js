@@ -48,7 +48,7 @@ export class ElementShareContainer extends React.PureComponent {
       // issue, track the completed state locally and set the
       // [data-render-complete] value accordingly.
       // this is similar to renderComplete directive in Kibana,
-      // see: src/ui/public/render_complete/directive.js
+      // see: src/legacy/ui/public/render_complete/directive.js
       this.setState({ renderComplete: true });
     });
   }
