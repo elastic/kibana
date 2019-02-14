@@ -107,7 +107,7 @@ export class CodeFileTree extends React.Component<Props> {
           <div
             data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
             onClick={onClick}
-            className={className}
+            className={classes(className, 'code-file-tree-file')}
             role="button"
           >
             <EuiIcon type="submodule" />

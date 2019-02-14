@@ -66,11 +66,13 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   const typeIconMap: { [k: number]: IconType } = {
     [FileTreeItemType.File]: 'document',
     [FileTreeItemType.Directory]: 'folderClosed',
+    [FileTreeItemType.Link]: 'symlink',
+    [FileTreeItemType.Submodule]: 'submodule',
   };
   const nodes = props.nodes.map(n => (
     <DirectoryNode key={n.path}>
       <Link to={props.getUrl(n.path!)} data-test-subj={`codeFileExplorerNode-${n.name}`}>
-        <EuiIcon type={typeIconMap[props.type]} color="black" />
+        <EuiIcon type={typeIconMap[n.type]} color="black" />
         <NodeName>{n.name}</NodeName>
       </Link>
     </DirectoryNode>
@@ -93,32 +95,24 @@ export const Directory = withRouter((props: Props) => {
   let files: FileTree[] = [];
   let folders: FileTree[] = [];
   if (props.node && props.node.children) {
-    files = props.node.children.filter(n => n.type === FileTreeItemType.File);
-    folders = props.node.children.filter(n => n.type === FileTreeItemType.Directory);
+    files = props.node.children.filter(
+      n => n.type === FileTreeItemType.File || n.type === FileTreeItemType.Link
+    );
+    folders = props.node.children.filter(
+      n => n.type === FileTreeItemType.Directory || n.type === FileTreeItemType.Submodule
+    );
   }
   const { resource, org, repo, revision } = props.match.params;
   const getUrl = (pathType: PathTypes) => (path: string) =>
     `/${resource}/${org}/${repo}/${pathType}/${revision}/${path}`;
-  const fileList = (
-    <DirectoryNodes
-      nodes={files}
-      title="Files"
-      type={FileTreeItemType.File}
-      getUrl={getUrl(PathTypes.blob)}
-    />
-  );
+  const fileList = <DirectoryNodes nodes={files} title="Files" getUrl={getUrl(PathTypes.blob)} />;
   const folderList = (
-    <DirectoryNodes
-      nodes={folders}
-      title="Directories"
-      type={FileTreeItemType.Directory}
-      getUrl={getUrl(PathTypes.tree)}
-    />
+    <DirectoryNodes nodes={folders} title="Directories" getUrl={getUrl(PathTypes.tree)} />
   );
   return (
     <Root>
-      {fileList}
-      {folderList}
+      {files.length > 0 && fileList}
+      {folders.length > 0 && folderList}
     </Root>
   );
 });
