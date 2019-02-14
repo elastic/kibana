@@ -121,7 +121,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.10.1",
+    "@elastic/eui": "7.0.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
@@ -215,7 +215,6 @@
     "oppsy": "^2.0.0",
     "papaparse": "^4.6.0",
     "pdfmake": "0.1.33",
-    "pivotal-ui": "13.0.1",
     "pluralize": "3.1.0",
     "pngjs": "3.3.1",
     "polished": "^1.9.2",

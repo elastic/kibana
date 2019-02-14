@@ -46,7 +46,7 @@ export function traefikLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-Traefik-Dashboard',
+          id: 'Filebeat-Traefik-Dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Traefik logs dashboard',
           }),
