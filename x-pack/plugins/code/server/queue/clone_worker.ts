@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { delay } from 'lodash';
+
 import { RepositoryUtils } from '../../common/repository_utils';
 import {
   CloneProgress,
@@ -50,6 +52,7 @@ export class CloneWorker extends AbstractGitWorker {
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     this.log.info(`Clone job done for ${res.repo.uri}`);
+    await super.onJobCompleted(job, res);
 
     if (this.socketService) {
       this.socketService.broadcastCloneProgress(
@@ -59,14 +62,14 @@ export class CloneWorker extends AbstractGitWorker {
       );
     }
 
-    // Throw out a repository index request.
-    const payload = {
-      uri: res.repo.uri,
-      revision: res.repo.revision,
-    };
-    await this.indexWorker.enqueueJob(payload, {});
-
-    return await super.onJobCompleted(job, res);
+    // Throw out a repository index request after 1 second.
+    return delay(async () => {
+      const payload = {
+        uri: res.repo.uri,
+        revision: res.repo.revision,
+      };
+      await this.indexWorker.enqueueJob(payload, {});
+    }, 1000);
   }
 
   public async onJobEnqueued(job: Job) {
