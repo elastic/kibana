@@ -312,6 +312,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickSavedSearch(savedSearchName) {
+      await testSubjects.click('savedSearchesTab');
       await find.clickByPartialLinkText(savedSearchName);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

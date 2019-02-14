@@ -57,7 +57,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
 
     this.tabs = [
       {
-        id: 'index-pattern',
+        id: 'indexPatterns',
         name: i18n.translate('kbn.visualize.newVisWizard.indexPatternTabLabel', {
           defaultMessage: 'Index pattern',
         }),
@@ -75,7 +75,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
         ),
       },
       {
-        id: 'searches',
+        id: 'savedSearches',
         name: i18n.translate('kbn.visualize.newVisWizard.savedSearchTabLabel', {
           defaultMessage: 'Saved search',
         }),
@@ -111,6 +111,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
         onClick={() => this.onSelectedTabChanged(tab)}
         isSelected={tab.id === this.state.selectedTab.id}
         key={tab.id}
+        data-test-subj={`${tab.id}Tab`}
       >
         {tab.name}
       </EuiTab>
