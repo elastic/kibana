@@ -20,14 +20,14 @@
 import { BehaviorSubject, Subject, throwError } from 'rxjs';
 
 jest.mock('./legacy_platform_proxy');
-jest.mock('../../../server/kbn_server');
+jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
 
 import { first } from 'rxjs/operators';
 import { LegacyService } from '.';
 // @ts-ignore: implicit any for JS file
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
-import KbnServer from '../../../server/kbn_server';
+import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { logger } from '../logging/__mocks__';

@@ -328,7 +328,7 @@ class VisualizeListingTableUi extends Component {
         <KuiListingTable
           pager={this.renderPager()}
           toolBarActions={this.renderToolBarActions()}
-          enableSelection={uiCapabilities.visualize.showWriteControls}
+          enableSelection={uiCapabilities.visualize.save}
           selectedRowIds={this.state.selectedRowIds}
           rows={this.createRows()}
           header={this.renderHeader()}

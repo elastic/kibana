@@ -18,7 +18,7 @@
  */
 
 import 'ui/doc_table';
-
+import { uiCapabilities } from 'ui/capabilities';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { SearchEmbeddable } from './search_embeddable';
 
@@ -45,6 +45,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
   create(panelMetadata, onEmbeddableStateChanged) {
     const searchId = panelMetadata.id;
     const editUrl = this.getEditPath(searchId);
+    const editable = uiCapabilities.discover.save;
 
     return this.searchLoader.get(searchId)
       .then(savedObject => {
@@ -52,6 +53,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
           onEmbeddableStateChanged,
           savedSearch: savedObject,
           editUrl,
+          editable,
           $rootScope: this.$rootScope,
           $compile: this.$compile,
         });

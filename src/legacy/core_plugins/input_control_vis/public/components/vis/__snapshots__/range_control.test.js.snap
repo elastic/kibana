@@ -16,6 +16,7 @@ exports[`disabled 1`] = `
     min={1}
     showInput={false}
     showLabels={false}
+    showRange={false}
     showTicks={false}
     showValue={false}
   />

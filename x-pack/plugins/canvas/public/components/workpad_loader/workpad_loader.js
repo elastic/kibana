@@ -235,7 +235,6 @@ export class WorkpadLoader extends React.PureComponent {
       <Fragment>
         <WorkpadDropzone onUpload={this.onUpload} disabled={createPending || !canUserWrite}>
           <EuiBasicTable
-            compressed
             items={rows}
             itemId="id"
             columns={columns}

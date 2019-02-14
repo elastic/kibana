@@ -30,7 +30,7 @@ import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -252,10 +252,10 @@ export default class BaseOptimizer {
       entry: {
         ...this.uiBundles.toWebpackEntries(),
         light_theme: [
-          require.resolve('../ui/public/styles/bootstrap_light.less'),
+          require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
         ],
         dark_theme: [
-          require.resolve('../ui/public/styles/bootstrap_dark.less'),
+          require.resolve('../legacy/ui/public/styles/bootstrap_dark.less'),
         ],
       },
 
@@ -356,8 +356,8 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.png$/,
-            loader: 'url-loader'
+            test: /\.(png|jpg|gif|jpeg)$/,
+            loader: ['url-loader'],
           },
           {
             test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
@@ -399,7 +399,10 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases()
+        alias: {
+          ...this.uiBundles.getAliases(),
+          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
+        }
       },
 
       performance: {

@@ -24,7 +24,7 @@ import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import {
   createStubClient,
