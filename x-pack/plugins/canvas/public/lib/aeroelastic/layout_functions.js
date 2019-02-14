@@ -1014,6 +1014,7 @@ const getLeafs = (descendCondition, allShapes, shapes) =>
 
 const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedShapes });
 
+// todo move it outside layout_functions as gestures is using it too
 export const getScene = state => state.currentScene;
 
 export const configuration = state => {
@@ -1449,7 +1450,8 @@ export const getNextScene = (
   cursor,
   selectionState,
   mouseTransformState,
-  selectedShapes
+  selectedShapes,
+  gestureState
 ) => {
   const selectedLeafShapes = getLeafs(
     shape => shape.type === config.groupName,
@@ -1471,6 +1473,7 @@ export const getNextScene = (
     draggedShape,
     cursor,
     selectionState,
+    gestureState,
     mouseTransformState,
     selectedShapeObjects: selectedShapes,
   };

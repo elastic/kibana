@@ -5,6 +5,7 @@
  */
 
 import { select, selectReduce } from './state';
+import { getScene } from './layout_functions';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
 // so it's OK that user agent strings are not reliable; in case it's spoofed, it'll just work with a slightly
@@ -25,6 +26,16 @@ const appleKeyboard = Boolean(
  */
 
 const primaryUpdate = state => state.primaryUpdate;
+
+const gestureStatePrev = select(
+  scene =>
+    scene.gestureState || {
+      cursor: {
+        x: 0,
+        y: 0,
+      },
+    }
+)(getScene);
 
 /**
  * Gestures - derived selectors for transient state
@@ -47,10 +58,14 @@ export const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(k
 export const optionHeld = select(appleKeyboard ? e => e.altKey : e => e.ctrlKey)(keyFromMouse);
 export const shiftHeld = select(e => e.shiftKey)(keyFromMouse);
 
-export const cursorPosition = selectReduce((previous, position) => position || previous, {
-  x: 0,
-  y: 0,
-})(rawCursorPosition);
+export const cursorPosition = select(({ cursor }, position) => position || cursor)(
+  gestureStatePrev,
+  rawCursorPosition
+);
+
+export const gestureState = select(cursor => ({
+  cursor,
+}))(cursorPosition);
 
 export const mouseButton = selectReduce(
   (prev, next) => {
