@@ -46,7 +46,7 @@ export function osqueryLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '69f5ae20-eb02-11e7-8f04-51231daa5b05',
+          id: '69f5ae20-eb02-11e7-8f04-51231daa5b05-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Osquery logs dashboard',
           }),
