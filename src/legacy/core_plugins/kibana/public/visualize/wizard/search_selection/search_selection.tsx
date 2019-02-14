@@ -18,7 +18,6 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -36,7 +35,6 @@ import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_find
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
-  goBack: () => void;
   visType: VisType;
 }
 
@@ -125,18 +123,14 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="kbn.visualize.newVisWizard.newVisTypeHeaderTitle"
+              id="kbn.visualize.newVisWizard.newVisTypeTitle"
               defaultMessage="New {visTypeName}"
               values={{ visTypeName: this.props.visType.title }}
-            />
-            <EuiButtonIcon
-              color="primary"
-              onClick={this.props.goBack}
-              iconType="pencil"
-              aria-label={i18n.translate('kbn.visualize.newVisWizard.goBackButtonAriaLabel', {
-                defaultMessage: 'Go back',
-              })}
-              className="superscriptButton"
+            />{' '}
+            /{' '}
+            <FormattedMessage
+              id="kbn.visualize.newVisWizard.chooseSourceTitle"
+              defaultMessage="Choose a source"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>

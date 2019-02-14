@@ -67,11 +67,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
-          <SearchSelection
-            onSearchSelected={this.onSearchSelected}
-            visType={this.state.visType}
-            goBack={this.goToTypeSelection}
-          />
+          <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
         </EuiModal>
       ) : (
         <EuiModal onClose={this.onCloseModal} maxWidth={'100vw'} className="visNewVisDialog">
@@ -85,10 +81,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
   }
-
-  private goToTypeSelection = () => {
-    this.setState({ showSearchVisModal: false, visType: undefined });
-  };
 
   private onCloseModal = () => {
     this.setState({ showSearchVisModal: false });
