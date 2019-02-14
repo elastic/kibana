@@ -8,13 +8,13 @@ import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE }
   from '../../store/ui';
-import { getTemporaryLayers } from "../../selectors/map_selectors";
+import { getTemporaryLayers } from '../../selectors/map_selectors';
 import {
   addLayer,
   removeLayer,
   clearTemporaryLayers,
   setSelectedLayer,
-} from "../../actions/store_actions";
+} from '../../actions/store_actions';
 import _ from 'lodash';
 
 function mapStateToProps(state = {}) {

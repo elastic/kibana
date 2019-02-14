@@ -83,7 +83,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
       if (!scope.cluster) {
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');
-        scope.cluster = $route.current.locals.clusters.find(cluster => cluster.cluster_uuid === globalState.cluster_uuid);
+        scope.cluster = ($route.current.locals.clusters || []).find(cluster => cluster.cluster_uuid === globalState.cluster_uuid);
       }
 
       function getSetupObj() {

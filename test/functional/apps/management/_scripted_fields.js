@@ -46,11 +46,11 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {

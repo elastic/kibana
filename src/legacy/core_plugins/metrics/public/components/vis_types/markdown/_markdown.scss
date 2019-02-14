@@ -6,6 +6,7 @@
 }
 
 .tvbMarkdown__content {
+  @include euiScrollBar;
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
@@ -16,13 +17,15 @@
   bottom: 0;
   overflow: hidden;
 
-  &.middle {
+  &--middle {
     justify-content: center;
   }
-  &.bottom {
+
+  &--bottom {
     justify-content: flex-end;
   }
-  &.scrolling {
+
+  &-isScrolling {
     overflow: auto;
   }
 }
