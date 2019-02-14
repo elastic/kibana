@@ -86,8 +86,8 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
             <p>
               <FormattedMessage
                 id="common.ui.queryBar.syntaxOptionsDescription"
-                defaultMessage="Our new autocomplete and simple syntax features can help you create your
-                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+                defaultMessage="Use the Kibana query language (KQL) to get suggestions as you type.
+                If you disable KQL, Kibana uses Lucene, which doesn't offer suggestions. See docs {docsLink}."
                 values={{
                   docsLink: (
                     <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
@@ -112,7 +112,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
                 label={
                   <FormattedMessage
                     id="common.ui.queryBar.turnOnQueryFeaturesLabel"
-                    defaultMessage="Turn on query features"
+                    defaultMessage="Turn on KQL"
                   />
                 }
                 checked={this.props.language === 'kuery'}
