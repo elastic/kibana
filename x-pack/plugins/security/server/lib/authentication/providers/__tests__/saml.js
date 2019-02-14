@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import * as Rx from 'rxjs';
 import Boom from 'boom';
 import expect from 'expect.js';
 import sinon from 'sinon';
@@ -11,17 +11,23 @@ import sinon from 'sinon';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
 
 import { SAMLAuthenticationProvider } from '../saml';
+import { ClusterSecurityFeatures } from '../../../cluster_security_features';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider;
   let callWithRequest;
   let callWithInternalUser;
+  let xpackUsage$;
   beforeEach(() => {
     callWithRequest = sinon.stub();
     callWithInternalUser = sinon.stub();
+    xpackUsage$ = new Rx.BehaviorSubject({ security: { realms: { saml: { enabled: true } } } });
 
     provider = new SAMLAuthenticationProvider({
       client: { callWithRequest, callWithInternalUser },
+      clusterSecurityFeatures: new ClusterSecurityFeatures({
+        getUsage$: () => xpackUsage$
+      }),
       log() {},
       protocol: 'test-protocol',
       hostname: 'test-hostname',
@@ -33,6 +39,18 @@ describe('SAMLAuthenticationProvider', () => {
   describe('`authenticate` method', () => {
     it('does not handle AJAX request that can not be authenticated.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
+
+      const authenticationResult = await provider.authenticate(request, null);
+
+      expect(authenticationResult.notHandled()).to.be(true);
+    });
+
+    it('does not handle requests when the SAML realm is disabled in elasticsearch.', async () => {
+      xpackUsage$.next({
+        security: { realms: { saml: { enabled: false } } }
+      });
+
+      const request = requestFixture({ path: '/some-path' });
 
       const authenticationResult = await provider.authenticate(request, null);
 

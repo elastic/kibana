@@ -82,6 +82,11 @@ export class SAMLAuthenticationProvider {
   async authenticate(request, state) {
     this._options.log(['debug', 'security', 'saml'], `Trying to authenticate user request to ${request.url.path}.`);
 
+    if (!this._options.clusterSecurityFeatures.isSAMLRealmEnabled()) {
+      this._options.log(['warning', 'security', 'saml'], `SAML auth realm is not enabled in Elasticsearch.`);
+      return AuthenticationResult.notHandled();
+    }
+
     let {
       authenticationResult,
       headerNotRecognized, // eslint-disable-line prefer-const

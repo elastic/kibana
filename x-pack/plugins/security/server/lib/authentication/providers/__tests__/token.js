@@ -3,23 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import * as Rx from 'rxjs';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
 import { LoginAttempt } from '../../login_attempt';
 import { TokenAuthenticationProvider } from '../token';
+import { ClusterSecurityFeatures } from '../../../cluster_security_features';
 
 describe('TokenAuthenticationProvider', () => {
   describe('`authenticate` method', () => {
     let provider;
     let callWithRequest;
     let callWithInternalUser;
+    let xpackUsage$;
+
     beforeEach(() => {
       callWithRequest = sinon.stub();
       callWithInternalUser = sinon.stub();
+      xpackUsage$ = new Rx.BehaviorSubject({ security: { token_service: { enabled: true } } });
+
       provider = new TokenAuthenticationProvider({
         client: { callWithRequest, callWithInternalUser },
+        clusterSecurityFeatures: new ClusterSecurityFeatures({
+          getUsage$: () => xpackUsage$
+        }),
         log() {},
         basePath: '/base-path'
       });
@@ -32,6 +40,16 @@ describe('TokenAuthenticationProvider', () => {
         requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } }),
         null
       );
+
+      expect(authenticationResult.notHandled()).to.be(true);
+    });
+
+    it('does not handle requests when the token service is disabled in elasticsearch.', async () => {
+      xpackUsage$.next({ security: { token_service: { enabled: false } } });
+
+      const request = requestFixture();
+
+      const authenticationResult = await provider.authenticate(request);
 
       expect(authenticationResult.notHandled()).to.be(true);
     });

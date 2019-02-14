@@ -6,6 +6,7 @@
 
 import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
+import { XPackUsage } from './xpack_usage';
 
 /**
  * Setup the X-Pack Main plugin. This is fired every time that the Elasticsearch plugin becomes Green.
@@ -20,7 +21,12 @@ export function setupXPackMain(server) {
     pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
   });
 
+  const usage = new XPackUsage(server, {
+    pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
+  });
+
   server.expose('info', info);
+  server.expose('usage', usage);
   server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
@@ -35,6 +41,7 @@ export function setupXPackMain(server) {
   // trigger an xpack info refresh whenever the elasticsearch plugin status changes
   server.plugins.elasticsearch.status.on('change', async () => {
     await info.refreshNow();
+    await usage.refreshNow();
     setPluginStatus();
   });
 

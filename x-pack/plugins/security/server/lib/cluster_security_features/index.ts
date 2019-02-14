@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export declare class Poller {
-  constructor(options: any);
-
-  public start(): void;
-
-  public stop(): void;
-
-  public getPollFrequency(): number;
-}
+export { ClusterSecurityFeatures } from './cluster_security_features';

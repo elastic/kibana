@@ -65,6 +65,11 @@ export class TokenAuthenticationProvider {
   async authenticate(request, state) {
     this._options.log(['debug', 'security', 'token'], `Trying to authenticate user request to ${request.url.path}.`);
 
+    if (!this._options.clusterSecurityFeatures.isTokenServiceEnabled()) {
+      this._options.log(['warning', 'security', 'token'], `Token service is not enabled in Elasticsearch.`);
+      return AuthenticationResult.notHandled();
+    }
+
     // first try from login payload
     let authenticationResult = await this._authenticateViaLoginAttempt(request);
 

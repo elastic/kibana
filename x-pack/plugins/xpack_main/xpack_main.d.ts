@@ -5,8 +5,10 @@
  */
 
 import { XPackInfo, XPackInfoOptions } from './server/lib/xpack_info';
+import { XPackUsage } from './server/lib/xpack_usage';
 
 export interface XPackMainPlugin {
   info: XPackInfo;
+  usage: XPackUsage;
   createXPackInfo(options: XPackInfoOptions): XPackInfo;
 }
