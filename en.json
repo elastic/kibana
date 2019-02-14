@@ -1,0 +1,98 @@
+{
+  "formats": {
+    "number": {
+      "currency": {
+        "style": "currency"
+      },
+      "percent": {
+        "style": "percent"
+      }
+    },
+    "date": {
+      "short": {
+        "month": "numeric",
+        "day": "numeric",
+        "year": "2-digit"
+      },
+      "medium": {
+        "month": "short",
+        "day": "numeric",
+        "year": "numeric"
+      },
+      "long": {
+        "month": "long",
+        "day": "numeric",
+        "year": "numeric"
+      },
+      "full": {
+        "weekday": "long",
+        "month": "long",
+        "day": "numeric",
+        "year": "numeric"
+      }
+    },
+    "time": {
+      "short": {
+        "hour": "numeric",
+        "minute": "numeric"
+      },
+      "medium": {
+        "hour": "numeric",
+        "minute": "numeric",
+        "second": "numeric"
+      },
+      "long": {
+        "hour": "numeric",
+        "minute": "numeric",
+        "second": "numeric",
+        "timeZoneName": "short"
+      },
+      "full": {
+        "hour": "numeric",
+        "minute": "numeric",
+        "second": "numeric",
+        "timeZoneName": "short"
+      }
+    },
+    "relative": {
+      "years": {
+        "units": "year"
+      },
+      "months": {
+        "units": "month"
+      },
+      "days": {
+        "units": "day"
+      },
+      "hours": {
+        "units": "hour"
+      },
+      "minutes": {
+        "units": "minute"
+      },
+      "seconds": {
+        "units": "second"
+      }
+    }
+  },
+  "messages": {
+    "xpack.maps.appDescription": "Map application",
+    "xpack.maps.appDisabled": "Maps app disabled by configuration",
+    "xpack.maps.appTitle": "Maps",
+    "xpack.maps.elasticsearch_geo_utils.geohashIsUnsupported": "Unable to convert to geojson, geohash not supported",
+    "xpack.maps.elasticsearch_geo_utils.unsupportedFieldType": "Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}",
+    "xpack.maps.elasticsearch_geo_utils.unsupportedGeoFieldType": "Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}",
+    "xpack.maps.elasticsearch_geo_utils.unsupportedGeoPointValue": "Unsupported geo_point value: {geoPointValue}",
+    "xpack.maps.elasticsearch_geo_utils.wktIsUnsupported": "Unable to convert WKT to geojson, not supported",
+    "xpack.maps.feature.appDescription": "Explore geospatial data from Elasticsearch and the Elastic Maps Service",
+    "xpack.maps.server.missingEMSId": "Must supply id parameters to retrieve EMS file",
+    "xpack.maps.source.ems_xyz.description": "Map tiles from a URL that includes the XYZ coordinates",
+    "xpack.maps.source.ems_xyz.title": "Tile Map Service from URL",
+    "xpack.maps.style.heatmap.displayName": "Heatmap style",
+    "xpack.maps.style.tile.displayName": "Tile style",
+    "xpack.maps.style.vector.displayName": "Vector style",
+    "xpack.maps.telemetry.loadError": "Error loading maps telemetry: {error}",
+    "xpack.maps.telemetry.scheduleError": "Error scheduling telemetry task, received {message}",
+    "xpack.maps.telemetry.taskTitle": "Maps telemetry fetch task"
+  }
+}

@@ -13,12 +13,17 @@ import {
 
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
+import { i18n } from '@kbn/i18n';
 
 export class WMSSource extends AbstractTMSSource {
 
   static type = 'WMS';
-  static title = 'Web Map Service';
-  static description = 'Maps from OGC Standard WMS';
+  static title = i18n.translate('xpack.maps.source.wms.title', {
+    defaultMessage: 'Web Map Service'
+  });
+  static description = i18n.translate('xpack.maps.source.wms.description', {
+    defaultMessage: 'Maps from OGC Standard WMS'
+  });
   static icon = 'grid';
 
   static createDescriptor({ serviceUrl, layers, styles }) {
@@ -67,7 +72,6 @@ export class WMSSource extends AbstractTMSSource {
   }
 
   getUrlTemplate() {
-    console.warn('should compose url using url formatter, not string formatting');
     const styles = this._descriptor.styles ? this._descriptor.styles : '';
     // eslint-disable-next-line max-len
     return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=${styles}`;
