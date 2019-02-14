@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { SFC } from 'react';
-import './advanced_filter.scss';
 
 export interface Props {
   /** Optional value for the component */

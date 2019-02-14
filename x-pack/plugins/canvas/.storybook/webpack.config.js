@@ -7,7 +7,10 @@
 const path = require('path');
 const TSDocgenPlugin = require('react-docgen-typescript-webpack-plugin');
 
+// Extend the Storybook Webpack config with some customizations;
 module.exports = (_baseConfig, _env, config) => {
+
+  // Include the React preset for Storybook JS files.
   config.module.rules.push(
     {
       test: /\.js$/,
@@ -19,8 +22,21 @@ module.exports = (_baseConfig, _env, config) => {
     },
   );
 
+  // Find and alter the CSS rule to replace the Kibana public path string with a path
+  // to the route we've added in middleware.js
+  const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
+  cssRule.use.push({
+    loader: 'string-replace-loader',
+    options: {
+      search: '__REPLACE_WITH_PUBLIC_PATH__',
+      replace: '/',
+      flags: 'g'
+    }
+  });
+  
+  // Configure loading LESS files from Kibana
   config.module.rules.push({
-    test: /\.scss$/,
+    test: /\.less$/,
     use: [
       { loader: 'style-loader' },
       { loader: 'css-loader', options: { importLoaders: 2 } },
@@ -30,19 +46,11 @@ module.exports = (_baseConfig, _env, config) => {
           config: { path: path.resolve(__dirname, './../../../../src/optimize/postcss.config.js') },
         },
       },
-      { loader: 'sass-loader' },
-      {
-        loader: 'sass-resources-loader',
-        options: {
-          resources: ['../../../node_modules/@elastic/eui/src/theme_light.scss'],
-        },
-      },
-    ],
-    include: [
-      path.resolve(__dirname, '../'),
+      { loader: 'less-loader' },
     ],
   });
 
+  // Support .ts/x files using the tsconfig from Kibana
   config.module.rules.push({
     test: /\.tsx?$/,
     use: [
@@ -62,8 +70,14 @@ module.exports = (_baseConfig, _env, config) => {
     ],
   });
 
+  // Include the TSDocgen plugin to display Typescript param comments in the stories.
   config.plugins.push(new TSDocgenPlugin());
+  
+  // Tell Webpack about the ts/x extensions
   config.resolve.extensions.push('.ts', '.tsx');
-  config.resolve.alias.ui = path.resolve(__dirname, './../../../../src/ui/public');
+
+  // Alias the any imports from ui/ to the proper directory.
+  config.resolve.alias.ui = path.resolve(__dirname, './../../../../src/legacy/ui/public');
+
   return config;
 };
