@@ -53,7 +53,7 @@ const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) =>
   return (
     <EuiPanel className="code-timeline__commit--root">
       <CommitContainer>
-        <EuiText>
+        <EuiText size="s">
           <p>{message}</p>
         </EuiText>
         <EuiText size="xs">
