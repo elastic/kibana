@@ -13,12 +13,17 @@ import {
 
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
+import { i18n } from '@kbn/i18n';
 
 export class XYZTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_XYZ';
-  static title = 'Tile Map Service from URL';
-  static description = 'Map tiles from a URL that includes the XYZ coordinates';
+  static title = i18n.translate('xpack.maps.source.ems_xyz.title', {
+    defaultMessage: 'Tile Map Service from URL'
+  });
+  static description = i18n.translate('xpack.maps.source.ems_xyz.description', {
+    defaultMessage: 'Map tiles from a URL that includes the XYZ coordinates'
+  });
   static icon = 'grid';
 
   static createDescriptor(urlTemplate) {
