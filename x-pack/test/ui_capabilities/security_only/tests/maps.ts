@@ -44,41 +44,19 @@ export default function mapsTests({ getService }: KibanaFunctionalTestDefaultPro
               save: false,
             });
             break;
-          // these users can't do anything with Advanced Settings
-          case 'advancedSettings_all':
-          case 'advancedSettings_read':
-          case 'apm_all':
-          case 'canvas_all':
-          case 'canvas_read':
-          case 'dev_tools_read':
-          case 'dashboard_all':
-          case 'dashboard_read':
-          case 'discover_all':
-          case 'discover_read':
-          case 'graph_all':
-          case 'graph_read':
-          case 'infrastructure_read':
-          case 'logs_read':
-          case 'ml_all':
-          case 'monitoring_all':
-          case 'timelion_all':
-          case 'timelion_read':
-          case 'uptime_read':
-          case 'visualize_all':
-          case 'visualize_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('maps');
-            expect(uiCapabilities.value!.maps).to.eql({
-              save: false,
-            });
-            break;
+          // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
+          // all other users can't do anything with Maps
           default:
-            throw new UnreachableError(scenario);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('maps');
+            expect(uiCapabilities.value!.maps).to.eql({
+              save: false,
+            });
         }
       });
     });

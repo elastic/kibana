@@ -42,6 +42,11 @@ export interface EmbeddableMetadata {
    * offer for editing directly on the dashboard.
    */
   editUrl?: string;
+
+  /**
+   * A flag indicating if this embeddable can be edited.
+   */
+  editable?: boolean;
 }
 
 export abstract class Embeddable {
