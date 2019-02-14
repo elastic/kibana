@@ -47,8 +47,8 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="Our new autocomplete and simple syntax features can help you create your
-                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+          defaultMessage="Use the Kibana query language (KQL) to get suggestions as you type.
+                If you disable KQL, Kibana uses Lucene, which doesn't offer suggestions. See docs {docsLink}."
           id="common.ui.queryBar.syntaxOptionsDescription"
           values={
             Object {
@@ -84,7 +84,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
           id="queryEnhancementOptIn"
           label={
             <FormattedMessage
-              defaultMessage="Turn on query features"
+              defaultMessage="Turn on KQL"
               id="common.ui.queryBar.turnOnQueryFeaturesLabel"
               values={Object {}}
             />
@@ -176,8 +176,8 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="Our new autocomplete and simple syntax features can help you create your
-                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+          defaultMessage="Use the Kibana query language (KQL) to get suggestions as you type.
+                If you disable KQL, Kibana uses Lucene, which doesn't offer suggestions. See docs {docsLink}."
           id="common.ui.queryBar.syntaxOptionsDescription"
           values={
             Object {
@@ -213,7 +213,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
           id="queryEnhancementOptIn"
           label={
             <FormattedMessage
-              defaultMessage="Turn on query features"
+              defaultMessage="Turn on KQL"
               id="common.ui.queryBar.turnOnQueryFeaturesLabel"
               values={Object {}}
             />
