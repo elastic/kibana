@@ -132,7 +132,6 @@
     "color": "1.0.3",
     "commander": "2.8.1",
     "compare-versions": "3.1.0",
-    "content-disposition": "^0.5.3",
     "css-loader": "1.0.0",
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.6",
