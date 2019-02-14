@@ -7,6 +7,31 @@
 export const genericRules = [
   {
     when: {
+      exists: ['event.dataset', 'log.level', 'message'],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
+      },
+      {
+        constant: '][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'message',
+      },
+    ],
+  },
+  {
+    when: {
       exists: ['log.level', 'message'],
     },
     format: [
@@ -41,6 +66,25 @@ export const genericRules = [
     format: [
       {
         field: '@message',
+      },
+    ],
+  },
+  {
+    when: {
+      exists: ['event.dataset', 'log.original'],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'log.original',
       },
     ],
   },

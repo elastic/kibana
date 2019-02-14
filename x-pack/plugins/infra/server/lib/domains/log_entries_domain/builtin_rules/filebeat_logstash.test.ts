@@ -33,6 +33,14 @@ Array [
     "constant": "[",
   },
   Object {
+    "field": "event.dataset",
+    "highlights": Array [],
+    "value": "logstash.log",
+  },
+  Object {
+    "constant": "][",
+  },
+  Object {
     "field": "log.level",
     "highlights": Array [],
     "value": "INFO",

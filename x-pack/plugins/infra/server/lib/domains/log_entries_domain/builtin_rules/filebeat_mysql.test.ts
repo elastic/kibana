@@ -33,6 +33,14 @@ Array [
     "constant": "[",
   },
   Object {
+    "field": "event.dataset",
+    "highlights": Array [],
+    "value": "mysql.error",
+  },
+  Object {
+    "constant": "][",
+  },
+  Object {
     "field": "log.level",
     "highlights": Array [],
     "value": "Warning",
