@@ -85,14 +85,16 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Installing from snapshot'));
     this._log.indent(4);
 
+    const version = process.env.SNAPSHOT_VERSION || options.version;
+
+    if (version !== options.version) {
+      this._log.info(`Using Elasticearch version ${version} from env.SNAPSHOT_VERSION`);
+    }
+
     const { installPath } = await installSnapshot({
       log: this._log,
       ...options,
-
-      // HACK. This is a temporary hack to get Kibana 6.7 tests
-      // to run against Elasticsearch 7.0, so we can test the upgrade
-      // scenario. This will be removed prior to merge / final code review.
-      version: '7.0.0',
+      version,
     });
 
     this._log.indent(-4);

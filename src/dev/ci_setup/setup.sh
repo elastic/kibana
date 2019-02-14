@@ -16,6 +16,9 @@ C_RESET='\033[0m' # Reset color
 ###
 export FORCE_COLOR=1
 
+### HACK: Force this test run to use Elasticsearch 7.0.0, don't merge into 6.7
+export SNAPSHOT_VERSION=7.0.0
+
 ###
 ### check that we seem to be in a kibana project
 ###
