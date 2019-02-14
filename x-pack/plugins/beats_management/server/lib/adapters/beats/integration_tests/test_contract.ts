@@ -23,7 +23,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     });
 
     it('Should insert beat', async () => {
-      const result = adapter.insert(internalUser, {
+      const result = adapter.upsert(internalUser, {
         id: 'something',
         type: 'filebeat',
         access_token: '3helu3huh34klh5k3l4uh',
@@ -37,8 +37,8 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       expect(result).toMatchSnapshot('insert-beat');
     });
 
-    it('Should re-insert beat without error', async () => {
-      let result = await adapter.insert(internalUser, {
+    it('Should re-insert beat without error, should update it', async () => {
+      let result: any = await adapter.upsert(internalUser, {
         id: 'something',
         type: 'filebeat',
         access_token: '3helu3huh34klh5k3l4uh',
@@ -51,22 +51,28 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       });
       expect(result).toMatchSnapshot('insert-beat');
 
-      result = await adapter.insert(internalUser, {
+      result = await adapter.upsert(internalUser, {
         id: 'something',
         type: 'filebeat',
         access_token: '3helu3huh34klh5k3l4uh',
         enrollment_token: 'wekruhw4lglu',
         active: true,
         host_ip: '192.168.1.1',
-        host_name: 'localhost',
+        host_name: 'localhost2',
         tags: [],
         last_updated: 1550025030,
       });
       expect(result).toMatchSnapshot('insert-beat');
+
+      result = await adapter.getAll(internalUser);
+      expect(result.length).toEqual(1);
+      expect(result[0].host_name).toEqual('localhost2');
+
+      expect(result).toMatchSnapshot('list-beats');
     });
 
     it('Should get beat', async () => {
-      await adapter.insert(internalUser, {
+      await adapter.upsert(internalUser, {
         id: 'something',
         type: 'filebeat',
         access_token: '3helu3huh34klh5k3l4uh',

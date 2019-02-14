@@ -5,7 +5,6 @@
  */
 
 import { intersection, omit } from 'lodash';
-
 import { CMBeat } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
@@ -21,7 +20,7 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.find(beat => beat.id === id) || null;
   }
 
-  public async insert(user: FrameworkUser, beat: CMBeat) {
+  public async upsert(user: FrameworkUser, beat: CMBeat) {
     this.beatsDB.push(beat);
   }
 

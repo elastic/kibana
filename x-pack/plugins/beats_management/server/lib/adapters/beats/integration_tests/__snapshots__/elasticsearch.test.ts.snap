@@ -16,6 +16,21 @@ Object {
 
 exports[`Beats Elasticsearch Adapter Should insert beat: insert-beat 1`] = `Promise {}`;
 
-exports[`Beats Elasticsearch Adapter Should re-insert beat without error: insert-beat 1`] = `undefined`;
+exports[`Beats Elasticsearch Adapter Should re-insert beat without error, should update it: insert-beat 1`] = `undefined`;
 
-exports[`Beats Elasticsearch Adapter Should re-insert beat without error: insert-beat 2`] = `undefined`;
+exports[`Beats Elasticsearch Adapter Should re-insert beat without error, should update it: insert-beat 2`] = `undefined`;
+
+exports[`Beats Elasticsearch Adapter Should re-insert beat without error, should update it: list-beats 1`] = `
+Array [
+  Object {
+    "active": true,
+    "enrollment_token": "wekruhw4lglu",
+    "host_ip": "192.168.1.1",
+    "host_name": "localhost2",
+    "id": "something",
+    "last_updated": 1550025030,
+    "tags": Array [],
+    "type": "filebeat",
+  },
+]
+`;

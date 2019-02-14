@@ -83,7 +83,7 @@ export class CMBeatsDomain {
 
     const user = typeof userOrToken === 'string' ? this.framework.internalUser : userOrToken;
 
-    await this.adapter.update(user, {
+    await this.adapter.upsert(user, {
       ...beat,
       ...beatData,
     });
@@ -112,7 +112,7 @@ export class CMBeatsDomain {
     const accessToken = this.tokens.generateAccessToken();
     const verifiedOn = moment().toJSON();
 
-    await this.adapter.insert(this.framework.internalUser, {
+    await this.adapter.upsert(this.framework.internalUser, {
       tags: [],
       ...beat,
       active: true,

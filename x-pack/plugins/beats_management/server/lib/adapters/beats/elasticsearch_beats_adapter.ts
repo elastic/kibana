@@ -34,7 +34,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     return beat;
   }
 
-  public async insert(user: FrameworkUser, beat: CMBeat) {
+  public async upsert(user: FrameworkUser, beat: CMBeat) {
     const body = {
       beat,
       type: 'beat',
@@ -46,21 +46,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
     });
-  }
-
-  public async update(user: FrameworkUser, beat: CMBeat) {
-    const body = {
-      beat,
-      type: 'beat',
-    };
-
-    const params = {
-      body,
-      id: `beat:${beat.id}`,
-      index: INDEX_NAMES.BEATS,
-      refresh: 'wait_for',
-    };
-    await this.database.index(user, params);
   }
 
   public async getWithIds(user: FrameworkUser, beatIds: string[]) {
