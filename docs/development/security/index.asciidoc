@@ -3,7 +3,7 @@
 
 === Overview
 
-Feature development must consider user access permissions. Its easy for a design to assume access to several APIs which may have independent availability. Feature implementation must account for this although clever use of apis may sidestep apparent restrictions.
+Feature development must consider user access permissions. A design may assume access to several APIs which may have independent availability but feature implementation must account for all possible combinations of API access.
 
 === Implementation
 
@@ -15,8 +15,8 @@ Kibana has generally been able to implement security transparently to core and p
 
 However, {kib} requires all access to the `.kibana` index go through the `SavedObjectsClient`. Its responsible for translating the documents stored in Elasticsearch to and from Saved Objects and determining when to use `callWithRequest` versus `callWithInternalUser`.
 
-Determining user access is best done by querying the desired resource and handling 403 errors as appropriate. Its also possible to query user access permssions via `has-privileges` but its an X-Pack only feature.
+There are two methods of determining user access. X-Pack features can query user access permssions via `has-privileges`. Outside of X-Pack simply query the desired resource and handle 403 errors as appropriate.
 
-A user with minimal permissions is useful for testing no-access cases - create a new role,  set `Minimum privileges for all spaces` to `all`, and create a user with that role. The user will be able to log into kibana but without access to any indices.
+A user with minimal permissions is useful for testing no-access cases - create a new user and add the `kibana_user` role. The user will be able to log into kibana but without access to any indices.
 
 include::rbac.asciidoc[]
