@@ -54,6 +54,6 @@ it('Should return false when lower value is less than min', () => {
 });
 
 it('Should return false when upper value is greater than max', () => {
-  const { isValid,  } = isRangeValid([0, 12], 1, 10, formatMessageMock);
+  const { isValid,  } = isRangeValid([2, 12], 1, 10, formatMessageMock);
   expect(isValid).toBe(false);
 });
