@@ -91,9 +91,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     savedObjectsInstallMsg: i18n.translate(
       'kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg',
       {
-        defaultMessage:
-          'Load index pattern, visualizations, and pre-defined dashboards. \
-An index pattern is required for some features in the APM UI.',
+        defaultMessage: 'An APM index pattern is required for some features in the APM UI.',
       }
     ),
   };
