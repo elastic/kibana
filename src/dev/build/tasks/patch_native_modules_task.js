@@ -23,7 +23,7 @@ import binaryInfo from '../../../../x-pack/plugins/code/tasks/nodegit_info';
 import wreck from 'wreck';
 import mkdirp from 'mkdirp';
 import { dirname, join, basename } from 'path';
-import { createPromiseFromStreams } from '../../../utils/streams';
+import { createPromiseFromStreams } from '../../../legacy/utils/streams';
 
 async function download(url, destination, log) {
   const response = await wreck.request('GET', url);
