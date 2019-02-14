@@ -68,7 +68,7 @@ export function maps(kibana) {
       if (!mapsEnabled) {
         server.log(['info', 'maps'],
           i18n.translate('xpack.maps.appDisabled', {
-            defaultMessage: 'Maps'
+            defaultMessage: 'Maps app disabled by configuration'
           }));
         return;
       }
