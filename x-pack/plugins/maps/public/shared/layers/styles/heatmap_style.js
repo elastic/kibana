@@ -6,6 +6,7 @@
 
 import { GRID_RESOLUTION } from '../grid_resolution';
 import { AbstractStyle } from './abstract_style';
+import { i18n } from '@kbn/i18n';
 
 export class HeatmapStyle extends AbstractStyle {
 
@@ -27,7 +28,9 @@ export class HeatmapStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return 'Heatmap style';
+    return i18n.translate('xpack.maps.style.heatmap.displayName', {
+      defaultMessage: 'Heatmap style'
+    });
   }
 
   static renderEditor() {
