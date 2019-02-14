@@ -472,7 +472,7 @@ export class VectorLayer extends AbstractLayer {
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
         type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
+        data: EMPTY_FEATURE_COLLECTION
       });
     }
   }
@@ -483,8 +483,8 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor({
+  renderStyleEditor(Style, options) {
+    return Style.renderEditor({
       layer: this,
       ...options
     });
@@ -493,7 +493,6 @@ export class VectorLayer extends AbstractLayer {
   _canShowTooltips() {
     return this._source.canFormatFeatureProperties();
   }
-
 
   async _getPropertiesForTooltip(feature) {
     const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
