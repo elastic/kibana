@@ -5,6 +5,7 @@
  */
 
 import { spawn } from 'child_process';
+import chmodr from 'chmodr';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -89,34 +90,33 @@ export class JavaLauncher implements ILanguageServerLauncher {
       if (!JDKFound.length) {
         log.error('cannot find executable JDK');
       }
-      return JDKFound;
+      return path.resolve(installationPath, JDKFound[0]);
     }
 
-    let config = './config_mac/';
-    let javaPath = '';
+    let config = 'config_mac';
+    let javaPath = 'java';
     let javaHomePath = '';
     // detect platform
     switch (getOsPlatform()) {
       case 'darwin':
         javaHomePath = `${findJDK('osx')}/Contents/Home`;
-        javaPath = `${javaHomePath}/bin/java`;
+        javaPath = path.resolve(`${javaHomePath}`, 'bin', 'java');
         break;
       case 'win32':
         javaHomePath = `${findJDK('windows')}`;
-        javaPath = `${javaHomePath}/bin/java.exe`;
-        config = './config_win/';
+        javaPath = path.resolve(`${javaHomePath}`, 'bin', 'java.exe');
+        config = 'config_win';
         break;
       case 'linux':
         javaHomePath = `${findJDK('linux')}`;
-        javaPath = `${javaHomePath}/bin/java`;
-        config = './config_linux/';
+        javaPath = path.resolve(`${javaHomePath}`, 'bin', 'java');
+        config = 'config_linux';
         break;
       default:
         log.error('Unable to find platform for this os');
     }
-    process.env.CLIENT_HOST = '127.0.0.1';
-    process.env.CLIENT_PORT = port.toString();
-    process.env.JAVA_HOME = javaHomePath;
+
+    chmodr.sync(path.dirname(javaPath), 0o755);
 
     const p = spawn(
       javaPath,
@@ -130,14 +130,14 @@ export class JavaLauncher implements ILanguageServerLauncher {
         '-jar',
         path.resolve(installationPath, launchersFound[0]),
         '-configuration',
-        path.resolve(installationPath, config),
+        path.resolve(installationPath, './repository', config),
         '-data',
         this.options.jdtWorkspacePath,
       ],
       {
         detached: false,
         stdio: 'pipe',
-        env: process.env,
+        env: { CLIENT_HOST: '127.0.0.1', CLIENT_PORT: port.toString(), JAVA_HOME: javaHomePath },
       }
     );
     p.stdout.on('data', data => {
