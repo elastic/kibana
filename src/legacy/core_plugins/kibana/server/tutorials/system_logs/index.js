@@ -46,7 +46,7 @@ Unix/Linux based distributions. This module is not available on Windows. \
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-syslog-dashboard',
+          id: 'Filebeat-syslog-dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.systemLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'System logs dashboard',
           }),

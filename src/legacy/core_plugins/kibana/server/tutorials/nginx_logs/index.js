@@ -46,7 +46,7 @@ export function nginxLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519',
+          id: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.nginxLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Nginx logs dashboard',
           }),

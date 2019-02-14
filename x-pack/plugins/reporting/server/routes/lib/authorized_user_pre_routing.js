@@ -5,8 +5,8 @@
  */
 
 import boom from 'boom';
-import { getUserFactory } from './get_user';
-import { oncePerServer } from './once_per_server';
+import { getUserFactory } from '../../lib/get_user';
+import { oncePerServer } from '../../lib/once_per_server';
 
 const superuserRole = 'superuser';
 
@@ -43,4 +43,3 @@ function authorizedUserPreRoutingFn(server) {
 }
 
 export const authorizedUserPreRoutingFactory = oncePerServer(authorizedUserPreRoutingFn);
-
