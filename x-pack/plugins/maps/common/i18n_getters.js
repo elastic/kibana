@@ -5,11 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APP_TITLE_EN } from './constants';
-
 
 export function getAppTitle() {
   return i18n.translate('xpack.maps.appTitle', {
-    defaultMessage: APP_TITLE_EN
+    defaultMessage: 'Maps'
   });
 }

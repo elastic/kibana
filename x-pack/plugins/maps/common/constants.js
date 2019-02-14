@@ -14,8 +14,6 @@ export const ZOOM_PRECISION = 2;
 
 export const DEFAULT_EMS_TILE_LAYER = 'road_map';
 
-export const APP_TITLE_EN = 'Maps';
-
 export const APP_ID = 'maps';
 
 export const APP_ICON = 'gisApp';
