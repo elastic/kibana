@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
 import { initializeWorkpad } from '../../../state/actions/workpad';
 import { selectElement } from '../../../state/actions/transient';
-import { canUserWrite, getAppReady } from '../../../state/selectors/app';
+import { canUserWrite, getAppReady, getFullscreen } from '../../../state/selectors/app';
 import { getWorkpad, isWriteable, getAllElements } from '../../../state/selectors/workpad';
 import { getInFlight } from '../../../state/selectors/resolved_args';
 import { LoadWorkpad } from './load_workpad';
@@ -23,6 +23,7 @@ const mapStateToProps = state => {
     workpad: getWorkpad(state),
     totalElementCount: getAllElements(state).length,
     inFlight: getInFlight(state),
+    isFullscreen: getFullscreen(state),
   };
 };
 

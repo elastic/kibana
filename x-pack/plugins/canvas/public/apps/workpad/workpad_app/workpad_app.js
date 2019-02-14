@@ -17,6 +17,8 @@ export class WorkpadApp extends React.PureComponent {
     isWriteable: PropTypes.bool.isRequired,
     deselectElement: PropTypes.func,
     initializeWorkpad: PropTypes.func.isRequired,
+    inFlight: PropTypes.bool.isRequired,
+    isFullscreen: PropTypes.bool.isRequired,
   };
 
   state = { renderedElementCount: 0 };
@@ -35,19 +37,23 @@ export class WorkpadApp extends React.PureComponent {
 
   incrementRenderCount = () => {
     this.renderedElementCount += 1;
+    this.setState({ renderedElementCount: this.renderedElementCount });
     console.log(this.renderedElementCount);
   };
 
   resetRenderCount = () => {
     this.renderedElementCount = 0;
+    this.setState({ renderedElementCount: 0 });
   };
 
   render() {
-    const { isWriteable, deselectElement, totalElementCount } = this.props;
+    const { isWriteable, deselectElement, totalElementCount, inFlight, isFullscreen } = this.props;
 
     return (
       <div className="canvasLayout">
-        <WorkpadProgress value={this.renderedElementCount} max={totalElementCount} />
+        {inFlight && !isFullscreen && (
+          <WorkpadProgress value={this.state.renderedElementCount} max={totalElementCount} />
+        )}
         <div className="canvasLayout__rows">
           <div className="canvasLayout__cols">
             <div className="canvasLayout__stage">

@@ -6,10 +6,12 @@
 
 import { connect } from 'react-redux';
 import { getInFlight } from '../../state/selectors/resolved_args';
+import { getFullscreen } from '../../state/selectors/app';
 import { WorkpadProgress as Component } from './workpad_progress';
 
 const mapStateToProps = state => ({
   inFlight: getInFlight(state),
+  isFullScreen: getFullscreen(state),
 });
 
 export const WorkpadProgress = connect(mapStateToProps)(Component);
