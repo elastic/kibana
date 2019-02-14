@@ -17,14 +17,19 @@
  * under the License.
  */
 
-export function isBadRequestError(maybeError: any): boolean;
-export function isNotAuthorizedError(maybeError: any): boolean;
-export function isForbiddenError(maybeError: any): boolean;
-export function isRequestEntityTooLargeError(maybeError: any): boolean;
-export function isNotFoundError(maybeError: any): boolean;
-export function isConflictError(maybeError: any): boolean;
-export function isEsUnavailableError(maybeError: any): boolean;
-export function isEsAutoCreateIndexError(maybeError: any): boolean;
+jest.mock('./decode_version', () => ({
+  decodeVersion: jest.fn().mockReturnValue({ _seq_no: 1, _primary_term: 2 }),
+}));
 
-export function createInvalidVersionError(version: any): Error;
-export function isInvalidVersionError(maybeError: Error): boolean;
+import { decodeRequestVersion } from './decode_request_version';
+import { decodeVersion } from './decode_version';
+
+it('renames decodeVersion() return value to use if_seq_no and if_primary_term', () => {
+  expect(decodeRequestVersion('foobar')).toMatchInlineSnapshot(`
+Object {
+  "if_primary_term": 2,
+  "if_seq_no": 1,
+}
+`);
+  expect(decodeVersion).toHaveBeenCalledWith('foobar');
+});

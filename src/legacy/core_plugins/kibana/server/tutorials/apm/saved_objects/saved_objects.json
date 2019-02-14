@@ -11,7 +11,7 @@
     },
     "id": "1ffc5e20-7827-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -26,7 +26,7 @@
     },
     "id": "1bdca740-7828-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 2
+    "version": "2"
 },
 {
     "attributes": {
@@ -41,7 +41,7 @@
     },
     "id": "804ffc40-7828-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -59,7 +59,7 @@
     },
     "id": "8d3ed660-7828-11e7-8c47-65b845b5cfb3",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -74,7 +74,7 @@
     },
     "id": "c618e4e0-7c69-11e7-aa55-3b0d52c71c60",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -100,7 +100,7 @@
     },
     "id": "ceefd050-7c6a-11e7-aa55-3b0d52c71c60",
     "type": "search",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -118,7 +118,7 @@
     },
     "id": "5f08a870-7c6a-11e7-aa55-3b0d52c71c60",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -133,7 +133,7 @@
     },
     "id": "22518e70-7c69-11e7-aa55-3b0d52c71c60",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -151,7 +151,7 @@
     },
     "id": "37f6fac0-7c6a-11e7-aa55-3b0d52c71c60",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -166,7 +166,7 @@
     },
     "id": "a2e199b0-7820-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -181,7 +181,7 @@
     },
     "id": "09bcf890-7822-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 2
+    "version": "2"
 },
 {
     "attributes": {
@@ -196,7 +196,7 @@
     },
     "id": "55606a60-7823-11e7-8c47-65b845b5cfb3",
     "type": "visualization",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -214,7 +214,7 @@
     },
     "id": "41b5d920-7821-11e7-8c47-65b845b5cfb3",
     "type": "dashboard",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -238,7 +238,7 @@
     },
     "id": "d7735b90-7ddf-11e7-b115-df9c90da2df1",
     "type": "search",
-    "version": 1
+    "version": "1"
 },
 {
     "attributes": {
@@ -256,5 +256,5 @@
     },
     "id": "3e3de700-7de0-11e7-b115-df9c90da2df1",
     "type": "dashboard",
-    "version": 2
+    "version": "2"
 }]

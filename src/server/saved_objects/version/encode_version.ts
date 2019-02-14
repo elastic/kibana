@@ -17,14 +17,21 @@
  * under the License.
  */
 
-export function isBadRequestError(maybeError: any): boolean;
-export function isNotAuthorizedError(maybeError: any): boolean;
-export function isForbiddenError(maybeError: any): boolean;
-export function isRequestEntityTooLargeError(maybeError: any): boolean;
-export function isNotFoundError(maybeError: any): boolean;
-export function isConflictError(maybeError: any): boolean;
-export function isEsUnavailableError(maybeError: any): boolean;
-export function isEsAutoCreateIndexError(maybeError: any): boolean;
+import { encodeBase64 } from './base64';
 
-export function createInvalidVersionError(version: any): Error;
-export function isInvalidVersionError(maybeError: Error): boolean;
+/**
+ * Encode the sequence params into an "opaque" version string
+ * that can be used in the saved object API in place of numeric
+ * version numbers
+ */
+export function encodeVersion(seqNo: number, primaryTerm: number) {
+  if (!Number.isInteger(primaryTerm)) {
+    throw new TypeError('_primary_term from elasticsearch must be an integer');
+  }
+
+  if (!Number.isInteger(seqNo)) {
+    throw new TypeError('_seq_no from elasticsearch must be an integer');
+  }
+
+  return encodeBase64(JSON.stringify([seqNo, primaryTerm]));
+}

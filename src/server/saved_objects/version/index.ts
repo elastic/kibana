@@ -17,14 +17,7 @@
  * under the License.
  */
 
-export function isBadRequestError(maybeError: any): boolean;
-export function isNotAuthorizedError(maybeError: any): boolean;
-export function isForbiddenError(maybeError: any): boolean;
-export function isRequestEntityTooLargeError(maybeError: any): boolean;
-export function isNotFoundError(maybeError: any): boolean;
-export function isConflictError(maybeError: any): boolean;
-export function isEsUnavailableError(maybeError: any): boolean;
-export function isEsAutoCreateIndexError(maybeError: any): boolean;
-
-export function createInvalidVersionError(version: any): Error;
-export function isInvalidVersionError(maybeError: Error): boolean;
+export * from './encode_version';
+export * from './encode_hit_version';
+export * from './decode_version';
+export * from './decode_request_version';

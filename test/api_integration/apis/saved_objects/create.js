@@ -48,7 +48,7 @@ export default function ({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               updated_at: resp.body.updated_at,
-              version: 1,
+              version: 'WzgsMV0=',
               attributes: {
                 title: 'My favorite vis'
               }
@@ -86,7 +86,7 @@ export default function ({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               updated_at: resp.body.updated_at,
-              version: 1,
+              version: 'WzAsMV0=',
               attributes: {
                 title: 'My favorite vis'
               }

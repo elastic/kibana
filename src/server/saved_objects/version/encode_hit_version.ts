@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export function isBadRequestError(maybeError: any): boolean;
-export function isNotAuthorizedError(maybeError: any): boolean;
-export function isForbiddenError(maybeError: any): boolean;
-export function isRequestEntityTooLargeError(maybeError: any): boolean;
-export function isNotFoundError(maybeError: any): boolean;
-export function isConflictError(maybeError: any): boolean;
-export function isEsUnavailableError(maybeError: any): boolean;
-export function isEsAutoCreateIndexError(maybeError: any): boolean;
+import { encodeVersion } from './encode_version';
 
-export function createInvalidVersionError(version: any): Error;
-export function isInvalidVersionError(maybeError: Error): boolean;
+/**
+ * Helper for encoding a version from a "hit" (hits.hits[#] from _search) or
+ * "doc" (body from GET, update, etc) object
+ */
+export function encodeHitVersion(response: { _seq_no: number; _primary_term: number }) {
+  return encodeVersion(response._seq_no, response._primary_term);
+}

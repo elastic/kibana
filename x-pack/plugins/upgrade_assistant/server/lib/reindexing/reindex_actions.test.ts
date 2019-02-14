@@ -119,7 +119,7 @@ describe('ReindexActions', () => {
           type: REINDEX_OP_TYPE,
           id: '9',
           attributes: { indexName: 'hi', locked: moment().format() },
-          version: 1,
+          version: 'foo',
         } as ReindexSavedObject,
         { newIndexName: 'test' }
       );
@@ -129,7 +129,7 @@ describe('ReindexActions', () => {
       expect(args[1]).toEqual('9');
       expect(args[2].indexName).toEqual('hi');
       expect(args[2].newIndexName).toEqual('test');
-      expect(args[3]).toEqual({ version: 1 });
+      expect(args[3]).toEqual({ version: 'foo' });
     });
 
     it('throws if the reindexOp is not locked', async () => {
@@ -139,7 +139,7 @@ describe('ReindexActions', () => {
             type: REINDEX_OP_TYPE,
             id: '10',
             attributes: { indexName: 'hi', locked: null },
-            version: 1,
+            version: 'foo',
           } as ReindexSavedObject,
           { newIndexName: 'test' }
         )
