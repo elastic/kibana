@@ -195,7 +195,7 @@ class TutorialDirectoryUi extends React.Component {
 
   render() {
     return (
-      <EuiPage className="homPage">
+      <EuiPage restrictWidth={1200}>
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>
