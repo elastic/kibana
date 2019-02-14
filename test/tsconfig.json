@@ -4,7 +4,16 @@
     "module": "commonjs",
     "allowJs": true,
     "outDir": "target",
-    "baseUrl": "."
+    "baseUrl": "./",
+    "paths": {
+      "*":[
+        "*"
+      ]
+    },
+    "types": [
+      "node",
+      "mocha"
+    ]
   },
   "exclude": [
     "node_modules"

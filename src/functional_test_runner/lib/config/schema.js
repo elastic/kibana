@@ -108,6 +108,7 @@ export const schema = Joi.object().keys({
     slow: Joi.number().default(30000),
     timeout: Joi.number().default(INSPECTING ? Infinity : 180000),
     ui: Joi.string().default('bdd'),
+    require: Joi.string().default('')
   }).default(),
 
   updateBaselines: Joi.boolean().default(false),
