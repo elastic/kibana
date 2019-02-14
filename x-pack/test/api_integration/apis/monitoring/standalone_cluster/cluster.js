@@ -32,7 +32,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-      console.log(JSON.stringify(body));
       expect(body).to.eql(clusterFixture);
     });
   });
