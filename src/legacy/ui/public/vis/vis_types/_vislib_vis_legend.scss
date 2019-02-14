@@ -2,6 +2,9 @@
 
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
+$colorPickerWidth: $euiSizeM * 10;
+$legendLineHeight: $euiSize;
+
 .visLegend__toggle {
   border-radius: $euiBorderRadius;
   position: absolute;
@@ -45,7 +48,7 @@
 
 .visLegend__list {
   @include euiScrollBar;
-  line-height: $euiSize;
+  line-height: $legendLineHeight;
   width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
   overflow-x: hidden;
@@ -94,19 +97,45 @@
 
 .visLegend__valueTitle--full {
   word-break: break-all;
+  overflow: hidden;
+  min-width: $colorPickerWidth;
 }
 
 .visLegend__valueDetails {
-  border-bottom: 1px solid $euiColorLightShade;
-  padding-bottom: $euiSizeXS;
+  background-color: $euiColorEmptyShade;
+
+  .visLib--legend-left &,
+  .visLib--legend-right & {
+    margin-top: $euiSizeXS;
+    border-bottom: 1px solid $euiColorLightShade;
+  }
+
+
+  .visLib--legend-top & {
+    position: absolute;
+    margin-top: $euiSizeXS;
+  }
+
+  .visLib--legend-bottom & {
+    position: absolute;
+    margin-bottom: 2 * $euiSizeXS;
+    bottom: $legendLineHeight;
+  }
+
 }
 
 .visLegend__valueColorPicker {
-  width: $euiSizeM * 10;
+  $colorPickerDotsPerRow: 8;
+
+  width: $colorPickerWidth;
   margin: auto;
 
   .visLegend__valueColorPickerDot {
-    margin: $euiSizeXS / 2;
+    $colorPickerDotMargin: $euiSizeXS / 2;
+    $colorPickerDotWidth: $colorPickerWidth / $colorPickerDotsPerRow - 2 * $colorPickerDotMargin;
+
+    margin: $colorPickerDotMargin;
+    width: $colorPickerDotWidth;
 
     &:hover {
       transform: scale(1.4);
