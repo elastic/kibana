@@ -28,8 +28,15 @@ export const userProfile = handleActions(
       }),
     [String(loadUserProfileSuccess)]: (state: UserProfileState, action: Action<any>) =>
       produce<UserProfileState>(state, draft => {
-        draft.isCodeAdmin = action.payload!.roles.includes('code_admin');
-        draft.isCodeUser = action.payload!.roles.includes('code_user');
+        if (action.payload!.roles) {
+          // If security is enabled and the roles field is set. Then we should check the
+          // 'code_admin' and 'code_user' roles.
+          draft.isCodeAdmin = action.payload!.roles.includes('code_admin');
+          draft.isCodeUser = action.payload!.roles.includes('code_user');
+        } else {
+          // If security is not enabled, then every user is code admin.
+          draft.isCodeAdmin = true;
+        }
       }),
     [String(loadUserProfileFailed)]: (state: UserProfileState, action: Action<any>) => {
       if (action.payload) {
