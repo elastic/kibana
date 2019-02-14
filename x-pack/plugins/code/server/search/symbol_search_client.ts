@@ -26,7 +26,7 @@ export class SymbolSearchClient extends AbstractSearchClient {
         size,
         query: {
           term: {
-            qname: qname.toLowerCase(),
+            qname,
           },
         },
       },
