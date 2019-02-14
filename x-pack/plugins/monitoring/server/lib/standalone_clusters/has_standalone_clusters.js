@@ -52,7 +52,7 @@ export async function hasStandaloneClusters(req, indexPatterns) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
   if (response && response.hits) {
-    return get(response, 'hits.total', 0) > 0;
+    return get(response, 'hits.total', 0) > 0 || get(response, 'hits.total.value', 0) > 0;
   }
   return false;
 }
