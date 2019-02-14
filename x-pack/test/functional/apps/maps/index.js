@@ -17,7 +17,6 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.load('maps/data');
       await esArchiver.load('maps/kibana');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
