@@ -1449,6 +1449,7 @@ function getEventDistributionData(
     }
 
     const body = {
+      track_total_hits: true,
       query: {
         // using function_score and random_score to get a random sample of documents.
         // otherwise all documents would have the same score and the sampler aggregation
@@ -1524,7 +1525,7 @@ function getEventDistributionData(
         // Because of the sampling, results of metricFunctions which use sum or count
         // can be significantly skewed. Taking into account totalHits we calculate a
         // a factor to normalize results for these metricFunctions.
-        const totalHits = _.get(resp, ['hits', 'total'], 0);
+        const totalHits = _.get(resp, ['hits', 'total', 'value'], 0);
         const successfulShards = _.get(resp, ['_shards', 'successful'], 0);
 
         let normalizeFactor = 1;
