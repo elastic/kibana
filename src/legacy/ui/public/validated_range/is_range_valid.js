@@ -41,8 +41,11 @@ export function isRangeValid(value, min, max, formatMessage) {
     isValid = false;
     errorMessage = formatMessage({
       id: 'common.ui.dualRangeControl.outsideOfRangeErrorMessage',
-      values: { min, max },
-      defaultMessage: `must be between ${min} and ${max}`
+      defaultMessage: 'must be between {min} and {max}'
+    },
+    {
+      min,
+      max
     });
   }
 
