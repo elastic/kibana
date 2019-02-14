@@ -19,6 +19,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -28,13 +29,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { CreateButton } from '../create_button';
+import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPattern, IndexPatternCreationOption } from '../types';
 
 const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    render: (name, { id }) => (
+    render: (name: string, { id }: { id: string }) => (
       <EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>
         {name}
       </EuiButtonEmpty>
@@ -65,49 +67,78 @@ const search = {
   },
 };
 
-export const IndexPatternTable = ({
-  indexPatterns,
-  indexPatternCreationOptions,
-}: {
+interface Props {
   indexPatterns: IndexPattern[];
   indexPatternCreationOptions: IndexPatternCreationOption[];
-}) => (
-  <EuiPanel paddingSize="l">
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText>
-          <h2>
-            <FormattedMessage
-              id="kbn.management.indexPatternTable.title"
-              defaultMessage="Index patterns"
-            />
-          </h2>
-          <p>
-            <FormattedMessage
-              id="kbn.management.indexPatternTable.subtitle"
-              defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
-               Kibana."
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <CreateButton options={indexPatternCreationOptions}>
-          <FormattedMessage
-            id="kbn.management.indexPatternTable.createBtn"
-            defaultMessage="Create index pattern"
-          />
-        </CreateButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiInMemoryTable
-      itemId="id"
-      isSelectable={false}
-      items={indexPatterns}
-      columns={columns}
-      pagination={pagination}
-      sorting={sorting}
-      search={search}
-    />
-  </EuiPanel>
-);
+}
+
+interface State {
+  showFlyout: boolean;
+}
+
+export class IndexPatternTable extends React.Component<Props, State> {
+  public readonly state = {
+    showFlyout: this.props.indexPatterns.length === 0,
+  };
+
+  public render() {
+    return (
+      <EuiPanel paddingSize="l">
+        {this.state.showFlyout && (
+          <CreateIndexPatternPrompt onClose={() => this.setState({ showFlyout: false })} />
+        )}
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <h2>
+                    <FormattedMessage
+                      id="kbn.management.indexPatternTable.title"
+                      defaultMessage="Index patterns"
+                    />
+                  </h2>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconSize="l"
+                  iconType="questionInCircle"
+                  onClick={() => this.setState({ showFlyout: true })}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <CreateButton options={this.props.indexPatternCreationOptions}>
+                  <FormattedMessage
+                    id="kbn.management.indexPatternTable.createBtn"
+                    defaultMessage="Create index pattern"
+                  />
+                </CreateButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="kbn.management.indexPatternTable.subtitle"
+                  defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
+                  Kibana."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiInMemoryTable
+          itemId="id"
+          isSelectable={false}
+          items={this.props.indexPatterns}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+        />
+      </EuiPanel>
+    );
+  }
+}

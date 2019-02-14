@@ -27,7 +27,6 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import indexPatternListTemplate from './list.html';
 import { IndexPatternTable } from './index_pattern_table';
-import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
@@ -52,15 +51,11 @@ export function updateIndexPatternList(
 
   render(
     <I18nContext>
-      {indexPatterns.length === 0 ?
-        (<CreateIndexPatternPrompt
-          indexPatternCreationOptions={indexPatternCreationOptions}
-        />) :
-        (<IndexPatternTable
-          indexPatterns={indexPatterns}
-          navTo={kbnUrl.redirect}
-          indexPatternCreationOptions={indexPatternCreationOptions}
-        />)}
+      <IndexPatternTable
+        indexPatterns={indexPatterns}
+        navTo={kbnUrl.redirect}
+        indexPatternCreationOptions={indexPatternCreationOptions}
+      />
     </I18nContext>,
     node,
   );
@@ -118,7 +113,7 @@ uiModules.get('apps/management')
               id: id,
               title:
   <span>
-    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge style={{ marginLeft: '8px' }}>Default</EuiBadge>)}
+    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge className="indexPatternList__badge">Default</EuiBadge>)}
   </span>,
               url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,
