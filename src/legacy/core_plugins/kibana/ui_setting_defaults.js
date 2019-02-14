@@ -47,7 +47,7 @@ export function getUiSettingDefaults() {
                        'kbn.advancedSettings.query.queryStringOptionsText',
           values: {
             optionsLink:
-              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">' +
+              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
               i18n.translate('kbn.advancedSettings.query.queryStringOptions.optionsLinkText', {
                 defaultMessage: 'Options',
               }) +
@@ -104,7 +104,7 @@ export function getUiSettingDefaults() {
                      'kbn.advancedSettings.sortOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.sortOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -342,7 +342,7 @@ export function getUiSettingDefaults() {
           setRequestReferenceSetting: '<strong>courier:setRequestPreference</strong>',
           customSettingValue: '"custom"',
           requestPreferenceLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText', {
               defaultMessage: 'Request Preference',
             }) +
@@ -364,7 +364,7 @@ export function getUiSettingDefaults() {
         values: {
           maxRequestsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
-            target="_blank" rel="noopener noreferrer" >max_concurrent_shard_requests</a>`
+            target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
       }),
       category: ['search'],
@@ -372,7 +372,7 @@ export function getUiSettingDefaults() {
     'search:includeFrozen': {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
-        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
       category: ['search'],
@@ -432,7 +432,7 @@ export function getUiSettingDefaults() {
         values: {
           cellDimensionsLink:
             `<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText', {
               defaultMessage: 'Explanation of cell dimensions',
             }) +
@@ -837,7 +837,7 @@ export function getUiSettingDefaults() {
         values: {
           acceptedFormatsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
               defaultMessage: 'accepted formats',
             }) +
@@ -888,7 +888,7 @@ export function getUiSettingDefaults() {
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +
