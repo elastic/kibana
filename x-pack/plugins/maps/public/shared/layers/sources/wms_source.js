@@ -129,12 +129,12 @@ class WMSEditor extends  React.Component {
             onChange={(e) => this._handleServiceUrlChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Layers" helpText={"use comma separated list of layer names"}>
+        <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
           <EuiFieldText
             onChange={(e) => this._handleLayersChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Styles" helpText={"use comma separated list of style names"}>
+        <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
           <EuiFieldText
             onChange={(e) => this._handleStylesChange(e)}
           />
