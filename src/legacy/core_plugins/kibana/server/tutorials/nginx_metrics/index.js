@@ -47,7 +47,7 @@ which must be enabled in your Nginx installation. \
     artifacts: {
       dashboards: [
         {
-          id: '023d2930-f1a5-11e7-a9ef-93c69af7b129',
+          id: '023d2930-f1a5-11e7-a9ef-93c69af7b129-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.nginxMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Nginx metrics dashboard',
           }),

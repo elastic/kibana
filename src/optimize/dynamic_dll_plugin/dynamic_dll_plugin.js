@@ -20,6 +20,7 @@
 import { DllCompiler } from './dll_compiler';
 import { notInNodeModulesOrWebpackShims, inPluginNodeModules } from './dll_allowed_modules';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { dllEntryTemplate } from './dll_entry_template';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';
@@ -34,8 +35,8 @@ export class DynamicDllPlugin {
   constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
     this.logWithMetadata = logWithMetadata || (() => null);
     this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, logWithMetadata);
-    this.entryPaths = '';
-    this.afterCompilationEntryPaths = '';
+    this.entryPaths = dllEntryTemplate();
+    this.afterCompilationEntryPaths = dllEntryTemplate();
     this.maxCompilations = maxCompilations;
     this.performedCompilations = 0;
     this.forceDLLCreationFlag = !!(process && process.env && process.env.FORCE_DLL_CREATION);
@@ -161,19 +162,19 @@ export class DynamicDllPlugin {
             if (absoluteResource.includes('node_modules') || absoluteResource.includes('webpackShims')) {
               // NOTE: normalizePosixPath is been used as we only want to have posix
               // paths inside our final dll entry file
-              requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, absoluteResource))}');`] = true;
+              requiresMap[normalizePosixPath(path.relative(dllOutputPath, absoluteResource))] = true;
             }
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, module.stubResource))}');`] = true;
+            requiresMap[normalizePosixPath(path.relative(dllOutputPath, module.stubResource))] = true;
           }
         }
 
         // Sort and join all the discovered require deps
         // in order to create a consistent entry file
-        this.afterCompilationEntryPaths = Object.keys(requiresMap).sort().join('\n');
+        this.afterCompilationEntryPaths = dllEntryTemplate(Object.keys(requiresMap));
         // The dll compilation will run if on of the following conditions return true:
         // 1 - the new generated entry paths are different from the
         // old ones
