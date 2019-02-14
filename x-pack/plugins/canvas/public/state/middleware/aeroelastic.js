@@ -262,8 +262,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
     aero.createStore(
       {
         primaryUpdate: null,
-        currentScene: { shapes: [] },
-        configuration: aeroelasticConfiguration,
+        currentScene: { shapes: [], configuration: aeroelasticConfiguration },
       },
       onChangeCallback,
       page

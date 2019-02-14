@@ -1018,7 +1018,7 @@ const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedSha
 export const getScene = state => state.currentScene;
 
 export const configuration = state => {
-  return state.configuration;
+  return state.currentScene.configuration;
 };
 
 export const getShapes = scene => scene.shapes;
