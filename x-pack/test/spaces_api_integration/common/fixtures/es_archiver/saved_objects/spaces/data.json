@@ -7,9 +7,13 @@
       "space": {
         "_reserved": true,
         "description": "This is the default space",
-        "disabledFeatures": []
-      }
-    }
+        "disabledFeatures": [],
+        "name": "Default Space"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
@@ -20,11 +24,14 @@
     "index": ".kibana",
     "source": {
       "space": {
-        "name": "Space 1",
         "description": "This is the first test space",
-        "disabledFeatures": []
-      }
-    }
+        "disabledFeatures": [],
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 
@@ -35,11 +42,14 @@
     "index": ".kibana",
     "source": {
       "space": {
-        "name": "Space 2",
         "description": "This is the second test space",
-        "disabledFeatures": []
-      }
-    }
+        "disabledFeatures": [],
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
   }
 }
 

@@ -397,6 +397,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
                     },
                   ],
                 },
+                "group": Array [],
                 "is": Object {},
                 "term": Array [],
               },
@@ -404,6 +405,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
             "syntax": Object {
               "parse": [Function],
               "print": [Function],
+              "printClause": [Function],
             },
             "text": "ariaName:\\"test string setting\\"",
           }
@@ -487,6 +489,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
                 },
               ],
             },
+            "group": Array [],
             "is": Object {},
             "term": Array [],
           },
@@ -494,6 +497,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
         "syntax": Object {
           "parse": [Function],
           "print": [Function],
+          "printClause": [Function],
         },
         "text": "ariaName:\\"test string setting\\"",
       }
