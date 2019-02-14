@@ -46,7 +46,7 @@ export const PersonalInfo = (props: Props) => {
             <strong title="email" data-test-subj="email">
               {props.user.email || (
                 <FormattedMessage
-                  id="xpack.security.account.noEmailAddress"
+                  id="xpack.security.account.noEmailMessage"
                   defaultMessage="(no email address)"
                 />
               )}
