@@ -149,13 +149,13 @@ export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, ele
 export const fetchAllRenderables = createThunk(
   'fetchAllRenderables',
   ({ dispatch, getState }, { onlyActivePage = false } = {}) => {
+    dispatch(args.inFlightActive());
+
     const workpadPages = getPages(getState());
     const currentPageIndex = getSelectedPageIndex(getState());
 
     const currentPage = workpadPages[currentPageIndex];
     const otherPages = without(workpadPages, currentPage);
-
-    dispatch(args.inFlightActive());
 
     function fetchElementsOnPage(page) {
       const renderablePromises = page.elements.map(element => {
