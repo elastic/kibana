@@ -51,14 +51,12 @@ const columns = [
             })}
       </EuiHealth>
     ),
-    sortable: true,
   },
   {
     field: 'timestamp',
     name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
       defaultMessage: 'Timestamp',
     }),
-    sortable: true,
     render: (timestamp: string) => moment(timestamp).fromNow(),
   },
   {
@@ -82,7 +80,6 @@ const columns = [
       description: 'The "ms" in the default message is an abbreviation for milliseconds',
     }),
     render: (duration: number) => duration / 1000,
-    sortable: true,
   },
   {
     field: 'error.type',
@@ -174,7 +171,6 @@ export const PingList = (props: PingListProps) => {
           columns={columns}
           items={pings}
           pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
-          sorting={true}
         />
       </EuiPanel>
     </Fragment>
