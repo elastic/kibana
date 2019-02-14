@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show the default index pattern when clicking "Add filter"', async () => {
       await testSubjects.click('addFilter');
       const fields = await filterBar.getFilterEditorFields();
-      await testSubjects.click('cancelSaveFilter');
+      await filterBar.ensureFieldEditorModalIsClosed();
       expect(fields.length).to.be.greaterThan(0);
     });
 
