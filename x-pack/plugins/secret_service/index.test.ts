@@ -27,6 +27,7 @@ describe('The SecretService', function TestSecretService() {
   });
 
   it('should expose a method to encrypt data', () => {
+    const stubConfigGet = sinon.stub();
     const core = {
       expose: sinon.spy(),
       log: sinon.spy(),
@@ -36,7 +37,7 @@ describe('The SecretService', function TestSecretService() {
       },
       config: () => {
         return {
-          get: sinon.spy(),
+          get: stubConfigGet,
         };
       },
       Keystore,
@@ -48,6 +49,7 @@ describe('The SecretService', function TestSecretService() {
         },
       },
     };
+    stubConfigGet.withArgs('path.data').returns('test-kibana-keystore');
     subject.init(core);
     core.expose.calledWith('secretservice', sinon.match.func);
   });
