@@ -35,7 +35,7 @@ export interface TsvbPanel {
   index_pattern: string;
   pivot_id: string;
   pivot_label: string;
-  pivot_rows: string;
+  pivot_rows: number;
   interval: string;
   series: Array<{
     formatter: string;

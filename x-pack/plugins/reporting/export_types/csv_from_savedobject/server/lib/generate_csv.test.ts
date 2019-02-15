@@ -30,6 +30,9 @@ const getMockPanel = (): TsvbPanel => ({
   interval: 'auto',
   series: [],
   type: 'table',
+  pivot_id: 'Year',
+  pivot_label: 'year',
+  pivot_rows: 100,
 });
 const getMockReq = (): any => ({});
 
