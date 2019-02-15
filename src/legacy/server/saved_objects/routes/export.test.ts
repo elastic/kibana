@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import { createExportRoute } from './export';
 import { MockServer } from './_mock_server';
+import { createExportRoute } from './export';
 
 describe('GET /api/saved_objects/_export', () => {
-  let server;
+  const server = MockServer();
   const savedObjectsClient = {
     find: jest.fn(),
     bulkGet: jest.fn(),
   };
 
   beforeEach(() => {
-    server = new MockServer();
-
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -74,7 +72,7 @@ describe('GET /api/saved_objects/_export', () => {
     });
 
     const { payload, statusCode } = await server.inject(request);
-    const objects = payload.split('\n').map(JSON.parse);
+    const objects = payload.split('\n').map(row => JSON.parse(row));
 
     expect(statusCode).toBe(200);
     expect(objects).toMatchInlineSnapshot(`
@@ -143,7 +141,7 @@ Array [
     });
 
     const { payload, statusCode } = await server.inject(request);
-    const objects = payload.split('\n').map(JSON.parse);
+    const objects = payload.split('\n').map(row => JSON.parse(row));
 
     expect(statusCode).toBe(200);
     expect(objects).toMatchInlineSnapshot(`
@@ -209,7 +207,7 @@ Array [
     });
 
     const { payload, statusCode } = await server.inject(request);
-    const objects = payload.split('\n').map(JSON.parse);
+    const objects = payload.split('\n').map(row => JSON.parse(row));
 
     expect(statusCode).toBe(200);
     expect(objects).toMatchInlineSnapshot(`
@@ -300,7 +298,7 @@ Array [
     });
 
     const { payload, statusCode } = await server.inject(request);
-    const objects = payload.split('\n').map(JSON.parse);
+    const objects = payload.split('\n').map(row => JSON.parse(row));
 
     expect(statusCode).toBe(200);
     expect(objects).toMatchInlineSnapshot(`

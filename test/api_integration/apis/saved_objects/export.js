@@ -33,6 +33,7 @@ export default function ({ getService }) {
         .expect(200)
         .then((resp) => {
           expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+          expect(resp.headers['content-type']).to.eql('application/ndjson');
           resp.text.split('\n').map(JSON.parse);
         });
     });
@@ -46,6 +47,7 @@ export default function ({ getService }) {
         .expect(200)
         .then((resp) => {
           expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+          expect(resp.headers['content-type']).to.eql('application/ndjson');
           const objects = resp.text.split('\n').map(JSON.parse);
           expect(objects).to.eql([{
             attributes: {
@@ -100,6 +102,7 @@ export default function ({ getService }) {
         .expect(200)
         .then((resp) => {
           expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+          expect(resp.headers['content-type']).to.eql('application/ndjson');
           const objects = resp.text.split('\n').map(JSON.parse);
           expect(objects).to.eql([{
             attributes: {

@@ -22,7 +22,7 @@ import { getExportDocuments } from '../lib/export';
 
 const EXPORT_SIZE_LIMIT = 10000;
 
-export const createExportRoute = (prereqs) => ({
+export const createExportRoute = (prereqs: any) => ({
   path: '/api/saved_objects/_export',
   method: 'GET',
   config: {
@@ -44,9 +44,11 @@ export const createExportRoute = (prereqs) => ({
         })
         .default(),
     },
-    async handler(request, h) {
+    async handler(request: any, h: any) {
       const { savedObjectsClient } = request.pre;
-      const types = request.query.type || request.server.savedObjects.types.filter(type => type !== 'space');
+      const types =
+        request.query.type ||
+        request.server.savedObjects.types.filter((type: string) => type !== 'space');
       const docsToExport = await getExportDocuments({
         types,
         objects: request.query.objects,
@@ -56,7 +58,8 @@ export const createExportRoute = (prereqs) => ({
       // Send file to response
       return h
         .response(docsToExport.map(doc => JSON.stringify(doc)).join('\n'))
-        .header('Content-Disposition', `attachment; filename="export.ndjson"`);
+        .header('Content-Disposition', `attachment; filename="export.ndjson"`)
+        .header('Content-Type', 'application/ndjson');
     },
   },
 });
