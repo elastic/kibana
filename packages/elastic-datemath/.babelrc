@@ -1,13 +1,18 @@
 {
-  "presets": [["env", {
-    "targets": {
-      "node": "current",
-      "browsers": [
-        "last 2 versions",
-        "> 5%",
-        "Safari 7",
-      ]
-    }
-  }]],
-  "plugins": ["add-module-exports"]
+  "presets": [
+    [
+      "@babel/preset-typescript",
+      {
+        "targets": {
+          "node": "current",
+          "browsers": [
+            "last 2 versions",
+            "> 5%",
+            "Safari 7"
+          ]
+        }
+      },
+      "@babel/preset-env"
+    ]
+  ]
 }

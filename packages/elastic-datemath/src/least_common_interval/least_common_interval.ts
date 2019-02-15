@@ -16,10 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import dateMath from '../datemath';
+import { parseEsInterval } from '../parse_es_interval';
 
-import dateMath from '@elastic/datemath';
-import { leastCommonMultiple } from '../../utils/math';
-import { parseEsInterval } from '../../utils/parse_es_interval';
+/**
+ * Calculates the greates common divisor of two numbers. This will be the
+ * greatest positive integer number, that both input values share as a divisor.
+ *
+ * This method does not properly work for fractional (non integer) numbers. If you
+ * pass in fractional numbers there usually will be an output, but that's not necessarily
+ * the greatest common divisor of those two numbers.
+ */
+export function greatestCommonDivisor(a: number, b: number): number {
+  return a === 0 ? Math.abs(b) : greatestCommonDivisor(b % a, a);
+}
+
+/**
+ * Calculates the least common multiple of two numbers. The least common multiple
+ * is the smallest positive integer number, that is divisible by both input parameters.
+ *
+ * Since this calculation suffers from rounding issues in decimal values, this method
+ * won't work for passing in fractional (non integer) numbers. It will return a value,
+ * but that value won't necessarily be the mathematical correct least common multiple.
+ */
+export function leastCommonMultiple(a: number, b: number): number {
+  return Math.abs((a * b) / greatestCommonDivisor(a, b));
+}
 
 /**
  * Finds the lowest common interval between two given ES date histogram intervals

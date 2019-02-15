@@ -16,37 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Unit } from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
-export class InvalidEsCalendarIntervalError extends Error {
-  constructor(
-    public readonly interval: string,
-    public readonly value: number,
-    public readonly unit: Unit,
-    public readonly type: string
-  ) {
+export class InvalidEsIntervalFormatError extends Error {
+  constructor(public readonly interval: string) {
     super(
-      i18n.translate('common.ui.parseEsInterval.invalidEsCalendarIntervalErrorMessage', {
-        defaultMessage: 'Invalid calendar interval: {interval}, value must be 1',
+      i18n.translate('elasticDatemath.parseEsInterval.invalidEsIntervalFormatErrorMessage', {
+        defaultMessage: 'Invalid interval format: {interval}',
         values: { interval },
       })
     );
 
-    this.name = 'InvalidEsCalendarIntervalError';
-    this.value = value;
-    this.unit = unit;
-    this.type = type;
+    this.name = 'InvalidEsIntervalFormatError';
 
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidEsCalendarIntervalError);
+      Error.captureStackTrace(this, InvalidEsIntervalFormatError);
     }
 
     // Babel doesn't support traditional `extends` syntax for built-in classes.
     // https://babeljs.io/docs/en/caveats/#classes
-    Object.setPrototypeOf(this, InvalidEsCalendarIntervalError.prototype);
+    Object.setPrototypeOf(this, InvalidEsIntervalFormatError.prototype);
   }
 }

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import dateMath from '@elastic/datemath';
-import { parseEsInterval } from 'ui/utils/parse_es_interval';
+import dateMath, { parseEsInterval } from '@elastic/datemath';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('M');

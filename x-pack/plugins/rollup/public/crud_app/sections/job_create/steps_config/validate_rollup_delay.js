@@ -10,7 +10,7 @@ import {
   InvalidEsIntervalFormatError,
   InvalidEsCalendarIntervalError,
   parseEsInterval,
-} from 'ui/utils/parse_es_interval';
+} from '@elastic/datemath';
 
 export function validateRollupDelay(rollupDelay) {
   // This field is optional, so if nothing has been provided we can skip validation.

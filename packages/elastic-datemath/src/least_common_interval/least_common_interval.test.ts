@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { leastCommonInterval } from './least_common_interval';
 
 describe('leastCommonInterval', () => {

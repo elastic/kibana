@@ -16,35 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import moment from 'moment';
-
-export type Unit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
-
-declare const datemath: {
-  unitsMap: {
-    [k in Unit]: {
-      weight: number;
-      type: 'calendar' | 'fixed' | 'mixed';
-      base: number;
-    }
-  };
-  units: Unit[];
-  unitsAsc: Unit[];
-  unitsDesc: Unit[];
-
-  /**
-   * Parses a string into a moment object. The string can be something like "now - 15m".
-   * @param options.forceNow If this optional parameter is supplied, "now" will be treated as this
-   * date, rather than the real "now".
-   */
-  parse(
-    input: string,
-    options?: {
-      roundUp?: boolean;
-      forceNow?: Date;
-      momentInstance?: typeof moment;
-    }
-  ): moment.Moment | undefined;
-};
-
-export default datemath;
+export { leastCommonInterval } from './least_common_interval';

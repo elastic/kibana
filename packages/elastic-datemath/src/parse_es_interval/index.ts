@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 export { parseEsInterval, ParsedInterval } from './parse_es_interval';
 export { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 export { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';

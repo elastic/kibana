@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { leastCommonInterval } from '@elastic/datemath';
 import { parseInterval } from './utils/parse_interval';
 import { uiModules } from './modules';
-import { leastCommonInterval } from './vis/lib/least_common_interval';
 
 uiModules
   .get('kibana')

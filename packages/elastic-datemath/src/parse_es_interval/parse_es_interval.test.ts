@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
 import { parseEsInterval } from './parse_es_interval';
