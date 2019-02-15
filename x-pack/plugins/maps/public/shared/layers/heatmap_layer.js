@@ -14,7 +14,7 @@ const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store sca
 
 export class HeatmapLayer extends AbstractLayer {
 
-  static type = "HEATMAP";
+  static type = 'HEATMAP';
 
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
