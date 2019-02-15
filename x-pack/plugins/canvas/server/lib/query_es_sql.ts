@@ -6,14 +6,14 @@
 import { map, zipObject } from 'lodash';
 import { CallCluster } from '../../../../../src/legacy/core_plugins/elasticsearch';
 import { buildBoolArray } from './build_bool_array';
-import { GenericFilter } from './filters';
+import { CanvasQueryFilter } from './filters';
 import { normalizeType } from './normalize_type';
 import { sanitizeName } from './sanitize_name';
 
 interface QueryParams {
   count: number;
   query: string;
-  filter: GenericFilter[];
+  filter: CanvasQueryFilter[];
 }
 
 export const queryEsSQL = (

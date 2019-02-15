@@ -10,14 +10,21 @@
   filter is the abstracted canvas filter.
 */
 
-import { GenericFilter } from './filters';
+import {
+  CanvasQueryFilter,
+  ElasticsarchTermFilter,
+  ElasticsearchLuceneQueryStringFilter,
+  ElasticsearchTimeFilter,
+} from './filters';
 import * as filters from './filters';
 
 interface FilterTypes {
   [key: string]: any;
 }
 
-export function getESFilter(filter: GenericFilter): GenericFilter {
+export function getESFilter(
+  filter: CanvasQueryFilter
+): ElasticsarchTermFilter | ElasticsearchTimeFilter | ElasticsearchLuceneQueryStringFilter {
   if (!(filters as FilterTypes)[filter.type]) {
     throw new Error(`Unknown filter type: ${filter.type}`);
   }

@@ -4,20 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GenericFilter } from './filters';
+import {
+  CanvasQueryFilter,
+  ElasticsarchTermFilter,
+  ElasticsearchLuceneQueryStringFilter,
+  ElasticsearchTimeFilter,
+} from './filters';
 import { getESFilter } from './get_es_filter';
 
-const compact = (arr: Array<GenericFilter | undefined>) =>
-  Array.isArray(arr) ? arr.filter((val): val is GenericFilter => Boolean(val)) : [];
+type ElasticsearchFilter =
+  | ElasticsarchTermFilter
+  | ElasticsearchLuceneQueryStringFilter
+  | ElasticsearchTimeFilter;
 
-export function buildBoolArray(canvasQueryFilterArray: GenericFilter[]) {
+const compact = (arr: Array<ElasticsearchFilter | undefined>) =>
+  Array.isArray(arr) ? arr.filter((val): val is ElasticsearchFilter => Boolean(val)) : [];
+
+export function buildBoolArray(canvasQueryFilterArray: CanvasQueryFilter[]) {
   return compact(
-    canvasQueryFilterArray.map((clause: GenericFilter) => {
-      try {
-        return getESFilter(clause);
-      } catch (e) {
-        return;
+    canvasQueryFilterArray.map(
+      (clause: CanvasQueryFilter): ElasticsearchFilter | undefined => {
+        try {
+          return getESFilter(clause);
+        } catch (e) {
+          return;
+        }
       }
-    })
+    )
   );
 }

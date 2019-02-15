@@ -6,29 +6,52 @@
 
 // TODO: This could be pluggable
 
-export interface GenericFilter {
+export interface CanvasQueryFilter {
   type: 'time' | 'exactly' | 'luceneQueryString';
 }
 
-export interface TimeFilter extends GenericFilter {
+export interface CanvasTimeFilter extends CanvasQueryFilter {
   type: 'time';
   column: string;
   from: string;
   to: string;
 }
 
-export interface ExactlyFilter extends GenericFilter {
+export interface CanvasExactlyFilter extends CanvasQueryFilter {
   type: 'exactly';
   column: string;
   value: string;
 }
 
-export interface LuceneQueryStringFilter extends GenericFilter {
+export interface CanvasLuceneQueryFilter extends CanvasQueryFilter {
   type: 'luceneQueryString';
   query: string;
 }
 
-export function time(filter: TimeFilter) {
+export interface ElasticsearchTimeFilter {
+  range: {
+    [key: string]: {
+      gte: string;
+      lte: string;
+    };
+  };
+}
+
+export interface ElasticsearchLuceneQueryStringFilter {
+  query_string: {
+    query: string;
+  };
+}
+
+export interface ElasticsarchTermFilter {
+  term: {
+    [x: string]: {
+      value: string;
+    };
+  };
+}
+
+export function time(filter: CanvasTimeFilter): ElasticsearchTimeFilter {
   if (!filter.column) {
     throw new Error('column is required for Elasticsearch range filters');
   }
@@ -40,7 +63,9 @@ export function time(filter: TimeFilter) {
   };
 }
 
-export function luceneQueryString(filter: LuceneQueryStringFilter) {
+export function luceneQueryString(
+  filter: CanvasLuceneQueryFilter
+): ElasticsearchLuceneQueryStringFilter {
   return {
     query_string: {
       query: filter.query || '*',
@@ -48,7 +73,7 @@ export function luceneQueryString(filter: LuceneQueryStringFilter) {
   };
 }
 
-export function exactly(filter: ExactlyFilter) {
+export function exactly(filter: CanvasExactlyFilter): ElasticsarchTermFilter {
   return {
     term: {
       [filter.column]: {

@@ -5,17 +5,27 @@
  */
 
 import { buildBoolArray } from './build_bool_array';
-import { GenericFilter } from './filters';
+import {
+  CanvasQueryFilter,
+  ElasticsarchTermFilter,
+  ElasticsearchLuceneQueryStringFilter,
+  ElasticsearchTimeFilter,
+} from './filters';
+
+type ElasticsearchFilter =
+  | ElasticsarchTermFilter
+  | ElasticsearchLuceneQueryStringFilter
+  | ElasticsearchTimeFilter;
 
 interface ElementFilter {
   size: number;
-  and: GenericFilter[];
+  and: CanvasQueryFilter[];
 }
 
 export interface EsRequest {
   size: number;
   index: string;
-  body: { query: { bool: { must: GenericFilter[] } } };
+  body: { query: { bool: { must: ElasticsearchFilter[] } } };
 }
 
 export function buildESRequest(esRequest: EsRequest, canvasQuery: ElementFilter) {
