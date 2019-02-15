@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { KbnServer } from '../../../../types';
-import {
-  TimelionPanel,
-  TsvbAggregationCell,
-  TsvbAggregationRow,
-  TsvbPanel,
-  TsvbTableData,
-} from '../../types';
+import { TimelionPanel, TsvbPanel } from '../../types';
+import { generateCsvTsvb } from './generate_csv_tsvb';
 
 interface CsvGenerationResult {
   type: string;
@@ -26,54 +21,21 @@ export async function generateCsv(
   visType: string,
   panel: TsvbPanel | TimelionPanel
 ) {
-  const generate = async (term: string): Promise<CsvGenerationResult> => {
+  const generate = async (): Promise<CsvGenerationResult> => {
     switch (visType) {
       case 'metrics':
-        const { getTableData: getTableDataTSVB } = server.plugins.metrics; // FIXME: don't crash if config has tsvb disabled
-        const tableDataTSVB: TsvbTableData = await getTableDataTSVB(req, panel);
-
-        if (!tableDataTSVB) {
-          throw new Error('Metrics plugin returned no data for the request!');
-        }
-        const { type: mtype } = tableDataTSVB;
-        if (mtype !== 'table') {
-          throw badRequest(
-            `The Visual Builder visualization type is required to be [table]. Found: [${mtype}]`
-          );
-        }
-
-        const dataSet: TsvbAggregationRow[] = tableDataTSVB.series;
-
-        // form the header from the first row's column labels
-        let csvRows: string[] = [];
-        if (dataSet.length > 0) {
-          const csvHeader = [
-            term,
-            ...dataSet[0].series.map((cell: TsvbAggregationCell) => cell.label),
-          ].join(','); // FIXME use separator from config
-
-          // form all the rows beginning with the header
-          csvRows = [
-            csvHeader, // header row
-            ...dataSet.map(row => {
-              // rest of the data
-              return [row.key, ...row.series.map((cell: TsvbAggregationCell) => cell.last)].join(
-                ','
-              );
-            }),
-          ];
-        }
-
-        return {
-          type: 'CSV from Metrics visualization',
-          rows: csvRows,
-        };
+        // @ts-ignore Type 'TsvbPanel | TimelionPanel' is not assignable to
+        // type 'TsvbPanel'.  Type 'TimelionPanel' is not assignable to type
+        // 'TsvbPanel'.    Property 'filter' is missing in type
+        // 'TimelionPanel'.
+        const tsvbPanel: TsvbPanel = panel;
+        return await generateCsvTsvb(req, server, tsvbPanel);
       case 'timelion':
-        throw badRequest('Timelion is not yet supported by this API');
+        throw notImplemented('Timelion is not yet supported by this API');
       default:
-        throw new Error(`Unsupported or unrecognized saved object type: ${visType}`);
+        throw badRequest(`Unsupported or unrecognized saved object type: ${visType}`);
     }
   };
 
-  return generate('term'); // FIXME get the right label for "term"
+  return generate();
 }

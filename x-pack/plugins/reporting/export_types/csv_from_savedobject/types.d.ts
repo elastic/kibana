@@ -33,6 +33,9 @@ export interface TsvbPanel {
   filter: string;
   id: string;
   index_pattern: string;
+  pivot_id: string;
+  pivot_label: string;
+  pivot_rows: string;
   interval: string;
   series: Array<{
     formatter: string;
@@ -56,6 +59,10 @@ interface TsvbAggregationCell {
 interface TsvbAggregationRow {
   key: string;
   series: TsvbAggregationCell[];
+  pivot: {
+    pivot_id: string;
+    pivot_label: string;
+  };
 }
 
 export interface TsvbTableData {
