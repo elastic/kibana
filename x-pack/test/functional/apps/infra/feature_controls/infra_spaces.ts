@@ -13,7 +13,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 

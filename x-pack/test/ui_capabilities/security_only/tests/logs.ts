@@ -26,52 +26,26 @@ export default function advancedSettingsTests({
           password: scenario.password,
         });
         switch (scenario.username) {
-          // these users have a read/write view of Infrastructure
+          // these users have a read/write view of Logs
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
-          case 'logs_read': // TODO: awaiting read/write privilege for logs
+          case 'logs_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
+              save: true,
             });
             break;
-          // these users have a read-only view of Advanced Settings
+          // these users have a read-only view of Logs
           case 'dual_privileges_read':
+          case 'logs_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
-            });
-            break;
-          // these users can't do anything with Advanced Settings
-          case 'advancedSettings_all':
-          case 'advancedSettings_read':
-          case 'apm_all':
-          case 'canvas_all':
-          case 'canvas_read':
-          case 'dev_tools_read':
-          case 'dashboard_all':
-          case 'dashboard_read':
-          case 'discover_all':
-          case 'discover_read':
-          case 'graph_all':
-          case 'graph_read':
-          case 'infrastructure_read':
-          case 'maps_all':
-          case 'maps_read':
-          case 'ml_all':
-          case 'monitoring_all':
-          case 'timelion_all':
-          case 'timelion_read':
-          case 'uptime_read':
-          case 'visualize_all':
-          case 'visualize_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('logs');
-            expect(uiCapabilities.value!.logs).to.eql({
-              show: false,
+              save: false,
             });
             break;
           case 'legacy_all':
@@ -79,8 +53,15 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
+          // all other users can't do anything with Logs
           default:
-            throw new UnreachableError(scenario);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('logs');
+            expect(uiCapabilities.value!.logs).to.eql({
+              show: false,
+              save: false,
+            });
+            break;
         }
       });
     });
