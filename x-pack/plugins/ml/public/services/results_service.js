@@ -1175,7 +1175,7 @@ function getMetricData(
   index,
   entityFields,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
@@ -1411,7 +1411,7 @@ function getEventDistributionData(
   splitField,
   filterField = null,
   query,
-  metricFunction,
+  metricFunction, // ES aggregation name
   metricFieldName,
   timeFieldName,
   earliestMs,
