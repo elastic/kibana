@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.6.1>>
 * <<release-notes-6.6.0>>
 * <<release-notes-6.5.4>>
 * <<release-notes-6.5.3>>
@@ -83,6 +84,60 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.6.1]]
+== {kib} 6.6.1
+
+coming[6.6.1]
+
+See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+
+[float]
+[[bug-6.6.1]]
+=== Bug fixes
+Canvas::
+* Wraps URL check in `retry.try` {pull}29536[#29536]
+* Avoids server crash when no value is found {pull}29069[#29069]
+* Identifies Canvas for metrics collection {pull}29078[#29078]
+* Removes text selection on writeable change {pull}28887[#28887]
+* Prevents sort in pie function {pull}27076[#27076]
+* Maintains element selection when using up/down layering operations {pull}29634[#29634]
+* Uses `server.basePath` to create socket connection from interpreter {pull}29393[#29393]
+Kibana App::
+* Renames `defaultSpaceBasePath` to `serverBasePath` {pull}29431[#29431]
+Machine Learning::
+* Fixes race condition related to view by swimlane update {pull}28990[#28990]
+* Adds an integrity check to creating, updating, and deleting annotations {pull}29969[#29969]
+* Removes key attribute from annotation before indexing {pull}30183[#30183]
+* Makes index pattern related links optional {pull}29332[#29332]
+* Fixes unmounting jobs list React component on page change {pull}29980[#29980]
+* Uses intl.formatMessage for File Data Visualizer file picker {pull}29251[#29251]
+Management::
+* Adds Webhook Action type on client {pull}29818[#29818]
+Monitoring::
+* Fixes Logstash date format {pull}29637[#29637]
+* Fixes UI regressions with shard allocation {pull}29757[#29757]
+Operations::
+* Fixes plugin deprecations {pull}29737[#29737]
+* Changes Node version to 10.15.1 {pull}27918[#27918]
+* Fixes Chrome EUI icons on status page {pull}29131[#29131]
+Querying & Filtering::
+* Adds support for matching field names with newlines {pull}29539[#29539]
+Reporting::
+* Fixes date formatting on server for CSV export {pull}29977[#29977]
+Security::
+* Adds missing cluster privileges to role management screen {pull}28692[#28692]
+Visualizations::
+* Fixes standard deviation aggregation to prevent crash of Time Series Visual Builder {pull}30798[#30798]
+* Fixes Time Series Visual Builder flot chart render after index pattern change {pull}29949[#29949]
+* Enables `orderBy` and `orderAgg` in visualization editor for rollup visualizations {pull}29894[#29894]
+
+
+
+
+
 
 [[release-notes-6.6.0]]
 == {kib} 6.6.0
