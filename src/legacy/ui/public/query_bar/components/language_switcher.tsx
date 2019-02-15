@@ -87,14 +87,11 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
               <FormattedMessage
                 id="common.ui.queryBar.syntaxOptionsDescription"
                 defaultMessage="Use the Kibana query language (KQL) to get suggestions as you type.
-                If you disable KQL, Kibana uses Lucene, which doesn't offer suggestions. See docs {docsLink}."
+                If you turn off KQL, Kibana uses Lucene, which doesn't offer suggestions. See {docsLink} docs."
                 values={{
                   docsLink: (
                     <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
-                      <FormattedMessage
-                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
+                      {kqlLabel}
                     </EuiLink>
                   ),
                 }}
@@ -121,27 +118,6 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
               />
             </EuiFormRow>
           </EuiForm>
-
-          <EuiHorizontalRule margin="s" />
-
-          <EuiText size="xs">
-            <p>
-              <FormattedMessage
-                id="common.ui.queryBar.luceneDocsDescription"
-                defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
-                values={{
-                  docsLink: (
-                    <EuiLink href={luceneQuerySyntaxDocs} target="_blank">
-                      <FormattedMessage
-                        id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiText>
         </div>
       </EuiPopover>
     );
