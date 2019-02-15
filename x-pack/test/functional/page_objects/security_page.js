@@ -97,6 +97,22 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       ));
     }
 
+    async forceLogout() {
+      log.debug('SecurityPage.forceLogout');
+      if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
+        log.debug('Already on the login page, not forcing anything');
+        return;
+      }
+
+      log.debug('Redirecting to /logout to force the logout');
+      const url = PageObjects.common.getHostPort() + '/logout';
+      await browser.get(url);
+      log.debug('Waiting on the login form to appear');
+      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
+        await find.existsByDisplayedByCssSelector('.login-form')
+      ));
+    }
+
     async clickRolesSection() {
       await testSubjects.click('roles');
     }

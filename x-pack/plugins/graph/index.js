@@ -67,7 +67,7 @@ export function graph(kibana) {
               all: ['graph-workspace'],
               read: ['config', 'index-pattern'],
             },
-            ui: [],
+            ui: ['save', 'delete'],
           },
           read: {
             savedObject: {

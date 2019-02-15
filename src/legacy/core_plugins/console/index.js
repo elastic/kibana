@@ -143,7 +143,12 @@ export default function (kibana) {
               ),
               { auth: false }
             )
-          )
+          ),
+          uiCapabilities: {
+            dev_tools: {
+              show: true
+            },
+          }
         };
       },
 
