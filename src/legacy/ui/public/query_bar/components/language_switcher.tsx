@@ -57,6 +57,12 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     const kqlLabel = (
       <FormattedMessage id="common.ui.queryBar.kqlLanguageName" defaultMessage="KQL" />
     );
+    const kqlFullName = (
+      <FormattedMessage
+        id="common.ui.queryBar.kqlFullLanguageName"
+        defaultMessage="Kibana query language"
+      />
+    );
 
     const button = (
       <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
@@ -86,12 +92,13 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
             <p>
               <FormattedMessage
                 id="common.ui.queryBar.syntaxOptionsDescription"
-                defaultMessage="Use the Kibana query language (KQL) to get suggestions as you type.
-                If you turn off KQL, Kibana uses Lucene, which doesn't offer suggestions. See {docsLink} docs."
+                defaultMessage="The {docsLink} (KQL) offers a simplified query
+                syntax and support for scripted fields. KQL also provides autocomplete if you have
+                a Basic license or above. If you turn off KQL, Kibana uses Lucene."
                 values={{
                   docsLink: (
                     <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
-                      {kqlLabel}
+                      {kqlFullName}
                     </EuiLink>
                   ),
                 }}
@@ -102,15 +109,16 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
           <EuiSpacer size="m" />
 
           <EuiForm>
-            <EuiFormRow>
+            <EuiFormRow label={kqlFullName}>
               <EuiSwitch
                 id="queryEnhancementOptIn"
                 name="popswitch"
                 label={
-                  <FormattedMessage
-                    id="common.ui.queryBar.turnOnQueryFeaturesLabel"
-                    defaultMessage="Turn on KQL"
-                  />
+                  this.props.language === 'kuery' ? (
+                    <FormattedMessage id="common.ui.queryBar.kqlOnLabel" defaultMessage="On" />
+                  ) : (
+                    <FormattedMessage id="common.ui.queryBar.kqlOffLabel" defaultMessage="Off" />
+                  )
                 }
                 checked={this.props.language === 'kuery'}
                 onChange={this.onSwitchChange}
