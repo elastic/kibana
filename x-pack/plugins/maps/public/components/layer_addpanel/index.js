@@ -13,7 +13,7 @@ import {
   removeLayer,
   clearTemporaryLayers,
   setSelectedLayer,
-} from "../../actions/store_actions";
+} from '../../actions/store_actions';
 import _ from 'lodash';
 
 function mapStateToProps(state = {}) {

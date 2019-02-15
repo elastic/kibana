@@ -62,23 +62,23 @@ describe('Saved object does not have layer list', () => {
     };
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
-      "alpha": 1,
-      "__dataRequests": [],
-      "id": layers[0].id,
-      "label": null,
-      "maxZoom": 24,
-      "minZoom": 0,
-      "sourceDescriptor": {
-        "type": "EMS_TMS",
-        "id": "road_map",
+      'alpha': 1,
+      '__dataRequests': [],
+      'id': layers[0].id,
+      'label': null,
+      'maxZoom': 24,
+      'minZoom': 0,
+      'sourceDescriptor': {
+        'type': 'EMS_TMS',
+        'id': 'road_map',
       },
-      "style": {
-        "properties": {},
-        "type": "TILE",
+      'style': {
+        'properties': {},
+        'type': 'TILE',
       },
-      "temporary": false,
-      "type": "TILE",
-      "visible": true,
+      'temporary': false,
+      'type': 'TILE',
+      'visible': true,
     }]);
   });
 
@@ -92,7 +92,7 @@ describe('Saved object does not have layer list', () => {
 
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
-      "alpha": 1,
+      'alpha': 1,
       __dataRequests: [],
       id: layers[0].id,
       label: null,
@@ -119,7 +119,7 @@ describe('Saved object does not have layer list', () => {
 
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
-      "alpha": 1,
+      'alpha': 1,
       __dataRequests: [],
       id: layers[0].id,
       label: null,
