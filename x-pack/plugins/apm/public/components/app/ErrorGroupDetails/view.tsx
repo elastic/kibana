@@ -23,7 +23,7 @@ import {
   units
 } from '../../../style/variables';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 
@@ -108,7 +108,7 @@ export function ErrorGroupDetailsView({ urlParams, location }: Props) {
 
             <EuiSpacer size="m" />
 
-            <KueryBar />
+            <FilterBar />
 
             <EuiSpacer size="s" />
 

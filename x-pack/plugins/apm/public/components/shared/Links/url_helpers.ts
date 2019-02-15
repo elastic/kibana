@@ -37,7 +37,7 @@ function stringifyWithoutEncoding(query: QueryParams) {
   });
 }
 
-function risonSafeDecode(value?: string) {
+export function risonSafeDecode<T>(value?: string) {
   if (!value) {
     return {};
   }
@@ -60,7 +60,7 @@ const DEFAULT_KIBANA_TIME_RANGE = {
   }
 };
 
-function getQueryWithRisonParams(
+export function getQueryWithRisonParams(
   location: Location,
   pathname: string,
   query: RisonDecoded = {}

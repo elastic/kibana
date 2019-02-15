@@ -147,8 +147,13 @@ function getPathParams(pathname: string) {
   }
 }
 
+interface TimeUpdate {
+  min: string;
+  max: string;
+}
+
 // ACTION CREATORS
-export function updateTimePicker(time: string) {
+export function updateTimePicker(time: TimeUpdate) {
   return { type: TIMEPICKER_UPDATE, time };
 }
 

@@ -10,7 +10,7 @@ import React from 'react';
 import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 
@@ -45,7 +45,7 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
 
               <EuiSpacer />
 
-              <KueryBar />
+              <FilterBar />
 
               <ServiceDetailTabs
                 location={location}

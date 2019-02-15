@@ -24,6 +24,7 @@ const waitForAngularReady = new Promise(resolve => {
 });
 
 export function initTimepicker(history, dispatch) {
+  return Promise.resolve();
   return new Promise(resolve => {
     // default the timepicker to the last 24 hours
     chrome.getUiSettingsClient().overrideLocalDefault(
