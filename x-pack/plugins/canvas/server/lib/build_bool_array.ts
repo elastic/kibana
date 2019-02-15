@@ -7,7 +7,8 @@
 import { GenericFilter } from './filters';
 import { getESFilter } from './get_es_filter';
 
-const compact = (arr: boolean[]) => (Array.isArray(arr) ? arr.filter(val => Boolean(val)) : []);
+const compact = (arr: Array<GenericFilter | undefined>) =>
+  Array.isArray(arr) ? arr.filter((val): val is GenericFilter => Boolean(val)) : [];
 
 export function buildBoolArray(canvasQueryFilterArray: GenericFilter[]) {
   return compact(

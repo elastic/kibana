@@ -5,8 +5,20 @@
  */
 
 import { buildBoolArray } from './build_bool_array';
+import { GenericFilter } from './filters';
 
-export function buildESRequest(esRequest: any, canvasQuery: any) {
+interface ElementFilter {
+  size: number;
+  and: GenericFilter[];
+}
+
+export interface EsRequest {
+  size: number;
+  index: string;
+  body: { query: { bool: { must: GenericFilter[] } } };
+}
+
+export function buildESRequest(esRequest: EsRequest, canvasQuery: ElementFilter) {
   if (canvasQuery.size) {
     esRequest = { ...esRequest, size: canvasQuery.size };
   }

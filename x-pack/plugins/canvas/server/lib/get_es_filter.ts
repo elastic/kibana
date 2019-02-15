@@ -17,7 +17,7 @@ interface FilterTypes {
   [key: string]: any;
 }
 
-export function getESFilter(filter: GenericFilter) {
+export function getESFilter(filter: GenericFilter): GenericFilter {
   if (!(filters as FilterTypes)[filter.type]) {
     throw new Error(`Unknown filter type: ${filter.type}`);
   }
