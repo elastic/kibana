@@ -911,10 +911,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-7.0.0.tgz#48fbaf290e60ceae9678b8ddf16eb03bc747876f"
-  integrity sha512-NPbIADwiWBBaIsxb05gYJLVt5xRagIcXQqmzTwGFbUbkIMiNp6j2otWRy3ZrQezRItsMGEIPHmeCrXlV1X7IAw==
+"@elastic/eui@7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-7.1.0.tgz#0c5d26b5e43048de93bdde0878187442c3593fa6"
+  integrity sha512-B+ANn2zviDvdcgtZc+a8FbmAvfNTjgpkmEPHknRwVdZSnXIRHphdIWRYRKQTkBHsOKy5wmyMaBS06ENAKNBFFg==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
