@@ -5,7 +5,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import {
   EuiButton,
@@ -22,8 +22,7 @@ import {
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
 
-export class ContextMenuUi extends PureComponent {
-
+export class ContextMenu extends PureComponent {
   static propTypes = {
     iconSide: PropTypes.string,
     iconType: PropTypes.string,
@@ -178,5 +177,3 @@ export class ContextMenuUi extends PureComponent {
     );
   }
 }
-
-export const ContextMenu = injectI18n(ContextMenuUi);

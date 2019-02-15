@@ -167,9 +167,9 @@ export const advancedSettingsFields = [
     ),
     description: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountDescription', {
-        defaultMessage: `The maximum number of operations that can be queued for writing; when this
-          limit is reached, reads from the remote cluster will be deferred until the number of queued
-          operations goes below the limit.`
+        defaultMessage: 'The maximum number of operations that can be queued for writing; when this ' +
+          'limit is reached, reads from the remote cluster will be deferred until the number of queued ' +
+          'operations goes below the limit.'
       }
     ),
     label: i18n.translate(
@@ -189,9 +189,9 @@ export const advancedSettingsFields = [
     ),
     description: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeDescription', {
-        defaultMessage: `The maximum total bytes of operations that can be queued for writing; when
-          this limit is reached, reads from the remote cluster will be deferred until the total bytes
-          of queued operations goes below the limit.`
+        defaultMessage: 'The maximum total bytes of operations that can be queued for writing; when ' +
+          'this limit is reached, reads from the remote cluster will be deferred until the total bytes ' +
+          'of queued operations goes below the limit.'
       }
     ),
     label: i18n.translate(
@@ -211,8 +211,8 @@ export const advancedSettingsFields = [
     ),
     description: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayDescription', {
-        defaultMessage: `The maximum time to wait before retrying an operation that failed exceptionally;
-        an exponential backoff strategy is employed when retrying.`
+        defaultMessage: 'The maximum time to wait before retrying an operation that failed exceptionally; ' +
+        'an exponential backoff strategy is employed when retrying.'
       }
     ),
     label: i18n.translate(
@@ -232,10 +232,10 @@ export const advancedSettingsFields = [
     ),
     description: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutDescription', {
-        defaultMessage: `The maximum time to wait for new operations on the remote cluster when the
-          follower index is synchronized with the leader index; when the timeout has elapsed, the
-          poll for operations will return to the follower so that it can update some statistics, and
-          then the follower will immediately attempt to read from the leader again.`
+        defaultMessage: 'The maximum time to wait for new operations on the remote cluster when the ' +
+          'follower index is synchronized with the leader index; when the timeout has elapsed, the ' +
+          'poll for operations will return to the follower so that it can update some statistics, and ' +
+          'then the follower will immediately attempt to read from the leader again.'
       }
     ),
     label: i18n.translate(
