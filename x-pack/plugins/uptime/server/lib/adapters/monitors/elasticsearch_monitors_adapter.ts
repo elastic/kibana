@@ -88,40 +88,47 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const result = await this.database.search(request, params);
     const buckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
 
-    let statusMaxCount = 0;
-    let durationMaxValue = 0;
-    const mappedBuckets = buckets.map(bucket => {
-      const x = get(bucket, 'key');
-      const docCount = get(bucket, 'doc_count', 0);
-      statusMaxCount = Math.max(docCount, statusMaxCount);
-      durationMaxValue = Math.max(durationMaxValue, get(bucket, 'duration.max', 0));
-      return {
-        x,
-        durationMin: get(bucket, 'duration.min', null),
-        durationMax: get(bucket, 'duration.max', null),
-        durationAvg: get(bucket, 'duration.avg', null),
-        status: formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount),
-      };
-    });
-    const counter: MonitorChart = {
+    /**
+     * The code below is responsible for formatting the aggregation data we fetched above in a way
+     * that the chart components used by the client understands.
+     * There are five required values. Two are lists of points that conform to a simple (x,y) structure.
+     *
+     * The third list is for an area chart expressing a range, and it requires an (x,y,y0) structure,
+     * where y0 is the min value for the point and y is the max.
+     *
+     * Additionally, we supply the maximum value for duration and status, so the corresponding charts know
+     * what the domain size should be.
+     */
+    const monitorChartsData: MonitorChart = {
       durationArea: [],
       durationLine: [],
       status: [],
-      durationMaxValue,
-      statusMaxCount,
+      durationMaxValue: 0,
+      statusMaxCount: 0,
     };
-    return mappedBuckets.reduce(
-      (
-        accumulator,
-        { x, durationAvg, durationMax, durationMin, status: { up, down, total } }
-      ): MonitorChart => {
-        accumulator.durationArea.push({ x, y0: durationMin, y: durationMax });
-        accumulator.durationLine.push({ x, y: durationAvg });
-        accumulator.status.push({ x, up, down, total });
-        return accumulator;
-      },
-      counter
-    );
+
+    buckets.forEach(bucket => {
+      const x = get(bucket, 'key');
+      const docCount = get(bucket, 'doc_count', 0);
+      // update the maximum value for each point
+      monitorChartsData.statusMaxCount = Math.max(docCount, monitorChartsData.statusMaxCount);
+      monitorChartsData.durationMaxValue = Math.max(
+        monitorChartsData.durationMaxValue,
+        get(bucket, 'duration.max', 0)
+      );
+
+      // these points express a range that will be displayed as an area chart
+      monitorChartsData.durationArea.push({
+        x,
+        y0: get(bucket, 'duration.min', null),
+        y: get(bucket, 'duration.max', null),
+      });
+      monitorChartsData.durationLine.push({ x, y: get(bucket, 'duration.avg', null) });
+      monitorChartsData.status.push(
+        formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount)
+      );
+    });
+    return monitorChartsData;
   }
 
   /**
