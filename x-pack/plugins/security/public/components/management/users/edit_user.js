@@ -68,7 +68,7 @@ class EditUserUI extends Component {
             id: 'xpack.security.management.users.editUser.errorLoadingUserTitle',
             defaultMessage: 'Error loading user'
           }),
-          text: get(err, 'data.message') || err.message,
+          text: get(err, 'body.message') || err.message,
         });
         return;
       }
@@ -83,7 +83,7 @@ class EditUserUI extends Component {
           id: 'xpack.security.management.users.editUser.errorLoadingRolesTitle',
           defaultMessage: 'Error loading roles'
         }),
-        text: get(err, 'data.message') || err.message,
+        text: get(err, 'body.message') || err.message,
       });
       return;
     }

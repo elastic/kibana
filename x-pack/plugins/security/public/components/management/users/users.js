@@ -49,7 +49,7 @@ class UsersUI extends Component {
       const users = await UserAPIClient.getUsers();
       this.setState({ users });
     } catch (e) {
-      if (e.status === 403) {
+      if (e.body.statusCode === 403) {
         this.setState({ permissionDenied: true });
       } else {
         toastNotifications.addDanger(
