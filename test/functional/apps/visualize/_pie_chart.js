@@ -295,10 +295,11 @@ export default function ({ getService, getPageObjects }) {
           [ '360,000', '47', 'IN', '8' ], [ '360,000', '47', 'CN', '6' ], [ '360,000', '47', 'US', '4' ],
           [ '360,000', '47', 'BD', '3' ], [ '360,000', '47', 'BR', '2' ] ];
 
-        await inspector.open();
-        await inspector.setTablePageSize(50);
-        await inspector.expectTableData(expectedTableData);
-        await inspector.close();
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data = await PageObjects.visualize.getInspectorTableData();
+        await PageObjects.visualize.closeInspector();
+        expect(data).to.eql(expectedTableData);
       });
 
       it('should correctly filter on legend', async () => {
@@ -306,7 +307,8 @@ export default function ({ getService, getPageObjects }) {
           '200,000', 'CN', '240,000', 'CN', '280,000', 'CN', '320,000', 'CN', '360,000', 'CN' ];
         await PageObjects.visualize.filterLegend('CN');
         await PageObjects.visualize.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData);
+        const data = await PageObjects.visualize.getLegendEntries();
+        expect(data).to.eql(expectedTableData);
         await filterBar.removeFilter('geo.dest');
         await PageObjects.visualize.waitForVisualization();
       });

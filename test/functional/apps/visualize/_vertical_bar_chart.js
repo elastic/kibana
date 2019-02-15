@@ -270,6 +270,7 @@ export default function ({ getService, getPageObjects }) {
       it ('should correctly filter by legend', async () => {
         await PageObjects.visualize.filterLegend('200');
         await PageObjects.visualize.waitForVisualization();
+        await PageObjects.common.sleep(1003);
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         const expectedEntries = ['200'];
         expect(legendEntries).to.eql(expectedEntries);
