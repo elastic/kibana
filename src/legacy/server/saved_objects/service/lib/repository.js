@@ -37,7 +37,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
-      allowedTypes,
+      allowedTypes = [],
       onBeforeWrite = () => { },
     } = options;
 
@@ -52,7 +52,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    if(!allowedTypes || allowedTypes.length === 0) {
+    if(allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
     this._allowedTypes = allowedTypes;
