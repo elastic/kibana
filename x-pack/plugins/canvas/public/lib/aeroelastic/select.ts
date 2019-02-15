@@ -6,9 +6,11 @@
 
 import { ActionId, NodeFunction, NodeResult } from './types';
 
-export const select = (fun: NodeFunction): NodeFunction => (
+const selectDebug = (fun: NodeFunction): NodeFunction => (
   ...inputs: NodeFunction[]
-): NodeResult => {
+): NodeResult => (state: NodeResult) => fun(...inputs.map(input => input(state)));
+
+const selectFast = (fun: NodeFunction): NodeFunction => (...inputs: NodeFunction[]): NodeResult => {
   // last-value memoizing version of this single line function:
   // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
   let value: NodeResult;
@@ -24,3 +26,5 @@ export const select = (fun: NodeFunction): NodeFunction => (
     return value;
   };
 };
+
+export const select = selectFast;
