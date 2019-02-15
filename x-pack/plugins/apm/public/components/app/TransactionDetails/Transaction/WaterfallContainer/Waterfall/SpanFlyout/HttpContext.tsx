@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import {
   borderRadius,
   fontFamilyCode,
+  fontSize,
   px,
   unit,
   units
@@ -25,6 +26,7 @@ const ContextUrl = styled.div`
   border-radius: ${borderRadius};
   border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 
 interface Props {
