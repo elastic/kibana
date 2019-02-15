@@ -97,7 +97,6 @@ export interface DatabaseSearchResponse<T> {
     max_score: number;
     hits: Array<{
       _index: string;
-      _type: string;
       _id: string;
       _score: number;
       _source: T;
@@ -128,7 +127,6 @@ export interface DatabaseShardsResponse {
 
 export interface DatabaseGetDocumentResponse<Source> {
   _index: string;
-  _type: string;
   _id: string;
   _seq_no: number;
   _primary_term: number;
@@ -149,7 +147,6 @@ export interface DatabaseBulkIndexDocumentsParams extends DatabaseGenericParams 
   refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
-  type?: string;
   fields?: DatabaseNameList;
   _source?: DatabaseNameList;
   _sourceExclude?: DatabaseNameList;
@@ -167,7 +164,6 @@ export interface DatabaseMGetParams extends DatabaseGenericParams {
   _sourceExclude?: DatabaseNameList;
   _source_includes?: DatabaseNameList;
   index: string;
-  type?: string;
 }
 
 export interface DatabaseMGetResponse<T> {
@@ -188,14 +184,12 @@ export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   ifSeqNo?: number;
   ifPrimaryTerm?: number;
   index: string;
-  type: string;
   id: string;
 }
 
 export interface DatabaseIndexDocumentResponse {
   found: boolean;
   _index: string;
-  _type: string;
   _id: string;
   _seq_no: number;
   _primary_term: number;
@@ -205,7 +199,6 @@ export interface DatabaseIndexDocumentResponse {
 export interface DatabaseUpdateDocumentResponse {
   found: boolean;
   _index: string;
-  _type: string;
   _id: string;
   _seq_no: number;
   _primary_term: number;
@@ -215,7 +208,6 @@ export interface DatabaseUpdateDocumentResponse {
 export interface DatabaseDeleteDocumentResponse {
   found: boolean;
   _index: string;
-  _type: string;
   _id: string;
   _seq_no: number;
   _primary_term: number;
@@ -236,7 +228,6 @@ export interface DatabaseIndexDocumentParams<T> extends DatabaseGenericParams {
   pipeline?: string;
   id?: string;
   index: string;
-  type: string;
   body: T;
 }
 
@@ -257,7 +248,6 @@ export interface DatabaseCreateDocumentParams extends DatabaseGenericParams {
   pipeline?: string;
   id?: string;
   index: string;
-  type: string;
 }
 
 export interface DatabaseCreateDocumentResponse {
@@ -274,7 +264,6 @@ export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   ifSeqNo?: number;
   ifPrimaryTerm?: number;
   index: string;
-  type: string;
   id: string;
 }
 
@@ -292,7 +281,6 @@ export interface DatabaseGetParams extends DatabaseGenericParams {
   ifPrimaryTerm?: number;
   id: string;
   index: string;
-  type: string;
 }
 
 export type DatabaseNameList = string | string[] | boolean;

@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
-          "indices": [{
-            "names": ["dlstest"],
-            "privileges": ["read", "view_index_metadata"],
-            "query": "{\"match\": {\"region\": \"EAST\"}}"
+          'indices': [{
+            'names': ['dlstest'],
+            'privileges': ['read', 'view_index_metadata'],
+            'query': '{"match": {"region": "EAST"}}'
           }]
         },
         kibana: {

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
+import { ES_INDEX_NAME } from './constants';
 import moment from 'moment';
 
 export default function ({ getService }) {
@@ -42,7 +42,6 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -69,7 +68,6 @@ export default function ({ getService }) {
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -94,7 +92,6 @@ export default function ({ getService }) {
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
