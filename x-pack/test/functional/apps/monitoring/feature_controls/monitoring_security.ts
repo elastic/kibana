@@ -31,7 +31,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
@@ -39,7 +39,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await security.role.delete('global_all_role');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('monitoring_user', () => {
