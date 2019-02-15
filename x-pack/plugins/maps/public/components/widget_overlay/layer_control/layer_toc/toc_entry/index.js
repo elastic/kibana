@@ -7,13 +7,14 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import { getIsReadOnly, updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
 import { fitToLayerExtent, setSelectedLayer, toggleLayerVisible } from '../../../../../actions/store_actions';
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
+    isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
     getSelectedLayerSelector: () => {
       return getSelectedLayer(state);
