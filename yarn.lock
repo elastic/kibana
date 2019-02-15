@@ -1892,11 +1892,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/expect.js@^0.3.29":
-  version "0.3.29"
-  resolved "https://registry.yarnpkg.com/@types/expect.js/-/expect.js-0.3.29.tgz#28dd359155b84b8ecb094afc3f4b74c3222dca3b"
-  integrity sha1-KN01kVW4S47LCUr8P0t0wyItyjs=
-
 "@types/fetch-mock@7.2.1":
   version "7.2.1"
   resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-7.2.1.tgz#5630999aa75532e00af42a54cbe05e1651f4a080"

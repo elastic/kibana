@@ -44,7 +44,6 @@
     "@types/d3-time": "^1.0.7",
     "@types/d3-time-format": "^2.1.0",
     "@types/elasticsearch": "^5.0.30",
-    "@types/expect.js": "^0.3.29",
     "@types/graphql": "^0.13.1",
     "@types/history": "^4.6.2",
     "@types/jest": "^23.3.1",

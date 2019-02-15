@@ -273,7 +273,6 @@
     "@types/enzyme": "^3.1.12",
     "@types/eslint": "^4.16.2",
     "@types/execa": "^0.9.0",
-    "@types/expect.js": "^0.3.29",
     "@types/fetch-mock": "7.2.1",
     "@types/json5": "^0.0.30",
     "@types/getopts": "^2.0.0",
