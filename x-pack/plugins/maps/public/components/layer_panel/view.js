@@ -10,7 +10,6 @@ import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
-import _ from 'lodash';
 
 import {
   EuiButtonIcon,
@@ -44,7 +43,7 @@ export class LayerPanel  extends React.Component {
     return {
       styleUpdated: prevState.styleUpdated
         ? prevState.styleUpdated
-        : !_.isEqual(nextProps.styleProperties, prevState.style)
+        : nextProps.stateChanged
     };
   }
 

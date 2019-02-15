@@ -6,7 +6,7 @@
 
 import {
   SET_SELECTED_LAYER,
-  ADD_TRANSIENT_LAYER,
+  SET_TRANSIENT_LAYER,
   UPDATE_LAYER_ORDER,
   LAYER_DATA_LOAD_STARTED,
   LAYER_DATA_LOAD_ENDED,
@@ -32,7 +32,6 @@ import {
   CLEAR_MOUSE_COORDINATES,
   SET_GOTO,
   CLEAR_GOTO,
-  CLEAR_TRANSIENT_LAYER,
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE
@@ -225,11 +224,9 @@ export function map(state = INITIAL_STATE, action) {
     case SET_SELECTED_LAYER:
       const selectedMatch = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
-    case ADD_TRANSIENT_LAYER:
+    case SET_TRANSIENT_LAYER:
       const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
       return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
-    case CLEAR_TRANSIENT_LAYER:
-      return { ...state, __transientLayerId: INITIAL_STATE.__transientLayerId };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case UPDATE_LAYER_PROP:

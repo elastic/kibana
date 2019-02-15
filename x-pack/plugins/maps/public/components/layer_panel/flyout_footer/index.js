@@ -8,7 +8,6 @@ import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
 import {
-  clearTransientLayer,
   setSelectedLayer,
   removeSelectedLayer,
   rollbackToTrackedLayerStateForSelectedLayer,
@@ -19,7 +18,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     cancelLayerPanel: async () => {
       await dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      await dispatch(clearTransientLayer());
       await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
       await dispatch(setSelectedLayer(null));
     },

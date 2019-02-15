@@ -30,6 +30,7 @@ export class AddLayerPanel extends Component {
       sourceType: null,
       isLoading: false,
       hasLayerSelected: false,
+      layer: null
     };
   }
 
@@ -41,15 +42,16 @@ export class AddLayerPanel extends Component {
   }
 
   _previewLayer = (source) => {
-    this.layer = source.createDefaultLayer();
-    this.props.previewLayer(this.layer);
+    this.setState({ layer: source.createDefaultLayer() }, () => {
+      this.props.previewLayer(this.state.layer);
+    });
   };
 
   _clearSource = () => {
     this.setState({ sourceType: null });
 
-    if (this.layer) {
-      this.props.removeLayer(this.layer.getId());
+    if (this.state.layer) {
+      this.props.removeLayer();
     }
   }
 
@@ -62,7 +64,7 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const { showSettings } = this.props;
+    const { selectLayerAndAdd } = this.props;
     const { hasLayerSelected, isLoading } = this.state;
     return (
       <EuiButton
@@ -71,8 +73,8 @@ export class AddLayerPanel extends Component {
         iconSide="right"
         iconType={'sortRight'}
         onClick={() => {
-          this.layer = null;
-          showSettings();
+          this.setState({ layer: null });
+          selectLayerAndAdd();
         }}
         fill
       >
@@ -172,8 +174,8 @@ export class AddLayerPanel extends Component {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={() => {
-                  if (this.layer) {
-                    this.props.closeFlyout(this.layer.getId());
+                  if (this.state.layer) {
+                    this.props.closeFlyout(this.state.layer.getId());
                   }
                 }}
                 flush="left"

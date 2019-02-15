@@ -10,8 +10,9 @@ import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE }
   from '../../store/ui';
 import {
   removeLayer,
-  addTransientLayer,
-  clearTransientLayer,
+  setTransientLayer,
+  addLayer,
+  setSelectedLayer
 } from "../../actions/store_actions";
 import { getSelectedLayer } from "../../selectors/map_selectors";
 
@@ -28,17 +29,21 @@ function mapDispatchToProps(dispatch) {
   return {
     closeFlyout: layerId => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(clearTransientLayer());
+      dispatch(setTransientLayer(null));
+      dispatch(setSelectedLayer(null));
       dispatch(removeLayer(layerId));
     },
     previewLayer: layer => {
-      dispatch(
-        addTransientLayer(layer.getId(), layer.toLayerDescriptor())
-      );
+      dispatch(addLayer(layer.toLayerDescriptor()));
+      dispatch(setSelectedLayer(layer.getId()));
+      dispatch(setTransientLayer(layer.getId()));
     },
-    removeLayer: id => dispatch(removeLayer(id)),
-    showSettings: () => {
-      dispatch(clearTransientLayer());
+    removeLayer: () => {
+      dispatch(setSelectedLayer(null));
+      dispatch(setTransientLayer(null));
+    },
+    selectLayerAndAdd: () => {
+      dispatch(setTransientLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
   };

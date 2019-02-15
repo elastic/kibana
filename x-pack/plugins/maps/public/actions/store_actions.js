@@ -18,7 +18,7 @@ import {
 import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
-export const ADD_TRANSIENT_LAYER = 'ADD_TRANSIENT_LAYER';
+export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
 export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
@@ -115,8 +115,6 @@ export function replaceLayerList(newLayerList) {
 
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
-    dispatch(clearTransientLayer());
-
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
       dispatch({
@@ -170,7 +168,6 @@ export function setSelectedLayer(layerId) {
   return async (dispatch, getState) => {
     const transientLayerId = getTransientLayerId(getState());
     if (transientLayerId) {
-      dispatch(clearTransientLayer());
       dispatch(removeLayer(transientLayerId));
     }
     const oldSelectedLayer = getSelectedLayerId(getState());
@@ -187,20 +184,10 @@ export function setSelectedLayer(layerId) {
   };
 }
 
-export function addTransientLayer(layerId, layerDescriptor) {
-  return async dispatch => {
-    await dispatch(addLayer(layerDescriptor));
-    await dispatch(setSelectedLayer(layerId));
-    dispatch({
-      type: ADD_TRANSIENT_LAYER,
-      transientLayerId: layerId,
-    });
-  };
-}
-
-export function clearTransientLayer() {
-  return {
-    type: CLEAR_TRANSIENT_LAYER
+export function setTransientLayer(layerId) {
+  return  {
+    type: SET_TRANSIENT_LAYER,
+    transientLayerId: layerId,
   };
 }
 
