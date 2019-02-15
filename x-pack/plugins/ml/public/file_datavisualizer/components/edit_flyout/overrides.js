@@ -218,7 +218,7 @@ export class Overrides extends Component {
       linesToSample,
     } = overrides;
 
-    const fieldOptions = fields.map(f => ({ label: f }));
+    const fieldOptions = getSortedFields(fields);
 
     return (
 
@@ -441,6 +441,12 @@ export class Overrides extends Component {
 
 function selectedOption(opt) {
   return [{ label: (opt || '') }];
+}
+
+// return a list of objects compatible with EuiComboBox
+// also sort alphanumerically
+function getSortedFields(fields) {
+  return fields.map(f => ({ label: f })).sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 }
 
 // Some delimiter characters cannot be used as items in select list.
