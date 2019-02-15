@@ -304,7 +304,7 @@ export function VislibLibDataProvider(Private) {
       _.forEach(array, function (obj) {
         names.push({
           label: obj.name,
-          values: obj,
+          aggConfigResult: obj.aggConfigResult,
           index: index
         });
 
