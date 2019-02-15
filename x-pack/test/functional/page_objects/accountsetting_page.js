@@ -15,11 +15,11 @@ export function AccountSettingProvider({ getService }) {
     async verifyAccountSettings(expectedEmail, expectedUserName) {
       await userMenu.clickProvileLink();
 
-      const usernameField = await testSubjects.find('usernameField');
+      const usernameField = await testSubjects.find('username');
       const userName = await usernameField.getVisibleText();
       expect(userName).to.be(expectedUserName);
 
-      const emailIdField = await testSubjects.find('emailIdField');
+      const emailIdField = await testSubjects.find('emial');
       const emailField = await emailIdField.getVisibleText();
       expect(emailField).to.be(expectedEmail);
     }

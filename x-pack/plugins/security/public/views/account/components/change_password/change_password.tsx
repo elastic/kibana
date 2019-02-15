@@ -4,24 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  EuiButton,
   // @ts-ignore
   EuiButtonEmpty,
   // @ts-ignore
   EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ChangePasswordForm } from 'plugins/security/components/management/change_password_form';
-import React, { ChangeEvent, Component } from 'react';
-import { toastNotifications } from 'ui/notify';
+import React, { Component } from 'react';
 import { canUserChangePassword, User } from '../../../../../common/model/user';
-import { UserAPIClient } from '../../../../lib/api';
+import { ChangePasswordForm } from '../../../..//components/management/change_password_form';
 
 interface Props {
   user: User;

@@ -74,8 +74,6 @@ describe('<ChangePasswordForm>', () => {
       const confirmPassword = getConfirmPasswordField(wrapper);
       confirmPassword.props().onChange({ target: { value: 'myNewPassword ' } });
 
-      getChangePasswordButton(wrapper).simulate('click');
-
       // TODO: finish test
     });
   });
