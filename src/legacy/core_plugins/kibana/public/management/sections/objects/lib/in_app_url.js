@@ -17,11 +17,27 @@
  * under the License.
  */
 
+export function getInAppUrl(id, type) {
+  switch (type) {
+    case 'search':
+    case 'searches':
+      return `/discover/${id}`;
+    case 'visualization':
+    case 'visualizations':
+      return `/visualize/edit/${id}`;
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return `/management/kibana/index_patterns/${id}`;
+    case 'dashboard':
+    case 'dashboards':
+      return `/dashboard/${id}`;
+    default:
+      return `/${type.toLowerCase()}/${id}`;
+  }
+}
+
 export function canViewInApp(uiCapabilities, type) {
-  // ¯\_(ツ)_/¯
-  // I don't quite understand why we're doing this "fuzziness", as
-  // the types shouldn't differ or they won't conform to the mappings
-  // of the .kibana index, but I'm emualating what's being done in "getInAppUrl"
   switch (type) {
     case 'search':
     case 'searches':
