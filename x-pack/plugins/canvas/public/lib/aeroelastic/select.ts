@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionId, NodeFunc, NodeResult } from './types';
+import { ActionId, NodeFunc, NodeResult, State } from './types';
 
-export const select = (fun: NodeFunc): NodeFunc => (...inputs: NodeFunc[]): NodeResult => {
-  let { value, actionId } = { value: null as NodeResult, actionId: NaN as ActionId };
-  return (state: NodeResult) => {
-    const previousActionId: ActionId = state.primaryUpdate.payload.uid;
-    value = actionId === previousActionId ? value : fun.apply(0, inputs.map(input => input(state)));
-    actionId = previousActionId;
+export const select = (selectFun: NodeFunc): NodeFunc => (...fns: NodeFunc[]): NodeResult => {
+  let { prevId, value } = { prevId: NaN as ActionId, value: null as NodeResult };
+  return (object: State) => {
+    const currentId: ActionId = object.primaryUpdate.payload.uid;
+    value = prevId === currentId ? value : selectFun(...fns.map(fun => fun(object)));
+    prevId = currentId;
     return value;
   };
 };

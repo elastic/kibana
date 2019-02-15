@@ -17,5 +17,8 @@ export type transformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f]
 
 export type ActionId = number;
 export type TypeName = string;
-export type NodeResult = any;
 export type NodeFunc = (...args: any[]) => any;
+export type NodeResult = any;
+export interface State {
+  primaryUpdate: { payload: { uid: ActionId } };
+}
