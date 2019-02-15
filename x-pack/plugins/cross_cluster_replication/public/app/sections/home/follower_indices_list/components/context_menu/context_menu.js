@@ -67,12 +67,13 @@ export class ContextMenu extends PureComponent {
           values={{ followerIndicesLength }}
         />
       ),
+      testSubj,
     } = this.props;
 
 
     const button = (
       <EuiButton
-        data-test-subj="ccrFollowerIndexContextMenuButton"
+        data-test-subj={testSubj}
         iconSide={iconSide}
         onClick={this.onButtonClick}
         iconType={iconType}

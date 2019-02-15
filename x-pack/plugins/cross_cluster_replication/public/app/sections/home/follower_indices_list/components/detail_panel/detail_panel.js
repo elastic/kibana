@@ -485,6 +485,7 @@ export class DetailPanel extends Component {
                       />
                     )}
                     followerIndices={[followerIndex]}
+                    testSubj="ccrFollowerIndexDetailsViewContextMenuButton"
                   />
                 </EuiFlexItem>
               )}

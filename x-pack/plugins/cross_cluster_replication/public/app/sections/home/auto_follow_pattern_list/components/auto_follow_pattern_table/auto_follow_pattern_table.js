@@ -255,6 +255,12 @@ export class AutoFollowPatternTable extends PureComponent {
           sorting={sorting}
           selection={selection}
           isSelectable={true}
+          rowProps={() => ({
+            'data-test-subj': 'ccrAutoFollowPatternListTableRow'
+          })}
+          cellProps={(item, column) => ({
+            'data-test-subj': `ccrAutoFollowPatternListTableCell-${column.field}`
+          })}
         />
         {this.renderLoading()}
       </Fragment>
