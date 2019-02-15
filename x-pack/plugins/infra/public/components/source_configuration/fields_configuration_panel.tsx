@@ -14,6 +14,7 @@ interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;
   hostFieldProps: InputFieldProps;
   isLoading: boolean;
+  disabled: boolean;
   podFieldProps: InputFieldProps;
   tiebreakerFieldProps: InputFieldProps;
   timestampFieldProps: InputFieldProps;
@@ -23,6 +24,7 @@ export const FieldsConfigurationPanel = ({
   containerFieldProps,
   hostFieldProps,
   isLoading,
+  disabled,
   podFieldProps,
   tiebreakerFieldProps,
   timestampFieldProps,
@@ -57,7 +59,12 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...timestampFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading || disabled}
+        isLoading={isLoading}
+        {...timestampFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={tiebreakerFieldProps.error}
@@ -81,7 +88,7 @@ export const FieldsConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         isLoading={isLoading}
         {...tiebreakerFieldProps}
       />
@@ -106,7 +113,12 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...containerFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading || disabled}
+        isLoading={isLoading}
+        {...containerFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={hostFieldProps.error}
@@ -128,7 +140,12 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...hostFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading || disabled}
+        isLoading={isLoading}
+        {...hostFieldProps}
+      />
     </EuiFormRow>
     <EuiFormRow
       error={podFieldProps.error}
@@ -150,7 +167,12 @@ export const FieldsConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...podFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading || disabled}
+        isLoading={isLoading}
+        {...podFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );

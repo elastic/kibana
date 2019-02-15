@@ -35,10 +35,10 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     privileges: {
       all: {
         savedObject: {
-          all: [],
+          all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show', 'save'],
       },
       read: {
         savedObject: {
@@ -62,15 +62,15 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     privileges: {
       all: {
         savedObject: {
-          all: [],
+          all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show', 'save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config'],
+          read: ['config', 'infrastructure-ui-source'],
         },
         ui: ['show'],
       },

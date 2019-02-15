@@ -19,6 +19,8 @@ import {
 import React from 'react';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { UICapabilities } from 'ui/capabilities';
+import { injectUICapabilities } from 'ui/capabilities/react';
 import { WithSource } from '../../containers/with_source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
@@ -28,142 +30,159 @@ import { WithSourceConfigurationFormState } from './source_configuration_form_st
 
 const noop = () => undefined;
 
+const isDisabled = (uiCapabilities: UICapabilities) => !uiCapabilities.infrastructure.save;
+
 interface SourceConfigurationFlyoutProps {
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
 }
 
-export const SourceConfigurationFlyout = injectI18n(({ intl }: SourceConfigurationFlyoutProps) => (
-  <WithSourceConfigurationFlyoutState>
-    {({ disable: close, value: isVisible }) =>
-      isVisible ? (
-        <WithSource>
-          {({ create, configuration, exists, isLoading, update }) =>
-            configuration ? (
-              <WithSourceConfigurationFormState
-                initialFormState={{
-                  name: configuration.name,
-                  description: configuration.description,
-                  fields: {
-                    container: configuration.fields.container,
-                    host: configuration.fields.host,
-                    pod: configuration.fields.pod,
-                    tiebreaker: configuration.fields.tiebreaker,
-                    timestamp: configuration.fields.timestamp,
-                  },
-                  logAlias: configuration.logAlias,
-                  metricAlias: configuration.metricAlias,
-                }}
-              >
-                {({
-                  getCurrentFormState,
-                  getNameFieldProps,
-                  getLogAliasFieldProps,
-                  getMetricAliasFieldProps,
-                  getFieldFieldProps,
-                  isFormValid,
-                  resetForm,
-                  updates,
-                }) => (
-                  <EuiFlyout
-                    aria-labelledby="sourceConfigurationTitle"
-                    hideCloseButton
-                    onClose={noop}
-                  >
-                    <EuiFlyoutHeader>
-                      <EuiTitle>
-                        <h2 id="sourceConfigurationTitle">
-                          <FormattedMessage
-                            id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
-                            defaultMessage="Configure source"
-                          />
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlyoutHeader>
-                    <EuiFlyoutBody>
-                      <NameConfigurationPanel
-                        isLoading={isLoading}
-                        nameFieldProps={getNameFieldProps()}
-                      />
-                      <EuiSpacer />
-                      <IndicesConfigurationPanel
-                        isLoading={isLoading}
-                        logAliasFieldProps={getLogAliasFieldProps()}
-                        metricAliasFieldProps={getMetricAliasFieldProps()}
-                      />
-                      <EuiSpacer />
-                      <FieldsConfigurationPanel
-                        containerFieldProps={getFieldFieldProps('container')}
-                        hostFieldProps={getFieldFieldProps('host')}
-                        isLoading={isLoading}
-                        podFieldProps={getFieldFieldProps('pod')}
-                        tiebreakerFieldProps={getFieldFieldProps('tiebreaker')}
-                        timestampFieldProps={getFieldFieldProps('timestamp')}
-                      />
-                    </EuiFlyoutBody>
-                    <EuiFlyoutFooter>
-                      <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
-                          {updates.length === 0 ? (
-                            <EuiButtonEmpty
-                              iconType="cross"
-                              isDisabled={isLoading}
-                              onClick={() => close()}
-                            >
+export const SourceConfigurationFlyout = injectUICapabilities(
+  injectI18n(({ intl, uiCapabilities }: SourceConfigurationFlyoutProps) => (
+    <WithSourceConfigurationFlyoutState>
+      {({ disable: close, value: isVisible }) =>
+        isVisible ? (
+          <WithSource>
+            {({ create, configuration, exists, isLoading, update }) =>
+              configuration ? (
+                <WithSourceConfigurationFormState
+                  initialFormState={{
+                    name: configuration.name,
+                    description: configuration.description,
+                    fields: {
+                      container: configuration.fields.container,
+                      host: configuration.fields.host,
+                      pod: configuration.fields.pod,
+                      tiebreaker: configuration.fields.tiebreaker,
+                      timestamp: configuration.fields.timestamp,
+                    },
+                    logAlias: configuration.logAlias,
+                    metricAlias: configuration.metricAlias,
+                  }}
+                >
+                  {({
+                    getCurrentFormState,
+                    getNameFieldProps,
+                    getLogAliasFieldProps,
+                    getMetricAliasFieldProps,
+                    getFieldFieldProps,
+                    isFormValid,
+                    resetForm,
+                    updates,
+                  }) => (
+                    <EuiFlyout
+                      aria-labelledby="sourceConfigurationTitle"
+                      hideCloseButton
+                      onClose={noop}
+                    >
+                      <EuiFlyoutHeader>
+                        <EuiTitle>
+                          <h2 id="sourceConfigurationTitle">
+                            {isDisabled(uiCapabilities) ? (
                               <FormattedMessage
-                                id="xpack.infra.sourceConfiguration.closeButtonLabel"
-                                defaultMessage="Close"
+                                id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
+                                defaultMessage="View source"
                               />
-                            </EuiButtonEmpty>
-                          ) : (
-                            <EuiButtonEmpty
-                              color="danger"
-                              iconType="cross"
-                              isDisabled={isLoading}
-                              onClick={() => {
-                                resetForm();
-                                close();
-                              }}
-                            >
+                            ) : (
                               <FormattedMessage
-                                id="xpack.infra.sourceConfiguration.discardAndCloseButtonLabel"
-                                defaultMessage="Discard and Close"
+                                id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
+                                defaultMessage="Configure source"
                               />
-                            </EuiButtonEmpty>
+                            )}
+                          </h2>
+                        </EuiTitle>
+                      </EuiFlyoutHeader>
+                      <EuiFlyoutBody>
+                        <NameConfigurationPanel
+                          isLoading={isLoading}
+                          disabled={isDisabled(uiCapabilities)}
+                          nameFieldProps={getNameFieldProps()}
+                        />
+                        <EuiSpacer />
+                        <IndicesConfigurationPanel
+                          isLoading={isLoading}
+                          disabled={isDisabled(uiCapabilities)}
+                          logAliasFieldProps={getLogAliasFieldProps()}
+                          metricAliasFieldProps={getMetricAliasFieldProps()}
+                        />
+                        <EuiSpacer />
+                        <FieldsConfigurationPanel
+                          containerFieldProps={getFieldFieldProps('container')}
+                          hostFieldProps={getFieldFieldProps('host')}
+                          isLoading={isLoading}
+                          disabled={isDisabled(uiCapabilities)}
+                          podFieldProps={getFieldFieldProps('pod')}
+                          tiebreakerFieldProps={getFieldFieldProps('tiebreaker')}
+                          timestampFieldProps={getFieldFieldProps('timestamp')}
+                        />
+                      </EuiFlyoutBody>
+                      <EuiFlyoutFooter>
+                        <EuiFlexGroup>
+                          <EuiFlexItem grow={false}>
+                            {updates.length === 0 ? (
+                              <EuiButtonEmpty
+                                iconType="cross"
+                                isDisabled={isLoading}
+                                onClick={() => close()}
+                              >
+                                <FormattedMessage
+                                  id="xpack.infra.sourceConfiguration.closeButtonLabel"
+                                  defaultMessage="Close"
+                                />
+                              </EuiButtonEmpty>
+                            ) : (
+                              <EuiButtonEmpty
+                                color="danger"
+                                iconType="cross"
+                                isDisabled={isLoading}
+                                onClick={() => {
+                                  resetForm();
+                                  close();
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.infra.sourceConfiguration.discardAndCloseButtonLabel"
+                                  defaultMessage="Discard and Close"
+                                />
+                              </EuiButtonEmpty>
+                            )}
+                          </EuiFlexItem>
+                          <EuiFlexItem />
+                          {!isDisabled(uiCapabilities) && (
+                            <EuiFlexItem grow={false}>
+                              {isLoading ? (
+                                <EuiButton color="primary" isLoading fill>
+                                  Loading
+                                </EuiButton>
+                              ) : (
+                                <EuiButton
+                                  color="primary"
+                                  isDisabled={updates.length === 0 || !isFormValid()}
+                                  fill
+                                  onClick={() =>
+                                    (exists ? update(updates) : create(getCurrentFormState())).then(
+                                      () => resetForm()
+                                    )
+                                  }
+                                >
+                                  <FormattedMessage
+                                    id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
+                                    defaultMessage="Update Source"
+                                  />
+                                </EuiButton>
+                              )}
+                            </EuiFlexItem>
                           )}
-                        </EuiFlexItem>
-                        <EuiFlexItem />
-                        <EuiFlexItem grow={false}>
-                          {isLoading ? (
-                            <EuiButton color="primary" isLoading fill>
-                              Loading
-                            </EuiButton>
-                          ) : (
-                            <EuiButton
-                              color="primary"
-                              isDisabled={updates.length === 0 || !isFormValid()}
-                              fill
-                              onClick={() =>
-                                (exists ? update(updates) : create(getCurrentFormState())).then(
-                                  () => resetForm()
-                                )
-                              }
-                            >
-                              <FormattedMessage
-                                id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
-                                defaultMessage="Update Source"
-                              />
-                            </EuiButton>
-                          )}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlyoutFooter>
-                  </EuiFlyout>
-                )}
-              </WithSourceConfigurationFormState>
-            ) : null
-          }
-        </WithSource>
-      ) : null
-    }
-  </WithSourceConfigurationFlyoutState>
-));
+                        </EuiFlexGroup>
+                      </EuiFlyoutFooter>
+                    </EuiFlyout>
+                  )}
+                </WithSourceConfigurationFormState>
+              ) : null
+            }
+          </WithSource>
+        ) : null
+      }
+    </WithSourceConfigurationFlyoutState>
+  ))
+);

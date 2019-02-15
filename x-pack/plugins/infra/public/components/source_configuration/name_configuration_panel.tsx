@@ -12,11 +12,13 @@ import { InputFieldProps } from './source_configuration_form_state';
 
 interface NameConfigurationPanelProps {
   isLoading: boolean;
+  disabled: boolean;
   nameFieldProps: InputFieldProps;
 }
 
 export const NameConfigurationPanel = ({
   isLoading,
+  disabled,
   nameFieldProps,
 }: NameConfigurationPanelProps) => (
   <EuiForm>
@@ -37,7 +39,12 @@ export const NameConfigurationPanel = ({
         <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...nameFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading || disabled}
+        isLoading={isLoading}
+        {...nameFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );

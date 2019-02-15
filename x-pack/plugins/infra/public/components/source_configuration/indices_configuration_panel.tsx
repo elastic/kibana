@@ -12,12 +12,14 @@ import { InputFieldProps } from './source_configuration_form_state';
 
 interface IndicesConfigurationPanelProps {
   isLoading: boolean;
+  disabled: boolean;
   logAliasFieldProps: InputFieldProps;
   metricAliasFieldProps: InputFieldProps;
 }
 
 export const IndicesConfigurationPanel = ({
   isLoading,
+  disabled,
   logAliasFieldProps,
   metricAliasFieldProps,
 }: IndicesConfigurationPanelProps) => (
@@ -53,7 +55,7 @@ export const IndicesConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         isLoading={isLoading}
         {...metricAliasFieldProps}
       />
@@ -78,7 +80,12 @@ export const IndicesConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...logAliasFieldProps} />
+      <EuiFieldText
+        fullWidth
+        disabled={isLoading || disabled}
+        isLoading={isLoading}
+        {...logAliasFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );
