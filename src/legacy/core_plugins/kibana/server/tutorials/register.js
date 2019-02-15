@@ -65,6 +65,7 @@ import { uptimeMonitorsSpecProvider } from './uptime_monitors';
 import { cloudwatchLogsSpecProvider } from './cloudwatch_logs';
 import { awsMetricsSpecProvider } from './aws_metrics';
 import { mssqlMetricsSpecProvider } from './mssql_metrics';
+import { natsMetricsSpecProvider } from './nats_metrics';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -115,4 +116,5 @@ export function registerTutorials(server) {
   server.registerTutorial(cloudwatchLogsSpecProvider);
   server.registerTutorial(awsMetricsSpecProvider);
   server.registerTutorial(mssqlMetricsSpecProvider);
+  server.registerTutorial(natsMetricsSpecProvider);
 }
