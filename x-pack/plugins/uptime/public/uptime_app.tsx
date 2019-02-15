@@ -15,7 +15,7 @@ import {
   EuiHeaderSectionItem,
   // @ts-ignore missing typings for EuiHeaderSectionItem
   EuiPage,
-  EuiSpacer
+  EuiSpacer,
   // @ts-ignore missing typings for EuiSuperDatePicker
   EuiSuperDatePicker,
   EuiTitle,
