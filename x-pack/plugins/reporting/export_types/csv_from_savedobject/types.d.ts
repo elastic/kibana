@@ -52,21 +52,17 @@ export interface TsvbPanel {
 interface TsvbAggregationCell {
   label: string;
   last: number;
-  slope: number;
-  data: number;
+  slope?: number;
+  data?: [number, number]; // timestamp & metric
 }
 
 interface TsvbAggregationRow {
   key: string;
   series: TsvbAggregationCell[];
-  pivot: {
-    pivot_id: string;
-    pivot_label: string;
-  };
 }
 
 export interface TsvbTableData {
-  type: 'table';
+  type: string;
   series: TsvbAggregationRow[];
 }
 

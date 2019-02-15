@@ -26,6 +26,7 @@ export async function generateCsvTsvb(req: Request, server: KbnServer, tsvbPanel
   const dataSet: TsvbAggregationRow[] = tableDataTSVB.series;
 
   // form the header from the first row's column labels
+  // FIXME labels' chars need to be escaped
   let csvRows: string[] = [];
   if (dataSet.length > 0) {
     const csvHeader = [
