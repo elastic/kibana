@@ -11,7 +11,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const find = getService('find');
 
@@ -33,7 +33,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await spacesService.delete('custom_space');
       });
 
-      it('shows stack monitoring navlink', async () => {
+      it('shows Stack Monitoring navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
@@ -66,7 +66,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await spacesService.delete('custom_space');
       });
 
-      it(`doesn't show stack monitoring navlink`, async () => {
+      it(`doesn't show Stack Monitoring navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
@@ -83,14 +83,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        await PageObjects.error.expectNotFound();
       });
     });
   });

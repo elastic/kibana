@@ -16,7 +16,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
 
   class LoginPage {
     async login(username, password, options = {}) {
@@ -40,15 +40,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectForbidden) {
         await retry.try(async () => {
-          const bodyText = await PageObjects.common.getBodyText();
-          const forbiddenMessage = {
-            statusCode: 403,
-            error: 'Forbidden',
-            message: 'Forbidden'
-          };
-          if (bodyText !== JSON.stringify(forbiddenMessage)) {
-            throw new Error(`Expected forbidden message, but didn't find it`);
-          }
+          await PageObjects.error.expectForbidden();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectSuccess) {
