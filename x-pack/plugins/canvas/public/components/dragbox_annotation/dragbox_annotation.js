@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { toCSS } from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const DragBoxAnnotation = ({ transformMatrix, width, height }) => {
   const newStyle = {
@@ -14,7 +14,7 @@ export const DragBoxAnnotation = ({ transformMatrix, width, height }) => {
     height,
     marginLeft: -width / 2,
     marginTop: -height / 2,
-    transform: toCSS(transformMatrix),
+    transform: matrixToCSS(transformMatrix),
   };
   return <div className="canvasDragBoxAnnotation canvasLayoutAnnotation" style={newStyle} />;
 };

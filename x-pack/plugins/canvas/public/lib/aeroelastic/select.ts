@@ -4,21 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ActionId,
-  ChangeCallbackFunction,
-  Meta,
-  NodeFunction,
-  NodeResult,
-  Payload,
-  TypeName,
-  UpdaterFunction,
-} from './types';
+import { ActionId, NodeFunction, NodeResult } from './types';
 
 const shallowArrayEqual = (a: any, b: any): boolean =>
   a.length === b.length && a.every((v: any, i: number) => v === b[i]);
-
-const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
 export const select = (fun: NodeFunction): NodeFunction => (
   ...inputs: NodeFunction[]
@@ -41,29 +30,4 @@ export const select = (fun: NodeFunction): NodeFunction => (
     actionId = lastActionId;
     return value;
   };
-};
-
-export const createStore = (initialState: NodeResult, onChangeCallback: ChangeCallbackFunction) => {
-  let currentState = initialState;
-  let updater: UpdaterFunction = (state: NodeResult): NodeResult => state; // default: no side effect
-  const getCurrentState = () => currentState;
-  // const setCurrentState = newState => (currentState = newState);
-  const setUpdater = (updaterFunction: UpdaterFunction) => {
-    updater = updaterFunction;
-  };
-
-  const commit = (type: TypeName, payload: Payload, meta: Meta = { silent: false }) => {
-    currentState = updater({
-      ...currentState,
-      primaryUpdate: {
-        type,
-        payload: { ...payload, uid: makeUid() },
-      },
-    });
-    if (!meta.silent) {
-      onChangeCallback({ type, state: currentState }, meta);
-    }
-  };
-
-  return { getCurrentState, setUpdater, commit };
 };

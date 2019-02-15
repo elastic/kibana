@@ -384,6 +384,7 @@ const shapeApplyLocalTransforms = intents => shape => {
       .filter(identity)
   );
 
+  if(!shape.localTransformMatrix) debugger
   const baselineLocalTransformMatrix = multiply(
     shape.baselineLocalTransformMatrix || shape.localTransformMatrix,
     ...transformIntents
@@ -393,7 +394,7 @@ const shapeApplyLocalTransforms = intents => shape => {
   const localTransformMatrix = cumulativeTransformIntents.length
     ? multiply(baselineLocalTransformMatrix, cumulativeTransformIntentMatrix)
     : baselineLocalTransformMatrix;
-
+if(!localTransformMatrix) debugger
   const cumulativeSizeIntentMatrix = multiply2d(...cumulativeSizeIntents);
   const sizeVector = mvMultiply2d(
     cumulativeSizeIntents.length
@@ -1453,6 +1454,7 @@ export const getNextScene = (
   selectedShapes,
   gestureState
 ) => {
+  if (shapes.find(s => !s.transformMatrix)) debugger;
   const selectedLeafShapes = getLeafs(
     shape => shape.type === config.groupName,
     shapes,

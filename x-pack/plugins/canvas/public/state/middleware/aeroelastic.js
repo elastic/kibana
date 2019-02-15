@@ -5,9 +5,7 @@
  */
 
 import { shallowEqual } from 'recompose';
-import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
-import { arrayToMap, identity } from '../../lib/aeroelastic/functional';
 import {
   addElement,
   removeElements,
@@ -23,89 +21,8 @@ import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
 
-const aeroelasticConfiguration = {
-  getAdHocChildAnnotationName: 'adHocChildAnnotation',
-  adHocGroupName: 'adHocGroup',
-  alignmentGuideName: 'alignmentGuide',
-  atopZ: 1000,
-  depthSelect: true,
-  devColor: 'magenta',
-  dragBoxAnnotationName: 'dragBoxAnnotation',
-  dragBoxZ: 1050, // above alignment guides but below the upcoming hover tooltip
-  groupName: 'group',
-  groupResize: true,
-  guideDistance: 3,
-  hoverAnnotationName: 'hoverAnnotation',
-  hoverLift: 100,
-  intraGroupManipulation: false,
-  intraGroupSnapOnly: false,
-  minimumElementSize: 0,
-  persistentGroupName: 'persistentGroup',
-  resizeAnnotationConnectorOffset: 0,
-  resizeAnnotationOffset: 0,
-  resizeAnnotationOffsetZ: 0.1, // causes resize markers to be slightly above the shape plane
-  resizeAnnotationSize: 10,
-  resizeConnectorName: 'resizeConnector',
-  resizeHandleName: 'resizeHandle',
-  rotateAnnotationOffset: 12,
-  rotateSnapInPixels: 10,
-  rotationEpsilon: 0.001,
-  rotationHandleName: 'rotationHandle',
-  rotationHandleSize: 14,
-  rotationTooltipName: 'rotationTooltip',
-  shortcuts: false,
-  singleSelect: false,
-  snapConstraint: true,
-  tooltipZ: 1100,
-};
+const isGroupId = id => id.startsWith('group');
 
-const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
-
-/**
- * elementToShape
- *
- * converts a `kibana-canvas` element to an `aeroelastic` shape.
- *
- * Shape: the layout algorithms need to deal with objects through their geometric properties, excluding other aspects,
- * such as what's inside the element, eg. image or scatter plot. This representation is, at its core, a transform matrix
- * that establishes a new local coordinate system https://drafts.csswg.org/css-transforms/#local-coordinate-system plus a
- * size descriptor. There are two versions of the transform matrix:
- *   - `transformMatrix` is analogous to the SVG https://drafts.csswg.org/css-transforms/#current-transformation-matrix
- *   - `localTransformMatrix` is analogous to the SVG https://drafts.csswg.org/css-transforms/#transformation-matrix
- *
- * Element: it also needs to represent the geometry, primarily because of the need to persist it in `redux` and on the
- * server, and to accept such data from the server. The redux and server representations will need to change as more general
- * projections such as 3D are added. The element also needs to maintain its content, such as an image or a plot.
- *
- * While all elements on the current page also exist as shapes, there are shapes that are not elements: annotations.
- * For example, `rotation_handle`, `border_resize_handle` and `border_connection` are modeled as shapes by the layout
- * library, simply for generality.
- */
-const elementToShape = (element, i) => {
-  const position = element.position;
-  const a = position.width / 2;
-  const b = position.height / 2;
-  const cx = position.left + a;
-  const cy = position.top + b;
-  const z = i; // painter's algo: latest item goes to top
-  // multiplying the angle with -1 as `transform: matrix3d` uses a left-handed coordinate system
-  const angleRadians = (-position.angle / 180) * Math.PI;
-  const transformMatrix = aero.matrix.multiply(
-    aero.matrix.translate(cx, cy, z),
-    aero.matrix.rotateZ(angleRadians)
-  );
-  const isGroup = isGroupId(element.id);
-  const parent = (element.position && element.position.parent) || null; // reserved for hierarchical (tree shaped) grouping
-  return {
-    id: element.id,
-    type: isGroup ? 'group' : 'rectangleElement',
-    subtype: isGroup ? 'persistentGroup' : '',
-    parent,
-    transformMatrix,
-    a, // we currently specify half-width, half-height as it leads to
-    b, // more regular math (like ellipsis radii rather than diameters)
-  };
-};
 
 const shapeToElement = shape => {
   return {
@@ -160,23 +77,6 @@ const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, uns
 };
 
 const id = element => element.id;
-// check for duplication
-const deduped = a => a.filter((d, i) => a.indexOf(d) === i);
-const idDuplicateCheck = groups => {
-  if (deduped(groups.map(g => g.id)).length !== groups.length) {
-    throw new Error('Duplicate element encountered');
-  }
-};
-
-const missingParentCheck = groups => {
-  const idMap = arrayToMap(groups.map(g => g.id));
-  groups.forEach(g => {
-    if (g.parent && !idMap[g.parent]) {
-      g.parent = null;
-    }
-  });
-};
-
 export const aeroelastic = ({ dispatch, getState }) => {
   // When aeroelastic updates an element, we need to dispatch actions to notify redux of the changes
 

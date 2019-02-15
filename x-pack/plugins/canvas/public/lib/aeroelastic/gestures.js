@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { select } from './state';
+import { select } from './select';
 import { getScene } from './layout_functions';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,

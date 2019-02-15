@@ -21,10 +21,4 @@ export interface Meta {
 export type ActionId = number;
 export type TypeName = string;
 export type NodeResult = any;
-export type Payload = any;
 export type NodeFunction = (...args: any[]) => any;
-export type UpdaterFunction = (arg: NodeResult) => NodeResult;
-export type ChangeCallbackFunction = (
-  { type, state }: { type: TypeName; state: NodeResult },
-  meta: Meta
-) => void;
