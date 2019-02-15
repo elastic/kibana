@@ -286,16 +286,6 @@ module.exports = {
     },
 
     /**
-     * X-Pack global overrides
-     */
-    {
-      files: ['x-pack/**/*'],
-      rules: {
-        quotes: 'off',
-      },
-    },
-
-    /**
      * Files that require Elastic license headers instead of Apache 2.0 header
      */
     {
@@ -367,7 +357,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/ml/**/*'],
       rules: {
-        quotes: 'error',
         'no-shadow': 'error',
       },
     },

@@ -12,7 +12,7 @@ import { TileStyle } from '../layers/styles/tile_style';
 
 export class TileLayer extends AbstractLayer {
 
-  static type = "TILE";
+  static type = 'TILE';
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
