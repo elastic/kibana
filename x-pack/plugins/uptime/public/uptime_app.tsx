@@ -137,7 +137,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       <I18nProvider>
         <Router basename={routerBasename}>
           <ApolloProvider client={graphQLClient}>
-            <EuiPage className="app-wrapper-panel">
+            <EuiPage className="app-wrapper-panel ">
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle>
