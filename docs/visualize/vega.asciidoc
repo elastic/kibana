@@ -8,7 +8,7 @@ into Kibana, either standalone, or on top of a map.  To see Vega in action,
 watch this
 https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
 
-Currently Vega version 4.4 and VegaLite version 2.6 are supported.
+Currently Vega version 4.4 and Vega-Lite version 2.6 are supported.
 
 NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals as data urls. This is not supported in Kibana as all data is fetched at once prior to passing it to the Vega renderer.
 
@@ -16,32 +16,34 @@ NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals a
 [[vega-quick-demo]]
 === Getting Started with Vega
 
-* Go to *Visualize*, click *+*, and select *Vega* to see an example graph.
+* To experiment using sample data, first click the {kib} logo in the upper left hand corner
+and then click the link next to *Sample Data*.
+* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph.
+** The default graph is written in Vega-Lite, but you can build visualizations in either of the languages.
+Edit the `schema` value at the top of the graph to define which language you would like to use.
 * Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
 or `square`. Check out the 
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega docs] for more information.
 * Explore other available https://vega.github.io/vega/examples/[Vega] or
-https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. 
+https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations. 
 Note: You might need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. 
-See <<vega-using-vega-and-vegalite-examples, Vega and VegaLite examples>>.
-* You can generate some Logstash data to experiment with using https://www.npmjs.com/package/makelogs[makelogs util]. 
- *Note: Do not use makelogs on a production cluster.*
+See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
 * For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].  
 
 
 [[vega-vs-vegalite]]
-=== Vega vs VegaLite
+=== Vega vs Vega-Lite
 
-VegaLite is a simplified version of Vega, useful to quickly get started,
-but has a number of limitations. VegaLite is automatically converted
+Vega-Lite is a simplified version of Vega, useful to quickly get started,
+but has a number of limitations. Vega-Lite is automatically converted
 into Vega before rendering. Compare
 https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
 and
 https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
-(both use the same Elasticsearch logstash data). You may use
-https://vega.github.io/editor/[this editor] to convert VegaLite into
+(both use the same Elasticsearch Logstash data). You may use
+https://vega.github.io/editor/[this editor] to convert Vega-Lite into
 Vega.
 
 
@@ -246,12 +248,12 @@ positioning of the map.
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
 * `view` - access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
- on how to inspect data and signals at runtime. For VegaLite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
+ on how to inspect data and signals at runtime. For Vega-Lite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
  For Vega, it uses the data name as defined in your Vega spec.
 * `vega_spec` - Vega JSON graph specification after some modifications by Kibana. In case
-of VegaLite, this is the output of the VegaLite compiler.
-* `vegalite_spec` - If this is a VegaLite graph, JSON specification of the graph before
-VegaLite compilation.
+of Vega-Lite, this is the output of the Vega-Lite compiler.
+* `vegalite_spec` - If this is a Vega-Lite graph, JSON specification of the graph before
+Vega-Lite compilation.
 
 [[vega-data]]
 ==== Data
@@ -279,9 +281,9 @@ to your kibana.yml file.
 === Useful Links
 
 * The https://vega.github.io/editor/[Vega Editor] includes examples for Vega &
-VegaLite, but does not support any Kibana-specific features like
+Vega-Lite, but does not support any Kibana-specific features like
 Elasticsearch requests and interactive base maps.
-* VegaLite
+* Vega-Lite
 https://vega.github.io/vega-lite/tutorials/getting_started.html[tutorials],
 https://vega.github.io/vega-lite/docs/[docs], and
 https://vega.github.io/vega-lite/examples/[examples]
@@ -290,7 +292,7 @@ https://vega.github.io/vega/docs/[docs],
 https://vega.github.io/vega/examples/[examples]
 
 [[vega-using-vega-and-vegalite-examples]]
-==== Using Vega and VegaLite examples
+==== Using Vega and Vega-Lite examples
 
 When using https://vega.github.io/vega/examples/[Vega] and
 https://vega.github.io/vega-lite/examples/[VegaLite] examples, you may
@@ -331,11 +333,11 @@ additional configuration options.
 ==== Sizing and positioning
 
 [[vega-and-vegalite]]
-===== Vega and VegaLite
+===== Vega and Vega-Lite
 
 By default, Kibana Vega graphs will use
 `autosize = { type: 'fit', contains: 'padding' }` layout model for Vega
-and VegaLite graphs. The `fit` model uses all available space, ignores
+and Vega-Lite graphs. The `fit` model uses all available space, ignores
 `width` and `height` values, but respects the padding values. You may
 override this behaviour by specifying a different `autosize` value.
 
