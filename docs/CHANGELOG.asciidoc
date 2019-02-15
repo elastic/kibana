@@ -123,7 +123,6 @@ Operations::
 * Fixes plugin deprecations {pull}29737[#29737]
 * Changes Node version to 10.15.1 {pull}27918[#27918]
 * Fixes Chrome EUI icons on status page {pull}29131[#29131]
-* Fixes plugin deprecations (#29737) {pull}29985[#29985]
 Querying & Filtering::
 * Adds support for matching field names with newlines {pull}29539[#29539]
 Reporting::
