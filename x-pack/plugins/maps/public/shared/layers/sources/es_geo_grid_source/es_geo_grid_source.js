@@ -50,7 +50,7 @@ const aggSchemas = new Schemas([
 export class ESGeoGridSource extends AbstractESSource {
 
   static type = 'ES_GEO_GRID';
-  static title = 'Elasticsearch grid aggregation';
+  static title = 'Grid aggregation';
   static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {

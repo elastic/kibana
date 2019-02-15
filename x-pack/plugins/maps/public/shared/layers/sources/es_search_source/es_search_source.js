@@ -18,7 +18,7 @@ const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends AbstractESSource {
 
   static type = 'ES_SEARCH';
-  static title = 'Elasticsearch documents';
+  static title = 'Documents';
   static description = 'Geospatial data from a Kibana index pattern';
 
   static renderEditor({ onPreviewSource }) {
