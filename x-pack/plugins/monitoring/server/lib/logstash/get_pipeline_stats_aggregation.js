@@ -113,7 +113,6 @@ function fetchPipelineLatestStats(query, logstashIndexPattern, pipelineId, versi
     }
   };
 
-  console.log(JSON.stringify(params.body));
   return callWithRequest(req, 'search', params);
 }
 
