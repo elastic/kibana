@@ -20,13 +20,13 @@ NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals a
 and then click the link next to *Sample Data*.
 * Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph. 
 *Note*: The default graph is written in Vega-Lite, but you can build visualizations 
-in either expression language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information. 
+in either language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information. 
 * Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
 or `square`. Check out the 
-https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega docs] for more information.
+https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega-Lite docs] for more information.
 * Explore other available https://vega.github.io/vega/examples/[Vega] or
 https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations. 
-Note: You might need to make URLs absolute, for example, replace
+*Note*: You might need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. 
 See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
