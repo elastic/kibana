@@ -4,11 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { SFC } from 'react';
 
-export const AdvancedFilter = ({ value, onChange, commit }) => (
+export interface Props {
+  /** Optional value for the component */
+  value?: string;
+  /** Function to invoke when the filter value is changed */
+  onChange: (value: string) => void;
+  /** Function to invoke when the filter value is committed */
+  commit: (value: string) => void;
+}
+
+export const AdvancedFilter: SFC<Props> = ({ value = '', onChange, commit }) => (
   <form
     onSubmit={e => {
       e.preventDefault();
@@ -27,11 +36,7 @@ export const AdvancedFilter = ({ value, onChange, commit }) => (
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <button
-          className="canvasAdvancedFilter__button"
-          type="submit"
-          onClick={() => commit(value)}
-        >
+        <button className="canvasAdvancedFilter__button" type="submit">
           Apply
         </button>
       </EuiFlexItem>
@@ -39,8 +44,12 @@ export const AdvancedFilter = ({ value, onChange, commit }) => (
   </form>
 );
 
+AdvancedFilter.defaultProps = {
+  value: '',
+};
+
 AdvancedFilter.propTypes = {
-  onChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
-  commit: PropTypes.func,
+  commit: PropTypes.func.isRequired,
 };

@@ -115,7 +115,7 @@ export function geoShapeToGeometry(value) {
   }
 
   // TODO handle case where value is WKT and convert to geojson
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     throw new Error(`Unable to convert WKT to geojson, not supported`);
   }
 
@@ -196,8 +196,8 @@ function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   const bottomRight = [right, bottom];
   const topRight = [right, top];
   return {
-    "type": "polygon",
-    "coordinates": [
+    'type': 'polygon',
+    'coordinates': [
       [ topLeft, bottomLeft, bottomRight, topRight, topLeft ]
     ]
   };
