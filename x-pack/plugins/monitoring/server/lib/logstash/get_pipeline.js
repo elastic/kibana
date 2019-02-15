@@ -57,8 +57,8 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
 /**
  * The UI needs a list of all vertices for the requested pipeline version, with each vertex in the list having its timeseries metrics associated with it. The
- * stateDocument object provides the list of vertices while the statsAggregation object provides timeseries metrics. This function stitches the two together
- * and returns the modified stateDocument object.
+ * stateDocument object provides the list of vertices while the statsAggregation object provides the latest metrics for each of these vertices.
+ * This function stitches the two together and returns the modified stateDocument object.
  *
  * @param {Object} stateDocument
  * @param {Object} statsAggregation
@@ -75,47 +75,36 @@ export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation
     vertex.stats = {};
   });
 
-  // The statsAggregation object buckets by time first, then by vertex ID. However, the logstashState object (which is part of the
-  // stateDocument object) buckets by vertex ID first. The UI desires the latter structure so it can look up stats by vertex. So we
-  // transpose statsAggregation to bucket by vertex ID first, then by time. This then allows us to stitch the per-vertex timeseries stats
-  // from the transposed statsAggregation object onto the logstashState object.
-  const timeseriesBuckets = statsAggregation.timeseriesStats;
-  timeseriesBuckets.forEach(timeseriesBucket => {
-    // each bucket calculates stats for total pipeline CPU time for the associated timeseries
-    const totalDurationStats = timeseriesBucket.pipelines.scoped.total_processor_duration_stats;
-    const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
+  const totalDurationStats = statsAggregation.aggregations.pipelines.scoped.total_processor_duration_stats;
+  const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
-    // Each timeseriesBucket contains a list of vertices and their stats for a single timeseries interval
-    const timestamp = timeseriesBucket.key.time_bucket;
-    const vertexStatsByIdBuckets = get(timeseriesBucket, 'pipelines.scoped.vertices.vertex_id.buckets', []);
+  const verticesWithStatsBuckets = statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
+  verticesWithStatsBuckets.forEach(vertexStatsBucket => {
+    // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
+    const vertexId = vertexStatsBucket.key;
+    const vertex = verticesById[vertexId];
 
-    vertexStatsByIdBuckets.forEach(vertexStatsBucket => {
-      // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
-      const vertexId = vertexStatsBucket.key;
-      const vertex = verticesById[vertexId];
+    if (vertex !== undefined) {
+      // We extract this vertex's stats from vertexStatsBucket
+      const vertexStats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
 
-      if (vertex !== undefined) {
-        // We extract this vertex's stats from vertexStatsBucket
-        const vertexStats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
+      // For each stat (metric), we add it to the stats property of the vertex object in logstashState
+      const metrics = Object.keys(vertexStats);
+      metrics.forEach(metric => {
+        // Create metric object if it doesn't already exist
+        if (!vertex.stats.hasOwnProperty(metric)) {
+          vertex.stats[metric] = {
+            timeRange: {
+              min: firstSeen,
+              max: lastSeen
+            },
+            data: []
+          };
+        }
 
-        // For each stat (metric), we add it to the stats property of the vertex object in logstashState
-        const metrics = Object.keys(vertexStats);
-        metrics.forEach(metric => {
-          // Create metric object if it doesn't already exist
-          if (!vertex.stats.hasOwnProperty(metric)) {
-            vertex.stats[metric] = {
-              timeRange: {
-                min: firstSeen,
-                max: lastSeen
-              },
-              data: []
-            };
-          }
-
-          vertex.stats[metric].data.push([ timestamp, vertexStats[metric]]);
-        });
-      }
-    });
+      });
+      vertex.stats = vertexStats;
+    }
   });
 
   return stateDocument.logstash_state;
@@ -149,7 +138,6 @@ export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipe
   const [ stateDocument, statsAggregation ] = await Promise.all([
     getPipelineStateDocument(callWithRequest, req, lsIndexPattern, options),
     getPipelineStatsAggregation(callWithRequest, req, lsIndexPattern, timeseriesInterval, options),
-    // getPipelineStatsAggregationLatest(callWithRequest, req, lsIndexPattern, timeseriesInterval, options)
   ]);
 
   if (stateDocument === null) {

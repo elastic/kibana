@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, last } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
@@ -90,25 +89,22 @@ function createScopedAgg(pipelineId, pipelineHash, agg) {
   };
 }
 
-function createTimeseriesAggs(pipelineId, pipelineHash, maxBucketSize, timeseriesInterval, lastTimeBucket) {
-  return {
-    by_time: {
-      composite: {
-        sources: [
-          {
-            time_bucket: {
-              date_histogram: {
-                field: 'logstash_stats.timestamp',
-                interval: timeseriesInterval + 's'
-              }
-            }
-          }
-        ],
-        after: {
-          time_bucket: lastTimeBucket
-        }
-      },
-      aggs: createScopedAgg(pipelineId, pipelineHash, {
+function fetchPipelineLatestStats(query, logstashIndexPattern, pipelineId, version, maxBucketSize, callWithRequest, req) {
+  const params = {
+    index: logstashIndexPattern,
+    size: 0,
+    ignoreUnavailable: true,
+    filterPath: [
+      'aggregations.pipelines.scoped.vertices.vertex_id.buckets.key',
+      'aggregations.pipelines.scoped.vertices.vertex_id.buckets.events_in_total',
+      'aggregations.pipelines.scoped.vertices.vertex_id.buckets.events_out_total',
+      'aggregations.pipelines.scoped.vertices.vertex_id.buckets.duration_in_millis_total',
+      'aggregations.pipelines.scoped.vertices.vertex_id.buckets.queue_push_duration_in_millis_total',
+      'aggregations.pipelines.scoped.total_processor_duration_stats'
+    ],
+    body: {
+      query: query,
+      aggs: createScopedAgg(pipelineId, version.hash, {
         vertices: nestedVertices(maxBucketSize),
         total_processor_duration_stats: {
           stats: {
@@ -118,34 +114,11 @@ function createTimeseriesAggs(pipelineId, pipelineHash, maxBucketSize, timeserie
       })
     }
   };
-}
 
-function fetchPipelineTimeseriesStats(query, logstashIndexPattern, pipelineId, version,
-  maxBucketSize, timeseriesInterval, callWithRequest, req, lastTimeBucket = 0) {
-  const params = {
-    index: logstashIndexPattern,
-    size: 0,
-    ignoreUnavailable: true,
-    filterPath: [
-      'aggregations.by_time.buckets.key.time_bucket',
-      'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.key',
-      'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.events_in_total',
-      'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.events_out_total',
-      'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.duration_in_millis_total',
-      'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.queue_push_duration_in_millis_total',
-      'aggregations.by_time.buckets.pipelines.scoped.total_processor_duration_stats'
-    ],
-    body: {
-      query: query,
-      aggs: createTimeseriesAggs(pipelineId, version.hash, maxBucketSize, timeseriesInterval, lastTimeBucket)
-    }
-  };
-
-  console.log(JSON.stringify(params.body));
   return callWithRequest(req, 'search', params);
 }
 
-export async function getPipelineStatsAggregation(callWithRequest, req, logstashIndexPattern, timeseriesInterval,
+export function getPipelineStatsAggregation(callWithRequest, req, logstashIndexPattern, timeseriesInterval,
   { clusterUuid, start, end, pipelineId, version }) {
   const filters = [
     {
@@ -163,6 +136,7 @@ export async function getPipelineStatsAggregation(callWithRequest, req, logstash
     }
   ];
 
+  // TODO: pull up into caller?
   if (timeseriesInterval <= 10) {
     timeseriesInterval = 30;
   }
@@ -183,24 +157,6 @@ export async function getPipelineStatsAggregation(callWithRequest, req, logstash
 
   const config = req.server.config();
 
-  const timeBuckets = [];
-  let paginatedTimeBuckets;
-  do {
-    const lastTimeBucket = get(last(paginatedTimeBuckets), 'key.time_bucket', 0);
-    const paginatedResponse = await fetchPipelineTimeseriesStats(query, logstashIndexPattern, pipelineId, version,
-      config.get('xpack.monitoring.max_bucket_size'), timeseriesInterval, callWithRequest, req, lastTimeBucket);
-
-    paginatedTimeBuckets = get(paginatedResponse, 'aggregations.by_time.buckets', []);
-    timeBuckets.push(...paginatedTimeBuckets);
-  } while (paginatedTimeBuckets.length > 0);
-
-  // Drop the last bucket if it is partial (spoiler alert: this will be the case most of the time)
-  const lastTimeBucket = last(timeBuckets);
-  if (version.lastSeen - lastTimeBucket.key.time_bucket < timeseriesInterval * 1000) {
-    timeBuckets.pop();
-  }
-
-  return {
-    timeseriesStats: timeBuckets
-  };
+  return fetchPipelineLatestStats(query, logstashIndexPattern, pipelineId, version,
+    config.get('xpack.monitoring.max_bucket_size'), callWithRequest, req);
 }
