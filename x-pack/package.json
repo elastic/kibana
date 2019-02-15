@@ -22,8 +22,7 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "10.12.12",
-    "@types/react": "16.3.14"
+    "**/@types/node": "10.12.12"
   },
   "devDependencies": {
     "@kbn/dev-utils": "1.0.0",
@@ -54,7 +53,7 @@
     "@types/mocha": "^5.2.5",
     "@types/pngjs": "^3.3.1",
     "@types/prop-types": "^15.5.3",
-    "@types/react": "16.3.14",
+    "@types/react": "^16.3.14",
     "@types/react-datepicker": "^1.1.5",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
