@@ -1,4 +1,4 @@
-<kbn-management-app section="kibana/objects" class="kuiView">
+<kbn-management-app section="kibana/objects" class="kuiView" data-test-subj="savedObjectsEdit">
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
     <!-- Header -->
     <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
@@ -40,6 +40,7 @@
           class="kuiButton kuiButton--danger kuiButton--iconText"
           ng-click="delete()"
           ng-if="canDelete"
+          data-test-subj="savedObjectEditDelete"
         >
           <span class="kuiButton__inner">
             <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
@@ -128,6 +129,7 @@
         role="form"
         name="objectForm"
         ng-submit="submit()"
+        data-test-subj="savedObjectEditForm"
       >
         <div class="kuiFormSection" ng-repeat="field in fields">
           <label for="{{ field.name }}" class="kuiFormLabel">
@@ -185,6 +187,7 @@
           i18n-default-message="Save { title } Object"
           i18n-values="{ title }"
           ng-if="canEdit"
+          data-test-subj="savedObjectEditSave"
         ></button>
 
         <button

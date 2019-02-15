@@ -10,6 +10,7 @@ import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
 
   describe('feature controls saved objects management', () => {
@@ -91,9 +92,39 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           expect(actual).to.be(true);
         });
       });
+
+      describe('edit visualization', () => {
+        before(async () => {
+          await PageObjects.common.navigateToActualUrl(
+            'kibana',
+            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+            {
+              loginIfPrompted: false,
+            }
+          );
+        });
+
+        it('shows delete button', async () => {
+          await testSubjects.existOrFail('savedObjectEditDelete');
+        });
+
+        it('shows save button', async () => {
+          await testSubjects.existOrFail('savedObjectEditSave');
+        });
+
+        it('has inputs without readonly attributes', async () => {
+          const form = await testSubjects.find('savedObjectEditForm');
+          const inputs = await form.findAllByCssSelector('input');
+          expect(inputs.length).to.be.greaterThan(0);
+          for (const input of inputs) {
+            const isEnabled = await input.isEnabled();
+            expect(isEnabled).to.be(true);
+          }
+        });
+      });
     });
 
-    describe('global visualize all privileges', () => {
+    describe('global visualize read privileges', () => {
       before(async () => {
         await security.role.create('global_visualize_all_role', {
           elasticsearch: {
@@ -102,7 +133,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           kibana: [
             {
               feature: {
-                visualize: ['all'],
+                visualize: ['read'],
               },
               spaces: ['*'],
             },
@@ -134,34 +165,67 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         ]);
       });
 
-      before(async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
+      describe('listing', () => {
+        before(async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaSavedObjects();
+        });
+
+        it('shows a visualization and an index pattern', async () => {
+          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          expect(objects).to.eql(['logstash-*', 'A Pie']);
+        });
+
+        it('can view only the visualization in application', async () => {
+          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          expect(bools).to.eql([
+            {
+              title: 'logstash-*',
+              canViewInApp: false,
+            },
+            {
+              title: 'A Pie',
+              canViewInApp: true,
+            },
+          ]);
+        });
+
+        it(`can't delete all saved objects`, async () => {
+          await PageObjects.settings.clickSavedObjectsTableSelectAll();
+          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          expect(actual).to.be(false);
+        });
       });
 
-      it('shows a visualization and an index pattern', async () => {
-        const objects = await PageObjects.settings.getSavedObjectsInTable();
-        expect(objects).to.eql(['logstash-*', 'A Pie']);
-      });
+      describe('edit visualization', () => {
+        before(async () => {
+          await PageObjects.common.navigateToActualUrl(
+            'kibana',
+            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+            {
+              loginIfPrompted: false,
+            }
+          );
+          await testSubjects.existOrFail('savedObjectsEdit');
+        });
 
-      it('can view only the visualization in application', async () => {
-        const bools = await PageObjects.settings.getSavedObjectsTableSummary();
-        expect(bools).to.eql([
-          {
-            title: 'logstash-*',
-            canViewInApp: false,
-          },
-          {
-            title: 'A Pie',
-            canViewInApp: true,
-          },
-        ]);
-      });
+        it('shows delete button', async () => {
+          await testSubjects.missingOrFail('savedObjectEditDelete');
+        });
 
-      it(`can't delete all saved objects`, async () => {
-        await PageObjects.settings.clickSavedObjectsTableSelectAll();
-        const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
-        expect(actual).to.be(false);
+        it('shows save button', async () => {
+          await testSubjects.missingOrFail('savedObjectEditSave');
+        });
+
+        it('has inputs without readonly attributes', async () => {
+          const form = await testSubjects.find('savedObjectEditForm');
+          const inputs = await form.findAllByCssSelector('input');
+          expect(inputs.length).to.be.greaterThan(0);
+          for (const input of inputs) {
+            const isEnabled = await input.isEnabled();
+            expect(isEnabled).to.be(false);
+          }
+        });
       });
     });
   });
