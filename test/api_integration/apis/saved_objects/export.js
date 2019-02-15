@@ -38,6 +38,54 @@ export default function ({ getService }) {
         });
     });
 
+    it('exports by single type', async () => {
+      await supertest
+        .get('/api/saved_objects/_export')
+        .query({
+          type: 'dashboard',
+        })
+        .expect(200)
+        .then((resp) => {
+          const objects = resp.text.split('\n').map(JSON.parse);
+          expect(objects).to.have.length(1);
+        });
+    });
+
+    it('exports by multiple types', async () => {
+      await supertest
+        .get('/api/saved_objects/_export')
+        .query({
+          type: ['dashboard', 'index-pattern'],
+        })
+        .expect(200)
+        .then((resp) => {
+          const objects = resp.text.split('\n').map(JSON.parse);
+          expect(objects).to.have.length(2);
+        });
+    });
+
+    it('exports by objects', async () => {
+      await supertest
+        .get('/api/saved_objects/_export')
+        .query({
+          objects: JSON.stringify([
+            {
+              type: 'dashboard',
+              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab'
+            },
+            {
+              type: 'index-pattern',
+              id: '91200a00-9efd-11e7-acb3-3dab96693fab'
+            },
+          ]),
+        })
+        .expect(200)
+        .then((resp) => {
+          const objects = resp.text.split('\n').map(JSON.parse);
+          expect(objects).to.have.length(2);
+        });
+    });
+
     it('should return 200 exporting by type', async () => {
       await supertest
         .get('/api/saved_objects/_export')
