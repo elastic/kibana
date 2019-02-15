@@ -28,6 +28,7 @@ export const SnapshotHistogram = ({
   dangerColor,
   histogram,
   primaryColor,
+  secondaryColor,
   windowWidth,
 }: SnapshotHistogramProps) => (
   <EuiSeriesChart
@@ -38,18 +39,18 @@ export const SnapshotHistogram = ({
     xCrosshairFormat="YYYY-MM-DD hh:mmZ"
   >
     <EuiHistogramSeries
-      data={histogram.map(({ x, x0, upCount }) => ({ x, x0, y: upCount }))}
-      name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
-        defaultMessage: 'Up',
-      })}
-      color={primaryColor}
-    />
-    <EuiHistogramSeries
       data={histogram.map(({ x, x0, downCount }) => ({ x, x0, y: downCount }))}
       name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
         defaultMessage: 'Down',
       })}
       color={dangerColor}
+    />
+    <EuiHistogramSeries
+      data={histogram.map(({ x, x0, upCount }) => ({ x, x0, y: upCount }))}
+      name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
+        defaultMessage: 'Up',
+      })}
+      color={secondaryColor}
     />
   </EuiSeriesChart>
 );

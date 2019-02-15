@@ -16,12 +16,14 @@ import {
   EuiSeriesChart,
   // @ts-ignore missing type definition
   EuiSeriesChartUtils,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { LatestMonitor } from '../../../common/graphql/types';
 import { formatSparklineCounts } from './format_sparkline_counts';
@@ -41,8 +43,8 @@ const monitorListPagination = {
 };
 
 export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: MonitorListProps) => (
-  <Fragment>
-    <EuiTitle size="xs">
+  <EuiPanel paddingSize="s">
+    <EuiTitle size="xxs">
       <h5>
         <FormattedMessage
           id="xpack.uptime.monitorList.monitoringStatusTitle"
@@ -50,15 +52,17 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
         />
       </h5>
     </EuiTitle>
-    <EuiPanel paddingSize="l">
-      <EuiInMemoryTable
-        columns={[
-          {
-            field: 'ping.monitor.status',
-            name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-              defaultMessage: 'Status',
-            }),
-            render: (status: string) => (
+    <EuiSpacer size="s" />
+    <EuiInMemoryTable
+      columns={[
+        {
+          field: 'ping.monitor.status',
+          width: 150,
+          name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+            defaultMessage: 'Status',
+          }),
+          render: (status: string, monitor: LatestMonitor) => (
+            <div>
               <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
                 {status === 'up'
                   ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
@@ -68,87 +72,84 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
                       defaultMessage: 'Down',
                     })}
               </EuiHealth>
-            ),
-          },
-          {
-            field: 'ping.timestamp',
-            name: i18n.translate('xpack.uptime.monitorList.lastUpdatedColumnLabel', {
-              defaultMessage: 'Last updated',
-            }),
-            render: (timestamp: string) => moment(timestamp).fromNow(),
-          },
-          {
-            field: 'ping.monitor.id',
-            name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
-              defaultMessage: 'ID',
-            }),
-            render: (id: string, monitor: LatestMonitor) => (
-              <Link to={`/monitor/${id}`}>
-                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
-                  ? monitor.ping.monitor.name
-                  : id}
-              </Link>
-            ),
-          },
-          {
-            field: 'ping.url.full',
-            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-              defaultMessage: 'URL',
-            }),
-            render: (url: string) => (
-              <EuiLink href={url} target="_blank">
+              <EuiText size="xs" color="subdued">
+                {moment(monitor.ping.monitor.timestamp).fromNow()}
+              </EuiText>
+            </div>
+          ),
+        },
+        {
+          field: 'ping.monitor.id',
+          name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
+            defaultMessage: 'ID',
+          }),
+          render: (id: string, monitor: LatestMonitor) => (
+            <Link to={`/monitor/${id}`}>
+              {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
+                ? monitor.ping.monitor.name
+                : id}
+            </Link>
+          ),
+        },
+        {
+          field: 'ping.url.full',
+          name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+            defaultMessage: 'URL',
+          }),
+          render: (url: string, monitor: LatestMonitor) => (
+            <div>
+              <EuiLink href={url} target="_blank" color="subdued">
                 {url}
               </EuiLink>
-            ),
+              {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.ip ? (
+                <EuiText size="xs">{monitor.ping.monitor.ip}</EuiText>
+              ) : null}
+            </div>
+          ),
+        },
+        {
+          field: 'upSeries',
+          width: 180,
+          align: 'right',
+          name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+            defaultMessage: 'Downtime history',
+          }),
+          // @ts-ignore TODO fix typing
+          render: (upSeries, monitor) => {
+            const { downSeries } = monitor;
+            return (
+              <EuiSeriesChart
+                showDefaultAxis={false}
+                width={180}
+                height={70}
+                stackBy="y"
+                // TODO: style hack
+                style={{ marginBottom: -24 }}
+                xType={EuiSeriesChartUtils.SCALE.TIME}
+                xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+              >
+                <EuiHistogramSeries
+                  data={formatSparklineCounts(downSeries)}
+                  name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
+                    defaultMessage: 'Down',
+                  })}
+                  color={dangerColor}
+                />
+                <EuiHistogramSeries
+                  data={formatSparklineCounts(upSeries)}
+                  name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
+                    defaultMessage: 'Up',
+                  })}
+                  color={primaryColor}
+                />
+              </EuiSeriesChart>
+            );
           },
-          {
-            field: 'ping.monitor.ip',
-            name: i18n.translate('xpack.uptime.monitorList.ipColumnLabel', {
-              defaultMessage: 'IP',
-            }),
-          },
-          {
-            field: 'upSeries',
-            name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-              defaultMessage: 'Monitor History',
-            }),
-            // @ts-ignore TODO fix typing
-            render: (upSeries, monitor) => {
-              const { downSeries } = monitor;
-              return (
-                <EuiSeriesChart
-                  showDefaultAxis={false}
-                  width={180}
-                  height={70}
-                  stackBy="y"
-                  // TODO: style hack
-                  style={{ marginBottom: '-20px' }}
-                  xType={EuiSeriesChartUtils.SCALE.TIME}
-                  xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-                >
-                  <EuiHistogramSeries
-                    data={formatSparklineCounts(downSeries)}
-                    name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
-                      defaultMessage: 'Down',
-                    })}
-                    color={dangerColor}
-                  />
-                  <EuiHistogramSeries
-                    data={formatSparklineCounts(upSeries)}
-                    name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
-                      defaultMessage: 'Up',
-                    })}
-                    color={primaryColor}
-                  />
-                </EuiSeriesChart>
-              );
-            },
-          },
-        ]}
-        loading={loading}
-        items={monitors}
-        pagination={monitorListPagination}
-      />
-    </EuiPanel>
-  </Fragment>
+        },
+      ]}
+      loading={loading}
+      items={monitors}
+      pagination={monitorListPagination}
+    />
+  </EuiPanel>
 );

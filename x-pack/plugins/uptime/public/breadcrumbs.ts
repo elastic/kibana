@@ -19,7 +19,7 @@ export const monitorBreadcrumb: UMBreadcrumb = {
 
 export const overviewBreadcrumb: UMBreadcrumb = {
   text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
-    defaultMessage: 'Overview',
+    defaultMessage: 'Uptime',
   }),
   href: '#/',
 };

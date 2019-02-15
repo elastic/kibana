@@ -18,6 +18,7 @@ import {
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
@@ -37,69 +38,63 @@ export const Snapshot = ({
   snapshot: { up, down, total, histogram },
   windowWidth,
 }: SnapshotProps) => (
-  <EuiFlexGroup alignItems="baseline" gutterSize="xl">
+  <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={4}>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.endpointStatusTitle"
-            defaultMessage="Endpoint status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiPanel>
-        <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="xl">
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xxs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.endpointStatusTitle"
+              defaultMessage="Endpoint status"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
           <EuiFlexItem>
-            {/* TODO: this is a UI hack that needs to be replaced */}
-            <EuiPanel>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
-                  defaultMessage: 'Up',
-                })}
-                textAlign="center"
-                title={up}
-                titleColor="primary"
-              />
-            </EuiPanel>
+            <EuiStat
+              description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
+                defaultMessage: 'Up',
+              })}
+              textAlign="center"
+              title={up}
+              titleColor="secondary"
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
-                  defaultMessage: 'Down',
-                })}
-                textAlign="center"
-                title={down}
-                titleColor="danger"
-              />
-            </EuiPanel>
+            <EuiStat
+              description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
+                defaultMessage: 'Down',
+              })}
+              textAlign="center"
+              title={down}
+              titleColor="danger"
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
-                  defaultMessage: 'Total',
-                })}
-                textAlign="center"
-                title={total}
-                titleColor="subdued"
-              />
-            </EuiPanel>
+            <EuiStat
+              description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
+                defaultMessage: 'Total',
+              })}
+              textAlign="center"
+              title={total}
+              titleColor="subdued"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
-    <EuiFlexItem grow={8} style={{ paddingTop: '12px', paddingRight: '12px' }}>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.statusOverTimeTitle"
-            defaultMessage="Status over time"
-          />
-        </h5>
-      </EuiTitle>
-      {/* TODO: this is a UI hack that should be replaced */}
-      <EuiPanel paddingSize="s" style={{ maxHeight: '137px' }}>
+    <EuiFlexItem grow={8}>
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xxs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.statusOverTimeTitle"
+              defaultMessage="Status over time"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         {histogram && (
           <SnapshotHistogram
             dangerColor={dangerColor}

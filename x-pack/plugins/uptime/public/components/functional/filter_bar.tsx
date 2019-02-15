@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore No typings for EuiSearchBar
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
@@ -112,25 +112,22 @@ export const FilterBar = ({
     },
   ];
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow>
-        <EuiSearchBar
-          // TODO: update typing
-          onChange={({ query }: { query?: { text: string } }) => {
-            try {
-              let esQuery;
-              if (query && query.text) {
-                esQuery = EuiSearchBar.Query.toESQuery(query);
-              }
-              updateQuery(esQuery);
-            } catch (e) {
-              updateQuery(undefined);
-            }
-          }}
-          filters={filters}
-          schema={filterBarSearchSchema}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSearchBar
+      // TODO: update typing
+      onChange={({ query }: { query?: { text: string } }) => {
+        try {
+          let esQuery;
+          if (query && query.text) {
+            esQuery = EuiSearchBar.Query.toESQuery(query);
+          }
+          updateQuery(esQuery);
+        } catch (e) {
+          updateQuery(undefined);
+        }
+      }}
+      className="euiFlexGroup--gutterSmall"
+      filters={filters}
+      schema={filterBarSearchSchema}
+    />
   );
 };

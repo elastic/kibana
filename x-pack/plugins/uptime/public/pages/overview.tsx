@@ -49,10 +49,11 @@ export class OverviewPage extends React.Component<Props, OverviewPageState> {
               this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
             }}
           />
+          <EuiSpacer size="s" />
           <SnapshotQuery filters={this.state.currentFilterQuery} {...this.props} />
-          <EuiSpacer size="xl" />
+          <EuiSpacer size="s" />
           <MonitorListQuery filters={this.state.currentFilterQuery} {...this.props} />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <ErrorListQuery filters={this.state.currentFilterQuery} {...this.props} />
         </EmptyStateQuery>
       </Fragment>
