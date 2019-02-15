@@ -19,6 +19,26 @@ const unsignedIntegerScalar = new GraphQLScalarType({
     if (parsed < 0) {
       return null;
     }
+    return parsed;
+  },
+  parseLiteral(ast) {
+    switch (ast.kind) {
+      case Kind.INT:
+      case Kind.FLOAT:
+      case Kind.STRING:
+        return parseInt(ast.value, 10);
+    }
+    return null;
+  },
+});
+
+const int64Scalar = new GraphQLScalarType({
+  name: 'Int64',
+  description: 'Represents a signed 64-bit integer',
+  serialize(value): number {
+    return parseInt(value, 10);
+  },
+  parseValue(value) {
     return parseInt(value, 10);
   },
   parseLiteral(ast) {
@@ -34,4 +54,5 @@ const unsignedIntegerScalar = new GraphQLScalarType({
 
 export const unsignedIntegerResolverFunctions: CreateUMGraphQLResolvers = (libs: UMServerLibs) => ({
   UnsignedInteger: unsignedIntegerScalar,
+  Int64: int64Scalar,
 });

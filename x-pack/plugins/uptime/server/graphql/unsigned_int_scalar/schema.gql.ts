@@ -6,6 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const unsignedIntegerSchema = gql`
+export const bigIntSchema = gql`
   scalar UnsignedInteger
+  scalar Int64
 `;

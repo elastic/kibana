@@ -5,4 +5,4 @@
  */
 
 export { unsignedIntegerResolverFunctions } from './resolvers';
-export { unsignedIntegerSchema } from './schema.gql';
+export { bigIntSchema } from './schema.gql';
