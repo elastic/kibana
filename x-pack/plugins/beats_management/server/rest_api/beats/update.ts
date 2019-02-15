@@ -5,7 +5,9 @@
  */
 
 import Joi from 'joi';
+import { CMBeat } from 'x-pack/plugins/beats_management/common/domain_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { ReturnTypeUpdate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -38,7 +40,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }),
     },
   },
-  handler: async (request: FrameworkRequest, h: any) => {
+  handler: async (request: FrameworkRequest, h: any): Promise<ReturnTypeUpdate<CMBeat>> => {
     const { beatId } = request.params;
     const accessToken = request.headers['kbn-beats-access-token'];
     const remoteAddress = request.info.remoteAddress;

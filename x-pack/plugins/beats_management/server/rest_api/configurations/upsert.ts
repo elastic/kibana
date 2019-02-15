@@ -16,6 +16,7 @@ import {
   ConfigurationBlock,
   createConfigurationBlockInterface,
 } from '../../../common/domain_types';
+import { ReturnTypeBulkUpsert } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
@@ -30,7 +31,7 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
       payload: Joi.array().items(Joi.object({}).unknown(true)),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkUpsert> => {
     const result = request.payload.map(async (block: ConfigurationBlock) => {
       const assertData = createConfigurationBlockInterface().decode(block);
       if (assertData.isLeft()) {

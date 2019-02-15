@@ -5,6 +5,7 @@
  */
 import Joi from 'joi';
 import { ConfigurationBlock } from '../../../common/domain_types';
+import { ReturnTypeList } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -19,7 +20,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     },
     auth: false,
   },
-  handler: async (request: any, h: any) => {
+  handler: async (request: any, h: any): Promise<ReturnTypeList<ConfigurationBlock>> => {
     const beatId = request.params.beatId;
     const accessToken = request.headers['kbn-beats-access-token'];
 

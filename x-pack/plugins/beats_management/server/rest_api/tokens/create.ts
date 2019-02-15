@@ -8,6 +8,7 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { get } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { ReturnTypeBulkCreate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
@@ -28,7 +29,7 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkCreate> => {
     const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
     try {

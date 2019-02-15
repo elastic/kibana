@@ -7,6 +7,7 @@
 import * as Joi from 'joi';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { CMBeat } from '../../../common/domain_types';
+import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -27,7 +28,7 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<CMBeat>> => {
     const listByAndValueParts = request.params.listByAndValue
       ? request.params.listByAndValue.split('/')
       : [];

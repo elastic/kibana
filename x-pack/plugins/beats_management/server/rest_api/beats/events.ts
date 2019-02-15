@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
+import { BeatEvent } from '../../../common/domain_types';
+import { ReturnTypeCreate } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -18,7 +20,7 @@ export const beatEventsRoute = (libs: CMServerLibs) => ({
     },
     auth: false,
   },
-  handler: async (request: any, h: any) => {
+  handler: async (request: any, h: any): Promise<ReturnTypeCreate<BeatEvent>> => {
     const beatId = request.params.beatId;
     const events = request.payload;
     const accessToken = request.headers['kbn-beats-access-token'];

@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
@@ -29,7 +30,7 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkAction> => {
     const { assignments }: { assignments: BeatsTagAssignment[] } = request.payload;
 
     try {

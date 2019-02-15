@@ -5,6 +5,7 @@
  */
 
 import { CMBeat } from '../../../common/domain_types';
+import { ReturnTypeGet } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
@@ -12,7 +13,7 @@ export const createGetBeatRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agent/{beatId}/{token?}',
   requiredRoles: ['beats_admin'],
-  handler: async (request: any, h: any) => {
+  handler: async (request: any, h: any): Promise<ReturnTypeGet<CMBeat>> => {
     const beatId = request.params.beatId;
 
     let beat: CMBeat | null;

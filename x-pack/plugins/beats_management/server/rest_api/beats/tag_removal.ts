@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -28,7 +29,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkAction> => {
     const { removals } = request.payload;
 
     try {
