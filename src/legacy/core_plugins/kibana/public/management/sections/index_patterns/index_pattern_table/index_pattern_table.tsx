@@ -22,6 +22,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  // @ts-ignore
   EuiInMemoryTable,
   EuiPanel,
   EuiText,
