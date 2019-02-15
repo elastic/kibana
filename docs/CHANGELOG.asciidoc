@@ -108,15 +108,15 @@ Kibana App::
 * Renames `defaultSpaceBasePath` to `serverBasePath` {pull}29431[#29431]
 Machine Learning::
 * Fixes race condition related to view by swimlane update {pull}28990[#28990]
-* Adds an integrity check to creating, updating and deleting annotations {pull}29969[#29969]
+* Adds an integrity check to creating, updating, and deleting annotations {pull}29969[#29969]
 * Removes key attribute from annotation before indexing {pull}30183[#30183]
 * Makes index pattern related links optional {pull}29332[#29332]
-* Fixes unmounting jobs list react component on page change {pull}29980[#29980]
+* Fixes unmounting jobs list React component on page change {pull}29980[#29980]
 * Uses intl.formatMessage for File Data Visualizer file picker {pull}29251[#29251]
 Management::
 * Adds Webhook Action type on client {pull}29818[#29818]
 Monitoring::
-* Fixes logstash date format {pull}29637[#29637]
+* Fixes Logstash date format {pull}29637[#29637]
 * Fixes UI regressions with shard allocation {pull}29757[#29757]
 Operations::
 * Fixes plugin deprecations {pull}29737[#29737]
