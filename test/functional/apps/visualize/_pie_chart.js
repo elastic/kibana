@@ -302,17 +302,6 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql(expectedTableData);
       });
 
-      it('should correctly filter on legend', async () => {
-        const expectedTableData = [ '0', 'CN', '40,000', 'CN', '80,000', 'CN', '120,000', 'CN', '160,000', 'CN',
-          '200,000', 'CN', '240,000', 'CN', '280,000', 'CN', '320,000', 'CN', '360,000', 'CN' ];
-        await PageObjects.visualize.filterLegend('CN');
-        await PageObjects.visualize.waitForVisualization();
-        const data = await PageObjects.visualize.getLegendEntries();
-        expect(data).to.eql(expectedTableData);
-        await filterBar.removeFilter('geo.dest');
-        await PageObjects.visualize.waitForVisualization();
-      });
-
       it('should still showing pie chart when a subseries have zero data', async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickPieChart');
