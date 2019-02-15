@@ -416,7 +416,7 @@ multiple split tables will now see those tables rendered differently.
 [float]
 ==== Removed overseas territories from France Departments vector layer
 
-*Details:* Overseas territories in the France Departments vector layer have been removed. These territories have no ISO 3166-2 or INSEE codes to join Elasticsearch data to.
+*Details:* Overseas territories in the France Departments vector layer have been removed. These territories have no ISO 3166-2 or INSEE codes to join to Elasticsearch data.
 
 *Impact:* Region Map, Vega, and Maps plugin visualizations using the France Departments layer will not show overseas territories. 
 
