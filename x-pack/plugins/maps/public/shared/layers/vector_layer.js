@@ -14,8 +14,6 @@ import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
 import { FeatureTooltip } from '../../components/map/feature_tooltip';
-import { getStore } from '../../store/store';
-import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
 
 const EMPTY_FEATURE_COLLECTION = {
@@ -30,17 +28,15 @@ export class VectorLayer extends AbstractLayer {
   static popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false,
-    className: 'euiPanel euiPanel--shadow',
   });
 
   static tooltipContainer = document.createElement('div');
 
-  static createDescriptor(options) {
+  static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
 
     if (!options.style) {
-      const mapColors = getMapColors(getStore().getState());
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
@@ -65,10 +61,6 @@ export class VectorLayer extends AbstractLayer {
     this._joins.forEach(joinSource => {
       joinSource.destroy();
     });
-  }
-
-  isJoinable() {
-    return true;
   }
 
   getJoins() {
@@ -256,8 +248,7 @@ export class VectorLayer extends AbstractLayer {
         propertiesMap: propertiesMap,
       };
     } catch(e) {
-      console.error(e);
-      onLoadError(sourceDataId, requestToken, e.medium);
+      onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
         shouldJoin: false,
         join: join
@@ -327,9 +318,10 @@ export class VectorLayer extends AbstractLayer {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return false;
     }
-    if (!sourceResult.featureCollection) {
+    if (!sourceResult.featureCollection || !joinState.propertiesMap) {
       return false;
     }
+
     joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
@@ -337,7 +329,6 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _performJoins(sourceResult, joinStates) {
-
     const hasJoined = joinStates.map(joinState => {
       return this._joinToFeatureCollection(sourceResult, joinState);
     });
@@ -481,7 +472,7 @@ export class VectorLayer extends AbstractLayer {
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
         type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
+        data: EMPTY_FEATURE_COLLECTION
       });
     }
   }
@@ -492,8 +483,8 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor({
+  renderStyleEditor(Style, options) {
+    return Style.renderEditor({
       layer: this,
       ...options
     });
@@ -502,7 +493,6 @@ export class VectorLayer extends AbstractLayer {
   _canShowTooltips() {
     return this._source.canFormatFeatureProperties();
   }
-
 
   async _getPropertiesForTooltip(feature) {
     const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);

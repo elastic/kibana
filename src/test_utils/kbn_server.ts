@@ -223,7 +223,7 @@ export async function startTestServers({
 
     // Override provided configs, we know what the elastic user is now
     kbnSettings.elasticsearch = {
-      url: esTestConfig.getUrl(),
+      hosts: [esTestConfig.getUrl()],
       username: esTestConfig.getUrlParts().username,
       password: esTestConfig.getUrlParts().password,
     };

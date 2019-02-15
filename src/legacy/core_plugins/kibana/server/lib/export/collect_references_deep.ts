@@ -20,7 +20,7 @@
 import {
   SavedObject,
   SavedObjectsClient,
-} from '../../../../../../server/saved_objects/service/saved_objects_client';
+} from '../../../../../server/saved_objects/service/saved_objects_client';
 
 const MAX_BULK_GET_SIZE = 10000;
 

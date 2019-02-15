@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
+import { get } from 'lodash';
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 
@@ -18,7 +19,7 @@ export function registerClusterCheckupRoutes(server: Legacy.Server) {
     method: 'GET',
     async handler(request) {
       try {
-        const apmIndexPatterns = server.plugins.apm_oss.indexPatterns;
+        const apmIndexPatterns = get(server, 'plugins.apm_oss.indexPatterns', []);
 
         return await getUpgradeAssistantStatus(
           callWithRequest,
