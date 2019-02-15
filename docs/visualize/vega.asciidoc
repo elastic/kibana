@@ -8,9 +8,7 @@ into Kibana, either standalone, or on top of a map.  To see Vega in action,
 watch this
 https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
 
-
-Currently Vega version 4.3 and VegaLite version 2.6 are supported.
-
+Currently Vega version 4.3 and Vega-Lite version 2.6 are supported.
 
 NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals as data urls. This is not supported in Kibana as all data is fetched at once prior to passing it to the Vega renderer.
 
@@ -296,16 +294,25 @@ to your kibana.yml file.
 [[vega-useful-links]]
 === Useful Links
 
-* The https://vega.github.io/editor/[Vega Editor] includes examples for Vega &
-Vega-Lite, but does not support any Kibana-specific features like
-Elasticsearch requests and interactive base maps.
-* Vega-Lite
-https://vega.github.io/vega-lite/tutorials/getting_started.html[tutorials],
-https://vega.github.io/vega-lite/docs/[docs], and
-https://vega.github.io/vega-lite/examples/[examples]
-* Vega https://vega.github.io/vega/tutorials/[tutorials],
-https://vega.github.io/vega/docs/[docs],
-https://vega.github.io/vega/examples/[examples]
+==== Vega Editor
+The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any 
+{kib}-specific features like {es} requests and interactive base maps.
+
+==== Vega-Lite resources
+* https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials]
+* https://vega.github.io/vega-lite/docs/[Docs]
+* https://vega.github.io/vega-lite/examples/[Examples]
+
+==== Vega resources 
+* https://vega.github.io/vega/tutorials/[Tutorials]
+* https://vega.github.io/vega/docs/[Docs]
+* https://vega.github.io/vega/examples/[Examples]
+
+==== Elastic blog posts
+* https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting Started with Vega Visualizations in Kibana]
+* https://www.elastic.co/blog/custom-vega-visualizations-in-kibana[Custom Vega Visualizations in Kibana]  
+* https://www.elastic.co/blog/sankey-visualization-with-vega-in-kibana[Sankey Visualization with Vega in Kibana]
+
 
 [[vega-using-vega-and-vegalite-examples]]
 ==== Using Vega and Vega-Lite examples
