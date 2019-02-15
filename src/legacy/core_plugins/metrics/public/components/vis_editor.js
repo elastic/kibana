@@ -103,8 +103,8 @@ class VisEditor extends Component {
     this.setState({ autoApply: event.target.checked });
   }
 
-  onDataChange = (data) => {
-    this.visDataSubject.next(data);
+  onDataChange = ({ visData }) => {
+    this.visDataSubject.next(visData);
   }
 
   render() {
