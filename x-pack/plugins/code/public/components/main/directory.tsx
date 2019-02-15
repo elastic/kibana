@@ -75,7 +75,7 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
       <Link to={props.getUrl(n.path!)} data-test-subj={`codeFileExplorerNode-${n.name}`}>
         <EuiIcon type={typeIconMap[n.type]} color="subdued" />
         <NodeName>
-          <EuiText size="s" style={{ display: 'inline-block' }}>
+          <EuiText size="s" className="eui-displayInlineBlock">
             {n.name}
           </EuiText>
         </NodeName>

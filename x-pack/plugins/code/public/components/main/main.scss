@@ -42,12 +42,16 @@
   }
 }
 
-.code-file-tree__container {
+.codeFileTree--container {
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
   padding: $euiSizeM;
   background-color: $euiColorLightestShade;
+}
+
+.codeFileTree--icon {
+  margin-right: $euiSizeS;
 }
 
 .code-directory__node {

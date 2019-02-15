@@ -96,7 +96,7 @@ export class CodeFileTree extends React.Component<Props> {
                 type="arrowDown"
                 size="s"
                 color="subdued"
-                style={{ marginRight: '.5rem' }}
+                className="codeFileTree--icon"
                 onClick={onFolderClick}
               />
             ) : (
@@ -104,7 +104,7 @@ export class CodeFileTree extends React.Component<Props> {
                 type="arrowRight"
                 size="s"
                 color="subdued"
-                style={{ marginRight: '.5rem' }}
+                className="codeFileTree--icon"
                 onClick={onFolderClick}
               />
             )}
@@ -127,7 +127,7 @@ export class CodeFileTree extends React.Component<Props> {
           >
             <EuiIcon type="submodule" color="subdued" />
             <DirectoryNode>
-              <EuiText size="s" grow={false} style={{ display: 'inline-block' }}>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                 {node.name}
               </EuiText>
             </DirectoryNode>
@@ -144,7 +144,7 @@ export class CodeFileTree extends React.Component<Props> {
           >
             <EuiIcon type="symlink" color="subdued" />
             <DirectoryNode>
-              <EuiText size="s" grow={false} style={{ display: 'inline-block' }}>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                 {node.name}
               </EuiText>
             </DirectoryNode>
@@ -161,7 +161,7 @@ export class CodeFileTree extends React.Component<Props> {
           >
             <EuiIcon type="document" color="subdued" />
             <DirectoryNode>
-              <EuiText size="s" grow={false} style={{ display: 'inline-block' }}>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                 {node.name}
               </EuiText>
             </DirectoryNode>
