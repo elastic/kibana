@@ -37,7 +37,6 @@ export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
-export const CLEAR_TRANSIENT_LAYER = 'CLEAR_TRANSIENT_LAYER';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
@@ -166,10 +165,6 @@ export function toggleLayerVisible(layerId) {
 
 export function setSelectedLayer(layerId) {
   return async (dispatch, getState) => {
-    const transientLayerId = getTransientLayerId(getState());
-    if (transientLayerId) {
-      dispatch(removeLayer(transientLayerId));
-    }
     const oldSelectedLayer = getSelectedLayerId(getState());
     if (oldSelectedLayer) {
       await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
@@ -184,6 +179,16 @@ export function setSelectedLayer(layerId) {
   };
 }
 
+export function removeTransientLayer() {
+  return async (dispatch, getState) => {
+    const transientLayerId = getTransientLayerId(getState());
+    if (transientLayerId) {
+      dispatch(removeLayer(transientLayerId));
+      dispatch(setTransientLayer(null));
+    }
+  };
+}
+
 export function setTransientLayer(layerId) {
   return  {
     type: SET_TRANSIENT_LAYER,
@@ -191,10 +196,11 @@ export function setTransientLayer(layerId) {
   };
 }
 
-export function saveWorkspace() {
+export function clearTransientLayerStateAndCloseFlyout() {
   return async dispatch => {
-    await dispatch(setSelectedLayer(null));
     await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    await dispatch(setSelectedLayer(null));
+    await dispatch(removeTransientLayer());
   };
 }
 

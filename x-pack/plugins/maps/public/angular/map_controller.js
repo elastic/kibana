@@ -19,7 +19,7 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
-  saveWorkspace,
+  clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
   enableFullScreen,
@@ -206,7 +206,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   ]);
 
   async function doSave(saveOptions) {
-    await store.dispatch(saveWorkspace());
+    await store.dispatch(clearTransientLayerStateAndCloseFlyout());
     savedMap.syncWithStore(store.getState());
     const docTitle = Private(DocTitleProvider);
     let id;

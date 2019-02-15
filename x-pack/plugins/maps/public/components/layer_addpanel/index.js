@@ -13,7 +13,8 @@ import {
   removeLayer,
   setTransientLayer,
   addLayer,
-  setSelectedLayer
+  setSelectedLayer,
+  removeTransientLayer
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -31,7 +32,7 @@ function mapDispatchToProps(dispatch) {
   return {
     closeFlyout: layerId => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(setTransientLayer(null));
+      dispatch(removeTransientLayer());
       dispatch(setSelectedLayer(null));
       dispatch(removeLayer(layerId));
     },
@@ -42,7 +43,7 @@ function mapDispatchToProps(dispatch) {
     },
     removeLayer: () => {
       dispatch(setSelectedLayer(null));
-      dispatch(setTransientLayer(null));
+      dispatch(removeTransientLayer());
     },
     selectLayerAndAdd: () => {
       dispatch(setTransientLayer(null));

@@ -15,7 +15,7 @@ function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
     selectedLayer,
-    stateChanged: hasDirtyState(state)
+    hasStateChanged: hasDirtyState(state)
   };
 }
 

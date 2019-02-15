@@ -35,15 +35,14 @@ export class LayerPanel  extends React.Component {
         displayName: '',
         immutableSourceProps: [],
         hasLoadedSourcePropsForLayer: false,
-        styleUpdated: false,
-        style: nextProps.styleProperties,
+        hasStateChanged: false,
         prevId: nextId,
       };
     }
     return {
-      styleUpdated: prevState.styleUpdated
-        ? prevState.styleUpdated
-        : nextProps.stateChanged
+      hasStateChanged: prevState.hasStateChanged
+        ? prevState.hasStateChanged
+        : nextProps.hasStateChanged
     };
   }
 
@@ -166,7 +165,7 @@ export class LayerPanel  extends React.Component {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter activateSave={this.state.styleUpdated}/>
+          <FlyoutFooter hasStateChanged={this.state.hasStateChanged}/>
         </EuiFlyoutFooter>
       </EuiFlexGroup>
     );

@@ -23,15 +23,11 @@ import {
 
 export class AddLayerPanel extends Component {
 
-  constructor() {
-    super();
-
-    this.state = {
-      sourceType: null,
-      isLoading: false,
-      hasLayerSelected: false,
-      layer: null
-    };
+  state = {
+    sourceType: null,
+    isLoading: false,
+    hasLayerSelected: false,
+    layer: null
   }
 
   static getDerivedStateFromProps(props) {

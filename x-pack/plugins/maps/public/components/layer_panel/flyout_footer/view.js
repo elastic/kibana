@@ -14,7 +14,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
-  activateSave }) => {
+  hasStateChanged }) => {
   const removeBtn = (
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
@@ -44,7 +44,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
       {removeBtn}
       <EuiFlexItem grow={false}>
         <EuiButton
-          disabled={!activateSave}
+          disabled={!hasStateChanged}
           iconType="check"
           onClick={saveLayerEdits}
           fill
