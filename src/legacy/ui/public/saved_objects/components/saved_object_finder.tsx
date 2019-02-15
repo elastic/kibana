@@ -62,6 +62,7 @@ interface SavedObjectFinderUIProps extends InjectedIntlProps {
   noItemsMessage?: React.ReactNode;
   savedObjectType: 'visualization' | 'search';
   visTypes?: VisTypesRegistryProvider;
+  initialPageSize?: 5 | 10 | 15;
 }
 
 class SavedObjectFinderUI extends React.Component<
@@ -75,6 +76,7 @@ class SavedObjectFinderUI extends React.Component<
     noItemsMessage: PropTypes.node,
     savedObjectType: PropTypes.oneOf(['visualization', 'search']).isRequired,
     visTypes: PropTypes.object,
+    initialPageSize: PropTypes.number,
   };
 
   private isComponentMounted: boolean = false;
@@ -133,7 +135,7 @@ class SavedObjectFinderUI extends React.Component<
       items: [],
       isFetchingItems: false,
       page: 0,
-      perPage: 10,
+      perPage: props.initialPageSize || 15,
       filter: '',
     };
   }
@@ -253,7 +255,7 @@ class SavedObjectFinderUI extends React.Component<
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
       totalItemCount: this.state.items.length,
-      pageSizeOptions: [5, 10],
+      pageSizeOptions: [5, 10, 15],
     };
     // TODO there should be a Type in EUI for that, replace if it exists
     const sorting: { sort?: EuiTableCriteria['sort'] } = {};

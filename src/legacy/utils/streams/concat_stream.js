@@ -33,7 +33,6 @@ import { createReduceStream } from './reduce_stream';
  *  Concatenate values into an array:
  *    createListStream([1,2,3])
  *      .pipe(createConcatStream([]))
- *      .pipe(createJsonStringifyStream())
  *      .on('data', console.log)
  *      // logs "[1,2,3]"
  *
