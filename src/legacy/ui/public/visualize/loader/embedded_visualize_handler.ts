@@ -468,7 +468,7 @@ export class EmbeddedVisualizeHandler {
       error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
 
     toastNotifications.addDanger({
-      title: i18n.translate('kbn.visualize.loader.dataLoaderError', {
+      title: i18n.translate('common.ui.visualize.dataLoaderError', {
         defaultMessage: 'Error in visualization',
       }),
       text: error.message,
