@@ -9,6 +9,11 @@ import contentDisposition from 'content-disposition';
 // @ts-ignore
 import { oncePerServer } from '../../lib/once_per_server';
 
+const DEFAULT_TITLE = 'report';
+
+const getTitle = (exportType: any, title?: string): string =>
+  `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
+
 function getDocumentPayloadFn(server: any) {
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
@@ -23,7 +28,7 @@ function getDocumentPayloadFn(server: any) {
 
   function getCompleted(output: any, jobType: string, title: any) {
     const exportType = exportTypesRegistry.get((item: any) => item.jobType === jobType);
-    const filename = `${title || 'report'}.${exportType.jobContentExtension}`;
+    const filename = getTitle(exportType, title);
 
     return {
       statusCode: 200,
