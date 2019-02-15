@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 jest.useFakeTimers();
 
 import { EventEmitter } from 'events';
@@ -25,6 +26,15 @@ import MockState from '../../../../../fixtures/mock_state';
 import { Adapters } from '../../inspector/types';
 import { RequestHandlerParams, Vis } from '../../vis';
 import { VisResponseData } from './types';
+
+jest.mock('./utils', () => ({
+  queryGeohashBounds: jest.fn(),
+}));
+
+jest.mock('./pipeline_helpers/utilities', () => ({
+  getFormat: jest.fn(),
+  getTableAggs: jest.fn(),
+}));
 
 const timefilter = new EventEmitter();
 jest.mock('../../timefilter', () => ({ timefilter }));
@@ -36,11 +46,6 @@ jest.mock('../../inspector', () => ({
     open: (adapters: Adapters, opts: any) => mockInspectorOpen(adapters, opts),
     isAvailable: (adapters: Adapters) => mockInspectorIsAvailable(adapters),
   },
-}));
-
-jest.mock('./pipeline_helpers/utilities', () => ({
-  getFormat: jest.fn(),
-  getTableAggs: jest.fn(),
 }));
 
 const mockDataLoaderFetch = jest.fn().mockReturnValue({
@@ -81,6 +86,7 @@ describe('EmbeddedVisualizeHandler', () => {
     on: () => ({}),
     off: () => ({}),
     removeListener: jest.fn(),
+    API: {},
   };
 
   beforeEach(() => {
