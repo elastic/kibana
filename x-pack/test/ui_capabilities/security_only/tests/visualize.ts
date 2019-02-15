@@ -27,7 +27,11 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           // these users have a read/write view of Visualize
           case 'superuser':
           case 'all':
+          case 'apm_user_and_all':
           case 'dual_privileges_all':
+          case 'machine_learning_admin_and_all':
+          case 'machine_learning_user_and_all':
+          case 'monitoring_user_and_all':
           case 'visualize_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('visualize');
@@ -49,6 +53,10 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
+          case 'apm_user':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;

@@ -31,8 +31,12 @@ export default function graphTests({ getService }: KibanaFunctionalTestDefaultPr
           // these users have a read/write view of Graph
           case 'superuser':
           case 'all':
+          case 'apm_user_and_all':
           case 'dual_privileges_all':
           case 'graph_all':
+          case 'machine_learning_admin_and_all':
+          case 'machine_learning_user_and_all':
+          case 'monitoring_user_and_all':
             expect(uiCapabilities.success).to.be(true);
             expect(capabilities).to.have.property('graph');
             expect(capabilities!.graph).to.eql({
@@ -51,8 +55,12 @@ export default function graphTests({ getService }: KibanaFunctionalTestDefaultPr
             });
             break;
           // these users have no access to even get the ui capabilities
-          case 'no_kibana_privileges':
           case 'legacy_all':
+          case 'no_kibana_privileges':
+          case 'apm_user':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;

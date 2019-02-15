@@ -57,8 +57,12 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users have no access to even get the ui capabilities
-          case 'no_kibana_privileges':
           case 'legacy_all':
+          case 'no_kibana_privileges':
+          case 'apm_user':
+          case 'machine_learning_admin':
+          case 'machine_learning_user':
+          case 'monitoring_user':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
