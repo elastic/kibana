@@ -44,16 +44,6 @@ export class LibraryStackFrames extends React.Component<Props, State> {
       return null;
     }
 
-    if (stackframes.length === 1) {
-      return (
-        <Stackframe
-          isLibraryFrame
-          codeLanguage={codeLanguage}
-          stackframe={stackframes[0]}
-        />
-      );
-    }
-
     return (
       <div>
         <LibraryFrameToggle>
