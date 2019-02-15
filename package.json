@@ -82,6 +82,7 @@
       "packages/*",
       "x-pack",
       "x-pack/plugins/*",
+      "x-pack/test/functional/fixtures/*",
       "test/plugin_functional/plugins/*"
     ],
     "nohoist": [
@@ -90,7 +91,8 @@
       "**/grunt-*",
       "**/grunt-*/**",
       "x-pack/typescript",
-      "kbn_tp_*/**"
+      "kbn_tp_*/**",
+      "functional_tests_plugin/**"
     ]
   },
   "dependencies": {
