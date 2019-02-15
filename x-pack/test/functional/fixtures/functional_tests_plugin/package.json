@@ -1,7 +1,14 @@
 {
   "name": "functional_tests_plugin",
   "version": "0.0.0",
+  "private": true,
+  "license": "Elastic-License",
   "kibana": {
-    "version": "kibana"
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "dependencies": {
+    "@elastic/eui": "7.0.0",
+    "react": "^16.6.0"
   }
 }
