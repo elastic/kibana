@@ -5,14 +5,16 @@
  */
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
-export const standaloneClusterDefinition = {
-  cluster_uuid: STANDALONE_CLUSTER_CLUSTER_UUID,
-  license: {},
-  cluster_state: {},
-  cluster_stats: {
-    nodes: {
-      jvm: {},
-      count: {}
+export const getStandaloneClusterDefinition = () => {
+  return {
+    cluster_uuid: STANDALONE_CLUSTER_CLUSTER_UUID,
+    license: {},
+    cluster_state: {},
+    cluster_stats: {
+      nodes: {
+        jvm: {},
+        count: {}
+      }
     }
-  }
+  };
 };
