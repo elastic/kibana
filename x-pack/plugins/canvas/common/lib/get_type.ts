@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getType(node) {
+export function getType(node?: { type: string } | string | number | boolean | symbol): string {
   if (node == null) {
     return 'null';
   }
