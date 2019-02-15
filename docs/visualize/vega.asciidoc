@@ -43,8 +43,11 @@ in the https://vega.github.io/vega-lite/[Veg-Lite documentation].
 
 You can use
 https://vega.github.io/editor/[this editor] to convert Vega-Lite into
-Vega. You can also edit the `schema` value in the dev tools to the left of the 
-graph in {kib} to define which of the two expression languages you would like to use.
+Vega. 
+
+When you create a Vega visualization in {kib}, you can edit the `schema` 
+value in the dev tools to the left of the graph to define which of the two expression 
+languages you would like to use. For example, `$schema: https://vega.github.io/schema/vega-lite/v2.json`
 
 
 [[vega-querying-elasticsearch]]
