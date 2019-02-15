@@ -46,12 +46,6 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-/**
- * 1. Position the .visLegend__valueDetails absolutely against the legend item
- * 2. Make sure the .visLegend__valueDetails is visible outside the list bounds
- * 3. Make sure the currently selected item is top most in z level
- */
-
 .visLegend__list {
   @include euiScrollBar;
   display: flex;
@@ -127,6 +121,11 @@ $visLegendLineHeight: $euiSize;
 
   .visLib--legend-bottom & {
     bottom: $visLegendLineHeight + $euiSizeXS;
+    margin-bottom: $euiSizeXS;
+  }
+
+  .visLib--legend-top & {
+    margin-top: $euiSizeXS;
   }
 }
 
