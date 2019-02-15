@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { getStore } from '../store/store';
+import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
 import {
   setSelectedLayer,
@@ -48,6 +48,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   const savedMap = $scope.map = $route.current.locals.map;
   let unsubscribe;
 
+  const store = createMapStore();
   inspectorAdapters.requests.reset();
 
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
@@ -100,7 +101,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.time = dateRange;
     syncAppAndGlobalState();
 
-    getStore().dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
@@ -109,12 +110,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     };
     syncAppAndGlobalState();
 
-    getStore().dispatch(setRefreshConfig($scope.refreshConfig));
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
   function renderMap() {
-    const store = getStore();
-
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -206,7 +205,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   ]);
 
   async function doSave(saveOptions) {
-    savedMap.syncWithStore(getStore().getState());
+    savedMap.syncWithStore(store.getState());
     const docTitle = Private(DocTitleProvider);
     let id;
 
@@ -246,7 +245,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     description: 'full screen',
     testId: 'mapsFullScreenMode',
     run() {
-      getStore().dispatch(enableFullScreen());
+      store.dispatch(enableFullScreen());
     }
   }, {
     key: 'inspect',

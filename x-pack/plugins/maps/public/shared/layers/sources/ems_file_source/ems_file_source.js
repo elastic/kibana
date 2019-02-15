@@ -14,7 +14,7 @@ import { EMSFileCreateSourceEditor } from './create_source_editor';
 export class EMSFileSource extends AbstractVectorSource {
 
   static type = EMS_FILE;
-  static title = 'Elastic Maps Service vector shapes';
+  static title = 'Vector shapes';
   static description = 'Vector shapes of administrative boundaries from Elastic Maps Service';
   static icon = 'emsApp';
 
