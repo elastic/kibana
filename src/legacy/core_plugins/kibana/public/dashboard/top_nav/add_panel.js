@@ -20,6 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { uiCapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
@@ -40,7 +41,7 @@ class DashboardAddPanelUi extends React.Component {
   constructor(props) {
     super(props);
 
-    const addNewVisBtn = (
+    const addNewVisBtn = uiCapabilities.visualize.save ? (
       <EuiButton
         onClick={this.props.addNewVis}
         data-test-subj="addNewSavedObjectLink"
@@ -50,7 +51,7 @@ class DashboardAddPanelUi extends React.Component {
           defaultMessage="Add new Visualization"
         />
       </EuiButton>
-    );
+    ) : null;
 
     const tabs = [{
       id: VIS_TAB_ID,
@@ -146,7 +147,6 @@ class DashboardAddPanelUi extends React.Component {
       <EuiFlyout
         ownFocus
         onClose={this.props.onClose}
-        size="s"
         data-test-subj="dashboardAddPanel"
       >
         <EuiFlyoutBody>

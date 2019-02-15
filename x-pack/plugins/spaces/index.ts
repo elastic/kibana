@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 
-import { SavedObjectsService } from 'src/server/saved_objects';
+import { SavedObjectsService } from 'src/legacy/server/saved_objects';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -125,7 +125,7 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
+      // to re-compute the license check results for this plugin.
       xpackMainPlugin.info
         .feature(thisPlugin.id)
         .registerLicenseCheckResultsGenerator(checkLicense);

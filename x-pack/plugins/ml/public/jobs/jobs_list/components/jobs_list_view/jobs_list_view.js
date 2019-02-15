@@ -8,7 +8,7 @@
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs } from '../utils';
+import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -85,6 +85,12 @@ export class JobsListView extends Component {
 
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
+
+    // check to see if we need to open the start datafeed modal
+    // after the page has rendered. This will happen if the user
+    // has just created a job in the advanced wizard and selected to
+    // start the datafeed now.
+    this.openAutoStartDatafeedModal();
   }
 
   componentWillUnmount() {
@@ -134,6 +140,13 @@ export class JobsListView extends Component {
   clearRefreshInterval() {
     this.blockRefresh = true;
     clearInterval(jobsRefreshInterval);
+  }
+
+  openAutoStartDatafeedModal() {
+    const job = checkForAutoStartDatafeed();
+    if (job !== undefined) {
+      this.showStartDatafeedModal([job]);
+    }
   }
 
   toggleRow = (jobId) => {

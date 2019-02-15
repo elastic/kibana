@@ -68,7 +68,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('dashboard', 'management')
             );
             break;
-
+          case 'dev_tools_all':
           case 'dev_tools_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
@@ -113,6 +113,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('apm', 'ml'));
             break;
+          case 'infrastructure_all':
           case 'infrastructure_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
@@ -120,6 +121,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('infrastructure', 'management')
             );
             break;
+          case 'logs_all':
           case 'logs_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
@@ -135,6 +137,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('timelion', 'management')
             );
             break;
+          case 'uptime_all':
           case 'uptime_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');

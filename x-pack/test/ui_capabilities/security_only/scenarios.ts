@@ -281,6 +281,26 @@ const DashboardRead: DashboardRead = {
   },
 };
 
+interface DevToolsAll extends User {
+  username: 'dev_tools_all';
+}
+const DevToolsAll: DevToolsAll = {
+  username: 'dev_tools_all',
+  fullName: 'dev_tools_all',
+  password: 'dev_tools_all-password',
+  role: {
+    name: 'dev_tools_all_role',
+    kibana: [
+      {
+        feature: {
+          dev_tools: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 interface DevToolsRead extends User {
   username: 'dev_tools_read';
 }
@@ -421,6 +441,26 @@ const MapsRead: MapsRead = {
   },
 };
 
+interface InfrastructureAll extends User {
+  username: 'infrastructure_all';
+}
+const InfrastructureAll: InfrastructureAll = {
+  username: 'infrastructure_all',
+  fullName: 'infrastructure_all',
+  password: 'infrastructure_all-password',
+  role: {
+    name: 'infrastructure_all_role',
+    kibana: [
+      {
+        feature: {
+          infrastructure: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 interface InfrastructureRead extends User {
   username: 'infrastructure_read';
 }
@@ -434,6 +474,26 @@ const InfrastructureRead: InfrastructureRead = {
       {
         feature: {
           infrastructure: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+interface LogsAll extends User {
+  username: 'logs_all';
+}
+const LogsAll: LogsAll = {
+  username: 'logs_all',
+  fullName: 'logs_all',
+  password: 'logs_all-password',
+  role: {
+    name: 'logs_all_role',
+    kibana: [
+      {
+        feature: {
+          logs: ['all'],
         },
         spaces: ['*'],
       },
@@ -582,6 +642,26 @@ const TimelionRead: TimelionRead = {
   },
 };
 
+interface UptimeAll extends User {
+  username: 'uptime_all';
+}
+const UptimeAll: UptimeAll = {
+  username: 'uptime_all',
+  fullName: 'uptime_all',
+  password: 'uptime_all-password',
+  role: {
+    name: 'uptime_all_role',
+    kibana: [
+      {
+        feature: {
+          uptime: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 interface UptimeRead extends User {
   username: 'uptime_read';
 }
@@ -657,6 +737,7 @@ export type UserScenarios =
   | CanvasRead
   | DashboardAll
   | DashboardRead
+  | DevToolsAll
   | DevToolsRead
   | DiscoverAll
   | DiscoverRead
@@ -664,7 +745,9 @@ export type UserScenarios =
   | GraphRead
   | MapsAll
   | MapsRead
+  | InfrastructureAll
   | InfrastructureRead
+  | LogsAll
   | LogsRead
   | MachineLearningAdmin
   | MachineLearningAdminAndAll
@@ -674,6 +757,7 @@ export type UserScenarios =
   | MonitoringUserAndAll
   | TimelionAll
   | TimelionRead
+  | UptimeAll
   | UptimeRead
   | VisualizeAll
   | VisualizeRead;
@@ -690,6 +774,7 @@ export const UserScenarios: UserScenarios[] = [
   CanvasRead,
   DashboardAll,
   DashboardRead,
+  DevToolsAll,
   DevToolsRead,
   DiscoverAll,
   DiscoverRead,
@@ -697,7 +782,9 @@ export const UserScenarios: UserScenarios[] = [
   GraphRead,
   MapsAll,
   MapsRead,
+  InfrastructureAll,
   InfrastructureRead,
+  LogsAll,
   LogsRead,
   MachineLearningAdmin,
   MachineLearningAdminAndAll,
@@ -707,6 +794,7 @@ export const UserScenarios: UserScenarios[] = [
   MonitoringUserAndAll,
   TimelionAll,
   TimelionRead,
+  UptimeAll,
   UptimeRead,
   VisualizeAll,
   VisualizeRead,

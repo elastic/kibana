@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { uiCapabilities } from 'ui/capabilities';
@@ -13,7 +13,7 @@ export const SecureSpaceMessage = ({}) => {
   if (uiCapabilities.spaces.manage) {
     return (
       <Fragment>
-        <EuiSpacer />
+        <EuiHorizontalRule />
         <EuiText className="eui-textCenter">
           <p>
             <FormattedMessage

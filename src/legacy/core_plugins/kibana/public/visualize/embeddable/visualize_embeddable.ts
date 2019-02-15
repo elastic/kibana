@@ -36,6 +36,7 @@ export interface VisualizeEmbeddableConfiguration {
   savedVisualization: VisSavedObject;
   indexPattern?: StaticIndexPattern;
   editUrl?: string;
+  editable: boolean;
   loader: VisualizeLoader;
 }
 
@@ -56,11 +57,13 @@ export class VisualizeEmbeddable extends Embeddable {
     savedVisualization,
     indexPattern,
     editUrl,
+    editable,
     loader,
   }: VisualizeEmbeddableConfiguration) {
     super({
       title: savedVisualization.title,
       editUrl,
+      editable,
       indexPattern,
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;

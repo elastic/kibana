@@ -2,48 +2,31 @@
   "type": "index",
   "value": {
     "index": ".kibana",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "1"
-      }
-    },
     "mappings": {
       "properties": {
-        "type": {
-          "type": "keyword"
-        },
-        "index-pattern": {
-          "dynamic": "strict",
+        "config": {
+          "dynamic": "true",
           "properties": {
-            "fieldFormatMap": {
-              "type": "text"
-            },
-            "fields": {
-              "type": "text"
-            },
-            "intervalName": {
+            "buildNum": {
               "type": "keyword"
             },
-            "notExpandable": {
-              "type": "boolean"
-            },
-            "sourceFilters": {
+            "dateFormat:tz": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
               "type": "text"
             },
-            "timeFieldName": {
-              "type": "keyword"
-            },
-            "title": {
+            "defaultIndex": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
               "type": "text"
-            }
-          }
-        },
-        "server": {
-          "dynamic": "strict",
-          "properties": {
-            "uuid": {
-              "type": "keyword"
             }
           }
         },
@@ -105,6 +88,32 @@
             }
           }
         },
+        "index-pattern": {
+          "dynamic": "strict",
+          "properties": {
+            "fieldFormatMap": {
+              "type": "text"
+            },
+            "fields": {
+              "type": "text"
+            },
+            "intervalName": {
+              "type": "keyword"
+            },
+            "notExpandable": {
+              "type": "boolean"
+            },
+            "sourceFilters": {
+              "type": "text"
+            },
+            "timeFieldName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
         "search": {
           "dynamic": "strict",
           "properties": {
@@ -135,82 +144,11 @@
             }
           }
         },
-        "url": {
+        "server": {
           "dynamic": "strict",
           "properties": {
-            "accessCount": {
-              "type": "long"
-            },
-            "accessDate": {
-              "type": "date"
-            },
-            "createDate": {
-              "type": "date"
-            },
-            "url": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
-                }
-              }
-            }
-          }
-        },
-        "config": {
-          "dynamic": "true",
-          "properties": {
-            "buildNum": {
+            "uuid": {
               "type": "keyword"
-            },
-            "dateFormat:tz": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
-            },
-            "defaultIndex": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
-            }
-          }
-        },
-        "visualization": {
-          "dynamic": "strict",
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "savedSearchId": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            },
-            "visState": {
-              "type": "text"
             }
           }
         },
@@ -255,7 +193,69 @@
               "type": "integer"
             }
           }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "url": {
+          "dynamic": "strict",
+          "properties": {
+            "accessCount": {
+              "type": "long"
+            },
+            "accessDate": {
+              "type": "date"
+            },
+            "createDate": {
+              "type": "date"
+            },
+            "url": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "visualization": {
+          "dynamic": "strict",
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchId": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "type": "text"
+            }
+          }
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
       }
     }
   }
