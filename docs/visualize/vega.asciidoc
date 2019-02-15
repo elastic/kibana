@@ -18,10 +18,8 @@ NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals a
 
 * To experiment using sample data, first click the {kib} logo in the upper left hand corner
 and then click the link next to *Sample Data*.
-* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph.
-** *Note*: The default graph is written in Vega-Lite, but you can build visualizations in either of the languages.
-Edit the `schema` value in the dev tools to the left of the graph to define which language you would like to use.
-For example: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
+* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph. 
+*Note*: The default graph is written in Vega-Lite, but you can build visualizations in either of the languages (see below for more information). Edit the `schema` value in the dev tools to the left of the graph to define which language you would like to use. For example: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
 * Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
 or `square`. Check out the 
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega docs] for more information.
@@ -37,15 +35,16 @@ See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
 [[vega-vs-vegalite]]
 === Vega vs Vega-Lite
 
-Vega-Lite is a simplified version of Vega, useful to quickly get started,
-but has a number of limitations. Vega-Lite is automatically converted
-into Vega before rendering. Compare
-https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
-and
-https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
-(both use the same Elasticsearch Logstash data). You may use
+Vega-Lite is a simplified version of Vega; it automates some constructions and has 
+much shorter specifications than Vega. Vega-Lite is automatically converted into 
+Vega before rendering, but it has some limitations, and there are some visualizations
+that can be expressed in Vega that cannot be expressed in Vega-Lite. You can learn more
+in the https://vega.github.io/vega-lite/[Veg-Lite documentation].
+
+You can use
 https://vega.github.io/editor/[this editor] to convert Vega-Lite into
-Vega.
+Vega. You can also edit the `schema` value in the dev tools to the left of the 
+graph in {kib} to define which of the two expression languages you would like to use.
 
 
 [[vega-querying-elasticsearch]]
