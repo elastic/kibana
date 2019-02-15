@@ -27,8 +27,7 @@ import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
-import { canViewInApp } from './lib/can_view_in_app';
-import { getInAppUrl } from './lib/get_in_app_url';
+import { canViewInApp, getInAppUrl } from './lib/in_app_url';
 import { I18nContext } from 'ui/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';

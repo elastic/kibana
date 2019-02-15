@@ -29,7 +29,7 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
-import { canViewInApp } from './lib/can_view_in_app';
+import { canViewInApp } from './lib/in_app_url';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
