@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-export default function ({ loadTestFile }) {
-  describe('graph app', function () {
-    this.tags('ciGroup1');
+// tslint:disable:no-default-export
+export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+  describe('console', function() {
+    this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./graph'));
   });
 }

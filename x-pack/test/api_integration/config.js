@@ -12,6 +12,11 @@ import {
   InfraOpsGraphQLProvider
 } from './services';
 
+import {
+  SecurityServiceProvider,
+  SpacesServiceProvider,
+} from '../common/services';
+
 export default async function ({ readConfigFile }) {
 
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
@@ -32,6 +37,8 @@ export default async function ({ readConfigFile }) {
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
       chance: kibanaAPITestsConfig.get('services.chance'),
+      security: SecurityServiceProvider,
+      spaces: SpacesServiceProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

@@ -14,7 +14,6 @@ import {
   EuiPopover,
   EuiPopoverProps,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
@@ -186,24 +185,20 @@ export class CustomizeSpace extends Component<Props, State> {
   };
 
   public getPanelDescription = () => {
-    return (
-      <EuiText>
-        {this.props.editingExistingSpace ? (
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierNotEditable"
-              defaultMessage="The url identifier cannot be changed."
-            />
-          </p>
-        ) : (
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierEditable"
-              defaultMessage="Note the URL identifier. You cannot change it after you create the space."
-            />
-          </p>
-        )}
-      </EuiText>
+    return this.props.editingExistingSpace ? (
+      <p>
+        <FormattedMessage
+          id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierNotEditable"
+          defaultMessage="The url identifier cannot be changed."
+        />
+      </p>
+    ) : (
+      <p>
+        <FormattedMessage
+          id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierEditable"
+          defaultMessage="Note the URL identifier. You cannot change it after you create the space."
+        />
+      </p>
     );
   };
 

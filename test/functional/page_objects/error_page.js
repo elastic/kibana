@@ -16,27 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import expect from 'expect.js';
 
-import uiRoutes from 'ui/routes';
-import template from './index.html';
+export function ErrorPageProvider({ getService }) {
+  const find = getService('find');
 
-require('brace');
-require('ui-bootstrap-custom');
+  class ErrorPage {
+    async expectNotFound() {
+      const el = await find.byCssSelector('body>pre');
+      const messageText = await el.getVisibleText();
+      expect(messageText).to.eql(
+        JSON.stringify({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Not Found',
+        })
+      );
+    }
+  }
 
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
-require('ui/autoload/styles');
-require('ui/capabilities/route_setup');
-
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
-
-
-uiRoutes.when('/dev_tools/console', {
-  requireUICapability: 'dev_tools.show',
-  controller: 'SenseController',
-  template,
-});
+  return new ErrorPage();
+}

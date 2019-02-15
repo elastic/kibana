@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('graph app', function () {
-    this.tags('ciGroup1');
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
+// tslint:disable:no-default-export
+export default function consoleApiIntegrationTests({
+  loadTestFile,
+}: KibanaFunctionalTestDefaultProviders) {
+  describe('console', () => {
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./graph'));
   });
 }
