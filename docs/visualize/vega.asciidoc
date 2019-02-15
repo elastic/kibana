@@ -22,11 +22,11 @@ or `square`. Check out the
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega docs] for more information.
 * Explore other available https://vega.github.io/vega/examples/[Vega] or
 https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. 
-Note: You may need to make URLs absolute, for example, replace
+Note: You might need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. 
 See <<vega-using-vega-and-vegalite-examples, Vega and VegaLite examples>>.
-* You can generate some logstash data to experiment with using https://www.npmjs.com/package/makelogs[makelogs util]. 
+* You can generate some Logstash data to experiment with using https://www.npmjs.com/package/makelogs[makelogs util]. 
  *Note: Do not use makelogs on a production cluster.*
 * For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].  
 
