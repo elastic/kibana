@@ -115,7 +115,7 @@ $visLegendLineHeight: $euiSize;
   .visLib--legend-left &,
   .visLib--legend-right & {
     margin-top: $euiSizeXS;
-    border-bottom: 1px solid $euiColorLightShade;
+    border-bottom: $euiBorderThin;
   }
 
   .visLib--legend-top &,
