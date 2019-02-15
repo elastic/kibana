@@ -17,7 +17,6 @@ import './elasticsearch/index/advanced';
 import './elasticsearch/nodes';
 import './elasticsearch/node';
 import './elasticsearch/node/advanced';
-import './elasticsearch/node/logs';
 import './elasticsearch/ccr';
 import './elasticsearch/ccr/shard';
 import './elasticsearch/ml_jobs';
