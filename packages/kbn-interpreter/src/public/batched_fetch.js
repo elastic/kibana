@@ -97,7 +97,7 @@ async function processBatch(kfetch, batch) {
 
     results.forEach(({ id, result }) => {
       const { future } = batch[id];
-      if (result.statusCode && result.err) {
+      if (result && result.statusCode && result.err) {
         future.reject(result);
       } else {
         future.resolve(result);
