@@ -41,6 +41,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const queryContext = { bool: { must, filter } };
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           ...queryContext,
@@ -78,6 +79,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
+      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
@@ -141,6 +143,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const query = getFilterFromMust(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
+      rest_total_hits_as_int: true,
       body: {
         query,
         aggs: {
