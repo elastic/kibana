@@ -120,8 +120,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       // these points express a range that will be displayed as an area chart
       monitorChartsData.durationArea.push({
         x,
-        y0: get(bucket, 'duration.min', null),
-        y: get(bucket, 'duration.max', null),
+        yMin: get(bucket, 'duration.min', null),
+        yMax: get(bucket, 'duration.max', null),
       });
       monitorChartsData.durationLine.push({ x, y: get(bucket, 'duration.avg', null) });
       monitorChartsData.status.push(

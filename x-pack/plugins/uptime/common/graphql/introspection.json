@@ -1904,7 +1904,7 @@
             "deprecationReason": null
           },
           {
-            "name": "y0",
+            "name": "yMin",
             "description": "The min duration value in microseconds at this time.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -1912,7 +1912,7 @@
             "deprecationReason": null
           },
           {
-            "name": "y",
+            "name": "yMax",
             "description": "The max duration value in microseconds at this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

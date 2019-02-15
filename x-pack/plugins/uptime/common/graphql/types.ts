@@ -370,9 +370,9 @@ export interface MonitorDurationAreaPoint {
   /** The timeseries value for this point in time. */
   x: UnsignedInteger;
   /** The min duration value in microseconds at this time. */
-  y0?: number | null;
+  yMin?: number | null;
   /** The max duration value in microseconds at this point. */
-  y?: number | null;
+  yMax?: number | null;
 }
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {

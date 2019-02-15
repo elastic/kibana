@@ -4,30 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore missing typings
-  EuiAreaSeries,
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore missing typings
-  EuiLineSeries,
-  EuiPanel,
-  // @ts-ignore missing typings
-  EuiSeriesChart,
-  // @ts-ignore missing typings
-  EuiSeriesChartUtils,
-  // @ts-ignore missing typings
-  EuiSpacer,
-  // @ts-ignore missing typings
-  EuiTitle,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Query } from 'react-apollo';
 import { MonitorChart } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeCommonProps } from '../../../uptime_app';
+import { MonitorCharts } from '../../functional';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
 
 interface MonitorChartsProps {
@@ -75,122 +58,26 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
           }
 
           const {
-            monitorChartsData: {
-              durationArea,
-              durationLine,
-              durationMaxValue,
-              status,
-              statusMaxCount,
-            },
+            monitorChartsData,
+            monitorChartsData: { durationMaxValue, statusMaxCount },
           }: { monitorChartsData: MonitorChart } = data;
 
+          const durationMax = microsToMillis(durationMaxValue);
           // These limits provide domain sizes for the charts
           const checkDomainLimits = [0, statusMaxCount];
-          const durationDomainLimits = [0, microsToMillis(durationMaxValue)];
+          const durationDomainLimits = [0, durationMax ? durationMax : 0];
 
           return (
-            <Fragment>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                        defaultMessage="Monitor Duration ms"
-                        description="The 'ms' is an abbreviation for milliseconds."
-                      />
-                    </h4>
-                  </EuiTitle>
-
-                  <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
-                    <EuiSeriesChart
-                      margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-                      width={500}
-                      height={200}
-                      xType={EuiSeriesChartUtils.SCALE.TIME}
-                      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-                      yDomain={durationDomainLimits}
-                      crosshairValue={this.state.crosshairLocation}
-                      onCrosshairUpdate={this.updateCrosshairLocation}
-                    >
-                      <EuiAreaSeries
-                        color={secondary}
-                        name={i18n.translate(
-                          'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
-                          {
-                            defaultMessage: 'Duration range',
-                          }
-                        )}
-                        data={durationArea.map(({ x, y, y0 }) => ({
-                          x,
-                          y: microsToMillis(y),
-                          y0: microsToMillis(y0),
-                        }))}
-                        curve="curveBasis"
-                      />
-                      <EuiLineSeries
-                        color={primary}
-                        name={i18n.translate(
-                          'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
-                          {
-                            defaultMessage: 'Mean duration',
-                          }
-                        )}
-                        data={durationLine.map(({ x, y }) => ({
-                          x,
-                          y: microsToMillis(y),
-                        }))}
-                      />
-                    </EuiSeriesChart>
-                  </EuiPanel>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.uptime.monitorCharts.checkStatus.title"
-                        defaultMessage="Check status"
-                      />
-                    </h4>
-                  </EuiTitle>
-                  <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
-                    <EuiSeriesChart
-                      margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-                      width={500}
-                      height={200}
-                      xType={EuiSeriesChartUtils.SCALE.TIME}
-                      xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-                      stackBy="y"
-                      crosshairValue={this.state.crosshairLocation}
-                      onCrosshairUpdate={this.updateCrosshairLocation}
-                      yDomain={checkDomainLimits}
-                    >
-                      <EuiAreaSeries
-                        name={i18n.translate(
-                          'xpack.uptime.monitorCharts.checkStatus.series.upCountLabel',
-                          {
-                            defaultMessage: 'Up count',
-                          }
-                        )}
-                        data={status.map(({ x, up }) => ({ x, y: up }))}
-                        curve="curveBasis"
-                        color={primary}
-                      />
-                      <EuiAreaSeries
-                        name={i18n.translate(
-                          'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
-                          {
-                            defaultMessage: 'Down count',
-                          }
-                        )}
-                        data={status.map(({ x, down }) => ({ x, y: down }))}
-                        color={danger}
-                      />
-                    </EuiSeriesChart>
-                  </EuiPanel>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Fragment>
+            <MonitorCharts
+              checkDomainLimits={checkDomainLimits}
+              crosshairLocation={this.state.crosshairLocation}
+              danger={danger}
+              durationDomainLimits={durationDomainLimits}
+              monitorChartData={monitorChartsData}
+              primary={primary}
+              secondary={secondary}
+              updateCrosshairLocation={this.updateCrosshairLocation}
+            />
           );
         }}
       </Query>

@@ -15,8 +15,8 @@ query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
   ) {
     durationArea {
       x
-      y0
-      y
+      yMin
+      yMax
     }
     durationLine {
       x

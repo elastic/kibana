@@ -76,9 +76,9 @@ export const monitorsSchema = gql`
     "The timeseries value for this point in time."
     x: UnsignedInteger!
     "The min duration value in microseconds at this time."
-    y0: Float
+    yMin: Float
     "The max duration value in microseconds at this point."
-    y: Float
+    yMax: Float
   }
 
   "Represents the average monitor duration ms at a point in time."
