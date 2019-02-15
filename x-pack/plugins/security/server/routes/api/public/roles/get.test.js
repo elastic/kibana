@@ -647,6 +647,156 @@ describe('GET roles', () => {
       },
     });
 
+    getRolesTest(`space privilege assigned globally returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all'],
+              resources: ['*'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
+
+    getRolesTest(`global base privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['all'],
+              resources: ['space:marketing'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
+
+    getRolesTest(`reserved privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`, {
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['reserved_foo'],
+              resources: ['space:marketing'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _transform_error: ['kibana'],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
+
     getRolesTest(`transforms unrecognized applications`, {
       callWithRequestImpl: async () => ({
         first_role: {
@@ -1349,6 +1499,153 @@ describe('GET role', () => {
               application,
               privileges: ['space_all'],
               resources: ['space:engineering'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _transform_error: ['kibana'],
+          _unrecognized_applications: [],
+        },
+      },
+    });
+
+    getRoleTest(`space privilege assigned globally returns empty kibana section with _transform_error set to ['kibana']`, {
+      name: 'first_role',
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all'],
+              resources: ['*'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _transform_error: ['kibana'],
+          _unrecognized_applications: [],
+        },
+      },
+    });
+
+    getRoleTest(`global base privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`, {
+      name: 'first_role',
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['all'],
+              resources: ['space:marketing'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
+            }
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          name: 'first_role',
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [],
+          _transform_error: ['kibana'],
+          _unrecognized_applications: [],
+        },
+      },
+    });
+
+    getRoleTest(`reserved privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`, {
+      name: 'first_role',
+      callWithRequestImpl: async () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['reserved_foo'],
+              resources: ['space:marketing'],
             },
             {
               application,

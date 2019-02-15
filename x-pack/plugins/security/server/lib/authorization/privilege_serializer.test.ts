@@ -36,6 +36,43 @@ describe(`#isSerializedSpaceBasePrivilege`, () => {
   });
 });
 
+describe(`#isSerializedReservedPrivilege`, () => {
+  ['reserved_foo', 'reserved_bar'].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isSerializedReservedPrivilege(validValue)).toBe(true);
+    });
+  });
+
+  [
+    'all',
+    'read',
+    'space_all',
+    'space_reserved',
+    'foo_reserved',
+    'bar',
+    'feature_foo',
+    'feature_foo.privilege1',
+  ].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isSerializedReservedPrivilege(validValue)).toBe(false);
+    });
+  });
+});
+
+describe(`#isSerializedFeaturePrivilege`, () => {
+  ['feature_foo.privilege1', 'feature_bar.privilege2'].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isSerializedFeaturePrivilege(validValue)).toBe(true);
+    });
+  });
+
+  ['all', 'read', 'space_all', 'space_read', 'reserved_foo', 'reserved_bar'].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isSerializedFeaturePrivilege(validValue)).toBe(false);
+    });
+  });
+});
+
 describe('#serializeGlobalBasePrivilege', () => {
   test('throws Error if unrecognized privilege used', () => {
     expect(() =>

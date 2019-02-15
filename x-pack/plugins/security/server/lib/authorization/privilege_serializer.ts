@@ -34,6 +34,10 @@ export class PrivilegeSerializer {
     return privilegeName.startsWith(reservedPrefix);
   }
 
+  public static isSerializedFeaturePrivilege(privilegeName: string) {
+    return privilegeName.startsWith(featurePrefix);
+  }
+
   public static serializeGlobalBasePrivilege(privilegeName: string) {
     if (!globalBasePrivileges.includes(privilegeName)) {
       throw new Error('Unrecognized global base privilege');

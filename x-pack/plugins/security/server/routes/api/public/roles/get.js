@@ -15,6 +15,34 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
     const roleKibanaApplications = roleApplications
       .filter(roleApplication => roleApplication.application === application);
 
+    // if any application entry contains an empty resource, we throw an error
+    if (roleKibanaApplications.some(entry => entry.resources.length === 0)) {
+      throw new Error(`ES returned an application entry without resources, can't process this`);
+    }
+
+    // if space privilege assigned globally, we can't transform these
+    if (roleKibanaApplications.some(entry =>
+      entry.resources.includes(GLOBAL_RESOURCE) &&
+      entry.privileges.some(privilege => PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege)))
+    ) {
+      return {
+        success: false
+      };
+    }
+
+    // if global base or reserved privilege assigned at a space, we can't transform these
+    if (roleKibanaApplications.some(entry =>
+      !entry.resources.includes(GLOBAL_RESOURCE) &&
+      entry.privileges.some(privilege =>
+        PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege) ||
+        PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
+      ))
+    ) {
+      return {
+        success: false
+      };
+    }
+
     // if any application entry contains the '*' resource in addition to another resource, we can't transform these
     if (roleKibanaApplications.some(entry => entry.resources.includes(GLOBAL_RESOURCE) && entry.resources.length > 1)) {
       return {
@@ -44,10 +72,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
           const reservedPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedReservedPrivilege(privilege));
           const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege));
-          const featurePrivileges = privileges.filter(privilege =>
-            !PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege) &&
-            !PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
-          );
+          const featurePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedFeaturePrivilege(privilege));
 
           return {
             ...reservedPrivileges.length ? {
@@ -69,7 +94,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         }
 
         const basePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege));
-        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceBasePrivilege(privilege));
+        const featurePrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedFeaturePrivilege(privilege));
         return {
           base: basePrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceBasePrivilege(privilege)),
           feature: featurePrivileges.reduce((acc, privilege) => {
