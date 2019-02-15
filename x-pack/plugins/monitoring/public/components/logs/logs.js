@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { PureComponent } from 'react';
+import { capitalize } from 'lodash';
 import chrome from 'ui/chrome';
 import {
   EuiBasicTable,
@@ -19,35 +20,33 @@ const columns = [
   {
     field: 'timestamp',
     name: 'Timestamp',
-    width: '15%',
+    width: '12%',
     render: timestamp => formatDateTimeLocal(timestamp),
   },
   {
     field: 'level',
     name: 'Level',
-    width: '5%'
+    width: '5%',
+  },
+  {
+    field: 'type',
+    name: 'Type',
+    width: '10%',
+    render: type => capitalize(type),
   },
   {
     field: 'message',
     name: 'Message',
-    width: '65%'
+    width: '55%'
   },
   {
     field: 'component',
     name: 'Component',
-    width: '15%'
+    width: '18%'
   },
 ];
 
 export class Logs extends PureComponent {
-  state = {
-    pageIndex: 0,
-    pageSize: 5,
-    sortField: 'level',
-    sortDirection: 'asc',
-    selectedItems: [],
-  }
-
   render() {
     return (
       <div>
@@ -59,7 +58,7 @@ export class Logs extends PureComponent {
         </EuiText>
         <EuiSpacer size="m"/>
         <EuiBasicTable
-          items={this.props.logs}
+          items={this.props.logs || []}
           columns={columns}
         />
         <EuiSpacer size="m"/>

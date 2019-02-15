@@ -5,3 +5,4 @@
  */
 
 export { getLogs } from './get_logs';
+export { getLogTypes } from './get_log_types';

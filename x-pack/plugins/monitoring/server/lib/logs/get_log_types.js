@@ -9,23 +9,21 @@ import { checkParam } from '../error_missing_required';
 import { createTimeFilter } from '../create_query';
 
 function handleResponse(response) {
-  return get(response, 'hits.hits', [])
-    .map(hit => {
-      const source = hit._source;
-      const type = get(source, 'event.dataset').split('.')[1];
-
+  return get(response, 'aggregations.types.buckets', [])
+    .map(typeBucket => {
       return {
-        timestamp: get(source, 'event.created'),
-        component: get(source, 'elasticsearch.component'),
-        index: get(source, 'elasticsearch.index.name'),
-        level: get(source, 'log.level'),
-        type,
-        message: get(source, 'message'),
+        type: typeBucket.key.split('.')[1],
+        levels: typeBucket.levels.buckets.map(levelBucket => {
+          return {
+            level: levelBucket.key.toLowerCase(),
+            count: levelBucket.doc_count
+          };
+        })
       };
     });
 }
 
-export async function getLogs(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end }) {
+export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end }) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
   const metric = { timestampField: 'event.created' };
@@ -42,14 +40,10 @@ export async function getLogs(req, filebeatIndexPattern, { clusterUuid, nodeUuid
 
   const params = {
     index: filebeatIndexPattern,
-    size: 10, //config.get('xpack.monitoring.max_bucket_size'),
+    size: 0,
     filterPath: [
-      'hits.hits._source.message',
-      'hits.hits._source.log.level',
-      'hits.hits._source.event.created',
-      'hits.hits._source.event.dataset',
-      'hits.hits._source.elasticsearch.component',
-      'hits.hits._source.elasticsearch.index.name',
+      'aggregations.levels.buckets',
+      'aggregations.types.buckets',
     ],
     ignoreUnavailable: true,
     body: {
@@ -57,6 +51,20 @@ export async function getLogs(req, filebeatIndexPattern, { clusterUuid, nodeUuid
       query: {
         bool: {
           filter,
+        }
+      },
+      aggs: {
+        types: {
+          terms: {
+            field: 'event.dataset'
+          },
+          aggs: {
+            levels: {
+              terms: {
+                field: 'log.level'
+              }
+            },
+          }
         }
       }
     }

@@ -22,6 +22,7 @@ import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
+import { getLogTypes } from '../logs';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -86,6 +87,8 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     if (alerts) {
       cluster.alerts = alerts;
     }
+
+    cluster.logs = await getLogTypes(req, 'filebeat-*', { clusterUuid: cluster.cluster_uuid, start, end });
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {

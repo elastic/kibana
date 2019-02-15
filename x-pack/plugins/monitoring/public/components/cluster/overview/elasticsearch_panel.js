@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { get } from 'lodash';
+import React, { Fragment } from 'react';
+import { get, capitalize } from 'lodash';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, HealthStatusIndicator, BytesUsage, BytesPercentageUsage } from './helpers';
 import {
@@ -18,6 +18,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiBadge,
+  EuiToolTip,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -39,6 +42,38 @@ const calculateShards = shards => {
     replicas
   };
 };
+
+function getBadgeColorFromLogLevel(level) {
+  switch (level) {
+    case 'warn':
+      return 'warning';
+    case 'debug':
+      return 'hollow';
+    case 'info':
+      return 'default';
+    case 'error':
+      return 'danger';
+  }
+}
+
+function renderLog(log) {
+  return (
+    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+      {log.levels.map((level, index) => (
+        <EuiFlexItem grow={false} key={index}>
+          <EuiToolTip
+            position="top"
+            content={`The number of ${capitalize(level.level)} logs`}
+          >
+            <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
+              {level.count}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+}
 
 function ElasticsearchPanelUi(props) {
 
@@ -235,6 +270,42 @@ function ElasticsearchPanelUi(props) {
               <EuiDescriptionListDescription data-test-subj="esReplicaShards">
                 { replicas }
               </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiPanel paddingSize="m">
+            <EuiTitle size="s">
+              <h3>
+                <EuiLink
+                  onClick={goToElasticsearch}
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel', defaultMessage: 'Elasticsearch Logs' })}
+                  data-test-subj="esLogs"
+                >
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.esPanel.logsLinkLabel"
+                    defaultMessage="Logs"
+                  />
+                </EuiLink>
+              </h3>
+            </EuiTitle>
+            <EuiHorizontalRule margin="m" />
+            <EuiDescriptionList type="column">
+              {props.logs.map((log, index) => (
+                <Fragment key={index}>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id={`xpack.monitoring.cluster.overview.logsPanel.${log.type}LogLabel`}
+                      defaultMessage={capitalize(log.type)}
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {renderLog(log)}
+                  </EuiDescriptionListDescription>
+                </Fragment>
+              ))}
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
