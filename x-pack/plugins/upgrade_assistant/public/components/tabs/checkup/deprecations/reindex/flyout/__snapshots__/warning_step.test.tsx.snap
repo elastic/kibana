@@ -77,7 +77,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
           defaultMessage="If a document contain a boolean field that is neither {true} or {false}
                    (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
                    Ensure that no application code or scripts rely on boolean fields in the deprecated format."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
           values={
             Object {
               "false": <EuiCode>
