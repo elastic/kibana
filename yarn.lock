@@ -8396,11 +8396,6 @@ doctypes@^1.1.0:
   resolved "https://registry.yarnpkg.com/doctypes/-/doctypes-1.1.0.tgz#ea80b106a87538774e8a3a4a5afe293de489e0a9"
   integrity sha1-6oCxBqh1OHdOijpKWv4pPeSJ4Kk=
 
-dojo@2.0.0-alpha.7:
-  version "2.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/dojo/-/dojo-2.0.0-alpha.7.tgz#c2b25d43d8f72ccc9c8fe89a34906a2d271e5c91"
-  integrity sha1-wrJdQ9j3LMycj+iaNJBqLSceXJE=
-
 dom-converter@~0.2:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/dom-converter/-/dom-converter-0.2.0.tgz#6721a9daee2e293682955b6afe416771627bb768"
@@ -14488,13 +14483,6 @@ jsx-ast-utils@^2.0.1:
   dependencies:
     array-includes "^3.0.3"
 
-jszip@2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/jszip/-/jszip-2.5.0.tgz#7444fd8551ddf3e5da7198fea0c91bc8308cc274"
-  integrity sha1-dET9hVHd8+XacZj+oMkbyDCMwnQ=
-  dependencies:
-    pako "~0.2.5"
-
 jszip@^3.1.3:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.1.5.tgz#e3c2a6c6d706ac6e603314036d43cd40beefdf37"
@@ -14781,14 +14769,6 @@ lead@^1.0.0:
   integrity sha1-bxT5mje+Op3XhPVJVpDlkDRm7kI=
   dependencies:
     flush-write-stream "^1.0.2"
-
-leadfoot@1.7.5:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
-  integrity sha512-NLPJyZ5HYjM2PbMzkpF89EwOboEpyE/ceyLNOmp7TzFZwJQDdxSxdEj3kuJtnfVCUSZXzxvNMUtO300bS+j4nA==
-  dependencies:
-    dojo "2.0.0-alpha.7"
-    jszip "2.5.0"
 
 leaflet-draw@0.4.10:
   version "0.4.10"
@@ -17568,7 +17548,7 @@ pad-component@0.0.1:
   resolved "https://registry.yarnpkg.com/pad-component/-/pad-component-0.0.1.tgz#ad1f22ce1bf0fdc0d6ddd908af17f351a404b8ac"
   integrity sha1-rR8izhvw/cDW3dkIrxfzUaQEuKw=
 
-pako@^0.2.5, pako@~0.2.5:
+pako@^0.2.5:
   version "0.2.9"
   resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
   integrity sha1-8/dSL073gjSNqBYbrZ7P1Rv4OnU=

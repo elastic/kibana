@@ -797,6 +797,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
     async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
       const svg = await find.byCssSelector('div.chart > svg');

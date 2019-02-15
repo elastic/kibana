@@ -105,7 +105,7 @@ export class ProviderCollection {
           instance = createAsyncInstance(type, name, instance);
         }
 
-        if (name !== '__leadfoot__' && name !== 'log' && name !== 'config' && instance && typeof instance === 'object') {
+        if (name !== '__webdriver__' && name !== 'log' && name !== 'config' && instance && typeof instance === 'object') {
           instance = createVerboseInstance(
             this._log,
             type === 'PageObject' ? `PageObjects.${name}` : name,
