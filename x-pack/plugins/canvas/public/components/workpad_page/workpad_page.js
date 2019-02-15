@@ -47,7 +47,13 @@ export class WorkpadPage extends PureComponent {
     resetHandler: PropTypes.func,
     copyElements: PropTypes.func,
     cutElements: PropTypes.func,
+    duplicateElements: PropTypes.func,
     pasteElements: PropTypes.func,
+    removeElements: PropTypes.func,
+    bringForward: PropTypes.func,
+    bringToFront: PropTypes.func,
+    sendBackward: PropTypes.func,
+    sendToBack: PropTypes.func,
   };
 
   componentWillUnmount() {
@@ -73,21 +79,46 @@ export class WorkpadPage extends PureComponent {
       onMouseUp,
       onAnimationEnd,
       onWheel,
+      removeElements,
       copyElements,
       cutElements,
+      duplicateElements,
       pasteElements,
+      bringForward,
+      bringToFront,
+      sendBackward,
+      sendToBack,
     } = this.props;
 
-    const keyHandler = action => {
+    const keyHandler = (action, event) => {
+      event.preventDefault();
       switch (action) {
         case 'COPY':
           copyElements();
           break;
+        case 'CLONE':
+          duplicateElements();
+          break;
         case 'CUT':
           cutElements();
           break;
+        case 'DELETE':
+          removeElements();
+          break;
         case 'PASTE':
           pasteElements();
+          break;
+        case 'BRING_FORWARD':
+          bringForward();
+          break;
+        case 'BRING_TO_FRONT':
+          bringToFront();
+          break;
+        case 'SEND_BACKWARD':
+          sendBackward();
+          break;
+        case 'SEND_TO_BACK':
+          sendToBack();
           break;
       }
     };
