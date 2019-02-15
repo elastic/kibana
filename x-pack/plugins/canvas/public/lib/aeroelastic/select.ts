@@ -7,9 +7,7 @@
 import { ActionId, NodeFunc, NodeResult, State } from './types';
 
 export const select = (selectFun: NodeFunc): NodeFunc => (...fns: NodeFunc[]): NodeResult => {
-  let { prevId, value } = { prevId: NaN as ActionId, value: null as NodeResult };
-  return (object: State) => {
-    const sameId: boolean = prevId === (prevId = object.primaryUpdate.payload.uid);
-    return (value = sameId ? value : selectFun(...fns.map(fun => fun(object))));
-  };
+  let { prevId, memo } = { prevId: NaN as ActionId, memo: null as NodeResult };
+  const old = (object: State) => prevId === (prevId = object.primaryUpdate.payload.uid);
+  return (obj: State) => (old(obj) ? memo : (memo = selectFun(...fns.map(fun => fun(obj)))));
 };
