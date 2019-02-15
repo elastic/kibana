@@ -43,7 +43,7 @@ export function kubernetesMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'AV4RGUqo5NkDleZmzKuZ',
+          id: 'AV4RGUqo5NkDleZmzKuZ-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.kubernetesMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Kubernetes metrics dashboard',
           }),

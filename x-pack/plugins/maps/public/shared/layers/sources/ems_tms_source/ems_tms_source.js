@@ -14,7 +14,7 @@ import { EMSTMSCreateSourceEditor } from './create_source_editor';
 export class EMSTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_TMS';
-  static title = 'Elastic Maps Service tiles';
+  static title = 'Tiles';
   static description = 'Map tiles from Elastic Maps Service';
   static icon = 'emsApp';
 

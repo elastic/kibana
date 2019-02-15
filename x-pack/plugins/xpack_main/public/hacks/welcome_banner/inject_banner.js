@@ -42,7 +42,7 @@ async function asyncInjectBanner($injector) {
 
   // determine if the banner should be displayed
   if (await shouldShowBanner(telemetryOptInProvider, config)) {
-    const $http = $injector.get("$http");
+    const $http = $injector.get('$http');
 
     renderBanner(telemetryOptInProvider, () => fetchTelemetry($http));
   }

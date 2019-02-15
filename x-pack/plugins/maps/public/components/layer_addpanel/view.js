@@ -32,9 +32,8 @@ export class AddLayerPanel extends Component {
   }
 
   _previewLayer = (source) => {
-    this.layer = source.createDefaultLayer({
-      temporary: true,
-    });
+    const options = { temporary: true };
+    this.layer = source.createDefaultLayer(options, this.props.mapColors);
     this.props.previewLayer(this.layer);
   };
 

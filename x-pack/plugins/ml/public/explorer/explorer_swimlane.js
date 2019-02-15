@@ -313,7 +313,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .style('width', `${laneLabelWidth}px`)
       .html(label => mlEscape(label))
       .on('click', () => {
-        if (typeof selection.lanes !== 'undefined') {
+        if (selection && typeof selection.lanes !== 'undefined') {
           swimlaneCellClick({});
         }
       })
