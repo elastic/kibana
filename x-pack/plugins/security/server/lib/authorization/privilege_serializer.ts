@@ -8,7 +8,7 @@ const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const reservedPrefix = 'reserved_';
 const basePrivilegeNames = ['all', 'read'];
-const globalBasePrivileges = [...basePrivilegeNames, 'apm', 'ml', 'monitoring'];
+const globalBasePrivileges = [...basePrivilegeNames];
 const spaceBasePrivileges = basePrivilegeNames.map(
   privilegeName => `${spacePrefix}${privilegeName}`
 );
