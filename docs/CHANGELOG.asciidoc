@@ -104,6 +104,7 @@ Canvas::
 * Removes text selection on writeable change {pull}28887[#28887]
 * Prevents sort in pie function {pull}27076[#27076]
 * Maintains element selection when using up/down layering operations {pull}29634[#29634]
+* Uses `server.basePath` to create socket connection from interpreter {pull}29393[#29393]
 Kibana App::
 * Renames `defaultSpaceBasePath` to `serverBasePath` {pull}29431[#29431]
 Machine Learning::
@@ -128,7 +129,6 @@ Querying & Filtering::
 Reporting::
 * Fixes date formatting on server for CSV export {pull}29977[#29977]
 Security::
-* Uses `server.basePath` to create socket connection from interpreter {pull}29393[#29393]
 * Adds missing cluster privileges to role management screen {pull}28692[#28692]
 Visualizations::
 * Fixes standard deviation aggregation to prevent crash of Time Series Visual Builder {pull}30798[#30798]
