@@ -5,11 +5,17 @@
  */
 
 import axios from 'axios';
-import { findIndex, set } from 'lodash';
+import { findIndex, get, set } from 'lodash';
 import React from 'react';
 
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import {
+  EuiEmptyPrompt,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
@@ -26,6 +32,7 @@ interface TabsState {
   checkupData?: UpgradeAssistantStatus;
   selectedTabIndex: number;
   telemetryState: TelemetryState;
+  upgradeableCluster: boolean;
 }
 
 export class UpgradeAssistantTabsUI extends React.Component<
@@ -37,6 +44,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
 
     this.state = {
       loadingState: LoadingState.Loading,
+      upgradeableCluster: true,
       selectedTabIndex: 0,
       telemetryState: TelemetryState.Complete,
     };
@@ -50,8 +58,38 @@ export class UpgradeAssistantTabsUI extends React.Component<
   }
 
   public render() {
-    const { selectedTabIndex, telemetryState } = this.state;
+    const { selectedTabIndex, telemetryState, upgradeableCluster } = this.state;
     const tabs = this.tabs;
+
+    if (!upgradeableCluster) {
+      return (
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <EuiEmptyPrompt
+              iconType="logoElasticsearch"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle"
+                    defaultMessage="Your cluster is upgrading"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
+                    defaultMessage="This Elasticsearch Cluster contains nodes with a different version of
+                      Elasticsearch. After all nodes are upgraded, upgrade Kibana to use the Upgrade
+                      Assistant."
+                  />
+                </p>
+              }
+            />
+          </EuiPageContentBody>
+        </EuiPageContent>
+      );
+    }
 
     return (
       <EuiTabbedContent
@@ -94,7 +132,14 @@ export class UpgradeAssistantTabsUI extends React.Component<
         checkupData: resp.data,
       });
     } catch (e) {
-      this.setState({ loadingState: LoadingState.Error, loadingError: e });
+      if (get(e, 'response.status') === 426) {
+        this.setState({
+          loadingState: LoadingState.Success,
+          upgradeableCluster: false,
+        });
+      } else {
+        this.setState({ loadingState: LoadingState.Error, loadingError: e });
+      }
     }
   };
 
