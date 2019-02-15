@@ -9,7 +9,7 @@ import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import { getType } from '@kbn/interpreter/common';
+import { getType } from '../../../../common/lib';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { SimpleMathFunction } from './simple_math_function';

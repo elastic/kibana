@@ -16,6 +16,7 @@ export * from './fonts';
 export * from './get_colors_from_palette';
 export * from './get_field_type';
 export * from './get_legend_config';
+export * from './get_type';
 export * from './handlebars';
 export * from './hex_to_rgb';
 export * from './httpurl';
