@@ -8,8 +8,9 @@ import { Server } from 'hapi';
 import { KIBANA_CLOUD_STATS_TYPE } from './constants';
 
 export interface UsageStats {
-  cloudID: string;
   isCloudEnabled: boolean;
+  cloudID: string | undefined;
+  esUUID: string | undefined;
 }
 
 export interface KibanaHapiServer extends Server {
@@ -20,13 +21,29 @@ export interface KibanaHapiServer extends Server {
   };
 }
 
+export function parseEsUUID(cloudID?: string): string | undefined {
+  // cloudID hash pattern `HOST$ES-ID$KB-ID`
+  // https://github.com/elastic/cloud/blob/master/scala-services/zookeeper/src/main/scala/no/found/zookeeper/models/clusters/id/CloudIdGenerator.scala#L111
+  if (!cloudID) {
+    return;
+  }
+  const [hash] = cloudID.split(':').reverse();
+  const decodedIds = Buffer.from(hash, 'base64').toString();
+  const hashingPattern = /^(?<host>.*)\$(?<esID>.*)\$(?<kbID>.*)$/;
+  const match = decodedIds.match(hashingPattern);
+  if (match && match.groups) {
+    return match.groups.esID;
+  }
+}
+
 export function createCollectorFetch(server: any) {
   return async function fetchUsageStats(): Promise<UsageStats> {
-    const config = server.config().get(`xpack.cloud`);
+    const { id } = server.config().get(`xpack.cloud`);
 
     return {
-      cloudID: config.id,
-      isCloudEnabled: !!config.id,
+      isCloudEnabled: !!id,
+      cloudID: id,
+      esUUID: parseEsUUID(id),
     };
   };
 }
