@@ -16,21 +16,20 @@ NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals a
 [[vega-quick-demo]]
 === Getting Started with Vega
 
-Follow these steps to create your first Vega visualization.
-
-. In Kibana, choose Visualize, and add Vega visualization. You should see a default graph.
-. Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
+* In {kib}, choose *Visualize*, and add Vega visualization. You should see a default graph.
+* Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
 `square`, ... (see
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[docs])
-. Try other https://vega.github.io/vega/examples/[Vega] or
+* Try other https://vega.github.io/vega/examples/[Vega] or
 https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. You
 may need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. 
 See <<vega-using-vega-and-vegalite-examples, Vega and VegaLite examples>>.
-. Use https://www.npmjs.com/package/makelogs[makelogs util] to generate
-some logstash data and try link:public/examples/logstash[logstash
-examples].  *Note: Do not use makelogs on a production cluster.*
+* You can generate some logstash data to experiment with using https://www.npmjs.com/package/makelogs[makelogs util]. 
+ *Note: Do not use makelogs on a production cluster.*
+* For more examples, check out our https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting started blog post].  
+
 
 [[vega-vs-vegalite]]
 === Vega vs VegaLite
@@ -279,14 +278,14 @@ to your kibana.yml file.
 [[vega-useful-links]]
 === Useful Links
 
-* https://vega.github.io/editor/[Editor] - includes examples for Vega &
+* The https://vega.github.io/editor/[Vega Editor] includes examples for Vega &
 VegaLite, but does not support any Kibana-specific features like
 Elasticsearch requests and interactive base maps.
 * VegaLite
-https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials],
+https://vega.github.io/vega-lite/tutorials/getting_started.html[tutorials],
 https://vega.github.io/vega-lite/docs/[docs], and
 https://vega.github.io/vega-lite/examples/[examples]
-* Vega https://vega.github.io/vega/tutorials/[Tutorial],
+* Vega https://vega.github.io/vega/tutorials/[tutorials],
 https://vega.github.io/vega/docs/[docs],
 https://vega.github.io/vega/examples/[examples]
 
