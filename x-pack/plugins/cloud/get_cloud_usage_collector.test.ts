@@ -66,13 +66,6 @@ describe('Cloud usage collector', () => {
       expect(collector.isCloudEnabled).toBe(true);
     });
 
-    it('returns `xpack.cloud.id` if available as `cloudID`', async () => {
-      const withCloudID = await createCollectorFetch(getMockServer(CLOUD_ID))();
-      const withoutCloudID = await createCollectorFetch(getMockServer())();
-      expect(withCloudID.cloudID).toEqual(CLOUD_ID);
-      expect(withoutCloudID.cloudID).toEqual(undefined);
-    });
-
     it('returns elasticsearch cluster uuid', async () => {
       const usageStats = await createCollectorFetch(getMockServer(CLOUD_ID))();
       expect(usageStats.esUUID).toEqual(ES_UUID);

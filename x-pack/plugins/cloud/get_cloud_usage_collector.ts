@@ -9,7 +9,6 @@ import { KIBANA_CLOUD_STATS_TYPE } from './constants';
 
 export interface UsageStats {
   isCloudEnabled: boolean;
-  cloudID: string | undefined;
   esUUID: string | undefined;
 }
 
@@ -42,7 +41,6 @@ export function createCollectorFetch(server: any) {
 
     return {
       isCloudEnabled: !!id,
-      cloudID: id,
       esUUID: parseEsUUID(id),
     };
   };
