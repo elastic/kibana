@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ReactDOM from 'react-dom';
-import React from 'react';
-import { get } from 'lodash';
+// @ts-ignore - Interpreter not typed yet
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { get } from 'lodash';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { RendererFactory } from '../types';
 import { DropdownFilter } from './component';
 
-export const dropdownFilter = () => ({
+interface Config {
+  column: string;
+  choices: string[];
+}
+
+export const dropdownFilter: RendererFactory<Config> = () => ({
   name: 'dropdown_filter',
   displayName: 'Dropdown filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
@@ -23,8 +30,8 @@ export const dropdownFilter = () => ({
       value = get(filterAST, 'chain[0].arguments.value[0]');
     }
 
-    const commit = value => {
-      if (value === '%%CANVAS_MATCH_ALL%%') {
+    const commit = (commitValue: string) => {
+      if (commitValue === '%%CANVAS_MATCH_ALL%%') {
         handlers.setFilter('');
       } else {
         const newFilterAST = {
