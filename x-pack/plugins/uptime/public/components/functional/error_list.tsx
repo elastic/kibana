@@ -64,7 +64,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             defaultMessage: 'Status code',
           }),
           render: (statusCode: string) =>
-            (statusCode ? <EuiBadge>{statusCode}</EuiBadge> : null);
+            (statusCode ? <EuiBadge>{statusCode}</EuiBadge> : null),
         },
         {
           field: 'latestMessage',
