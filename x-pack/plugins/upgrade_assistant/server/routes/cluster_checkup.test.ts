@@ -41,7 +41,9 @@ describe('cluster checkup API', () => {
     it('is provided to getUpgradeAssistantStatus', async () => {
       const server = register({
         cloud: {
-          isCloudEnabled: true,
+          config: {
+            isCloudEnabled: true,
+          },
         },
       });
 
@@ -60,9 +62,7 @@ describe('cluster checkup API', () => {
   });
 
   describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {
-    let server;
-
-    beforeEach(() => (server = register()));
+    const server = register();
 
     it('returns state', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({

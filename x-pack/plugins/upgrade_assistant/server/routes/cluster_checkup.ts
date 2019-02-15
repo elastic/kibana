@@ -6,12 +6,13 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
+import _ from 'lodash';
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 
 export function registerClusterCheckupRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-  const isCloudEnabled = server.plugins.cloud ? server.plugins.cloud.isCloudEnabled : false;
+  const isCloudEnabled = _.get(server.plugins, 'cloud.config.isCloudEnabled', false);
 
   server.route({
     path: '/api/upgrade_assistant/status',
