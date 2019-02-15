@@ -600,6 +600,50 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       return objects;
     }
+
+    async getSavedObjectsTableSummary() {
+      const table = await testSubjects.find('savedObjectsTable');
+      const rows = await table.findAllByCssSelector('tbody tr');
+
+      const summary = [];
+      for (const row of rows) {
+        const titleCell = await row.findByCssSelector('td:nth-child(3)');
+        const title = await titleCell.getVisibleText();
+
+
+        const viewInAppButtons = await row.findAllByCssSelector('[aria-label="In app"]');
+        const canViewInApp = Boolean(viewInAppButtons.length);
+        summary.push({
+          title,
+          canViewInApp,
+        });
+      }
+
+      return summary;
+    }
+
+    async clickSavedObjectsTableSelectAll() {
+      const checkboxSelectAll = await testSubjects.find('checkboxSelectAll');
+      await checkboxSelectAll.click();
+    }
+
+    async canSavedObjectsBeDeleted() {
+      const deleteButton = await testSubjects.find('savedObjectsManagementDelete');
+      return await deleteButton.isEnabled();
+    }
+
+    async canSavedObjectBeDeleted(id) {
+      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
+      for (const checkBox of allCheckBoxes) {
+        if (await checkBox.isSelected()) {
+          await checkBox.click();
+        }
+      }
+
+      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
+      await checkBox.click();
+      return await this.canSavedObjectsBeDeleted();
+    }
   }
 
   return new SettingsPage();

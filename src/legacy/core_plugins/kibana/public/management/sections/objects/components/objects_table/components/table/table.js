@@ -243,6 +243,7 @@ class TableUI extends PureComponent {
               title={
                 unableToDeleteSavedObjectTypes.length > 0 ? `Unable to delete ${unableToDeleteSavedObjectTypes.join(', ')}` : undefined
               }
+              data-test-subj="savedObjectsManagementDelete"
             >
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.table.deleteButtonLabel"

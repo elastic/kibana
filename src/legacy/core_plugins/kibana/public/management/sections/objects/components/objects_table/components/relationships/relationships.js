@@ -270,6 +270,7 @@ class RelationshipsUI extends Component {
                       icon: 'eye',
                       available: () => canGoInApp(type),
                       onClick: object => goInApp(object.id, type),
+                      testId: 'savedObjectsManagementRelationshipsViewInApp'
                     },
                   ],
                 },
