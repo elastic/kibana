@@ -12,13 +12,13 @@ import {
   dragging,
   dragVector,
   gestureEnd,
+  gestureState,
   metaHeld,
   mouseButton,
   mouseDowned,
   mouseIsDown,
   optionHeld,
   shiftHeld,
-  gestureState,
 } from './gestures';
 
 import {
@@ -67,18 +67,21 @@ import {
   primaryUpdate,
   resizeAnnotationsFunction,
 } from './layout_functions';
+import { state } from './dagStart';
 
 /**
  * Scenegraph update based on events, gestures...
  */
 
-export const shapes = select(getShapes)(getScene);
+const scene = select(getScene)(state);
+
+export const shapes = select(getShapes)(scene);
 
 const hoveredShapes = select(getHoveredShapes)(configuration, shapes, cursorPosition);
 
 const hoveredShape = select(getHoveredShape)(hoveredShapes);
 
-const draggedShape = select(draggingShape)(getScene, hoveredShape, mouseIsDown, mouseDowned);
+const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
 
 export const focusedShape = select(getFocusedShape)(draggedShape, hoveredShape);
 
@@ -86,7 +89,7 @@ const alterSnapGesture = select(getAlterSnapGesture)(metaHeld);
 
 const multiselectModifier = shiftHeld; // todo abstract out keybindings
 
-const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(getScene);
+const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(scene);
 
 const mouseTransformState = select(getMouseTransformState)(
   mouseTransformGesturePrev,
@@ -105,9 +108,9 @@ const dragBox = select(getDragBox)(dragging, draggedShape, dragVector);
 // directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
 const directSelect = select(getDirectSelect)(primaryUpdate);
 
-const selectedShapeObjects = select(getSelectedShapeObjects)(getScene);
+const selectedShapeObjects = select(getSelectedShapeObjects)(scene);
 
-const selectedShapesPrev = select(getSelectedShapesPrev)(getScene);
+const selectedShapesPrev = select(getSelectedShapesPrev)(scene);
 
 const boxHovered = select(getDragBoxHovered)(dragBox, shapes);
 

@@ -5,6 +5,7 @@
  */
 
 import { select } from './select';
+import { state } from './dagStart';
 import { getScene } from './layout_functions';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
@@ -25,7 +26,8 @@ const appleKeyboard = Boolean(
  *    (we could turn gesture.js into a factory, with this state root - primaryUpdate - being passed...)
  */
 
-const primaryUpdate = state => state.primaryUpdate;
+const scene = select(getScene)(state);
+const primaryUpdate = select(state => state.primaryUpdate)(state);
 
 const gestureStatePrev = select(
   scene =>
@@ -37,7 +39,7 @@ const gestureStatePrev = select(
       mouseIsDown: false,
       mouseButtonState: { buttonState: 'up', downX: null, downY: null },
     }
-)(getScene);
+)(scene);
 
 export const gestureEnd = select(
   action =>

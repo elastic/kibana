@@ -203,7 +203,6 @@ export const WorkpadPage = compose(
     };
   }),
   withState('aeroelastic', 'setAeroelastic', props => {
-    console.log('initializing state');
     const shapes = props.elements
       .map(elementToShape)
       .filter((d, i, a) => !d.id.startsWith('group') || a.find(s => s.parent === d.id));

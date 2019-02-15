@@ -15,10 +15,7 @@ export type transformMatrix2d = [f, f, f, f, f, f, f, f, f] &
 export type transformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] &
   ReadonlyArray<f> & { __nominal: 'transformMatrix3d' };
 
-export interface Meta {
-  silent: boolean;
-}
 export type ActionId = number;
 export type TypeName = string;
 export type NodeResult = any;
-export type NodeFunction = (...args: any[]) => any;
+export type NodeFunc = (...args: any[]) => any;

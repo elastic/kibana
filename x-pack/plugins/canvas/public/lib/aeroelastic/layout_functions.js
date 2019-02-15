@@ -5,7 +5,7 @@
  */
 
 import { getId } from './../../lib/get_id';
-import { landmarkPoint, shapesAt, insideAABB } from './geometry';
+import { insideAABB, landmarkPoint, shapesAt } from './geometry';
 
 import {
   compositeComponent,
@@ -384,7 +384,6 @@ const shapeApplyLocalTransforms = intents => shape => {
       .filter(identity)
   );
 
-  if(!shape.localTransformMatrix) debugger
   const baselineLocalTransformMatrix = multiply(
     shape.baselineLocalTransformMatrix || shape.localTransformMatrix,
     ...transformIntents
@@ -394,7 +393,6 @@ const shapeApplyLocalTransforms = intents => shape => {
   const localTransformMatrix = cumulativeTransformIntents.length
     ? multiply(baselineLocalTransformMatrix, cumulativeTransformIntentMatrix)
     : baselineLocalTransformMatrix;
-if(!localTransformMatrix) debugger
   const cumulativeSizeIntentMatrix = multiply2d(...cumulativeSizeIntents);
   const sizeVector = mvMultiply2d(
     cumulativeSizeIntents.length

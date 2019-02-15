@@ -4,27 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionId, NodeFunction, NodeResult } from './types';
+import { ActionId, NodeFunc, NodeResult } from './types';
 
-const selectDebug = (fun: NodeFunction): NodeFunction => (
-  ...inputs: NodeFunction[]
-): NodeResult => (state: NodeResult) => fun(...inputs.map(input => input(state)));
-
-const selectFast = (fun: NodeFunction): NodeFunction => (...inputs: NodeFunction[]): NodeResult => {
-  // last-value memoizing version of this single line function:
-  // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
-  let value: NodeResult;
-  let actionId: ActionId;
+export const select = (fun: NodeFunc): NodeFunc => (...inputs: NodeFunc[]): NodeResult => {
+  let { value, actionId } = { value: null as NodeResult, actionId: NaN as ActionId };
   return (state: NodeResult) => {
-    const lastActionId: ActionId = state.primaryUpdate.payload.uid;
-    if (actionId === lastActionId) {
-      return value;
-    }
-
-    value = fun(...inputs.map(input => input(state)));
-    actionId = lastActionId;
+    const previousActionId: ActionId = state.primaryUpdate.payload.uid;
+    value = actionId === previousActionId ? value : fun.apply(0, inputs.map(input => input(state)));
+    actionId = previousActionId;
     return value;
   };
 };
-
-export const select = selectFast;
