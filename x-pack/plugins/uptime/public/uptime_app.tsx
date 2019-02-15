@@ -227,7 +227,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           defaultMessage: 'Go to our discuss page',
                         })}
                         iconType="help"
-                        href="https://discuss.elastic.co/c/beats/heartbeat"
+                        href="https://discuss.elastic.co/c/uptime"
                         target="_blank"
                       >
                         <FormattedMessage
