@@ -13,6 +13,13 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 `POST /api/saved_objects/<type>/<id>`
 
+When **not** targeting the `default` Kibana space:
+
+`POST /s/<space id>/api/saved_objects/<type>` +
+
+`POST /s/<space id>/api/saved_objects/<type>/<id>`
+
+
 ==== Path Parameters
 
 `type` (required)::

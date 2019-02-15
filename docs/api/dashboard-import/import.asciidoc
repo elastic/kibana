@@ -13,6 +13,10 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 `POST /api/kibana/dashboards/import`
 
+When **not** targeting the `default` Kibana space:
+
+`POST /s/<space id>/api/kibana/dashboards/import`
+
 ==== Query Parameters
 
 `force` (optional)::

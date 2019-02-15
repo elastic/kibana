@@ -13,6 +13,10 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 `GET /api/kibana/dashboards/export`
 
+When **not** targeting the `default` Kibana space:
+
+`GET /s/<space id>/api/kibana/dashboards/export`
+
 ==== Query Parameters
 
 `dashboard` (required)::

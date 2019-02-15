@@ -12,6 +12,9 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 `POST /api/saved_objects/_bulk_create`
 
+When **not** targeting the `default` Kibana space:
+
+`POST /s/<space id>/api/saved_objects/_bulk_create`
 
 ==== Query Parameters
 
