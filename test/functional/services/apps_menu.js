@@ -26,15 +26,16 @@ export function AppsMenuProvider({ getService }) {
   return new class AppsMenu {
     async readLinks() {
       await this._ensureMenuOpen();
-      const buttons = await testSubjects.findAll('appsMenu appLink');
-      try {
-        return Promise.all(buttons.map(async (element) => ({
-          text: await element.getVisibleText(),
-          href: await element.getProperty('href'),
-        })));
-      } finally {
-        await this._ensureMenuClosed();
-      }
+      const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
+      const $ = await appMenu.parseDomContent();
+      const links = $('[data-test-subj="appLink"]').toArray().map(link => {
+        return {
+          text: $(link).text(),
+          href: $(link).attr('href')
+        };
+      });
+      await this._ensureMenuClosed();
+      return links;
     }
 
     async linkExists(name) {
@@ -45,7 +46,7 @@ export function AppsMenuProvider({ getService }) {
       try {
         log.debug(`click "${appTitle}" tab`);
         await this._ensureMenuOpen();
-        const container = await testSubjects.find('appsMenu');
+        const container = await testSubjects.find('navDrawer&expanded appsMenu');
         const link = await container.findByPartialLinkText(appTitle);
         await link.click();
       } finally {
