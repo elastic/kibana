@@ -26,8 +26,8 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return ({
-    openLayerPanel: layerId => {
-      dispatch(setSelectedLayer(layerId));
+    openLayerPanel: async layerId => {
+      await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     toggleVisible: layerId => {
