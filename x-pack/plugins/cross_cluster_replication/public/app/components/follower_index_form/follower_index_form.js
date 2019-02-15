@@ -563,7 +563,7 @@ export const FollowerIndexForm = injectI18n(
               <Fragment>
                 <EuiSpacer size="s"/>
                 {advancedSettingsFields.map((advancedSetting) => {
-                  const { field, title, description, label, helpText, defaultValue, type } = advancedSetting;
+                  const { field, testSubject, title, description, label, helpText, defaultValue, type } = advancedSetting;
                   return (
                     <FormEntryRow
                       key={field}
@@ -582,7 +582,7 @@ export const FollowerIndexForm = injectI18n(
                       type={type}
                       areErrorsVisible={areErrorsVisible}
                       onValueUpdate={this.onFieldsChange}
-                      dataTestSubj={`ccrFollowerIndexForm${field.charAt(0).toUpperCase() + field.slice(1)}Input`}
+                      testSubj={testSubject}
                     />
                   );
                 })}

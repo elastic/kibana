@@ -39,7 +39,7 @@ export const CrossClusterReplicationHome = injectI18n(
           defaultMessage="Follower indices"
         />
       ),
-      dataTestSubj: 'ccrFollowerIndicesTab',
+      testSubj: 'ccrFollowerIndicesTab',
     }, {
       id: 'auto_follow_patterns',
       name: (
@@ -48,7 +48,7 @@ export const CrossClusterReplicationHome = injectI18n(
           defaultMessage="Auto-follow patterns"
         />
       ),
-      dataTestSubj: 'ccrAutoFollowPatternsTab',
+      testSubj: 'ccrAutoFollowPatternsTab',
     }]
 
     componentDidMount() {
@@ -87,7 +87,7 @@ export const CrossClusterReplicationHome = injectI18n(
                   onClick={() => this.onSectionChange(tab.id)}
                   isSelected={tab.id === this.state.activeSection}
                   key={tab.id}
-                  data-test-subject={tab.dataTestSubj}
+                  data-test-subject={tab.testSubj}
                 >
                   {tab.name}
                 </EuiTab>
