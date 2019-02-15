@@ -36,7 +36,7 @@ chrome.helpExtension.set(domElement => {
     <EuiLink
       href="https://discuss.elastic.co/c/apm"
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noopener"
     >
       {i18n.translate('xpack.apm.feedbackMenu.provideFeedbackTitle', {
         defaultMessage: 'Give APM Feedback'
