@@ -11,7 +11,9 @@ import React from 'react';
 import { LogsPageContent } from './page_content';
 import { LogsToolbar } from './toolbar';
 
+import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
+
 import { Header } from '../../components/header';
 import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
@@ -62,6 +64,12 @@ export const LogsPage = injectI18n(
               sourceId,
             }) => (
               <>
+                <DocumentTitle
+                  title={intl.formatMessage({
+                    id: 'xpack.infra.logsPage.documentTitle',
+                    defaultMessage: 'Logs',
+                  })}
+                />
                 <SourceConfigurationFlyout />
                 {isLoading ? (
                   <SourceLoadingPage />
