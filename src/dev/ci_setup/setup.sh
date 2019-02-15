@@ -18,7 +18,7 @@ export FORCE_COLOR=1
 
 ### To run the test suite against a different version of Elasticsearch than
 ### the default, uncomment this line, and change the version.
-# export SNAPSHOT_VERSION=7.0.0
+# export ES_SNAPSHOT_VERSION=7.0.0
 
 ###
 ### check that we seem to be in a kibana project

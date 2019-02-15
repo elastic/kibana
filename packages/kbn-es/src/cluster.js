@@ -85,10 +85,10 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Installing from snapshot'));
     this._log.indent(4);
 
-    const version = process.env.SNAPSHOT_VERSION || options.version;
+    const version = process.env.ES_SNAPSHOT_VERSION || options.version;
 
     if (version !== options.version) {
-      this._log.info(`Using Elasticearch version ${version} from env.SNAPSHOT_VERSION`);
+      this._log.info(`Using Elasticearch version ${version} from env.ES_SNAPSHOT_VERSION`);
     }
 
     const { installPath } = await installSnapshot({

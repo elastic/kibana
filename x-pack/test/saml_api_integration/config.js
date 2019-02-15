@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = resolve(__dirname, '../../test/saml_api_integration/fixtures/idp_metadata.xml');
 
-  const isV6 = (process.env.SNAPSHOT_VERSION || '6.').startsWith('6.');
+  const isV6 = (process.env.ES_SNAPSHOT_VERSION || '6.').startsWith('6.');
 
   const v6Args = [
     'xpack.security.authc.token.enabled=true',
