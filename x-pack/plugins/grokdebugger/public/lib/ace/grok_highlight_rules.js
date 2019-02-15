@@ -15,25 +15,25 @@ export class GrokHighlightRules extends TextHighlightRules {
       start: [
         {
           token: [
-            "grokStart",
-            "grokPatternName",
-            "grokSeparator",
-            "grokFieldName",
-            "grokEnd"
+            'grokStart',
+            'grokPatternName',
+            'grokSeparator',
+            'grokFieldName',
+            'grokEnd'
           ],
-          regex: "(%{)([^:]+)(:)([^:]+)(})"
+          regex: '(%{)([^:]+)(:)([^:]+)(})'
         },
         {
           token: [
-            "grokStart",
-            "grokPatternName",
-            "grokSeparator",
-            "grokFieldName",
-            "grokSeparator",
-            "grokFieldType",
-            "grokEnd"
+            'grokStart',
+            'grokPatternName',
+            'grokSeparator',
+            'grokFieldName',
+            'grokSeparator',
+            'grokFieldType',
+            'grokEnd'
           ],
-          regex: "(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})"
+          regex: '(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})'
         },
         {
           token: (escapeToken, /* regexToken */) => {
@@ -42,7 +42,7 @@ export class GrokHighlightRules extends TextHighlightRules {
             }
             return 'grokRegex';
           },
-          regex: "(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])"
+          regex: '(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])'
         },
       ]
     };

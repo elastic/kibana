@@ -18,7 +18,7 @@
  */
 
 
-import { fromRoot } from '../../../utils';
+import { fromRoot } from '../../../legacy/utils';
 import { chain } from 'lodash';
 import { resolve } from 'path';
 import { fromNode } from 'bluebird';
