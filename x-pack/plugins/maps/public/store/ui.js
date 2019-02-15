@@ -19,7 +19,7 @@ export const FLYOUT_STATE = {
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
-  isReadOnly: true,
+  isReadOnly: false,
 };
 
 // Reducer
