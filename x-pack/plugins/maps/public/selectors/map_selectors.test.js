@@ -6,6 +6,11 @@
 
 jest.mock('../shared/layers/vector_layer', () => {});
 jest.mock('../shared/layers/sources/all_sources', () => {});
+jest.mock('../store/non_serializable_instances', () => ({
+  getInspectorAdapters: () => {
+    return {};
+  }
+}));
 jest.mock('ui/timefilter', () => ({
   timefilter: {
     getTime: () => {
