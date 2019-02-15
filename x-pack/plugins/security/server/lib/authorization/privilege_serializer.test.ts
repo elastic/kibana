@@ -52,9 +52,9 @@ describe(`#isSerializedReservedPrivilege`, () => {
     'bar',
     'feature_foo',
     'feature_foo.privilege1',
-  ].forEach(validValue => {
-    test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSerializedReservedPrivilege(validValue)).toBe(false);
+  ].forEach(invalidValue => {
+    test(`returns false for '${invalidValue}'`, () => {
+      expect(PrivilegeSerializer.isSerializedReservedPrivilege(invalidValue)).toBe(false);
     });
   });
 });
@@ -66,9 +66,9 @@ describe(`#isSerializedFeaturePrivilege`, () => {
     });
   });
 
-  ['all', 'read', 'space_all', 'space_read', 'reserved_foo', 'reserved_bar'].forEach(validValue => {
-    test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSerializedFeaturePrivilege(validValue)).toBe(false);
+  ['all', 'read', 'space_all', 'space_read', 'reserved_foo', 'reserved_bar'].forEach(invalidValue => {
+    test(`returns false for '${invalidValue}'`, () => {
+      expect(PrivilegeSerializer.isSerializedFeaturePrivilege(invalidValue)).toBe(false);
     });
   });
 });
