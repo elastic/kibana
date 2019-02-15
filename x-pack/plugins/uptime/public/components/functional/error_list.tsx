@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore missing typings
-import { EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiCodeBlock, EuiInMemoryTable, EuiPanel, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -22,13 +22,28 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
-        <FormattedMessage id="xpack.uptime.errorList.title" defaultMessage="Error list" />
+        <FormattedMessage id="xpack.uptime.errorList.title" defaultMessage="Errors" />
       </h5>
     </EuiTitle>
     <EuiInMemoryTable
       loading={loading}
       items={errorList}
       columns={[
+        {
+          field: 'count',
+          width: 200,
+          name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
+            defaultMessage: 'Frequency',
+          }),
+          render: (count: number, item: object) => (
+            <div>
+              <EuiText size="s"><EuiTextColor color="danger">{count}</EuiTextColor> errors</EuiText>
+              <EuiText size="xs" color="subdued">
+                Latest was {moment(item.timestamp).fromNow()}
+              </EuiText>
+            </div>
+          ),
+        },
         {
           field: 'type',
           name: i18n.translate('xpack.uptime.errorList.errorTypeColumnLabel', {
@@ -44,23 +59,12 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           width: '25%',
         },
         {
-          field: 'count',
-          name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
-            defaultMessage: 'Count',
-          }),
-        },
-        {
-          field: 'timestamp',
-          name: i18n.translate('xpack.uptime.errorList.latestErrorColumnLabel', {
-            defaultMessage: 'Latest error',
-          }),
-          render: (timestamp: string) => moment(timestamp).fromNow(),
-        },
-        {
           field: 'statusCode',
           name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
             defaultMessage: 'Status code',
           }),
+          render: (statusCode: string) =>
+            (statusCode ? <EuiBadge>{statusCode}</EuiBadge> : null);
         },
         {
           field: 'latestMessage',
@@ -68,6 +72,12 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             defaultMessage: 'Latest message',
           }),
           width: '40%',
+          render: (message: string) => (
+            <div>
+              <EuiCodeBlock transparentBackground size="xs" paddingSize="none">
+                {message}
+              </EuiCodeBlock>
+            </div>
         },
       ]}
       pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}

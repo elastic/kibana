@@ -105,7 +105,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     let colors: UptimeAppColors;
     if (darkMode) {
       colors = {
-        primary: euiDarkVars.euiColorVis1,
+        primary: euiDarkVars.euiColorLightestShade,
         secondary: euiDarkVars.euiColorVis0,
         danger: euiDarkVars.euiColorVis9,
       };
