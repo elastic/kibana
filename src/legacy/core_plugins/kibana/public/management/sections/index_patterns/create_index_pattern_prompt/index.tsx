@@ -25,6 +25,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -54,13 +55,14 @@ export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) =
       </EuiText>
       <EuiHorizontalRule margin="l" />
       <EuiText textAlign="left">
-        <p>
+        <h3>
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.examplesTitle"
             defaultMessage="Examples of index patterns"
           />
-        </p>
+        </h3>
       </EuiText>
+      <EuiSpacer />
       <EuiDescriptionList className="indexPatternListPrompt__descList">
         <EuiDescriptionListTitle>
           <FormattedMessage
