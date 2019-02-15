@@ -19,18 +19,17 @@ function createInspectorAdapters() {
   return inspectorAdapters;
 }
 
-
 const INITIAL_STATE = {
   inspectorAdapters: createInspectorAdapters(),
 };
 
 // Reducer
-export function nonSerializableKibanaInstances(state = INITIAL_STATE) {
-  // nonSerializableKibanaInstances state is read only and provides access to kibana object instances
+export function nonSerializableInstances(state = INITIAL_STATE) {
+  // state is read only and provides access to non-serializeable object instances
   return state;
 }
 
 // Selectors
-export const getInspectorAdapters = ({ nonSerializableKibanaInstances }) => {
-  return _.get(nonSerializableKibanaInstances, 'inspectorAdapters', {});
+export const getInspectorAdapters = ({ nonSerializableInstances }) => {
+  return _.get(nonSerializableInstances, 'inspectorAdapters', {});
 };

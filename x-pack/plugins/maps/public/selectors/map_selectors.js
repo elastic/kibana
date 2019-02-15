@@ -14,8 +14,7 @@ import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../store/non_serializable_kibana_instances';
-
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {

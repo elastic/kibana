@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { getTemporaryLayers, getMapColors } from '../../selectors/map_selectors';
-import { getInspectorAdapters } from '../../store/non_serializable_kibana_instances';
+import { getInspectorAdapters } from '../../store/non_serializable_instances';
 import {
   addLayer,
   removeLayer,

@@ -27,7 +27,7 @@ import {
   FLYOUT_STATE
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../store/non_serializable_kibana_instances';
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
 import { indexPatternService } from '../kibana_services';

@@ -16,7 +16,7 @@ import {
   setLayerErrorStatus,
 } from '../../../actions/store_actions';
 import { getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
-import { getInspectorAdapters } from '../../../store/non_serializable_kibana_instances';
+import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
