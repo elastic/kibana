@@ -48,11 +48,6 @@ export function TestSubjectsProvider({ getService }) {
       );
     }
 
-    async existsInDOM(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      log.debug(`TestSubjects.existsInDOM(${selector})`);
-      return await find.existsByCssSelector(testSubjSelector(selector), timeout);
-    }
-
     async existOrFail(selector, existsOptions) {
       if (!await this.exists(selector, { timeout: TRY_TIME, ...existsOptions })) {
         throw new Error(`expected testSubject(${selector}) to exist`);

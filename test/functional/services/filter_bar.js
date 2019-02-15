@@ -25,7 +25,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
   class FilterBar {
     hasFilter(key, value, enabled = true) {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
-      return testSubjects.existsInDOM(
+      return testSubjects.exists(
         `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`
       );
     }
