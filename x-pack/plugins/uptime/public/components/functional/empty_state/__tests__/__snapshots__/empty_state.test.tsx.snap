@@ -225,7 +225,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                       <a
                         className="euiLink euiLink--primary"
                         href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
-                        rel="noopener"
+                        rel="noopener noreferrer"
                         target="_blank"
                       >
                         <FormattedMessage

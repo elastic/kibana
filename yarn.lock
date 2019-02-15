@@ -871,10 +871,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.10.2":
-  version "6.10.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.2.tgz#2eeaf71cb21f0b2b704c1c5e43757bf9a1a9157b"
-  integrity sha512-L5BpbggbK21pU4HRVSR284Y+qtuDNuTxPGcrIck32SC9Ex6nC8VPJgb8TmIMp+IamgSiZGoe3ebt6ey5hvfu5g==
+"@elastic/eui@6.10.1":
+  version "6.10.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.1.tgz#b94d9a6749f5d7c6d03e55e1700870ff1e4132b3"
+  integrity sha512-Ay9KeaSFLHtdDeKwPcxnOfVw3Axm7uDIhzi+r5UdmdnK2MbXYqQR1G8wayziAto4vKV5n2oXl0qfjQHlcft49A==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
