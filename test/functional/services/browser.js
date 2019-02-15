@@ -28,16 +28,7 @@ export async function BrowserProvider({ getService }) {
     /**
      * Keyboard events
      */
-    keys = {
-      ENTER: Key.ENTER,
-      COMMAND: Key.COMMAND,
-      CONTROL: Key.CONTROL,
-      NULL: Key.NULL,
-      RETURN: Key.RETURN,
-      SPACE: Key.SPACE,
-      ARROW_RIGHT: Key.ARROW_RIGHT,
-      BACKSPACE: Key.BACK_SPACE
-    };
+    keys = Key;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
