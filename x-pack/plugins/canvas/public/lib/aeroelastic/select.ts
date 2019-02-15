@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionId, NodeFunc, NodeResult, State } from './types';
+import { ActionId, Json, PlainFun, Selector, State } from './types';
 
-export const select = (selectFun: NodeFunc): NodeFunc => (...fns: NodeFunc[]): NodeResult => {
-  let { prevId, cache } = { prevId: NaN as ActionId, cache: null as NodeResult };
-  const old = (object: State) => prevId === (prevId = object.primaryUpdate.payload.uid);
-  return (obj: State) => (old(obj) ? cache : (cache = selectFun(...fns.map(fun => fun(obj)))));
+export const select = (fun: PlainFun): Selector => (...fns) => {
+  let { prevId, cache } = { prevId: NaN as ActionId, cache: null as Json };
+  const old = (object: State): boolean => prevId === (prevId = object.primaryUpdate.payload.uid);
+  return obj => (old(obj) ? cache : (cache = fun(...fns.map(f => f(obj) as Json))));
 };
