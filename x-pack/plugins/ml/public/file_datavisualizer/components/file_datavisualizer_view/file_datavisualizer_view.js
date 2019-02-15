@@ -259,12 +259,9 @@ export class FileDataVisualizerView extends Component {
     const fields = (results !== undefined && results.field_stats !== undefined) ? Object.keys(results.field_stats) : [];
 
     return (
-      <React.Fragment>
+      <div className="file-datavisualizer__content">
         {(mode === MODE.READ) &&
           <React.Fragment>
-
-
-            {/* <EuiSpacer size="l" /> */}
 
             {(!loading && !loaded) &&
               <AboutPanel
@@ -342,7 +339,7 @@ export class FileDataVisualizerView extends Component {
             <BottomPadding />
           </React.Fragment>
         }
-      </React.Fragment>
+      </div>
     );
   }
 }

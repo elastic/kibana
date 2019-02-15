@@ -30,7 +30,7 @@ export const indexNameValidator = (value) => {
   if (isEmpty(value)) {
     return [(
       <FormattedMessage
-        id="xpack.crossClusterReplication.followerIndexForm.errors.nameMissing"
+        id="xpack.crossClusterReplication.followerIndexForm.errors.nameMissingMessage"
         defaultMessage="Name is required."
       />
     )];
@@ -39,7 +39,7 @@ export const indexNameValidator = (value) => {
   if (beginsWithPeriod(value)) {
     return [(
       <FormattedMessage
-        id="xpack.crossClusterReplication.followerIndexForm.errors.nameBeginsWithPeriod"
+        id="xpack.crossClusterReplication.followerIndexForm.errors.nameBeginsWithPeriodMessage"
         defaultMessage="Name can't begin with a period."
       />
     )];
@@ -50,7 +50,7 @@ export const indexNameValidator = (value) => {
   if (illegalCharacters.length) {
     return [(
       <FormattedMessage
-        id="xpack.crossClusterReplication.followerIndexForm.errors.nameIllegalCharacters"
+        id="xpack.crossClusterReplication.followerIndexForm.errors.nameIllegalCharactersMessage"
         defaultMessage="Remove the characters {characterList} from your name."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
       />
@@ -64,7 +64,7 @@ export const leaderIndexValidator = (value) => {
   if (isEmpty(value)) {
     return [(
       <FormattedMessage
-        id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexMissing"
+        id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexMissingMessage"
         defaultMessage="Leader index is required."
       />
     )];
@@ -75,7 +75,7 @@ export const leaderIndexValidator = (value) => {
   if (illegalCharacters.length) {
     return [(
       <FormattedMessage
-        id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexIllegalCharacters"
+        id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexIllegalCharactersMessage"
         defaultMessage="Remove the characters {characterList} from your leader index."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
       />
