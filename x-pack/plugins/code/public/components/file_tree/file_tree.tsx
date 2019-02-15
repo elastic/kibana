@@ -110,7 +110,7 @@ export class CodeFileTree extends React.Component<Props> {
             )}
             <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} color="subdued" />
             <DirectoryNode>
-              <EuiText size="s" grow={false} style={{ display: 'inline-block' }}>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                 {`${node.name}/`}
               </EuiText>
             </DirectoryNode>
