@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
+import { ToolingLog } from '@kbn/dev-utils';
+import { Client } from 'elasticsearch';
 
-  describe('console app', function () {
-    this.tags('ciGroup1');
-
-    before(async function () {
-      await browser.setWindowSize(1300, 1100);
-    });
-
-    loadTestFile(require.resolve('./_console'));
-  });
+export class EsArchiver {
+  constructor(options: { client: Client; dataDir: string; log: ToolingLog; kibanaUrl: string });
+  public save(name: string, indices: string | string[], options?: { raw?: boolean }): Promise<void>;
+  public load(name: string, options?: { skipExisting?: boolean }): Promise<void>;
+  public unload(name: string): Promise<void>;
+  public rebuildAll(): Promise<void>;
+  public edit(prefix: string, handler: () => Promise<void>): Promise<void>;
+  public loadIfNeeded(name: string): Promise<void>;
+  public emptyKibanaIndex(): Promise<void>;
 }
