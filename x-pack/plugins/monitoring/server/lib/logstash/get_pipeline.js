@@ -65,7 +65,7 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
  * @param {Object} First and last seen timestamps for pipeline version we're getting data for
  * @param {Integer} timeseriesIntervalInSeconds The size of each timeseries bucket, in seconds
  */
-export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation, { firstSeen, lastSeen }, timeseriesIntervalInSeconds) {
+export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesIntervalInSeconds) {
   const logstashState = stateDocument.logstash_state;
   const vertices = logstashState.pipeline.representation.graph.vertices;
 
@@ -86,24 +86,7 @@ export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation
 
     if (vertex !== undefined) {
       // We extract this vertex's stats from vertexStatsBucket
-      const vertexStats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
-
-      // For each stat (metric), we add it to the stats property of the vertex object in logstashState
-      const metrics = Object.keys(vertexStats);
-      metrics.forEach(metric => {
-        // Create metric object if it doesn't already exist
-        if (!vertex.stats.hasOwnProperty(metric)) {
-          vertex.stats[metric] = {
-            timeRange: {
-              min: firstSeen,
-              max: lastSeen
-            },
-            data: []
-          };
-        }
-
-      });
-      vertex.stats = vertexStats;
+      vertex.stats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
     }
   });
 
@@ -145,7 +128,7 @@ export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipe
   }
 
   const result = {
-    ..._enrichStateWithStatsAggregation(stateDocument, statsAggregation, version, timeseriesInterval),
+    ..._enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval),
     versions
   };
   return result;

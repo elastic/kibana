@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last, get, omit } from 'lodash';
+import { get } from 'lodash';
 import { Vertex } from './vertex';
 
 export const TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT = 2;
@@ -44,28 +44,22 @@ export class PluginVertex extends Vertex {
   }
 
   get latestMillisPerEvent() {
-    const latestMillisPerEventBucket = last(get(this.stats, 'millis_per_event.data', [])) || [];
-    return latestMillisPerEventBucket[1];
+    return get(this.stats, 'millis_per_event');
   }
 
   get percentOfTotalProcessorTime() {
-    const latestPercentOfTotalProcessorDurationBucket = last(get(this.stats, 'percent_of_total_processor_duration.data', [])) || [];
-    return latestPercentOfTotalProcessorDurationBucket[1];
+    return get(this.stats, 'percent_of_total_processor_duration');
   }
 
   get eventsPerSecond() {
     const eventsPerMillisecond = this.isInput
       ? this.stats.events_out_per_millisecond
       : this.stats.events_in_per_millisecond;
-    return {
-      ...omit(eventsPerMillisecond, 'data'),
-      data: get(eventsPerMillisecond, 'data', []).map(([x, y]) => [x, y * 1000])
-    };
+    return eventsPerMillisecond * 1000;
   }
 
   get latestEventsPerSecond() {
-    const latestBucket = last(get(this.eventsPerSecond, 'data', [])) || [];
-    return latestBucket[1];
+    return this.eventsPerSecond;
   }
 
   isTimeConsuming() {
