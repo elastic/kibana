@@ -4,49 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const refresh = { osx: 'option+r', windows: 'alt+r', linux: 'alt+r', other: 'alt+r' };
+import { mapValues } from 'lodash';
+
+// maps 'option' for mac and 'alt' for other OS
+const getAltShortcuts = shortcuts => {
+  if (!Array.isArray(shortcuts)) {
+    shortcuts = [shortcuts];
+  }
+  const optionShortcuts = shortcuts.map(shortcut => `option+${shortcut}`);
+  const altShortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
+
+  return {
+    osx: optionShortcuts,
+    windows: altShortcuts,
+    linux: altShortcuts,
+    other: altShortcuts,
+  };
+};
+
+// maps 'command' for mac and 'ctrl' for other OS
+const getCtrlShortcuts = shortcuts => {
+  if (!Array.isArray(shortcuts)) {
+    shortcuts = [shortcuts];
+  }
+  const cmdShortcuts = shortcuts.map(shortcut => `command+${shortcut}`);
+  const ctrlShortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
+
+  return {
+    osx: cmdShortcuts,
+    windows: ctrlShortcuts,
+    linux: ctrlShortcuts,
+    other: ctrlShortcuts,
+  };
+};
+
+const refreshShortcut = getAltShortcuts('r');
+const previousPageShortcut = getAltShortcuts('[');
+const nextPageShortcut = getAltShortcuts(']');
 
 export const keymap = {
   EDITOR: {
-    UNDO: { osx: 'command+z', windows: 'ctrl+z', linux: 'ctrl+z', other: 'ctrl+z' },
-    REDO: {
-      osx: 'command+shift+y',
-      windows: 'ctrl+shift+y',
-      linux: 'ctrl+shift+y',
-      other: 'ctrl+shift+y',
-    },
-    NEXT: { osx: 'option+]', windows: 'alt+]', linux: 'alt+]', other: 'alt+]' },
-    PREV: { osx: 'option+[', windows: 'alt+[', linux: 'alt+[', other: 'alt+[' },
-    FULLSCREEN: {
-      osx: ['option+p', 'option+f'],
-      windows: ['alt+p', 'alt+f'],
-      linux: ['alt+p', 'alt+f'],
-      other: ['alt+p', 'alt+f'],
-    },
+    UNDO: getCtrlShortcuts('z'),
+    REDO: getCtrlShortcuts('shift+z'),
+    PREV: previousPageShortcut,
+    NEXT: nextPageShortcut,
+    FULLSCREEN: getAltShortcuts(['p', 'f']),
     FULLSCREEN_EXIT: ['escape'],
-    EDITING: { osx: 'option+e', windows: 'alt+e', linux: 'alt+e', other: 'alt+e' },
-    GRID: { osx: 'option+g', windows: 'alt+g', linux: 'alt+g', other: 'alt+g' },
-    REFRESH: refresh,
+    EDITING: getAltShortcuts('e'),
+    GRID: getAltShortcuts('g'),
+    REFRESH: refreshShortcut,
   },
   ELEMENT: {
-    COPY: { osx: 'command+c', windows: 'ctrl+c', linux: 'ctrl+c', other: 'ctrl+c' },
-    CUT: { osx: 'command+x', windows: 'ctrl+x', linux: 'ctrl+x', other: 'ctrl+x' },
-    PASTE: { osx: 'command+v', windows: 'ctrl+v', linux: 'ctrl+v', other: 'ctrl+v' },
+    COPY: getCtrlShortcuts('c'),
+    CLONE: getCtrlShortcuts('d'),
+    CUT: getCtrlShortcuts('x'),
+    PASTE: getCtrlShortcuts('v'),
     DELETE: ['del', 'backspace'],
+    BRING_FORWARD: getCtrlShortcuts('up'),
+    SEND_BACKWARD: getCtrlShortcuts('down'),
+    BRING_TO_FRONT: getCtrlShortcuts('shift+up'),
+    SEND_TO_BACK: getCtrlShortcuts('shift+down'),
   },
   PRESENTATION: {
-    NEXT: {
-      osx: ['space', 'right', 'option+]'],
-      windows: ['space', 'right', 'alt+]'],
-      linux: ['space', 'right', 'alt+]'],
-      other: ['space', 'right', 'alt+]'],
-    },
-    PREV: {
-      osx: ['left', 'option+['],
-      windows: ['left', 'alt+['],
-      linux: ['left', 'alt+['],
-      other: ['left', 'alt+['],
-    },
-    REFRESH: refresh,
+    PREV: mapValues(previousPageShortcut, osShortcuts => osShortcuts.concat(['backspace', 'left'])),
+    NEXT: mapValues(nextPageShortcut, osShortcuts => osShortcuts.concat(['space', 'right'])),
+    REFRESH: refreshShortcut,
   },
 };

@@ -46,7 +46,7 @@ export function postgresqlLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '158be870-87f4-11e7-ad9c-db80de0bf8d3',
+          id: '158be870-87f4-11e7-ad9c-db80de0bf8d3-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'PostgreSQL logs dashboard',
           }),
