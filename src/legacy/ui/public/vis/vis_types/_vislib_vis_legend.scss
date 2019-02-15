@@ -55,7 +55,7 @@ $visLegendLineHeight: $euiSize;
 .visLegend__list {
   @include euiScrollBar;
   display: flex;
-  line-height: $visvisLegendLineHeight;
+  line-height: $visLegendLineHeight;
   width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
   flex-direction: column;
@@ -67,7 +67,7 @@ $visLegendLineHeight: $euiSize;
     width: auto;
     flex-direction: row;
     flex-wrap: wrap;
-    overflow: visible; /* 2 */
+    overflow: visible;
 
     .visLegend__value {
       flex-grow: 0;
@@ -85,7 +85,7 @@ $visLegendLineHeight: $euiSize;
   padding: $euiSizeXS;
   display: flex;
   flex-shrink: 0;
-  position: relative; /* 1 */
+  position: relative;
 
   > * {
     max-width: 100%; // Needed for truncation (dom element has no class)
@@ -106,7 +106,7 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__valueTitle--full ~ .visLegend__valueDetails {
-  z-index: 2; /* 3 */
+  z-index: 2;
 }
 
 .visLegend__valueDetails {
@@ -121,7 +121,7 @@ $visLegendLineHeight: $euiSize;
   .visLib--legend-top &,
   .visLib--legend-bottom & {
     @include euiBottomShadowMedium;
-    position: absolute; /* 1 */
+    position: absolute;
     border-radius: $euiBorderRadius;
   }
 
