@@ -50,7 +50,7 @@ export const buildQuery = ({
   const agg = {
     user_count: {
       cardinality: {
-        field: 'auditd.data.acct',
+        field: 'auditd.summary.actor.secondary',
       },
     },
   };
