@@ -52,7 +52,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           basePath: '/s/custom_space',
         });
 
-        await testSubjects.existOrFail('ml-jobs-list', 10000);
+        await testSubjects.existOrFail('ml-jobs-list');
       });
     });
 
