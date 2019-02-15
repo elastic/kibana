@@ -24,13 +24,13 @@ Follow these steps to create your first Vega visualization.
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[docs])
 . Try other https://vega.github.io/vega/examples/[Vega] or
 https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. You
-may need to make URLs absolute, e.g. replace
+may need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
-`"url": "https://vega.github.io/editor/data/world-110m.json"`. (see
-link:#Using%20Vega%20and%20VegaLite%20examples[notes below])
-. Using https://www.npmjs.com/package/makelogs[makelogs util], generate
+`"url": "https://vega.github.io/editor/data/world-110m.json"`. 
+See <<vega-using-vega-and-vegalite-examples, Vega and VegaLite examples>>.
+. Use https://www.npmjs.com/package/makelogs[makelogs util] to generate
 some logstash data and try link:public/examples/logstash[logstash
-examples].  *(Do not use makelogs on a production cluster.)*
+examples].  *Note: Do not use makelogs on a production cluster.*
 
 [[vega-vs-vegalite]]
 === Vega vs VegaLite
@@ -332,7 +332,7 @@ additional configuration options.
 ==== Sizing and positioning
 
 [[vega-and-vegalite]]
-Vega and VegaLite
+===== Vega and VegaLite
 
 By default, Kibana Vega graphs will use
 `autosize = { type: 'fit', contains: 'padding' }` layout model for Vega
@@ -341,7 +341,7 @@ and VegaLite graphs. The `fit` model uses all available space, ignores
 override this behaviour by specifying a different `autosize` value.
 
 [[vega-on-a-map]]
-Vega on a map
+===== Vega on a map
 
 All Vega graphs will ignore `autosize`, `width`, `height`, and `padding`
 values, using `fit` model with zero padding.
