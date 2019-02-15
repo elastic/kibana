@@ -30,7 +30,7 @@ export const NodeContextMenu = injectI18n(
     // #26620 for the details for these fields.
     // TODO: This is tech debt, remove it after 7.0 & ECS migration.
     const APM_FIELDS = {
-      [InfraNodeType.host]: 'context.system.hostname',
+      [InfraNodeType.host]: 'host.hostname',
       [InfraNodeType.container]: 'container.id',
       [InfraNodeType.pod]: 'kubernetes.pod.uid',
     };
