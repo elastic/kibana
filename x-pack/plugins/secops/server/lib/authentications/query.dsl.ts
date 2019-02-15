@@ -35,8 +35,8 @@ export const buildQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.category': 'user-login' } },
-    { term: { 'process.exe': '/usr/sbin/sshd' } },
-    { terms: { 'event.type': ['user_login', 'user_start'] } },
+    { term: { 'process.executable': '/usr/sbin/sshd' } },
+    { terms: { 'auditd.message_type': ['user_login', 'user_start'] } },
     {
       range: {
         [timestamp]: {
