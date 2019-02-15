@@ -13,7 +13,6 @@
 
 .tvbVisTopN__table {
   width: 100%;
-  table-layout: fixed;
 }
 
 .tvbVisTopN__table tr > td:nth-child(1) {
@@ -36,6 +35,7 @@
 .tvbVisTopN__label {
   color: $tvbTextColor;
   padding: $euiSizeXS 0;
+  max-width: 150px;
 }
 
 .tvbVisTopN__label span {
