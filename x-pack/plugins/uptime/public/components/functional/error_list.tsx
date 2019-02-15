@@ -5,7 +5,15 @@
  */
 
 // @ts-ignore missing typings
-import { EuiBadge, EuiCodeBlock, EuiInMemoryTable, EuiPanel, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -37,7 +45,9 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           }),
           render: (count: number, item: object) => (
             <div>
-              <EuiText size="s"><EuiTextColor color="danger">{count}</EuiTextColor> errors</EuiText>
+              <EuiText size="s">
+                <EuiTextColor color="danger">{count}</EuiTextColor> errors
+              </EuiText>
               <EuiText size="xs" color="subdued">
                 Latest was {moment(item.timestamp).fromNow()}
               </EuiText>
@@ -63,8 +73,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
             defaultMessage: 'Status code',
           }),
-          render: (statusCode: string) =>
-            (statusCode ? <EuiBadge>{statusCode}</EuiBadge> : null),
+          render: (statusCode: string) => (statusCode ? <EuiBadge>{statusCode}</EuiBadge> : null),
         },
         {
           field: 'latestMessage',
@@ -78,6 +87,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
                 {message}
               </EuiCodeBlock>
             </div>
+          ),
         },
       ]}
       pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
