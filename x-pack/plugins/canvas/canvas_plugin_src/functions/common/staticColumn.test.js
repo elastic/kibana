@@ -5,9 +5,9 @@
  */
 
 import expect from 'expect.js';
-import { staticColumn } from '../staticColumn';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from './fixtures/test_tables';
+import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { staticColumn } from './staticColumn';
+import { testTable } from './__tests__/fixtures/test_tables';
 
 describe('staticColumn', () => {
   const fn = functionWrapper(staticColumn);
@@ -19,6 +19,15 @@ describe('staticColumn', () => {
     expect(result.columns).to.eql([...testTable.columns, { name: 'foo', type: 'string' }]);
     expect(result.rows.every(row => typeof row.foo === 'string')).to.be(true);
     expect(result.rows.every(row => row.foo === 'bar')).to.be(true);
+  });
+
+  it('adds a number column if value is a number', () => {
+    const result = fn(testTable, { name: 'foo', value: 1 });
+
+    expect(result.type).to.be('datatable');
+    expect(result.columns).to.eql([...testTable.columns, { name: 'foo', type: 'number' }]);
+    expect(result.rows.every(row => typeof row.foo === 'number')).to.be(true);
+    expect(result.rows.every(row => row.foo === 1)).to.be(true);
   });
 
   it('overwrites an existing column if provided an existing column name', () => {

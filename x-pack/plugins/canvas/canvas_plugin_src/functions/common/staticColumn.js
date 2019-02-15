@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getType } from '@kbn/interpreter/common';
-
 export const staticColumn = () => ({
   name: 'staticColumn',
   type: 'datatable',
@@ -29,7 +27,8 @@ export const staticColumn = () => ({
   },
   fn: (context, args) => {
     const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
-    const type = getType(rows[0][args.name]);
+    // typeof null is actually 'object', not 'null'.
+    const type = rows[0][args.name] === null ? 'null' : typeof rows[0][args.name];
     const columns = [...context.columns];
     const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
     const newColumn = { name: args.name, type };
