@@ -135,7 +135,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
 
-      // we filter out the features here which don't have any privileges to simplify the login within
+      // we filter out the features here which don't have any privileges to simplify the logic within
       const featuresWithPrivileges = features.filter(feature => Object.keys(feature.privileges).length > 0);
       render(
         <I18nContext>
