@@ -39,6 +39,7 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
+              save: true,
             });
             break;
           case 'nothing_space':
@@ -47,6 +48,7 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: false,
+              save: false,
             });
             break;
           default:

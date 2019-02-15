@@ -35,6 +35,7 @@ export default function infrastructureTests({ getService }: KibanaFunctionalTest
             expect(uiCapabilities.value).to.have.property('infrastructure');
             expect(uiCapabilities.value!.infrastructure).to.eql({
               show: true,
+              save: true,
             });
             break;
           // these users have a read only view of Infra
@@ -45,6 +46,7 @@ export default function infrastructureTests({ getService }: KibanaFunctionalTest
             expect(uiCapabilities.value).to.have.property('infrastructure');
             expect(uiCapabilities.value!.infrastructure).to.eql({
               show: true,
+              save: false,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -60,6 +62,7 @@ export default function infrastructureTests({ getService }: KibanaFunctionalTest
             expect(uiCapabilities.value).to.have.property('infrastructure');
             expect(uiCapabilities.value!.infrastructure).to.eql({
               show: false,
+              save: false,
             });
             break;
           // if we don't have access at the space itself, we're

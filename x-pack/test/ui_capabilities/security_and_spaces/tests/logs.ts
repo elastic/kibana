@@ -35,6 +35,7 @@ export default function logsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
+              save: true,
             });
             break;
           // these users have a read only view of Logs
@@ -45,6 +46,7 @@ export default function logsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
+              save: false,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -60,6 +62,7 @@ export default function logsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: false,
+              save: false,
             });
             break;
           // if we don't have access at the space itself, we're
