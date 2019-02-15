@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withState } from 'recompose';
-import { AdvancedFilter as Component } from './advanced_filter';
-
-export const AdvancedFilter = compose(withState('value', 'onChange', ({ filter }) => filter || ''))(
-  Component
-);
+import '@storybook/addon-options/register';
+import '@storybook/addon-actions/register';
+import '@storybook/addon-knobs/register';
+import '@storybook/addon-console';
