@@ -18,7 +18,7 @@ import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree, FileTreeItemType, SearchScope, WorkerReservedProgress } from '../../../model';
-import { CommitInfo } from '../../../model/commit';
+import { CommitInfo, ReferenceInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
@@ -75,6 +75,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   file: FetchFileResponse | undefined;
   currentTree: FileTree | undefined;
   commits: CommitInfo[];
+  branches: ReferenceInfo[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
@@ -180,6 +181,7 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <ButtonsContainer>
           <EuiButtonGroup
+            buttonSize="m"
             color="primary"
             options={this.buttonOptions}
             type="single"
@@ -187,6 +189,7 @@ class CodeContent extends React.PureComponent<Props> {
             onChange={this.switchButton}
           />
           <EuiButtonGroup
+            buttonSize="m"
             color="primary"
             options={this.rawButtonOptions}
             type="single"
@@ -199,6 +202,7 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <ButtonsContainer>
           <EuiButtonGroup
+            buttonSize="m"
             color="primary"
             options={[
               {
@@ -227,6 +231,7 @@ class CodeContent extends React.PureComponent<Props> {
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
           repoScope={this.props.repoScope}
+          branches={this.props.branches}
         />
         {this.renderContent()}
       </Root>
@@ -373,6 +378,7 @@ const mapStateToProps = (state: RootState) => ({
   tree: state.file.tree,
   currentTree: currentTreeSelector(state),
   commits: treeCommitsSelector(state),
+  branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
