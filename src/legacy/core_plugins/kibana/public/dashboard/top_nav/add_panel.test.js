@@ -25,13 +25,12 @@ import {
   DashboardAddPanel,
 } from './add_panel';
 
-jest.mock('ui/chrome',
+jest.mock('ui/capabilities',
   () => ({
-    getInjected(injected) {
-      if (injected === 'uiCapabilities') {
-        return {
-          visualize: { show: true, save: true },
-        };
+    uiCapabilities: {
+      visualize: {
+        show: true,
+        save: true
       }
     }
   }), { virtual: true });
