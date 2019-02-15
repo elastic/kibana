@@ -21,7 +21,6 @@ import datemath from './datemath';
 export {
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  ParsedInterval,
   parseEsInterval,
 } from './parse_es_interval';
 export { leastCommonInterval } from './least_common_interval';

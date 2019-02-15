@@ -11,8 +11,7 @@
             "Safari 7"
           ]
         }
-      },
-      "@babel/preset-env"
+      }
     ]
   ]
 }

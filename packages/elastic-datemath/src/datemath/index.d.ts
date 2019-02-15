@@ -47,7 +47,4 @@ declare const datemath: {
   ): moment.Moment | undefined;
 };
 
-export function parseEsInterval(interval: string): Unit;
-export function leastCommonInterval(a: string, b: string): string;
-
 export default datemath;
