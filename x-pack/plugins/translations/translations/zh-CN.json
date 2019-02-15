@@ -2412,7 +2412,6 @@
     "tagCloud.visParams.showLabelToggleLabel": "显示标签",
     "tagCloud.visParams.textScaleLabel": "文本比例",
     "tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage": "子函数应实现此方法以响应数据更新",
-    "tileMap.coordinateMapsVisualization.unableToGetBoundErrorTitle": "无法获取边界",
     "tileMap.geohashLayer.mapTitle": "{mapType} 地图类型无法识别",
     "tileMap.tooltipFormatter.latitudeLabel": "纬度",
     "tileMap.tooltipFormatter.longitudeLabel": "经度",
