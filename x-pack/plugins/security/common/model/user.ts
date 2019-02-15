@@ -10,11 +10,11 @@ export interface User {
   full_name: string;
   roles: string[];
   enabled: boolean;
-  authentication_realm: {
+  authentication_realm?: {
     name: string;
     type: string;
   };
-  lookup_realm: {
+  lookup_realm?: {
     name: string;
     type: string;
   };
@@ -28,5 +28,10 @@ export function getUserDisplayName(user: User): string {
 
 export function canUserChangePassword(user: User): boolean {
   const { authentication_realm: authenticationRealm } = user;
+
+  if (!authenticationRealm) {
+    return true;
+  }
+
   return REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
 }

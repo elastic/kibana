@@ -40,6 +40,14 @@ describe('#canUserChangePassword', () => {
     });
   });
 
+  it(`returns true when no realm is provided`, () => {
+    expect(
+      canUserChangePassword({
+        username: 'foo',
+      } as User)
+    ).toEqual(true);
+  });
+
   it(`returns false for all other realms`, () => {
     expect(
       canUserChangePassword({
