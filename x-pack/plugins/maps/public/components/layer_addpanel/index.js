@@ -6,22 +6,24 @@
 
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE }
-  from '../../store/ui';
+import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { getSelectedLayer, getMapColors } from '../../selectors/map_selectors';
+import { getInspectorAdapters } from '../../store/non_serializable_instances';
 import {
   removeLayer,
   setTransientLayer,
   addLayer,
   setSelectedLayer
-} from "../../actions/store_actions";
-import { getSelectedLayer } from "../../selectors/map_selectors";
+} from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
+    inspectorAdapters: getInspectorAdapters(state),
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     hasLayerSelected: !!selectedLayer,
-    isLoading: selectedLayer && selectedLayer.isLayerLoading()
+    isLoading: selectedLayer && selectedLayer.isLayerLoading(),
+    mapColors: getMapColors(state),
   };
 }
 

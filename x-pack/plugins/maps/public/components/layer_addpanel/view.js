@@ -42,9 +42,11 @@ export class AddLayerPanel extends Component {
   }
 
   _previewLayer = (source) => {
-    this.setState({ layer: source.createDefaultLayer() }, () => {
-      this.props.previewLayer(this.state.layer);
-    });
+    const options = { temporary: true };
+    this.setState({
+      layer: source.createDefaultLayer(options, this.props.mapColors)
+    },
+    () => this.props.previewLayer(this.state.layer));
   };
 
   _clearSource = () => {
@@ -117,7 +119,8 @@ export class AddLayerPanel extends Component {
 
   _renderSourceEditor() {
     const editorProperties = {
-      onPreviewSource: this._previewLayer
+      onPreviewSource: this._previewLayer,
+      inspectorAdapters: this.props.inspectorAdapters,
     };
 
     const Source = ALL_SOURCES.find((Source) => {

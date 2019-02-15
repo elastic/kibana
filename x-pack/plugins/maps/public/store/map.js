@@ -35,7 +35,7 @@ import {
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE
-} from "../actions/store_actions";
+} from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
 

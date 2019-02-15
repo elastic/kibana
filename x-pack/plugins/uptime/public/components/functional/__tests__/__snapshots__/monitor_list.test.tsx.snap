@@ -26,13 +26,11 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
             "field": "ping.monitor.status",
             "name": "Status",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "ping.timestamp",
             "name": "Last updated",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "ping.monitor.id",
@@ -47,7 +45,6 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           Object {
             "field": "ping.monitor.ip",
             "name": "IP",
-            "sortable": true,
           },
           Object {
             "field": "upSeries",
@@ -1284,7 +1281,7 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
         }
       }
       responsive={true}
-      sorting={true}
+      sorting={false}
     />
   </EuiPanel>
 </Fragment>
