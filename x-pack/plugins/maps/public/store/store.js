@@ -8,10 +8,12 @@ import { combineReducers, applyMiddleware, createStore, compose } from 'redux';
 import thunk from 'redux-thunk';
 import { ui } from './ui';
 import { map } from './map';
+import { nonSerializableInstances } from './non_serializable_instances';
 
 const rootReducer = combineReducers({
   map,
-  ui
+  ui,
+  nonSerializableInstances
 });
 
 const enhancers = [ applyMiddleware(thunk) ];
