@@ -11,7 +11,7 @@ const pathTypes = `:pathType(${PathTypes.blob}|${PathTypes.tree}|${PathTypes.bla
   PathTypes.commits
 })`;
 export const MAIN = `/:resource/:org/:repo/${pathTypes}/:revision/:path*:goto(!.*)?`;
-export const DIFF = '/commit/:resource/:org/:repo/:commitId';
+export const DIFF = '/:resource/:org/:repo/commit/:commitId';
 export const REPO = `/:resource/:org/:repo`;
 export const MAIN_ROOT = `/:resource/:org/:repo/${pathTypes}/:revision`;
 export const ADMIN = '/admin';
