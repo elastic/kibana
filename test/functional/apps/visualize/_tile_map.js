@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header', 'settings']);
 
 
   describe('tile map visualize app', function () {
@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }) {
           const data = await inspector.getTableData();
           await inspector.close();
 
-          await filterBar.removeAllFilters();
+          await PageObjects.discover.removeAllFilters();
           compareTableData(data, expectedPrecision2DataTable);
         });
 
