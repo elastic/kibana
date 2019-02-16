@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }) {
   describe('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
 
       await PageObjects.settings.navigateTo();
