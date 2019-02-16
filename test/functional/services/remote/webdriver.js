@@ -28,6 +28,8 @@ const geckoDriver = require('geckodriver');
 const chromeDriver = require('chromedriver');
 const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 
+import { preventParallelCalls } from './prevent_parallel_calls';
+
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = [
@@ -44,44 +46,9 @@ const NO_QUEUE_COMMANDS = [
  * queue all calls to Executor#send() if there is already a call in
  * progress.
  */
-const actualExecute = Executor.prototype.execute;
-const execQueue = [];
-Executor.prototype.execute = async function (command) {
-  if (NO_QUEUE_COMMANDS.includes(command.getName())) {
-    return await actualExecute.call(this, command);
-  }
-
-  const task = {
-    exec: async () => {
-      try {
-        task.resolve(await actualExecute.call(this, command));
-      } catch (error) {
-        task.reject(error);
-      } finally {
-        if (task !== execQueue.shift()) {
-          // this shouldn't be possible, but if someone changes something...
-          throw new Error('execQueue corrupt');
-        }
-
-        if (execQueue.length) {
-          execQueue[0].exec();
-        }
-      }
-    }
-  };
-
-  task.promise = new Promise((resolve, reject) => {
-    task.resolve = resolve;
-    task.reject = reject;
-  });
-
-  if (execQueue.push(task) === 1) {
-    // only item in the queue, kick it off
-    task.exec();
-  }
-
-  return task.promise;
-};
+Executor.prototype.execute = preventParallelCalls(Executor.prototype.execute, (command) => (
+  NO_QUEUE_COMMANDS.includes(command.getName())
+));
 
 let attemptCounter = 0;
 async function attemptToCreateCommand(log, browserType) {
