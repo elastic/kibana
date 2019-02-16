@@ -20,6 +20,7 @@
 import { delay } from 'bluebird';
 import  { Builder, By, Key, until, logging } from 'selenium-webdriver';
 const { LegacyActionSequence } =  require('selenium-webdriver/lib/actions');
+const { getLogger } =  require('selenium-webdriver/lib/logging');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const geckoDriver = require('geckodriver');
@@ -84,6 +85,13 @@ async function attemptToCreateCommand(log, browserType) {
 }
 
 export async function initWebDriver({ log, browserType }) {
+  const logger = getLogger('webdriver.http.Executor');
+  logger.setLevel(logging.Level.FINEST);
+  logger.addHandler((entry) => {
+    log.verbose(entry.message);
+  });
+
+
   return await Promise.race([
     (async () => {
       await delay(2 * MINUTE);
