@@ -6,11 +6,14 @@
 
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from "./server/routes/api/license/";
+import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from './server/routes/api/license/';
+import { createRouter } from '../../server/lib/create_router';
+import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 
 export function licenseManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.license_management',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
     uiExports: {
@@ -20,9 +23,12 @@ export function licenseManagement(kibana)  {
       ]
     },
     init: (server) => {
-      registerLicenseRoute(server);
-      registerStartTrialRoutes(server);
-      registerStartBasicRoute(server);
+      registerLicenseChecker(server, PLUGIN.ID);
+      const xpackInfo = server.plugins.xpack_main.info;
+      const router = createRouter(server, PLUGIN.ID, '/api/license');
+      registerLicenseRoute(router, xpackInfo);
+      registerStartTrialRoutes(router, xpackInfo);
+      registerStartBasicRoute(router, xpackInfo);
     }
   });
 }

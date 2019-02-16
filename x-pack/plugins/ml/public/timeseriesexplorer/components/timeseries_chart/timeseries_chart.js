@@ -25,8 +25,8 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../common/util/anomaly_utils';
-import { AnnotationFlyout } from '../annotation_flyout';
-import { DeleteAnnotationModal } from '../delete_annotation_modal';
+import { annotation$ } from '../../../services/annotations_service';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -55,6 +55,8 @@ import {
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation
 } from './timeseries_chart_annotations';
+
+import { injectI18n } from '@kbn/i18n/react';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
@@ -89,22 +91,20 @@ function getSvgHeight() {
   return focusHeight + contextChartHeight + swimlaneHeight + chartSpacing + margin.top + margin.bottom;
 }
 
-export class TimeseriesChart extends React.Component {
+const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Component {
   static propTypes = {
-    indexAnnotation: PropTypes.func,
+    annotation: PropTypes.object,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
     contextChartData: PropTypes.array,
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
-    deleteAnnotation: PropTypes.func,
     detectorIndex: PropTypes.string,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool.isRequired,
-    refresh: PropTypes.func,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -112,98 +112,9 @@ export class TimeseriesChart extends React.Component {
     svgWidth: PropTypes.number.isRequired,
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
-    toastNotifications: PropTypes.object,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
   };
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      annotation: {},
-      isFlyoutVisible: false,
-      isDeleteModalVisible: false,
-    };
-  }
-
-  closeDeleteModal = () => {
-    this.setState({ isDeleteModalVisible: false });
-  }
-
-  closeFlyout = () => {
-    const chartElement = d3.select(this.rootNode);
-    chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
-    this.setState({ isFlyoutVisible: false, annotation: {} });
-  }
-
-  showFlyout = (annotation) => {
-    this.setState({ isFlyoutVisible: true, annotation });
-  }
-
-  handleAnnotationChange = (e) => {
-    // e is a React Syntethic Event, we need to cast it to
-    // a placeholder variable so it's still valid in the
-    // setState() asynchronous callback
-    const annotation = e.target.value;
-    this.setState((state) => {
-      state.annotation.annotation = annotation;
-      return state;
-    });
-  }
-
-  deleteAnnotation = () => {
-    this.setState({ isDeleteModalVisible: true });
-  }
-
-  deleteAnnotationConfirmation = async () => {
-    const {
-      deleteAnnotation,
-      refresh,
-      toastNotifications
-    } = this.props;
-
-    const { annotation } = this.state;
-
-    try {
-      await deleteAnnotation(annotation._id);
-      toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
-    } catch (err) {
-      toastNotifications
-        .addDanger(`An error occured deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(err)}`);
-    }
-
-    this.closeDeleteModal();
-    this.closeFlyout();
-
-    refresh();
-  }
-
-  indexAnnotation = (annotation) => {
-    const {
-      indexAnnotation,
-      refresh,
-      toastNotifications
-    } = this.props;
-
-    this.closeFlyout();
-
-    indexAnnotation(annotation)
-      .then(() => {
-        refresh();
-        const action = (typeof annotation._id === 'undefined') ? 'Added an' : 'Updated';
-        if (typeof annotation._id === 'undefined') {
-          toastNotifications.addSuccess(`${action} annotation for job with ID ${annotation.job_id}.`);
-        } else {
-          toastNotifications.addSuccess(`${action} annotation for job with ID ${annotation.job_id}.`);
-        }
-      })
-      .catch((resp) => {
-        const action = (typeof annotation._id === 'undefined') ? 'creating' : 'updating';
-        toastNotifications
-          .addDanger(`An error occured ${action} the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
-      });
-  }
 
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
@@ -293,6 +204,11 @@ export class TimeseriesChart extends React.Component {
     }
 
     this.renderFocusChart();
+
+    if (mlAnnotationsEnabled && this.props.annotation === null) {
+      const chartElement = d3.select(this.rootNode);
+      chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
+    }
   }
 
   renderChart() {
@@ -580,7 +496,8 @@ export class TimeseriesChart extends React.Component {
       selectedJob,
       showAnnotations,
       showForecast,
-      showModelBounds
+      showModelBounds,
+      intl
     } = this.props;
 
     if (focusChartData === undefined) {
@@ -590,7 +507,6 @@ export class TimeseriesChart extends React.Component {
     const data = focusChartData;
 
     const contextYScale = this.contextYScale;
-    const showFlyout = this.showFlyout.bind(this);
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
 
     const focusChart = d3.select('.focus-chart');
@@ -600,7 +516,11 @@ export class TimeseriesChart extends React.Component {
     const bucketSpan = selectedJob.analysis_config.bucket_span;
     const chartElement = d3.select(this.rootNode);
     chartElement.select('.zoom-aggregation-interval').text(
-      `(aggregation interval: ${focusAggInt}, bucket span: ${bucketSpan})`);
+      intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel',
+        defaultMessage: '(aggregation interval: {focusAggInt}, bucket span: {bucketSpan})',
+      }, { focusAggInt, bucketSpan })
+    );
 
     // Render the axes.
 
@@ -637,10 +557,20 @@ export class TimeseriesChart extends React.Component {
       }
 
       yMin = d3.min(combinedData, (d) => {
-        return d.lower !== undefined ? Math.min(d.value, d.lower) : d.value;
+        let metricValue = d.value;
+        if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+          // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+          metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+        }
+        return d.lower !== undefined ? Math.min(metricValue, d.lower) : metricValue;
       });
       yMax = d3.max(combinedData, (d) => {
-        return d.upper !== undefined ? Math.max(d.value, d.upper) : d.value;
+        let metricValue = d.value;
+        if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+          // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+          metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+        }
+        return d.upper !== undefined ? Math.max(metricValue, d.upper) : metricValue;
       });
 
       if (yMax === yMin) {
@@ -662,7 +592,7 @@ export class TimeseriesChart extends React.Component {
       if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
-        // TODO needs revisting to be a more robust normalization
+        // TODO needs revisiting to be a more robust normalization
         yMax = yMax * (1 + (maxLevel + 1) / 5);
       }
       this.focusYScale.domain([yMin, yMax]);
@@ -703,8 +633,7 @@ export class TimeseriesChart extends React.Component {
         focusChartHeight,
         this.focusXScale,
         showAnnotations,
-        showFocusChartTooltip,
-        showFlyout
+        showFocusChartTooltip
       );
 
       // disable brushing (creation of annotations) when annotations aren't shown
@@ -718,9 +647,11 @@ export class TimeseriesChart extends React.Component {
 
     // Render circle markers for the points.
     // These are used for displaying tooltips on mouseover.
-    // Don't render dots where value=null (data gaps) or for multi-bucket anomalies.
+    // Don't render dots where value=null (data gaps, with no anomalies)
+    // or for multi-bucket anomalies.
     const dots = d3.select('.focus-chart-markers').selectAll('.metric-value')
-      .data(data.filter(d => (d.value !== null && !showMultiBucketAnomalyMarker(d))));
+      .data(data.filter(d => ((d.value !== null || typeof d.anomalyScore === 'number') &&
+        !showMultiBucketAnomalyMarker(d))));
 
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();
@@ -738,11 +669,10 @@ export class TimeseriesChart extends React.Component {
       .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (_.has(d, 'anomalyScore')) {
-          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
+          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
         }
         return markerClass;
       });
-
 
     // Render cross symbols for any multi-bucket anomalies.
     const multiBucketMarkers = d3.select('.focus-chart-markers').selectAll('.multi-bucket')
@@ -761,7 +691,7 @@ export class TimeseriesChart extends React.Component {
 
     // Update all markers to new positions.
     multiBucketMarkers.attr('transform', d => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`)
-      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`);
+      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
 
     // Add rectangular markers for any scheduled events.
@@ -818,7 +748,8 @@ export class TimeseriesChart extends React.Component {
     const {
       autoZoomDuration,
       modelPlotEnabled,
-      timefilter
+      timefilter,
+      intl
     } = this.props;
 
     const setZoomInterval = this.setZoomInterval.bind(this);
@@ -834,7 +765,12 @@ export class TimeseriesChart extends React.Component {
       .attr('x', xPos)
       .attr('y', 17)
       .attr('class', 'zoom-info-text')
-      .text('Zoom:');
+      .text(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomLabel',
+          defaultMessage: 'Zoom:',
+        })
+      );
 
     const zoomOptions = [{ durationMs: autoZoomDuration, label: 'auto' }];
     _.each(ZOOM_INTERVAL_OPTIONS, (option) => {
@@ -862,14 +798,22 @@ export class TimeseriesChart extends React.Component {
       .attr('x', (xPos + 6))
       .attr('y', 17)
       .attr('class', 'zoom-info-text zoom-aggregation-interval')
-      .text('(aggregation interval: , bucket span: )');
+      .text(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomGroupAggregationIntervalLabel',
+          defaultMessage: '(aggregation interval: , bucket span: )',
+        })
+      );
 
     if (modelPlotEnabled === false) {
       const modelPlotLabel = zoomGroup.append('text')
         .attr('x', 300)
         .attr('y', 17)
         .attr('class', 'zoom-info-text')
-        .text('Model bounds are not available');
+        .text(intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelBoundsNotAvailableLabel',
+          defaultMessage: 'Model bounds are not available',
+        }));
 
       modelPlotLabel.attr('x', (fcsWidth - (modelPlotLabel.node().getBBox().width + 10)));
     }
@@ -1285,7 +1229,8 @@ export class TimeseriesChart extends React.Component {
 
   showFocusChartTooltip(marker, circle) {
     const {
-      modelPlotEnabled
+      modelPlotEnabled,
+      intl
     } = this.props;
 
     const fieldFormat = this.fieldFormat;
@@ -1298,10 +1243,19 @@ export class TimeseriesChart extends React.Component {
     if (_.has(marker, 'anomalyScore')) {
       const score = parseInt(marker.anomalyScore);
       const displayScore = (score > 0 ? score : '< 1');
-      contents += `anomaly score: ${displayScore}<br/>`;
+      contents += intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel',
+        defaultMessage: 'anomaly score: {displayScore}{br}'
+      }, { displayScore, br: '<br />' });
 
       if (showMultiBucketAnomalyTooltip(marker) === true) {
-        contents += `multi-bucket impact: ${getMultiBucketImpactLabel(marker.multiBucketImpact)}<br/>`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
+          defaultMessage: 'multi-bucket impact: {multiBucketImpactLabel}{br}'
+        }, {
+          br: '<br />',
+          multiBucketImpactLabel: getMultiBucketImpactLabel(marker.multiBucketImpact)
+        });
       }
 
       if (modelPlotEnabled === false) {
@@ -1311,43 +1265,108 @@ export class TimeseriesChart extends React.Component {
         if (_.has(marker, 'actual') && marker.function !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
-          contents += `actual: ${formatValue(marker.actual, marker.function, fieldFormat)}`;
-          contents += `<br/>typical: ${formatValue(marker.typical, marker.function, fieldFormat)}`;
+          contents += intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.actualLabel',
+            defaultMessage: 'actual: {actualValue}'
+          }, {
+            actualValue: formatValue(marker.actual, marker.function, fieldFormat)
+          });
+          contents += intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.typicalLabel',
+            defaultMessage: '{br}typical: {typicalValue}'
+          }, {
+            br: '<br />',
+            typicalValue: formatValue(marker.typical, marker.function, fieldFormat)
+          });
         } else {
-          contents += `value: ${formatValue(marker.value, marker.function, fieldFormat)}`;
+          contents += intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel',
+            defaultMessage: 'value: {value}'
+          }, {
+            value: formatValue(marker.value, marker.function, fieldFormat)
+          });
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
+            // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
             const byFieldName = mlEscape(marker.byFieldName);
-            if (numberOfCauses < 10) {
-              // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
-              contents += `<br/> ${numberOfCauses} unusual ${byFieldName} values`;
-            } else {
+            contents += intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.moreThanOneUnusualByFieldValuesLabel',
+              defaultMessage: '{br} {numberOfCauses}{plusSign} unusual {byFieldName} values'
+            }, {
+              br: '<br />',
+              numberOfCauses,
+              byFieldName,
               // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-              contents += `<br/> ${numberOfCauses}+ unusual ${byFieldName} values`;
-            }
+              plusSign: numberOfCauses < 10 ? '' : '+'
+            });
           }
         }
       } else {
-        contents += `value: ${formatValue(marker.value, marker.function, fieldFormat)}`;
-        contents += `<br/>upper bounds: ${formatValue(marker.upper, marker.function, fieldFormat)}`;
-        contents += `<br/>lower bounds: ${formatValue(marker.lower, marker.function, fieldFormat)}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.valueLabel',
+          defaultMessage: 'value: {value}'
+        }, {
+          value: formatValue(marker.value, marker.function, fieldFormat)
+        });
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.upperBoundsLabel',
+          defaultMessage: '{br}upper bounds: {upperBoundsValue}'
+        }, {
+          br: '<br />',
+          upperBoundsValue: formatValue(marker.upper, marker.function, fieldFormat)
+        });
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.lowerBoundsLabel',
+          defaultMessage: '{br}lower bounds: {lowerBoundsValue}'
+        }, {
+          br: '<br />',
+          lowerBoundsValue: formatValue(marker.lower, marker.function, fieldFormat)
+        });
       }
     } else {
       // TODO - need better formatting for small decimals.
       if (_.get(marker, 'isForecast', false) === true) {
-        contents += `prediction: ${formatValue(marker.value, marker.function, fieldFormat)}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.predictionLabel',
+          defaultMessage: 'prediction: {predictionValue}'
+        }, {
+          predictionValue: formatValue(marker.value, marker.function, fieldFormat)
+        });
       } else {
-        contents += `value: ${formatValue(marker.value, marker.function, fieldFormat)}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',
+          defaultMessage: 'value: {value}'
+        }, {
+          value: formatValue(marker.value, marker.function, fieldFormat)
+        });
       }
 
       if (modelPlotEnabled === true) {
-        contents += `<br/>upper bounds: ${formatValue(marker.upper, marker.function, fieldFormat)}`;
-        contents += `<br/>lower bounds: ${formatValue(marker.lower, marker.function, fieldFormat)}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.upperBoundsLabel',
+          defaultMessage: '{br}upper bounds: {upperBoundsValue}'
+        }, {
+          br: '<br />',
+          upperBoundsValue: formatValue(marker.upper, marker.function, fieldFormat)
+        });
+        contents += intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.lowerBoundsLabel',
+          defaultMessage: '{br}lower bounds: {lowerBoundsValue}'
+        }, {
+          br: '<br />',
+          lowerBoundsValue: formatValue(marker.lower, marker.function, fieldFormat)
+        });
       }
     }
 
     if (_.has(marker, 'scheduledEvents')) {
-      contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
+      contents += '<br/><hr/>' + intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
+        defaultMessage: 'Scheduled events:{br}{scheduledEventsValue}'
+      }, {
+        br: '<br />',
+        scheduledEventsValue: marker.scheduledEvents.map(mlEscape).join('<br/>')
+      });
     }
 
     if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
@@ -1393,13 +1412,13 @@ export class TimeseriesChart extends React.Component {
         selectedMarker.enter().append('path')
           .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
           .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
-          .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)} highlighted`);
+          .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id} highlighted`);
       } else {
         selectedMarker.enter().append('circle')
           .attr('r', LINE_CHART_ANOMALY_RADIUS)
           .attr('cx', d => focusXScale(d.date))
           .attr('cy', d => focusYScale(d.value))
-          .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore)} highlighted`);
+          .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore).id} highlighted`);
       }
 
       // Display the chart tooltip for this marker.
@@ -1426,29 +1445,11 @@ export class TimeseriesChart extends React.Component {
   }
 
   render() {
-    const { annotation, isDeleteModalVisible, isFlyoutVisible } = this.state;
-
-    return (
-      <React.Fragment>
-        <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {mlAnnotationsEnabled && isFlyoutVisible &&
-          <React.Fragment>
-            <AnnotationFlyout
-              annotation={annotation}
-              cancelAction={this.closeFlyout}
-              controlFunc={this.handleAnnotationChange}
-              deleteAction={this.deleteAnnotation}
-              saveAction={this.indexAnnotation}
-            />
-            <DeleteAnnotationModal
-              annotation={annotation}
-              cancelAction={this.closeDeleteModal}
-              deleteAction={this.deleteAnnotationConfirmation}
-              isVisible={isDeleteModalVisible}
-            />
-          </React.Fragment>
-        }
-      </React.Fragment>
-    );
+    return <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />;
   }
-}
+});
+
+export const TimeseriesChart = injectObservablesAsProps(
+  { annotation: annotation$ },
+  TimeseriesChartIntl
+);

@@ -52,6 +52,8 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
   return parse(expression, parseOptions);
 }
 
+// indexPattern isn't required, but if you pass one in, we can be more intelligent
+// about how we craft the queries (e.g. scripted fields)
 export function toElasticsearchQuery(node, indexPattern) {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));

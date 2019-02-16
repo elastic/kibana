@@ -10,6 +10,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   Client.prototype.ccr = components.clientAction.namespaceFactory();
   const ccr = Client.prototype.ccr.prototype;
 
+  ccr.permissions = ca({
+    urls: [
+      {
+        fmt: '/_security/user/_has_privileges',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
   ccr.autoFollowPatterns = ca({
     urls: [
       {
@@ -61,5 +71,100 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     needBody: true,
     method: 'DELETE'
+  });
+
+  ccr.info = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/info',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
+  ccr.stats = ca({
+    urls: [
+      {
+        fmt: '/_ccr/stats',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ccr.followerIndexStats = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/stats',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
+  ccr.saveFollowerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=name%>/_ccr/follow',
+        req: {
+          name: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'PUT'
+  });
+
+  ccr.pauseFollowerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/pause_follow',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ccr.resumeFollowerIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/resume_follow',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
+  ccr.unfollowLeaderIndex = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/unfollow',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
   });
 };

@@ -46,6 +46,11 @@ describe('metric vis', () => {
         aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
       });
 
+      vis.params.metric.metrics = [{ accessor: 0, format: { id: 'url', params: {
+        urlTemplate: 'http://ip.info?address={{value}}',
+        labelTemplate: 'ip[{{value}}]'
+      } } }];
+
       const el = document.createElement('div');
       const Controller = metricVisType.visualization;
       const controller = new Controller(el, vis);
@@ -62,7 +67,7 @@ describe('metric vis', () => {
 
     const ip = '235.195.237.208';
     render({
-      columns: [{ id: 'col-0', title: 'ip', aggConfig: vis.aggs[0] }],
+      columns: [{ id: 'col-0', name: 'ip' }],
       rows: [{ 'col-0': ip }]
     });
 

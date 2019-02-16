@@ -1,11 +1,30 @@
 <div ng-if="card.existsInDocs === true" class="card-contents">
   <div class="stats euiText">
     <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
-      {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
+      <span
+        i18n-id="xpack.ml.fieldDataCard.cardDate.cardStatsCountDocumentsPercentsLabel"
+        i18n-default-message="{cardStatsCount, plural, one {# document} other {# documents}}"
+        i18n-values="{
+          cardStatsCount: card.stats.count,
+        }"
+      ></span>
       ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
     </div>
-    <div class="stat">earliest {{ card.stats.earliest | moment }}</div>
-    <div class="stat">latest {{ card.stats.latest | moment }}</div>
-
+    <div
+      class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
+      i18n-default-message="earliest {earliestCardStats}"
+      i18n-values="{
+        earliestCardStats: (card.stats.earliest | moment),
+      }"
+    ></div>
+    <div
+      class="stat"
+      i18n-id="xpack.ml.fieldDataCard.cardDate.latestLabel"
+      i18n-default-message="latest {latestCardStats}"
+      i18n-values="{
+        latestCardStats: (card.stats.latest | moment),
+      }"
+    ></div>
   </div>
 </div>

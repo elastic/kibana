@@ -6,31 +6,27 @@
 
 import React from 'react';
 
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
-import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
+import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { UpgradeAssistantTabs } from './components/tabs';
 
-export const RootComponentUI: React.StatelessComponent = () => (
-  <EuiPage restrictWidth data-test-subj="upgradeAssistantRoot">
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.appTitle"
-                defaultMessage="{version} Upgrade Assistant"
-                values={{ version: `${NEXT_MAJOR_VERSION}.0` }}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <UpgradeAssistantTabs />
-    </EuiPageBody>
-  </EuiPage>
+export const RootComponent: React.StatelessComponent = () => (
+  <div data-test-subj="upgradeAssistantRoot">
+    <EuiPageHeader>
+      <EuiPageHeaderSection>
+        <EuiTitle size="l">
+          <h1>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.appTitle"
+              defaultMessage="{version} Upgrade Assistant"
+              values={{ version: `${NEXT_MAJOR_VERSION}.0` }}
+            />
+          </h1>
+        </EuiTitle>
+      </EuiPageHeaderSection>
+    </EuiPageHeader>
+    <UpgradeAssistantTabs />
+  </div>
 );
-
-export const RootComponent = injectI18nProvider(RootComponentUI);

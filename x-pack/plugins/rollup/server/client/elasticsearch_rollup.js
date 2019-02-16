@@ -13,7 +13,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.rollupIndexCapabilities = ca({
     urls: [
       {
-        fmt: '/<%=indexPattern%>/_xpack/rollup/data',
+        fmt: '/<%=indexPattern%>/_rollup/data',
         req: {
           indexPattern: {
             type: 'string'
@@ -56,7 +56,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.jobs = ca({
     urls: [
       {
-        fmt: '/_xpack/rollup/job/_all',
+        fmt: '/_rollup/job/_all',
       }
     ],
     method: 'GET'
@@ -65,7 +65,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.job = ca({
     urls: [
       {
-        fmt: '/_xpack/rollup/job/<%=id%>',
+        fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
             type: 'string'
@@ -79,7 +79,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.startJob = ca({
     urls: [
       {
-        fmt: '/_xpack/rollup/job/<%=id%>/_start',
+        fmt: '/_rollup/job/<%=id%>/_start',
         req: {
           id: {
             type: 'string'
@@ -93,7 +93,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.stopJob = ca({
     urls: [
       {
-        fmt: '/_xpack/rollup/job/<%=id%>/_stop',
+        fmt: '/_rollup/job/<%=id%>/_stop',
         req: {
           id: {
             type: 'string'
@@ -107,7 +107,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.deleteJob = ca({
     urls: [
       {
-        fmt: '/_xpack/rollup/job/<%=id%>',
+        fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
             type: 'string'
@@ -121,7 +121,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.createJob = ca({
     urls: [
       {
-        fmt: '/_xpack/rollup/job/<%=id%>',
+        fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
             type: 'string'

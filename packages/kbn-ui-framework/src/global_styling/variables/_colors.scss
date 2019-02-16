@@ -19,18 +19,8 @@ $kuiTextColor: $euiTextColor;
 $kuiLinkColor: $euiColorPrimary;
 $kuiLinkColor-isHover: darken($kuiLinkColor, 10%);
 $kuiInputTextColor: $kuiTextColor;
-$kuiInputBackgroundColor: $kuiColorWhite;
-$kuiInputBorderColor: $euiBorderColor;
-
-// Dark theme colors
-
-$kuiTextColor--darkTheme: #DDD;
-$kuiBackgroundColor--darkTheme: #222;
-$kuiLinkColor--darkTheme: #4DA1C0;
-$kuiLinkColor-isHover--darkTheme: #def2f6;
-$kuiInputTextColor--darkTheme: $kuiTextColor--darkTheme;
-$kuiInputBackgroundColor--darkTheme: #1b1b1b;
-$kuiInputBorderColor--darkTheme: #333;
+$kuiInputBackgroundColor: $euiFormBackgroundColor;
+$kuiInputBorderColor: $euiFormBorderColor;
 
 // Colors
 
@@ -43,7 +33,7 @@ $kuiFocusColor: $euiColorPrimary;
 $kuiFocusAltBackgroundColor: rgba($kuiInfoColor, 0.2);
 $kuiFocusDangerColor: $euiColorDanger;
 $kuiFocusWarningColor: $euiColorWarning;
-$kuiFocusBackgroundColor: #fff;
+$kuiFocusBackgroundColor: $euiColorEmptyShade;
 $kuiFontColor: $euiTextColor;
 $kuiSubduedTextColor: $euiColorDarkShade;
 $kuiLinkHoverColor: darken($euiColorPrimary, 10%);

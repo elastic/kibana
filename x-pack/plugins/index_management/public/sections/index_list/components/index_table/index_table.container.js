@@ -16,6 +16,7 @@ import {
   isSortAscending,
   getIndicesAsArray,
   indicesLoading,
+  getTableState
 } from '../../../../store/selectors';
 import {
   filterChanged,
@@ -26,7 +27,8 @@ import {
   sortChanged,
   showSystemIndicesChanged,
   loadIndices,
-  reloadIndices
+  reloadIndices,
+  toggleChanged
 } from '../../../../store/actions';
 
 import { IndexTable as PresentationComponent } from './index_table';
@@ -43,6 +45,7 @@ const mapStateToProps = (state) => {
     sortField: getSortField(state),
     isSortAscending: isSortAscending(state),
     indicesLoading: indicesLoading(state),
+    toggleNameToVisibleMap: getTableState(state).toggleNameToVisibleMap
   };
 };
 
@@ -62,6 +65,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     showSystemIndicesChanged: (showSystemIndices) => {
       dispatch(showSystemIndicesChanged({ showSystemIndices }));
+    },
+    toggleChanged: (toggleName, toggleValue) => {
+      dispatch(toggleChanged({ toggleName, toggleValue }));
     },
     openDetailPanel: (indexName) => {
       dispatch(openDetailPanel({ indexName }));

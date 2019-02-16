@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import * as actions from '../actions/elements';
 
 const getLocation = type => (type === 'group' ? 'groups' : 'elements');
+const firstOccurrence = (element, index, array) => array.indexOf(element) === index;
 
 const getLocationFromIds = (workpadState, pageId, nodeId) => {
   const page = workpadState.pages.find(p => p.id === pageId);
@@ -122,26 +123,19 @@ export const elementsReducer = handleActions(
         trimElement(element)
       );
     },
-    [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
+    [actions.insertNodes]: (workpadState, { payload: { pageId, elements } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) {
         return workpadState;
       }
-      return push(
-        workpadState,
-        ['pages', pageIndex, getLocation(element.position.type)],
-        trimElement(element)
-      );
-    },
-    [actions.rawDuplicateElement]: (workpadState, { payload: { pageId, element } }) => {
-      const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) {
-        return workpadState;
-      }
-      return push(
-        workpadState,
-        ['pages', pageIndex, getLocation(element.position.type)],
-        trimElement(element)
+      return elements.reduce(
+        (state, element) =>
+          push(
+            state,
+            ['pages', pageIndex, getLocation(element.position.type)],
+            trimElement(element)
+          ),
+        workpadState
       );
     },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
@@ -151,6 +145,7 @@ export const elementsReducer = handleActions(
       }
 
       const nodeIndices = elementIds
+        .filter(firstOccurrence)
         .map(nodeId => {
           const location = getLocationFromIds(workpadState, pageId, nodeId);
           return {

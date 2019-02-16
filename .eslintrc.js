@@ -204,6 +204,34 @@ module.exports = {
     },
 
     /**
+     * Files that run in the browser with only node-level transpilation
+     */
+    {
+      files: [
+        'test/functional/services/lib/leadfoot_element_wrapper/scroll_into_view_if_necessary.js',
+      ],
+      rules: {
+        'prefer-object-spread/prefer-object-spread': 'off',
+        'no-var': 'off',
+        'prefer-const': 'off',
+        'prefer-destructuring': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ArrowFunctionExpression',
+          'AwaitExpression',
+          'ClassDeclaration',
+          'RestElement',
+          'SpreadElement',
+          'YieldExpression',
+          'VariableDeclaration[kind="const"]',
+          'VariableDeclaration[kind="let"]',
+          'VariableDeclarator[id.type="ArrayPattern"]',
+          'VariableDeclarator[id.type="ObjectPattern"]',
+        ],
+      },
+    },
+
+    /**
      * Files that run AFTER node version check
      * and are not also transpiled with babel
      */
@@ -257,16 +285,6 @@ module.exports = {
     },
 
     /**
-     * X-Pack global overrides
-     */
-    {
-      files: ['x-pack/**/*'],
-      rules: {
-        quotes: 'off',
-      },
-    },
-
-    /**
      * Files that require Elastic license headers instead of Apache 2.0 header
      */
     {
@@ -303,7 +321,7 @@ module.exports = {
      * GIS overrides
      */
     {
-      files: ['x-pack/plugins/gis/**/*'],
+      files: ['x-pack/plugins/maps/**/*'],
       rules: {
         'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },
@@ -338,7 +356,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/ml/**/*'],
       rules: {
-        quotes: 'error',
         'no-shadow': 'error',
       },
     },

@@ -8,20 +8,27 @@ import { escape, flatten } from 'lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
 import { isFilterable } from 'ui/index_patterns/static_utils';
+import { i18n } from '@kbn/i18n';
 
 
 const type = 'field';
 
 function getDescription(fieldName) {
-  return `<p>Filter results that contain <span class="suggestionItem__callout">${escape(fieldName)}</span></p>`;
+  return '<p>' +
+    i18n.translate('xpack.kueryAutocomplete.filterResultsDescription', {
+      defaultMessage: 'Filter results that contain {fieldName}',
+      values: { fieldName: `<span class="kbnSuggestionItem__callout">${escape(fieldName)}</span>` }
+    }) +
+    '</p>';
 }
 
 export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields));
+  const allFields = flatten(indexPatterns.map(indexPattern => {
+    return indexPattern.fields.filter(isFilterable);
+  }));
   return function getFieldSuggestions({ start, end, prefix, suffix }) {
     const search = `${prefix}${suffix}`.toLowerCase();
-    const filterableFields = allFields.filter(isFilterable);
-    const fieldNames = filterableFields.map(field => field.name);
+    const fieldNames = allFields.map(field => field.name);
     const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
     const suggestions = sortedFieldNames.map(fieldName => {

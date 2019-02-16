@@ -18,7 +18,8 @@
  */
 
 import { DllCompiler } from './dll_compiler';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { dllEntryTemplate } from './dll_entry_template';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';
@@ -40,11 +41,11 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, threadLoaderPoolConfig, log, maxCompilations = 1 }) {
-    this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, log);
-    this.entryPaths = '';
-    this.afterCompilationEntryPaths = '';
+  constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
+    this.logWithMetadata = logWithMetadata || (() => null);
+    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, logWithMetadata);
+    this.entryPaths = dllEntryTemplate();
+    this.afterCompilationEntryPaths = dllEntryTemplate();
     this.maxCompilations = maxCompilations;
     this.performedCompilations = 0;
     this.forceDLLCreationFlag = !!(process && process.env && process.env.FORCE_DLL_CREATION);
@@ -92,7 +93,7 @@ export class DynamicDllPlugin {
   }
 
   registerTasksHooks(compiler) {
-    this.log(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
+    this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
     this.registerBeforeCompileHook(compiler);
     this.registerCompilationHook(compiler);
     this.registerDoneHook(compiler);
@@ -172,14 +173,14 @@ export class DynamicDllPlugin {
             if (absoluteResource.includes('node_modules') || absoluteResource.includes('webpackShims')) {
               // NOTE: normalizePosixPath is been used as we only want to have posix
               // paths inside our final dll entry file
-              requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, absoluteResource))}');`] = true;
+              requiresMap[normalizePosixPath(path.relative(dllOutputPath, absoluteResource))] = true;
               requiredModulePath = absoluteResource;
             }
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, module.stubResource))}');`] = true;
+            requiresMap[normalizePosixPath(path.relative(dllOutputPath, module.stubResource))] = true;
             requiredModulePath = module.stubResource;
           }
 
@@ -214,7 +215,7 @@ export class DynamicDllPlugin {
 
         // Sort and join all the discovered require deps
         // in order to create a consistent entry file
-        this.afterCompilationEntryPaths = Object.keys(requiresMap).sort().join('\n');
+        this.afterCompilationEntryPaths = dllEntryTemplate(Object.keys(requiresMap));
         // The dll compilation will run if on of the following conditions return true:
         // 1 - the new generated entry paths are different from the
         // old ones
@@ -231,7 +232,7 @@ export class DynamicDllPlugin {
         // Only run this info log in the first performed dll compilation
         // per each execution run
         if (this.performedCompilations === 0) {
-          this.log(
+          this.logWithMetadata(
             ['info', 'optimize:dynamic_dll_plugin'],
             compilation.needsDLLCompilation
               ? 'Need to compile the client vendors dll'
@@ -269,7 +270,7 @@ export class DynamicDllPlugin {
       if (this.forceDLLCreationFlag) {
         this.forceDLLCreationFlag = false;
       }
-      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
+      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
   }
 
@@ -379,12 +380,12 @@ export class DynamicDllPlugin {
           // rebuild our final webpackShim entry path in the original
           // webpack loader format `webpack-loader!script_path`
           // but right now resolved relatively to the dll output path
-          internalRequiresMap[`require('${resolvedDepToRequireFirstPart}!${resolvedDepToRequireSecondPart}');`] = true;
+          internalRequiresMap[`${resolvedDepToRequireFirstPart}!${resolvedDepToRequireSecondPart}`] = true;
         } else {
           // in case we didn't have any webpack-loader in the require path
           // resolve the dependency path relative to the dllOutput path
           // to get our final entry path
-          internalRequiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, resolvedDep))}');`] = true;
+          internalRequiresMap[normalizePosixPath(path.relative(dllOutputPath, resolvedDep))] = true;
         }
       }
     });

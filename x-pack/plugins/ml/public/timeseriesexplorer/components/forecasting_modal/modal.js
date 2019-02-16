@@ -29,6 +29,8 @@ import { MessageCallOut } from 'plugins/ml/components/message_call_out';
 import { ForecastsList } from './forecasts_list';
 import { RunControls } from './run_controls';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 
 export function Modal(props) {
   return (
@@ -39,7 +41,12 @@ export function Modal(props) {
       >
 
         <EuiModalHeader>
-          <EuiModalHeaderTitle>Forecasting</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
+              defaultMessage="Forecasting"
+            />
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
@@ -70,7 +77,10 @@ export function Modal(props) {
             onClick={props.close}
             size="s"
           >
-            Close
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.forecastingModal.closeButtonLabel"
+              defaultMessage="Close"
+            />
           </EuiButtonEmpty>
         </EuiModalFooter>
       </EuiModal>

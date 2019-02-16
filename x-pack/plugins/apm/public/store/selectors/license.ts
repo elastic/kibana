@@ -13,5 +13,5 @@ export const selectIsMLAvailable = createSelector(
     license.data &&
     license.data.features &&
     license.data.features.ml &&
-    license.data.features.ml.isAvailable
+    license.data.features.ml.is_available
 );

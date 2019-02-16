@@ -29,15 +29,6 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/delete] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/delete] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFound = (spaceId: string, type: string, id: string) => (resp: {
     [key: string]: any;
   }) => {
@@ -130,7 +121,6 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   deleteTest.only = makeDeleteTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     createExpectSpaceAwareNotFound,
     createExpectUnknownDocNotFound,
     deleteTest,

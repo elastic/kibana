@@ -9,9 +9,16 @@ import PropTypes from 'prop-types';
 import dateMath from '@elastic/datemath';
 import { EuiDatePicker } from '@elastic/eui';
 import { DatetimeInput } from '../datetime_input';
-import './datetime_calendar.scss';
 
-export const DatetimeCalendar = ({ value, onValueChange, onSelect, startDate, endDate }) => (
+export const DatetimeCalendar = ({
+  value,
+  onValueChange,
+  onSelect,
+  startDate,
+  endDate,
+  minDate,
+  maxDate,
+}) => (
   <div className="canvasDateTimeCal">
     <DatetimeInput moment={dateMath.parse(value)} setMoment={onValueChange} />
     <EuiDatePicker
@@ -23,6 +30,8 @@ export const DatetimeCalendar = ({ value, onValueChange, onSelect, startDate, en
       shouldCloseOnSelect={false}
       startDate={startDate}
       endDate={endDate}
+      minDate={minDate}
+      maxDate={maxDate}
     />
   </div>
 );
@@ -33,4 +42,6 @@ DatetimeCalendar.propTypes = {
   onValueChange: PropTypes.func, // Called with a moment
   startDate: PropTypes.object, // a moment
   endDate: PropTypes.object, // a moment
+  minDate: PropTypes.object, // a moment
+  maxDate: PropTypes.object, // a moment
 };

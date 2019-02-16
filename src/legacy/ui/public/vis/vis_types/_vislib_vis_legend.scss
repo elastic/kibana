@@ -1,0 +1,115 @@
+@import '../../vislib/variables';
+
+// NOTE: Some of the styles attempt to align with the TSVB legend
+
+.visLegend__toggle {
+  border-radius: $euiBorderRadius;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: $euiColorEmptyShade;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance,
+              background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+
+  &:focus {
+    box-shadow: none;
+    background-color: $euiFocusBackgroundColor !important;
+  }
+}
+
+.visLegend__toggle--isOpen {
+  background-color: transparentize($euiColorDarkestShade, .9);
+  opacity: 1;
+}
+
+
+.visLegend {
+  @include euiFontSizeXS;
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.visLib--legend-left{
+  .visLegend__list {
+    margin-bottom: $euiSizeL;
+  }
+}
+
+.visLib--legend-bottom {
+  .visLegend__list {
+    margin-left: $euiSizeL;
+  }
+}
+
+.visLegend__list {
+  @include euiScrollBar;
+  line-height: $euiSize;
+  width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .visLib--legend-top &,
+  .visLib--legend-bottom & {
+    width: auto;
+    overflow-y: hidden;
+
+    .visLegend__value {
+      display: inline-block;
+    }
+  }
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+.visLegend__value {
+  cursor: pointer;
+  padding: $euiSizeXS;
+  display: flex;
+
+  > * {
+    max-width: 100%;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+  }
+}
+
+.visLegend__valueTitle {
+  color: $visTextColor;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.visLegend__valueTitle--truncate {
+  @include euiTextTruncate;
+}
+
+.visLegend__valueTitle--full {
+  word-break: break-all;
+}
+
+.visLegend__valueDetails {
+  border-bottom: 1px solid $euiColorLightShade;
+  padding-bottom: $euiSizeXS;
+}
+
+.visLegend__valueColorPicker {
+  width: $euiSizeM * 10;
+  margin: auto;
+
+  .visLegend__valueColorPickerDot {
+    margin: $euiSizeXS / 2;
+
+    &:hover {
+      transform: scale(1.4);
+    }
+  }
+}

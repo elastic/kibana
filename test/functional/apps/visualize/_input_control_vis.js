@@ -21,8 +21,9 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
+  const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
 
@@ -34,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
       // set time range to time with no documents - input controls do not use time filter be default
-      await PageObjects.header.setAbsoluteRange('2017-01-01', '2017-01-02');
+      await PageObjects.timePicker.setAbsoluteRange('2017-01-01 00:00:00.000', '2017-01-02 00:00:00.000');
       await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
       await comboBox.set('indexPatternSelect-0', 'logstash- ');
@@ -44,8 +45,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should not have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(false);
+      await inspector.expectIsNotEnabled();
     });
 
     describe('updateFiltersOnChange is false', () => {
@@ -168,8 +168,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should re-create control when global time filter is updated', async () => {
-        await PageObjects.header.setAbsoluteRange('2015-01-01', '2016-01-01');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange('2015-01-01 00:00:00.000', '2016-01-01 00:00:00.000');
 
         // Expect control to have values for selected time filter
         const menu = await comboBox.getOptionsList('listControlSelect0');

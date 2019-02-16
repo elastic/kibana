@@ -16,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -184,6 +182,7 @@ export class JobListUi extends Component {
         }
         actions={
           <EuiButton
+            data-test-subj="createRollupJobButton"
             {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}
             fill
             iconType="plusInCircle"
@@ -270,16 +269,13 @@ export class JobListUi extends Component {
     }
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {content}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent
+        horizontalPosition="center"
+      >
+        {content}
+      </EuiPageContent>
     );
   }
 }
 
 export const JobList = injectI18n(JobListUi);
-

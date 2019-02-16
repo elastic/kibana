@@ -7,31 +7,12 @@
 import { defaults, get } from 'lodash';
 import { MissingRequiredError } from './error_missing_required';
 import moment from 'moment';
-
-/*
- * Builds a type filter syntax that supports backwards compatibility to read
- * from indices before and after `_type` is removed from Elasticsearch
- *
- * TODO: this backwards compatibility helper will only be supported for 5.x-6. This
- * function should be removed in 7.0
- */
-export const createTypeFilter = (type) => {
-  return {
-    bool: {
-      should: [
-        { term: { _type: type } },
-        { term: { type } }
-      ]
-    }
-  };
-};
+import { standaloneClusterFilter } from './standalone_clusters';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 /*
  * Creates the boilerplace for querying monitoring data, including filling in
  * document UUIDs, start time and end time, and injecting additional filters.
- *
- * Create a bool for types that will query for documents using `_type` (true type) and `type` (as a field)
- * Makes backwards compatibility for types being deprecated in Elasticsearch
  *
  * Options object:
  * @param {String} options.type - `type` field value of the documents
@@ -46,13 +27,15 @@ export function createQuery(options) {
   options = defaults(options, { filters: [] });
   const { type, clusterUuid, uuid, start, end, filters } = options;
 
+  const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+
   let typeFilter;
   if (type) {
-    typeFilter = createTypeFilter(type);
+    typeFilter = { term: { type } };
   }
 
   let clusterUuidFilter;
-  if (clusterUuid) {
+  if (clusterUuid && !isFromStandaloneCluster) {
     clusterUuidFilter = { term: { 'cluster_uuid': clusterUuid } };
   }
 
@@ -89,9 +72,15 @@ export function createQuery(options) {
     combinedFilters.push(timeRangeFilter);
   }
 
-  return {
+  if (isFromStandaloneCluster) {
+    combinedFilters.push(standaloneClusterFilter);
+  }
+
+  const query = {
     bool: {
       filter: combinedFilters.filter(Boolean)
     }
   };
+
+  return query;
 }

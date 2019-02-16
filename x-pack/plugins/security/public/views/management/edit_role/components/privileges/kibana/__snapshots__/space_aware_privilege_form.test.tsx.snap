@@ -185,7 +185,7 @@ exports[`<SpaceAwarePrivilegeForm> hides the space table if there are no existin
 `;
 
 exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiDescribedFormGroup
     description={
       <p>
@@ -233,66 +233,130 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
   <EuiSpacer
     size="l"
   />
-  <React.Fragment>
-    <EuiTitle
-      size="xs"
-      textTransform="none"
-    >
-      <h3>
-        <FormattedMessage
-          defaultMessage="Higher privileges for individual spaces"
-          id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
-          values={Object {}}
-        />
-      </h3>
-    </EuiTitle>
-    <EuiSpacer
-      size="s"
-    />
-    <EuiText
-      color="subdued"
-      grow={false}
-      size="s"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
+  <EuiTitle
+    size="xs"
+    textTransform="none"
+  >
+    <h3>
+      <FormattedMessage
+        defaultMessage="Higher privileges for individual spaces"
+        id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiText
+    color="subdued"
+    grow={false}
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
               {read} for all spaces, you can set the privileges to {all}
               for an individual space."
-          id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
-          values={
-            Object {
-              "all": <strong>
-                <FormattedMessage
-                  defaultMessage="all"
-                  id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.allText"
-                  values={Object {}}
-                />
-              </strong>,
-              "read": <strong>
-                <FormattedMessage
-                  defaultMessage="read"
-                  id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.readText"
-                  values={Object {}}
-                />
-              </strong>,
-            }
+        id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
+        values={
+          Object {
+            "all": <strong>
+              <FormattedMessage
+                defaultMessage="all"
+                id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.allText"
+                values={Object {}}
+              />
+            </strong>,
+            "read": <strong>
+              <FormattedMessage
+                defaultMessage="read"
+                id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.readText"
+                values={Object {}}
+              />
+            </strong>,
           }
-        />
-      </p>
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    />
-    <React.Fragment>
-      <InjectIntl(PrivilegeSpaceTableUI)
-        availablePrivileges={
-          Array [
-            "all",
-            "read",
-          ]
         }
-        onChange={[Function]}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+  <InjectIntl(PrivilegeSpaceTableUI)
+    availablePrivileges={
+      Array [
+        "all",
+        "read",
+      ]
+    }
+    onChange={[Function]}
+    role={
+      Object {
+        "elasticsearch": Object {
+          "cluster": Array [
+            "manage",
+          ],
+          "indices": Array [],
+          "run_as": Array [],
+        },
+        "kibana": Object {
+          "global": Array [],
+          "space": Object {},
+        },
+        "name": "",
+      }
+    }
+    spacePrivileges={Object {}}
+    spaces={
+      Array [
+        Object {
+          "_reserved": true,
+          "id": "default",
+          "name": "Default Space",
+        },
+        Object {
+          "id": "marketing",
+          "name": "Marketing",
+        },
+      ]
+    }
+  />
+  <EuiFlexGroup
+    alignItems="baseline"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="addSpacePrivilegeButton"
+        fill={false}
+        iconSide="left"
+        iconType="plusInCircle"
+        onClick={[Function]}
+        size="s"
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Add space privilege"
+          id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <InjectIntl(ImpactedSpacesFlyoutUI)
         role={
           Object {
             "elasticsearch": Object {
@@ -309,7 +373,6 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
             "name": "",
           }
         }
-        spacePrivileges={Object {}}
         spaces={
           Array [
             Object {
@@ -323,82 +386,15 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
             },
           ]
         }
+        userProfile={
+          Object {
+            "hasCapability": [Function],
+          }
+        }
       />
-    </React.Fragment>
-    <EuiFlexGroup
-      alignItems="baseline"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButton
-          color="primary"
-          data-test-subj="addSpacePrivilegeButton"
-          fill={false}
-          iconSide="left"
-          iconType="plusInCircle"
-          onClick={[Function]}
-          size="s"
-          type="button"
-        >
-          <FormattedMessage
-            defaultMessage="Add space privilege"
-            id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
-            values={Object {}}
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <InjectIntl(ImpactedSpacesFlyoutUI)
-          role={
-            Object {
-              "elasticsearch": Object {
-                "cluster": Array [
-                  "manage",
-                ],
-                "indices": Array [],
-                "run_as": Array [],
-              },
-              "kibana": Object {
-                "global": Array [],
-                "space": Object {},
-              },
-              "name": "",
-            }
-          }
-          spaces={
-            Array [
-              Object {
-                "_reserved": true,
-                "id": "default",
-                "name": "Default Space",
-              },
-              Object {
-                "id": "marketing",
-                "name": "Marketing",
-              },
-            ]
-          }
-          userProfile={
-            Object {
-              "hasCapability": [Function],
-            }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </React.Fragment>
-</React.Fragment>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
 `;
 
 exports[`<SpaceAwarePrivilegeForm> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `

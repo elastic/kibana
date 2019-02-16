@@ -10,8 +10,7 @@ import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { loadAgentStatus } from '../../../services/rest/apm/status_check';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
-import { EmptyMessage } from '../../shared/EmptyMessage';
-import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
+import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 
 interface Props {
@@ -20,6 +19,7 @@ interface Props {
 }
 
 interface State {
+  // any data submitted from APM agents found (not just in the given time range)
   historicalDataFound: boolean;
 }
 
@@ -37,20 +37,6 @@ export class ServiceOverview extends Component<Props, State> {
 
   public render() {
     const { urlParams } = this.props;
-    const { historicalDataFound } = this.state;
-
-    const noItemsMessage = (
-      <EmptyMessage
-        heading={
-          historicalDataFound
-            ? 'No services were found'
-            : "Looks like you don't have any services with APM installed. Let's add some!"
-        }
-        subheading={
-          !historicalDataFound ? <SetupInstructionsLink buttonFill /> : null
-        }
-      />
-    );
 
     // Render method here uses this.props.serviceList instead of received "data" from RRR
     // to make it easier to test -- mapStateToProps uses the RRR selector so the data
@@ -62,7 +48,11 @@ export class ServiceOverview extends Component<Props, State> {
           render={() => (
             <ServiceList
               items={this.props.serviceList.data}
-              noItemsMessage={noItemsMessage}
+              noItemsMessage={
+                <NoServicesMessage
+                  historicalDataFound={this.state.historicalDataFound}
+                />
+              }
             />
           )}
         />

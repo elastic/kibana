@@ -5,14 +5,14 @@ bower_components
 /.es
 /plugins
 /optimize
-/dlls
+/built_assets
 /src/fixtures/vislib/mock_data
-/src/ui/public/angular-bootstrap
-/src/ui/public/flot-charts
+/src/legacy/ui/public/angular-bootstrap
+/src/legacy/ui/public/flot-charts
 /test/fixtures/scenarios
 /src/legacy/core_plugins/console/public/webpackShims
 /src/legacy/core_plugins/console/public/tests/webpackShims
-/src/ui/public/utils/decode_geo_hash.js
+/src/legacy/ui/public/utils/decode_geo_hash.js
 /src/legacy/core_plugins/timelion/public/webpackShims/jquery.flot.*
 /src/core/lib/kbn_internal_native_observable
 /packages/*/target
@@ -25,7 +25,7 @@ bower_components
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
-/x-pack/plugins/gis/public/vendor/**
+/x-pack/plugins/maps/public/vendor/**
 /x-pack/coverage
 /x-pack/build
 /x-pack/plugins/**/__tests__/fixtures/**

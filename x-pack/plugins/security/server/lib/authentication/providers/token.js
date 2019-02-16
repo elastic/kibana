@@ -119,27 +119,35 @@ export class TokenAuthenticationProvider {
 
     try {
       // First invalidate the access token.
-      const { created: deletedAccessToken } = await this._options.client.callWithInternalUser(
+      const { invalidated_tokens: invalidatedAccessTokensCount } = await this._options.client.callWithInternalUser(
         'shield.deleteAccessToken',
         { body: { token: state.accessToken } }
       );
 
-      if (deletedAccessToken) {
+      if (invalidatedAccessTokensCount === 0) {
+        this._options.log(['debug', 'security', 'token'], 'User access token was already invalidated.');
+      } else if (invalidatedAccessTokensCount === 1) {
         this._options.log(['debug', 'security', 'token'], 'User access token has been successfully invalidated.');
       } else {
-        this._options.log(['debug', 'security', 'token'], 'User access token was already invalidated.');
+        this._options.log(['debug', 'security', 'token'],
+          `${invalidatedAccessTokensCount} user access tokens were invalidated, this is unexpected.`
+        );
       }
 
       // Then invalidate the refresh token.
-      const { created: deletedRefreshToken } = await this._options.client.callWithInternalUser(
+      const { invalidated_tokens: invalidatedRefreshTokensCount } = await this._options.client.callWithInternalUser(
         'shield.deleteAccessToken',
         { body: { refresh_token: state.refreshToken } }
       );
 
-      if (deletedRefreshToken) {
+      if (invalidatedRefreshTokensCount === 0) {
+        this._options.log(['debug', 'security', 'token'], 'User refresh token was already invalidated.');
+      } else if (invalidatedRefreshTokensCount === 1) {
         this._options.log(['debug', 'security', 'token'], 'User refresh token has been successfully invalidated.');
       } else {
-        this._options.log(['debug', 'security', 'token'], 'User refresh token was already invalidated.');
+        this._options.log(['debug', 'security', 'token'],
+          `${invalidatedRefreshTokensCount} user refresh tokens were invalidated, this is unexpected.`
+        );
       }
 
       return DeauthenticationResult.redirectTo(

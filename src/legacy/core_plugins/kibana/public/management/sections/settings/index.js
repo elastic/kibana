@@ -20,6 +20,7 @@
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { I18nContext } from 'ui/i18n';
 import indexTemplate from './index.html';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
@@ -39,10 +40,12 @@ function updateAdvancedSettings($scope, config, query) {
     }
 
     render(
-      <AdvancedSettings
-        config={config}
-        query={query}
-      />,
+      <I18nContext>
+        <AdvancedSettings
+          config={config}
+          query={query}
+        />
+      </I18nContext>,
       node,
     );
   });

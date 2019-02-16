@@ -49,7 +49,7 @@ export default function ({ getService }) {
 
       before('load mappings', async () => {
         const template = await es.indices.getTemplate({ name: indexTemplate });
-        mappings = get(template, [indexTemplate, 'mappings', 'doc', 'properties']);
+        mappings = get(template, [indexTemplate, 'mappings', 'properties']);
       });
 
       describe(`for ${name}`, () => { // eslint-disable-line no-loop-func

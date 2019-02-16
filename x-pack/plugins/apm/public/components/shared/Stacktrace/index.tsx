@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
+import { IStackframe } from '../../../../typings/es_schemas/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
@@ -20,7 +22,17 @@ interface Props {
 
 export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   if (isEmpty(stackframes)) {
-    return <EmptyMessage heading="No stacktrace available." hideSubheading />;
+    return (
+      <EmptyMessage
+        heading={i18n.translate(
+          'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
+          {
+            defaultMessage: 'No stacktrace available.'
+          }
+        )}
+        hideSubheading
+      />
+    );
   }
 
   const groups = getGroupedStackframes(stackframes);
@@ -29,14 +41,20 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
       {groups.map((group, i) => {
         // library frame
         if (group.isLibraryFrame) {
-          const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
+          const hasMultipleStackframes = group.stackframes.length > 1;
+          const hasLeadingSpacer = hasMultipleStackframes && i !== 0;
+          const hasTrailingSpacer =
+            hasMultipleStackframes && i !== groups.length - 1;
           return (
-            <LibraryStackFrames
-              key={i}
-              initialVisiblity={initialVisiblity}
-              stackframes={group.stackframes}
-              codeLanguage={codeLanguage}
-            />
+            <Fragment key={i}>
+              {hasLeadingSpacer && <EuiSpacer size="m" />}
+              <LibraryStackFrames
+                initialVisiblity={!hasMultipleStackframes}
+                stackframes={group.stackframes}
+                codeLanguage={codeLanguage}
+              />
+              {hasTrailingSpacer && <EuiSpacer size="m" />}
+            </Fragment>
           );
         }
 
@@ -49,6 +67,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
           />
         ));
       })}
+      <EuiSpacer size="m" />
     </Fragment>
   );
 }

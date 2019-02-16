@@ -40,12 +40,12 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async getValueAxesCount() {
-      const axes = await find.allByCssSelector('.kuiSideBarSection:contains("Value Axes") > .kuiSideBarSection');
+      const axes = await find.allByCssSelector('.visEditorSidebar__section:contains("Value Axes") > .visEditorSidebar__section');
       return axes.length;
     }
 
     async getSeriesCount() {
-      const series = await find.allByCssSelector('.kuiSideBarSection:contains("Series") > .kuiSideBarSection');
+      const series = await find.allByCssSelector('.visEditorSidebar__section:contains("Series") > .visEditorSidebar__section');
       return series.length;
     }
 
@@ -82,7 +82,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async toggleCollapsibleTitle(title) {
-      const sidebarTitles = await find.allByCssSelector('.kuiSideBarCollapsibleTitle .kuiSideBarCollapsibleTitle__text');
+      const sidebarTitles = await find.allByCssSelector('.visEditorSidebar__collapsibleTitle .visEditorSidebar__collapsibleTitleText');
       log.debug('found sidebar titles ' + sidebarTitles.length);
 
       return Promise.all(sidebarTitles.map(async (titleDiv) => {

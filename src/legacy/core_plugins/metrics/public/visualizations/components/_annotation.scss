@@ -18,13 +18,8 @@
 }
 
 .tvbVisAnnotation__tooltip {
-  @include euiBottomShadow($color: $euiColorFullShade);
   @include euiFontSizeXS;
   padding: $euiSizeS;
-  animation-duration: .0s;
-  animation-delay: .0;
-}
-
-.tvbVisAnnotation__timestamp {
-  color: $euiColorLightShade;
+  animation-duration: 0s;
+  animation-delay: 0s;
 }

@@ -25,6 +25,7 @@ Object {
             },
           ],
         },
+        "group": Array [],
         "is": Object {},
         "term": Array [],
       },
@@ -32,6 +33,7 @@ Object {
     "syntax": Object {
       "parse": [Function],
       "print": [Function],
+      "printClause": [Function],
     },
     "text": "ilm.step:ERROR",
   },
@@ -248,7 +250,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management
@@ -269,7 +271,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     title={
       <FormattedMessage
         defaultMessage="Index lifecycle error"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
         values={Object {}}
       />
     }
@@ -295,7 +297,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
             viewBox="0 0 16 16"
             width="16"
             xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
           >
             <svg
               aria-hidden="true"
@@ -306,17 +307,9 @@ exports[`ilm summary extension should return extension when index has lifecycle 
               viewBox="0 0 16 16"
               width="16"
               xmlns="http://www.w3.org/2000/svg"
-              xmlnsXlink="http://www.w3.org/1999/xlink"
             >
-              <defs>
-                <path
-                  d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
-                  id="cross-a"
-                />
-              </defs>
-              <use
-                fillRule="nonzero"
-                xlinkHref="#cross-a"
+              <path
+                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
               />
             </svg>
           </cross>
@@ -326,7 +319,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         >
           <FormattedMessage
             defaultMessage="Index lifecycle error"
-            id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
             values={Object {}}
           >
             Index lifecycle error
@@ -530,7 +523,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   >
                     <FormattedMessage
                       defaultMessage="Show phase definition"
-                      id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                       values={Object {}}
                     />
                   </EuiLink>
@@ -545,6 +538,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                 withTitle={true}
               >
                 <EuiOutsideClickDetector
+                  isDisabled={true}
                   onOutsideClick={[Function]}
                 >
                   <div
@@ -568,7 +562,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                         >
                           <FormattedMessage
                             defaultMessage="Show phase definition"
-                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                             values={Object {}}
                           >
                             Show phase definition
@@ -729,7 +723,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management

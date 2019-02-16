@@ -32,6 +32,8 @@ import { JOB_STATE } from '../../../../common/constants/states';
 import { ForecastProgress } from './forecast_progress';
 import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 function getRunInputDisabledState(
@@ -45,7 +47,9 @@ function getRunInputDisabledState(
   if (mlNodesAvailable() === false) {
     return {
       isDisabled: true,
-      isDisabledToolTipText: 'There are no ML nodes available.'
+      isDisabledToolTipText: i18n.translate('xpack.ml.timeSeriesExplorer.runControls.noMLNodesAvailableTooltip', {
+        defaultMessage: 'There are no ML nodes available.'
+      })
     };
   }
 
@@ -60,7 +64,10 @@ function getRunInputDisabledState(
   if (job.state !== JOB_STATE.OPENED && job.state !== JOB_STATE.CLOSED) {
     return {
       isDisabled: true,
-      isDisabledToolTipText: `Forecasts cannot be run on ${job.state} jobs`
+      isDisabledToolTipText: i18n.translate('xpack.ml.timeSeriesExplorer.runControls.forecastsCanNotBeRunOnJobsTooltip', {
+        defaultMessage: 'Forecasts cannot be run on {jobState} jobs',
+        values: { jobState: job.state }
+      })
     };
   }
 
@@ -100,26 +107,40 @@ export function RunControls({
       onClick={runForecast}
       isDisabled={disabledState.isDisabled || !isNewForecastDurationValid}
     >
-      Run
+      <FormattedMessage
+        id="xpack.ml.timeSeriesExplorer.runControls.runButtonLabel"
+        defaultMessage="Run"
+      />
     </EuiButton>
   );
 
   return (
     <div>
       <EuiText>
-        <h3>Run a new forecast</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.runControls.runNewForecastTitle"
+            defaultMessage="Run a new forecast"
+          />
+        </h3>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiForm>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label="Duration"
+              label={<FormattedMessage
+                id="xpack.ml.timeSeriesExplorer.runControls.durationLabel"
+                defaultMessage="Duration"
+              />}
               fullWidth
               isInvalid={!isNewForecastDurationValid}
               error={newForecastDurationErrors}
-              helpText={'Length of forecast, up to a maximum of 8 weeks. ' +
-                'Use s for seconds, m for minutes, h for hours, d for days, w for weeks.'}
+              helpText={<FormattedMessage
+                id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
+                defaultMessage="Length of forecast, up to a maximum of 8 weeks.
+                  Use s for seconds, m for minutes, h for hours, d for days, w for weeks."
+              />}
             >
               {disabledState.isDisabledToolTipText === undefined ? durationInput
                 : (
