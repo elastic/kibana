@@ -51,8 +51,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug('clickKibanaIndexPatterns link');
       await testSubjects.click('index_patterns');
 
-      if (await testSubjects.exists('euiFlyoutCloseButton')) {
-        await testSubjects.click('euiFlyoutCloseButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // check for the index pattern info flyout that covers the
+      // create index pattern button on smaller screens
+      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+        await testSubjects.click('CreateIndexPatternPrompt euiFlyoutCloseButton');
       }
     }
 
