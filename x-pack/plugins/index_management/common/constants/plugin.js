@@ -5,5 +5,12 @@
  */
 
 export const PLUGIN = {
-  ID: 'index_management'
+  ID: 'index_management',
+  VALID_LICENSE_MODES: [
+    'trial',
+    'basic',
+    'standard',
+    'gold',
+    'platinum'
+  ],
 };

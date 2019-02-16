@@ -23,7 +23,7 @@ export function licenseManagement(kibana)  {
       ]
     },
     init: (server) => {
-      registerLicenseChecker(server, PLUGIN.ID);
+      registerLicenseChecker(server, PLUGIN.ID, PLUGIN.VALID_LICENSE_MODES);
       const xpackInfo = server.plugins.xpack_main.info;
       const router = createRouter(server, PLUGIN.ID, '/api/license');
       registerLicenseRoute(router, xpackInfo);
