@@ -50,6 +50,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
       await testSubjects.click('index_patterns');
+      if (await testSubjects.isDisplayed('euiFlyoutCloseButton')) {
+        await testSubjects.click('euiFlyoutCloseButton');
+      }
     }
 
     async getAdvancedSettings(propertyName) {
