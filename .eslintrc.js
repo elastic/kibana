@@ -207,9 +207,7 @@ module.exports = {
      * Files that run in the browser with only node-level transpilation
      */
     {
-      files: [
-        'test/functional/services/lib/leadfoot_element_wrapper/scroll_into_view_if_necessary.js',
-      ],
+      files: ['test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js'],
       rules: {
         'prefer-object-spread/prefer-object-spread': 'off',
         'no-var': 'off',

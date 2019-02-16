@@ -17,15 +17,39 @@
  * under the License.
  */
 
-import { BrowserDriverApi } from './browser_driver_api';
+export function preventParallelCalls(fn, filter) {
+  const execQueue = [];
 
-export function createRemoteBrowserDriverApi(log, url) {
-  return new BrowserDriverApi({
-    url,
-
-    start() {
-      log.info(`Reusing instance at %j`, url);
+  return async function (arg) {
+    if (filter(arg)) {
+      return await fn.call(this, arg);
     }
 
-  });
+    const task = {
+      exec: async () => {
+        try {
+          task.resolve(await fn.call(this, arg));
+        } catch (error) {
+          task.reject(error);
+        } finally {
+          execQueue.shift();
+          if (execQueue.length) {
+            execQueue[0].exec();
+          }
+        }
+      }
+    };
+
+    task.promise = new Promise((resolve, reject) => {
+      task.resolve = resolve;
+      task.reject = reject;
+    });
+
+    if (execQueue.push(task) === 1) {
+      // only item in the queue, kick it off
+      task.exec();
+    }
+
+    return task.promise;
+  };
 }
