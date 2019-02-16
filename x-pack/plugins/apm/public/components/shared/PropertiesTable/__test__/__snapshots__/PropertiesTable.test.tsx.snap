@@ -12,7 +12,7 @@ exports[`PropertiesTable AgentFeatureTipMessage component should render when doc
   <EuiLink
     color="primary"
     href="mock-url"
-    rel="noopener noreferrer"
+    rel="noopener"
     target="_blank"
     type="button"
   >
