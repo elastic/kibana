@@ -40,5 +40,5 @@ export const mockData: { Hosts: HostsData; DateFields: string[] } = {
       hasNextPage: false,
     },
   },
-  DateFields: ['firstSeen'],
+  DateFields: ['lastBeat'],
 };

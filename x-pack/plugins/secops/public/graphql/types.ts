@@ -311,6 +311,8 @@ export interface HostItem {
   firstSeen?: string | null;
 
   host?: HostEcsFields | null;
+
+  lastBeat?: string | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -862,6 +864,8 @@ export namespace GetHostSummaryQuery {
 
     firstSeen?: string | null;
 
+    lastBeat?: string | null;
+
     host?: Host | null;
   };
 
@@ -962,6 +966,8 @@ export namespace GetHostsTableQuery {
     _id?: string | null;
 
     firstSeen?: string | null;
+
+    lastBeat?: string | null;
 
     host?: Host | null;
   };

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
 
 export const hostsFieldsMap: Readonly<Record<string, string>> = {
-  firstSeen: '@timestamp',
+  lastBeat: '@timestamp',
   ...{ ...hostFieldsMap },
 };
 
@@ -57,12 +56,15 @@ export const buildQuery = ({
       aggregations: {
         ...agg,
         group_by_host: {
-          composite: {
+          terms: {
             size: limit + 1,
-            sources: [{ host_name: { terms: { field: 'host.id' } } }],
+            field: 'host.id',
+            order: {
+              firstSeen: 'asc',
+            },
           },
           aggs: {
-            time: {
+            firstSeen: {
               min: {
                 field: '@timestamp',
               },
@@ -73,8 +75,7 @@ export const buildQuery = ({
                 _source: esFields,
                 sort: [
                   {
-                    '@timestamp': { order: 'asc' },
-                    'host.name': { order: 'asc' },
+                    '@timestamp': 'desc',
                   },
                 ],
               },
@@ -91,22 +92,6 @@ export const buildQuery = ({
       track_total_hits: false,
     },
   };
-
-  if (cursor) {
-    return merge(dslQuery, {
-      body: {
-        aggregations: {
-          group_by_host: {
-            composite: {
-              after: {
-                host_name: cursor,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
 
   return dslQuery;
 };

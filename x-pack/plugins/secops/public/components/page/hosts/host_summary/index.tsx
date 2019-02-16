@@ -54,7 +54,7 @@ export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, l
 
 const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.name': i18n.NAME,
-  firstSeen: i18n.LAST_BEAT,
+  lastBeat: i18n.LAST_BEAT,
   'host.id': i18n.ID,
   'host.ip': i18n.IP_ADDRESS,
   'host.mac': i18n.MAC_ADDRESS,
@@ -66,7 +66,7 @@ const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.architecture': i18n.ARCHITECTURE,
 };
 
-const dateFields: string[] = ['firstSeen'];
+const dateFields: string[] = ['lastBeat'];
 
 export const getEuiDescriptionList = (
   host: HostItem | null,

@@ -24,6 +24,7 @@ export const mockHostsData: { Hosts: HostsData } = {
             },
           },
           firstSeen: '2018-12-06T15:45:52.095Z',
+          lastBeat: '2018-12-06T15:45:52.095Z',
         },
         cursor: {
           value: '6f7be6fb33e6c77f057266415c094408',
@@ -40,6 +41,7 @@ export const mockHostsData: { Hosts: HostsData } = {
             },
           },
           firstSeen: '2018-12-06T15:40:53.319Z',
+          lastBeat: '2018-12-06T15:40:53.319Z',
         },
         cursor: {
           value: '98966fa2013c396155c460d35c0902be',
@@ -152,6 +154,15 @@ export const mockHostsFields: FieldNode = {
                     name: {
                       kind: 'Name',
                       value: 'firstSeen',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'lastBeat',
                     },
                     arguments: [],
                     directives: [],

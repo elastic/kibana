@@ -68,10 +68,10 @@ describe('Host Summary Component', () => {
     test('if it returns a FormattedRelative element', () => {
       const draggable = createDraggable(
         '2019-01-28T22:14:16.039Z',
-        'firstSeen',
+        'lastBeat',
         552204000000,
         618472800000,
-        ['firstSeen']
+        ['lastBeat']
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>

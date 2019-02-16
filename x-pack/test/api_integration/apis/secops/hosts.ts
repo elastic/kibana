@@ -42,7 +42,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           const hosts = resp.data.source.Hosts;
           expect(hosts.edges.length).to.be(1);
           expect(hosts.totalCount).to.be(2);
-          expect(hosts.pageInfo.endCursor!.value).to.equal('aa7ca589f1b8220002f2fc61c64cfbf1');
+          expect(hosts.pageInfo.endCursor!.value).to.equal('1');
         });
     });
 
@@ -59,7 +59,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 2,
-              cursor: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+              cursor: '1',
             },
           },
         })
