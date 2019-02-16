@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TS Playground: https://tinyurl.com/y6nkkhrg
+
 import { ActionId, Json, PlainFun, Selector, State } from './types';
 
 export const select = (fun: PlainFun): Selector => (...fns) => {
