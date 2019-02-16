@@ -57,12 +57,15 @@ module.exports = (_baseConfig, _env, config) => {
       {
         loader: 'ts-loader',
         options: {
+          happyPackMode: true,
           transpileOnly: true,
           experimentalWatchApi: true,
           onlyCompileBundledFiles: true,
           configFile: require.resolve('../../../../tsconfig.json'),
           compilerOptions: {
             sourceMap: true,
+            target: "es5",
+            module: "esnext",
           },
         },
       },

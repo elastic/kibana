@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import expect from 'expect.js';
 import { render } from 'enzyme';
-import { Download } from '../';
+import expect from 'expect.js';
+import React from 'react';
+import { Download } from '..';
 
 describe('<Download />', () => {
   it('has canvasDownload class', () => {
@@ -17,6 +17,6 @@ describe('<Download />', () => {
       </Download>
     );
 
-    expect(wrapper.hasClass('canvasDownload')).to.be.ok;
+    expect(wrapper.hasClass('canvasDownload')).to.be.ok();
   });
 });
