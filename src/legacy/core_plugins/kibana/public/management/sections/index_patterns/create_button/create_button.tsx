@@ -17,73 +17,52 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
+// @ts-ignore
 import { euiColorAccent } from '@elastic/eui/dist/eui_theme_k6_light.json';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiBadge,
   EuiButton,
-  EuiPopover,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiPopover,
   rgbToHex,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class CreateButton extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isPopoverOpen: false,
-    };
-  }
+interface State {
+  isPopoverOpen: boolean;
+}
 
-  static propTypes = {
-    options: PropTypes.arrayOf(PropTypes.shape({
-      text: PropTypes.string.isRequired,
-      description: PropTypes.string,
-      onClick: PropTypes.func.isRequired,
-    })),
-  }
+interface Props {
+  options: Array<{
+    text: string;
+    description?: string;
+    testSubj?: string;
+    isBeta?: boolean;
+    onClick: () => void;
+  }>;
+}
 
-  togglePopover = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
-  }
-
-  closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  }
-
-  renderBetaBadge = () => {
-    const color = rgbToHex(euiColorAccent);
-    return (
-      <EuiBadge color={color}>
-        <FormattedMessage
-          id="kbn.management.indexPatternList.createButton.betaLabel"
-          defaultMessage="Beta"
-        />
-      </EuiBadge>
-    );
+export class CreateButton extends Component<Props, State> {
+  public state = {
+    isPopoverOpen: false,
   };
 
-  render() {
-    const { options, children } =  this.props;
-    const { isPopoverOpen } =  this.state;
+  public render() {
+    const { options, children } = this.props;
+    const { isPopoverOpen } = this.state;
 
-    if(!options || !options.length) {
+    if (!options || !options.length) {
       return null;
     }
 
-    if(options.length === 1) {
+    if (options.length === 1) {
       return (
         <EuiButton
           data-test-subj="createIndexPatternButton"
@@ -109,7 +88,7 @@ export class CreateButton extends Component {
       </EuiButton>
     );
 
-    if(options.length > 1) {
+    if (options.length > 1) {
       return (
         <EuiPopover
           id="singlePanel"
@@ -130,12 +109,7 @@ export class CreateButton extends Component {
                   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
                     <EuiDescriptionListTitle>
                       {option.text}
-                      { option.isBeta ? (
-                        <Fragment>
-                          {' '}
-                          {this.renderBetaBadge()}
-                        </Fragment>
-                      ) : null }
+                      {option.isBeta ? <Fragment> {this.renderBetaBadge()}</Fragment> : null}
                     </EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
                       {option.description}
@@ -149,4 +123,28 @@ export class CreateButton extends Component {
       );
     }
   }
+
+  private togglePopover = () => {
+    this.setState({
+      isPopoverOpen: !this.state.isPopoverOpen,
+    });
+  };
+
+  private closePopover = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
+  private renderBetaBadge = () => {
+    const color = rgbToHex(euiColorAccent);
+    return (
+      <EuiBadge color={color}>
+        <FormattedMessage
+          id="kbn.management.indexPatternList.createButton.betaLabel"
+          defaultMessage="Beta"
+        />
+      </EuiBadge>
+    );
+  };
 }
