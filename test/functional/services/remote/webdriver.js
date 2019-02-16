@@ -30,6 +30,11 @@ const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
+const NO_QUEUE_COMMANDS = [
+  'getStatus',
+  'newSession',
+  'quit'
+];
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -41,27 +46,41 @@ const MINUTE = 60 * SECOND;
  */
 const actualExecute = Executor.prototype.execute;
 const execQueue = [];
-Executor.prototype.execute = async function (...args) {
-  let queueItem;
-
-  if (execQueue.length) {
-    const prev = execQueue[execQueue.length - 1];
-    queueItem = {};
-    queueItem.promise = new Promise(resolve => {
-      queueItem.resolve = resolve;
-    });
-    execQueue.push(queueItem);
-
-    await prev.promise;
+Executor.prototype.execute = async function (command) {
+  if (NO_QUEUE_COMMANDS.includes(command.getName())) {
+    return await actualExecute.call(this, command);
   }
 
-  try {
-    return await actualExecute.apply(this, args);
-  } finally {
-    if (queueItem) {
-      queueItem.resolve();
+  const task = {
+    exec: async () => {
+      try {
+        task.resolve(await actualExecute.call(this, command));
+      } catch (error) {
+        task.reject(error);
+      } finally {
+        if (task !== execQueue.shift()) {
+          // this shouldn't be possible, but if someone changes something...
+          throw new Error('execQueue corrupt');
+        }
+
+        if (execQueue.length) {
+          execQueue[0].exec();
+        }
+      }
     }
+  };
+
+  task.promise = new Promise((resolve, reject) => {
+    task.resolve = resolve;
+    task.reject = reject;
+  });
+
+  if (execQueue.push(task) === 1) {
+    // only item in the queue, kick it off
+    task.exec();
   }
+
+  return task.promise;
 };
 
 let attemptCounter = 0;
