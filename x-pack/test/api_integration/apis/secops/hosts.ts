@@ -76,8 +76,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
       const expectedHost: GetHostSummaryQuery.Host = {
         architecture: 'x86_64',
         id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-        ip: null,
-        mac: null,
+        ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
+        mac: ['42:01:0a:8e:00:07'],
         name: 'siem-kibana',
         os: {
           family: 'debian',
