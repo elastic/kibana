@@ -30,11 +30,11 @@ export default function ({ loadTestFile, getService }) {
     describe('', function () {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./saved_object_management'));
+      loadTestFile(require.resolve('./sample_data'));
     });
 
     describe('', function () {
       this.tags('ciGroup3');
-      loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./es_search_source'));
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./joins'));
