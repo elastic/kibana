@@ -61,7 +61,6 @@ function nestedVertices(maxBucketSize) {
           ...scalarCounterAggregation('events_in', fieldPath, ephemeralIdField, maxBucketSize),
           ...scalarCounterAggregation('events_out', fieldPath, ephemeralIdField, maxBucketSize),
           ...scalarCounterAggregation('duration_in_millis', fieldPath, ephemeralIdField, maxBucketSize),
-          ...scalarCounterAggregation('queue_push_duration_in_millis', fieldPath, ephemeralIdField, maxBucketSize)
         }
       }
     }
@@ -99,7 +98,6 @@ function fetchPipelineLatestStats(query, logstashIndexPattern, pipelineId, versi
       'aggregations.pipelines.scoped.vertices.vertex_id.buckets.events_in_total',
       'aggregations.pipelines.scoped.vertices.vertex_id.buckets.events_out_total',
       'aggregations.pipelines.scoped.vertices.vertex_id.buckets.duration_in_millis_total',
-      'aggregations.pipelines.scoped.vertices.vertex_id.buckets.queue_push_duration_in_millis_total',
       'aggregations.pipelines.scoped.total_processor_duration_stats'
     ],
     body: {

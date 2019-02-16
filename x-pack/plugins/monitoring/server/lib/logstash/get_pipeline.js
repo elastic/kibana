@@ -24,7 +24,6 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   const durationInMillis = vertexStatsBucket.duration_in_millis_total.value;
 
-  const inputStats = {};
   const processorStats = {};
   const eventsProcessedStats = {
     events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis
@@ -34,8 +33,6 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   if (isInput) {
     eventsTotal = eventsOutTotal;
-    inputStats.queue_push_duration_in_millis = vertexStatsBucket.queue_push_duration_in_millis_total.value;
-    inputStats.queue_push_duration_in_millis_per_event = inputStats.queue_push_duration_in_millis / eventsTotal;
   }
 
   if (isProcessor) {
@@ -49,7 +46,6 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
     events_out: eventsOutTotal,
     duration_in_millis: durationInMillis,
     millis_per_event: durationInMillis / eventsTotal,
-    ...inputStats,
     ...processorStats,
     ...eventsProcessedStats
   };
