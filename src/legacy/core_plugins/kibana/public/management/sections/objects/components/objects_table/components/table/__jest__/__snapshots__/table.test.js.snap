@@ -28,6 +28,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
       Array [
         <EuiButton
           color="danger"
+          data-test-subj="savedObjectsManagementDelete"
           fill={false}
           iconSide="left"
           iconType="trash"
@@ -169,6 +170,7 @@ exports[`Table should render normally 1`] = `
       Array [
         <EuiButton
           color="danger"
+          data-test-subj="savedObjectsManagementDelete"
           fill={false}
           iconSide="left"
           iconType="trash"
