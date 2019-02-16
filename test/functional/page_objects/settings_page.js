@@ -50,6 +50,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
       await testSubjects.click('index_patterns');
+
+      if (await testSubjects.exists('euiFlyoutCloseButton')) {
+        await testSubjects.click('euiFlyoutCloseButton');
+      }
     }
 
     async getAdvancedSettings(propertyName) {
@@ -128,7 +132,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getCreateIndexPatternButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
+      return await testSubjects.find('createIndexPatternButton');
     }
 
     async getCreateButton() {
@@ -267,6 +271,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickIndexPatternLogstash() {
+      await find.clickByPartialLinkText('logstash-*');
+    }
+
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
@@ -284,7 +292,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await (await this.getCreateIndexPatternCreateButton()).click();
+        await (await this.getCreateIndexPatternButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -328,14 +336,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternGoToStep2Button() {
       return await testSubjects.find('createIndexPatternGoToStep2Button');
-    }
-
-    async getCreateIndexPatternCreateButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
-    }
-
-    async clickOnOnlyIndexPattern() {
-      return await testSubjects.click('indexPatternLink');
     }
 
     async removeIndexPattern() {
