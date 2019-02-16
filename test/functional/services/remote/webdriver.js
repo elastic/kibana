@@ -21,6 +21,7 @@ import { delay } from 'bluebird';
 import  { Builder, By, Key, until, logging } from 'selenium-webdriver';
 const { LegacyActionSequence } =  require('selenium-webdriver/lib/actions');
 const { getLogger } =  require('selenium-webdriver/lib/logging');
+const { Executor } =  require('selenium-webdriver/lib/http');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const geckoDriver = require('geckodriver');
@@ -29,6 +30,31 @@ const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
+
+const actualExecute = Executor.prototype.execute;
+const execQueue = [];
+Executor.prototype.execute = async function (...args) {
+  let queueItem;
+
+  if (execQueue.length) {
+    const prev = execQueue[execQueue.length - 1];
+    queueItem = {};
+    queueItem.promise = new Promise(resolve => {
+      queueItem.resolve = resolve;
+    });
+    execQueue.push(queueItem);
+
+    await prev.promise;
+  }
+
+  try {
+    return await actualExecute.apply(this, args);
+  } finally {
+    if (queueItem) {
+      queueItem.resolve();
+    }
+  }
+};
 
 let attemptCounter = 0;
 async function attemptToCreateCommand(log, browserType) {
