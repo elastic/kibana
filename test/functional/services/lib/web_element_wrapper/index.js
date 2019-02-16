@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { IndexPatternList } from './index_pattern_list';
+export { WebElementWrapper } from './web_element_wrapper';

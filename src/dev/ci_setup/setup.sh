@@ -105,6 +105,14 @@ export PATH="$PATH:$yarnGlobalDir"
 hash -r
 
 ###
+### use the chromedriver cache if it exists
+###
+if [ -x "$dir/.chromedriver/master/chromedriver" ]; then
+  export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver"
+  export CHROMEDRIVER_SKIP_DOWNLOAD=true
+fi
+
+###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"

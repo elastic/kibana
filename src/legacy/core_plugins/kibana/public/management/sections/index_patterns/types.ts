@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { BrowserDriverApi } from './browser_driver_api';
+export interface IndexPatternCreationOption {
+  text: string;
+  description?: string;
+  onClick: () => void;
+}
 
-export function createRemoteBrowserDriverApi(log, url) {
-  return new BrowserDriverApi({
-    url,
-
-    start() {
-      log.info(`Reusing instance at %j`, url);
-    }
-
-  });
+export interface IndexPattern {
+  id: string;
+  title: HTMLElement;
+  url: string;
+  active: boolean;
+  default: boolean;
+  tag?: string[];
 }

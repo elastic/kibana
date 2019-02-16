@@ -60,11 +60,10 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
 
         // non-library frame
         return group.stackframes.map((stackframe, idx) => (
-          <Stackframe
-            key={`${i}-${idx}`}
-            codeLanguage={codeLanguage}
-            stackframe={stackframe}
-          />
+          <Fragment key={`${i}-${idx}`}>
+            {idx > 0 && <EuiSpacer size="m" />}
+            <Stackframe codeLanguage={codeLanguage} stackframe={stackframe} />
+          </Fragment>
         ));
       })}
       <EuiSpacer size="m" />
