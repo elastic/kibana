@@ -64,14 +64,17 @@ function checkout_sibling {
 
     function checkout_clone_target {
       pick_clone_target
+
       if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
         export TEST_ES_FROM=snapshot
+        echo " -> using elasticsearch snapshot"
+        echo
+      else
+        echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
+        git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
+        echo " -> checked out ${project} revision: $(git -C ${targetDir} rev-parse HEAD)"
+        echo
       fi
-
-      echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
-      git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
-      echo " -> checked out ${project} revision: $(git -C ${targetDir} rev-parse HEAD)"
-      echo
     }
 
     checkout_clone_target
