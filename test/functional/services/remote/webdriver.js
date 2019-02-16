@@ -31,6 +31,14 @@ const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
+/**
+ * Best we can tell WebDriver locks up sometimes when we send too many
+ * commands at once, sometimes... It causes random lockups where we never
+ * receive another response from WedDriver and we don't want to live with
+ * that risk, so for now I've shimmed the Executor class in WebDiver to
+ * queue all calls to Executor#send() if there is already a call in
+ * progress.
+ */
 const actualExecute = Executor.prototype.execute;
 const execQueue = [];
 Executor.prototype.execute = async function (...args) {
