@@ -21,7 +21,7 @@ const INITIAL_STATE = {
 };
 
 // Reducer
-function ui(state = INITIAL_STATE, action) {
+export function ui(state = INITIAL_STATE, action) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
@@ -71,5 +71,3 @@ export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
 export const getIsSetViewOpen = ({ ui }) => _.get(ui, 'isSetViewOpen', false);
 export const getIsFullScreen = ({ ui }) => _.get(ui, 'isFullScreen', false);
-
-export default ui;

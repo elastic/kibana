@@ -149,7 +149,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         defaultMessage: 'Go to Uptime home page',
                       })}
                       href="#/"
-                      iconType="heartbeatApp"
+                      iconType="uptimeApp"
                       iconTitle={i18n.translate('xpack.uptime.appHeader.uptimeLogoTitle', {
                         defaultMessage: 'Uptime',
                       })}
@@ -208,7 +208,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           defaultMessage: 'Go to our discuss page',
                         })}
                         iconType="help"
-                        href="https://discuss.elastic.co/c/beats/heartbeat"
+                        href="https://discuss.elastic.co/c/uptime"
                         target="_blank"
                       >
                         <FormattedMessage

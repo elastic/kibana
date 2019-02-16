@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
-  EuiSuperSelect,
+  EuiComboBox,
   EuiCheckbox,
   EuiSpacer,
   EuiTitle,
@@ -129,19 +129,23 @@ export class Overrides extends Component {
     this.setState({ overrides });
   }
 
-  onFormatChange = (format) => {
+  onFormatChange = ([opt]) => {
+    const format = opt ? opt.label : '';
     this.setOverride({ format });
   }
 
-  onTimestampFormatChange = (timestampFormat) => {
+  onTimestampFormatChange = ([opt]) => {
+    const timestampFormat = opt ? opt.label : '';
     this.setOverride({ timestampFormat });
   }
 
-  onTimestampFieldChange = (timestampField) => {
+  onTimestampFieldChange = ([opt]) => {
+    const timestampField = opt ? opt.label : '';
     this.setOverride({ timestampField });
   }
 
-  onDelimiterChange = (delimiter) => {
+  onDelimiterChange = ([opt]) => {
+    const delimiter = opt ? opt.label : '';
     this.setOverride({ delimiter });
   }
 
@@ -149,7 +153,8 @@ export class Overrides extends Component {
     this.setState({ customDelimiter: e.target.value });
   }
 
-  onQuoteChange = (quote) => {
+  onQuoteChange = ([opt]) => {
+    const quote = opt ? opt.label : '';
     this.setOverride({ quote });
   }
 
@@ -161,7 +166,8 @@ export class Overrides extends Component {
     this.setOverride({ shouldTrimFields: e.target.checked });
   }
 
-  onCharsetChange = (charset) => {
+  onCharsetChange = ([opt]) => {
+    const charset = opt ? opt.label : '';
     this.setOverride({ charset });
   }
 
@@ -212,7 +218,7 @@ export class Overrides extends Component {
       linesToSample,
     } = overrides;
 
-    const fieldOptions = fields.map(f => ({ value: f, inputDisplay: f }));
+    const fieldOptions = getSortedFields(fields);
 
     return (
 
@@ -242,10 +248,12 @@ export class Overrides extends Component {
             />
           }
         >
-          <EuiSuperSelect
+          <EuiComboBox
             options={formatOptions}
-            valueOfSelected={format}
+            selectedOptions={selectedOption(format)}
             onChange={this.onFormatChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
           />
         </EuiFormRow>
         {
@@ -259,10 +267,12 @@ export class Overrides extends Component {
                 />
               }
             >
-              <EuiSuperSelect
+              <EuiComboBox
                 options={delimiterOptions}
-                valueOfSelected={delimiter}
+                selectedOptions={selectedOption(delimiter)}
                 onChange={this.onDelimiterChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
               />
             </EuiFormRow>
             {
@@ -290,10 +300,12 @@ export class Overrides extends Component {
                 />
               }
             >
-              <EuiSuperSelect
+              <EuiComboBox
                 options={quoteOptions}
-                valueOfSelected={quote}
+                selectedOptions={selectedOption(quote)}
                 onChange={this.onQuoteChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
               />
             </EuiFormRow>
 
@@ -355,10 +367,12 @@ export class Overrides extends Component {
             />
           }
         >
-          <EuiSuperSelect
+          <EuiComboBox
             options={timestampFormatOptions}
-            valueOfSelected={timestampFormat}
+            selectedOptions={selectedOption(timestampFormat)}
             onChange={this.onTimestampFormatChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
           />
         </EuiFormRow>
 
@@ -370,20 +384,23 @@ export class Overrides extends Component {
             />
           }
         >
-          <EuiSuperSelect
+          <EuiComboBox
             options={fieldOptions}
-            valueOfSelected={timestampField}
+            selectedOptions={selectedOption(timestampField)}
             onChange={this.onTimestampFieldChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
           />
         </EuiFormRow>
 
         {/* <EuiFormRow
           label="Charset"
         >
-          <EuiSuperSelect
+          <EuiComboBox
             options={charsetOptions}
-            valueOfSelected={charset}
-            onChange={this.onCharsetChange}
+            selectedOptions={selectedOption(charset)}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
           />
         </EuiFormRow> */}
         {
@@ -420,6 +437,16 @@ export class Overrides extends Component {
 
     );
   }
+}
+
+function selectedOption(opt) {
+  return [{ label: (opt || '') }];
+}
+
+// return a list of objects compatible with EuiComboBox
+// also sort alphanumerically
+function getSortedFields(fields) {
+  return fields.map(f => ({ label: f })).sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 }
 
 // Some delimiter characters cannot be used as items in select list.
