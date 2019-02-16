@@ -21,7 +21,6 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const log = getService('log');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   describe('test large number of fields', function () {
