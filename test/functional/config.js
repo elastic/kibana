@@ -102,7 +102,7 @@ export default async function ({ readConfigFile }) {
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
       retry: commonConfig.get('services.retry'),
-      __leadfoot__: RemoteProvider,
+      __webdriver__: RemoteProvider,
       filterBar: FilterBarProvider,
       queryBar: QueryBarProvider,
       find: FindProvider,
@@ -141,6 +141,7 @@ export default async function ({ readConfigFile }) {
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
         'telemetry:optIn': false
       },
     },

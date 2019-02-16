@@ -33,6 +33,7 @@ export default {
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
+    '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
