@@ -42,9 +42,6 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
   }
 
   return {
-    events_in: eventsInTotal,
-    events_out: eventsOutTotal,
-    duration_in_millis: durationInMillis,
     millis_per_event: durationInMillis / eventsTotal,
     ...processorStats,
     ...eventsProcessedStats
