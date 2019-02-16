@@ -8,6 +8,7 @@ This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
 
 * <<breaking_70_setting_changes>>
+* <<breaking_70_ems_changes>>
 
 See also <<release-highlights>> and <<release-notes>>.
 
@@ -432,3 +433,20 @@ multiple split tables will now see those tables rendered differently.
 *Details:* Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
 
 *Impact:* Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
+
+[[breaking_70_ems_changes]]
+=== Elastic Maps Service changes
+
+[float]
+==== Removed overseas territories from France Departments vector layer
+
+*Details:* Overseas territories in the France Departments vector layer have been removed. These territories have no ISO 3166-2 or INSEE codes to join to Elasticsearch data.
+
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the France Departments layer will not show overseas territories. 
+
+[float]
+==== USA Zip Codes vector layer updated with latest US Census data
+
+*Details:* The USA Zip Codes layer has been updated based on the https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been generalized from the source data for visualization and locations are approximate.
+
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip Codes layer will appear differently. ZCTA boundaries have changed dramatically in some areas. Also, some zip codes have been deprecated and new ones have been added.
