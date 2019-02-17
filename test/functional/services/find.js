@@ -201,6 +201,12 @@ export async function FindProvider({ getService }) {
           return found instanceof WebElementWrapper;
         }
       } catch (err) {
+        // TODO: we have to find a better way to identify known errors from selenium web driver
+        if (err.message.includes('stale element reference')) {
+          log.info('stale element reference exception in Find.exists(...) call, retrying');
+          return await this.exists(findFunction, timeout);
+        }
+
         await this._withTimeout(defaultFindTimeout);
         return false;
       }
