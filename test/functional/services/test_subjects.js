@@ -231,6 +231,10 @@ export function TestSubjectsProvider({ getService }) {
     async waitForAttributeToChange(selector, attribute, value) {
       await find.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
     }
+
+    getCssSelector(selector) {
+      return testSubjSelector(selector);
+    }
   }
 
   return new TestSubjects();
