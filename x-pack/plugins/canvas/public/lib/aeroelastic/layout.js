@@ -24,12 +24,12 @@ import {
 import {
   applyLocalTransforms,
   cascadeProperties,
-  configuration,
   draggingShape,
   getAdHocChildrenAnnotations,
   getAlignmentGuideAnnotations,
   getAlterSnapGesture,
   getAnnotatedShapes,
+  getConfiguration,
   getConstrainedShapesWithPreexistingAnnotations,
   getCursor,
   getDirectSelect,
@@ -77,6 +77,8 @@ import { state } from './dag_start';
 const scene = select(getScene)(state);
 
 export const shapes = select(getShapes)(scene);
+
+const configuration = select(getConfiguration)(scene);
 
 const hoveredShapes = select(getHoveredShapes)(configuration, shapes, cursorPosition);
 

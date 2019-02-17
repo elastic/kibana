@@ -1026,9 +1026,7 @@ const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedSha
 // todo move it outside layout_functions as gestures is using it too
 export const getScene = state => state.currentScene;
 
-export const configuration = state => {
-  return state.currentScene.configuration;
-};
+export const getConfiguration = scene => scene.configuration;
 
 export const getShapes = scene => scene.shapes;
 
