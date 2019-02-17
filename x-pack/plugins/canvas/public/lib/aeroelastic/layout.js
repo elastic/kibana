@@ -43,6 +43,7 @@ import {
   getGroupedSelectedShapeIds,
   getGroupedSelectedShapes,
   getGrouping,
+  getGroupingTuple,
   getHoverAnnotations,
   getHoveredShape,
   getHoveredShapes,
@@ -200,11 +201,18 @@ const rotationTooltipAnnotation = select(getRotationTooltipAnnotation)(
 
 const groupAction = select(getGroupAction)(actionEvent);
 
+const groupingTuple = select(getGroupingTuple)(
+  configuration,
+  constrainedShapesWithPreexistingAnnotations,
+  selectedShapes
+);
+
 const grouping = select(getGrouping)(
   configuration,
   constrainedShapesWithPreexistingAnnotations,
   selectedShapes,
-  groupAction
+  groupAction,
+  groupingTuple
 );
 
 const groupedSelectedShapes = select(getGroupedSelectedShapes)(grouping);

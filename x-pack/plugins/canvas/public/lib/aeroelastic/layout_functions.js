@@ -1063,7 +1063,7 @@ const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeOb
   };
 };
 
-export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
+export const getGroupingTuple = (config, shapes, selectedShapes) => {
   const childOfGroup = shape => shape.parent && shape.parent.startsWith(config.groupName);
   const isAdHocGroup = shape =>
     shape.type === config.groupName && shape.subtype === config.adHocGroupName;
@@ -1076,7 +1076,21 @@ export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
   const isOrBelongsToGroup = shape => isGroup(shape) || childOfGroup(shape);
   const someSelectedShapesAreGrouped = selectedShapes.some(isOrBelongsToGroup);
   const selectionOutsideGroup = !someSelectedShapesAreGrouped;
+  return {
+    selectionOutsideGroup,
+    freshSelectedShapes,
+    freshNonSelectedShapes,
+    preexistingAdHocGroups,
+  };
+};
 
+export const getGrouping = (config, shapes, selectedShapes, groupAction, tuple) => {
+  const {
+    selectionOutsideGroup,
+    freshSelectedShapes,
+    freshNonSelectedShapes,
+    preexistingAdHocGroups,
+  } = tuple;
   if (groupAction === 'group') {
     const selectedAdHocGroupsToPersist = selectedShapes.filter(
       s => s.subtype === config.adHocGroupName
@@ -1452,7 +1466,6 @@ export const getNextScene = (
   selectedShapes,
   gestureState
 ) => {
-  if (shapes.find(s => !s.transformMatrix)) debugger;
   const selectedLeafShapes = getLeafs(
     shape => shape.type === config.groupName,
     shapes,
