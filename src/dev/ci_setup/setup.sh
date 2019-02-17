@@ -29,13 +29,11 @@ fi
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
-export NODE_OPTIONS="--max_old_space_size=2048"
 
 echo "-> KIBANA_DIR $KIBANA_DIR"
 echo "-> XPACK_DIR $XPACK_DIR"
 echo "-> PARENT_DIR $PARENT_DIR"
 echo "-> TEST_ES_SNAPSHOT_VERSION $TEST_ES_SNAPSHOT_VERSION"
-echo "-> NODE_OPTIONS $NODE_OPTIONS"
 
 ###
 ### download node
@@ -105,6 +103,14 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 hash -r
+
+###
+### use the chromedriver cache if it exists
+###
+if [ -x "$dir/.chromedriver/master/chromedriver" ]; then
+  export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver"
+  export CHROMEDRIVER_SKIP_DOWNLOAD=true
+fi
 
 ###
 ### install dependencies

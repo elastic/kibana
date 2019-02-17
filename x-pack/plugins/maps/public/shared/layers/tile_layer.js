@@ -12,7 +12,7 @@ import { TileStyle } from '../layers/styles/tile_style';
 
 export class TileLayer extends AbstractLayer {
 
-  static type = "TILE";
+  static type = 'TILE';
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
@@ -34,6 +34,10 @@ export class TileLayer extends AbstractLayer {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {//data is immmutable
+      return;
+    }
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     startLoading(sourceDataId, requestToken, dataFilters);
@@ -52,6 +56,12 @@ export class TileLayer extends AbstractLayer {
 
     if (!source) {
       const sourceDataRequest = this.getSourceDataRequest();
+      if (!sourceDataRequest) {
+        //this is possible if the layer was invisible at startup.
+        //the actions will not perform any data=syncing as an optimization when a layer is invisible
+        //when turning the layer back into visible, it's possible the url has not been resovled yet.
+        return;
+      }
       const url = sourceDataRequest.getData();
       if (!url) {
         return;
@@ -80,11 +90,7 @@ export class TileLayer extends AbstractLayer {
   _setTileLayerProperties(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._style && this._style.setMBPaintProperties({
-      alpha: this.getAlpha(),
-      mbMap,
-      layerId: mbLayerId,
-    });
+    mbMap.setPaintProperty(mbLayerId, 'raster-opacity', this.getAlpha());
   }
 
   getLayerTypeIconName() {

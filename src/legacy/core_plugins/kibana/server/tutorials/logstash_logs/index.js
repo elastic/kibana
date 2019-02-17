@@ -46,7 +46,7 @@ export function logstashLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-Logstash-Log-Dashboard',
+          id: 'Filebeat-Logstash-Log-Dashboard-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.logstashLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Logstash logs dashboard',
           }),
