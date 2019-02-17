@@ -184,29 +184,16 @@ export async function FindProvider({ getService }) {
     }
 
     async exists(findFunction, timeout = WAIT_FOR_EXISTS_TIME) {
+      await this._withTimeout(timeout);
       try {
-        // we have seen some situations where the find timeout doesn't seem
-        // to apply, since we gurantee only a single call will execute at a time
-        // this style of call queues three operations right next to each other,
-        // waits for all of them, but makes sure that the find timeout from
-        // another call doesn't impact the timeouts used for this call
-        const [, found, ] = await Promise.all([
-          this._withTimeout(defaultFindTimeout),
-          findFunction(driver),
-          this._withTimeout(timeout)
-        ]);
+        const found = await findFunction(driver);
+        await this._withTimeout(defaultFindTimeout);
         if (Array.isArray(found)) {
           return found.length > 0;
         } else {
           return found instanceof WebElementWrapper;
         }
       } catch (err) {
-        // TODO: we have to find a better way to identify known errors from selenium web driver
-        if (err.message.includes('stale element reference')) {
-          log.info('stale element reference exception in Find.exists(...) call, retrying');
-          return await this.exists(findFunction, timeout);
-        }
-
         await this._withTimeout(defaultFindTimeout);
         return false;
       }
