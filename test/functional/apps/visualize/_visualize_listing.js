@@ -29,6 +29,9 @@ export default function ({ getPageObjects }) {
 
       before(async function () {
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.checkListingSelectAllCheckbox();
+        await PageObjects.visualize.clickDeleteSelected();
+        await PageObjects.common.clickConfirmOnModal();
       });
 
       after(async () => {
@@ -36,17 +39,6 @@ export default function ({ getPageObjects }) {
         await PageObjects.visualize.checkListingSelectAllCheckbox();
         await PageObjects.visualize.clickDeleteSelected();
         await PageObjects.common.clickConfirmOnModal();
-      });
-
-      it('delete first', async function () {
-        const initialVisCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(initialVisCount).to.equal(1);
-        await PageObjects.visualize.checkListingSelectAllCheckbox();
-        await PageObjects.visualize.clickDeleteSelected();
-        await PageObjects.common.clickConfirmOnModal();
-
-        const isShowingEmptyScreen = await PageObjects.visualize.getCreatePromptExists();
-        expect(isShowingEmptyScreen).to.equal(true);
       });
 
       it('create new viz', async function () {
