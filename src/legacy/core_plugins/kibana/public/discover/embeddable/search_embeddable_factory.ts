@@ -48,19 +48,21 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
    * @param onEmbeddableStateChanged
    * @return {Promise.<Embeddable>}
    */
-  public async create(
+  public create(
     { id }: EmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const editUrl = this.getEditPath(id);
 
-    const savedObject: SavedSearch = await this.searchLoader.get(id);
-    return new SearchEmbeddable({
-      onEmbeddableStateChanged,
-      savedSearch: savedObject,
-      editUrl,
-      $rootScope: this.$rootScope,
-      $compile: this.$compile,
+    // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
+    return this.searchLoader.get(id).then(savedObject => {
+      return new SearchEmbeddable({
+        onEmbeddableStateChanged,
+        savedSearch: savedObject,
+        editUrl,
+        $rootScope: this.$rootScope,
+        $compile: this.$compile,
+      });
     });
   }
 }
