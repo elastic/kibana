@@ -68,14 +68,6 @@ export default function ({ getPageObjects }) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
       });
 
-      after(async () => {
-        // delete all
-        await PageObjects.visualize.clearFilter();
-        await PageObjects.visualize.checkListingSelectAllCheckbox();
-        await PageObjects.visualize.clickDeleteSelected();
-        await PageObjects.common.clickConfirmOnModal();
-      });
-
       it('matches on the first word', async function () {
         await PageObjects.visualize.searchForItemWithName('Hello');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
