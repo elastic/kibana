@@ -74,7 +74,7 @@ exports[`after fetch initialFilter 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNew.createButtonLabel"
+              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -84,14 +84,14 @@ exports[`after fetch initialFilter 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNew.combineDataViewFromKibanaAppDescription"
+                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNew.newToKibanaDescription"
+                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
                     "sampleDataInstallLink": <EuiLink
@@ -101,7 +101,7 @@ exports[`after fetch initialFilter 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNew.sampleDataInstallLinkText"
+                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
                     </EuiLink>,
@@ -117,7 +117,7 @@ exports[`after fetch initialFilter 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNew.title"
+              id="kbn.dashboard.listing.createNewDashboard.title"
               values={Object {}}
             />
           </h2>
@@ -171,7 +171,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNew.createButtonLabel"
+              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -181,14 +181,14 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNew.combineDataViewFromKibanaAppDescription"
+                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNew.newToKibanaDescription"
+                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
                     "sampleDataInstallLink": <EuiLink
@@ -198,7 +198,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNew.sampleDataInstallLinkText"
+                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
                     </EuiLink>,
@@ -214,7 +214,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNew.title"
+              id="kbn.dashboard.listing.createNewDashboard.title"
               values={Object {}}
             />
           </h2>
@@ -268,7 +268,7 @@ exports[`after fetch renders table rows 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNew.createButtonLabel"
+              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -278,14 +278,14 @@ exports[`after fetch renders table rows 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNew.combineDataViewFromKibanaAppDescription"
+                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNew.newToKibanaDescription"
+                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
                     "sampleDataInstallLink": <EuiLink
@@ -295,7 +295,7 @@ exports[`after fetch renders table rows 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNew.sampleDataInstallLinkText"
+                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
                     </EuiLink>,
@@ -311,7 +311,7 @@ exports[`after fetch renders table rows 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNew.title"
+              id="kbn.dashboard.listing.createNewDashboard.title"
               values={Object {}}
             />
           </h2>
@@ -365,7 +365,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNew.createButtonLabel"
+              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -375,14 +375,14 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNew.combineDataViewFromKibanaAppDescription"
+                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNew.newToKibanaDescription"
+                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
                     "sampleDataInstallLink": <EuiLink
@@ -392,7 +392,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNew.sampleDataInstallLinkText"
+                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
                     </EuiLink>,
@@ -408,7 +408,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNew.title"
+              id="kbn.dashboard.listing.createNewDashboard.title"
               values={Object {}}
             />
           </h2>
@@ -462,7 +462,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNew.createButtonLabel"
+              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -472,14 +472,14 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
             <p>
               <FormattedMessage
                 defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNew.combineDataViewFromKibanaAppDescription"
+                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNew.newToKibanaDescription"
+                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                 values={
                   Object {
                     "sampleDataInstallLink": <EuiLink
@@ -489,7 +489,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
                     >
                       <FormattedMessage
                         defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNew.sampleDataInstallLinkText"
+                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         values={Object {}}
                       />
                     </EuiLink>,
@@ -505,7 +505,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNew.title"
+              id="kbn.dashboard.listing.createNewDashboard.title"
               values={Object {}}
             />
           </h2>
