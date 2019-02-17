@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getId } from './../../lib/get_id';
+import { getId as rawGetId } from './../../lib/get_id';
 import { insideAABB, landmarkPoint, shapesAt } from './geometry';
+
+const idMap = {};
+const getId = (name, extension) => {
+  // the original getId function is impure; this wrapper acts like one
+  // (while it's possible for the same group to have the same members - ungroup then make the same group again -
+  // it's okay if the newly arising group gets the same id)
+  // Todo move this mapping out of the layout engine into the Canvas state layout integration
+  const key = name + '|' + extension;
+  return idMap[key] || (idMap[key] = rawGetId(name));
+};
 
 import {
   compositeComponent,
@@ -925,7 +935,7 @@ const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
 const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
   const axisAlignedBoundingBox = getAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
-  const id = getId(config.groupName);
+  const id = getId(config.groupName, shapesToBox.map(s => s.id).join('|'));
   const aabbShape = {
     id,
     type: config.groupName,
