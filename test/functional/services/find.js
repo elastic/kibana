@@ -209,13 +209,15 @@ export async function FindProvider({ getService }) {
       return await retry.forSuccess({
         timeout,
         methodName: `Find.existsByDisplayedByCssSelector('${selector}')`,
-        accept: result => result.length > 0,
+        accept: result => !!result,
         onTimeout: () => false,
-        block: async () => (
-          await this.filterElementIsDisplayed(
+        async block() {
+          const elements = await this.filterElementIsDisplayed(
             wrapAll(await driver.findElements(By.css(selector)))
-          )
-        ),
+          );
+
+          return elements.length > 0;
+        },
       });
     }
 
