@@ -8,7 +8,7 @@ import { matrixToCSS } from './dom';
 import { nextScene } from './layout';
 import { primaryUpdate } from './layout_functions';
 import { multiply, rotateZ, translate } from './matrix';
-import { createStore, select } from './state';
+import { createStore, select } from './select';
 
 export const layout = { nextScene, primaryUpdate };
 export const matrix = { multiply, rotateZ, translate };

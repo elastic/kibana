@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { select, selectReduce } from './state';
+import { select, selectReduce } from './select';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
 // so it's OK that user agent strings are not reliable; in case it's spoofed, it'll just work with a slightly
