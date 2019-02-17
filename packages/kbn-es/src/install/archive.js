@@ -22,7 +22,7 @@ const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
 const del = require('del');
-const { log: defaultLog, decompress } = require('../utils');
+const { log: defaultLog, decompress, downloadFile } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 
 /**
@@ -44,13 +44,19 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     log = defaultLog,
   } = options;
 
+  let dest = archive;
+  if (archive.startsWith('http')) {
+    dest = path.resolve(basePath, 'cache', path.basename(archive));
+    await downloadFile(archive, dest, log);
+  }
+
   if (fs.existsSync(installPath)) {
     log.info('install directory already exists, removing');
     await del(installPath, { force: true });
   }
 
-  log.info('extracting %s', chalk.bold(archive));
-  await decompress(archive, installPath);
+  log.info('extracting %s', chalk.bold(dest));
+  await decompress(dest, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
   if (license === 'trial') {
