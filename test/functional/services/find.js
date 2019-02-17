@@ -184,10 +184,17 @@ export async function FindProvider({ getService }) {
     }
 
     async exists(findFunction, timeout = WAIT_FOR_EXISTS_TIME) {
-      await this._withTimeout(timeout);
       try {
-        const found = await findFunction(driver);
-        await this._withTimeout(defaultFindTimeout);
+        // we have seen some situations where the find timeout doesn't seem
+        // to apply, since we gurantee only a single call will execute at a time
+        // this style of call queues three operations right next to each other,
+        // waits for all of them, but makes sure that the find timeout from
+        // another call doesn't impact the timeouts used for this call
+        const [, found, ] = await Promise.all([
+          this._withTimeout(defaultFindTimeout),
+          findFunction(driver),
+          this._withTimeout(timeout)
+        ]);
         if (Array.isArray(found)) {
           return found.length > 0;
         } else {
