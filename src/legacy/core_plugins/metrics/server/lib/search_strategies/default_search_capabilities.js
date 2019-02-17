@@ -16,14 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { INTERVAL_STRING_RE } from '../../../common/interval_regexp';
-import unitToSeconds from '../vis_data/helpers/unit_to_seconds';
-
-const convertUnitToSeconds = interval => {
-  const matches = interval && interval.match(INTERVAL_STRING_RE);
-
-  return matches ? Number(matches[1]) * unitToSeconds(matches[2]) : 0;
-};
+import { convertIntervalToUnit, parseInterval } from '../vis_data/helpers/unit_to_seconds';
 
 const getTimezoneFromRequest = request => {
   return request.payload.timerange.timezone;
@@ -34,37 +27,32 @@ export default class DefaultSearchCapabilities {
     this.request = request;
     this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
-    this.validateTimeIntervalRules = [];
-  }
-
-  get fixedTimeZone() {
-    return null;
   }
 
   get defaultTimeInterval() {
     return null;
   }
 
-  get defaultTimeIntervalInSeconds() {
-    return this.getIntervalInSeconds(this.defaultTimeInterval);
-  }
-
   getSearchTimezone() {
-    return this.fixedTimeZone || getTimezoneFromRequest(this.request);
+    return getTimezoneFromRequest(this.request);
   }
 
-  getIntervalInSeconds(intervalString) {
-    return Boolean(intervalString) ? convertUnitToSeconds(intervalString) : 0;
+  parseInterval(interval) {
+    return parseInterval(interval);
   }
 
-  isTimeIntervalValid(intervalString) {
-    const userInterval = this.getIntervalInSeconds(intervalString);
+  convertIntervalToUnit(intervalString, unit) {
+    const parsedIntervalString = this.parseInterval(intervalString);
 
-    return this.validateTimeIntervalRules
-      .every(validationRule => validationRule(userInterval, this.defaultTimeIntervalInSeconds));
+    if (parsedIntervalString.unit !== unit) {
+      return convertIntervalToUnit(intervalString, unit);
+    }
+
+    return parsedIntervalString;
   }
 
   getValidTimeInterval(intervalString) {
-    return this.isTimeIntervalValid(intervalString) ? intervalString : this.defaultTimeInterval;
+    // Default search capabilities doesn't have any restrictions for the interval string
+    return intervalString;
   }
 }

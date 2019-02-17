@@ -33,23 +33,10 @@ describe('DefaultSearchCapabilities', () => {
     expect(defaultSearchCapabilities.request).toBe(req);
     expect(defaultSearchCapabilities.batchRequestsSupport).toBe(batchRequestsSupport);
     expect(defaultSearchCapabilities.fieldsCapabilities).toEqual({});
-    expect(defaultSearchCapabilities.validateTimeIntervalRules).toEqual([]);
-  });
-
-  test('should return fixedTimeZone', () => {
-    expect(defaultSearchCapabilities.fixedTimeZone).toBe(null);
   });
 
   test('should return defaultTimeInterval', () => {
     expect(defaultSearchCapabilities.defaultTimeInterval).toBe(null);
-  });
-
-  test('should return defaultTimeIntervalInSeconds', () => {
-    defaultSearchCapabilities.getIntervalInSeconds = jest.fn(() => '20m');
-
-    expect(defaultSearchCapabilities.defaultTimeIntervalInSeconds).toEqual('20m');
-    expect(defaultSearchCapabilities.getIntervalInSeconds)
-      .toHaveBeenCalledWith(defaultSearchCapabilities.defaultTimeInterval);
   });
 
   test('should return Search Timezone', () => {
@@ -64,35 +51,7 @@ describe('DefaultSearchCapabilities', () => {
     expect(defaultSearchCapabilities.getSearchTimezone()).toEqual('UTC');
   });
 
-  test('should return interval in seconds', () => {
-    expect(defaultSearchCapabilities.getIntervalInSeconds()).toEqual(0);
-    expect(defaultSearchCapabilities.getIntervalInSeconds('20m')).toEqual(1200);
-    expect(defaultSearchCapabilities.getIntervalInSeconds('1h')).toEqual(3600);
-  });
-
-  test('should check if a time interval is valid', () => {
-    defaultSearchCapabilities.validateTimeIntervalRules.push(
-      () => true
-    );
-
-    expect(defaultSearchCapabilities.isTimeIntervalValid()).toBe(true);
-    expect(defaultSearchCapabilities.isTimeIntervalValid('20m')).toBe(true);
-    expect(defaultSearchCapabilities.isTimeIntervalValid('1h')).toBe(true);
-
-    defaultSearchCapabilities.validateTimeIntervalRules.push(
-      () => false
-    );
-
-    expect(defaultSearchCapabilities.isTimeIntervalValid('20m')).toBe(false);
-  });
-
   test('should return a valid time interval', () => {
-    defaultSearchCapabilities.isTimeIntervalValid = jest.fn(() => true);
-
     expect(defaultSearchCapabilities.getValidTimeInterval('20m')).toBe('20m');
-
-    defaultSearchCapabilities.isTimeIntervalValid = jest.fn(() => false);
-
-    expect(defaultSearchCapabilities.getValidTimeInterval('20m')).toBe(null);
   });
 });

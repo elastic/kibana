@@ -64,7 +64,6 @@ describe('DefaultSearchStrategy', () => {
       request: req,
       batchRequestsSupport: true,
       fieldsCapabilities: {},
-      validateTimeIntervalRules: []
     });
   });
 });

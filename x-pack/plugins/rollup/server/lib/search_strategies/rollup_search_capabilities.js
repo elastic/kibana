@@ -5,8 +5,7 @@
 */
 import { get } from 'lodash';
 
-const intervalMultiple = (userTimeInterval, defaultTimeInterval) => !Boolean(userTimeInterval % defaultTimeInterval);
-const roundN = (num, base) => Math.ceil(num / base) * base;
+const leastCommonInterval = (num, base) => Math.max(Math.ceil(Math.floor(num) / base) * base, base);
 
 export default (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
@@ -14,23 +13,15 @@ export default (DefaultSearchCapabilities) =>
       super(req, batchRequestsSupport, fieldsCapabilities);
 
       this.rollupIndex = rollupIndex;
-      this.init();
-    }
-
-    get fixedTimeZone() {
-      return get(this.dateHistogram, 'time_zone', null);
+      this.dateHistogram = this.getDateHistogramAggregation();
     }
 
     get defaultTimeInterval() {
       return get(this.dateHistogram, 'interval', null);
     }
 
-    init() {
-      this.dateHistogram = this.getDateHistogramAggregation();
-
-      this.validateTimeIntervalRules = [
-        intervalMultiple,
-      ];
+    getSearchTimezone() {
+      return get(this.dateHistogram, 'time_zone', null);
     }
 
     getDateHistogramAggregation() {
@@ -41,12 +32,10 @@ export default (DefaultSearchCapabilities) =>
     }
 
     getValidTimeInterval(intervalString) {
-      if (this.isTimeIntervalValid(intervalString)) {
-        return intervalString;
-      }
+      const parsedDefaultInterval = this.parseInterval(this.defaultTimeInterval);
+      const parsedIntervalString = this.convertIntervalToUnit(intervalString, parsedDefaultInterval.unit);
+      const commonInterval = leastCommonInterval(parsedIntervalString.value, parsedDefaultInterval.value);
 
-      const userInterval = this.getIntervalInSeconds(intervalString);
-
-      return `${roundN(userInterval, this.defaultTimeIntervalInSeconds)}s`;
+      return `${commonInterval}${parsedDefaultInterval.unit}`;
     }
   });

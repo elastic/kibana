@@ -9,11 +9,11 @@ import mergeCapabilitiesWithFields from '../merge_capabilities_with_fields';
 import { getCapabilitiesForRollupIndices } from '../map_capabilities';
 
 const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
-const DEFAULT_INDEX_PATTERN = '*';
 const batchRequestsSupport = false;
 
 const getRollupIndices = rollupData => Object.keys(rollupData);
-const isIndexPatternValid = indexPattern => isString(indexPattern) && indexPattern !== DEFAULT_INDEX_PATTERN;
+const isIndexPatternValid = indexPattern => indexPattern &&
+  isString(indexPattern) && !indexPattern.includes('*');
 
 export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {
@@ -31,7 +31,7 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
       }).catch(() => Promise.resolve({}));
     }
 
-    async checkForViability(req, indexPattern = DEFAULT_INDEX_PATTERN) {
+    async checkForViability(req, indexPattern) {
       let isViable = false;
       let capabilities = null;
 
