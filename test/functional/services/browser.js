@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -314,8 +316,12 @@ export async function BrowserProvider({ getService }) {
      * @param  {string|function} function
      * @param  {...any[]} args
      */
-    async execute(...args) {
-      return await driver.executeScript(...args);
+    async execute(fn, ...args) {
+      return await driver.executeScript(fn, ...cloneDeep(args, arg => {
+        if (arg instanceof WebElementWrapper) {
+          return arg._webElement;
+        }
+      }));
     }
   }
 
