@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getId } from './../../lib/get_id';
 import { landmarkPoint, shapesAt } from './geometry';
 
 import {
@@ -40,6 +39,17 @@ import {
   removeDuplicates,
   shallowEqual,
 } from './functional';
+
+import { getId as rawGetId } from './../../lib/get_id';
+
+const idMap = {};
+const getId = (name, extension) => {
+  // ensures that `axisAlignedBoundingBoxShape` is pure-ish - a new call with the same input will not yield a new id
+  // (while it's possible for the same group to have the same members - ungroup then make the same group again -
+  // it's okay if the newly arising group gets the same id)
+  const key = name + '|' + extension;
+  return idMap[key] || (idMap[key] = rawGetId(name));
+};
 
 const resizeVertexTuples = [
   [-1, -1, 315],
@@ -926,7 +936,7 @@ const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
 const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
   const axisAlignedBoundingBox = getAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
-  const id = getId(config.groupName);
+  const id = getId(config.groupName, shapesToBox.map(s => s.id).join('|'));
   const aabbShape = {
     id,
     type: config.groupName,
