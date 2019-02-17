@@ -30,8 +30,6 @@ export default function ({ getService, getPageObjects }) {
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
