@@ -5,18 +5,17 @@
  */
 
 import { render } from 'enzyme';
-import expect from 'expect.js';
 import React from 'react';
 import { Download } from '..';
 
 describe('<Download />', () => {
-  it('has canvasDownload class', () => {
+  test('has canvasDownload class', () => {
     const wrapper = render(
       <Download fileName="hello" content="world">
         <button>Download it</button>
       </Download>
     );
 
-    expect(wrapper.hasClass('canvasDownload')).to.be.ok();
+    expect(wrapper.hasClass('canvasDownload')).toBeTruthy();
   });
 });

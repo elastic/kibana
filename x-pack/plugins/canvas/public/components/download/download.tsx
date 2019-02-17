@@ -8,30 +8,30 @@ import { toByteArray } from 'base64-js';
 import fileSaver from 'file-saver';
 import PropTypes from 'prop-types';
 import React, { ReactElement } from 'react';
-// @ts-ignore
 import { parseDataUrl } from '../../../common/lib/dataurl';
 
 interface Props {
   children: ReactElement<any>;
-  fileName?: string;
-  content: string | number;
-  onCopy?: (result: boolean) => void;
+  fileName: string;
+  content: string;
 }
 
 export class Download extends React.PureComponent<Props> {
   public static propTypes = {
     children: PropTypes.element.isRequired,
-    fileName: PropTypes.string,
+    fileName: PropTypes.string.isRequired,
     content: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    onCopy: PropTypes.func,
   };
 
   public onClick = () => {
     const { fileName, content } = this.props;
     const asset = parseDataUrl(content, true);
-    const assetBlob = new Blob([toByteArray(asset.data)], { type: asset.mimetype });
-    const ext = asset.extension ? `.${asset.extension}` : '';
-    fileSaver.saveAs(assetBlob, `canvas-${fileName}${ext}`);
+
+    if (asset && asset.data) {
+      const assetBlob = new Blob([toByteArray(asset.data)], { type: asset.mimetype });
+      const ext = asset.extension ? `.${asset.extension}` : '';
+      fileSaver.saveAs(assetBlob, `canvas-${fileName}${ext}`);
+    }
   };
 
   public render() {

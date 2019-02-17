@@ -11,15 +11,15 @@ const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0
 
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
-export function parseDataUrl(str, withData = false) {
+export function parseDataUrl(str: string, withData = false) {
   if (typeof str !== 'string') {
-    return;
+    return null;
   }
 
   const matches = str.match(dataurlRegex);
 
   if (!matches) {
-    return;
+    return null;
   }
 
   const [, mimetype, charset, , encoding] = matches;
@@ -27,7 +27,7 @@ export function parseDataUrl(str, withData = false) {
   // all types except for svg need to be base64 encoded
   const imageTypeIndex = imageTypes.indexOf(matches[1]);
   if (imageTypeIndex > 0 && encoding !== 'base64') {
-    return;
+    return null;
   }
 
   return {
@@ -40,16 +40,16 @@ export function parseDataUrl(str, withData = false) {
   };
 }
 
-export function isValidDataUrl(str) {
+export function isValidDataUrl(str: string) {
   return dataurlRegex.test(str);
 }
 
-export function encode(data, type = 'text/plain') {
+export function encode(data: any | null, type = 'text/plain') {
   // use FileReader if it's available, like in the browser
   if (FileReader) {
-    return new Promise((resolve, reject) => {
+    return new Promise((_, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
+      reader.onloadend = () => reader.result;
       reader.onerror = err => reject(err);
       reader.readAsDataURL(data);
     });

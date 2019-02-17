@@ -7,8 +7,8 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { AssetType } from './asset';
-import { AssetManager } from './asset_manager';
+import { AssetType } from '../asset';
+import { AssetManager } from '../asset_manager';
 
 const AIRPLANE: AssetType = {
   '@created': '2018-10-13T16:44:44.648Z',

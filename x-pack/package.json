@@ -53,6 +53,7 @@
     "@types/joi": "^13.4.2",
     "@types/jsonwebtoken": "^7.2.7",
     "@types/lodash": "^3.10.1",
+    "@types/mime": "^2.0.1",
     "@types/mocha": "^5.2.5",
     "@types/pngjs": "^3.3.1",
     "@types/prop-types": "^15.5.3",
