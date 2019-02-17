@@ -69,7 +69,7 @@ class DashboardListingUi extends React.Component {
         }
         tableListTitle={
           intl.formatMessage({
-            id: 'kbn.dashboard.listing.table.listTitle',
+            id: 'kbn.dashboard.listing.dashboardsTitle',
             defaultMessage: 'Dashboards',
           })
         }
@@ -103,7 +103,7 @@ class DashboardListingUi extends React.Component {
           title={
             <h2>
               <FormattedMessage
-                id="kbn.dashboard.listing.createNew.title"
+                id="kbn.dashboard.listing.createNewDashboard.title"
                 defaultMessage="Create your first dashboard"
               />
             </h2>
@@ -112,19 +112,19 @@ class DashboardListingUi extends React.Component {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="kbn.dashboard.listing.createNew.combineDataViewFromKibanaAppDescription"
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                   defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="kbn.dashboard.listing.createNew.newToKibanaDescription"
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
                   defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
                   values={{
                     sampleDataInstallLink: (
                       <EuiLink href="#/home/tutorial_directory/sampleData">
                         <FormattedMessage
-                          id="kbn.dashboard.listing.createNew.sampleDataInstallLinkText"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           defaultMessage="Install some sample data"
                         />
                       </EuiLink>
@@ -142,7 +142,7 @@ class DashboardListingUi extends React.Component {
               data-test-subj="createDashboardPromptButton"
             >
               <FormattedMessage
-                id="kbn.dashboard.listing.createNew.createButtonLabel"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
                 defaultMessage="Create new dashboard"
               />
             </EuiButton>
