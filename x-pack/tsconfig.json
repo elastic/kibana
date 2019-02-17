@@ -9,7 +9,8 @@
     "typings/**/*"
   ],
   "exclude": [
-    "test/**/*"
+    "test/**/*",
+    "**/typespec_tests.ts"
   ],
   "compilerOptions": {
     "paths": {

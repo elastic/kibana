@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../../tsconfig",
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": ["esnext", "dom"],
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": false,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "layout/*": ["aeroelastic/*"]
+    }
+  }
+}

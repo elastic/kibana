@@ -5740,7 +5740,7 @@ commander@0.6.1:
   resolved "https://registry.yarnpkg.com/commander/-/commander-0.6.1.tgz#fa68a14f6a945d54dbbe50d8cdb3320e9e3b1a06"
   integrity sha1-+mihT2qUXVTbvlDYzbMyDp47GgY=
 
-commander@2, commander@2.19.0, commander@^2.11.0, commander@^2.12.1, commander@^2.8.1, commander@^2.9.0:
+commander@2, commander@2.19.0, commander@^2.11.0, commander@^2.12.1, commander@^2.12.2, commander@^2.8.1, commander@^2.9.0:
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.19.0.tgz#f6198aa84e5b83c46054b94ddedbfed5ee9ff12a"
   integrity sha512-6tvAOO+D6OENvRAh524Dh9jcfKTYDQAqvqezbCW82xj5X0pSrcpxtvRKHLG0yBY6SD7PSDrJaj+0AiOcKVd1Xg==
@@ -21722,6 +21722,13 @@ typescript@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
   integrity sha512-kk80vLW9iGtjMnIv11qyxLqZm20UklzuR2tL0QAnDIygIUIemcZMxlMWudl9OOt76H3ntVzcTiddQ1/pAAJMYg==
+
+typings-tester@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/typings-tester/-/typings-tester-0.3.2.tgz#04cc499d15ab1d8b2d14dd48415a13d01333bc5b"
+  integrity sha512-HjGoAM2UoGhmSKKy23TYEKkxlphdJFdix5VvqWFLzH1BJVnnwG38tpC6SXPgqhfFGfHY77RlN1K8ts0dbWBQ7A==
+  dependencies:
+    commander "^2.12.2"
 
 ua-parser-js@^0.7.18, ua-parser-js@^0.7.9:
   version "0.7.18"
