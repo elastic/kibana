@@ -67,7 +67,7 @@ import {
   primaryUpdate,
   resizeAnnotationsFunction,
 } from './layout_functions';
-import { state } from './dagStart';
+import { state } from './dag_start';
 
 /**
  * Scenegraph update based on events, gestures...

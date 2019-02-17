@@ -5,7 +5,7 @@
  */
 
 import { select } from './select';
-import { state } from './dagStart';
+import { state } from './dag_start';
 import { getScene } from './layout_functions';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,

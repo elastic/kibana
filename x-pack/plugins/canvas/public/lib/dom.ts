@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { transformMatrix3d } from './aeroelastic/types';
+import { transformMatrix3d } from './aeroelastic';
 
 // converts a transform matrix to a CSS string
 export const matrixToCSS = (transformMatrix: transformMatrix3d): string =>
