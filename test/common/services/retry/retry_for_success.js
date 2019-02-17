@@ -25,7 +25,7 @@ const delay = ms => new Promise(resolve => (
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName) => (lastError) => {
+const defaultOnTimeout = (methodName) => (lastError) => {
   throw new Error(`${methodName} timeout: ${lastError.stack || lastError.message}`);
 };
 
@@ -51,7 +51,7 @@ export async function retryForSuccess(log, {
   timeout,
   methodName,
   block,
-  onFailure = defaultOnFailure(methodName),
+  onTimeout = defaultOnTimeout(methodName),
   accept = returnTrue
 }) {
   const start = Date.now();
@@ -60,8 +60,7 @@ export async function retryForSuccess(log, {
 
   while (true) {
     if (Date.now() - start > timeout) {
-      await onFailure(lastError);
-      throw new Error('expected onFailure() option to throw an error');
+      return await onTimeout(lastError);
     }
 
     const { result, error } = await runAttempt(block);

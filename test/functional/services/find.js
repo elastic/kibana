@@ -206,10 +206,15 @@ export async function FindProvider({ getService }) {
 
     async existsByDisplayedByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(async (driver) => {
-        const elements = wrapAll(await driver.findElements(By.css(selector)));
-        return await this.filterElementIsDisplayed(elements);
-      }, timeout);
+      return await retry.forSuccess({
+        timeout,
+        methodName: `Find.existsByDisplayedByCssSelector('${selector}')`,
+        accept: result => result.length > 0,
+        onTimeout: () => false,
+        block: async () => await this.filterElementIsDisplayed(
+          wrapAll(await driver.findElements(By.css(selector)))
+        ),
+      });
     }
 
     async existsByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {

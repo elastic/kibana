@@ -25,6 +25,10 @@ export function RetryProvider({ getService }) {
   const log = getService('log');
 
   return new class Retry {
+    async forSuccess(options) {
+      return await retryForSuccess(log, options);
+    }
+
     async tryForTime(timeout, block) {
       return await retryForSuccess(log, {
         timeout,

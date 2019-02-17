@@ -29,7 +29,7 @@ export async function retryForTruthy(log, {
 
   const accept = result => Boolean(result);
 
-  const onFailure = lastError => {
+  const onTimeout = lastError => {
     let msg = `timed out waiting for ${description}`;
 
     if (lastError) {
@@ -43,7 +43,7 @@ export async function retryForTruthy(log, {
     timeout,
     methodName,
     block,
-    onFailure,
+    onTimeout,
     accept
   });
 }
