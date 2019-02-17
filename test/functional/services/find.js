@@ -211,7 +211,7 @@ export async function FindProvider({ getService }) {
         methodName: `Find.existsByDisplayedByCssSelector('${selector}')`,
         accept: result => !!result,
         onTimeout: () => false,
-        async block() {
+        block: async () => {
           const elements = await this.filterElementIsDisplayed(
             wrapAll(await driver.findElements(By.css(selector)))
           );
