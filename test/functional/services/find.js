@@ -211,8 +211,10 @@ export async function FindProvider({ getService }) {
         methodName: `Find.existsByDisplayedByCssSelector('${selector}')`,
         accept: result => result.length > 0,
         onTimeout: () => false,
-        block: async () => await this.filterElementIsDisplayed(
-          wrapAll(await driver.findElements(By.css(selector)))
+        block: async () => (
+          await this.filterElementIsDisplayed(
+            wrapAll(await driver.findElements(By.css(selector)))
+          )
         ),
       });
     }
