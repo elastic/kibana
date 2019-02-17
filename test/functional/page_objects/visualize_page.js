@@ -383,7 +383,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickSavedSearch(savedSearchName) {
-      await find.clickByButtonText(savedSearchName);
+      await find.clickByLinkText(savedSearchName);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

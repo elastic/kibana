@@ -82,15 +82,12 @@ class VisualizeListingTableUi extends Component {
         }),
         sortable: true,
         render: (field, record) => (
-          <span>
-            {this.renderFlaskIcon(record)}
-            <EuiLink
-              onClick={() => this.props.edit(record)}
-              data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
-            >
-              {field}
-            </EuiLink>
-          </span>
+          <EuiLink
+            onClick={() => this.props.edit(record)}
+            data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
+          >
+            {this.renderFlaskIcon(record)}{field}
+          </EuiLink>
         )
       },
       {

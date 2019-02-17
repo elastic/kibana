@@ -363,6 +363,7 @@ class TableListViewUi extends React.Component {
           id: 'kbn.table_list_view.listing.table.actionTitle',
           defaultMessage: 'Actions',
         }),
+        width: '100px',
         actions
       });
     }
