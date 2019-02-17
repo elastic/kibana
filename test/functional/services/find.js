@@ -207,6 +207,7 @@ export async function FindProvider({ getService }) {
           return await this.exists(findFunction, timeout);
         }
 
+        log.debug('Find.exists(...) failed with: ' + require('util').inspect(err));
         await this._withTimeout(defaultFindTimeout);
         return false;
       }
