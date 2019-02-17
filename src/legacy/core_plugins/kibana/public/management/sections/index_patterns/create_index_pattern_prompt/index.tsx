@@ -32,7 +32,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) => (
-  <EuiFlyout size="s" onClose={onClose}>
+  <EuiFlyout size="s" onClose={onClose} data-test-subj="CreateIndexPatternPrompt">
     <EuiFlyoutHeader hasBorder>
       <EuiText grow={false}>
         <h2>
