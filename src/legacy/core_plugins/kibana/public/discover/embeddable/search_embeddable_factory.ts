@@ -24,7 +24,7 @@ import {
   EmbeddableInstanceConfiguration,
   OnEmbeddableStateChanged,
 } from 'ui/embeddable/embeddable_factory';
-import { SavedSearch, SavedSearchLoader } from '../types';
+import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable } from './search_embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
