@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { ViewControl } from './view_control';
-import { getMouseCoordinates } from "../../../selectors/map_selectors";
+import { getMouseCoordinates } from '../../../selectors/map_selectors';
 import {
   getIsSetViewOpen,
   closeSetView,

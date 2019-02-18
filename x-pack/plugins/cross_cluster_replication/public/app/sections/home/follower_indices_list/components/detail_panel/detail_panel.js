@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
 
 import {
@@ -38,7 +38,7 @@ import { ContextMenu } from '../context_menu';
 
 import { API_STATUS } from '../../../../../constants';
 
-export class DetailPanelUi extends Component {
+export class DetailPanel extends Component {
   static propTypes = {
     apiStatus: PropTypes.string,
     followerIndexId: PropTypes.string,
@@ -391,7 +391,7 @@ export class DetailPanelUi extends Component {
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexDetailPanel.loadingLabel"
-                    defaultMessage="Loading follower index..."
+                    defaultMessage="Loading follower index…"
                   />
                 </EuiTextColor>
               </EuiText>
@@ -449,6 +449,7 @@ export class DetailPanelUi extends Component {
               iconType="cross"
               flush="left"
               onClick={closeDetailPanel}
+              data-test-subj="ccrFollowerIndexDetailsFlyoutCloseButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexDetailPanel.closeButtonLabel"
@@ -462,6 +463,7 @@ export class DetailPanelUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={indexManagementUri}
+                  data-test-subj="ccrFollowerIndexDetailsViewIndexManagementButton"
                 >
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexDetailPanel.viewIndexLink"
@@ -483,6 +485,7 @@ export class DetailPanelUi extends Component {
                       />
                     )}
                     followerIndices={[followerIndex]}
+                    testSubj="ccrFollowerIndexDetailsViewContextMenuButton"
                   />
                 </EuiFlexItem>
               )}
@@ -499,7 +502,7 @@ export class DetailPanelUi extends Component {
     return (
       <EuiFlyout
         className="ccrFollowerIndicesDetailPanel"
-        data-test-subj="followerIndexDetailsFlyout"
+        data-test-subj="ccrFollowerIndexDetailsFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="followerIndexDetailsFlyoutTitle"
         size="m"
@@ -518,5 +521,3 @@ export class DetailPanelUi extends Component {
     );
   }
 }
-
-export const DetailPanel = injectI18n(DetailPanelUi);

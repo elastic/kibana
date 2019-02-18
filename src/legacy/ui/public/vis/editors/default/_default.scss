@@ -69,7 +69,7 @@
  */
 
 .visEditor__resizer {
-  @include kibana-resizer($vis-editor-resizer-width);
+  @include kbnResizer($vis-editor-resizer-width);
 
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
