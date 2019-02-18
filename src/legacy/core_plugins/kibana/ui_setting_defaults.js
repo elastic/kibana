@@ -334,7 +334,11 @@ export function getUiSettingDefaults() {
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
           </ul>`,
-        values: requestPreferenceOptionLabels,
+        values: {
+          sessionId: requestPreferenceOptionLabels.sessionId,
+          custom: requestPreferenceOptionLabels.custom,
+          none: requestPreferenceOptionLabels.none,
+        },
       }),
       category: ['search'],
     },
