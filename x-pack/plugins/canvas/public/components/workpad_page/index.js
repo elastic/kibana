@@ -6,19 +6,25 @@
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { compose, withState, withProps, withHandlers } from 'recompose';
+import { compose, shallowEqual, withState, withProps, withHandlers } from 'recompose';
 import { notify } from '../../lib/notify';
 import { setClipboardData, getClipboardData } from '../../lib/clipboard';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { removeElements, insertNodes, elementLayer } from '../../state/actions/elements';
+import {
+  removeElements,
+  insertNodes,
+  elementLayer,
+  addElement,
+  setMultiplePositions,
+} from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
 import { getNodes, isWriteable } from '../../state/selectors/workpad';
-import { arrayToMap, flatten } from '../../lib/aeroelastic/functional';
+import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
+import { nextScene } from '../../lib/aeroelastic/layout';
+import { invert, matrixToAngle, multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
 import { eventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
 import { selectElement } from './../../state/actions/transient';
-import { nextScene } from '../../lib/aeroelastic/layout';
-import { invert, matrixToAngle, multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
 
 const makeUid = () => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
@@ -69,6 +75,8 @@ const mapDispatchToProps = dispatch => {
   return {
     insertNodes: pageId => selectedElements => dispatch(insertNodes(selectedElements, pageId)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
+    addElement: pageId => element => dispatch(addElement(pageId, element)),
+    setMultiplePositions: positions => dispatch(setMultiplePositions(positions)),
     selectElement: selectedElement => dispatch(selectElement(selectedElement)),
     // TODO: Abstract this out. This is the same code as in sidebar/index.js
     elementLayer: (pageId, selectedElement, movement) => {
@@ -94,7 +102,6 @@ const getRootElementId = (lookup, id) => {
     : element.id;
 };
 
-const id = element => element.id;
 // check for duplication
 const deduped = a => a.filter((d, i) => a.indexOf(d) === i);
 const idDuplicateCheck = groups => {
@@ -142,7 +149,6 @@ const elementToShape = (element, i) => {
   // multiplying the angle with -1 as `transform: matrix3d` uses a left-handed coordinate system
   const angleRadians = (-position.angle / 180) * Math.PI;
   const transformMatrix = multiply(translate(cx, cy, z), rotateZ(angleRadians));
-  if (!transformMatrix) debugger;
   const isGroup = element.id.startsWith('group');
   const parent = (element.position && element.position.parent) || null; // reserved for hierarchical (tree shaped) grouping
   return {
@@ -162,7 +168,6 @@ const shapeToElement = shape => {
     angle = 0;
   }
   return {
-    id: shape.id,
     left: shape.transformMatrix[12] - shape.a,
     top: shape.transformMatrix[13] - shape.b,
     width: shape.a * 2,
@@ -171,6 +176,47 @@ const shapeToElement = shape => {
     parent: shape.parent || null,
     type: shape.type === 'group' ? 'group' : 'element',
   };
+};
+
+const updateGlobalPositions = (setPositions, { shapes, gestureEnd }, unsortedElements) => {
+  const ascending = (a, b) => (a.id < b.id ? -1 : 1);
+  const relevant = s => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
+  const elements = unsortedElements.filter(relevant).sort(ascending);
+  const repositionings = shapes
+    .filter(relevant)
+    .sort(ascending)
+    .map((shape, i) => {
+      const element = elements[i];
+      const elemPos = element && element.position;
+      if (elemPos && gestureEnd) {
+        // get existing position information from element
+        const oldProps = {
+          left: elemPos.left,
+          top: elemPos.top,
+          width: elemPos.width,
+          height: elemPos.height,
+          angle: Math.round(elemPos.angle),
+          type: elemPos.type,
+          parent: elemPos.parent || null,
+        };
+
+        // cast shape into element-like object to compare
+        const newProps = shapeToElement(shape);
+
+        if (1 / newProps.angle === -Infinity) {
+          newProps.angle = 0;
+        } // recompose.shallowEqual discerns between 0 and -0
+
+        const result = shallowEqual(oldProps, newProps)
+          ? null
+          : { position: newProps, elementId: shape.id };
+        return result;
+      }
+    })
+    .filter(identity);
+  if (repositionings.length) {
+    setPositions(repositionings);
+  }
 };
 
 export const WorkpadPage = compose(
@@ -206,6 +252,7 @@ export const WorkpadPage = compose(
     const shapes = props.elements
       .map(elementToShape)
       .filter((d, i, a) => !d.id.startsWith('group') || a.find(s => s.parent === d.id));
+    // todo delete these
     idDuplicateCheck(shapes);
     missingParentCheck(shapes);
     shapes.forEach(shape => {
@@ -216,6 +263,7 @@ export const WorkpadPage = compose(
           )
         : shape.transformMatrix;
     });
+    // todo move this initial state in a file under `aeroelastic/`
     return {
       primaryUpdate: null,
       currentScene: { shapes, configuration: aeroelasticConfiguration },
@@ -225,10 +273,10 @@ export const WorkpadPage = compose(
     ({
       aeroelastic,
       setAeroelastic,
-      updateCount,
-      setUpdateCount,
       page,
       elements: pageElements,
+      addElement,
+      setMultiplePositions,
       insertNodes,
       removeElements,
       selectElement,
@@ -274,25 +322,62 @@ export const WorkpadPage = compose(
           width: shape.a * 2,
           height: shape.b * 2,
         };
-        if (!result.transformMatrix) debugger;
         return result;
       });
       return {
         elements,
         cursor,
         commit: (type, payload) => {
-          //if (aeroelastic.monfera) debugger;
-          //console.log('setting aero state!');
           setAeroelastic(state => {
-            //if (state.monfera) debugger;
             const currentScene = nextScene({
               ...state,
               primaryUpdate: { type, payload: { ...payload, uid: makeUid() } },
             });
+            if (currentScene.gestureEnd) {
+              // annotations don't need Redux persisting
+              const primaryShapes = currentScene.shapes.filter(
+                shape => shape.type !== 'annotation'
+              );
+
+              // persistent groups
+              const persistableGroups = primaryShapes.filter(s => s.subtype === 'persistentGroup');
+
+              // remove all group elements
+              const elementsToRemove = pageElements.filter(
+                e => e.position.type === 'group' && !persistableGroups.find(p => p.id === e.id)
+              );
+              if (elementsToRemove.length) {
+                console.log('removing groups', elementsToRemove.map(e => e.id).join(', '));
+                removeElements(page.id)(elementsToRemove.map(e => e.id));
+              }
+
+              // create all needed groups
+              persistableGroups
+                .filter(p => !pageElements.find(e => p.id === e.id))
+                .forEach(g => {
+                  const partialElement = {
+                    id: g.id,
+                    filter: undefined,
+                    expression: 'shape fill="rgba(255,255,255,0)" | render',
+                    position: {
+                      ...shapeToElement(g),
+                    },
+                  };
+                  console.log('adding group', g.id);
+                  addElement(page.id)(partialElement);
+                });
+
+              // update the position of possibly changed elements
+              updateGlobalPositions(
+                positions => setMultiplePositions(positions.map(p => ({ ...p, pageId: page.id }))),
+                currentScene,
+                pageElements
+              );
+            }
+
             return {
               ...state,
               currentScene,
-              monfera: true,
             };
           });
         },
