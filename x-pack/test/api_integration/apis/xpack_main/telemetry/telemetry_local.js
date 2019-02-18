@@ -165,6 +165,8 @@ export default function ({ getService }) {
         'stack_stats.kibana.plugins.kql.defaultQueryLanguage',
         'stack_stats.kibana.plugins.kql.optInCount',
         'stack_stats.kibana.plugins.kql.optOutCount',
+        "stack_stats.kibana.plugins.localization.labelsCount",
+        "stack_stats.kibana.plugins.localization.locale",
         'stack_stats.kibana.plugins.maps.attributesPerMap.dataSourcesCount.avg',
         'stack_stats.kibana.plugins.maps.attributesPerMap.dataSourcesCount.max',
         'stack_stats.kibana.plugins.maps.attributesPerMap.dataSourcesCount.min',
