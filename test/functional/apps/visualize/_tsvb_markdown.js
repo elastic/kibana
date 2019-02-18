@@ -19,9 +19,8 @@
 
 import expect from 'expect.js';
 
-export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
-  const { visualBuilder, timePicker } = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder', 'timePicker']);
+export default function ({ getPageObjects }) {
+  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
 
@@ -33,33 +32,29 @@ export default function ({ getService, getPageObjects }) {
         await timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
 
-      it('should render all markdown components', async () => {
+      afterEach(async () => {
+        await visualBuilder.clearMarkdown();
+      });
+
+      it('should render subtabs and table variables markdown components', async () => {
         const tabs = await visualBuilder.getSubTabs();
         expect(tabs.length).to.be(3);
+
+        const variables = await visualBuilder.getMarkdownTableVariables();
+        expect(variables).not.to.be.empty();
+        expect(variables).to.have.length(5);
       });
 
       it('should allow printing raw timestamp of data', async () => {
-        await retry.try(async () => {
-          await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
-          const text = await visualBuilder.getMarkdownText();
-          expect(text).to.be('1442901600000');
-        });
+        await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
+        const text = await visualBuilder.getMarkdownText();
+        expect(text).to.be('1442901600000');
       });
 
       it('should allow printing raw value of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await visualBuilder.getMarkdownText();
         expect(text).to.be('6');
-      });
-
-      // must be fail after fix: https://github.com/elastic/kibana/issues/30625
-      it('should show empty table variables', async () => {
-        const variables = await visualBuilder.getMarkdownTableVariables();
-        expect(Array.isArray(variables)).to.be.ok();
-        expect(variables).to.be.empty();
-
-        const noVariables = await visualBuilder.getMarkdownTableNoVariables();
-        expect(noVariables).to.be.contain('No variables available for the selected data metrics');
       });
 
       it('should render html as plain text', async () => {
@@ -70,16 +65,26 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should render mustache list', async () => {
-        const list =
-          `{{#each _all}}
-{{ data.formatted.[0] }} {{ data.raw.[0] }}
-{{/each}}`;
+        const list = '{{#each _all}}\n{{ data.formatted.[0] }} {{ data.raw.[0] }}\n{{/each}}';
 
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
 
         await visualBuilder.enterMarkdown(list);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
+      });
+
+      it('should render first table variable', async () => {
+        const variables = await visualBuilder.getMarkdownTableVariables();
+        const beforeClickText = await visualBuilder.getMarkdownText();
+
+        expect(variables).not.to.be.empty();
+        expect(beforeClickText).to.be.empty();
+
+        await variables[0].selector.click();
+
+        const text = await visualBuilder.getMarkdownText();
+        expect(text).to.be('46');
       });
     });
   });

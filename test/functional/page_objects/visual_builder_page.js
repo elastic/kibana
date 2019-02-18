@@ -60,6 +60,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async enterMarkdown(markdown) {
       const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await this.clearMarkdown();
+      await input.type(markdown);
+      await PageObjects.common.sleep(500);
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    async clearMarkdown() {
+      const input = await find.byCssSelector('.ace_content');
+      // click for switching context(fix for "should render first table variable" test)
+      // see _tsvb_markdown.js
+      await input.click();
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
@@ -70,12 +81,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       }
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
       await input.pressKeys(browser.keys.BACKSPACE); // Delete all content
-      await input.type(markdown);
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
+      await PageObjects.common.sleep(300);
       return await el.getVisibleText();
     }
 
@@ -85,21 +95,28 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
      *
      * **Note**: if `table` not have variables, use `getMarkdownTableNoVariables` method instead
      * @see {getMarkdownTableNoVariables}
-     * @returns {Promise<string[]>}
+     * @returns {Promise<Array<{key:string, value:string}>>}
      * @memberof VisualBuilderPage
      */
     async getMarkdownTableVariables() {
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
-      const variablesSelector = 'tbody td';
+      const variablesSelector = 'tbody tr';
       const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
       if (!exists) {
         log.debug('variable list is empty');
         return [];
       }
-      const variables = testTableVariables.findAllByCssSelector(variablesSelector);
-      const variablesText = Promise.all(variables.map(variable => variable.getVisibleText()));
-      log.debug(`markdown table variables is: ${variablesText}`);
-      return variablesText;
+      const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
+
+      const variablesKeyValueSelectorMap = Promise.all(variables.map(async variable => {
+        const subVars = await variable.findAllByCssSelector('td');
+        const selector = subVars[0];
+        const key = await selector.getVisibleText();
+        const value = await subVars[1].getVisibleText();
+        return { key, value, selector };
+      }));
+      log.debug(`markdown table variables is: ${variablesKeyValueSelectorMap}`);
+      return variablesKeyValueSelectorMap;
     }
 
     /**
@@ -138,7 +155,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
-      await PageObjects.common.sleep(300);
+      await PageObjects.common.sleep(500);
     }
 
     async clearOffsetSeries() {
@@ -146,6 +163,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await el.clearValue();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
 
     async enterOffsetSeries(value) {
       const el = await testSubjects.find('offsetTimeSeries');
