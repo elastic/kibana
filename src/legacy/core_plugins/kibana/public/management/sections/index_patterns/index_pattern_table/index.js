@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { IndexPatternList } from './index_pattern_list';
+export { IndexPatternTable } from './index_pattern_table';

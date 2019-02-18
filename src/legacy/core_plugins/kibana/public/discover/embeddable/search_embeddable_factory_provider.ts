@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { IPrivate } from 'ui/private';
+import { SavedSearchLoader } from '../types';
+import { SearchEmbeddableFactory } from './search_embeddable_factory';
 
-import { Header } from './components/header';
-import { List } from './components/list';
+export function searchEmbeddableFactoryProvider(Private: IPrivate) {
+  const SearchEmbeddableFactoryProvider = (
+    $compile: ng.ICompileService,
+    $rootScope: ng.IRootScopeService,
+    savedSearches: SavedSearchLoader
+  ) => {
+    return new SearchEmbeddableFactory($compile, $rootScope, savedSearches);
+  };
+  return Private(SearchEmbeddableFactoryProvider);
+}
 
-export const IndexPatternList = ({
-  indexPatternCreationOptions,
-  defaultIndex,
-  indexPatterns
-}) => (
-  <Fragment>
-    <div className="indexPatternList__headerWrapper" data-test-subj="createIndexPatternParent">
-      <Header indexPatternCreationOptions={indexPatternCreationOptions} />
-    </div>
-    <List indexPatterns={indexPatterns} defaultIndex={defaultIndex} />
-  </Fragment>
-);
+EmbeddableFactoriesRegistryProvider.register(searchEmbeddableFactoryProvider);

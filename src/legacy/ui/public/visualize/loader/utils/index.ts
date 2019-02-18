@@ -17,17 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-import { CreateButton } from '../create_button';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-export const Header = ({
-  indexPatternCreationOptions
-}) => (
-  <CreateButton options={indexPatternCreationOptions}>
-    <FormattedMessage
-      id="kbn.management.indexPatternList.header.createIndexPatternButtonLabel"
-      defaultMessage="Create index pattern"
-    />
-  </CreateButton>
-);
+export { queryGeohashBounds } from './query_geohash_bounds';

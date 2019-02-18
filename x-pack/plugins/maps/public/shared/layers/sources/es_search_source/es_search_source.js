@@ -21,18 +21,18 @@ export class ESSearchSource extends AbstractESSource {
   static title = 'Documents';
   static description = 'Geospatial data from a Kibana index pattern';
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (layerConfig) => {
       const layerSource = new ESSearchSource({
         id: uuid(),
         ...layerConfig
-      });
+      }, inspectorAdapters);
       onPreviewSource(layerSource);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
 
-  constructor(descriptor) {
+  constructor(descriptor, inspectorAdapters) {
     super({
       id: descriptor.id,
       type: ESSearchSource.type,
@@ -41,7 +41,7 @@ export class ESSearchSource extends AbstractESSource {
       limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
-    });
+    }, inspectorAdapters);
   }
 
   renderSourceSettingsEditor({ onChange }) {

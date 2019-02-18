@@ -114,6 +114,7 @@ export class FollowerIndicesList extends PureComponent {
                 {...routing.getRouterLinkProps('/follower_indices/add')}
                 fill
                 iconType="plusInCircle"
+                data-test-subj="ccrCreateFollowerIndexButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
@@ -197,6 +198,7 @@ export class FollowerIndicesList extends PureComponent {
             {...routing.getRouterLinkProps('/follower_indices/add')}
             fill
             iconType="plusInCircle"
+            data-test-subj="ccrFollowerIndexEmptyPromptCreateButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.addFollowerButtonLabel"
