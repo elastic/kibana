@@ -39,84 +39,22 @@ interface SearchSelectionProps {
 }
 
 interface SearchSelectionState {
-  selectedTab: TabProps;
+  selectedTabId: string;
 }
 
 interface TabProps {
   id: string;
   name: string;
-  savedObjectFinder: React.ReactNode;
 }
 
+const INDEX_PATTERNS_TAB_ID = 'indexPatterns';
+const SAVED_SEARCHES_TAB_ID = 'savedSearches';
+
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
-  private tabs: TabProps[] = [];
-  private fixedPageSize: number = 8;
-
-  constructor(props: SearchSelectionProps) {
-    super(props);
-
-    this.tabs = [
-      {
-        id: 'indexPatterns',
-        name: i18n.translate('kbn.visualize.newVisWizard.indexPatternTabLabel', {
-          defaultMessage: 'Index pattern',
-        }),
-        savedObjectFinder: (
-          <SavedObjectFinder
-            key="visSavedObjectFinder"
-            onChoose={this.props.onSearchSelected}
-            noItemsMessage={i18n.translate(
-              'kbn.visualize.newVisWizard.indexPatternTab.notFoundLabel',
-              { defaultMessage: 'No matching index patterns found.' }
-            )}
-            savedObjectType="index-pattern"
-            fixedPageSize={this.fixedPageSize}
-          />
-        ),
-      },
-      {
-        id: 'savedSearches',
-        name: i18n.translate('kbn.visualize.newVisWizard.savedSearchTabLabel', {
-          defaultMessage: 'Saved search',
-        }),
-        savedObjectFinder: (
-          <SavedObjectFinder
-            key="searchSavedObjectFinder"
-            onChoose={this.props.onSearchSelected}
-            noItemsMessage={i18n.translate(
-              'kbn.visualize.newVisWizard.savedSearchTab.notFoundLabel',
-              { defaultMessage: 'No matching saved searches found.' }
-            )}
-            savedObjectType="search"
-            fixedPageSize={this.fixedPageSize}
-          />
-        ),
-      },
-    ];
-
-    this.state = {
-      selectedTab: this.tabs[0],
-    };
-    this.onSelectedTabChanged = this.onSelectedTabChanged.bind(this);
-  }
-  public onSelectedTabChanged = (tab: TabProps) => {
-    this.setState({
-      selectedTab: tab,
-    });
+  public state = {
+    selectedTabId: INDEX_PATTERNS_TAB_ID,
   };
-
-  public renderTabs() {
-    return this.tabs.map(tab => (
-      <EuiTab
-        onClick={() => this.onSelectedTabChanged(tab)}
-        isSelected={tab.id === this.state.selectedTab.id}
-        key={tab.id}
-        data-test-subj={`${tab.id}Tab`}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  }
+  private fixedPageSize: number = 8;
 
   public render() {
     return (
@@ -140,9 +78,73 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
 
           <EuiSpacer size="m" />
 
-          {this.state.selectedTab.savedObjectFinder}
+          {this.renderTab()}
         </EuiModalBody>
       </React.Fragment>
+    );
+  }
+
+  private onSelectedTabChanged = (tab: TabProps) => {
+    this.setState({
+      selectedTabId: tab.id,
+    });
+  };
+
+  private renderTabs() {
+    const tabs = [
+      {
+        id: INDEX_PATTERNS_TAB_ID,
+        name: i18n.translate('kbn.visualize.newVisWizard.indexPatternTabLabel', {
+          defaultMessage: 'Index pattern',
+        }),
+      },
+      {
+        id: SAVED_SEARCHES_TAB_ID,
+        name: i18n.translate('kbn.visualize.newVisWizard.savedSearchTabLabel', {
+          defaultMessage: 'Saved search',
+        }),
+      },
+    ];
+    const { selectedTabId } = this.state;
+
+    return tabs.map(tab => (
+      <EuiTab
+        onClick={() => this.onSelectedTabChanged(tab)}
+        isSelected={tab.id === selectedTabId}
+        key={tab.id}
+        data-test-subj={`${tab.id}Tab`}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  }
+
+  private renderTab() {
+    if (this.state.selectedTabId === SAVED_SEARCHES_TAB_ID) {
+      return (
+        <SavedObjectFinder
+          key="searchSavedObjectFinder"
+          onChoose={this.props.onSearchSelected}
+          noItemsMessage={i18n.translate(
+            'kbn.visualize.newVisWizard.savedSearchTab.notFoundLabel',
+            { defaultMessage: 'No matching saved searches found.' }
+          )}
+          savedObjectType="search"
+          fixedPageSize={this.fixedPageSize}
+        />
+      );
+    }
+
+    return (
+      <SavedObjectFinder
+        key="visSavedObjectFinder"
+        onChoose={this.props.onSearchSelected}
+        noItemsMessage={i18n.translate('kbn.visualize.newVisWizard.indexPatternTab.notFoundLabel', {
+          defaultMessage: 'No matching index patterns found.',
+        })}
+        savedObjectType="index-pattern"
+        fixedPageSize={this.fixedPageSize}
+      />
     );
   }
 }
