@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withState } from 'recompose';
+import { pure } from 'recompose';
+import { ItemGrid as Component, Props as ComponentProps } from './item_grid';
 
-import { ColorManager as Component } from './color_manager';
-
-export const ColorManager = compose(withState('adding', 'setAdding', false))(Component);
+export const ItemGrid = pure<ComponentProps<any>>(Component);
