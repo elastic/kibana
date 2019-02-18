@@ -19,7 +19,8 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
+  const retry = getService('retry');
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
@@ -47,21 +48,27 @@ export default function ({ getPageObjects }) {
 
       it('should allow printing raw timestamp of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
-        const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('1442901600000');
+        retry.try(async () => {
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('1442901600000');
+        });
       });
 
       it('should allow printing raw value of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
-        const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('6');
+        await retry.try(async () => {
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('6');
+        });
       });
 
       it('should render html as plain text', async () => {
         const html = '<h1>hello world</h1>';
         await visualBuilder.enterMarkdown(html);
-        const markdownText = await visualBuilder.getMarkdownText();
-        expect(markdownText).to.be(html);
+        retry.try(async () => {
+          const markdownText = await visualBuilder.getMarkdownText();
+          expect(markdownText).to.be(html);
+        });
       });
 
       it('should render mustache list', async () => {
@@ -70,21 +77,26 @@ export default function ({ getPageObjects }) {
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
 
         await visualBuilder.enterMarkdown(list);
-        const markdownText = await visualBuilder.getMarkdownText();
-        expect(markdownText).to.be(expectedRenderer);
+        retry.try(async () => {
+          const markdownText = await visualBuilder.getMarkdownText();
+          expect(markdownText).to.be(expectedRenderer);
+        });
       });
 
       it('should render first table variable', async () => {
-        const variables = await visualBuilder.getMarkdownTableVariables();
-        const beforeClickText = await visualBuilder.getMarkdownText();
+        retry.try(async () => {
+          await visualBuilder.clearMarkdown();
+          const variables = await visualBuilder.getMarkdownTableVariables();
+          const beforeClickText = await visualBuilder.getMarkdownText();
 
-        expect(variables).not.to.be.empty();
-        expect(beforeClickText).to.be.empty();
+          expect(variables).not.to.be.empty();
+          expect(beforeClickText).to.be.empty();
 
-        await variables[0].selector.click();
+          await variables[0].selector.click();
 
-        const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('46');
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('46');
+        });
       });
     });
   });
