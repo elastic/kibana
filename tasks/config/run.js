@@ -211,8 +211,6 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,
-        '--',
-        '--server.maxPayloadBytes=1648576',
       ],
     },
 
@@ -224,8 +222,6 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 
