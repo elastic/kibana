@@ -33,7 +33,7 @@ export async function getTableData(req, panel) {
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
 
   const params = {
-    index: indexPatternString || indexPatternObject.title,
+    index: indexPatternString,
     ignore_throttled: !includeFrozen,
     body: buildRequestBody(req, panel, esQueryConfig, indexPatternObject)
   };
