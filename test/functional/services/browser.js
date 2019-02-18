@@ -17,8 +17,12 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { modifyUrl } from '../../../src/core/utils';
 import Keys from 'leadfoot/keys';
+
+import { LeadfootElementWrapper } from './lib/leadfoot_element_wrapper';
 
 export function BrowserProvider({ getService }) {
   const leadfoot = getService('__leadfoot__');
@@ -260,8 +264,12 @@ export function BrowserProvider({ getService }) {
      * @param  {string|function} function
      * @param  {...any[]} args
      */
-    async execute(...args) {
-      return await leadfoot.execute(...args);
+    async execute(fn, ...args) {
+      return await leadfoot.execute(fn, cloneDeep(args, arg => {
+        if (arg instanceof LeadfootElementWrapper) {
+          return arg._leadfootElement;
+        }
+      }));
     }
   }
 
