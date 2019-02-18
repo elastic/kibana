@@ -20,17 +20,23 @@
 import 'ui/doc_table';
 
 import { EmbeddableFactory } from 'ui/embeddable';
+import {
+  EmbeddableInstanceConfiguration,
+  OnEmbeddableStateChanged,
+} from 'ui/embeddable/embeddable_factory';
+import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable } from './search_embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
-  constructor($compile, $rootScope, searchLoader) {
+  constructor(
+    private $compile: ng.ICompileService,
+    private $rootScope: ng.IRootScopeService,
+    private searchLoader: SavedSearchLoader
+  ) {
     super({ name: 'search' });
-    this.$compile = $compile;
-    this.searchLoader = searchLoader;
-    this.$rootScope = $rootScope;
   }
 
-  getEditPath(panelId) {
+  public getEditPath(panelId: string) {
     return this.searchLoader.urlFor(panelId);
   }
 
@@ -42,19 +48,21 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
    * @param onEmbeddableStateChanged
    * @return {Promise.<Embeddable>}
    */
-  create(panelMetadata, onEmbeddableStateChanged) {
-    const searchId = panelMetadata.id;
-    const editUrl = this.getEditPath(searchId);
+  public create(
+    { id }: EmbeddableInstanceConfiguration,
+    onEmbeddableStateChanged: OnEmbeddableStateChanged
+  ) {
+    const editUrl = this.getEditPath(id);
 
-    return this.searchLoader.get(searchId)
-      .then(savedObject => {
-        return new SearchEmbeddable({
-          onEmbeddableStateChanged,
-          savedSearch: savedObject,
-          editUrl,
-          $rootScope: this.$rootScope,
-          $compile: this.$compile,
-        });
+    // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
+    return this.searchLoader.get(id).then(savedObject => {
+      return new SearchEmbeddable({
+        onEmbeddableStateChanged,
+        savedSearch: savedObject,
+        editUrl,
+        $rootScope: this.$rootScope,
+        $compile: this.$compile,
       });
+    });
   }
 }
