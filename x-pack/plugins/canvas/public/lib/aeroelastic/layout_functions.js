@@ -1205,7 +1205,7 @@ export const getCursor = (config, shape, draggedPrimaryShape) => {
 /**
  * Selectors directly from a state object
  */
-export const primaryUpdate = state => state.primaryUpdate;
+export const getPrimaryUpdate = state => state.primaryUpdate;
 
 export const getSelectedShapesPrev = scene =>
   scene.selectionState || {

@@ -56,7 +56,6 @@ import {
   getRestateShapesEvent,
   getRotationAnnotations,
   getRotationTooltipAnnotation,
-  getScene,
   getSelectedPrimaryShapeIds,
   getSelectedShapeObjects,
   getSelectedShapes,
@@ -65,16 +64,10 @@ import {
   getShapes,
   getSnappedShapes,
   getTransformIntents,
-  primaryUpdate,
   resizeAnnotationsFunction,
 } from './layout_functions';
-import { state } from './dag_start';
 
-/**
- * Scenegraph update based on events, gestures...
- */
-
-const scene = select(getScene)(state);
+import { primaryUpdate, scene } from './dag_start';
 
 export const shapes = select(getShapes)(scene);
 

@@ -5,8 +5,7 @@
  */
 
 import { select } from './select';
-import { state } from './dag_start';
-import { getScene } from './layout_functions';
+import { primaryUpdate, scene } from './dag_start';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
 // so it's OK that user agent strings are not reliable; in case it's spoofed, it'll just work with a slightly
@@ -19,15 +18,6 @@ const appleKeyboard = Boolean(
     window.navigator.userAgent &&
     window.navigator.userAgent.match('Macintosh|iPhone|iPad')
 );
-
-/**
- * Selectors directly from a state object
- *
- *    (we could turn gesture.js into a factory, with this state root - primaryUpdate - being passed...)
- */
-
-const scene = select(getScene)(state);
-const primaryUpdate = select(state => state.primaryUpdate)(state);
 
 const gestureStatePrev = select(
   scene =>
