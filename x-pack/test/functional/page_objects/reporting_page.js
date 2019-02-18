@@ -146,7 +146,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async clickGenerateReportButton() {
-      await retry.try(() => testSubjects.click('generateReportButton'));
+      await testSubjects.click('generateReportButton');
     }
 
     async checkForReportingToasts() {
