@@ -264,7 +264,7 @@ export function BrowserProvider({ getService }) {
      * @param  {...any[]} args
      */
     async execute(fn, ...args) {
-      return await leadfoot.execute(fn, ...cloneDeep(args, arg => {
+      return await leadfoot.execute(fn, cloneDeep(args, arg => {
         if (arg instanceof LeadfootElementWrapper) {
           return arg._leadfootElement;
         }
