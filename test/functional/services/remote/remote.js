@@ -17,44 +17,54 @@
  * under the License.
  */
 
-import { initWebDriver } from './webdriver';
+import { initLeadfootCommand } from './leadfoot_command';
+import { BrowserDriverApi } from './browser_driver_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
-  const log = getService('log');
   const config = getService('config');
-  const possibleBrowsers = ['chrome', 'firefox', 'ie'];
+  const log = getService('log');
+  const possibleBrowsers = ['chrome', 'firefox'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (!possibleBrowsers.includes(browserType)) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
   }
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({ log, browserType });
+  const browserDriverApi = await BrowserDriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
+  lifecycle.on('cleanup', async () => await browserDriverApi.stop());
+
+  await browserDriverApi.start();
+
+  const { command } = await initLeadfootCommand({ log, browserDriverApi: browserDriverApi });
 
   log.info('Remote initialized');
 
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver.manage().window().setRect({ width: 1600, height: 1000 });
+    await command.setWindowSize(1600, 1000);
   });
 
   const windowSizeStack = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await driver.manage().window().getRect());
-  });
-
-  lifecycle.on('beforeEachTest', async () => {
-    await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
+    windowSizeStack.unshift(await command.getWindowSize());
   });
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift();
-    await driver.manage().window().setRect({ width: width, height: height });
+    await command.setWindowSize(width, height);
   });
 
-  lifecycle.on('cleanup', async () => await driver.quit());
+  return new Proxy({}, {
+    get(obj, prop) {
+      if (prop === 'then' || prop === 'catch' || prop === 'finally') {
+        // prevent the remote from being treated like a promise by
+        // hiding it's promise-like properties
+        return undefined;
+      }
 
-  return { driver, By, Key, until, LegacyActionSequence };
+      return command[prop];
+    }
+  });
 }

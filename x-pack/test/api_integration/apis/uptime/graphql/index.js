@@ -8,6 +8,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const archive = 'uptime/full_heartbeat';
 
+  // FLAKY: https://github.com/elastic/kibana/pull/31368
   describe('graphql', () => {
     before('load heartbeat data', () => esArchiver.load(archive));
     after('unload heartbeat index', () => esArchiver.unload(archive));

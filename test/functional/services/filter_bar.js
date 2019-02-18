@@ -26,10 +26,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     hasFilter(key, value, enabled = true) {
       const filterActivationState = enabled ? 'enabled' : 'disabled';
       return testSubjects.exists(
-        `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`,
-        {
-          allowHidden: true
-        }
+        `filter & filter-key-${key} & filter-value-${value} & filter-${filterActivationState}`
       );
     }
 
