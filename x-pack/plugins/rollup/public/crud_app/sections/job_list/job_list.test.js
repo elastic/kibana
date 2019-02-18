@@ -25,22 +25,47 @@ jest.mock('../../services', () => {
   };
 });
 
+const defaultProps = {
+  history: { location: {} },
+  loadJobs: () => {},
+  refreshJobs: () => {},
+  openDetailPanel: () => {},
+  jobs: [],
+  isLoading: false
+};
+
+const registerTestSubjExists = component => testSubject => findTestSubject(component, testSubject).length;
+
+const initiateComponent = (props, store = rollupJobsStore) => {
+  const component = mountWithIntl(
+    <Provider store={store}>
+      <JobList
+        {...defaultProps}
+        {...props}
+      />
+    </Provider>
+  );
+  const testSubjectExists = registerTestSubjExists(component);
+
+  return { component, testSubjectExists };
+};
+
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
-    const component = mountWithIntl(
-      <Provider store={rollupJobsStore}>
-        <JobList
-          loadJobs={() => {}}
-          refreshJobs={() => {}}
-          openDetailPanel={() => {}}
-          jobs={[]}
-          isLoading={false}
-          history={{ location: {} }}
-        />
-      </Provider>
-    );
+    const { testSubjectExists } = initiateComponent();
 
-    const emptyPrompt = findTestSubject(component, 'jobListEmptyPrompt');
-    expect(emptyPrompt).toBeTruthy();
+    expect(testSubjectExists('jobListEmptyPrompt')).toBeTruthy();
+  });
+
+  describe('when the user does not have the permission to access', () =>  {
+    const { testSubjectExists } = initiateComponent({ jobLoadError: { status: 403 } });
+
+    it('should render a callout message', () => {
+      expect(testSubjectExists('jobListNoPermission')).toBeTruthy();
+    });
+
+    it('should display the page header', () => {
+      expect(testSubjectExists('jobListPageHeader')).toBeTruthy();
+    });
   });
 });
