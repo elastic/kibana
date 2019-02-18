@@ -91,8 +91,6 @@ export function getUiSettingDefaults() {
           'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: 'query:queryString:options',
-          luceneLanguage: luceneQueryLanguageLabel,
-          queryLanguage: queryLanguageSettingName,
         },
       }),
     },
