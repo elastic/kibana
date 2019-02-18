@@ -34,9 +34,9 @@ const defaultProps = {
   isLoading: false
 };
 
-const registerTestSubjExists = component => testSubject => findTestSubjectHelper(component, testSubject).length;
+const registerTestSubjExists = component => testSubject => Boolean(findTestSubjectHelper(component, testSubject).length);
 
-const initiateComponent = (props, store = rollupJobsStore) => {
+const mountComponent = (props, store = rollupJobsStore) => {
   const component = mountWithIntl(
     <Provider store={store}>
       <JobList
@@ -53,13 +53,25 @@ const initiateComponent = (props, store = rollupJobsStore) => {
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
-    const { testSubjectExists } = initiateComponent();
+    const { testSubjectExists } = mountComponent();
 
     expect(testSubjectExists('jobListEmptyPrompt')).toBeTruthy();
   });
 
+  it('should display a loading message when loading the jobs', () => {
+    const { testSubjectExists } = mountComponent({ isLoading: true });
+    expect(testSubjectExists('jobListLoading')).toBeTruthy();
+    expect(testSubjectExists('jobListTable')).toBeFalsy();
+  });
+
+  it('should display the <JobTable /> when there are jobs', () => {
+    const { component, testSubjectExists } = mountComponent({ jobs: [{ foo: 'bar' }] });
+    expect(testSubjectExists('jobListLoading')).toBeFalsy();
+    expect(component.find('JobTableUi').length).toBeTruthy();
+  });
+
   describe('when there is an API error', () => {
-    const { testSubjectExists, findTestSubject } = initiateComponent({
+    const { testSubjectExists, findTestSubject } = mountComponent({
       jobLoadError: {
         status: 400,
         data: { statusCode: 400, error: 'Houston we got a problem.' }
@@ -75,7 +87,7 @@ describe('<JobList />', () => {
   });
 
   describe('when the user does not have the permission to access', () =>  {
-    const { testSubjectExists } = initiateComponent({ jobLoadError: { status: 403 } });
+    const { testSubjectExists } = mountComponent({ jobLoadError: { status: 403 } });
 
     it('should render a callout message', () => {
       expect(testSubjectExists('jobListNoPermission')).toBeTruthy();
