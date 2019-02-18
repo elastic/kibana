@@ -19,6 +19,7 @@
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import cheerio from 'cheerio';
+import testSubjSelector from '@kbn/test-subj-selector';
 
 export class WebElementWrapper {
   constructor(webElement, webDriver, timeout, fixedHeaderHeight, log) {
@@ -419,9 +420,23 @@ export class WebElementWrapper {
    */
   async parseDomContent() {
     const htmlContent = await this.getProperty('innerHTML');
-    return cheerio.load(htmlContent, {
+    const $ = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true
     });
+
+    $.findTestSubjects = function testSubjects(selector) {
+      return this(testSubjSelector(selector));
+    };
+
+    $.fn.findTestSubjects = function testSubjects(selector) {
+      return this.find(testSubjSelector(selector));
+    };
+
+    $.findTestSubject = $.fn.findTestSubject = function testSubjects(selector) {
+      return this.findTestSubjects(selector).first();
+    };
+
+    return $;
   }
 }

@@ -28,7 +28,7 @@ export function AppsMenuProvider({ getService }) {
       await this._ensureMenuOpen();
       const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
       const $ = await appMenu.parseDomContent();
-      const links = $('[data-test-subj="appLink"]').toArray().map(link => {
+      const links = $.findTestSubjects('appLink').toArray().map(link => {
         return {
           text: $(link).text(),
           href: $(link).attr('href')
