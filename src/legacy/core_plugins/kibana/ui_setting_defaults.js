@@ -88,8 +88,7 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
           'Currently only applies when experimental query features are enabled in the query bar. ' +
-          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}. Is only ' +
-          'used when "{queryLanguage}" is set to {luceneLanguage}.',
+          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: 'query:queryString:options',
           luceneLanguage: luceneQueryLanguageLabel,
@@ -102,7 +101,7 @@ export function getUiSettingDefaults() {
       value: 'kuery',
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. Kuery is a new language built specifically for Kibana.',
+          'Query language used by the query bar. KQL is a new language built specifically for Kibana.',
       }),
       type: 'select',
       options: ['lucene', 'kuery'],
