@@ -30,6 +30,18 @@ export function getUiSettingDefaults() {
     return numeralLanguage.id;
   })];
 
+  const requestPreferenceOptionLabels = {
+    sessionId: i18n.translate('kbn.advancedSettings.courier.requestPreferenceSessionId', {
+      defaultMessage: 'Session ID',
+    }),
+    custom: i18n.translate('kbn.advancedSettings.courier.requestPreferenceCustom', {
+      defaultMessage: 'Custom',
+    }),
+    none: i18n.translate('kbn.advancedSettings.courier.requestPreferenceNone', {
+      defaultMessage: 'None',
+    }),
+  };
+
   // wrapped in provider so that a new instance is given to each app/test
   return {
     'buildNum': {
@@ -238,6 +250,14 @@ export function getUiSettingDefaults() {
       }),
       value: 'desc',
       options: ['desc', 'asc'],
+      optionLabels: {
+        desc: i18n.translate('kbn.advancedSettings.discover.sortOrderDesc', {
+          defaultMessage: 'Descending',
+        }),
+        asc: i18n.translate('kbn.advancedSettings.discover.sortOrderAsc', {
+          defaultMessage: 'Ascending',
+        }),
+      },
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
         defaultMessage:
@@ -300,19 +320,25 @@ export function getUiSettingDefaults() {
       }),
       value: 'sessionId',
       options: ['sessionId', 'custom', 'none'],
+      optionLabels: requestPreferenceOptionLabels,
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.courier.requestPreferenceText', {
         defaultMessage:
           `Allows you to set which shards handle your search requests.
           <ul>
-            <li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards.
+            <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
-            <li><strong>custom:</strong> allows you to define a your own preference.
+            <li><strong>{custom}:</strong> allows you to define a your own preference.
               Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
-            <li><strong>none:</strong> means do not set a preference.
+            <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
           </ul>`,
+        values: {
+          sessionId: requestPreferenceOptionLabels.sessionId,
+          custom: requestPreferenceOptionLabels.custom,
+          none: requestPreferenceOptionLabels.none,
+        },
       }),
       category: ['search'],
     },
