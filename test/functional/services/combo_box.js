@@ -80,16 +80,16 @@ export function ComboBoxProvider({ getService }) {
 
     async getComboBoxSelectedOptions(comboBoxSelector) {
       log.debug(`comboBox.getComboBoxSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
-      return await retry.try(async () => {
-        const comboBox = await testSubjects.find(comboBoxSelector);
-        const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-        if (selectedOptions.length === 0) {
-          return [];
-        }
-        return Promise.all(selectedOptions.map(async (optionElement) => {
-          return await optionElement.getVisibleText();
-        }));
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
+      if (selectedOptions.length === 0) {
+        return [];
+      }
+
+      const getOptionValuePromises = selectedOptions.map(async (optionElement) => {
+        return await optionElement.getVisibleText();
       });
+      return await Promise.all(getOptionValuePromises);
     }
 
     async clear(comboBoxSelector) {

@@ -68,7 +68,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
         await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
       }
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
-      await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
+      await input.pressKeys(browser.keys.BACKSPACE); // Delete all content
       await input.type(markdown);
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
