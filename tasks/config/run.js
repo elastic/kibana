@@ -39,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -57,6 +56,7 @@ module.exports = function (grunt) {
   }
 
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
