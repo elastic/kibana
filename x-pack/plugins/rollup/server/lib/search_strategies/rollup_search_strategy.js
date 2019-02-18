@@ -12,8 +12,10 @@ const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
 const batchRequestsSupport = false;
 
 const getRollupIndices = rollupData => Object.keys(rollupData);
+
+const isIndexPatternContainsWildcard = indexPattern => indexPattern.includes('*');
 const isIndexPatternValid = indexPattern => indexPattern &&
-  isString(indexPattern) && !indexPattern.includes('*');
+  isString(indexPattern) && !isIndexPatternContainsWildcard(indexPattern);
 
 export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {

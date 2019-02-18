@@ -24,9 +24,9 @@ const units = {
   m: 60,
   h: 3600,
   d: 86400,
-  w: (86400) * 7, // Hum... might be wrong
-  M: (86400) * 30, // this too... 29,30,31?
-  y: (86400) * 356, // Leap year?
+  w: 86400 * 7, // Hum... might be wrong
+  M: 86400 * 7 * 4, // this too... 29,30,31?
+  y: 86400 * 7 * 4 * 12, // Leap year?
 };
 
 export const parseInterval = (intervalString) => {

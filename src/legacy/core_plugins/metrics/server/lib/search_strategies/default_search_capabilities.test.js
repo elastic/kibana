@@ -20,8 +20,8 @@ import DefaultSearchCapabilities from './default_search_capabilities';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities;
-  let req;
   let batchRequestsSupport;
+  let req;
 
   beforeEach(() => {
     req = {};
@@ -53,5 +53,54 @@ describe('DefaultSearchCapabilities', () => {
 
   test('should return a valid time interval', () => {
     expect(defaultSearchCapabilities.getValidTimeInterval('20m')).toBe('20m');
+  });
+
+  test('should parse interval', () => {
+    expect(defaultSearchCapabilities.parseInterval('120s')).toEqual({
+      value: 120,
+      unit: 's'
+    });
+
+    expect(defaultSearchCapabilities.parseInterval('20m')).toEqual({
+      value: 20,
+      unit: 'm'
+    });
+
+    expect(defaultSearchCapabilities.parseInterval('1y')).toEqual({
+      value: 1,
+      unit: 'y'
+    });
+  });
+
+  test('should convert interval string into different unit', () => {
+    expect(defaultSearchCapabilities.convertIntervalToUnit('120s', 's')).toEqual({
+      value: 120,
+      unit: 's'
+    });
+
+    expect(defaultSearchCapabilities.convertIntervalToUnit('60m', 'h')).toEqual({
+      value: 1,
+      unit: 'h'
+    });
+
+    expect(defaultSearchCapabilities.convertIntervalToUnit('4w', 'M')).toEqual({
+      value: 1,
+      unit: 'M'
+    });
+
+    expect(defaultSearchCapabilities.convertIntervalToUnit('1y', 'w')).toEqual({
+      value: 48,
+      unit: 'w'
+    });
+
+    expect(defaultSearchCapabilities.convertIntervalToUnit('60s', 'm')).toEqual({
+      value: 1,
+      unit: 'm'
+    });
+
+    expect(defaultSearchCapabilities.convertIntervalToUnit('1s', 'ms')).toEqual({
+      value: 1000,
+      unit: 'ms'
+    });
   });
 });
