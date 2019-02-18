@@ -241,7 +241,7 @@ function VisEditor(
       defaultMessage: 'Documentation',
     }),
     run() {
-      $window.open(documentationLinks.kibana);
+      $window.open(documentationLinks.kibana.visualize);
     },
   }];
 

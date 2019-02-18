@@ -366,7 +366,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
-      navActions[TopNavIds.DOCUMENTATION] = () => $window.open(documentationLinks.kibana);
+      navActions[TopNavIds.DOCUMENTATION] = () => $window.open(documentationLinks.kibana.dashboard);
       navActions[TopNavIds.FULL_SCREEN] = () =>
         dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);

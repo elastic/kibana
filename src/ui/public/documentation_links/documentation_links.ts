@@ -85,7 +85,10 @@ export const documentationLinks = {
     loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
     introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
   },
-  kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+  kibana: {
+    visualize: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
+    dashboard: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
+  },
   query: {
     luceneQuerySyntax: `${ELASTIC_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
     queryDsl: `${ELASTIC_DOCS}query-dsl.html`,
