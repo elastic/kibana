@@ -917,7 +917,6 @@
     "kbn.advancedSettings.notifications.warningLifetimeTitle": "警告通知生存时间",
     "kbn.advancedSettings.pinFiltersText": "筛选是否默认有全局状态（被固定）",
     "kbn.advancedSettings.pinFiltersTitle": "默认固定筛选",
-    "kbn.advancedSettings.query.allowWildcardsText": "设置后，将允许 * 用作查询语句的第一个字符。当前仅在查询栏中启用实验性查询功能时才会应用。要在基本 lucene 查询中禁用前导通配符，请使用“{queryStringOptionsPattern}”",
     "kbn.advancedSettings.query.allowWildcardsTitle": "在查询中允许前导通配符",
     "kbn.advancedSettings.query.queryStringOptions.optionsLinkText": "选项",
     "kbn.advancedSettings.query.queryStringOptionsText": "lucene 查询字符串分析器的{optionsLink}",
