@@ -175,11 +175,6 @@ class TableVis extends Component {
     const { visData, model } = this.props;
     const header = this.renderHeader();
     let rows;
-    let reversedClass = '';
-
-    if (this.props.reversed) {
-      reversedClass = 'reversed';
-    }
 
     if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
@@ -204,7 +199,7 @@ class TableVis extends Component {
       );
     }
     return(
-      <div className={`tvbVis ${reversedClass}`} data-test-subj="tableView">
+      <div className="tvbVis" data-test-subj="tableView">
         <table className="table">
           <thead>
             {header}
@@ -231,7 +226,6 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  reversed: PropTypes.bool,
   getConfig: PropTypes.func
 };
 

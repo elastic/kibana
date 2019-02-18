@@ -56,7 +56,7 @@ export default function HeatmapVisType(Private, i18n) {
             show: false,
             rotate: 0,
             overwriteColor: false,
-            color: '#555',
+            color: 'black',
           }
         }]
       },
