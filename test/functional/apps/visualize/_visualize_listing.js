@@ -44,6 +44,7 @@ export default function ({ getPageObjects }) {
       it('delete all viz', async function () {
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '1');
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '2');
+        await PageObjects.visualize.gotoVisualizationLandingPage();
 
         let visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(visCount).to.equal(3);

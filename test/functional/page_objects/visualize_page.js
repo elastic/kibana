@@ -83,6 +83,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async createSimpleMarkdownViz(vizName) {
+      await this.gotoVisualizationLandingPage();
       await this.navigateToNewVisualization();
       await this.clickMarkdownWidget();
       await this.setMarkdownTxt(vizName);
