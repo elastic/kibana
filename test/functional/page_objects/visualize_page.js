@@ -83,11 +83,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async createSimpleMarkdownViz(vizName) {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickMarkdownWidget();
-      await PageObjects.visualize.setMarkdownTxt(vizName);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.saveVisualization(vizName);
+      await this.navigateToNewVisualization();
+      await this.clickMarkdownWidget();
+      await this.setMarkdownTxt(vizName);
+      await this.clickGo();
+      await this.saveVisualization(vizName);
     }
 
     async createVisualizationPromptButton() {
