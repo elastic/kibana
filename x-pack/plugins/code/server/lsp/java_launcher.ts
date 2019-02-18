@@ -137,7 +137,12 @@ export class JavaLauncher implements ILanguageServerLauncher {
       {
         detached: false,
         stdio: 'pipe',
-        env: { CLIENT_HOST: '127.0.0.1', CLIENT_PORT: port.toString(), JAVA_HOME: javaHomePath },
+        env: {
+          ...process.env,
+          CLIENT_HOST: '127.0.0.1',
+          CLIENT_PORT: port.toString(),
+          JAVA_HOME: javaHomePath,
+        },
       }
     );
     p.stdout.on('data', data => {
