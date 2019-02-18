@@ -63,15 +63,17 @@ import { Json, Selector } from '../..';
   })(null);
 
   (function selectTests(selector: Selector): void {
-    select((a: Json) => a); // one arg
-    select((a: Json, b: Json): Json => `${a} and ${b}`); // more args
-    select(() => 1); // zero arg
-    select((...args: Json[]) => args); // variadic
+    selector = select((a: Json) => a); // one arg
+    selector = select((a: Json, b: Json): Json => `${a} and ${b}`); // more args
+    selector = select(() => 1); // zero arg
+    selector = select((...args: Json[]) => args); // variadic
 
     // typings:expect-error
-    select(() => {}); // should yield a JSON value, but it returns void
+    selector = (a: Json) => a; // not a selector
     // typings:expect-error
-    select((x: Json) => ({ a: x, b: undefined })); // should return a Json
+    selector = select(() => {}); // should yield a JSON value, but it returns void
+    // typings:expect-error
+    selector = select((x: Json) => ({ a: x, b: undefined })); // should return a Json
 
     return; // selectTests
   })(select((a: Json) => a));
