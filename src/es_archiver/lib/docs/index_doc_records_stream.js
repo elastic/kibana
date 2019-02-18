@@ -45,7 +45,7 @@ export function createIndexDocRecordsStream(client, stats) {
   }
 
   return new Writable({
-    highWaterMark: 300,
+    highWaterMark: 1000,
     objectMode: true,
 
     async write(record, enc, callback) {

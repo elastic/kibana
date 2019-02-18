@@ -17,24 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-import {
-  EuiCodeBlock,
-} from '@elastic/eui';
-
-function RequestDetailsRequest(props) {
-  return (
-    <EuiCodeBlock
-      language="json"
-      paddingSize="s"
-      isCopyable
-      data-test-subj="inspectorRequestBody"
-    >
-      { JSON.stringify(props.request.json, null, 2) }
-    </EuiCodeBlock>
-  );
-}
-
-RequestDetailsRequest.shouldShow = (request) => !!request.json;
-
-export { RequestDetailsRequest };
+export { BrowserDriverApi } from './browser_driver_api';
