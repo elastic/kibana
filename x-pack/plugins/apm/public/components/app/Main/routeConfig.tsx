@@ -17,7 +17,7 @@ import { Home } from './Home';
 
 interface BreadcrumbArgs {
   match: {
-    params: StringMap;
+    params: StringMap<string>;
   };
 }
 
@@ -25,7 +25,7 @@ interface RouteParams {
   serviceName: string;
 }
 
-type BreadcrumbFunction = (args: BreadcrumbArgs) => string | null;
+type BreadcrumbFunction = (args: BreadcrumbArgs) => string | undefined;
 
 interface Route extends RouteProps {
   switchRoutes?: Route[];
