@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import SearchStrategiesRegister from './search_strategies/search_strategies_register';
+import { SearchStrategiesRegister } from './search_strategies/search_strategies_register';
 import { uniq } from 'lodash';
 
 export async function getFields(req) {

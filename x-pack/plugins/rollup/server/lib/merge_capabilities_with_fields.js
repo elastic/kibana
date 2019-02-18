@@ -6,7 +6,7 @@
 
 // Merge rollup capabilities information with field information
 
-const mergeCapabilitiesWithFields = (rollupIndexCapabilities, fieldsFromFieldCapsApi, previousFields = []) => {
+export const mergeCapabilitiesWithFields = (rollupIndexCapabilities, fieldsFromFieldCapsApi, previousFields = []) => {
   const rollupFields = [...previousFields];
   const rollupFieldNames = [];
 
@@ -65,5 +65,3 @@ const mergeCapabilitiesWithFields = (rollupIndexCapabilities, fieldsFromFieldCap
 
   return rollupFields;
 };
-
-export default mergeCapabilitiesWithFields;

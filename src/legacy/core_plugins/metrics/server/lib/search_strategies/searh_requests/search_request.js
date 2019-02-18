@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import AbstractSearchRequest from './abstract_request';
+import { AbstractSearchRequest } from './abstract_request';
 
-import MultiSearchRequest from './multi_search_request';
-import SingleSearchRequest from './single_search_request';
+import { MultiSearchRequest } from './multi_search_request';
+import { SingleSearchRequest } from './single_search_request';
 
-export default class SearchRequest extends AbstractSearchRequest {
+export class SearchRequest extends AbstractSearchRequest {
   getSearchRequestType(options) {
     const isMultiSearch = Array.isArray(options.body);
     const SearchRequest = isMultiSearch ? MultiSearchRequest : SingleSearchRequest;

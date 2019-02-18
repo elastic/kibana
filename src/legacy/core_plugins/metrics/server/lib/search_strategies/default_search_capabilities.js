@@ -22,7 +22,7 @@ const getTimezoneFromRequest = request => {
   return request.payload.timerange.timezone;
 };
 
-export default class DefaultSearchCapabilities {
+export class DefaultSearchCapabilities {
   constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
     this.request = request;
     this.batchRequestsSupport = batchRequestsSupport;

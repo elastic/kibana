@@ -5,7 +5,7 @@
 */
 const SEARCH_METHOD = 'rollup.search';
 
-export default (AbstractSearchRequest) =>
+export const getRollupSearchRequest = (AbstractSearchRequest) =>
   (class RollupSearchRequest extends AbstractSearchRequest {
     async search(options) {
       const bodies = Array.isArray(options.body) ? options.body : [options.body];

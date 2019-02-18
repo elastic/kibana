@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export default class AbstractSearchRequest {
+export class AbstractSearchRequest {
   constructor(req, callWithRequest, indexPattern) {
     this.req = req;
     this.callWithRequest = callWithRequest;

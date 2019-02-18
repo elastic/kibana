@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import AbstractSearchRequest from './abstract_request';
+import { AbstractSearchRequest } from './abstract_request';
 
 const SEARCH_METHOD = 'msearch';
 
-export default class MultiSearchRequest extends AbstractSearchRequest {
+export class MultiSearchRequest extends AbstractSearchRequest {
   async search(options) {
     const includeFrozen = await this.req.getUiSettingsService().get('search:includeFrozen');
     const { responses } = await this.callWithRequest(this.req, SEARCH_METHOD, {

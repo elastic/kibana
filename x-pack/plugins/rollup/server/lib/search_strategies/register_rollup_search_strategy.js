@@ -3,11 +3,11 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-import getRollupSearchStrategy from './rollup_search_strategy';
-import getRollupSearchRequest from './rollup_search_request';
-import getRollupSearchCapabilities from './rollup_search_capabilities';
+import { getRollupSearchStrategy } from './rollup_search_strategy';
+import { getRollupSearchRequest } from './rollup_search_request';
+import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
-export default (kbnServer, server) => kbnServer.afterPluginsInit(() => {
+export const registerRollupSearchStrategy = (kbnServer, server) => kbnServer.afterPluginsInit(() => {
   if (!server.plugins.metrics) {
     return;
   }

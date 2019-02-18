@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import MultiSearchRequest from './multi_search_request';
+import { MultiSearchRequest } from './multi_search_request';
 
 describe('MultiSearchRequest', () => {
   let searchRequest;

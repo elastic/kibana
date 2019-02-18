@@ -17,7 +17,7 @@
  * under the License.
  */
 import handleAnnotationResponse from './handle_annotation_response';
-import getRequestParams from './annorations/get_request_params';
+import { getAnnotationRequestParams } from './annorations/get_request_params';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -27,12 +27,12 @@ function validAnnotation(annotation) {
     annotation.template;
 }
 
-export default async (req, panel, esQueryConfig, searchStrategy, capabilities) => {
+export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
   const indexPattern = panel.index_pattern;
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const annotations = panel.annotations.filter(validAnnotation);
 
-  const bodiesPromises = annotations.map(annotation => getRequestParams(req, panel, annotation, esQueryConfig, capabilities));
+  const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));
   const body = (await Promise.all(bodiesPromises))
     .reduce((acc, items) => acc.concat(items), []);
 
@@ -51,4 +51,4 @@ export default async (req, panel, esQueryConfig, searchStrategy, capabilities) =
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
   }
-};
+}

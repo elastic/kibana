@@ -7,7 +7,7 @@ import { get } from 'lodash';
 
 const leastCommonInterval = (num, base) => Math.max(Math.ceil(Math.floor(num) / base) * base, base);
 
-export default (DefaultSearchCapabilities) =>
+export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
     constructor(req, batchRequestsSupport, fieldsCapabilities, rollupIndex) {
       super(req, batchRequestsSupport, fieldsCapabilities);

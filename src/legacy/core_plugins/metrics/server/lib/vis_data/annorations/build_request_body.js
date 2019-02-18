@@ -19,7 +19,20 @@
 import buildProcessorFunction from '../build_processor_function';
 import processors from '../request_processors/annotations';
 
-export default function buildAnnotationRequest(...args) {
+/**
+ * Builds annotation request body
+ *
+ * @param {...args}: [
+ *   req: {Object} - a request object,
+ *   panel: {Object} - a panel object,
+ *   annotation: {Object} - an annotation object,
+ *   esQueryConfig: {Object} - es query config object,
+ *   indexPatternObject: {Object} - an index pattern object,
+ *   capabilities: {Object} - a search capabilities object
+ * ]
+ * @returns {Object} doc - processed body
+ */
+export function buildAnnotationRequest(...args) {
   const processor = buildProcessorFunction(processors, ...args);
   const doc = processor({});
   return doc;

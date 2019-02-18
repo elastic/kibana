@@ -77,7 +77,7 @@ const body = JSON.parse(`
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import buildRequestBody from '../build_request_body';
+import { buildRequestBody } from '../build_request_body';
 
 describe('buildRequestBody(req)', () => {
   it('returns a valid body', () => {

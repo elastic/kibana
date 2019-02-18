@@ -3,7 +3,7 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-import getRollupSearchStrategy from './rollup_search_strategy';
+import { getRollupSearchStrategy } from './rollup_search_strategy';
 
 describe('Rollup Search Strategy', () => {
   let RollupSearchStrategy;

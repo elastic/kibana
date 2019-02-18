@@ -10,7 +10,7 @@ import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import indexBy from 'lodash/collection/indexBy';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
-import mergeCapabilitiesWithFields from '../../lib/merge_capabilities_with_fields';
+import { mergeCapabilitiesWithFields } from '../../lib/merge_capabilities_with_fields';
 import querystring from 'querystring';
 
 /**

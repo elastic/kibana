@@ -16,6 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import SearchStrategiesRegister from './search_strategies_register';
 
-export default SearchStrategiesRegister;
+export { SearchStrategiesRegister } from './search_strategies_register';

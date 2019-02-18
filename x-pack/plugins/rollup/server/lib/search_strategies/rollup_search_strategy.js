@@ -5,7 +5,7 @@
 */
 import { indexBy, isString } from 'lodash';
 import { callWithRequestFactory } from '../call_with_request_factory';
-import mergeCapabilitiesWithFields from '../merge_capabilities_with_fields';
+import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
 import { getCapabilitiesForRollupIndices } from '../map_capabilities';
 
 const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
@@ -17,7 +17,7 @@ const isIndexPatternContainsWildcard = indexPattern => indexPattern.includes('*'
 const isIndexPatternValid = indexPattern => indexPattern &&
   isString(indexPattern) && !isIndexPatternContainsWildcard(indexPattern);
 
-export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
+export const getRollupSearchStrategy = (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {
     name = 'rollup';
 

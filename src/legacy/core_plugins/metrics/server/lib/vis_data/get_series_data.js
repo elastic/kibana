@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import getRequestParams from './series/get_request_params';
+import { getSeriesRequestParams } from './series/get_request_params';
 import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
-import getAnnotations from './get_annotations';
-import SearchStrategiesRegister from '../search_strategies/search_strategies_register';
+import { getAnnotations } from './get_annotations';
+import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 
 export async function getSeriesData(req, panel) {
@@ -29,7 +29,7 @@ export async function getSeriesData(req, panel) {
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
 
-  const bodiesPromises = panel.series.map(series => getRequestParams(req, panel, series, esQueryConfig, capabilities));
+  const bodiesPromises = panel.series.map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
   const body = (await Promise.all(bodiesPromises))
     .reduce((acc, items) => acc.concat(items), []);
 

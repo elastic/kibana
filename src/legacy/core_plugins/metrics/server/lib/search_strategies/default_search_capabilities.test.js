@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import DefaultSearchCapabilities from './default_search_capabilities';
+import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities;

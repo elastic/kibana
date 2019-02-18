@@ -20,7 +20,7 @@
 import dateHistogram from '../date_histogram';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import DefaultSearchCapabilities from '../../../../search_strategies/default_search_capabilities';
+import { DefaultSearchCapabilities } from '../../../../search_strategies/default_search_capabilities';
 
 describe('dateHistogram(req, panel, series)', () => {
 

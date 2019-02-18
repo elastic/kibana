@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './build_request_body';
-import getEsShardTimeout from '../helpers/get_es_shard_timeout';
+import { buildAnnotationRequest } from './build_request_body';
+import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
-export default async (req, panel, annotation, esQueryConfig, capabilities) => {
+export async function getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities) {
   const bodies = [];
   const esShardTimeout = getEsShardTimeout(req);
   const indexPattern = annotation.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPattern);
-  const request = buildRequestBody(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities);
+  const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
@@ -41,4 +41,4 @@ export default async (req, panel, annotation, esQueryConfig, capabilities) => {
   bodies.push(request);
 
   return bodies;
-};
+}

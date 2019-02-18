@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import AbstractSearchStrategy from './abstract_search_strategy';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 
 class SearchRequest {
   constructor(req, callWithRequest, indexPattern) {

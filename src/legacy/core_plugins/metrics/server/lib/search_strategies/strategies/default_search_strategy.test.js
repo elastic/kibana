@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import DefaultSearchStrategy from './default_search_strategy';
+import { DefaultSearchStrategy } from './default_search_strategy';
 
 describe('DefaultSearchStrategy', () => {
   let defaultSearchStrategy;

@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import AbstractSearchStrategy from './strategies/abstract_search_strategy';
-import AbstractSearchRequest from './searh_requests/abstract_request';
-import DefaultSearchStrategy from './strategies/default_search_strategy';
-import DefaultSearchCapabilities from './default_search_capabilities';
+import { AbstractSearchStrategy } from './strategies/abstract_search_strategy';
+import { AbstractSearchRequest } from './searh_requests/abstract_request';
+import { DefaultSearchStrategy } from './strategies/default_search_strategy';
+import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 const strategies = [];
 
@@ -30,7 +30,7 @@ const addStrategy = searchStrategy => {
   return strategies;
 };
 
-export default class SearchStrategiesRegister {
+export class SearchStrategiesRegister {
   static init(server) {
     server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
     server.expose('AbstractSearchRequest', AbstractSearchRequest);
