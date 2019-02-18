@@ -148,6 +148,7 @@ export class JobListUi extends Component {
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="jobListError"
           title={title}
           color="danger"
           iconType="alert"
