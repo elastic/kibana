@@ -17,6 +17,7 @@
  * under the License.
  */
 
+
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
@@ -59,6 +60,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async enterMarkdown(markdown) {
       const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await this.clearMarkdown();
+      await input.type(markdown);
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    async clearMarkdown() {
+      const input = await find.byCssSelector('.ace_content');
+      // click for switching context(fix for "should render first table variable" test)
+      // see _tsvb_markdown.js
+      await input.click();
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
@@ -69,23 +80,138 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       }
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
-      await input.type(markdown);
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
-
     async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
-      return await el.getVisibleText();
+      const text = await el.getVisibleText();
+      return text;
     }
 
-    async clickMarkdownData() {
-      await testSubjects.click('markdownDataBtn');
+    /**
+     *
+     * getting all markdown variables list which located on `table` section
+     *
+     * **Note**: if `table` not have variables, use `getMarkdownTableNoVariables` method instead
+     * @see {getMarkdownTableNoVariables}
+     * @returns {Promise<Array<{key:string, value:string}>>}
+     * @memberof VisualBuilderPage
+     */
+    async getMarkdownTableVariables() {
+      const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
+      const variablesSelector = 'tbody tr';
+      const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
+      if (!exists) {
+        log.debug('variable list is empty');
+        return [];
+      }
+      const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
+
+      const variablesKeyValueSelectorMap = Promise.all(variables.map(async variable => {
+        const subVars = await variable.findAllByCssSelector('td');
+        const selector = subVars[0];
+        const key = await selector.getVisibleText();
+        const value = await subVars[1].getVisibleText();
+        return { key, value, selector };
+      }));
+      log.debug(`markdown variables table is: ${variablesKeyValueSelectorMap}`);
+      return variablesKeyValueSelectorMap;
+    }
+
+    /**
+     * return variable table message, if `table` is empty it will be fail
+     *
+     * **Note:** if `table` have variables, use `getMarkdownTableVariables` method instead
+     * @see {@link VisualBuilderPage#getMarkdownTableVariables}
+     * @returns
+     * @memberof VisualBuilderPage
+     */
+    async getMarkdownTableNoVariables() {
+      return await testSubjects.getVisibleText('tvbMarkdownEditor__noVariables');
+    }
+
+    /**
+     * get all sub-tabs count for `time series`, `metric`, `top n`, `gauge`, `markdown` or `table` tab.
+     *
+     * @returns {Promise<number>}
+     * @memberof VisualBuilderPage
+     */
+    async getSubTabs() {
+      return await find.allByCssSelector('[data-test-subj$="-subtab"]');
+    }
+
+    /**
+     * switch markdown sub-tab for visualization
+     *
+     * @param {'data' | 'options'| 'markdown'} subTab
+     * @memberof VisualBuilderPage
+     */
+    async markdownSwitchSubTab(subTab) {
+      const element = await testSubjects.find(`${subTab}-subtab`);
+      await element.click();
+    }
+
+    /**
+     *
+     * getting all markdown variables list which located on `table` section
+     *
+     * **Note**: if `table` not have variables, return `No variables available for the selected data metrics.`
+     * @returns {Promise<string[] | string>}
+     * @memberof VisualBuilderPage
+     */
+    async getMarkdownTableVariables() {
+      const noVariablesSelector = '.euiTitle.euiTitle--xxsmall.tvbMarkdownEditor__noVariables';
+      const variablesListSelector = 'div.tvbMarkdownEditor__variables table > tbody';
+
+      const noVariables = await find.descendantExistsByCssSelector(noVariablesSelector);
+
+      if (!noVariables) {
+        const text = await (await find.byCssSelector(noVariablesSelector)).getVisibleText();
+        log.debug(`markdown table variable is: ${text}`);
+        return text;
+      }
+      const variables = await find.allByCssSelector(`${variablesListSelector} td`);
+      const variablesText = Promise.all(variables.map(variable => variable.getVisibleText()));
+      log.debug(`markdown table variables is: ${variablesText}`);
+      return variablesText;
+    }
+
+    /**
+     * get all sub-tabs count for `time series`, `metric`, `top n`, `gauge`, `markdown` or `table` tab.
+     *
+     * @returns {Promise<number>}
+     * @memberof VisualBuilderPage
+     */
+    async getSubTabsCount() {
+      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
+      const tabsSelector = 'button[role="tab"]';
+      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
+
+      return elements.length;
+    }
+
+    /**
+     * switch sub-tab for visualization
+     *
+     * @param {'Data' | 'Panel options'| 'Annotations' | 'Markdown' | 'Columns'} subTab
+     * @memberof VisualBuilderPage
+     */
+    async switchSubTab(subTab) {
+      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
+      const tabsSelector = `button[role="tab"] span`;
+
+      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
+
+      elements.forEach(tab => {
+        if (tab.getVisibleText() === subTab) {
+          tab.click();
+        }
+      });
     }
 
     async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
-      await PageObjects.common.sleep(300);
+      await PageObjects.common.sleep(500);
     }
 
     async clearOffsetSeries() {
@@ -175,7 +301,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-
     async selectGroupByField(fieldName) {
       await comboBox.set('groupByField', fieldName);
     }
@@ -191,17 +316,20 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const tableView = await testSubjects.find('tableView');
       return await tableView.getVisibleText();
     }
+
     async clickMetricPanelOptions() {
       const button = await testSubjects.find('metricEditorPanelOptionsBtn');
       await button.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
     async setIndexPatternValue(value) {
       const el = await testSubjects.find('metricsIndexPatternInput');
       await el.clearValue();
       await el.type(value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
     async selectIndexPatternTimeField(timeField) {
       const el = await testSubjects.find('comboBoxSearchInput');
       await el.clearValue();
