@@ -13,9 +13,9 @@ cd "x-pack";
 yarn gulp prepare;
 cd -;
 
-# cache the chromedriver bin
-mkdir -p ".chromedriver/master"
-cp node_modules/chromedriver/bin/chromedriver .chromedriver/master/
+# # cache the chromedriver bin
+# mkdir -p ".chromedriver/master"
+# cp node_modules/chromedriver/bin/chromedriver .chromedriver/master/
 
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
