@@ -27,12 +27,13 @@ import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 export async function getTableData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
-  const indexPatternString = panel.index_pattern;
 
   const esQueryConfig = await getEsQueryConfig(req);
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const indexPattern = panel.index_pattern;
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+
   const params = {
-    index: indexPatternString,
+    index: indexPatternString || indexPatternObject.title,
     ignore_throttled: !includeFrozen,
     body: buildRequestBody(req, panel, esQueryConfig, indexPatternObject)
   };
