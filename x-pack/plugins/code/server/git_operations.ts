@@ -367,15 +367,7 @@ export class GitOperations {
         const child = entry2Tree(e);
         fileTree.children.push(child);
         if (e.isDirectory()) {
-          const childChildrenCount = (await this.walkTree(
-            { ...child },
-            await e.getTree(),
-            [],
-            skip,
-            limit,
-            childrenDepth,
-            flatten
-          )).childrenCount;
+          const childChildrenCount = (await e.getTree()).entryCount();
           if ((childChildrenCount === 1 && flatten) || childrenDepth > 1) {
             await this.walkTree(
               child,
