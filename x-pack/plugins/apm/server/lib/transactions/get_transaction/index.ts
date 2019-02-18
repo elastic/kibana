@@ -12,6 +12,7 @@ import {
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
 export type TransactionAPIResponse = Transaction | undefined;
@@ -32,15 +33,7 @@ export async function getTransaction(
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [TRANSACTION_ID]: transactionId } },
     { term: { [TRACE_ID]: traceId } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { range: rangeFilter(start, end) }
   ];
 
   if (esFilterQuery) {

@@ -9,12 +9,13 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import { fontFamilyCode, px, units } from '../../../style/variables';
+import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
   color: ${theme.euiColorMediumShade};
   padding: ${px(units.half)};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 const LibraryFrameFileDetail = styled.span`
   color: ${theme.euiColorDarkShade};

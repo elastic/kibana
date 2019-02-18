@@ -24,11 +24,7 @@ export function createGenerateCsv(logger) {
     settings
   }) {
     const escapeValue = createEscapeValue(settings.quoteValues);
-    const flattenHit = createFlattenHit(fields, metaFields, conflictedTypesFields);
-    const formatCsvValues = createFormatCsvValues(escapeValue, settings.separator, fields, formatsMap);
-
     const builder = new MaxSizeStringBuilder(settings.maxSizeBytes);
-
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
     if (!builder.tryAppend(header)) {
       return {
@@ -40,6 +36,8 @@ export function createGenerateCsv(logger) {
     const iterator = hitIterator(settings.scroll, callEndpoint, searchRequest, cancellationToken);
     let maxSizeReached = false;
 
+    const flattenHit = createFlattenHit(fields, metaFields, conflictedTypesFields);
+    const formatCsvValues = createFormatCsvValues(escapeValue, settings.separator, fields, formatsMap);
     try {
       while (true) {
         const { done, value: hit } = await iterator.next();

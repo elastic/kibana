@@ -66,7 +66,6 @@ function Visualization(props) {
     return (
       React.createElement(component, {
         dateFormat: props.dateFormat,
-        reversed: props.reversed,
         backgroundColor: props.backgroundColor,
         model: props.model,
         onBrush: props.onBrush,
@@ -89,7 +88,6 @@ Visualization.propTypes = {
   onChange: PropTypes.func,
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
