@@ -15,7 +15,6 @@ import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
-import { SocketService } from '../socket_service';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
@@ -31,8 +30,7 @@ export class DeleteWorker extends AbstractWorker {
     protected readonly serverOptions: ServerOptions,
     private readonly cancellationService: CancellationSerivce,
     private readonly lspService: LspService,
-    private readonly repoServiceFactory: RepositoryServiceFactory,
-    private readonly socketService: SocketService
+    private readonly repoServiceFactory: RepositoryServiceFactory
   ) {
     super(queue, log);
     this.objectClient = new RepositoryObjectClient(this.client);
@@ -41,18 +39,15 @@ export class DeleteWorker extends AbstractWorker {
   public async executeJob(job: Job) {
     const { uri } = job.payload;
 
-    // 1. Notify repo delete start through websocket.
-    this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.INIT);
-
-    // 2. Cancel running workers
+    // 1. Cancel running workers
     // TODO: Add support for clone/update worker.
     this.cancellationService.cancelIndexJob(uri);
 
-    // 3. Delete repository on local fs.
+    // 2. Delete repository on local fs.
     const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
-    // 4. Delete ES indices and aliases
+    // 3. Delete ES indices and aliases
     const deleteSymbolESIndexPromise = this.deletePromiseWrapper(
       this.client.indices.delete({ index: `${SymbolIndexName(uri)}*` }),
       'symbol ES index',
@@ -79,10 +74,7 @@ export class DeleteWorker extends AbstractWorker {
         deleteWorkspacePromise,
       ]);
 
-      // 5. Notify repo delete end through websocket.
-      this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.COMPLETED);
-
-      // 6. Delete the document index and alias where the repository document and all status reside,
+      // 4. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are
       // fully removed.
       await this.deletePromiseWrapper(
@@ -98,8 +90,6 @@ export class DeleteWorker extends AbstractWorker {
     } catch (error) {
       this.log.error(`Delete repository ${uri} error.`);
       this.log.error(error);
-      // Notify repo delete failed through websocket.
-      this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.ERROR);
       return {
         uri,
         res: false,

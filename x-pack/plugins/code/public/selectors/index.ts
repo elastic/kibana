@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FileTree } from '../../model';
+import { FileTree, RepositoryUri } from '../../model';
 import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.file.tree;
@@ -35,8 +35,8 @@ export const repoUriSelector = (state: RootState) => {
   return `${resource}/${org}/${repo}`;
 };
 
-export const statusSelector = (state: RootState) => {
-  return state.status.status[repoUriSelector(state)];
+export const statusSelector = (state: RootState, repoUri: RepositoryUri) => {
+  return state.status.status[repoUri];
 };
 
 export const treeCommitsSelector = (state: RootState) => {

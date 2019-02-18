@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import { Lifecycle, Request, ResponseToolkit, Server, ServerRoute } from 'hapi';
-import { Handshake, Socket } from 'socket.io';
 
 export interface SecuredRoute extends ServerRoute {
   requireRoles?: string[];
@@ -80,32 +79,4 @@ export class SecureRoute {
 export function enableSecurity(server: Server) {
   const secureRoute = new SecureRoute(server);
   secureRoute.install();
-}
-
-function getSocketRequest(server: Server, { headers }: Handshake) {
-  const url = `/api/code/ping`;
-
-  return server
-    .inject({
-      method: 'POST',
-      url,
-      headers,
-    })
-    .then(res => {
-      if (res.statusCode !== 200) {
-        throw Boom.unauthorized('Failed to authenticate socket connection');
-      }
-      return res.request;
-    });
-}
-
-export async function getModifiedSocketRequest(server: Server, socket: Socket) {
-  try {
-    return await getSocketRequest(server, socket.handshake);
-  } catch (err) {
-    // on errors, notify the client and close the connection
-    socket.emit('connectionFailed', { reason: err.message || 'Socket connection failed' });
-    socket.disconnect(true);
-    return false;
-  }
 }

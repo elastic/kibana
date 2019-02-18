@@ -25,6 +25,7 @@ import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
   currentTreeSelector,
   hasMoreCommitsSelector,
+  repoUriSelector,
   statusSelector,
   treeCommitsSelector,
 } from '../../selectors';
@@ -374,7 +375,7 @@ const mapStateToProps = (state: RootState) => ({
   commits: treeCommitsSelector(state),
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
-  repoStatus: statusSelector(state),
+  repoStatus: statusSelector(state, repoUriSelector(state)),
   repoScope: state.search.searchOptions.repoScope.map(r => r.uri),
 });
 

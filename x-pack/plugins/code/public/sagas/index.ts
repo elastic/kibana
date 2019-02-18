@@ -17,7 +17,13 @@ import {
 import { watchFetchBranchesAndCommits, watchFetchRepoTree, watchRepoRouteChange } from './file';
 import { watchInstallLanguageServer, watchLoadLanguageServers } from './language_server';
 import { watchLoadConfigs, watchSwitchProjectLanguageServer } from './project_config';
-import { watchLoadRepoListStatus, watchLoadRepoStatus } from './project_status';
+import {
+  watchLoadRepoListStatus,
+  watchLoadRepoStatus,
+  watchRepoCloneStatusPolling,
+  watchRepoDeleteStatusPolling,
+  watchRepoIndexStatusPolling,
+} from './project_status';
 import {
   watchAdminRouteChange,
   watchDeleteRepo,
@@ -68,4 +74,7 @@ export function* rootSaga() {
   yield fork(watchLoadConfigs);
   yield fork(watchLoadRepoListStatus);
   yield fork(watchLoadRepoStatus);
+  yield fork(watchRepoDeleteStatusPolling);
+  yield fork(watchRepoIndexStatusPolling);
+  yield fork(watchRepoCloneStatusPolling);
 }

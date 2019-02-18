@@ -11,14 +11,13 @@ import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
-import { Repository, WorkerReservedProgress } from '../../model';
+import { Repository } from '../../model';
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { CloneWorker } from '../queue';
 import { IndexWorker } from '../queue';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
-import { SocketService } from '../socket_service';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
@@ -70,6 +69,7 @@ function cleanWorkspace() {
     rimraf(serverOptions.workspacePath, resolve);
   });
 }
+
 describe('clone_worker_tests', () => {
   // @ts-ignore
   before(async () => {
@@ -116,8 +116,7 @@ describe('clone_worker_tests', () => {
       {} as EsClient,
       serverOptions,
       {} as IndexWorker,
-      (repoServiceFactory as any) as RepositoryServiceFactory,
-      {} as SocketService
+      (repoServiceFactory as any) as RepositoryServiceFactory
     );
 
     await cloneWorker.executeJob({
@@ -132,13 +131,6 @@ describe('clone_worker_tests', () => {
   });
 
   it('On clone job completed.', async () => {
-    // Setup SocketService
-    const broadcastCloneProgressSpy = sinon.spy();
-    const socketService = {
-      broadcastCloneProgress: emptyAsyncFunc,
-    };
-    socketService.broadcastCloneProgress = broadcastCloneProgressSpy;
-
     // Setup IndexWorker
     const enqueueJobSpy = sinon.spy();
     const indexWorker = {
@@ -159,8 +151,7 @@ describe('clone_worker_tests', () => {
       esClient as EsClient,
       serverOptions,
       (indexWorker as any) as IndexWorker,
-      {} as RepositoryServiceFactory,
-      (socketService as any) as SocketService
+      {} as RepositoryServiceFactory
     );
 
     await cloneWorker.onJobCompleted(
@@ -178,11 +169,6 @@ describe('clone_worker_tests', () => {
       }
     );
 
-    assert.ok(broadcastCloneProgressSpy.calledOnce);
-    assert.strictEqual(
-      broadcastCloneProgressSpy.getCall(0).args[1],
-      WorkerReservedProgress.COMPLETED
-    );
     assert.ok(enqueueJobSpy.calledOnce);
     // EsClient update got called twice. One for updating default branch and revision
     // of a repository. The other for update git clone status.
@@ -203,8 +189,7 @@ describe('clone_worker_tests', () => {
       (esClient as any) as EsClient,
       serverOptions,
       {} as IndexWorker,
-      {} as RepositoryServiceFactory,
-      {} as SocketService
+      {} as RepositoryServiceFactory
     );
 
     await cloneWorker.onJobEnqueued({

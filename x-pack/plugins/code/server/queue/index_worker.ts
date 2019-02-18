@@ -17,7 +17,6 @@ import { IndexerFactory, IndexProgress } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
-import { SocketService } from '../socket_service';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -32,8 +31,7 @@ export class IndexWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly indexerFactories: IndexerFactory[],
-    private readonly cancellationService: CancellationSerivce,
-    private readonly socketService: SocketService
+    private readonly cancellationService: CancellationSerivce
   ) {
     super(queue, log);
 
@@ -43,9 +41,6 @@ export class IndexWorker extends AbstractWorker {
   public async executeJob(job: Job) {
     const { payload, cancellationToken } = job;
     const { uri, revision } = payload;
-
-    this.socketService.broadcastIndexProgress(uri, WorkerReservedProgress.INIT);
-
     const indexerNumber = this.indexerFactories.length;
 
     // Binding the index cancellation logic
@@ -64,9 +59,6 @@ export class IndexWorker extends AbstractWorker {
       }
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);
-
-    this.socketService.broadcastIndexProgress(uri, WorkerReservedProgress.COMPLETED);
-
     const res: IndexWorkerResult = {
       uri,
       revision,
@@ -114,11 +106,6 @@ export class IndexWorker extends AbstractWorker {
         timestamp: new Date(),
         revision,
       };
-
-      const globalProgress = (index * 100 + progress.percentage) / total;
-
-      this.socketService.broadcastIndexProgress(repoUri, globalProgress);
-
       return await this.objectClient.setRepositoryLspIndexStatus(repoUri, p);
     };
   }

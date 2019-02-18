@@ -21,16 +21,13 @@ import { fileRoute } from './routes/file';
 import { installRoute } from './routes/install';
 import { lspRoute, symbolByQnameRoute } from './routes/lsp';
 import { redirectRoute } from './routes/redirect';
-import { redirectSocketRoute } from './routes/redirect_socket';
 import { repositoryRoute } from './routes/repository';
 import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from './routes/search';
 import { setupRoute } from './routes/setup';
-import { socketRoute } from './routes/socket';
 import { workspaceRoute } from './routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './scheduler';
 import { enableSecurity } from './security';
 import { ServerOptions } from './server_options';
-import { SocketService } from './socket_service';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 
 async function retryUntilAvailable<T>(
@@ -130,7 +127,6 @@ async function initNonCodeNode(
   );
 
   redirectRoute(server, info.url, log);
-  await redirectSocketRoute(server, info.url, log);
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
@@ -138,8 +134,6 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   const queueIndex: string = server.config().get('xpack.code.queueIndex');
   const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
   const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
-  const socketService = new SocketService(server, log);
 
   // @ts-ignore
   const esClient: EsClient = adminCluster.getClient();
@@ -180,8 +174,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     [lspIndexerFactory],
-    cancellationService,
-    socketService
+    cancellationService
   ).bind();
 
   const repoServiceFactory: RepositoryServiceFactory = new RepositoryServiceFactory();
@@ -192,8 +185,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     esClient,
     serverOptions,
     indexWorker,
-    repoServiceFactory,
-    socketService
+    repoServiceFactory
   ).bind();
   const deleteWorker = new DeleteWorker(
     queue,
@@ -202,8 +194,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     serverOptions,
     cancellationService,
     lspService,
-    repoServiceFactory,
-    socketService
+    repoServiceFactory
   ).bind();
   const updateWorker = new UpdateWorker(
     queue,
@@ -237,8 +228,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   fileRoute(server, serverOptions);
   workspaceRoute(server, serverOptions);
   symbolByQnameRoute(server, log);
-  socketRoute(server, socketService, log);
-  installRoute(server, socketService, lspService, installManager, serverOptions);
+  installRoute(server, lspService, installManager);
   lspRoute(server, lspService, serverOptions);
   setupRoute(server);
 }
