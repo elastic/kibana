@@ -17,6 +17,7 @@ import {
 } from 'lodash';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 
@@ -197,9 +198,7 @@ function getServices(items: IWaterfallItem[]) {
   return uniq(serviceNames);
 }
 
-export interface IServiceColors {
-  [key: string]: string;
-}
+export type IServiceColors = StringMap<string>;
 
 function getServiceColors(services: string[]) {
   const assignedColors = [
