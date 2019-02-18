@@ -92,7 +92,7 @@ export class JobListUi extends Component {
 
   getHeaderSection() {
     return (
-      <EuiPageContentHeaderSection>
+      <EuiPageContentHeaderSection data-test-subj="jobListPageHeader">
         <EuiTitle size="l">
           <h1>
             <FormattedMessage
@@ -116,6 +116,7 @@ export class JobListUi extends Component {
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="jobListNoPermission"
           title={title}
           color="warning"
           iconType="help"
