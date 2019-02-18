@@ -160,6 +160,7 @@ export class JobListUi extends Component {
   renderEmpty() {
     return (
       <EuiEmptyPrompt
+        data-test-subj="jobListEmptyPrompt"
         iconType="indexRollupApp"
         title={(
           <h1>
