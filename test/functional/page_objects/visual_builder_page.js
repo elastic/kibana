@@ -62,7 +62,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
       await input.type(markdown);
-      await PageObjects.common.sleep(500);
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
@@ -82,11 +81,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
       await input.pressKeys(browser.keys.BACKSPACE); // Delete all content
     }
-
     async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
-      await PageObjects.common.sleep(300);
-      return await el.getVisibleText();
+      const text = await el.getVisibleText();
+      return text;
     }
 
     /**
@@ -115,7 +113,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
         const value = await subVars[1].getVisibleText();
         return { key, value, selector };
       }));
-      log.debug(`markdown table variables is: ${variablesKeyValueSelectorMap}`);
+      log.debug(`markdown variables table is: ${variablesKeyValueSelectorMap}`);
       return variablesKeyValueSelectorMap;
     }
 
@@ -163,7 +161,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await el.clearValue();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
-
 
     async enterOffsetSeries(value) {
       const el = await testSubjects.find('offsetTimeSeries');
@@ -246,7 +243,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-
     async selectGroupByField(fieldName) {
       await comboBox.set('groupByField', fieldName);
     }
@@ -262,17 +258,20 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const tableView = await testSubjects.find('tableView');
       return await tableView.getVisibleText();
     }
+
     async clickMetricPanelOptions() {
       const button = await testSubjects.find('metricEditorPanelOptionsBtn');
       await button.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
     async setIndexPatternValue(value) {
       const el = await testSubjects.find('metricsIndexPatternInput');
       await el.clearValue();
       await el.type(value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+
     async selectIndexPatternTimeField(timeField) {
       const el = await testSubjects.find('comboBoxSearchInput');
       await el.clearValue();
