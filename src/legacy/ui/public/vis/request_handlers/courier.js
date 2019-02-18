@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import makeSentinel, { configureSentinels } from 'mutation-sentinel';
 import { has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
@@ -25,6 +26,13 @@ import { getRequestInspectorStats, getResponseInspectorStats } from '../../couri
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 import { buildTabularInspectorData } from '../../inspector/build_tabular_inspector_data';
 import { getTime } from '../../timefilter/get_time';
+
+configureSentinels({
+  mutationHandler: mutation => {
+    console.error(mutation); // eslint-disable-line
+    throw new Error(`Mutation Detected: ${JSON.stringify(mutation)}`);
+  }
+});
 
 const CourierRequestHandlerProvider = function () {
 
@@ -122,6 +130,9 @@ const CourierRequestHandlerProvider = function () {
           });
         }
       }
+
+      // Listen for mutations
+      searchSource.rawResponse = makeSentinel(searchSource.rawResponse);
 
       let resp = searchSource.rawResponse;
       for (const agg of aggs) {
