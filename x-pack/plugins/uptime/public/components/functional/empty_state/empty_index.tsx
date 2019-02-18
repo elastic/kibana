@@ -30,7 +30,7 @@ export const EmptyIndex = (props: any) => (
               configureHeartbeatLink: (
                 <EuiLink
                   target="_blank"
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/master/configuring-howto-heartbeat.html"
                 >
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatLinkText"
