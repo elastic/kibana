@@ -76,10 +76,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await this.createVisualizationPromptButton();
     }
 
+    async deleteAllVisualizations() {
+      await this.checkListingSelectAllCheckbox();
+      await this.clickDeleteSelected();
+      await PageObjects.common.clickConfirmOnModal();
+    }
+
+    async createSimpleMarkdownViz(vizName) {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickMarkdownWidget();
+      await PageObjects.visualize.setMarkdownTxt(vizName);
+      await PageObjects.visualize.clickGo();
+      await PageObjects.visualize.saveVisualization(vizName);
+    }
+
     async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
     }
-
 
     async getSearchFilter() {
       const searchFilter = await find.allByCssSelector('.euiFieldSearch');

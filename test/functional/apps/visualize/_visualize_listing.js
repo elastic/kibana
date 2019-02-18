@@ -29,30 +29,29 @@ export default function ({ getPageObjects }) {
 
       before(async function () {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await PageObjects.visualize.checkListingSelectAllCheckbox();
-        await PageObjects.visualize.clickDeleteSelected();
-        await PageObjects.common.clickConfirmOnModal();
-      });
-
-      after(async () => {
-        // delete all
-        await PageObjects.visualize.checkListingSelectAllCheckbox();
-        await PageObjects.visualize.clickDeleteSelected();
-        await PageObjects.common.clickConfirmOnModal();
+        await PageObjects.visualize.deleteAllVisualizations();
       });
 
       it('create new viz', async function () {
         // type markdown is used for simplicity
-
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickMarkdownWidget();
-        await PageObjects.visualize.setMarkdownTxt(vizName);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.saveVisualization(vizName);
+        await PageObjects.visualize.createSimpleMarkdownViz(vizName);
 
         await PageObjects.visualize.gotoVisualizationLandingPage();
         const visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(visCount).to.equal(1);
+      });
+
+      it('delete all viz', async function () {
+        await PageObjects.visualize.createSimpleMarkdownViz(vizName + '1');
+        await PageObjects.visualize.createSimpleMarkdownViz(vizName + '2');
+
+        let visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
+        expect(visCount).to.equal(3);
+
+        await PageObjects.visualize.deleteAllVisualizations();
+        visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
+        expect(visCount).to.equal(0);
+
       });
     });
 

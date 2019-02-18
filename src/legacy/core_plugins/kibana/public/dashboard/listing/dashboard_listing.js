@@ -20,6 +20,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiLink,
@@ -43,34 +44,30 @@ class DashboardListingUi extends React.Component {
   }
 
   render() {
-    const { intl } = this.props;
     return (
       <TableListView
-        create={this.props.create}
-        find={this.props.find}
-        delete={this.props.delete}
-        edit={this.props.edit}
+        createItem={this.props.createItem}
+        findItems={this.props.findItems}
+        deleteItems={this.props.deleteItems}
+        editItem={this.props.editItem}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         initialFilter={this.props.initialFilter}
         hideWriteControls={this.props.hideWriteControls}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
-          intl.formatMessage({
-            id: 'kbn.dashboard.listing.table.entityName',
-            defaultMessage: 'dashboard',
+          i18n.translate('kbn.dashboard.listing.table.entityName', {
+            defaultMessage: 'dashboard'
           })
         }
         entityNamePlural={
-          intl.formatMessage({
-            id: 'kbn.dashboard.listing.table.entityNamePlural',
-            defaultMessage: 'dashboards',
+          i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
+            defaultMessage: 'dashboards'
           })
         }
         tableListTitle={
-          intl.formatMessage({
-            id: 'kbn.dashboard.listing.dashboardsTitle',
-            defaultMessage: 'Dashboards',
+          i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards'
           })
         }
       />
@@ -154,13 +151,11 @@ class DashboardListingUi extends React.Component {
   }
 
   getTableColumns() {
-    const { intl } = this.props;
     const tableColumns = [
       {
         field: 'title',
-        name: intl.formatMessage({
-          id: 'kbn.dashboard.listing.table.titleColumnName',
-          defaultMessage: 'Title',
+        name: i18n.translate('kbn.dashboard.listing.table.titleColumnName', {
+          defaultMessage: 'Title'
         }),
         sortable: true,
         render: (field, record) => (
@@ -174,9 +169,8 @@ class DashboardListingUi extends React.Component {
       },
       {
         field: 'description',
-        name: intl.formatMessage({
-          id: 'kbn.dashboard.listing.table.descriptionColumnName',
-          defaultMessage: 'Description',
+        name: i18n.translate('kbn.dashboard.listing.table.descriptionColumnName', {
+          defaultMessage: 'Description'
         }),
         dataType: 'string',
         sortable: true,
@@ -187,10 +181,10 @@ class DashboardListingUi extends React.Component {
 }
 
 DashboardListingUi.propTypes = {
-  create: PropTypes.func.isRequired,
-  find: PropTypes.func.isRequired,
-  delete: PropTypes.func.isRequired,
-  edit: PropTypes.func.isRequired,
+  createItem: PropTypes.func.isRequired,
+  findItems: PropTypes.func.isRequired,
+  deleteItems: PropTypes.func.isRequired,
+  editItem: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,

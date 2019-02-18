@@ -20,6 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -83,7 +84,7 @@ class TableListViewUi extends React.Component {
   }
 
   debouncedFetch = _.debounce(async (filter) => {
-    const response = await this.props.find(filter);
+    const response = await this.props.findItems(filter);
 
     if (!this._isMounted) {
       return;
@@ -116,12 +117,12 @@ class TableListViewUi extends React.Component {
       isDeletingItems: true
     });
     try {
-      await this.props.delete(this.state.selectedIds);
+      await this.props.deleteItems(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
         title: (
           <FormattedMessage
-            id="kbn.visualize.listing.unableToDeleteVisualizationsDangerMessage"
+            id="kbn.list_view.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName: this.props.entityName }}
           />
@@ -308,8 +309,6 @@ class TableListViewUi extends React.Component {
   }
 
   renderTable() {
-    const { intl } = this.props;
-
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
@@ -326,17 +325,15 @@ class TableListViewUi extends React.Component {
     };
 
     const actions = [{
-      name: intl.formatMessage({
-        id: 'kbn.table_list_view.listing.table.editActionName',
-        defaultMessage: 'Edit',
+      name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
+        defaultMessage: 'Edit'
       }),
-      description: intl.formatMessage({
-        id: 'kbn.table_list_view.listing.table.editActionDescription',
-        defaultMessage: 'Edit',
+      description: i18n.translate('kbn.table_list_view.listing.table.editActionDescription', {
+        defaultMessage: 'Edit'
       }),
       icon: 'pencil',
       type: 'icon',
-      onClick: this.props.edit
+      onClick: this.props.editItem
     }];
 
     const sorting = {};
@@ -359,9 +356,8 @@ class TableListViewUi extends React.Component {
     const columns = this.props.tableColumns.slice();
     if (!this.state.hideWriteControls) {
       columns.push({
-        name: intl.formatMessage({
-          id: 'kbn.table_list_view.listing.table.actionTitle',
-          defaultMessage: 'Actions',
+        name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
+          defaultMessage: 'Actions'
         }),
         width: '100px',
         actions
@@ -407,7 +403,7 @@ class TableListViewUi extends React.Component {
       createButton = (
         <EuiFlexItem grow={false}>
           <EuiButton
-            onClick={this.props.create}
+            onClick={this.props.createItem}
             data-test-subj="newItemButton"
             iconType="plusInCircle"
             fill
@@ -479,10 +475,10 @@ TableListViewUi.propTypes = {
 
   noItemsFragment: PropTypes.object,
 
-  find: PropTypes.func.isRequired,
-  delete: PropTypes.func.isRequired,
-  create: PropTypes.func.isRequired,
-  edit: PropTypes.func.isRequired,
+  findItems: PropTypes.func.isRequired,
+  deleteItems: PropTypes.func.isRequired,
+  createItem: PropTypes.func.isRequired,
+  editItem: PropTypes.func.isRequired,
 
   listingLimit: PropTypes.number,
   hideWriteControls: PropTypes.bool.isRequired,

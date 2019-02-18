@@ -28,7 +28,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
-import { VisualizeConstants } from '../visualize_constants';
+import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
 
 import { i18n } from '@kbn/i18n';
 
@@ -54,7 +54,7 @@ export function VisualizeListingController($injector, createNewVis) {
   };
 
   this.edit = ({ id }) => {
-    kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id });
+    kbnUrl.change(createVisualizeEditUrl(id));
   };
 
   this.closeNewVisModal = () => {

@@ -219,16 +219,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
-      let exists = await testSubjects.exists('newItemButton');
+      /*
+        This method relies on the 'create prompt' test, that already validated the behavior of the buttons.
+        Assuming that it works correctly, then newDashboardLink button is only visible when dashboard
+        listing table is displayed (at least one dashboard).
+        If no dashboards exist, then newItemButton to create a new dashboard.
+      */
+      const exists = await testSubjects.exists('newItemButton');
       if (exists) {
         return await testSubjects.click('newItemButton');
       }
 
-      exists = await testSubjects.exists('createDashboardPromptButton');
-
-      // no dashboards exist, click newItemButton to create new dashboard
+      await testSubjects.exists('createDashboardPromptButton');
       return await this.clickCreateDashboardPrompt();
+
     }
 
     async clickCreateDashboardPrompt() {

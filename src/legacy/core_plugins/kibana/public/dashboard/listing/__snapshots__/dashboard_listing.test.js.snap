@@ -2,12 +2,12 @@
 
 exports[`after fetch hideWriteControls 1`] = `
 <InjectIntl(TableListViewUi)
-  create={[Function]}
-  delete={[Function]}
-  edit={[Function]}
+  createItem={[Function]}
+  deleteItems={[Function]}
+  editItem={[Function]}
   entityName="dashboard"
   entityNamePlural="dashboards"
-  find={[Function]}
+  findItems={[Function]}
   hideWriteControls={true}
   initialFilter=""
   listingLimit={1}
@@ -50,12 +50,12 @@ exports[`after fetch hideWriteControls 1`] = `
 
 exports[`after fetch initialFilter 1`] = `
 <InjectIntl(TableListViewUi)
-  create={[Function]}
-  delete={[Function]}
-  edit={[Function]}
+  createItem={[Function]}
+  deleteItems={[Function]}
+  editItem={[Function]}
   entityName="dashboard"
   entityNamePlural="dashboards"
-  find={[Function]}
+  findItems={[Function]}
   hideWriteControls={false}
   initialFilter="my dashboard"
   listingLimit={1000}
@@ -69,7 +69,6 @@ exports[`after fetch initialFilter 1`] = `
             fill={true}
             iconSide="left"
             iconType="plusInCircle"
-            onClick={[Function]}
             type="button"
           >
             <FormattedMessage
@@ -147,12 +146,12 @@ exports[`after fetch initialFilter 1`] = `
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <InjectIntl(TableListViewUi)
-  create={[Function]}
-  delete={[Function]}
-  edit={[Function]}
+  createItem={[Function]}
+  deleteItems={[Function]}
+  editItem={[Function]}
   entityName="dashboard"
   entityNamePlural="dashboards"
-  find={[Function]}
+  findItems={[Function]}
   hideWriteControls={false}
   initialFilter=""
   listingLimit={1}
@@ -166,7 +165,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
             fill={true}
             iconSide="left"
             iconType="plusInCircle"
-            onClick={[Function]}
             type="button"
           >
             <FormattedMessage
@@ -244,12 +242,12 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 
 exports[`after fetch renders table rows 1`] = `
 <InjectIntl(TableListViewUi)
-  create={[Function]}
-  delete={[Function]}
-  edit={[Function]}
+  createItem={[Function]}
+  deleteItems={[Function]}
+  editItem={[Function]}
   entityName="dashboard"
   entityNamePlural="dashboards"
-  find={[Function]}
+  findItems={[Function]}
   hideWriteControls={false}
   initialFilter=""
   listingLimit={1000}
@@ -263,7 +261,6 @@ exports[`after fetch renders table rows 1`] = `
             fill={true}
             iconSide="left"
             iconType="plusInCircle"
-            onClick={[Function]}
             type="button"
           >
             <FormattedMessage
@@ -341,12 +338,12 @@ exports[`after fetch renders table rows 1`] = `
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <InjectIntl(TableListViewUi)
-  create={[Function]}
-  delete={[Function]}
-  edit={[Function]}
+  createItem={[Function]}
+  deleteItems={[Function]}
+  editItem={[Function]}
   entityName="dashboard"
   entityNamePlural="dashboards"
-  find={[Function]}
+  findItems={[Function]}
   hideWriteControls={false}
   initialFilter=""
   listingLimit={1}
@@ -360,7 +357,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             fill={true}
             iconSide="left"
             iconType="plusInCircle"
-            onClick={[Function]}
             type="button"
           >
             <FormattedMessage
@@ -438,12 +434,12 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 
 exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
 <InjectIntl(TableListViewUi)
-  create={[Function]}
-  delete={[Function]}
-  edit={[Function]}
+  createItem={[Function]}
+  deleteItems={[Function]}
+  editItem={[Function]}
   entityName="dashboard"
   entityNamePlural="dashboards"
-  find={[Function]}
+  findItems={[Function]}
   hideWriteControls={false}
   initialFilter=""
   listingLimit={1000}
@@ -457,7 +453,6 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
             fill={true}
             iconSide="left"
             iconType="plusInCircle"
-            onClick={[Function]}
             type="button"
           >
             <FormattedMessage

@@ -40,10 +40,10 @@ class VisualizeListingTableUi extends Component {
     const { intl } = this.props;
     return (
       <TableListView
-        create={this.props.create}
-        find={this.props.find}
-        delete={this.props.delete}
-        edit={this.props.edit}
+        createItem={this.props.createItem}
+        findItems={this.props.findItems}
+        deleteItems={this.props.deleteItems}
+        editItem={this.props.editItem}
         tableColumns={this.getTableColumns()}
         listingLimit={100}
         initialFilter={''}
@@ -195,28 +195,22 @@ class VisualizeListingTableUi extends Component {
   }
 
   renderFlaskIcon(item) {
-    let flaskHolder;
-    if (item.type.shouldMarkAsExperimentalInUI()) {
-      flaskHolder =  (
-        <EuiIcon
-          className="visListingTable__typeIcon"
-          aria-hidden="true"
-          type="beaker"
-          size="m"
-        />
-      );
-    }else{
-      flaskHolder = <span />;
-    }
-    return flaskHolder;
+    return item.type.shouldMarkAsExperimentalInUI() && (
+      <EuiIcon
+        className="visListingTable__typeIcon"
+        aria-hidden="true"
+        type="beaker"
+        size="m"
+      />
+    );
   }
 }
 
 VisualizeListingTableUi.propTypes = {
-  delete: PropTypes.func.isRequired,
-  find: PropTypes.func.isRequired,
-  create: PropTypes.func.isRequired,
-  edit: PropTypes.func.isRequired,
+  deleteItems: PropTypes.func.isRequired,
+  findItems: PropTypes.func.isRequired,
+  createItem: PropTypes.func.isRequired,
+  editItem: PropTypes.func.isRequired,
 };
 
 export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);
