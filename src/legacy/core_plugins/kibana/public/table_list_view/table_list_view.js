@@ -122,7 +122,7 @@ class TableListViewUi extends React.Component {
       toastNotifications.addDanger({
         title: (
           <FormattedMessage
-            id="kbn.list_view.listing.unableToDeleteDangerMessage"
+            id="kbn.table_list_view.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName: this.props.entityName }}
           />

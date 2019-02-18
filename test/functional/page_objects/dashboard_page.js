@@ -228,7 +228,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // If no dashboards exist, then newItemButton to create a new dashboard.
       return await this.clickCreateDashboardPrompt();
-
     }
 
     async clickCreateDashboardPrompt() {

@@ -133,7 +133,7 @@ class DashboardListingUi extends React.Component {
           }
           actions={
             <EuiButton
-              onClick={this.props.create}
+              onClick={this.props.createItem}
               fill
               iconType="plusInCircle"
               data-test-subj="createDashboardPromptButton"
@@ -160,7 +160,7 @@ class DashboardListingUi extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            onClick={() => this.props.edit(record)}
+            onClick={() => this.props.editItem(record)}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
