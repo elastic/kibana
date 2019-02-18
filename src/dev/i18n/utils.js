@@ -301,9 +301,15 @@ export function extractDescriptionValueFromNode(node, messageId) {
   );
 }
 
-export function extractValuesKeysFromNode(node, messageId) {
-  if (!isObjectExpression(node)) {
-    throw createFailError(`"values" value should be an inline object literal ("${messageId}").`);
+export function extractValuesKeysFromNode(node, messageId, path) {
+  if (!isObjectExpression(node) ) {
+    if (node.type === 'Identifier') {
+      const referencedVariable = path.scope.bindings[node.name];
+      if (referencedVariable.constant) {
+        return extractValuesKeysFromNode(referencedVariable.path.node.init, messageId, referencedVariable.path);
+      }
+    }
+    throw createFailError(`"values" value should be an object expression or a constant ("${messageId}").`);
   }
 
   return node.properties.map(property =>

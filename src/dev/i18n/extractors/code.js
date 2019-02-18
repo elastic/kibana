@@ -25,9 +25,10 @@ import {
   isJSXOpeningElement,
   isMemberExpression,
 } from '@babel/types';
+import traverse from '@babel/traverse';
 
 import { extractI18nCallMessages } from './i18n_call';
-import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
+import { createParserErrorMessage, isI18nTranslateFunction } from '../utils';
 import { extractIntlMessages, extractFormattedMessages } from './react';
 import { createFailError, isFailError } from '../../run';
 
@@ -77,10 +78,18 @@ export function* extractCodeMessages(buffer, reporter) {
     }
   }
 
-  for (const node of traverseNodes(ast.program.body)) {
+  const paths = [];
+  traverse(ast, {
+    enter(path) {
+      paths.push(path);
+    }
+  });
+
+  for (const path of paths) {
+    const node = path.node;
     try {
       if (isI18nTranslateFunction(node)) {
-        yield extractI18nCallMessages(node);
+        yield extractI18nCallMessages(node, path);
       } else if (isIntlFormatMessageFunction(node)) {
         yield extractIntlMessages(node);
       } else if (isFormattedMessageElement(node)) {

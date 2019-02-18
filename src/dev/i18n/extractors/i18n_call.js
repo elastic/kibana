@@ -34,7 +34,7 @@ import { createFailError } from '../../run';
 /**
  * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST
  */
-export function extractI18nCallMessages(node) {
+export function extractI18nCallMessages(node, path) {
   const [idSubTree, optionsSubTree] = node.arguments;
   const messageId = extractMessageIdFromNode(idSubTree);
 
@@ -69,7 +69,7 @@ export function extractI18nCallMessages(node) {
   }
 
   const valuesKeys = valuesProperty
-    ? extractValuesKeysFromNode(valuesProperty.value, messageId)
+    ? extractValuesKeysFromNode(valuesProperty.value, messageId, path)
     : [];
 
   checkValuesProperty(valuesKeys, message, messageId);
