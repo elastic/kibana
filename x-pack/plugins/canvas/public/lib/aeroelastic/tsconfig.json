@@ -9,7 +9,7 @@
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
