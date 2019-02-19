@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 // @ts-ignore
 import { KueryBar } from '../KueryBar';
@@ -11,9 +12,13 @@ import { DatePicker } from './DatePicker';
 
 export function FilterBar() {
   return (
-    <React.Fragment>
-      <KueryBar />
-      <DatePicker />
-    </React.Fragment>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <KueryBar />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DatePicker />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
