@@ -301,9 +301,7 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(sourceDataId, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data, meta } = await this._source.getGeoJsonWithMeta({
-        layerName,
-      }, searchFilters);
+      const { data, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
       stopLoading(sourceDataId, requestToken, data, meta);
       return {
         refreshed: true,
