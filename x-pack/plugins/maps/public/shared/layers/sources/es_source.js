@@ -75,9 +75,9 @@ export class AbstractESSource extends AbstractVectorSource {
     return searchSource;
   }
 
-  async getBoundsForFilters(searchFilters, layerName) {
+  async getBoundsForFilters({ query, timeFilters, filters }) {
 
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this._makeSearchSource({ query, timeFilters, filters }, 0);
     const geoField = await this._getGeoField();
     const indexPattern = await this._getIndexPattern();
 
@@ -93,15 +93,29 @@ export class AbstractESSource extends AbstractVectorSource {
     const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
-    const esResp = await this._runEsQuery(layerName, searchSource, 'bounds request');
-    const esBounds = _.get(esResp, 'aggregations.1.bounds');
-    return (esBounds) ?
-      {
-        min_lon: esBounds.top_left.lon,
-        max_lon: esBounds.bottom_right.lon,
-        min_lat: esBounds.bottom_right.lat,
-        max_lat: esBounds.top_left.lat
-      }  : null;
+    let esBounds;
+    try {
+      const esResp = await searchSource.fetch();
+      esBounds = _.get(esResp, 'aggregations.1.bounds');
+    } catch(error) {
+      esBounds = {
+        top_left: {
+          lat: 90,
+          lon: -180
+        },
+        bottom_right: {
+          lat: -90,
+          lon: 180
+        }
+      };
+    }
+
+    return {
+      min_lon: esBounds.top_left.lon,
+      max_lon: esBounds.bottom_right.lon,
+      min_lat: esBounds.bottom_right.lat,
+      max_lat: esBounds.top_left.lat
+    };
   }
 
   async isTimeAware() {
