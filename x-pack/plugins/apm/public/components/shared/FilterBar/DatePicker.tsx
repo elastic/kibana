@@ -58,12 +58,13 @@ declare module '@elastic/eui' {
   }
 
   export type EuiSuperDatePickerProps = CommonProps & {
-    start: string;
-    end: string;
-    isPaused: boolean;
-    refreshInterval: number;
+    start?: string;
+    end?: string;
+    isPaused?: boolean;
+    refreshInterval?: number;
     onTimeChange: (props: OnTimeChangeProps) => void;
-    onRefreshChange: (props: OnRefreshChangeProps) => void;
+    onRefreshChange?: (props: OnRefreshChangeProps) => void;
+    showUpdateButton?: boolean;
   };
   export const EuiSuperDatePicker: React.SFC<EuiSuperDatePickerProps>;
 }
@@ -195,6 +196,7 @@ class DatePickerComponent extends React.Component<Props, State> {
         refreshInterval={this.state.refreshInterval}
         onTimeChange={this.handleTimeChange}
         onRefreshChange={this.handleRefreshChange}
+        showUpdateButton={false}
       />
     );
   }
