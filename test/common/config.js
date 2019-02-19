@@ -46,10 +46,10 @@ export default function () {
       buildArgs: [ '--optimize.useBundleCache=true' ],
       sourceArgs: [
         '--no-base-path',
+        '--env.name=development',
         `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
       ],
       serverArgs: [
-        '--env.name=development',
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         `--optimize.watchPort=${kbnTestConfig.getPort() + 10}`,

@@ -104,7 +104,7 @@ export default function GoalVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     },
