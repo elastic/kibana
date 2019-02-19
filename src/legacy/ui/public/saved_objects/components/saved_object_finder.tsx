@@ -36,13 +36,13 @@ import { injectI18n } from '@kbn/i18n/react';
 
 import { SavedObjectAttributes } from '../../../../server/saved_objects';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
-import { SavedObject } from '../saved_object';
+import { SimpleSavedObject } from '../simple_saved_object';
 
 interface SavedObjectFinderUIState {
   items: Array<{
     title: string | null;
-    id: SavedObject<SavedObjectAttributes>['id'];
-    type: SavedObject<SavedObjectAttributes>['type'];
+    id: SimpleSavedObject<SavedObjectAttributes>['id'];
+    type: SimpleSavedObject<SavedObjectAttributes>['type'];
   }>;
   filter: string;
   isFetchingItems: boolean;
@@ -55,10 +55,10 @@ interface SavedObjectFinderUIState {
 interface SavedObjectFinderUIProps extends InjectedIntlProps {
   callToActionButton?: React.ReactNode;
   onChoose?: (
-    id: SavedObject<SavedObjectAttributes>['id'],
-    type: SavedObject<SavedObjectAttributes>['type']
+    id: SimpleSavedObject<SavedObjectAttributes>['id'],
+    type: SimpleSavedObject<SavedObjectAttributes>['type']
   ) => void;
-  makeUrl?: (id: SavedObject<SavedObjectAttributes>['id']) => void;
+  makeUrl?: (id: SimpleSavedObject<SavedObjectAttributes>['id']) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectType: 'visualization' | 'search';
   visTypes?: VisTypesRegistryProvider;
@@ -273,7 +273,7 @@ class SavedObjectFinderUI extends React.Component<
           defaultMessage: 'Title',
         }),
         sortable: true,
-        render: (title: string, record: SavedObject<SavedObjectAttributes>) => {
+        render: (title: string, record: SimpleSavedObject<SavedObjectAttributes>) => {
           const { onChoose, makeUrl } = this.props;
 
           if (!onChoose && !makeUrl) {
