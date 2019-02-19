@@ -165,7 +165,7 @@ export class AddLayerPanel extends Component {
               <EuiButtonEmpty
                 onClick={() => {
                   if (this.state.layer) {
-                    this.props.closeFlyout(this.state.layer.getId());
+                    this.props.closeFlyout();
                   }
                 }}
                 flush="left"

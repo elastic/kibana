@@ -35,7 +35,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           onClick={cancelLayerPanel}
           flush="left"
         >
-          Cancel
+          {hasStateChanged ? 'Cancel' : 'Close'}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>

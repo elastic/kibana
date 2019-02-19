@@ -10,7 +10,7 @@ import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { getSelectedLayer, getMapColors } from '../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../store/non_serializable_instances';
 import {
-  removeLayer,
+  clearTransientLayerStateAndCloseFlyout,
   setTransientLayer,
   addLayer,
   setSelectedLayer,
@@ -30,11 +30,8 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeFlyout: layerId => {
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(removeTransientLayer());
-      dispatch(setSelectedLayer(null));
-      dispatch(removeLayer(layerId));
+    closeFlyout: () => {
+      clearTransientLayerStateAndCloseFlyout();
     },
     previewLayer: layer => {
       dispatch(addLayer(layer.toLayerDescriptor()));
