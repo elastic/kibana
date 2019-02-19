@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/courier';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import {
   getTimeFilters,
   getMapZoom,
