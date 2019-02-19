@@ -52,7 +52,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       ]);
 
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': defaultIndex,
       });
       await this.selectDefaultIndex(defaultIndex);
@@ -69,7 +68,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async selectDefaultIndex(indexName) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickLinkText(indexName);
+      await find.clickByPartialLinkText(indexName);
       await PageObjects.settings.clickDefaultIndexButton();
     }
 

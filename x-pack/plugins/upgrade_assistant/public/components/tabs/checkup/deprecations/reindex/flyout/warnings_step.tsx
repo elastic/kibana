@@ -20,9 +20,46 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ReindexWarning } from '../../../../../../../common/types';
 
+interface CheckedIds {
+  [id: string]: boolean;
+}
+
 export const idForWarning = (warning: ReindexWarning) => `reindexWarning-${warning}`;
+
+const WarningCheckbox: React.StatelessComponent<{
+  checkedIds: CheckedIds;
+  warning: ReindexWarning;
+  label: React.ReactNode;
+  description: React.ReactNode;
+  documentationUrl: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ checkedIds, warning, label, onChange, description, documentationUrl }) => (
+  <Fragment>
+    <EuiText>
+      <EuiCheckbox
+        id={idForWarning(warning)}
+        label={<strong>{label}</strong>}
+        checked={checkedIds[idForWarning(warning)]}
+        onChange={onChange}
+      />
+      <p className="upgWarningsStep__warningDescription">
+        {description}
+        <br />
+        <EuiLink href={documentationUrl} target="_blank">
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
+            defaultMessage="Documentation"
+          />
+        </EuiLink>
+      </p>
+    </EuiText>
+
+    <EuiSpacer />
+  </Fragment>
+);
 
 interface WarningsConfirmationFlyoutProps {
   closeFlyout: () => void;
@@ -31,7 +68,7 @@ interface WarningsConfirmationFlyoutProps {
 }
 
 interface WarningsConfirmationFlyoutState {
-  checkedIds: { [id: string]: boolean };
+  checkedIds: CheckedIds;
 }
 
 /**
@@ -67,117 +104,123 @@ export class WarningsFlyoutStep extends React.Component<
       <Fragment>
         <EuiFlyoutBody>
           <EuiCallOut
-            title="This index requires destructive changes that can't be undone"
+            title={
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
+                defaultMessage="This index requires destructive changes that can't be undone"
+              />
+            }
             color="danger"
             iconType="alert"
           >
             <p>
-              Back up your index, then proceed with the reindex by accepting each breaking change.
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
+                defaultMessage="Back up your index, then proceed with the reindex by accepting each breaking change."
+              />
             </p>
           </EuiCallOut>
 
           <EuiSpacer />
 
           {warnings.includes(ReindexWarning.allField) && (
-            <Fragment>
-              <EuiText>
-                <EuiCheckbox
-                  id={idForWarning(ReindexWarning.allField)}
-                  label={
-                    <strong>
-                      <EuiCode>_all</EuiCode> field will be removed
-                    </strong>
-                  }
-                  checked={checkedIds[idForWarning(ReindexWarning.allField)]}
-                  onChange={this.onChange}
+            <WarningCheckbox
+              checkedIds={checkedIds}
+              onChange={this.onChange}
+              warning={ReindexWarning.allField}
+              label={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningTitle"
+                  defaultMessage="{allField} will be removed"
+                  values={{
+                    allField: <EuiCode>_all</EuiCode>,
+                  }}
                 />
-                <p className="upgWarningsStep__warningDescription">
-                  The <EuiCode>_all</EuiCode> meta field is no longer supported in 7.0. Reindexing
-                  removes the <EuiCode>_all</EuiCode> field in the new index. Ensure that no
-                  application code or scripts reply on this field.
-                  <br />
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default"
-                    target="_blank"
-                  >
-                    Documentation
-                  </EuiLink>
-                </p>
-              </EuiText>
-
-              <EuiSpacer />
-            </Fragment>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
+                  defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
+                      the {allField} field in the new index. Ensure that no application code or scripts reply on
+                      this field."
+                  values={{
+                    allField: <EuiCode>_all</EuiCode>,
+                  }}
+                />
+              }
+              documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default"
+            />
           )}
 
           {warnings.includes(ReindexWarning.apmReindex) && (
-            <Fragment>
-              <EuiText>
-                <EuiCheckbox
-                  id={idForWarning(ReindexWarning.apmReindex)}
-                  label={<strong>This index will be converted to ECS format</strong>}
-                  checked={checkedIds[idForWarning(ReindexWarning.apmReindex)]}
-                  onChange={this.onChange}
+            <WarningCheckbox
+              checkedIds={checkedIds}
+              onChange={this.onChange}
+              warning={ReindexWarning.apmReindex}
+              label={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
+                  defaultMessage="This index will be converted to ECS format"
                 />
-                <p className="upgWarningsStep__warningDescription">
-                  Starting in version 7.0.0, APM data will be represented in the Elastic Common
-                  Schema. Historical APM data will not visible until it's reindexed.
-                  <br />
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html"
-                    target="_blank"
-                  >
-                    Documentation
-                  </EuiLink>
-                </p>
-              </EuiText>
-
-              <EuiSpacer />
-            </Fragment>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
+                  defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema.
+                      Historical APM data will not visible until it's reindexed."
+                />
+              }
+              documentationUrl="https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html"
+            />
           )}
 
           {warnings.includes(ReindexWarning.booleanFields) && (
-            <Fragment>
-              <EuiText>
-                <EuiCheckbox
-                  id={idForWarning(ReindexWarning.booleanFields)}
-                  label={
-                    <strong>
-                      Boolean data in <EuiCode>_source</EuiCode> might change
-                    </strong>
-                  }
-                  checked={checkedIds[idForWarning(ReindexWarning.booleanFields)]}
-                  onChange={this.onChange}
+            <WarningCheckbox
+              checkedIds={checkedIds}
+              onChange={this.onChange}
+              warning={ReindexWarning.booleanFields}
+              label={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningTitle"
+                  defaultMessage="Boolean data in {_source} might change"
+                  values={{ _source: <EuiCode>_source</EuiCode> }}
                 />
-                <p className="upgWarningsStep__warningDescription">
-                  If a documents contain a boolean field that is neither <EuiCode>true</EuiCode> or{' '}
-                  <EuiCode>false</EuiCode> (for example, <EuiCode>"yes"</EuiCode>,{' '}
-                  <EuiCode>"on"</EuiCode>, <EuiCode>1</EuiCode>), reindexing converts these fields
-                  to <EuiCode>true</EuiCode> or <EuiCode>false</EuiCode>. Ensure that no application
-                  code or scripts rely on boolean fields in the deprecated format.
-                  <br />
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields"
-                    target="_blank"
-                  >
-                    Documentation
-                  </EuiLink>
-                </p>
-              </EuiText>
-
-              <EuiSpacer />
-            </Fragment>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
+                  defaultMessage="If a document contain a boolean field that is neither {true} or {false}
+                   (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
+                   Ensure that no application code or scripts rely on boolean fields in the deprecated format."
+                  values={{
+                    true: <EuiCode>true</EuiCode>,
+                    false: <EuiCode>false</EuiCode>,
+                    yes: <EuiCode>"yes"</EuiCode>,
+                    on: <EuiCode>"on"</EuiCode>,
+                    one: <EuiCode>1</EuiCode>,
+                  }}
+                />
+              }
+              documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_field"
+            />
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                Cancel
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton fill color="danger" onClick={advanceNextStep} disabled={blockAdvance}>
-                Continue with reindex
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
+                  defaultMessage="Continue with reindex"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

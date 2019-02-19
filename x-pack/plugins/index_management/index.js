@@ -11,7 +11,7 @@ import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
-import { addIndexManagementDataEnricher } from "./index_management_data";
+import { addIndexManagementDataEnricher } from './index_management_data';
 import { createRouter } from '../../server/lib/create_router';
 
 export function indexManagement(kibana)  {

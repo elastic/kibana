@@ -25,6 +25,7 @@ Object {
             },
           ],
         },
+        "group": Array [],
         "is": Object {},
         "term": Array [],
       },
@@ -32,6 +33,7 @@ Object {
     "syntax": Object {
       "parse": [Function],
       "print": [Function],
+      "printClause": [Function],
     },
     "text": "ilm.step:ERROR",
   },

@@ -90,9 +90,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-
-  // FLAKY: https://github.com/elastic/kibana/issues/28818
-  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
 
@@ -115,18 +113,16 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.panelCount(27);
       await PageObjects.dashboard.waitForRenderComplete();
-      const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(27);
     });
 
     it('adding saved searches', async () => {
       await dashboardAddPanel.addEverySavedSearch('"Rendering Test"');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.panelCount(28);
       await PageObjects.dashboard.waitForRenderComplete();
-      const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(28);
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
