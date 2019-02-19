@@ -24,171 +24,163 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('export', () => {
-    before(() => esArchiver.load('saved_objects/massive'));
-    after(() => esArchiver.unload('saved_objects/massive'));
+    describe('10,000 objects', () => {
+      before(() => esArchiver.load('saved_objects/10k'));
+      after(() => esArchiver.unload('saved_objects/10k'));
 
-    it('should return 200 exporting without type or objects passed in', async () => {
-      await supertest
-        .get('/api/saved_objects/_export')
-        .expect(200)
-        .then((resp) => {
-          expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-          expect(resp.headers['content-type']).to.eql('application/ndjson');
-          resp.text.split('\n').map(JSON.parse);
-        });
-    });
+      it('should return 200 exporting without type or objects passed in', async () => {
+        await supertest
+          .get('/api/saved_objects/_export')
+          .expect(200)
+          .then((resp) => {
+            expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+            expect(resp.headers['content-type']).to.eql('application/ndjson');
+            const objects = resp.text.split('\n').map(JSON.parse);
+            expect(objects).to.have.length(10000);
+          });
+      });
 
-    it('exports by single type', async () => {
-      await supertest
-        .get('/api/saved_objects/_export')
-        .query({
-          type: 'dashboard',
-        })
-        .expect(200)
-        .then((resp) => {
-          const objects = resp.text.split('\n').map(JSON.parse);
-          expect(objects).to.have.length(1);
-        });
-    });
-
-    it('exports by multiple types', async () => {
-      await supertest
-        .get('/api/saved_objects/_export')
-        .query({
-          type: ['dashboard', 'index-pattern'],
-        })
-        .expect(200)
-        .then((resp) => {
-          const objects = resp.text.split('\n').map(JSON.parse);
-          expect(objects).to.have.length(2);
-        });
-    });
-
-    it('exports by objects', async () => {
-      await supertest
-        .get('/api/saved_objects/_export')
-        .query({
-          objects: JSON.stringify([
-            {
-              type: 'dashboard',
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab'
-            },
-            {
-              type: 'index-pattern',
-              id: '91200a00-9efd-11e7-acb3-3dab96693fab'
-            },
-          ]),
-        })
-        .expect(200)
-        .then((resp) => {
-          const objects = resp.text.split('\n').map(JSON.parse);
-          expect(objects).to.have.length(2);
-        });
-    });
-
-    it('should return 200 exporting by type', async () => {
-      await supertest
-        .get('/api/saved_objects/_export')
-        .query({
-          type: ['dashboard'],
-        })
-        .expect(200)
-        .then((resp) => {
-          expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-          expect(resp.headers['content-type']).to.eql('application/ndjson');
-          const objects = resp.text.split('\n').map(JSON.parse);
-          expect(objects).to.eql([{
-            attributes: {
-              description: '',
-              hits: 0,
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+      it('should return 200 exporting by type', async () => {
+        await supertest
+          .get('/api/saved_objects/_export')
+          .query({
+            type: ['dashboard'],
+          })
+          .expect(200)
+          .then((resp) => {
+            expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+            expect(resp.headers['content-type']).to.eql('application/ndjson');
+            const objects = resp.text.split('\n').map(JSON.parse);
+            expect(objects).to.eql([{
+              attributes: {
+                description: '',
+                hits: 0,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                },
+                optionsJSON: objects[0].attributes.optionsJSON,
+                panelsJSON: objects[0].attributes.panelsJSON,
+                refreshInterval: {
+                  display: 'Off',
+                  pause: false,
+                  value: 0,
+                },
+                timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                timeRestore: true,
+                timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                title: 'Requests',
+                uiStateJSON: '{}',
+                version: 1,
               },
-              optionsJSON: objects[0].attributes.optionsJSON,
-              panelsJSON: objects[0].attributes.panelsJSON,
-              refreshInterval: {
-                display: 'Off',
-                pause: false,
-                value: 0,
-              },
-              timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-              timeRestore: true,
-              timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-              title: 'Requests',
-              uiStateJSON: '{}',
-              version: 1,
-            },
-            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-            migrationVersion: {
-              dashboard: '7.0.0',
-            },
-            references: [
-              {
-                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                name: 'panel_0',
-                type: 'visualization',
-              },
-            ],
-            type: 'dashboard',
-            updated_at: '2017-09-21T18:57:40.826Z',
-            version: objects[0].version,
-          }]);
-        });
-    });
-
-    it('should return 200 exporting by objects', async () => {
-      await supertest
-        .get('/api/saved_objects/_export')
-        .query({
-          objects: JSON.stringify([
-            {
-              type: 'dashboard',
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-            },
-          ]),
-        })
-        .expect(200)
-        .then((resp) => {
-          expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-          expect(resp.headers['content-type']).to.eql('application/ndjson');
-          const objects = resp.text.split('\n').map(JSON.parse);
-          expect(objects).to.eql([{
-            attributes: {
-              description: '',
-              hits: 0,
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+              migrationVersion: {
+                dashboard: '7.0.0',
               },
-              optionsJSON: objects[0].attributes.optionsJSON,
-              panelsJSON: objects[0].attributes.panelsJSON,
-              refreshInterval: {
-                display: 'Off',
-                pause: false,
-                value: 0,
-              },
-              timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-              timeRestore: true,
-              timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-              title: 'Requests',
-              uiStateJSON: '{}',
-              version: 1,
-            },
-            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-            migrationVersion: {
-              dashboard: '7.0.0',
-            },
-            references: [
+              references: [
+                {
+                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                  name: 'panel_0',
+                  type: 'visualization',
+                },
+              ],
+              type: 'dashboard',
+              updated_at: '2017-09-21T18:57:40.826Z',
+              version: objects[0].version,
+            }]);
+          });
+      });
+
+      it('should return 200 exporting by objects', async () => {
+        await supertest
+          .get('/api/saved_objects/_export')
+          .query({
+            objects: JSON.stringify([
               {
-                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                name: 'panel_0',
-                type: 'visualization',
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
               },
-            ],
-            type: 'dashboard',
-            updated_at: '2017-09-21T18:57:40.826Z',
-            version: objects[0].version,
-          }]);
-        });
+            ]),
+          })
+          .expect(200)
+          .then((resp) => {
+            expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+            expect(resp.headers['content-type']).to.eql('application/ndjson');
+            const objects = resp.text.split('\n').map(JSON.parse);
+            expect(objects).to.eql([{
+              attributes: {
+                description: '',
+                hits: 0,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                },
+                optionsJSON: objects[0].attributes.optionsJSON,
+                panelsJSON: objects[0].attributes.panelsJSON,
+                refreshInterval: {
+                  display: 'Off',
+                  pause: false,
+                  value: 0,
+                },
+                timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                timeRestore: true,
+                timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                title: 'Requests',
+                uiStateJSON: '{}',
+                version: 1,
+              },
+              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+              migrationVersion: {
+                dashboard: '7.0.0',
+              },
+              references: [
+                {
+                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                  name: 'panel_0',
+                  type: 'visualization',
+                },
+              ],
+              type: 'dashboard',
+              updated_at: '2017-09-21T18:57:40.826Z',
+              version: objects[0].version,
+            }]);
+          });
+      });
+    });
+
+    describe('10,001 objects', () => {
+      let customVisId;
+      before(async () => {
+        await esArchiver.load('saved_objects/10k');
+        await supertest
+          .post('/api/saved_objects/visualization')
+          .send({
+            attributes: {
+              title: 'My favorite vis',
+            },
+          })
+          .expect(200)
+          .then((resp) => {
+            customVisId = resp.body.id;
+          });
+      });
+      after(async () => {
+        await supertest
+          .delete(`/api/saved_objects/visualization/${customVisId}`)
+          .expect(200);
+        await esArchiver.unload('saved_objects/10k');
+      });
+
+      it('should return 400 when exporting more than 10,000', async () => {
+        await supertest
+          .get('/api/saved_objects/_export')
+          .expect(400)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message: `Can't export more than 10000 objects`
+            });
+          });
+      });
     });
   });
 }
