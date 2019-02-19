@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import * as wildcard from '../wildcard';
+import * as wildcard from './wildcard';
 
 describe('kuery node types', function () {
 

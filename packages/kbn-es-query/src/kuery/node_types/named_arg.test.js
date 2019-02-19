@@ -18,8 +18,8 @@
  */
 
 import expect from 'expect.js';
-import * as namedArg from '../named_arg';
-import { nodeTypes } from '../../node_types';
+import * as namedArg from './named_arg';
+import { nodeTypes } from '.';
 
 describe('kuery node types', function () {
 

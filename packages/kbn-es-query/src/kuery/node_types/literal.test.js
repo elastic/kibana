@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import * as literal from '../literal';
+import * as literal from './literal';
 
 describe('kuery node types', function () {
 

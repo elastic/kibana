@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import * as functionType from '../function';
+import * as functionType from './function';
 import _ from 'lodash';
 import expect from 'expect.js';
-import * as isFunction from '../../functions/is';
-import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
+import * as isFunction from '../functions/is';
+import indexPatternResponse from '../../__fixtures__/index_pattern_response.json';
 
-import { nodeTypes } from '../../node_types';
+import { nodeTypes } from '.';
 
 describe('kuery node types', function () {
 
