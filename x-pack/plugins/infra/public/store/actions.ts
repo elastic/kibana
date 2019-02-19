@@ -8,7 +8,6 @@ export {
   logFilterActions,
   logMinimapActions,
   logPositionActions,
-  logTextviewActions,
   metricTimeActions,
   waffleFilterActions,
   waffleTimeActions,
