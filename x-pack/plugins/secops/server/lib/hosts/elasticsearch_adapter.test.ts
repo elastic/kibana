@@ -31,7 +31,7 @@ describe('hosts elasticsearch_adapter', () => {
     };
 
     test('it formats a host with firstSeen correctly', () => {
-      const fields: ReadonlyArray<string> = [];
+      const fields: ReadonlyArray<string> = ['firstSeen'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
       const expected: HostsEdges = {
         cursor: {
