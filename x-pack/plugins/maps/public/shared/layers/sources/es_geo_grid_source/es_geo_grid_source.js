@@ -142,14 +142,9 @@ export class ESGeoGridSource extends AbstractESSource {
     throw new Error(`Grid resolution param not recognized: ${this._descriptor.resolution}`);
   }
 
-  async getGeoJsonWithMeta({ layerName }, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters) {
 
-    const featureCollection = await this.getGeoJsonPoints({ layerName }, {
-      geogridPrecision: searchFilters.geogridPrecision,
-      buffer: searchFilters.buffer,
-      timeFilters: searchFilters.timeFilters,
-      query: searchFilters.query,
-    });
+    const featureCollection = await this.getGeoJsonPoints(layerName, searchFilters);
 
     return {
       data: featureCollection,
@@ -165,11 +160,11 @@ export class ESGeoGridSource extends AbstractESSource {
     });
   }
 
-  async getGeoJsonPoints({ layerName }, { geogridPrecision, buffer, timeFilters, query }) {
+  async getGeoJsonPoints(layerName, searchFilters) {
 
     const indexPattern = await this._getIndexPattern();
-    const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geogridPrecision), aggSchemas.all);
+    const searchSource  = await this._makeSearchSource(searchFilters, 0);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 

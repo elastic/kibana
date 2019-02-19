@@ -456,7 +456,7 @@ export function removeLayer(id) {
   };
 }
 
-export function setQuery({ query, timeFilters }) {
+export function setQuery({ query, timeFilters, filters = [] }) {
   return async (dispatch, getState) => {
     dispatch({
       type: SET_QUERY,
@@ -466,6 +466,7 @@ export function setQuery({ query, timeFilters }) {
         // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
         queryLastTriggeredAt: (new Date()).toISOString(),
       },
+      filters,
     });
 
     const dataFilters = getDataFilters(getState());

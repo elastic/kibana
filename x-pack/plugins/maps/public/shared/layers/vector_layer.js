@@ -202,8 +202,10 @@ export class VectorLayer extends AbstractLayer {
     }
 
     let updateDueToQuery = false;
+    let updateDueToFilters = false;
     if (isQueryAware) {
       updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
     }
 
     let updateDueToPrecisionChange = false;
@@ -218,6 +220,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToExtentChange
       && !updateDueToFields
       && !updateDueToQuery
+      && !updateDueToFilters
       && !updateDueToPrecisionChange;
   }
 

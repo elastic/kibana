@@ -105,6 +105,9 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 
 export const getQuery = ({ map }) => map.mapState.query;
 
+export const getFilters = ({ map }) => map.mapState.filters ?
+  map.mapState.filters : [];
+
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;
@@ -126,7 +129,8 @@ export const getDataFilters = createSelector(
   getTimeFilters,
   getRefreshTimerLastTriggeredAt,
   getQuery,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query) => {
+  getFilters,
+  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query, filters) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
@@ -134,6 +138,7 @@ export const getDataFilters = createSelector(
       timeFilters,
       refreshTimerLastTriggeredAt,
       query,
+      filters,
     };
   }
 );

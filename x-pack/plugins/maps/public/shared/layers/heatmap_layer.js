@@ -111,54 +111,52 @@ export class HeatmapLayer extends AbstractLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
     const geogridPrecision = this._source.getGeoGridPrecision(dataFilters.zoom);
-    const isSamePrecision = dataMeta.geogridPrecision === geogridPrecision;
+    const isSamePrecision = meta.geogridPrecision === geogridPrecision;
 
-    const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
+    const isSameTime = _.isEqual(meta.timeFilters, dataFilters.timeFilters);
 
     const updateDueToRefreshTimer = dataFilters.refreshTimerLastTriggeredAt
-      && !_.isEqual(dataMeta.refreshTimerLastTriggeredAt, dataFilters.refreshTimerLastTriggeredAt);
+      && !_.isEqual(meta.refreshTimerLastTriggeredAt, dataFilters.refreshTimerLastTriggeredAt);
 
-    const updateDueToExtent = this.updateDueToExtent(this._source, dataMeta, dataFilters);
+    const updateDueToExtent = this.updateDueToExtent(this._source, meta, dataFilters);
 
     const updateDueToQuery = dataFilters.query
-      && !_.isEqual(dataMeta.query, dataFilters.query);
+      && !_.isEqual(meta.query, dataFilters.query);
+
+    const updateDueToFilters = dataFilters.filters
+      && !_.isEqual(meta.filters, dataFilters.filters);
 
     const metricPropertyKey = this._getPropKeyOfSelectedMetric();
-    const updateDueToMetricChange = !_.isEqual(dataMeta.metric, metricPropertyKey);
+    const updateDueToMetricChange = !_.isEqual(meta.metric, metricPropertyKey);
 
     if (isSamePrecision
       && isSameTime
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
+      && !updateDueToFilters
       && !updateDueToMetricChange
     ) {
       return;
     }
 
-    const newDataMeta = {
+    const searchFilters = {
       ...dataFilters,
       geogridPrecision,
       metric: metricPropertyKey
     };
-    await this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
+    await this._fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters });
   }
 
-  async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
-    const { geogridPrecision, timeFilters, buffer, query } = dataMeta;
+  async _fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters }) {
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
-    startLoading('source', requestToken, dataMeta);
+    startLoading('source', requestToken, searchFilters);
     try {
       const layerName = await this.getDisplayName();
-      const data = await this._source.getGeoJsonPoints({ layerName }, {
-        geogridPrecision,
-        buffer,
-        timeFilters,
-        query,
-      });
+      const data = await this._source.getGeoJsonPoints(layerName, searchFilters);
       stopLoading('source', requestToken, data);
     } catch (error) {
       onLoadError('source', requestToken, error.message);

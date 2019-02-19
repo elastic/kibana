@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Embeddable } from 'ui/embeddable';
 import { I18nContext } from 'ui/i18n';
@@ -35,6 +37,25 @@ export class MapEmbeddable extends Embeddable {
     return getInspectorAdapters(this.store.getState());
   }
 
+  onContainerStateChanged(containerState) {
+    if (!_.isEqual(containerState.timeRange, this.prevTimeRange) ||
+        !_.isEqual(containerState.query, this.prevQuery) ||
+        !_.isEqual(containerState.filters, this.prevFilters)) {
+      this.dispatchSetQuery(containerState);
+    }
+  }
+
+  dispatchSetQuery({ query, timeRange, filters }) {
+    this.prevTimeRange = timeRange;
+    this.prevQuery = query;
+    this.prevFilters = filters;
+    this.store.dispatch(setQuery({
+      filters: filters.filter(filter => !filter.meta.disabled),
+      query,
+      timeFilters: timeRange,
+    }));
+  }
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -52,7 +73,7 @@ export class MapEmbeddable extends Embeddable {
     }
     const layerList = getInitialLayers(this.savedMap.layerListJSON);
     this.store.dispatch(replaceLayerList(layerList));
-    this.store.dispatch(setQuery({ query: containerState.query, timeFilters: containerState.timeRange }));
+    this.dispatchSetQuery(containerState);
 
     render(
       <Provider store={this.store}>
@@ -72,6 +93,6 @@ export class MapEmbeddable extends Embeddable {
   }
 
   reload() {
-
+    this.dispatchSetQuery();
   }
 }

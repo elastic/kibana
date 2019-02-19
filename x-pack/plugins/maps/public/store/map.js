@@ -92,6 +92,7 @@ const INITIAL_STATE = {
     mouseCoordinates: null,
     timeFilters: null,
     query: null,
+    filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
@@ -191,13 +192,14 @@ export function map(state = INITIAL_STATE, action) {
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const { query, timeFilters } = action;
+      const { query, timeFilters, filters } = action;
       return {
         ...state,
         mapState: {
           ...state.mapState,
           query,
           timeFilters,
+          filters,
         }
       };
     case SET_REFRESH_CONFIG:

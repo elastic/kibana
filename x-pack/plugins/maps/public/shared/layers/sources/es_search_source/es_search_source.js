@@ -93,7 +93,7 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async getGeoJsonWithMeta({ layerName }, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters) {
     const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default

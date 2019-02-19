@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { MapEmbeddable } from './map_embeddable';
 
@@ -15,7 +16,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   }
 
   getEditPath(mapId) {
-    return mapId;
+    return chrome.addBasePath(`/app/maps#map/${mapId}`);
   }
 
   async create(panelMetadata, onEmbeddableStateChanged) {
@@ -23,7 +24,6 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     const editUrl = this.getEditPath(mapId);
 
     const savedMap = await this.savedObjectLoader.get(mapId);
-    console.log('savedMap', savedMap);
 
     return new MapEmbeddable({
       onEmbeddableStateChanged,
