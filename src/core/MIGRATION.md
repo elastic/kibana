@@ -11,6 +11,10 @@
   * Architectural changes with legacy "shim"
   * Switch to new platform services
   * Migrate to the new platform
+* Frequently asked questions
+  * How is static code shared between plugins?
+  * How is "common" code shared on both the client and server?
+  * When does code go into a plugin, core, or packages?
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
