@@ -45,46 +45,46 @@ const nextPageShortcut = { ...getAltShortcuts(']'), help: 'Go to next page' };
 export const keymap = {
   ELEMENT: {
     displayName: 'Element controls',
-    COPY: { ...getCtrlShortcuts('c'), help: 'Copy elements' },
-    CLONE: { ...getCtrlShortcuts('d'), help: 'Clone elements' },
-    CUT: { ...getCtrlShortcuts('x'), help: 'Cut elements' },
+    COPY: { ...getCtrlShortcuts('c'), help: 'Copy' },
+    CLONE: { ...getCtrlShortcuts('d'), help: 'Clone' },
+    CUT: { ...getCtrlShortcuts('x'), help: 'Cut' },
     PASTE: { ...getCtrlShortcuts('v'), help: 'Paste' },
     DELETE: {
       osx: ['backspace'],
       windows: ['del', 'backspace'],
       linux: ['del', 'backspace'],
       other: ['del', 'backspace'],
-      help: 'Delete elements',
+      help: 'Delete',
     },
     BRING_FORWARD: {
       ...getCtrlShortcuts('up'),
-      help: 'Send element forward one layer',
-    },
-    SEND_BACKWARD: {
-      ...getCtrlShortcuts('down'),
-      help: 'Send element back one layer',
+      help: 'Send forward',
     },
     BRING_TO_FRONT: {
       ...getCtrlShortcuts('shift+up'),
-      help: 'Send element to front',
+      help: 'Send to front',
+    },
+    SEND_BACKWARD: {
+      ...getCtrlShortcuts('down'),
+      help: 'Send backward',
     },
     SEND_TO_BACK: {
       ...getCtrlShortcuts('shift+down'),
-      help: 'Send element to back',
+      help: 'Send to back',
     },
     GROUP: {
       osx: ['g'],
       windows: ['g'],
       linux: ['g'],
       other: ['g'],
-      help: 'Group elements',
+      help: 'Group',
     },
     UNGROUP: {
       osx: ['u'],
       windows: ['u'],
       linux: ['u'],
       other: ['u'],
-      help: 'Ungroup elements',
+      help: 'Ungroup',
     },
   },
   EDITOR: {

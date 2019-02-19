@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { keymap } from '../../lib/keymap';
 import { getClientPlatform } from '../../lib/get_client_platform';
@@ -54,19 +55,24 @@ const getDescriptionListItems = shortcuts =>
 export const KeyboardShortcutsDoc = props => (
   <EuiFlyout closeButtonAriaLabel="Closes keyboard shortcuts reference" size="s" {...props}>
     <EuiFlyoutHeader hasBorder>
-      <h2>Keyboard Shortcuts</h2>
+      <EuiTitle size="s">
+        <h2>Keyboard Shortcuts</h2>
+      </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       {Object.values(keymap).map(namespace => {
         const { displayName, ...shortcuts } = namespace;
         return (
           <div key={getId('shortcuts')} className="canvasKeyboardShortcut">
-            <h3>{displayName}</h3>
+            <EuiTitle size="xs">
+              <h4>{displayName}</h4>
+            </EuiTitle>
             <EuiHorizontalRule margin="s" />
             <EuiDescriptionList
               textStyle="reverse"
               type="column"
               listItems={getDescriptionListItems(shortcuts)}
+              compressed
             />
             <EuiSpacer />
           </div>
