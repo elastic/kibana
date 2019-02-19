@@ -87,9 +87,6 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
 
       expect(stats.stack_stats.xpack.graph).to.be.an('object');
-      expect(stats.stack_stats.xpack.data_frame).to.be.an('object');
-      expect(stats.stack_stats.xpack.data_frame.available).to.be.an('boolean');
-      expect(stats.stack_stats.xpack.data_frame.enabled).to.be.an('boolean');
       expect(stats.stack_stats.xpack.ilm).to.be.an('object');
       expect(stats.stack_stats.xpack.logstash).to.be.an('object');
       expect(stats.stack_stats.xpack.ml).to.be.an('object');
