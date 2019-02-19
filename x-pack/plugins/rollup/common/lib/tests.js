@@ -11,7 +11,7 @@ import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test'
 const registerTestSubjExists = component => testSubject => Boolean(findTestSubjectHelper(component, testSubject).length);
 
 export const registerTestBed = (Component, mountWithIntl, defaultProps, store = {}) => (props) => {
-  const wrapped = mountWithIntl(
+  const component = mountWithIntl(
     <Provider store={store}>
       <Component
         {...defaultProps}
@@ -20,9 +20,7 @@ export const registerTestBed = (Component, mountWithIntl, defaultProps, store = 
     </Provider>
   );
 
-  const component = wrapped.find(Component);
-
-  const setProps = (props) => wrapped.setProps({
+  const setProps = (props) => component.setProps({
     children: (
       <Component
         {...defaultProps}

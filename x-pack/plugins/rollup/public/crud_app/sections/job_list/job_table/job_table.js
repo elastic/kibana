@@ -302,7 +302,7 @@ export class JobTableUi extends Component {
               onChange={() => {
                 this.toggleItem(id);
               }}
-              data-test-subj="indexTableRowCheckbox"
+              data-test-subj={`indexTableRowCheckbox-${id}`}
             />
           </EuiTableRowCellCheckbox>
 

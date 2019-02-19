@@ -28,13 +28,13 @@ const defaultProps = {
 const initTestBed = registerTestBed(JobTable, mountWithIntl, defaultProps, rollupJobsStore);
 
 describe('<JobTable />', () => {
-  describe('table rows', () => {
-    const totalJobs = 5;
-    const jobs = getJobs(totalJobs);
-    const openDetailPanel = jest.fn();
-    const { findTestSubject } = initTestBed({ jobs, openDetailPanel });
-    const tableRows = findTestSubject('jobTableRow');
+  const totalJobs = 5;
+  const jobs = getJobs(totalJobs);
+  const openDetailPanel = jest.fn();
+  const { findTestSubject, testSubjectExists } = initTestBed({ jobs, openDetailPanel });
+  const tableRows = findTestSubject('jobTableRow');
 
+  describe('table rows', () => {
     it('should create 1 table row per job', () => {
       expect(tableRows.length).toEqual(totalJobs);
     });
@@ -114,6 +114,18 @@ describe('<JobTable />', () => {
       linkJobId.simulate('click');
 
       expect(openDetailPanel.mock.calls[0][0]).toEqual(job.id);
+    });
+  });
+
+  describe('action menu', () => {
+    it('should be visible when a job is selected', () => {
+      const row = tableRows.first();
+      const job = jobs[0];
+      const checkBox = row.find(`[data-test-subj="indexTableRowCheckbox-${job.id}"]`).hostNodes();
+
+      expect(testSubjectExists('jobActionMenuButton')).toBeFalsy();
+      checkBox.simulate('change', { target: { checked: true } });
+      expect(testSubjectExists('jobActionMenuButton')).toBeTruthy();
     });
   });
 });
