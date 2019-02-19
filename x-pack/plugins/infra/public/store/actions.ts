@@ -6,7 +6,6 @@
 
 export {
   logFilterActions,
-  logMinimapActions,
   logPositionActions,
   metricTimeActions,
   waffleFilterActions,

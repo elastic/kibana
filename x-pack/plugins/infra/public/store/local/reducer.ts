@@ -8,7 +8,6 @@ import { combineReducers } from 'redux';
 
 import { initialLogFilterState, logFilterReducer, LogFilterState } from './log_filter';
 import { flyoutOptionsReducer, FlyoutOptionsState, initialFlyoutOptionsState } from './log_flyout';
-import { initialLogMinimapState, logMinimapReducer, LogMinimapState } from './log_minimap';
 import { initialLogPositionState, logPositionReducer, LogPositionState } from './log_position';
 import { initialMetricTimeState, metricTimeReducer, MetricTimeState } from './metric_time';
 import { initialWaffleFilterState, waffleFilterReducer, WaffleFilterState } from './waffle_filter';
@@ -21,7 +20,6 @@ import { initialWaffleTimeState, waffleTimeReducer, WaffleTimeState } from './wa
 
 export interface LocalState {
   logFilter: LogFilterState;
-  logMinimap: LogMinimapState;
   logPosition: LogPositionState;
   metricTime: MetricTimeState;
   waffleFilter: WaffleFilterState;
@@ -32,7 +30,6 @@ export interface LocalState {
 
 export const initialLocalState: LocalState = {
   logFilter: initialLogFilterState,
-  logMinimap: initialLogMinimapState,
   logPosition: initialLogPositionState,
   metricTime: initialMetricTimeState,
   waffleFilter: initialWaffleFilterState,
@@ -43,7 +40,6 @@ export const initialLocalState: LocalState = {
 
 export const localReducer = combineReducers<LocalState>({
   logFilter: logFilterReducer,
-  logMinimap: logMinimapReducer,
   logPosition: logPositionReducer,
   metricTime: metricTimeReducer,
   waffleFilter: waffleFilterReducer,

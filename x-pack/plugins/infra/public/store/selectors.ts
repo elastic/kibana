@@ -11,7 +11,6 @@ import { globalizeSelectors } from '../utils/typed_redux';
 import {
   flyoutOptionsSelectors as localFlyoutOptionsSelectors,
   logFilterSelectors as localLogFilterSelectors,
-  logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
   metricTimeSelectors as localMetricTimeSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
@@ -31,7 +30,6 @@ import {
 const selectLocal = (state: State) => state.local;
 
 export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilterSelectors);
-export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
 export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTimeSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
