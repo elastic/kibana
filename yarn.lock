@@ -7025,6 +7025,11 @@ constants-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha1-wguW2MYXdIqvHBYCF2DNJ/y4y3U=
 
+"constate-latest@npm:constate@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/constate/-/constate-1.0.0.tgz#93fa87108e364a05e93b3597e22d53adaf86776d"
+  integrity sha512-b1Pip712fAQ1el4pndiYeVMXAzlbrD8+Z8ik79TOQc3ZJNjxKGawT0gCPpANsNbT4eHszDZ/8472hvL1rowUhQ==
+
 constate@^0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/constate/-/constate-0.9.0.tgz#877197ef8fbcacee95672a7e98f7b21dec818891"
