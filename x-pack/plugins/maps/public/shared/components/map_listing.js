@@ -29,20 +29,16 @@ export const EMPTY_FILTER = '';
 
 export class MapListing extends React.Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      hasInitialFetchReturned: false,
-      isFetchingItems: false,
-      showDeleteModal: false,
-      showLimitError: false,
-      filter: EMPTY_FILTER,
-      items: [],
-      selectedIds: [],
-      page: 0,
-      perPage: 20,
-    };
+  state = {
+    hasInitialFetchReturned: false,
+    isFetchingItems: false,
+    showDeleteModal: false,
+    showLimitError: false,
+    filter: EMPTY_FILTER,
+    items: [],
+    selectedIds: [],
+    page: 0,
+    perPage: 20,
   }
 
   componentWillMount() {
