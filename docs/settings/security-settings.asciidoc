@@ -53,4 +53,4 @@ routing requests through a load balancer or proxy).
 `xpack.security.sessionTimeout`::
 Sets the session duration (in milliseconds). By default, sessions stay active
 until the browser is closed. When this is set to an explicit timeout, closing the
-browser will still require the user to log back in to {kib}.
+browser still requires the user to log back in to {kib}.
