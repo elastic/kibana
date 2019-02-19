@@ -20,6 +20,7 @@ import { ColumnarPage } from '../../components/page';
 
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
+import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
 import { WithLogFlyout } from '../../containers/logs/with_log_flyout';
 import { WithFlyoutOptions } from '../../containers/logs/with_log_flyout_options';
@@ -42,121 +43,123 @@ export const LogsPage = injectI18n(
       const { intl } = this.props;
 
       return (
-        <ColumnarPage>
-          <Header
-            breadcrumbs={[
-              {
-                text: intl.formatMessage({
-                  id: 'xpack.infra.logsPage.logsBreadcrumbsText',
-                  defaultMessage: 'Logs',
-                }),
-              },
-            ]}
-          />
-          <WithSource>
-            {({
-              derivedIndexPattern,
-              hasFailed,
-              isLoading,
-              lastFailureMessage,
-              load,
-              logIndicesExist,
-              sourceId,
-            }) => (
-              <>
-                <DocumentTitle
-                  title={intl.formatMessage({
-                    id: 'xpack.infra.logsPage.documentTitle',
+        <LogViewConfiguration.Provider>
+          <ColumnarPage>
+            <Header
+              breadcrumbs={[
+                {
+                  text: intl.formatMessage({
+                    id: 'xpack.infra.logsPage.logsBreadcrumbsText',
                     defaultMessage: 'Logs',
-                  })}
-                />
-                <SourceConfigurationFlyout />
-                {isLoading ? (
-                  <SourceLoadingPage />
-                ) : logIndicesExist ? (
-                  <>
-                    <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
-                    <WithLogPositionUrlState />
-                    <WithLogMinimapUrlState />
-                    <WithLogTextviewUrlState />
-                    <WithFlyoutOptionsUrlState />
-                    <LogsToolbar />
-                    <WithLogFilter indexPattern={derivedIndexPattern}>
-                      {({ applyFilterQueryFromKueryExpression }) => (
-                        <React.Fragment>
-                          <WithFlyoutOptions>
-                            {({ showFlyout, setFlyoutItem }) => (
-                              <LogsPageContent
-                                showFlyout={showFlyout}
-                                setFlyoutItem={setFlyoutItem}
-                              />
-                            )}
-                          </WithFlyoutOptions>
-                          <WithLogFlyout sourceId={sourceId}>
-                            {({ flyoutItem, hideFlyout, loading }) => (
-                              <LogFlyout
-                                setFilter={applyFilterQueryFromKueryExpression}
-                                flyoutItem={flyoutItem}
-                                hideFlyout={hideFlyout}
-                                loading={loading}
-                              />
-                            )}
-                          </WithLogFlyout>
-                        </React.Fragment>
+                  }),
+                },
+              ]}
+            />
+            <WithSource>
+              {({
+                derivedIndexPattern,
+                hasFailed,
+                isLoading,
+                lastFailureMessage,
+                load,
+                logIndicesExist,
+                sourceId,
+              }) => (
+                <>
+                  <DocumentTitle
+                    title={intl.formatMessage({
+                      id: 'xpack.infra.logsPage.documentTitle',
+                      defaultMessage: 'Logs',
+                    })}
+                  />
+                  <SourceConfigurationFlyout />
+                  {isLoading ? (
+                    <SourceLoadingPage />
+                  ) : logIndicesExist ? (
+                    <>
+                      <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
+                      <WithLogPositionUrlState />
+                      <WithLogMinimapUrlState />
+                      <WithLogTextviewUrlState />
+                      <WithFlyoutOptionsUrlState />
+                      <LogsToolbar />
+                      <WithLogFilter indexPattern={derivedIndexPattern}>
+                        {({ applyFilterQueryFromKueryExpression }) => (
+                          <React.Fragment>
+                            <WithFlyoutOptions>
+                              {({ showFlyout, setFlyoutItem }) => (
+                                <LogsPageContent
+                                  showFlyout={showFlyout}
+                                  setFlyoutItem={setFlyoutItem}
+                                />
+                              )}
+                            </WithFlyoutOptions>
+                            <WithLogFlyout sourceId={sourceId}>
+                              {({ flyoutItem, hideFlyout, loading }) => (
+                                <LogFlyout
+                                  setFilter={applyFilterQueryFromKueryExpression}
+                                  flyoutItem={flyoutItem}
+                                  hideFlyout={hideFlyout}
+                                  loading={loading}
+                                />
+                              )}
+                            </WithLogFlyout>
+                          </React.Fragment>
+                        )}
+                      </WithLogFilter>
+                    </>
+                  ) : hasFailed ? (
+                    <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
+                  ) : (
+                    <WithKibanaChrome>
+                      {({ basePath }) => (
+                        <NoIndices
+                          title={intl.formatMessage({
+                            id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
+                            defaultMessage: "Looks like you don't have any logging indices.",
+                          })}
+                          message={intl.formatMessage({
+                            id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
+                            defaultMessage: "Let's add some!",
+                          })}
+                          actions={
+                            <EuiFlexGroup>
+                              <EuiFlexItem>
+                                <EuiButton
+                                  href={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
+                                  color="primary"
+                                  fill
+                                >
+                                  {intl.formatMessage({
+                                    id:
+                                      'xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel',
+                                    defaultMessage: 'View setup instructions',
+                                  })}
+                                </EuiButton>
+                              </EuiFlexItem>
+                              <EuiFlexItem>
+                                <WithSourceConfigurationFlyoutState>
+                                  {({ enable }) => (
+                                    <EuiButton color="primary" onClick={enable}>
+                                      {intl.formatMessage({
+                                        id: 'xpack.infra.configureSourceActionLabel',
+                                        defaultMessage: 'Change source configuration',
+                                      })}
+                                    </EuiButton>
+                                  )}
+                                </WithSourceConfigurationFlyoutState>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          }
+                        />
                       )}
-                    </WithLogFilter>
-                  </>
-                ) : hasFailed ? (
-                  <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
-                ) : (
-                  <WithKibanaChrome>
-                    {({ basePath }) => (
-                      <NoIndices
-                        title={intl.formatMessage({
-                          id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
-                          defaultMessage: "Looks like you don't have any logging indices.",
-                        })}
-                        message={intl.formatMessage({
-                          id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
-                          defaultMessage: "Let's add some!",
-                        })}
-                        actions={
-                          <EuiFlexGroup>
-                            <EuiFlexItem>
-                              <EuiButton
-                                href={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
-                                color="primary"
-                                fill
-                              >
-                                {intl.formatMessage({
-                                  id:
-                                    'xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel',
-                                  defaultMessage: 'View setup instructions',
-                                })}
-                              </EuiButton>
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <WithSourceConfigurationFlyoutState>
-                                {({ enable }) => (
-                                  <EuiButton color="primary" onClick={enable}>
-                                    {intl.formatMessage({
-                                      id: 'xpack.infra.configureSourceActionLabel',
-                                      defaultMessage: 'Change source configuration',
-                                    })}
-                                  </EuiButton>
-                                )}
-                              </WithSourceConfigurationFlyoutState>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        }
-                      />
-                    )}
-                  </WithKibanaChrome>
-                )}
-              </>
-            )}
-          </WithSource>
-        </ColumnarPage>
+                    </WithKibanaChrome>
+                  )}
+                </>
+              )}
+            </WithSource>
+          </ColumnarPage>
+        </LogViewConfiguration.Provider>
       );
     }
   }
