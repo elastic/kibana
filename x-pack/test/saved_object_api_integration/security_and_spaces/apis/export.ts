@@ -19,6 +19,7 @@ export default function({ getService }: TestInvoker) {
     const {
       createExpectEmpty,
       createExpectRbacForbidden,
+      expectTypeOrObjectsRequired,
       createExpectVisualizationResults,
       expectNotSpaceAwareResults,
       exportTest,
@@ -75,6 +76,11 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
+          },
         },
       });
 
@@ -96,6 +102,11 @@ export default function({ getService }: TestInvoker) {
             description: 'empty result',
             statusCode: 200,
             response: createExpectEmpty(),
+          },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
           },
         },
       });
@@ -119,6 +130,11 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
+          },
         },
       });
 
@@ -140,6 +156,11 @@ export default function({ getService }: TestInvoker) {
             description: 'empty result',
             statusCode: 200,
             response: createExpectEmpty(),
+          },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
           },
         },
       });
@@ -163,6 +184,11 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
+          },
         },
       });
 
@@ -184,6 +210,11 @@ export default function({ getService }: TestInvoker) {
             description: 'empty result',
             statusCode: 200,
             response: createExpectEmpty(),
+          },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
           },
         },
       });
@@ -207,6 +238,11 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
+          },
         },
       });
 
@@ -228,6 +264,11 @@ export default function({ getService }: TestInvoker) {
             description: 'forbidden and find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
+          },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
           },
         },
       });
@@ -251,6 +292,11 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
           },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
+          },
         },
       });
 
@@ -272,6 +318,11 @@ export default function({ getService }: TestInvoker) {
             description: 'forbidden login and find wigwags message',
             statusCode: 403,
             response: createExpectRbacForbidden('wigwags'),
+          },
+          noTypeOrObjects: {
+            description: 'bad request, type or object is required',
+            statusCode: 400,
+            response: expectTypeOrObjectsRequired,
           },
         },
       });

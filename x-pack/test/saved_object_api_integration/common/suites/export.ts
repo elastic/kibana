@@ -19,6 +19,7 @@ interface ExportTests {
   spaceAwareType: ExportTest;
   notSpaceAwareType: ExportTest;
   unknownType: ExportTest;
+  noTypeOrObjects: ExportTest;
 }
 
 interface ExportTestDefinition {
@@ -60,6 +61,15 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       references: [],
       updated_at: '2017-09-21T18:59:16.270Z',
       version: response.version,
+    });
+  };
+
+  const expectTypeOrObjectsRequired = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: '"value" must contain at least one of [type, objects]',
+      validation: { source: 'query', keys: ['value'] },
     });
   };
 
@@ -174,6 +184,18 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             .then(tests.unknownType.response);
         });
       });
+
+      describe('no type or objects', () => {
+        it(`should return ${tests.noTypeOrObjects.statusCode} with ${
+          tests.noTypeOrObjects.description
+        }`, async () => {
+          await supertest
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+            .auth(user.username, user.password)
+            .expect(tests.noTypeOrObjects.statusCode)
+            .then(tests.noTypeOrObjects.response);
+        });
+      });
     });
   };
 
@@ -184,6 +206,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   return {
     createExpectEmpty,
     createExpectRbacForbidden,
+    expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
     exportTest,
