@@ -13,6 +13,7 @@ import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
+import { kpiNetworkSchema } from './kpi_network';
 import { networkTopNFlowSchema } from './network_top_n_flow';
 import { dateSchema } from './scalar_date';
 import { sourceStatusSchema } from './source_status';
@@ -33,6 +34,7 @@ export const schemas = [
   sharedSchema,
   uncommonProcessesSchema,
   whoAmISchema,
+  kpiNetworkSchema,
 ];
 
 // The types from graphql-tools/src/mock.ts 'any' based. I add slightly

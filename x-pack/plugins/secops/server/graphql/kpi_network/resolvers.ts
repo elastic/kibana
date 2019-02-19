@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
+import { KpiNetwork } from '../../lib/kpi_network';
+import { createOptions } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+export type QueryKipNetWorkResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.KpiNetworkResolver>,
+  QuerySourceResolver
+>;
+
+export interface KpiNetworkResolversDeps {
+  kpiNetwork: KpiNetwork;
+}
+
+export const createKpiNetworkResolvers = (
+  libs: KpiNetworkResolversDeps
+): {
+  Source: {
+    kpiNetwork: QueryKipNetWorkResolver;
+  };
+} => ({
+  Source: {
+    async kpiNetwork(source, args, { req }, info) {
+      const options = { ...createOptions(source, args, info), kpiNetworkType: args.type };
+      return libs.kpiNetwork.getKpiNetwork(req, options);
+    },
+  },
+});

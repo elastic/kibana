@@ -74,6 +74,8 @@ export interface Source {
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: SayMyName | null;
+  /** hello world */
+  KpiNetwork? : KpiNetworkData | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -453,6 +455,21 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface KpiNetworkData {
+  networkEvents: number;
+
+  uniqueFlowId: number;
+
+  activateAgents: number;
+}
+
+
+export interface NetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -534,6 +551,13 @@ export interface UncommonProcessesSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface IndexFieldsSourceStatusArgs {
   indexTypes?: IndexType[] | null;
 }
@@ -572,6 +596,11 @@ export enum NetworkDirectionEcs {
   internal = 'internal',
   external = 'external',
   unknown = 'unknown',
+}
+
+export enum KpiNetworkType {
+  source = 'source',
+  destination = 'destination',
 }
 
 // ====================================================
@@ -628,6 +657,8 @@ export namespace SourceResolvers {
     UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, Context>;
     /** Just a simple example to get the app name */
     whoAmI?: WhoAmIResolver<SayMyName | null, TypeParent, Context>;
+    /** HelloWorld exercise*/
+    kpiNetwork? : KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>
   }
 
   export type IdResolver<R = string, Parent = Source, Context = SecOpsContext> = Resolver<
@@ -727,6 +758,25 @@ export namespace SourceResolvers {
     Parent = Source,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+
+  export type KpiNetworkResolver<
+    R = KpiNetworkData,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, KpiNetworkArgs>;
+
+  export interface KpiNetworkArgs {
+    id?: string | null;
+
+    type: KpiNetworkType;
+
+    timerange: TimerangeInput;
+
+    pagination: PaginationInput;
+
+    filterQuery?: string | null;
+  }
+
 }
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
@@ -1961,4 +2011,33 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace KpiNetworkResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = KpiNetworkData> {
+    /** The id of the source */
+    networkEvents?: NetworkEventsResolver<number, TypeParent, Context>;
+
+    uniqueFlowId?: UniqueFlowIdResolver<number, TypeParent, Context>;
+
+    activeAgents?: ActiveAgentsResolver<number, TypeParent, Context>;
+  }
+
+  export type NetworkEventsResolver<
+    R = string,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+
+  export type UniqueFlowIdResolver<
+    R = string,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+
+  export type ActiveAgentsResolver<
+    R = string,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }

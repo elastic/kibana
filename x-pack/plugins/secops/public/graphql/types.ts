@@ -1,3 +1,5 @@
+import { KpiNetworkData } from '../../server/graphql/types';
+
 /* tslint:disable */
 /*
      * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -41,6 +43,8 @@ export interface Source {
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
+
+  KpiNetwork: KpiNetworkData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -331,6 +335,54 @@ export interface NetworkTopNFlowData {
   pageInfo: PageInfo;
 }
 
+export interface KpiNetworkData {
+  edges: KpiNetworkEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface KpiNetworkEdges {
+  node: KpiNetworkItem;
+
+  cursor: CursorType;
+}
+
+export interface KpiNetworkItem {
+  _id?: string | null;
+
+  source?: KpiNetworkSource | null;
+
+  destination?: KpiNetworkDestination | null;
+
+  event?: KpiNetworkEvent | null;
+
+  network?: KpiNetworkNetwork | null;
+}
+
+export interface KpiNetworkSource {
+  ip?: string | null;
+
+  domain?: string | null;
+}
+
+export interface KpiNetworkDestination {
+  ip?: string | null;
+
+  domain?: string | null;
+}
+
+export interface KpiNetworkEvent {
+  duration?: number | null;
+}
+
+export interface KpiNetworkNetwork {
+  bytes?: number | null;
+
+  packets?: number | null;
+}
+
 export interface NetworkTopNFlowEdges {
   node: NetworkTopNFlowItem;
 
@@ -543,6 +595,11 @@ export enum NetworkDirectionEcs {
   internal = 'internal',
   external = 'external',
   unknown = 'unknown',
+}
+
+export enum KpiNetworkType {
+  source = 'source',
+  destination = 'destination',
 }
 
 // ====================================================
@@ -1168,6 +1225,110 @@ export namespace GetNetworkTopNFlowQuery {
     bytes?: number | null;
 
     direction?: NetworkDirectionEcs[] | null;
+
+    packets?: number | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
+export namespace GetKpiNetworkQuery {
+  export type Variables = {
+    sourceId: string;
+    type: KpiNetworkType;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkTopNFlow: NetworkTopNFlow;
+  };
+
+  export type NetworkTopNFlow = {
+    __typename?: 'NetworkTopNFlowData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkTopNFlowEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkTopNFlowItem';
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+
+    event?: Event | null;
+
+    network?: Network | null;
+  };
+
+  export type _Source = {
+    __typename?: 'NetworkTopNFlowSource';
+
+    ip?: string | null;
+
+    domain?: string | null;
+  };
+
+  export type Destination = {
+    __typename?: 'NetworkTopNFlowDestination';
+
+    ip?: string | null;
+
+    domain?: string | null;
+  };
+
+  export type Event = {
+    __typename?: 'NetworkTopNFlowEvent';
+
+    duration?: number | null;
+  };
+
+  export type Network = {
+    __typename?: 'NetworkTopNFlowNetwork';
+
+    bytes?: number | null;
 
     packets?: number | null;
   };

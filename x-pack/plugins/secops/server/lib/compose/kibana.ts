@@ -12,6 +12,7 @@ import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
+import { ElasticsearchKpiNetworkAdapter, KpiNetwork } from '../kpi_network';
 import { ElasticsearchNetworkTopNFlowAdapter, NetworkTopNFlow } from '../network_top_n_flow';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
@@ -31,6 +32,7 @@ export function compose(server: Server): AppBackendLibs {
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
     networkTopNFlow: new NetworkTopNFlow(new ElasticsearchNetworkTopNFlowAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
+    kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {

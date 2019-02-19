@@ -113,11 +113,14 @@ export interface DatabaseGetIndicesResponse {
   };
 }
 
-export interface RequestOptions {
+export interface RequestBasicOptions {
   sourceConfiguration: SourceConfiguration;
-  pagination: PaginationInput;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
+}
+
+export interface RequestOptions extends RequestBasicOptions {
+  pagination: PaginationInput;
   fields: string[];
   sortField?: SortField;
 }

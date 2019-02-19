@@ -10,6 +10,7 @@ import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
+import { KpiNetwork } from './kpi_network';
 import { NetworkTopNFlow } from './network_top_n_flow';
 import { SourceStatus } from './source_status';
 import { SourceConfigurations, Sources } from './sources';
@@ -23,6 +24,7 @@ export interface AppDomainLibs {
   fields: IndexFields;
   hosts: Hosts;
   networkTopNFlow: NetworkTopNFlow;
+  kpiNetwork: KpiNetwork;
   uncommonProcesses: UncommonProcesses;
 }
 
@@ -46,13 +48,18 @@ export interface SecOpsContext {
   req: FrameworkRequest;
 }
 
+interface TotalValue {
+  value: number;
+  relation: string;
+}
+
 export interface SearchResponse<T> {
   took: number;
   timed_out: boolean;
   _scroll_id?: string;
   _shards: ShardsResponse;
   hits: {
-    total: number;
+    total: TotalValue | number;
     max_score: number;
     hits: Array<{
       _index: string;
