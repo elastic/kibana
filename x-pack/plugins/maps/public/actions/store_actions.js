@@ -521,14 +521,13 @@ export function clearMissingStyleProperties(layerId) {
   };
 }
 
-export function updateLayerStyle(layerId, styleDescriptor, temporary = true) {
+export function updateLayerStyle(layerId, styleDescriptor) {
   return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_STYLE,
       layerId,
       style: {
-        ...styleDescriptor,
-        temporary
+        ...styleDescriptor
       },
     });
 
@@ -537,13 +536,13 @@ export function updateLayerStyle(layerId, styleDescriptor, temporary = true) {
   };
 }
 
-export function updateLayerStyleForSelectedLayer(styleDescriptor, temporary = true) {
+export function updateLayerStyleForSelectedLayer(styleDescriptor) {
   return (dispatch, getState) => {
     const selectedLayerId = getSelectedLayerId(getState());
     if (!selectedLayerId) {
       return;
     }
-    dispatch(updateLayerStyle(selectedLayerId, styleDescriptor, temporary));
+    dispatch(updateLayerStyle(selectedLayerId, styleDescriptor));
   };
 }
 
