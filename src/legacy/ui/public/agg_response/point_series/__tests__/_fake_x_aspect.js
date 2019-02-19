@@ -27,9 +27,11 @@ describe('makeFakeXAspect', function () {
 
     expect(aspect)
       .to.have.property('accessor', -1)
+      .and.have.property('column', -1)
       .and.have.property('title', 'All docs')
       .and.have.property('format')
       .and.have.property('params');
 
+    expect(aspect.params).to.have.property('defaultValue', '_all');
   });
 });
