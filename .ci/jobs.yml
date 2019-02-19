@@ -1,132 +1,44 @@
 JOB:
-  - kibana-intake
-  - x-pack-intake
-  # make sure all kibana-ciGRoups are listed in tasks/function_test_groups.js
-  - kibana-ciGroup1-1
-  - kibana-ciGroup2-1
-  - kibana-ciGroup3-1
-  - kibana-ciGroup4-1
-  - kibana-ciGroup5-1
-  - kibana-ciGroup6-1
-  - kibana-ciGroup7-1
-  - kibana-ciGroup8-1
-  - kibana-ciGroup9-1
-  - kibana-ciGroup10-1
-  - kibana-ciGroup11-1
-  - kibana-ciGroup12-1
-  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-ciGroup1-1
-  - x-pack-ciGroup2-1
-  - x-pack-ciGroup3-1
-  - x-pack-ciGroup4-1
-  - x-pack-ciGroup5-1
-  - x-pack-ciGroup6-1
   - x-pack-ciGroup7-1
-
-  - kibana-ciGroup1-2
-  - kibana-ciGroup2-2
-  - kibana-ciGroup3-2
-  - kibana-ciGroup4-2
-  - kibana-ciGroup5-2
-  - kibana-ciGroup6-2
-  - kibana-ciGroup7-2
-  - kibana-ciGroup8-2
-  - kibana-ciGroup9-2
-  - kibana-ciGroup10-2
-  - kibana-ciGroup11-2
-  - kibana-ciGroup12-2
-  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-ciGroup1-2
-  - x-pack-ciGroup2-2
-  - x-pack-ciGroup3-2
-  - x-pack-ciGroup4-2
-  - x-pack-ciGroup5-2
-  - x-pack-ciGroup6-2
   - x-pack-ciGroup7-2
-
-  - kibana-ciGroup1-3
-  - kibana-ciGroup2-3
-  - kibana-ciGroup3-3
-  - kibana-ciGroup4-3
-  - kibana-ciGroup5-3
-  - kibana-ciGroup6-3
-  - kibana-ciGroup7-3
-  - kibana-ciGroup8-3
-  - kibana-ciGroup9-3
-  - kibana-ciGroup10-3
-  - kibana-ciGroup11-3
-  - kibana-ciGroup12-3
-  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-ciGroup1-3
-  - x-pack-ciGroup2-3
-  - x-pack-ciGroup3-3
-  - x-pack-ciGroup4-3
-  - x-pack-ciGroup5-3
-  - x-pack-ciGroup6-3
   - x-pack-ciGroup7-3
-
-  - kibana-ciGroup1-4
-  - kibana-ciGroup2-4
-  - kibana-ciGroup3-4
-  - kibana-ciGroup4-4
-  - kibana-ciGroup5-4
-  - kibana-ciGroup6-4
-  - kibana-ciGroup7-4
-  - kibana-ciGroup8-4
-  - kibana-ciGroup9-4
-  - kibana-ciGroup10-4
-  - kibana-ciGroup11-4
-  - kibana-ciGroup12-4
-  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-ciGroup1-4
-  - x-pack-ciGroup2-4
-  - x-pack-ciGroup3-4
-  - x-pack-ciGroup4-4
-  - x-pack-ciGroup5-4
-  - x-pack-ciGroup6-4
   - x-pack-ciGroup7-4
-
-  - kibana-ciGroup1-5
-  - kibana-ciGroup2-5
-  - kibana-ciGroup3-5
-  - kibana-ciGroup4-5
-  - kibana-ciGroup5-5
-  - kibana-ciGroup6-5
-  - kibana-ciGroup7-5
-  - kibana-ciGroup8-5
-  - kibana-ciGroup9-5
-  - kibana-ciGroup10-5
-  - kibana-ciGroup11-5
-  - kibana-ciGroup12-5
-  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-ciGroup1-5
-  - x-pack-ciGroup2-5
-  - x-pack-ciGroup3-5
-  - x-pack-ciGroup4-5
-  - x-pack-ciGroup5-5
-  - x-pack-ciGroup6-5
   - x-pack-ciGroup7-5
-
-  - kibana-ciGroup1-6
-  - kibana-ciGroup2-6
-  - kibana-ciGroup3-6
-  - kibana-ciGroup4-6
-  - kibana-ciGroup5-6
-  - kibana-ciGroup6-6
-  - kibana-ciGroup7-6
-  - kibana-ciGroup8-6
-  - kibana-ciGroup9-6
-  - kibana-ciGroup10-6
-  - kibana-ciGroup11-6
-  - kibana-ciGroup12-6
-  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-ciGroup1-6
-  - x-pack-ciGroup2-6
-  - x-pack-ciGroup3-6
-  - x-pack-ciGroup4-6
-  - x-pack-ciGroup5-6
-  - x-pack-ciGroup6-6
   - x-pack-ciGroup7-6
+  - x-pack-ciGroup7-7
+  - x-pack-ciGroup7-8
+  - x-pack-ciGroup7-9
+  - x-pack-ciGroup7-10
+  - x-pack-ciGroup7-11
+  - x-pack-ciGroup7-12
+  - x-pack-ciGroup7-13
+  - x-pack-ciGroup7-14
+  - x-pack-ciGroup7-15
+  - x-pack-ciGroup7-16
+  - x-pack-ciGroup7-17
+  - x-pack-ciGroup7-18
+  - x-pack-ciGroup7-19
+  - x-pack-ciGroup7-20
+  - x-pack-ciGroup7-21
+  - x-pack-ciGroup7-22
+  - x-pack-ciGroup7-23
+  - x-pack-ciGroup7-24
+  - x-pack-ciGroup7-25
+  - x-pack-ciGroup7-26
+  - x-pack-ciGroup7-27
+  - x-pack-ciGroup7-28
+  - x-pack-ciGroup7-29
+  - x-pack-ciGroup7-30
+  - x-pack-ciGroup7-31
+  - x-pack-ciGroup7-32
+  - x-pack-ciGroup7-33
+  - x-pack-ciGroup7-34
+  - x-pack-ciGroup7-35
+  - x-pack-ciGroup7-36
+  - x-pack-ciGroup7-37
+  - x-pack-ciGroup7-38
+  - x-pack-ciGroup7-39
+  - x-pack-ciGroup7-40
 
 # `~` is yaml for `null`
 exclude: ~
