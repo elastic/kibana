@@ -11,17 +11,32 @@ const initialValues = {
   dateHistogramInterval: '24h',
   dateHistogramTimeZone: 'UTC',
   documentsProcessed: 0,
-  histogram: [],
+  histogram: [
+    { name: 'DistanceMiles' },
+    { name: 'FlightTimeMin' },
+  ],
   id: 'test',
   indexPattern: 'kibana*',
-  metrics: [],
+  metrics: [
+    {
+      name: 'dayOfWeek',
+      types: ['avg', 'min']
+    },
+    {
+      name: 'distanceKilometers',
+      types: ['avg', 'max']
+    }
+  ],
   pagesProcessed: 0,
   rollupCron: '0 0 0 ? * 7',
   rollupDelay: '1d',
   rollupIndex: 'my_rollup_index',
   rollupsIndexed: 0,
   status: 'stopped',
-  terms: [],
+  terms: [
+    { name: 'Carrier' },
+    { name: 'DestCountry' },
+  ],
   triggerCount: 0,
 };
 

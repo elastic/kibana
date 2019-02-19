@@ -28,13 +28,82 @@ const defaultProps = {
 const initTestBed = registerTestBed(JobTable, mountWithIntl, defaultProps, rollupJobsStore);
 
 describe('<JobTable />', () => {
-  it('should create 1 table row per job', () => {
+  describe('table rows', () => {
     const totalJobs = 5;
     const jobs = getJobs(totalJobs);
 
     const { findTestSubject } = initTestBed({ jobs });
     const tableRows = findTestSubject('jobTableRow');
 
-    expect(tableRows.length).toEqual(totalJobs);
+    it('should create 1 table row per job', () => {
+      expect(tableRows.length).toEqual(totalJobs);
+    });
+
+    it('should create the expected 8 columns for each row', () => {
+      const expectedColumns = [
+        'id',
+        'status',
+        'indexPattern',
+        'rollupIndex',
+        'rollupDelay',
+        'dateHistogramInterval',
+        'groups',
+        'metrics'
+      ];
+
+      const tableColumns = expectedColumns
+        .map(id => {
+          const col = findTestSubject(`jobTableHeaderCell-${id}`);
+          col.__id__ = id;
+          return col;
+        })
+        .filter(col => !!col.length)
+        .map(col => col.__id__);
+
+      expect(tableColumns).toEqual(expectedColumns);
+    });
+
+    it('should set the correct job value in each row cell', () => {
+      const fields = [
+        'id',
+        'indexPattern',
+        'rollupIndex',
+        'rollupDelay',
+        'dateHistogramInterval',
+      ];
+      const row = tableRows.first();
+      const job = jobs[0];
+      const getCellText = (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
+
+      // Simple fields
+      fields.forEach((field) => {
+        const cellText = getCellText(field);
+        expect(cellText).toEqual(job[field]);
+      });
+
+      // Status
+      const cellStatusText = getCellText('status');
+      expect(job.status).toEqual('stopped'); // make sure the job status *is* "stopped"
+      expect(cellStatusText).toEqual('Stopped');
+
+      // Groups
+      const expectedJobGroups = ['histogram', 'terms'].reduce((text, field) => {
+        if (job[field].length) {
+          return text
+            ? `${text}, ${field}`
+            : field.replace(/^\w/, char => char.toUpperCase());
+        }
+        return text;
+      }, '');
+      const cellGroupsText = getCellText('groups');
+      expect(cellGroupsText).toEqual(expectedJobGroups);
+
+      // Metrics
+      const expectedJobMetrics = job.metrics.reduce((text, { name }) => (
+        text ? `${text}, ${name}` : name
+      ), '');
+      const cellMetricsText = getCellText('metrics');
+      expect(cellMetricsText).toEqual(expectedJobMetrics);
+    });
   });
 });
