@@ -10,7 +10,6 @@ import {
   EuiSuperDatePicker,
   EuiSuperDatePickerProps
 } from '@elastic/eui';
-import { UndefinedType } from 'io-ts';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -44,6 +43,7 @@ interface QueryG {
   };
 }
 
+// TODO move into EUI as PR
 declare module '@elastic/eui' {
   interface OnTimeChangeProps {
     start: string;
@@ -86,6 +86,7 @@ class DatePickerComponent extends React.Component<Props, State> {
     refreshInterval: 0
   };
   public lastRefresh = 0;
+  public nextRefreshRafId = 0;
 
   public componentDidMount() {
     // read from query string to initialize, or set defaults
@@ -93,8 +94,13 @@ class DatePickerComponent extends React.Component<Props, State> {
     this.updateStateFromUrl(g);
   }
 
+  public componentWillUnmount() {
+    cancelAnimationFrame(this.nextRefreshRafId);
+  }
+
   public componentDidUpdate(prevProps: Props) {
     if (prevProps.location.search !== this.props.location.search) {
+      // TODO do we need to check for this
       const currentG = this.getG(this.props.location.search);
       const previousG = this.getG(prevProps.location.search);
       if (currentG !== previousG) {
@@ -108,45 +114,25 @@ class DatePickerComponent extends React.Component<Props, State> {
     return risonSafeDecode(_g) as QueryG | undefined;
   }
 
-  public refresh = () => {
-    const { from, to, isPaused, refreshInterval } = this.state;
+  public refresh = (min: string, max: string) => {
+    cancelAnimationFrame(this.nextRefreshRafId);
+    const { isPaused, refreshInterval } = this.state;
     const now = new Date().getTime();
-    const parsed = {
-      from: datemath.parse(from),
-      to: datemath.parse(to)
-    };
 
-    // UNCOMMENT THIS FOR DEBUGGING WHILE IN DEVELOPMENT, REMOVE BEFORE MERGING
-    // console.log('refreshing', {
-    //   last: this.lastRefresh,
-    //   isPaused,
-    //   refreshInterval,
-    //   since: now - this.lastRefresh || now,
-    //   parsed
-    // });
-
-    if (!parsed.from || !parsed.to || isPaused || !refreshInterval) {
-      // TODO: Can we do anything better here if parsed values are undefined?
+    if (isPaused || !refreshInterval) {
       return;
     }
     if (!this.lastRefresh) {
       this.lastRefresh = now;
     }
     if (now - this.lastRefresh >= refreshInterval) {
-      // UNCOMMENT THIS FOR DEBUGGING IN DEV, REMOVE BEFORE MERGING
-      // console.log(
-      //   '%cACTUAL REFRESH UPDATE',
-      //   'color: red; font-size: 30px; padding: 20px 0'
-      // );
-      const min = parsed.from.toISOString();
-      const max = parsed.to.toISOString();
       this.props.dispatchUpdateTimePicker({ min, max });
       this.lastRefresh = now;
     }
-    requestAnimationFrame(this.refresh);
+    requestAnimationFrame(() => this.refresh(min, max));
   };
 
-  public updateStateFromUrl(g: QueryG = {}, previousG: QueryG = {}) {
+  public updateStateFromUrl(g: QueryG = {}) {
     const { from, to } = g.time || APM_DEFAULT_TIME_RANGE;
     const { pause, value } = g.refreshInterval || APM_DEFAULT_REFRESH;
 
@@ -156,7 +142,8 @@ class DatePickerComponent extends React.Component<Props, State> {
     };
 
     if (!parsed.from || !parsed.to) {
-      // TODO: Can we do anything better here?
+      // set state with these bogus values and let EUI date picker component display error state
+      this.setState({ from, to });
       return;
     }
 
@@ -164,18 +151,22 @@ class DatePickerComponent extends React.Component<Props, State> {
     const max = parsed.to.toISOString();
     this.props.dispatchUpdateTimePicker({ min, max });
     this.setState({ from, to, isPaused: pause, refreshInterval: value }, () => {
-      this.refresh();
+      this.refresh(min, max);
     });
   }
 
   public updateUrlG(updatedG: QueryG) {
+    const currentSearch = toQuery(this.props.location.search);
     const nextSearch = getQueryWithRisonParams(this.props.location, '', {
       _g: updatedG
     });
 
     this.props.history.replace({
       ...this.props.location,
-      search: fromQuery(nextSearch)
+      search: fromQuery({
+        ...currentSearch,
+        ...nextSearch
+      })
     });
   }
 
@@ -183,7 +174,6 @@ class DatePickerComponent extends React.Component<Props, State> {
     isPaused,
     refreshInterval
   }) => {
-    // do stuff
     this.updateUrlG({
       refreshInterval: { pause: isPaused, value: refreshInterval }
     });
