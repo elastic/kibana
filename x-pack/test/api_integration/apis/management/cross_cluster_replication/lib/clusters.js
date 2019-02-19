@@ -23,11 +23,11 @@ export const initClusterHelpers = (supertest) => {
         .post(`${REMOTE_CLUSTERS_API_BASE_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          "name": name,
-          "seeds": [
-            "localhost:9300"
+          'name': name,
+          'seeds': [
+            'localhost:9300'
           ],
-          "skipUnavailable": true,
+          'skipUnavailable': true,
         })
     );
   };

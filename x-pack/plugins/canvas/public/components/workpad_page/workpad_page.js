@@ -10,6 +10,7 @@ import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
+import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
@@ -46,7 +47,13 @@ export class WorkpadPage extends PureComponent {
     resetHandler: PropTypes.func,
     copyElements: PropTypes.func,
     cutElements: PropTypes.func,
+    duplicateElements: PropTypes.func,
     pasteElements: PropTypes.func,
+    removeElements: PropTypes.func,
+    bringForward: PropTypes.func,
+    bringToFront: PropTypes.func,
+    sendBackward: PropTypes.func,
+    sendToBack: PropTypes.func,
   };
 
   componentWillUnmount() {
@@ -72,21 +79,46 @@ export class WorkpadPage extends PureComponent {
       onMouseUp,
       onAnimationEnd,
       onWheel,
+      removeElements,
       copyElements,
       cutElements,
+      duplicateElements,
       pasteElements,
+      bringForward,
+      bringToFront,
+      sendBackward,
+      sendToBack,
     } = this.props;
 
-    const keyHandler = action => {
+    const keyHandler = (action, event) => {
+      event.preventDefault();
       switch (action) {
         case 'COPY':
           copyElements();
           break;
+        case 'CLONE':
+          duplicateElements();
+          break;
         case 'CUT':
           cutElements();
           break;
+        case 'DELETE':
+          removeElements();
+          break;
         case 'PASTE':
           pasteElements();
+          break;
+        case 'BRING_FORWARD':
+          bringForward();
+          break;
+        case 'BRING_TO_FRONT':
+          bringToFront();
+          break;
+        case 'SEND_BACKWARD':
+          sendBackward();
+          break;
+        case 'SEND_TO_BACK':
+          sendToBack();
           break;
       }
     };
@@ -136,6 +168,7 @@ export class WorkpadPage extends PureComponent {
                 transformMatrix: element.transformMatrix,
                 width: element.width,
                 height: element.height,
+                text: element.text,
               };
 
               switch (element.subtype) {
@@ -150,6 +183,8 @@ export class WorkpadPage extends PureComponent {
                   return <BorderResizeHandle {...props} />;
                 case 'resizeConnector':
                   return <BorderConnection {...props} />;
+                case 'rotationTooltip':
+                  return <TooltipAnnotation {...props} />;
                 default:
                   return [];
               }
