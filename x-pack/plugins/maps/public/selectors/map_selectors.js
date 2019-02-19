@@ -14,9 +14,11 @@ import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
+import { getInspectorAdapters } from '../store/non_serializable_instances';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
 
-function createLayerInstance(layerDescriptor) {
-  const source = createSourceInstance(layerDescriptor.sourceDescriptor);
+function createLayerInstance(layerDescriptor, inspectorAdapters) {
+  const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
   const style = createStyleInstance(layerDescriptor.style);
   switch (layerDescriptor.type) {
     case TileLayer.type:
@@ -30,14 +32,14 @@ function createLayerInstance(layerDescriptor) {
   }
 }
 
-function createSourceInstance(sourceDescriptor) {
+function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   const Source = ALL_SOURCES.find(Source => {
     return Source.type === sourceDescriptor.type;
   });
   if (!Source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new Source(sourceDescriptor);
+  return new Source(sourceDescriptor, inspectorAdapters);
 }
 
 
@@ -63,7 +65,7 @@ export const getMapReady = ({ map }) => map && map.ready;
 
 export const getGoto = ({ map }) => map && map.goto;
 
-const getSelectedLayerId = ({ map }) => {
+export const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 
@@ -107,8 +109,6 @@ export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
 
-export const getMetadata = ({ config }) => config && config.meta;
-
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
@@ -131,9 +131,10 @@ export const getDataFilters = createSelector(
 
 export const getLayerList = createSelector(
   getLayerListRaw,
-  (layerDescriptorList) => {
+  getInspectorAdapters,
+  (layerDescriptorList, inspectorAdapters) => {
     return layerDescriptorList.map(layerDescriptor =>
-      createLayerInstance(layerDescriptor));
+      createLayerInstance(layerDescriptor, inspectorAdapters));
   });
 
 export const getSelectedLayer = createSelector(
@@ -163,3 +164,11 @@ export const getUniqueIndexPatternIds = createSelector(
 );
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));
+
+export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
+  return layerListRaw.some(layerDescriptor => {
+    const currentState = copyPersistentState(layerDescriptor);
+    const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
+    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
+  });
+});

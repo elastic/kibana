@@ -37,7 +37,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(sourceConfiguration.name).to.be('Default');
         expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
         expect(sourceConfiguration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
-        expect(sourceConfiguration.fields.container).to.be('docker.container.id');
+        expect(sourceConfiguration.fields.container).to.be('container.id');
         expect(sourceConfiguration.fields.host).to.be('host.name');
         expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
 
@@ -108,7 +108,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(configuration.description).to.be('');
         expect(configuration.metricAlias).to.be('metricbeat-*');
         expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
-        expect(configuration.fields.container).to.be('docker.container.id');
+        expect(configuration.fields.container).to.be('container.id');
         expect(configuration.fields.host).to.be('host.name');
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
         expect(configuration.fields.tiebreaker).to.be('_doc');
