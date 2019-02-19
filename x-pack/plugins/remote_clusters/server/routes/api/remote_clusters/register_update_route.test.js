@@ -39,17 +39,17 @@ describe('[API Routes] Remote Clusters Update', () => {
 
   it('should return the cluster information from Elasticsearch', async () => {
     const mock = {
-      "acknowledged": true,
-      "persistent": {
-        "cluster": {
-          "remote": {
-            "test_cluster": {
-              "seeds": []
+      'acknowledged': true,
+      'persistent': {
+        'cluster': {
+          'remote': {
+            'test_cluster': {
+              'seeds': []
             }
           }
         }
       },
-      "transient": {}
+      'transient': {}
     };
     setHttpRequestResponse(null, mock);
 
@@ -72,9 +72,9 @@ describe('[API Routes] Remote Clusters Update', () => {
 
   it('should return an error if the response does not contain cluster information', async () => {
     const mock = {
-      "acknowledged": true,
-      "persistent": {},
-      "transient": {}
+      'acknowledged': true,
+      'persistent': {},
+      'transient': {}
     };
     setHttpRequestResponse(null, mock);
 

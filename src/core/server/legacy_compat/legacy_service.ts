@@ -131,7 +131,7 @@ export class LegacyService implements CoreService {
   }
 
   private async createKbnServer(config: Config, { elasticsearch, http, plugins }: Deps) {
-    const KbnServer = require('../../../server/kbn_server');
+    const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
       // If core HTTP service is run we'll receive internal server reference and
       // options that were used to create that server so that we can properly

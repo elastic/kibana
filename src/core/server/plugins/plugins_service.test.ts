@@ -20,7 +20,7 @@
 import { ElasticsearchServiceStartContract } from '../elasticsearch';
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
 const mockDiscover = jest.fn();
 jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
