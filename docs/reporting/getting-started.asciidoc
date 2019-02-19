@@ -2,9 +2,19 @@
 [[reporting-getting-started]]
 == Getting Started
 
-{reporting} is automatically enabled in {kib}.
+[float]
+=== System Setup
 
-To manually generate a report:
+{reporting} is automatically enabled in {kib}. The first time Kibana runs, it downloads binary files for the Chromium web browser, which
+runs in a "headless" mode to render the Kibana charts.
+
+Chromium is an open-source project not related to Elastic, but the Chromium binary for Kibana was custom-built by Elastic to ensure it works
+with minimal setup. However, there still may be additional dependencies needed on your OS for it to run. See the
+<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies for
+different operating systems.
+
+[float]
+=== To manually generate a report:
 
 . Open {kib} in your web browser and log in. If you are running {kib}
 locally, go to `http://localhost:5601`. To access {kib} and generate
