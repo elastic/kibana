@@ -118,6 +118,7 @@ export class JobTableUi extends Component {
     filter: PropTypes.string.isRequired,
     sortField: PropTypes.string.isRequired,
     isSortAscending: PropTypes.bool.isRequired,
+    openDetailPanel: PropTypes.func.isRequired,
     closeDetailPanel: PropTypes.func.isRequired,
     filterChanged: PropTypes.func.isRequired,
     pageChanged: PropTypes.func.isRequired,

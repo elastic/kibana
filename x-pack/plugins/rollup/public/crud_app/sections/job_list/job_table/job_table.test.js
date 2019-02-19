@@ -31,8 +31,8 @@ describe('<JobTable />', () => {
   describe('table rows', () => {
     const totalJobs = 5;
     const jobs = getJobs(totalJobs);
-
-    const { findTestSubject } = initTestBed({ jobs });
+    const openDetailPanel = jest.fn();
+    const { findTestSubject } = initTestBed({ jobs, openDetailPanel });
     const tableRows = findTestSubject('jobTableRow');
 
     it('should create 1 table row per job', () => {
@@ -104,6 +104,16 @@ describe('<JobTable />', () => {
       ), '');
       const cellMetricsText = getCellText('metrics');
       expect(cellMetricsText).toEqual(expectedJobMetrics);
+    });
+
+    it('should open the detail panel when clicking on the job id', () => {
+      const row = tableRows.first();
+      const job = jobs[0];
+      const linkJobId = row.find(`[data-test-subj="jobTableCell-id"]`).hostNodes().find('EuiLink');
+
+      linkJobId.simulate('click');
+
+      expect(openDetailPanel.mock.calls[0][0]).toEqual(job.id);
     });
   });
 });
