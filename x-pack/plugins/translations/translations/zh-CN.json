@@ -2067,8 +2067,6 @@
     "kbn.visualize.listing.listingLimitHelpText": "您有 {totalItems} 个可视化，但“listingLimit”设置使得下表最多只能显示 {listingLimit} 个。此设置可在以下选项下更改：",
     "kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel": "创建可视化",
     "kbn.visualize.listing.noVisualizationsText": "看起来您还没有任何可视化。开始创建一些吧！",
-    "kbn.visualize.newVisWizard.createFromNewSearchTitle": "基于“新搜索”，选择“索引”",
-    "kbn.visualize.newVisWizard.createFromSavedSearchTitle": "或者，基于“已保存的搜索”",
     "kbn.visualize.newVisWizard.experimentalDescription": "这是实验性可视化。与稳定的可视化相比，其设计和实现均不够成熟，可能会随时发生更改。",
     "kbn.visualize.newVisWizard.experimentalTitle": "实验性",
     "kbn.visualize.newVisWizard.experimentalTooltip": "这是实验性可视化。",
