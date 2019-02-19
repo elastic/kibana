@@ -28,13 +28,13 @@ const defaultProps = {
 const initTestBed = registerTestBed(JobTable, defaultProps, rollupJobsStore);
 
 describe('<JobTable />', () => {
-  const totalJobs = 5;
-  const jobs = getJobs(totalJobs);
-  const openDetailPanel = jest.fn();
-  const { findTestSubject, testSubjectExists } = initTestBed({ jobs, openDetailPanel });
-  const tableRows = findTestSubject('jobTableRow');
-
   describe('table rows', () => {
+    const totalJobs = 5;
+    const jobs = getJobs(totalJobs);
+    const openDetailPanel = jest.fn();
+    const { findTestSubject } = initTestBed({ jobs, openDetailPanel });
+    const tableRows = findTestSubject('jobTableRow');
+
     it('should create 1 table row per job', () => {
       expect(tableRows.length).toEqual(totalJobs);
     });
@@ -190,14 +190,45 @@ describe('<JobTable />', () => {
   });
 
   describe('action menu', () => {
-    it('should be visible when a job is selected', () => {
-      const row = tableRows.first();
-      const job = jobs[0];
-      const checkBox = row.find(`[data-test-subj="indexTableRowCheckbox-${job.id}"]`).hostNodes();
+    let findTestSubject;
+    let testSubjectExists;
+    let row;
+    let job;
+    let checkBox;
 
+    beforeEach(() => {
+      const jobs = getJobs();
+      ({ findTestSubject, testSubjectExists } = initTestBed({ jobs }));
+      const tableRows = findTestSubject('jobTableRow');
+
+      row = tableRows.first();
+      job = jobs[0];
+      checkBox = row.find(`[data-test-subj="indexTableRowCheckbox-${job.id}"]`).hostNodes();
+    });
+
+    it('should be visible when a job is selected', () => {
       expect(testSubjectExists('jobActionMenuButton')).toBeFalsy();
+
       checkBox.simulate('change', { target: { checked: true } });
+
       expect(testSubjectExists('jobActionMenuButton')).toBeTruthy();
+    });
+
+    it('should have a "start" and "delete" action for a job that is stopped', () => {
+      expect(job.status).toEqual('stopped'); // make sure the job is stopped
+
+      checkBox.simulate('change', { target: { checked: true } });
+      const menuButton = findTestSubject('jobActionMenuButton');
+      menuButton.simulate('click'); // open the context menu
+
+      const contextMenu = findTestSubject('jobActionContextMenu');
+      expect(contextMenu.length).toBeTruthy();
+
+      const contextMenuButtons = contextMenu.find('button');
+      expect(contextMenuButtons.length).toEqual(2);
+
+      const texts = contextMenuButtons.map(btn => btn.text());
+      expect(texts).toEqual(['Start job', 'Delete job']);
     });
   });
 });
