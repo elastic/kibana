@@ -92,7 +92,6 @@ This section summarizes the changes in each release.
 
 [[release-notes-5.6.15]]
 == {kib} 5.6.15
-coming[5.6.15]
 
 [float]
 [[Enhancements-5.6.15]]
@@ -104,6 +103,18 @@ Operations::
 [float]
 [[bug-fixes-5.6.15]]
 === Bug Fixes
+
+Security::
+
+* Fixes an issue with a cross-site scripting (XSS) vulnerability (CVE-2019-7608). 
+See https://www.elastic.co/community/security[Security issues].
+
+* Fixes an arbitrary  code execution flaw in the Timelion visualizer (CVE-2019-7609). 
+See https://www.elastic.co/community/security[Security issues].
+
+* Fixes an arbitrary  code execution flaw in the security audit logger (CVE-2019-7610). 
+See https://www.elastic.co/community/security[Security issues].
+
 
 Timelion::
 
