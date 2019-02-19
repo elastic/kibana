@@ -105,7 +105,17 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 
 export const getQuery = ({ map }) => map.mapState.query;
 
-export const getRefreshConfig = ({ map }) => map.mapState.refreshConfig;
+export const getRefreshConfig = ({ map }) => {
+  if (map.mapState.refreshConfig) {
+    return map.mapState.refreshConfig;
+  }
+
+  const refreshInterval = timefilter.getRefreshInterval();
+  return {
+    isPaused: refreshInterval.pause,
+    interval: refreshInterval.value,
+  };
+};
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
 

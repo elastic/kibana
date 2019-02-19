@@ -16,7 +16,7 @@ export class LayerTOC extends React.Component {
   }
 
   componentDidMount() {
-    this._attachSortHandler();
+    //this._attachSortHandler();
   }
 
   _attachSortHandler() {
