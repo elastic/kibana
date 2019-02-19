@@ -48,7 +48,7 @@ describe('DefaultSearchCapabilities', () => {
       }
     };
 
-    expect(defaultSearchCapabilities.getSearchTimezone()).toEqual('UTC');
+    expect(defaultSearchCapabilities.searchTimezone).toEqual('UTC');
   });
 
   test('should return a valid time interval', () => {

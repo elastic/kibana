@@ -48,7 +48,7 @@ describe('Rollup Search Capabilities', () => {
   });
 
   test('should return the "timezone" for the rollup request', () => {
-    expect(rollupSearchCaps.getSearchTimezone()).toBe(testTimeZone);
+    expect(rollupSearchCaps.searchTimezone).toBe(testTimeZone);
   });
 
   test('should return the default "interval" for the rollup request', () => {

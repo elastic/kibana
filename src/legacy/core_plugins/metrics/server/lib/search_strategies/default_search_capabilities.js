@@ -33,7 +33,7 @@ export class DefaultSearchCapabilities {
     return null;
   }
 
-  getSearchTimezone() {
+  get searchTimezone() {
     return getTimezoneFromRequest(this.request);
   }
 
@@ -42,13 +42,13 @@ export class DefaultSearchCapabilities {
   }
 
   convertIntervalToUnit(intervalString, unit) {
-    const parsedIntervalString = this.parseInterval(intervalString);
+    const parsedInterval = this.parseInterval(intervalString);
 
-    if (parsedIntervalString.unit !== unit) {
+    if (parsedInterval.unit !== unit) {
       return convertIntervalToUnit(intervalString, unit);
     }
 
-    return parsedIntervalString;
+    return parsedInterval;
   }
 
   getValidTimeInterval(intervalString) {

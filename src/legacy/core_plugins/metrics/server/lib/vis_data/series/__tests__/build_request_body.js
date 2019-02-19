@@ -83,10 +83,9 @@ describe('buildRequestBody(req)', () => {
   it('returns a valid body', () => {
     const panel = body.panels[0];
     const series = panel.series[0];
-    const getSearchTimezone =  sinon.spy(() => 'UTC');
     const getValidTimeInterval = sinon.spy(() => '10s');
     const capabilities = {
-      getSearchTimezone,
+      searchTimezone: 'UTC',
       getValidTimeInterval
     };
     const config = {
@@ -95,7 +94,7 @@ describe('buildRequestBody(req)', () => {
     };
     const indexPatternObject = {};
     const doc = buildRequestBody({ payload: body }, panel, series, config, indexPatternObject, capabilities);
-    expect(getSearchTimezone.calledOnce).to.equal(true);
+
     expect(doc).to.eql({
       size: 0,
       query: {

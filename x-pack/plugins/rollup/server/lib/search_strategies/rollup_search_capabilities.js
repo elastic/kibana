@@ -5,7 +5,14 @@
 */
 import { get } from 'lodash';
 
-const leastCommonInterval = (num, base) => Math.max(Math.ceil(Math.floor(num) / base) * base, base);
+const leastCommonInterval = (num = 0, base = 0) => Math.max(Math.ceil(num / base) * base, base);
+
+const getDateHistogramAggregation = (fieldsCapabilities, rollupIndex) => {
+  const dateHistogramField = fieldsCapabilities[rollupIndex].aggs.date_histogram;
+
+  // there is also only one valid date_histogram field
+  return Object.values(dateHistogramField)[0];
+};
 
 export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
@@ -13,29 +20,22 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
       super(req, batchRequestsSupport, fieldsCapabilities);
 
       this.rollupIndex = rollupIndex;
-      this.dateHistogram = this.getDateHistogramAggregation();
+      this.dateHistogram = getDateHistogramAggregation(fieldsCapabilities, rollupIndex);
     }
 
     get defaultTimeInterval() {
       return get(this.dateHistogram, 'interval', null);
     }
 
-    getSearchTimezone() {
+    get searchTimezone() {
       return get(this.dateHistogram, 'time_zone', null);
     }
 
-    getDateHistogramAggregation() {
-      const dateHistogramField = this.fieldsCapabilities[this.rollupIndex].aggs.date_histogram;
-
-      // there is also only one valid date_histogram field
-      return Object.values(dateHistogramField)[0];
-    }
-
     getValidTimeInterval(intervalString) {
-      const parsedDefaultInterval = this.parseInterval(this.defaultTimeInterval);
-      const parsedIntervalString = this.convertIntervalToUnit(intervalString, parsedDefaultInterval.unit);
-      const commonInterval = leastCommonInterval(parsedIntervalString.value, parsedDefaultInterval.value);
+      const { unit, value } = this.parseInterval(this.defaultTimeInterval);
+      const parsedIntervalString = this.convertIntervalToUnit(intervalString, unit);
+      const commonInterval = leastCommonInterval(parsedIntervalString.value, value);
 
-      return `${commonInterval}${parsedDefaultInterval.unit}`;
+      return `${commonInterval}${unit}`;
     }
   });

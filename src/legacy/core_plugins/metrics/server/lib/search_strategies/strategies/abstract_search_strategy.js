@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 export class AbstractSearchStrategy {
   constructor(server, callWithRequestFactory, SearchRequest) {
     this.getCallWithRequestInstance = req => callWithRequestFactory(server, req);
@@ -33,5 +34,9 @@ export class AbstractSearchStrategy {
     return await indexPatternsService.getFieldsForWildcard({
       pattern: indexPattern,
     });
+  }
+
+  checkForViability() {
+    throw new TypeError('Must override method');
   }
 }

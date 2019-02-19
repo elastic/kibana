@@ -25,7 +25,7 @@ export default function dateHistogram(req, panel, annotation, esQueryConfig, ind
     const timeField = annotation.time_field;
     const { bucketSize, intervalString } = getBucketSize(req, 'auto', capabilities);
     const { from, to } = getTimerange(req);
-    const  timezone = capabilities.getSearchTimezone();
+    const  timezone = capabilities.searchTimezone;
 
     _.set(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,

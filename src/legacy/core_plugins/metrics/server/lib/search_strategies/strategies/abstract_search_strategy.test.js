@@ -54,6 +54,7 @@ describe('AbstractSearchStrategy', () => {
     expect(abstractSearchStrategy.getCallWithRequestInstance).toBeDefined();
     expect(abstractSearchStrategy.getSearchRequest).toBeDefined();
     expect(abstractSearchStrategy.getFieldsForWildcard).toBeDefined();
+    expect(abstractSearchStrategy.checkForViability).toBeDefined();
   });
 
   test('should return fields for wildcard', async () => {
