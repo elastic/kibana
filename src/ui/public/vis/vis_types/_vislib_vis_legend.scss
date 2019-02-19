@@ -17,10 +17,8 @@ $visLegendLineHeight: $euiSize;
   display: flex;
   flex-direction: row;
   padding: $euiSizeXS 0;
-  overflow: auto;
   min-height: 0;
   height: 100%;
-  overflow: hidden;
 
   // flex-direction re-aligns toggle button
   .visLib--legend-left & {
