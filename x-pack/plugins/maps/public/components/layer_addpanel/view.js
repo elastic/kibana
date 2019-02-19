@@ -30,17 +30,9 @@ export class AddLayerPanel extends Component {
     layer: null
   }
 
-  static getDerivedStateFromProps(props) {
-    return {
-      isLoading: props.isLoading,
-      hasLayerSelected: props.hasLayerSelected
-    };
-  }
-
   _previewLayer = (source) => {
-    const options = { temporary: true };
     this.setState({
-      layer: source.createDefaultLayer(options, this.props.mapColors)
+      layer: source.createDefaultLayer({}, this.props.mapColors)
     },
     () => this.props.previewLayer(this.state.layer));
   };
@@ -49,7 +41,7 @@ export class AddLayerPanel extends Component {
     this.setState({ sourceType: null });
 
     if (this.state.layer) {
-      this.props.removeLayer();
+      this.props.removeTransientLayer();
     }
   }
 
@@ -62,8 +54,7 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const { selectLayerAndAdd } = this.props;
-    const { hasLayerSelected, isLoading } = this.state;
+    const {  hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
     return (
       <EuiButton
         disabled={!hasLayerSelected}

@@ -39,11 +39,6 @@ export class LayerPanel  extends React.Component {
         prevId: nextId,
       };
     }
-    return {
-      hasStateChanged: prevState.hasStateChanged
-        ? prevState.hasStateChanged
-        : nextProps.hasStateChanged
-    };
   }
 
   state = {}
@@ -165,7 +160,7 @@ export class LayerPanel  extends React.Component {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter hasStateChanged={this.state.hasStateChanged}/>
+          <FlyoutFooter hasStateChanged={this.props.hasStateChanged}/>
         </EuiFlyoutFooter>
       </EuiFlexGroup>
     );

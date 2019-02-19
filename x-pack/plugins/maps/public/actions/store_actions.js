@@ -183,8 +183,8 @@ export function removeTransientLayer() {
   return async (dispatch, getState) => {
     const transientLayerId = getTransientLayerId(getState());
     if (transientLayerId) {
-      dispatch(removeLayer(transientLayerId));
-      dispatch(setTransientLayer(null));
+      await dispatch(removeLayer(transientLayerId));
+      await dispatch(setTransientLayer(null));
     }
   };
 }

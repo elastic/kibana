@@ -41,7 +41,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(setSelectedLayer(layer.getId()));
       dispatch(setTransientLayer(layer.getId()));
     },
-    removeLayer: () => {
+    removeTransientLayer: () => {
       dispatch(setSelectedLayer(null));
       dispatch(removeTransientLayer());
     },
