@@ -88,8 +88,6 @@ This section summarizes the changes in each release.
 [[release-notes-6.6.1]]
 == {kib} 6.6.1
 
-coming[6.6.1]
-
 See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
 when migrating your application from one version of Kibana to another.
 
@@ -129,6 +127,10 @@ Reporting::
 * Fixes date formatting on server for CSV export {pull}29977[#29977]
 Security::
 * Adds missing cluster privileges to role management screen {pull}28692[#28692]
+* Fixes an issue with a cross-site scripting (XSS) vulnerability (CVE-2019-7608). See https://www.elastic.co/community/security[Security issues].
+* Fixes an arbitrary  code execution flaw in the Timelion visualizer (CVE-2019-7609). See https://www.elastic.co/community/security[Security issues].
+* Fixes an arbitrary  code execution flaw in the security audit logger (CVE-2019-7610). See https://www.elastic.co/community/security[Security issues].
+
 Visualizations::
 * Fixes standard deviation aggregation to prevent crash of Time Series Visual Builder {pull}30798[#30798]
 * Fixes Time Series Visual Builder flot chart render after index pattern change {pull}29949[#29949]
