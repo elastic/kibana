@@ -127,6 +127,10 @@ interface APMQueryParams {
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshPaused?: string | boolean;
+  refreshInterval?: string | number;
 }
 
 interface RisonEncoded {

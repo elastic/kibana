@@ -10,41 +10,25 @@ import {
   EuiSuperDatePicker,
   EuiSuperDatePickerProps
 } from '@elastic/eui';
+import { memoize } from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { updateTimePicker } from 'x-pack/plugins/apm/public/store/urlParams';
-import {
-  fromQuery,
-  getQueryWithRisonParams,
-  risonSafeDecode,
-  toQuery
-} from '../Links/url_helpers';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 
 interface Props extends RouteComponentProps {
   dispatchUpdateTimePicker: typeof updateTimePicker;
 }
 
-interface State {
-  from: string;
-  to: string;
-  isPaused: boolean;
+interface DatePickerParams {
+  rangeFrom: string;
+  rangeTo: string;
+  refreshPaused: boolean;
   refreshInterval: number;
 }
 
-interface QueryG {
-  time?: {
-    from: string;
-    to: string;
-  };
-  refreshInterval?: {
-    pause: boolean;
-    value: number;
-  };
-}
-
-// TODO this can be removed when EUI PR lands:
-// https://github.com/elastic/eui/pull/1574
+// TODO this can be removed when EUI PR lands: https://github.com/elastic/eui/pull/1574
 declare module '@elastic/eui' {
   interface OnTimeChangeProps {
     start: string;
@@ -70,107 +54,111 @@ declare module '@elastic/eui' {
   export const EuiSuperDatePicker: React.SFC<EuiSuperDatePickerProps>;
 }
 
-const APM_DEFAULT_TIME_RANGE = {
-  from: 'now-24h',
-  to: 'now'
+const APM_DEFAULT_TIME_OPTIONS: DatePickerParams = {
+  rangeFrom: 'now-24h',
+  rangeTo: 'now',
+  refreshPaused: true,
+  refreshInterval: 0
 };
 
-const APM_DEFAULT_REFRESH = {
-  pause: true,
-  value: 0
-};
+class DatePickerComponent extends React.Component<Props> {
+  public refreshTimeoutId = 0;
 
-class DatePickerComponent extends React.Component<Props, State> {
-  public state = {
-    from: '',
-    to: '',
-    isPaused: true,
-    refreshInterval: 0
-  };
-  public refreshTimeoutId: NodeJS.Timeout | null = null;
+  public getParamsFromSearch = memoize((search: string) => {
+    const query = toQuery(search);
+    const converted = {
+      ...query,
+      refreshPaused:
+        query.refreshPaused === 'true' || query.refreshPaused === true,
+      refreshInterval:
+        typeof query.refreshInterval === 'undefined'
+          ? undefined
+          : Number(query.refreshInterval)
+    };
+    return {
+      ...APM_DEFAULT_TIME_OPTIONS,
+      ...converted
+    } as DatePickerParams;
+  });
 
   public componentDidMount() {
-    // read from query string to initialize, or set defaults
-    const g = this.getG(this.props.location.search);
-    this.updateStateFromUrl(g);
+    this.dispatchTimeRangeUpdate();
+    this.restartRefreshCycle();
   }
 
   public componentWillUnmount() {
     this.clearRefreshTimeout();
   }
 
-  public clearRefreshTimeout() {
-    if (this.refreshTimeoutId) {
-      clearTimeout(this.refreshTimeoutId);
-    }
-  }
-
   public componentDidUpdate(prevProps: Props) {
-    if (prevProps.location.search !== this.props.location.search) {
-      const currentG = this.getG(this.props.location.search);
-      const previousG = this.getG(prevProps.location.search);
-      if (currentG !== previousG) {
-        this.updateStateFromUrl(currentG);
-      }
+    const currentParams = this.getParamsFromSearch(this.props.location.search);
+    const previousParams = this.getParamsFromSearch(prevProps.location.search);
+    if (
+      currentParams.rangeFrom !== previousParams.rangeFrom ||
+      currentParams.rangeTo !== previousParams.rangeTo
+    ) {
+      this.dispatchTimeRangeUpdate();
+    }
+
+    if (
+      currentParams.refreshPaused !== previousParams.refreshPaused ||
+      currentParams.refreshInterval !== previousParams.refreshInterval
+    ) {
+      this.restartRefreshCycle();
     }
   }
 
-  public getG(search: string) {
-    const { _g } = toQuery(search);
-    return risonSafeDecode(_g) as QueryG | undefined;
-  }
-
-  public updateRefresh = ({
-    min,
-    max,
-    isPaused,
-    refreshInterval
-  }: {
-    min: string;
-    max: string;
-    isPaused: boolean;
-    refreshInterval: number;
-  }) => {
-    this.clearRefreshTimeout();
-
-    const refresh = () => {
-      if (!isPaused) {
-        this.props.dispatchUpdateTimePicker({ min, max });
-      }
-      this.refreshTimeoutId = setTimeout(refresh, refreshInterval);
-    };
-
-    this.refreshTimeoutId = setTimeout(refresh, refreshInterval);
-  };
-
-  public updateStateFromUrl(g: QueryG = {}) {
-    const { from, to } = g.time || APM_DEFAULT_TIME_RANGE;
-    const { pause, value } = g.refreshInterval || APM_DEFAULT_REFRESH;
-
+  public dispatchTimeRangeUpdate() {
+    const { rangeFrom, rangeTo } = this.getParamsFromSearch(
+      this.props.location.search
+    );
     const parsed = {
-      from: datemath.parse(from),
-      to: datemath.parse(to)
+      from: datemath.parse(rangeFrom),
+      to: datemath.parse(rangeTo)
     };
-
     if (!parsed.from || !parsed.to) {
-      // set state with these bogus values and let EUI date picker component display error state
-      this.setState({ from, to });
       return;
     }
-
     const min = parsed.from.toISOString();
     const max = parsed.to.toISOString();
     this.props.dispatchUpdateTimePicker({ min, max });
-    this.setState({ from, to, isPaused: pause, refreshInterval: value }, () => {
-      this.updateRefresh({ min, max, isPaused: pause, refreshInterval: value });
-    });
   }
 
-  public updateUrlG(updatedG: QueryG) {
+  public clearRefreshTimeout() {
+    if (this.refreshTimeoutId) {
+      window.clearTimeout(this.refreshTimeoutId);
+    }
+  }
+
+  public refresh = () => {
+    const { refreshPaused, refreshInterval } = this.getParamsFromSearch(
+      this.props.location.search
+    );
+
+    if (!refreshPaused) {
+      this.dispatchTimeRangeUpdate();
+    }
+    this.refreshTimeoutId = window.setTimeout(this.refresh, refreshInterval);
+  };
+
+  public restartRefreshCycle = () => {
+    this.clearRefreshTimeout();
+    const {
+      refreshInterval: initialRefreshInterval
+    } = this.getParamsFromSearch(this.props.location.search);
+    this.refreshTimeoutId = window.setTimeout(
+      this.refresh,
+      initialRefreshInterval
+    );
+  };
+
+  public updateUrl(nextSearch: {
+    rangeFrom?: string;
+    rangeTo?: string;
+    refreshPaused?: boolean;
+    refreshInterval?: number;
+  }) {
     const currentSearch = toQuery(this.props.location.search);
-    const nextSearch = getQueryWithRisonParams(this.props.location, '', {
-      _g: updatedG
-    });
 
     this.props.history.replace({
       ...this.props.location,
@@ -185,26 +173,30 @@ class DatePickerComponent extends React.Component<Props, State> {
     isPaused,
     refreshInterval
   }) => {
-    this.updateUrlG({
-      refreshInterval: { pause: isPaused, value: refreshInterval }
+    this.updateUrl({
+      refreshPaused: isPaused,
+      refreshInterval
     });
   };
 
   public handleTimeChange: EuiSuperDatePickerProps['onTimeChange'] = options => {
-    this.updateUrlG({ time: { from: options.start, to: options.end } });
+    this.updateUrl({ rangeFrom: options.start, rangeTo: options.end });
   };
 
   public render() {
-    if (this.state.from === '' || this.state.to === '') {
-      return null;
-    }
+    const {
+      rangeFrom,
+      rangeTo,
+      refreshPaused,
+      refreshInterval
+    } = this.getParamsFromSearch(this.props.location.search);
 
     return (
       <EuiSuperDatePicker
-        start={this.state.from}
-        end={this.state.to}
-        isPaused={this.state.isPaused}
-        refreshInterval={this.state.refreshInterval}
+        start={rangeFrom}
+        end={rangeTo}
+        isPaused={refreshPaused}
+        refreshInterval={refreshInterval}
         onTimeChange={this.handleTimeChange}
         onRefreshChange={this.handleRefreshChange}
         showUpdateButton={false}

@@ -47,7 +47,7 @@ describe('DatePicker', () => {
   });
 
   it('should parse "last 15 minutes" from URL params', () => {
-    const { store } = mountPicker('_g=(time:(from:now-15m,to:now))');
+    const { store } = mountPicker('rangeFrom=now-15m&rangeTo=now');
     expect(store.getState().urlParams).toEqual({
       start: '2019-02-15T11:45:00.000Z',
       end: '2019-02-15T12:00:00.000Z'
@@ -55,7 +55,7 @@ describe('DatePicker', () => {
   });
 
   it('should parse "last 7 days" from URL params', () => {
-    const { store } = mountPicker('_g=(time:(from:now-7d,to:now))');
+    const { store } = mountPicker('rangeFrom=now-7d&rangeTo=now');
     expect(store.getState().urlParams).toEqual({
       start: '2019-02-08T12:00:00.000Z',
       end: '2019-02-15T12:00:00.000Z'
@@ -64,7 +64,7 @@ describe('DatePicker', () => {
 
   it('should parse absolute dates from URL params', () => {
     const { store } = mountPicker(
-      `_g=(time:(from:'2019-02-03T10:00:00.000Z',to:'2019-02-10T16:30:00.000Z'))`
+      `rangeFrom=2019-02-03T10:00:00.000Z&rangeTo=2019-02-10T16:30:00.000Z`
     );
     expect(store.getState().urlParams).toEqual({
       start: '2019-02-03T10:00:00.000Z',
