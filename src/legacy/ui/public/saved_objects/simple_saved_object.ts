@@ -24,7 +24,15 @@ import {
 } from '../../../server/saved_objects';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export class SavedObject<T extends SavedObjectAttributes> {
+/**
+ * This class is a very simple wrapper for SavedObjects loaded from the server.
+ *
+ * It provides basic functionality for updating/deleting/etc. saved objects but
+ * doesn't include any type-specific implementations.
+ *
+ * For more sophisiticated use cases, the SavedObject class implements additional functions
+ */
+export class SimpleSavedObject<T extends SavedObjectAttributes> {
   public attributes: T;
   // tslint:disable-next-line variable-name We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];

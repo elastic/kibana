@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Header } from './header';
+export { SearchSelection } from './search_selection';
