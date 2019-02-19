@@ -26,6 +26,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { InspectorViewChooser } from './inspector_view_chooser';
 
@@ -84,28 +85,30 @@ class InspectorPanel extends Component {
     const { selectedView } = this.state;
 
     return (
-      <React.Fragment>
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-          >
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="s">
-                <h1>{ title }</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectorViewChooser
-                views={views}
-                onViewSelected={this.onViewSelected}
-                selectedView={selectedView}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        { this.renderSelectedPanel() }
-      </React.Fragment>
+      <I18nProvider>
+        <React.Fragment>
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="center"
+            >
+              <EuiFlexItem grow={true}>
+                <EuiTitle size="s">
+                  <h1>{ title }</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectorViewChooser
+                  views={views}
+                  onViewSelected={this.onViewSelected}
+                  selectedView={selectedView}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          { this.renderSelectedPanel() }
+        </React.Fragment>
+      </I18nProvider>
     );
   }
 }
