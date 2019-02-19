@@ -18,15 +18,21 @@ import { LogTimeControls } from '../../components/logging/log_time_controls';
 import { SourceConfigurationButton } from '../../components/source_configuration';
 import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { WithLogFilter } from '../../containers/logs/with_log_filter';
-import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../containers/with_source';
 
 export const LogsToolbar = injectI18n(({ intl }) => {
-  const { availableTextScales, textScale, setTextScale, setTextWrap, textWrap } = useContext(
-    LogViewConfiguration.Context
-  );
+  const {
+    availableIntervalSizes,
+    availableTextScales,
+    intervalSize,
+    setIntervalSize,
+    setTextScale,
+    setTextWrap,
+    textScale,
+    textWrap,
+  } = useContext(LogViewConfiguration.Context);
 
   return (
     <Toolbar>
@@ -66,15 +72,11 @@ export const LogsToolbar = injectI18n(({ intl }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogCustomizationMenu>
-                <WithLogMinimap>
-                  {({ availableIntervalSizes, intervalSize, setIntervalSize }) => (
-                    <LogMinimapScaleControls
-                      availableIntervalSizes={availableIntervalSizes}
-                      setIntervalSize={setIntervalSize}
-                      intervalSize={intervalSize}
-                    />
-                  )}
-                </WithLogMinimap>
+                <LogMinimapScaleControls
+                  availableIntervalSizes={availableIntervalSizes}
+                  setIntervalSize={setIntervalSize}
+                  intervalSize={intervalSize}
+                />
                 <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
                 <LogTextScaleControls
                   availableTextScales={availableTextScales}
