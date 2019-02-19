@@ -58,6 +58,11 @@ export const config = (Joi) => {
       sniffInterval: Joi.number().allow(false).default(false),
       sniffOnConnectionFault: Joi.boolean().default(false),
       hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single(), // if empty, use Kibana's connection config
+      keepAlive: Joi.boolean(),
+      keepAliveInterval: Joi.number(),
+      keepAliveMaxFreeSockets: Joi.number(),
+      keepAliveFreeSocketTimeout: Joi.number(),
+      maxSockets: Joi.number(),
       username: Joi.string(),
       password: Joi.string(),
       requestTimeout: Joi.number().default(30000),
