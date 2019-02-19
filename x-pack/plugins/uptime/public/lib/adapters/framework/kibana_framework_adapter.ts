@@ -38,6 +38,11 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.defaultAutorefreshIsPaused = autorefreshIsPaused || true;
   }
 
+  /**
+   * This function will acquire all the existing data from Kibana
+   * services and persisted state expected by the plugin's props
+   * interface. It then renders the plugin.
+   */
   public render = (
     renderComponent: BootstrapUptimeApp,
     createGraphQLClient: CreateGraphQLClient
@@ -49,22 +54,31 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
         const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
+
+          // configure breadcrumbs
           let kibanaBreadcrumbs: UMBreadcrumb[] = [];
           chrome.breadcrumbs.get$().subscribe((breadcrumbs: UMBreadcrumb[]) => {
             kibanaBreadcrumbs = breadcrumbs;
           });
+
+          // set up route with current base path
           const basePath = chrome.getBasePath();
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
-          const persistedState = this.initializePersistedState();
+
+          // determine whether dark mode is enabled
           const darkMode = config.get('theme:darkMode', false) || false;
+
+          // get current persisted state, if any
+          const persistedState = this.initializePersistedState();
           const {
             autorefreshIsPaused,
             autorefreshInterval,
             dateRangeStart,
             dateRangeEnd,
           } = persistedState;
+
           ReactDOM.render(
             renderComponent({
               darkMode,
