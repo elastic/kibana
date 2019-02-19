@@ -62,4 +62,5 @@ export async function i18nMixin(kbnServer, server, config) {
     locale,
     ...translations,
   }));
+  server.decorate('server', 'getTranslationsFilePaths', () => translationPaths);
 }
