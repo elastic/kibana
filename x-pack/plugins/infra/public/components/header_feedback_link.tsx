@@ -15,7 +15,7 @@ interface InfraHeaderFeedbackLinkProps {
 
 export const InfraHeaderFeedbackLink: React.SFC<InfraHeaderFeedbackLinkProps> = ({ url }) => (
   <VerticallyCenteredHeaderSection side="right">
-    <EuiLink href={url} target="_blank" rel="noopener noreferrer">
+    <EuiLink href={url} target="_blank" rel="noopener">
       <FormattedMessage
         id="xpack.infra.headerFeedbackLink.feedbackText"
         defaultMessage="Feedback"

@@ -119,7 +119,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
         for (const proto in heartbeatState) {
           if (!heartbeatState.hasOwnProperty(proto)) continue;
           const val = heartbeatState[proto];
-          if (typeof val !== "object") continue;
+          if (typeof val !== 'object') continue;
 
           if (!clusterHb.hasOwnProperty(proto)) {
             clusterHb[proto] = {

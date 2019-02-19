@@ -23,7 +23,8 @@
   }
 }
 
-@mixin kibana-resizer($size: ($euiSizeM + 2px), $direction: horizontal) {
+// Standardizes the look and layout of resizable area handles
+@mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
   display: flex;
   flex: 0 0 $size;
   background-color: $euiPageBackgroundColor;
@@ -40,7 +41,7 @@
     height: $size;
     width: 100%;
   } @else {
-    @warn("Direction unknown for kibana-resizer");
+    @warn("Direction unknown for kbnResizer");
   }
 
   &:hover {
