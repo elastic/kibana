@@ -10,7 +10,6 @@ import { WidgetOverlay } from '../widget_overlay/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Toasts } from '../toasts';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
 
 export class GisMap extends Component {
@@ -71,10 +70,10 @@ export class GisMap extends Component {
     if (noFlyoutVisible) {
       currentPanel = null;
     } else if (addLayerVisible) {
-      currentPanelClassName = "mapMapLayerPanel-isVisible";
+      currentPanelClassName = 'mapMapLayerPanel-isVisible';
       currentPanel = <AddLayerPanel/>;
     } else if (layerDetailsVisible) {
-      currentPanelClassName = "mapMapLayerPanel-isVisible";
+      currentPanelClassName = 'mapMapLayerPanel-isVisible';
       currentPanel = (
         <LayerPanel/>
       );
@@ -99,7 +98,6 @@ export class GisMap extends Component {
           {currentPanel}
         </EuiFlexItem>
 
-        <Toasts/>
         {exitFullScreenButton}
       </EuiFlexGroup>
     );

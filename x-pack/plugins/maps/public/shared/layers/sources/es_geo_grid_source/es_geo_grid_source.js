@@ -50,7 +50,7 @@ const aggSchemas = new Schemas([
 export class ESGeoGridSource extends AbstractESSource {
 
   static type = 'ES_GEO_GRID';
-  static title = 'Elasticsearch grid aggregation';
+  static title = 'Grid aggregation';
   static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
@@ -64,10 +64,10 @@ export class ESGeoGridSource extends AbstractESSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
       const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor);
+      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 
@@ -111,6 +111,10 @@ export class ESGeoGridSource extends AbstractESSource {
 
   isGeoGridPrecisionAware() {
     return true;
+  }
+
+  isJoinable() {
+    return false;
   }
 
   getGridResolution() {

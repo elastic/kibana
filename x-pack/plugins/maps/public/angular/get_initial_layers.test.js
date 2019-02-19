@@ -62,23 +62,23 @@ describe('Saved object does not have layer list', () => {
     };
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
-      "alpha": 1,
-      "dataRequests": [],
-      "id": layers[0].id,
-      "label": null,
-      "maxZoom": 24,
-      "minZoom": 0,
-      "sourceDescriptor": {
-        "type": "EMS_TMS",
-        "id": "road_map",
+      'alpha': 1,
+      '__dataRequests': [],
+      'id': layers[0].id,
+      'label': null,
+      'maxZoom': 24,
+      'minZoom': 0,
+      'sourceDescriptor': {
+        'type': 'EMS_TMS',
+        'id': 'road_map',
       },
-      "style": {
-        "properties": {},
-        "type": "TILE",
+      'style': {
+        'properties': {},
+        'type': 'TILE',
       },
-      "temporary": false,
-      "type": "TILE",
-      "visible": true,
+      'temporary': false,
+      'type': 'TILE',
+      'visible': true,
     }]);
   });
 
@@ -92,16 +92,14 @@ describe('Saved object does not have layer list', () => {
 
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
-      "alpha": 1,
-      dataRequests: [],
+      'alpha': 1,
+      __dataRequests: [],
       id: layers[0].id,
       label: null,
       maxZoom: 24,
       minZoom: 0,
-      source: undefined,
       sourceDescriptor: {
-        type: 'KIBANA_TILEMAP',
-        url: 'myTileUrl',
+        type: 'KIBANA_TILEMAP'
       },
       style: {
         properties: {},
@@ -121,8 +119,8 @@ describe('Saved object does not have layer list', () => {
 
     const layers = getInitialLayers(null);
     expect(layers).toEqual([{
-      "alpha": 1,
-      dataRequests: [],
+      'alpha': 1,
+      __dataRequests: [],
       id: layers[0].id,
       label: null,
       maxZoom: 24,

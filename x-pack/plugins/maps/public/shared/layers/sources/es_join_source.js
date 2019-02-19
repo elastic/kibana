@@ -6,12 +6,10 @@
 
 import _ from 'lodash';
 
-import { AbstractSource } from './source';
+import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
-  indexPatternService,
   SearchSource,
 } from '../../../kibana_services';
 import { AggConfigs } from 'ui/vis/agg_configs';
@@ -58,7 +56,7 @@ export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
   return propertiesMap;
 }
 
-export class ESJoinSource extends AbstractSource {
+export class ESJoinSource extends AbstractESSource {
 
   static type = 'ES_JOIN_SOURCE';
 
@@ -73,10 +71,6 @@ export class ESJoinSource extends AbstractSource {
     }
 
     return false;
-  }
-
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
   getIndexPatternIds() {
@@ -112,6 +106,7 @@ export class ESJoinSource extends AbstractSource {
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
       resp = await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
         requestId: this._descriptor.id,
@@ -139,34 +134,9 @@ export class ESJoinSource extends AbstractSource {
     };
   }
 
-  async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
-    return indexPattern;
-  }
-
-
-  async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
-  }
-
   isFilterByMapBounds() {
     // TODO
     return false;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  isQueryAware() {
-    return true;
   }
 
   getJoinDescription(leftSourceName, leftFieldName) {

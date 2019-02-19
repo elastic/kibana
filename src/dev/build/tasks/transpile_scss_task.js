@@ -18,9 +18,9 @@
  */
 
 import { toArray } from 'rxjs/operators';
-import { buildAll } from '../../../server/sass/build_all';
-import { findPluginSpecs } from '../../../plugin_discovery/find_plugin_specs';
-import { collectUiExports } from '../../../ui/ui_exports/collect_ui_exports';
+import { buildAll } from '../../../legacy/server/sass/build_all';
+import { findPluginSpecs } from '../../../legacy/plugin_discovery/find_plugin_specs';
+import { collectUiExports } from '../../../legacy/ui/ui_exports/collect_ui_exports';
 
 export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',

@@ -51,7 +51,6 @@ uiRoutes
   });
 
 import { uiModules } from 'ui/modules';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 const module = uiModules.get('apps/ml');
 
@@ -75,7 +74,6 @@ module.controller('MlExplorerController', function (
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
   $scope.jobs = [];
-  $scope.indexPatterns = $route.current ? $route.current.locals.indexPatterns.map(getFromSavedObject) : [];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 

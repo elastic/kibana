@@ -19,7 +19,7 @@
 
 import xml2js from 'xml2js';
 import vfs from 'vinyl-fs';
-import { createMapStream } from '../../utils/streams';
+import { createMapStream } from '../../legacy/utils/streams';
 import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
 import { find } from 'lodash';
 import stripAnsi from 'strip-ansi';

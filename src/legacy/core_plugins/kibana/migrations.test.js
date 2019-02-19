@@ -313,6 +313,50 @@ Object {
       /* eslint-enable max-len */
     });
 
+    it('extracts index patterns from controls', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          foo: true,
+          visState: JSON.stringify({
+            bar: false,
+            params: {
+              controls: [
+                {
+                  bar: true,
+                  indexPattern: 'pattern*',
+                },
+                {
+                  foo: true,
+                },
+              ],
+            },
+          }),
+        },
+      };
+      const migratedDoc = migrate(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "control_0_index_pattern",
+      "type": "index-pattern",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+    /* eslint-enable max-len */
+    });
+
     it('skips extracting savedSearchId when missing', () => {
       const doc = {
         id: '1',
@@ -1157,7 +1201,7 @@ Object {
   "type": "search",
 }
 `);
-    /* eslint-enable max-len */
+      /* eslint-enable max-len */
     });
   });
 });
