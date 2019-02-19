@@ -101,7 +101,12 @@ export class Cluster {
       'sniffOnStart',
       'sniffInterval',
       'sniffOnConnectionFault',
-      'log'
+      'log',
+      'maxSockets',
+      'keepAlive',
+      'keepAliveInterval',
+      'keepAliveMaxFreeSockets',
+      'keepAliveFreeSocketTimeout'
     ]);
   }
 }

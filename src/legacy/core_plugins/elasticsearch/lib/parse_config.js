@@ -27,11 +27,12 @@ const readFile = (file) => readFileSync(file, 'utf8');
 
 export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}) {
   const config = {
-    keepAlive: true,
     ...pick(serverConfig, [
-      'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
+      'plugins', 'apiVersion', 'pingTimeout',
       'requestTimeout', 'log', 'logQueries', 'sniffOnStart',
-      'sniffInterval', 'sniffOnConnectionFault', 'hosts'
+      'sniffInterval', 'sniffOnConnectionFault', 'hosts',
+      'keepAlive', 'keepAliveInterval', 'keepAliveMaxFreeSockets',
+      'maxSockets', 'keepAliveFreeSocketTimeout'
     ])
   };
 
