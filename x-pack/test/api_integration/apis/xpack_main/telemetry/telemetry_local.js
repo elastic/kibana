@@ -156,6 +156,7 @@ export default function ({ getService }) {
         'stack_stats.kibana.versions',
         'stack_stats.kibana.visualization',
         'stack_stats.xpack.ccr',
+        'stack_stats.xpack.data_frame',
         'stack_stats.xpack.graph',
         'stack_stats.xpack.ilm',
         'stack_stats.xpack.logstash',
