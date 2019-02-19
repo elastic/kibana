@@ -42,20 +42,17 @@ export const createExportRoute = (prereqs: any) => ({
             .max(EXPORT_SIZE_LIMIT)
             .optional(),
         })
+        .xor('type', 'objects')
         .default(),
     },
     async handler(request: any, h: any) {
       const { savedObjectsClient } = request.pre;
-      const types =
-        request.query.type ||
-        request.server.savedObjects.types.filter((type: string) => type !== 'space');
       const docsToExport = await getSortedObjectsForExport({
-        types,
-        objects: request.query.objects,
         savedObjectsClient,
+        types: request.query.type,
+        objects: request.query.objects,
         exportSizeLimit: EXPORT_SIZE_LIMIT,
       });
-      // Send file to response
       return h
         .response(docsToExport.map(doc => JSON.stringify(doc)).join('\n'))
         .header('Content-Disposition', `attachment; filename="export.ndjson"`)

@@ -239,62 +239,6 @@ Array [
       `"Can't export more than 1 objects"`
     );
   });
-
-  test('filters objects by type when "type" and "objects" is passed in', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'index-pattern',
-          references: [],
-        },
-      ],
-    });
-    const response = await getSortedObjectsForExport({
-      exportSizeLimit: 10000,
-      savedObjectsClient,
-      types: ['index-pattern'],
-      objects: [
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-      ],
-    });
-    expect(response).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-]
-`);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": Promise {},
-    },
-  ],
-}
-`);
-  });
 });
 
 describe('sortObjects()', () => {

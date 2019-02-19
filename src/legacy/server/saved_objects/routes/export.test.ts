@@ -50,23 +50,13 @@ describe('GET /api/saved_objects/_export', () => {
   test('formats successful response', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_export',
+      url: '/api/saved_objects/_export?type=index-pattern',
     };
     savedObjectsClient.find.mockResolvedValueOnce({
-      total: 2,
+      total: 1,
       saved_objects: [
         {
           id: '1',
-          type: 'search',
-          references: [
-            {
-              type: 'index-pattern',
-              id: '2',
-            },
-          ],
-        },
-        {
-          id: '2',
           type: 'index-pattern',
           references: [],
         },
@@ -80,19 +70,9 @@ describe('GET /api/saved_objects/_export', () => {
     expect(objects).toMatchInlineSnapshot(`
 Array [
   Object {
-    "id": "2",
+    "id": "1",
     "references": Array [],
     "type": "index-pattern",
-  },
-  Object {
-    "id": "1",
-    "references": Array [
-      Object {
-        "id": "2",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
   },
 ]
 `);
@@ -104,9 +84,6 @@ Array [
         "perPage": 10000,
         "type": Array [
           "index-pattern",
-          "search",
-          "visualization",
-          "dashboard",
         ],
       },
     ],

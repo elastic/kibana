@@ -28,23 +28,17 @@ export default function ({ getService }) {
       before(() => esArchiver.load('saved_objects/10k'));
       after(() => esArchiver.unload('saved_objects/10k'));
 
-      it('should return 200 when exporting without type or objects passed in', async () => {
+      it('should return 400 when exporting without type or objects passed in', async () => {
         await supertest
           .get('/api/saved_objects/_export')
-          .expect(200)
+          .expect(400)
           .then((resp) => {
-            expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-            expect(resp.headers['content-type']).to.eql('application/ndjson');
-            const objects = resp.text.split('\n').map(JSON.parse);
-            expect(objects).to.have.length(10000);
-            for (const object of objects) {
-              expect(typeof object.id).to.be('string');
-              expect(typeof object.attributes).to.be('object');
-              expect(typeof object.type).to.be('string');
-              expect(typeof object.references).to.be('object');
-              expect(typeof object.updated_at).to.be('string');
-              expect(typeof object.version).to.be('string');
-            }
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message: '"value" must contain at least one of [type, objects]',
+              validation: { source: 'query', keys: [ 'value' ] },
+            });
           });
       });
 
@@ -212,7 +206,7 @@ export default function ({ getService }) {
           });
       });
 
-      it('should return 200 when exporting by type and objects', async () => {
+      it('should return 400 when exporting by type and objects', async () => {
         await supertest
           .get('/api/saved_objects/_export')
           .query({
@@ -224,50 +218,14 @@ export default function ({ getService }) {
               },
             ]),
           })
-          .expect(200)
+          .expect(400)
           .then((resp) => {
-            expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
-            expect(resp.headers['content-type']).to.eql('application/ndjson');
-            const objects = resp.text.split('\n').map(JSON.parse);
-            expect(objects).to.eql([{
-              attributes: {
-                description: '',
-                hits: 0,
-                kibanaSavedObjectMeta: {
-                  searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
-                },
-                optionsJSON: objects[0].attributes.optionsJSON,
-                panelsJSON: objects[0].attributes.panelsJSON,
-                refreshInterval: {
-                  display: 'Off',
-                  pause: false,
-                  value: 0,
-                },
-                timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                timeRestore: true,
-                timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                title: 'Requests',
-                uiStateJSON: '{}',
-                version: 1,
-              },
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              migrationVersion: {
-                dashboard: '7.0.0',
-              },
-              references: [
-                {
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  name: 'panel_0',
-                  type: 'visualization',
-                },
-              ],
-              type: 'dashboard',
-              updated_at: '2017-09-21T18:57:40.826Z',
-              version: objects[0].version,
-            }]);
-            JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON);
-            JSON.parse(objects[0].attributes.optionsJSON);
-            JSON.parse(objects[0].attributes.panelsJSON);
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message: '"value" contains a conflict between exclusive peers [type, objects]',
+              validation: { source: 'query', keys: [ 'value' ] },
+            });
           });
       });
     });
@@ -298,6 +256,9 @@ export default function ({ getService }) {
       it('should return 400 when exporting more than 10,000', async () => {
         await supertest
           .get('/api/saved_objects/_export')
+          .query({
+            type: ['dashboard', 'visualization', 'search', 'index-pattern'],
+          })
           .expect(400)
           .then((resp) => {
             expect(resp.body).to.eql({

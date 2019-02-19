@@ -26,7 +26,7 @@ interface ObjectToExport {
 }
 
 interface ExportObjectsOptions {
-  types: string[];
+  types?: string[];
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
@@ -40,7 +40,6 @@ export async function getSortedObjectsForExport({
 }: ExportObjectsOptions) {
   let objectsToExport: SavedObject[] = [];
   if (objects) {
-    objects = objects.filter(obj => types.includes(obj.type));
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
