@@ -38,6 +38,7 @@ export class LayerPanel  extends React.Component {
         prevId: nextId,
       };
     }
+    return null;
   }
 
   state = {}
