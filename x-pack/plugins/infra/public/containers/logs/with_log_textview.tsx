@@ -15,9 +15,11 @@ interface LogTextviewUrlState {
 }
 
 export const WithLogTextviewUrlState = () => {
-  const { textScale, wrap, setTextScale, setTextWrap } = useContext(LogViewConfiguration.Context);
+  const { textScale, textWrap, setTextScale, setTextWrap } = useContext(
+    LogViewConfiguration.Context
+  );
 
-  const urlState = useMemo(() => ({ textScale, wrap }), [textScale, wrap]);
+  const urlState = useMemo(() => ({ textScale, wrap: textWrap }), [textScale, textWrap]);
 
   return (
     <UrlStateContainer

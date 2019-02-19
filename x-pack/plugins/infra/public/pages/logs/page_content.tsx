@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, setFlyoutItem }) => {
-  const { textScale, wrap } = useContext(LogViewConfiguration.Context);
+  const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
 
   return (
     <PageContent>
@@ -62,7 +62,7 @@ export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, se
                       scale={textScale}
                       target={targetPosition}
                       width={width}
-                      wrap={wrap}
+                      wrap={textWrap}
                       setFlyoutItem={setFlyoutItem}
                       showFlyout={showFlyout}
                     />

@@ -24,7 +24,7 @@ import { WithKueryAutocompletion } from '../../containers/with_kuery_autocomplet
 import { WithSource } from '../../containers/with_source';
 
 export const LogsToolbar = injectI18n(({ intl }) => {
-  const { availableTextScales, textScale, setTextScale, setTextWrap, wrap } = useContext(
+  const { availableTextScales, textScale, setTextScale, setTextWrap, textWrap } = useContext(
     LogViewConfiguration.Context
   );
 
@@ -75,7 +75,7 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                     />
                   )}
                 </WithLogMinimap>
-                <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
                 <LogTextScaleControls
                   availableTextScales={availableTextScales}
                   textScale={textScale}

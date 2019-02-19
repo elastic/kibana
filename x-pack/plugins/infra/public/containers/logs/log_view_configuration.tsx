@@ -25,7 +25,7 @@ export const useLogViewConfiguration = () => {
       setTextScale,
       setTextWrap,
       textScale,
-      wrap: textWrap,
+      textWrap,
     }),
     [textScale, textWrap]
   );
