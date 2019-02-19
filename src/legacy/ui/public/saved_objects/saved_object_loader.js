@@ -17,22 +17,23 @@
  * under the License.
  */
 
-import { Scanner } from '../../utils/scanner';
-import { StringUtils } from '../../utils/string_utils';
+import { StringUtils } from '../utils/string_utils';
 
+/**
+ * The SavedObjectLoader class provides some convenience functions
+ * to load and save one kind of saved objects (specified in the constructor).
+ *
+ * It is based on the SavedObjectClient which implements loading and saving
+ * in an abstract, type-agnostic way. If possible, use SavedObjectClient directly
+ * to avoid pulling in extra functionality which isn't used.
+ */
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome, savedObjectClient) {
+  constructor(SavedObjectClass, kbnUrl, chrome, savedObjectClient) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
-    this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
     this.chrome = chrome;
-
-    this.scanner = new Scanner($http, {
-      index: kbnIndex,
-      type: this.lowercaseType
-    });
 
     this.loaderProperties = {
       name: `${ this.lowercaseType }s`,
@@ -83,13 +84,6 @@ export class SavedObjectLoader {
     source.id = id;
     source.url = this.urlFor(id);
     return source;
-  }
-
-  scanAll(queryString, pageSize = 1000) {
-    return this.scanner.scanAndMap(queryString, {
-      pageSize,
-      docCount: Infinity
-    });
   }
 
   /**

@@ -50,7 +50,7 @@ import '../tooltip';
 import '../url';
 import '../validate_date_interval';
 import '../watch_multi';
-import '../courier/saved_object/ui/saved_object_save_as_checkbox';
+import '../saved_objects/ui/saved_object_save_as_checkbox';
 import '../react_components';
 import '../i18n';
 import '../query_bar/directive';

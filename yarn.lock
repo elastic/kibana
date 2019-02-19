@@ -15693,22 +15693,6 @@ makeerror@1.0.x:
   dependencies:
     tmpl "1.0.x"
 
-makelogs@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.3.0.tgz#cfcf9dbe8988f70a06472101e6731cdb27466ab2"
-  integrity sha512-2jSmXtlYhrr0/Y2AqVt0OmySEmxdJlUAd6UJgiPM40TZRfzyO/e51P4LrVnVqujp2pLHktTG6VcTUujyiQQsOA==
-  dependencies:
-    async "^1.4.2"
-    bluebird "^2.10.0"
-    elasticsearch "^15.2.0"
-    inquirer "^0.11.1"
-    lodash "~2.4.1"
-    moment "^2.10.6"
-    optimist "~0.6.1"
-    progress "^1.1.8"
-    through2 "^2.0.0"
-    update-notifier "^0.5.0"
-
 map-age-cleaner@^0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/map-age-cleaner/-/map-age-cleaner-0.1.2.tgz#098fb15538fd3dbe461f12745b0ca8568d4e3f74"
