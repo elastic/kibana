@@ -110,7 +110,7 @@ describe('FeatureRegistry', () => {
       name: 'Test Feature',
       app: ['app1', 'app2'],
       privileges: {
-        ['some invalid key']: {
+        foo: {
           app: ['app1', 'app2'],
           savedObject: {
             all: ['config', 'space', 'etc'],
@@ -119,12 +119,12 @@ describe('FeatureRegistry', () => {
           api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
-      },
+      } as any,
     };
 
     const featureRegistry = new FeatureRegistry();
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
-      `"child \\"privileges\\" fails because [\\"some invalid key\\" is not allowed]"`
+      `"child \\"privileges\\" fails because [\\"foo\\" is not allowed]"`
     );
   });
 

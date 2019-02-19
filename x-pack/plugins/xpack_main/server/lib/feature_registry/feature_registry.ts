@@ -37,7 +37,8 @@ export interface Feature {
   };
   catalogue?: string[];
   privileges: {
-    [key: string]: FeatureKibanaPrivileges;
+    all?: FeatureKibanaPrivileges;
+    read?: FeatureKibanaPrivileges;
   };
   privilegesTooltip?: string;
 }
@@ -73,7 +74,7 @@ const schema = Joi.object({
   catalogue: catalogueSchema,
   privileges: Joi.object()
     .pattern(
-      featurePrivilegePartRegex,
+      /^(read|all)$/,
       Joi.object({
         grantWithBaseRead: Joi.bool(),
         management: managementSchema,
