@@ -13,7 +13,7 @@ export function clusterRoute(server: Server, codeNodeClient: CodeNodeClient, log
   server.securedRoute({
     path: '/api/code/cluster',
     method: 'GET',
-    requireAdmin: true,
+    requireAdmin: false,
     async handler() {
       const info = codeNodeClient.getCodeNodeInfo();
       if (info) {
