@@ -21,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -33,7 +32,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { documentationLinks } from '../../documentation_links/documentation_links';
 
-const luceneQuerySyntaxDocs = documentationLinks.query.luceneQuerySyntax;
 const kueryQuerySyntaxDocs = documentationLinks.query.kueryQuerySyntax;
 
 interface State {
