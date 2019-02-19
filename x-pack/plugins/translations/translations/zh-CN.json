@@ -5119,7 +5119,6 @@
     "xpack.ml.jobSelect.jobDescription": "{jobId} 和 {jobsAmount, plural, zero {# 个其他作业} one {# 个其他作业} other {# 个其他作业}}",
     "xpack.ml.jobSelect.noJobsSelectedWarningMessage": "未选择作业，将自动选择第一个作业",
     "xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage": "已请求\n{invalidIdsLength, plural, one { 个作业 {invalidIds} 不存在} other { 个作业 {invalidIds} 不存在}}",
-    "xpack.ml.jobSelect.wholeGroupDescription": "{wholeGroup} 和 {total, plural, zero {# 个其他作业} one {# 个其他作业} other {# 个其他作业}}",
     "xpack.ml.jobSelectButton.jobSelectionMenuButtonAriaLabel": "作业选择菜单",
     "xpack.ml.jobSelectButton.jobSelectionMenuButtonTooltip": "已选择 {description}",
     "xpack.ml.jobSelectButton.jobTitle": "作业",
