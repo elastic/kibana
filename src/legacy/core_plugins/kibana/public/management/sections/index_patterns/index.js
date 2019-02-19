@@ -25,22 +25,24 @@ import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
+import indexPatternListTemplate from './list.html';
+import { IndexPatternTable } from './index_pattern_table';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
+import { EuiBadge } from '@elastic/eui';
+import { getListBreadcrumbs } from './breadcrumbs';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IndexPatternList } from './index_pattern_list';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
 export function updateIndexPatternList(
-  $scope,
-  indexPatternCreationOptions,
-  defaultIndex,
   indexPatterns,
+  kbnUrl,
+  indexPatternCreationOptions,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -48,13 +50,13 @@ export function updateIndexPatternList(
   }
 
   render(
-    <I18nProvider>
-      <IndexPatternList
-        indexPatternCreationOptions={indexPatternCreationOptions}
-        defaultIndex={defaultIndex}
+    <I18nContext>
+      <IndexPatternTable
         indexPatterns={indexPatterns}
+        navTo={kbnUrl.redirect}
+        indexPatternCreationOptions={indexPatternCreationOptions}
       />
-    </I18nProvider>,
+    </I18nContext>,
     node,
   );
 }
@@ -78,13 +80,19 @@ const indexPatternsResolutions = {
 
 // add a dependency to all of the subsection routes
 uiRoutes
-  .defaults(/management\/kibana\/(indices|index)/, {
+  .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
     resolve: indexPatternsResolutions
+  });
+
+uiRoutes
+  .when('/management/kibana/index_patterns', {
+    template: indexPatternListTemplate,
+    k7Breadcrumbs: getListBreadcrumbs
   });
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
-  .directive('kbnManagementIndices', function ($route, config, kbnUrl, Private) {
+  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl, Private) {
     return {
       restrict: 'E',
       transclude: true,
@@ -103,8 +111,11 @@ uiModules.get('apps/management')
 
             return {
               id: id,
-              title: pattern.get('title'),
-              url: kbnUrl.eval('#/management/kibana/indices/{{id}}', { id: id }),
+              title:
+  <span>
+    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge className="indexPatternList__badge">Default</EuiBadge>)}
+  </span>,
+              url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,
               default: $scope.defaultIndex === id,
               tag: tags && tags.length ? tags[0] : null,
@@ -125,7 +136,7 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
+          updateIndexPatternList($scope.indexPatternList, kbnUrl, indexPatternCreationOptions);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);
@@ -137,10 +148,10 @@ uiModules.get('apps/management')
     };
   });
 
-management.getSection('kibana').register('indices', {
+management.getSection('kibana').register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
-  url: '#/management/kibana/indices/'
+  url: '#/management/kibana/index_patterns/'
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -150,7 +161,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     description: i18n.translate('kbn.management.indexPatternLabel',
       { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
-    path: '/app/kibana#/management/kibana/indices',
+    path: '/app/kibana#/management/kibana/index_patterns',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN
   };

@@ -65,7 +65,9 @@ export default function ({ getService, getPageObjects }) {
 
         await pipelineEditor.clickSave();
         await pipelineList.assertExists();
-        const rows = await pipelineList.getRowsFromTable();
+        await pipelineList.setFilter(id);
+
+        const rows = await pipelineList.readRows();
         const newRow = rows.find(row => row.id === id);
 
         expect(newRow)
@@ -76,13 +78,13 @@ export default function ({ getService, getPageObjects }) {
     describe('cancel button', () => {
       it('discards the pipeline and redirects to the list', async () => {
         await PageObjects.logstash.gotoPipelineList();
-        const originalRows = await pipelineList.getRowsFromTable();
+        const originalRows = await pipelineList.readRows();
 
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.clickCancel();
 
         await pipelineList.assertExists();
-        const currentRows = await pipelineList.getRowsFromTable();
+        const currentRows = await pipelineList.readRows();
         expect(originalRows).to.eql(currentRows);
       });
     });

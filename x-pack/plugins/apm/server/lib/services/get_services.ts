@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oc } from 'ts-optchain';
-import { BucketAgg } from 'x-pack/plugins/apm/typings/elasticsearch';
+import { BucketAgg } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_DURATION
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export interface IServiceListItem {
@@ -29,8 +31,18 @@ export async function getServices(
 ): Promise<ServiceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
+  const filter: ESFilter[] = [
+    { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
+    { range: rangeFilter(start, end) }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
   const params = {
     index: [
+      config.get<string>('apm_oss.metricsIndices'),
       config.get<string>('apm_oss.errorIndices'),
       config.get<string>('apm_oss.transactionIndices')
     ],
@@ -38,25 +50,7 @@ export async function getServices(
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
-                  { term: { [PROCESSOR_EVENT]: 'error' } }
-                ]
-              }
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {
@@ -81,10 +75,6 @@ export async function getServices(
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
-
   interface ServiceBucket extends BucketAgg {
     avg: {
       value: number;
@@ -105,15 +95,15 @@ export async function getServices(
 
   const resp = await client<void, Aggs>('search', params);
   const aggs = resp.aggregations;
-  const serviceBuckets = oc(aggs).services.buckets([]);
+  const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
 
   return serviceBuckets.map(bucket => {
     const eventTypes = bucket.events.buckets;
     const transactions = eventTypes.find(e => e.key === 'transaction');
-    const totalTransactions = oc(transactions).doc_count(0);
+    const totalTransactions = idx(transactions, _ => _.doc_count) || 0;
 
     const errors = eventTypes.find(e => e.key === 'error');
-    const totalErrors = oc(errors).doc_count(0);
+    const totalErrors = idx(errors, _ => _.doc_count) || 0;
 
     const deltaAsMinutes = (end - start) / 1000 / 60;
     const transactionsPerMinute = totalTransactions / deltaAsMinutes;
@@ -121,7 +111,7 @@ export async function getServices(
 
     return {
       serviceName: bucket.key,
-      agentName: oc(bucket).agents.buckets[0].key(),
+      agentName: idx(bucket, _ => _.agents.buckets[0].key),
       transactionsPerMinute,
       errorsPerMinute,
       avgResponseTime: bucket.avg.value

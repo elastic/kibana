@@ -149,11 +149,6 @@ Button and ButtonGroup), or you just want to group some related components toget
 TextArea, and CheckBox), then they belong in the same logical grouping. In this case, you can create
 additional SCSS files for these components in the same component directory.
 
-### Writing CSS
-
-Check out our [CSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/css_style_guide.md)
-and [SCSS style guide](https://github.com/elastic/kibana/blob/master/style_guides/scss_style_guide.md).
-
 ## Benefits
 
 ### Dynamic, interactive documentation

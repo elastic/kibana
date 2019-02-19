@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleActions } from "redux-actions";
+import { handleActions } from 'redux-actions';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
 import { updateIndexSettingsSuccess, updateIndexSettingsError } from '../actions/update_index_settings';

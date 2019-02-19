@@ -35,7 +35,7 @@ export default function getSplits(resp, panel, series) {
       return buckets.map(bucket => {
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.label = formatKey(bucket.key, series);
-        bucket.color = panel.type === 'top_n' ? color.hex() : colors.shift();
+        bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
         bucket.meta = meta;
         return bucket;
       });
@@ -67,7 +67,7 @@ export default function getSplits(resp, panel, series) {
     {
       id: series.id,
       label: series.label || calculateLabel(metric, series.metrics),
-      color: color.hex(),
+      color: color.string(),
       ...mergeObj,
       meta
     }

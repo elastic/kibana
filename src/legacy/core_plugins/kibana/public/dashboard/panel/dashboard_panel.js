@@ -19,7 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 
@@ -28,6 +28,7 @@ import { PanelError } from './panel_error';
 
 import {
   EuiPanel,
+  EuiLoadingChart,
 } from '@elastic/eui';
 
 class DashboardPanelUi extends React.Component {
@@ -98,16 +99,19 @@ class DashboardPanelUi extends React.Component {
   };
 
   renderEmbeddableViewport() {
+    const classes = classNames('panel-content', {
+      'panel-content-isLoading': !this.props.initialized,
+    });
+
     return (
       <div
         id="embeddedPanel"
-        className="panel-content"
+        className={classes}
         ref={panelElement => this.panelElement = panelElement}
       >
-        {!this.props.initialized && <FormattedMessage
-          id="kbn.dashboard.panel.embeddableViewport.loadingLabel"
-          defaultMessage="loading…"
-        />}
+        {!this.props.initialized && (
+          <EuiLoadingChart size="l" mono/>
+        )}
       </div>
     );
   }
@@ -115,6 +119,10 @@ class DashboardPanelUi extends React.Component {
   shouldComponentUpdate(nextProps) {
     if (this.embeddable && !_.isEqual(nextProps.containerState, this.props.containerState)) {
       this.embeddable.onContainerStateChanged(nextProps.containerState);
+    }
+
+    if (this.embeddable && nextProps.lastReloadRequestTime !== this.props.lastReloadRequestTime) {
+      this.embeddable.reload();
     }
 
     return nextProps.error !== this.props.error ||
@@ -177,6 +185,7 @@ DashboardPanelUi.propTypes = {
   embeddableFactory: PropTypes.shape({
     create: PropTypes.func,
   }).isRequired,
+  lastReloadRequestTime: PropTypes.number.isRequired,
   embeddableStateChanged: PropTypes.func.isRequired,
   embeddableIsInitialized: PropTypes.func.isRequired,
   embeddableError: PropTypes.func.isRequired,

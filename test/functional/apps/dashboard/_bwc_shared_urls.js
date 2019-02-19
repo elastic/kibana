@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
+  const pieChart = getService('pieChart');
   const browser = getService('browser');
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -33,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
     `_a=(description:'',filters:!(),` +
         `fullScreenMode:!f,` +
-        `options:(darkTheme:!f),` +
+        `options:(),` +
         `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
                  `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
         `query:(language:lucene,query:'memory:%3E220000'),` +
@@ -67,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await dashboardExpect.pieSliceCount(5);
+        await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });

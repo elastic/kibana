@@ -1,8 +1,8 @@
 [role="xpack"]
 [[monitoring-settings-kb]]
-=== Monitoring Settings in Kibana
+=== Monitoring settings in Kibana
 ++++
-<titleabbrev>Monitoring Settings</titleabbrev>
+<titleabbrev>Monitoring settings</titleabbrev>
 ++++
 
 By default, the Monitoring application is enabled, but data collection
@@ -25,21 +25,21 @@ from Logstash, you configure
 in `logstash.yml`.
 
 For more information, see
-{xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
+{stack-ov}/xpack-monitoring.html[Monitoring the Elastic Stack].
 
 [float]
 [[monitoring-general-settings]]
-==== General Monitoring Settings
+==== General monitoring settings
 
 `xpack.monitoring.enabled`::
-Set to `true` (default) to enable {monitoring} in {kib}. Unlike the
+Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
 `xpack.monitoring.ui.enabled` setting, when this setting is `false`, the
 monitoring back-end does not run and {kib} stats are not sent to the monitoring
 cluster.
 
-`xpack.monitoring.elasticsearch.url`::
+`xpack.monitoring.elasticsearch.hosts`::
 Specifies the location of the {es} cluster where your monitoring data is stored.
-By default, this is the same as the `elasticsearch.url`. This setting enables
+By default, this is the same as `elasticsearch.hosts`. This setting enables
 you to use a single {kib} instance to search and visualize data in your
 production cluster as well as monitor data sent to a dedicated monitoring
 cluster.
@@ -53,9 +53,6 @@ from the monitoring cluster. If not set, {kib} uses the value of the
 Specifies the password that {kib} uses for authentication when it retrieves data
 from the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.password` setting.
-
-`xpack.monitoring.report_stats`::
-deprecated[6.3.0, Use `xpack.xpack_main.telemetry.enabled` instead.]
 
 `xpack.xpack_main.telemetry.enabled`::
 Set to `true` (default) to send cluster statistics to Elastic. Reporting your
@@ -71,7 +68,7 @@ which has a default value of `30000`.
 
 [float]
 [[monitoring-collection-settings]]
-==== Monitoring Collection Settings
+==== Monitoring collection settings
 
 These settings control how data is collected from {kib}.
 
@@ -87,7 +84,7 @@ Defaults to `10000` (10 seconds).
 
 [float]
 [[monitoring-ui-settings]]
-==== Monitoring UI Settings
+==== Monitoring UI settings
 
 These settings adjust how the {kib} Monitoring page displays monitoring data.
 However, the defaults work best in most circumstances. For more information
@@ -114,7 +111,7 @@ value in this setting.
 
 [float]
 [[monitoring-ui-cgroup-settings]]
-===== Monitoring UI Container Settings
+===== Monitoring UI container settings
 
 The Monitoring UI exposes the Cgroup statistics that we collect for you to make
 better decisions about your container performance, rather than guessing based on

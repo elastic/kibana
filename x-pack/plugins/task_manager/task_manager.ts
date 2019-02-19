@@ -13,7 +13,7 @@ import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task'
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
-import { FetchOpts, TaskStore } from './task_store';
+import { FetchOpts, FetchResult, RemoveResult, TaskStore } from './task_store';
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -53,11 +53,15 @@ export class TaskManager {
 
     const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
 
+    /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
+     * to initialize, and can change after startup */
     const store = new TaskStore({
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
       index: config.get('xpack.task_manager.index'),
       maxAttempts: config.get('xpack.task_manager.max_attempts'),
       supportedTypes: Object.keys(this.definitions),
+      logger,
+      getKibanaUuid: () => config.get('server.uuid'),
     });
     const pool = new TaskPool({
       logger,
@@ -75,7 +79,8 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger,
       pollInterval: config.get('xpack.task_manager.poll_interval'),
-      work() {
+      store,
+      work(): Promise<void> {
         return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
       },
     });
@@ -85,10 +90,24 @@ export class TaskManager {
     this.poller = poller;
 
     kbnServer.afterPluginsInit(async () => {
-      this.isInitialized = true;
       store.addSupportedTypes(Object.keys(this.definitions));
-      await store.init();
-      await poller.start();
+      const startPoller = () => {
+        return poller
+          .start()
+          .then(() => {
+            this.isInitialized = true;
+          })
+          .catch((err: Error) => {
+            // FIXME: check the type of error to make sure it's actually an ES error
+            logger.warning(`PollError ${err.message}`);
+
+            // rety again to initialize store and poller, using the timing of
+            // task_manager's configurable poll interval
+            const retryInterval = config.get('xpack.task_manager.poll_interval');
+            setTimeout(() => startPoller(), retryInterval);
+          });
+      };
+      return startPoller();
     });
   }
 
@@ -131,8 +150,9 @@ export class TaskManager {
    * Schedules a task.
    *
    * @param task - The task being scheduled.
+   * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async schedule(taskInstance: TaskInstance, options?: any) {
+  public async schedule(taskInstance: TaskInstance, options?: any): Promise<ConcreteTaskInstance> {
     this.assertInitialized('Tasks cannot be scheduled until after task manager is initialized!');
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
@@ -147,8 +167,9 @@ export class TaskManager {
    * Fetches a paginatable list of scheduled tasks.
    *
    * @param opts - The query options used to filter tasks
+   * @returns {Promise<FetchResult>}
    */
-  public async fetch(opts: FetchOpts) {
+  public async fetch(opts: FetchOpts): Promise<FetchResult> {
     this.assertInitialized('Tasks cannot be fetched before task manager is initialized!');
     return this.store.fetch(opts);
   }
@@ -157,19 +178,31 @@ export class TaskManager {
    * Removes the specified task from the index.
    *
    * @param {string} id
-   * @returns {Promise<void>}
+   * @returns {Promise<RemoveResult>}
    */
-  public async remove(id: string) {
+  public async remove(id: string): Promise<RemoveResult> {
     this.assertInitialized('Tasks cannot be removed before task manager is initialized!');
     return this.store.remove(id);
   }
 
+  /**
+   * Ensures task manager IS NOT already initialized
+   *
+   * @param {string} message shown if task manager is already initialized
+   * @returns void
+   */
   private assertUninitialized(message: string) {
     if (this.isInitialized) {
       throw new Error(`Cannot ${message} after the task manager is initialized!`);
     }
   }
 
+  /**
+   * Ensures task manager IS already initialized
+   *
+   * @param {string} message shown if task manager is not initialized
+   * @returns void
+   */
   private assertInitialized(message: string) {
     if (!this.isInitialized) {
       throw new Error(`NotInitialized: ${message}`);

@@ -4,20 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { main as mainRoutes } from './server/routes/main';
-import { jobs as jobRoutes } from './server/routes/jobs';
+import { registerRoutes } from './server/routes';
 
 import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
 import { validateMaxContentLength } from './server/lib/validate_max_content_length';
+import { validateBrowser } from './server/lib/validate_browser';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { PHANTOM, createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
@@ -94,7 +93,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: make chromium the only valid option in 7.0
+            type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
@@ -146,6 +145,7 @@ export const reporting = (kibana) => {
 
     init: async function (server) {
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
+      const browserFactory = await createBrowserDriverFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
@@ -153,6 +153,7 @@ export const reporting = (kibana) => {
 
       validateConfig(config, logWarning);
       validateMaxContentLength(server, logWarning);
+      validateBrowser(browserFactory, logWarning);
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
@@ -168,29 +169,19 @@ export const reporting = (kibana) => {
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getReportingUsageCollector(server));
 
-      server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
+      server.expose('browserDriverFactory', browserFactory);
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes
-      mainRoutes(server);
-      jobRoutes(server);
+      registerRoutes(server);
     },
 
     deprecations: function ({ unused }) {
       return [
-        (settings, log) => {
-          const isPhantom = get(settings, 'capture.browser.type') === PHANTOM;
-          if (isPhantom) {
-            log(
-              'Phantom browser support for Reporting will be removed and Chromium will be the only valid option starting in 7.0.0. ' +
-              'Use the default `chromium` value for `xpack.reporting.capture.browser.type` to dismiss this warning.'
-            );
-          }
-        },
-        unused("capture.concurrency"),
-        unused("capture.timeout"),
-        unused("capture.settleTime"),
-        unused("kibanaApp"),
+        unused('capture.concurrency'),
+        unused('capture.timeout'),
+        unused('capture.settleTime'),
+        unused('kibanaApp'),
       ];
     },
   });

@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { compact, get, has, set } from 'lodash';
-import { unset } from '../../../utils';
-
 import healthCheck from './lib/health_check';
 import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
-import filterHeaders from './lib/filter_headers';
-
 import { createProxy } from './lib/create_proxy';
+import filterHeaders from './lib/filter_headers';
+import { DEFAULT_API_VERSION } from './lib/default_api_version';
 
-const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
+const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -46,7 +43,10 @@ export default function (kibana) {
 
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        sniffOnStart: Joi.boolean().default(false),
+        sniffInterval: Joi.number().allow(false).default(false),
+        sniffOnConnectionFault: Joi.boolean().default(false),
+        hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
         preserveHost: Joi.boolean().default(true),
         username: Joi.string(),
         password: Joi.string(),
@@ -58,39 +58,11 @@ export default function (kibana) {
         startupTimeout: Joi.number().default(5000),
         logQueries: Joi.boolean().default(false),
         ssl: sslSchema,
-        apiVersion: Joi.string().default('master'),
+        apiVersion: Joi.string().default(DEFAULT_API_VERSION),
         healthCheck: Joi.object({
           delay: Joi.number().default(2500)
         }).default(),
       }).default();
-    },
-
-    deprecations({ rename }) {
-      const sslVerify = (basePath) => {
-        const getKey = (path) => {
-          return compact([basePath, path]).join('.');
-        };
-
-        return (settings, log) => {
-          const sslSettings = get(settings, getKey('ssl'));
-
-          if (!has(sslSettings, 'verify')) {
-            return;
-          }
-
-          const verificationMode = get(sslSettings, 'verify') ? 'full' : 'none';
-          set(sslSettings, 'verificationMode', verificationMode);
-          unset(sslSettings, 'verify');
-
-          log(`Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with "${getKey('ssl.verificationMode')}"`);
-        };
-      };
-
-      return [
-        rename('ssl.ca', 'ssl.certificateAuthorities'),
-        rename('ssl.cert', 'ssl.certificate'),
-        sslVerify(),
-      ];
     },
 
     uiExports: {
@@ -115,8 +87,7 @@ export default function (kibana) {
       createDataCluster(server);
       createAdminCluster(server);
 
-      createProxy(server, 'POST', '/{index}/_search');
-      createProxy(server, 'POST', '/_msearch');
+      createProxy(server);
 
       // Set up the health check service and start it.
       const { start, waitUntilReady } = healthCheck(this, server);

@@ -37,12 +37,6 @@ export function initAuthenticateApi(server) {
           throw Boom.unauthorized(authenticationResult.error);
         }
 
-        const { authorization } = server.plugins.security;
-        if (!authorization.mode.useRbacForRequest(request)) {
-          const msg = `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
-          server.log(['warning', 'deprecated', 'security'], msg);
-        }
-
         return h.response();
       } catch(err) {
         throw wrapError(err);

@@ -53,7 +53,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 1,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_0",
   },
@@ -61,7 +61,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 1,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_1",
   },
@@ -69,7 +69,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 1,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_2",
   },
@@ -89,7 +89,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 2,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_0",
   },
@@ -97,7 +97,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 2,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_1",
   },
@@ -120,7 +120,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 5,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_0",
   },
@@ -128,7 +128,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 2,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_1",
   },
@@ -136,7 +136,7 @@ Object {
     "createTaskRunner": [Function],
     "description": "one super cool task",
     "numWorkers": 1,
-    "timeOut": "5m",
+    "timeout": "5m",
     "title": "Test",
     "type": "test_task_type_2",
   },
@@ -157,7 +157,9 @@ Object {
           createTaskRunner() {
             return {
               async run() {
-                return {};
+                return {
+                  state: {},
+                };
               },
             };
           },

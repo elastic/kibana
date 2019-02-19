@@ -82,12 +82,12 @@ describe('ply', () => {
       it('throws when by is an invalid column', () => {
         expect(() => fn(testTable, { by: [''], expression: [averagePrice] })).to.throwException(
           e => {
-            expect(e.message).to.be('No such column: ');
+            expect(e.message).to.be(`Column not found: ''`);
           }
         );
         expect(() => fn(testTable, { by: ['foo'], expression: [averagePrice] })).to.throwException(
           e => {
-            expect(e.message).to.be('No such column: foo');
+            expect(e.message).to.be(`Column not found: 'foo'`);
           }
         );
       });

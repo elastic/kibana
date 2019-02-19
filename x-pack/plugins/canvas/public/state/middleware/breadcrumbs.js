@@ -18,6 +18,7 @@ export const breadcrumbs = ({ getState }) => next => action => {
   const updatedWorkpad = getWorkpad(getState());
 
   // if the workpad name changed, update the breadcrumb data
-  if (currentWorkpad.name !== updatedWorkpad.name)
+  if (currentWorkpad.name !== updatedWorkpad.name) {
     setBreadcrumb([getBaseBreadcrumb(), getWorkpadBreadcrumb(updatedWorkpad)]);
+  }
 };

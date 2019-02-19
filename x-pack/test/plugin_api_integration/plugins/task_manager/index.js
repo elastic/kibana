@@ -24,7 +24,7 @@ export default function (kibana) {
         sampleTask: {
           title: 'Sample Task',
           description: 'A sample task for testing the task_manager.',
-          timeOut: '1m',
+          timeout: '1m',
           numWorkers: 2,
 
           // This task allows tests to specify its behavior (whether it reschedules itself, whether it errors, etc)
@@ -43,7 +43,6 @@ export default function (kibana) {
               const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
               await callCluster('index', {
                 index: '.task_manager_test_result',
-                type: '_doc',
                 body: {
                   type: 'task',
                   taskId: taskInstance.id,

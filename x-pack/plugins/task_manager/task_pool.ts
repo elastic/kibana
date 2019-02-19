@@ -42,11 +42,8 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   get occupiedWorkers() {
-    let total = 0;
-
-    this.running.forEach(({ numWorkers }) => (total += numWorkers));
-
-    return total;
+    const running = Array.from(this.running); // get array from a Set
+    return running.reduce((total, { numWorkers }) => (total += numWorkers), 0);
   }
 
   /**
@@ -79,8 +76,8 @@ export class TaskPool {
         this.running.add(task);
         task
           .run()
-          .catch(error => {
-            this.logger.warning(`Task ${task} failed in attempt to run: ${error.stack}`);
+          .catch(err => {
+            this.logger.warning(`Task ${task} failed in attempt to run: ${err.message}`);
           })
           .then(() => this.running.delete(task));
       }
@@ -102,8 +99,8 @@ export class TaskPool {
       this.logger.debug(`Cancelling expired task ${task}.`);
       this.running.delete(task);
       await task.cancel();
-    } catch (error) {
-      this.logger.error(`Failed to cancel task ${task}: ${error.stack}`);
+    } catch (err) {
+      this.logger.error(`Failed to cancel task ${task}: ${err}`);
     }
   }
 }

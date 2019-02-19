@@ -4,75 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, ContextService, Stackframe } from './APMDoc';
-
-export interface DbContext {
-  instance?: string;
-  statement?: string;
-  type?: string;
-  user?: string;
-}
+import { APMDoc } from './APMDoc';
+import { IStackframe } from './fields/Stackframe';
 
 interface Processor {
   name: 'transaction';
   event: 'span';
 }
 
-export interface HttpContext {
-  url?: string;
-}
-
-interface TagsContext {
-  [key: string]: string;
-}
-
-interface Context {
-  db?: DbContext;
-  http?: HttpContext;
-  tags?: TagsContext;
-  service: ContextService;
-  [key: string]: unknown;
-}
-
-export interface SpanV1 extends APMDocV1 {
-  version: 'v1';
+export interface Span extends APMDoc {
   processor: Processor;
-  context: Context;
+  service: { name: string };
   span: {
-    duration: {
-      us: number;
-    };
-    start: {
-      us: number; // only v1
-    };
-    name: string;
-    type: string;
-    id: number; // we are manually adding span.id
-    parent?: string; // only v1
-    stacktrace?: Stackframe[];
-  };
-  transaction: {
+    action: string;
+    duration: { us: number };
     id: string;
-  };
-}
-
-export interface SpanV2 extends APMDocV2 {
-  version: 'v2';
-  processor: Processor;
-  context: Context;
-  span: {
-    duration: {
-      us: number;
-    };
     name: string;
+    stacktrace?: IStackframe[];
+    subtype: string;
+    sync: boolean;
     type: string;
-    id: number; // id will be derived from hex encoded 64 bit hex_id string in v2
-    hex_id: string; // only v2
-    stacktrace?: Stackframe[];
+    http?: {
+      url?: {
+        original?: string;
+      };
+      response?: {
+        status_code?: number;
+      };
+      method?: string;
+    };
+    db?: {
+      instance?: string;
+      statement?: string;
+      type?: string;
+      user?: {
+        name?: string;
+      };
+    };
   };
-  transaction: {
-    id: string;
-  };
+  transaction: { id: string };
 }
-
-export type Span = SpanV1 | SpanV2;

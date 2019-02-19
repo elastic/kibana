@@ -219,7 +219,7 @@ describe('TaskManagerRunner', () => {
     const store = {
       update: sinon.stub(),
       remove: sinon.stub(),
-      getMaxAttempts: sinon.stub().returns(5),
+      maxAttempts: 5,
     };
     const runner = new TaskManagerRunner({
       kbnServer: sinon.stub(),
@@ -230,11 +230,13 @@ describe('TaskManagerRunner', () => {
         {
           id: 'foo',
           taskType: 'bar',
-          version: 32,
+          sequenceNumber: 32,
+          primaryTerm: 32,
           runAt: new Date(),
+          scheduledAt: new Date(),
           attempts: 0,
           params: {},
-          scope: 'reporting',
+          scope: ['reporting'],
           state: {},
           status: 'idle',
           user: 'example',

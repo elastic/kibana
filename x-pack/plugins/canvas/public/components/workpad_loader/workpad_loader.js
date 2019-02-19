@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiToolTip,
   EuiEmptyPrompt,
+  EuiFilePicker,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
@@ -25,7 +26,7 @@ import { Paginate } from '../paginate';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
-import { WorkpadUpload } from './workpad_upload';
+import { uploadWorkpad } from './upload_workpad';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
@@ -62,7 +63,9 @@ export class WorkpadLoader extends React.PureComponent {
   componentWillReceiveProps(newProps) {
     // the workpadId prop will change when a is created or loaded, close the toolbar when it does
     const { workpadId, onClose } = this.props;
-    if (workpadId !== newProps.workpadId) onClose();
+    if (workpadId !== newProps.workpadId) {
+      onClose();
+    }
   }
 
   componentWillUnmount() {
@@ -77,7 +80,7 @@ export class WorkpadLoader extends React.PureComponent {
   };
 
   // create new workpad from uploaded JSON
-  uploadWorkpad = async workpad => {
+  onUpload = async workpad => {
     this.setState({ createPending: true });
     await this.props.createWorkpad(workpad);
     this._isMounted && this.setState({ createPending: false });
@@ -140,7 +143,7 @@ export class WorkpadLoader extends React.PureComponent {
             <EuiFlexItem grow={false}>
               <EuiToolTip content="Download">
                 <EuiButtonIcon
-                  iconType="sortDown"
+                  iconType="exportAction"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
                   aria-label="Download Workpad"
                 />
@@ -230,9 +233,8 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite}>
+        <WorkpadDropzone onUpload={this.onUpload} disabled={createPending || !canUserWrite}>
           <EuiBasicTable
-            compressed
             items={rows}
             itemId="id"
             columns={columns}
@@ -286,13 +288,20 @@ export class WorkpadLoader extends React.PureComponent {
     );
 
     const downloadButton = (
-      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
+      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="exportAction">
         {`Download (${selectedWorkpads.length})`}
       </EuiButton>
     );
 
     let uploadButton = (
-      <WorkpadUpload onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite} />
+      <EuiFilePicker
+        compressed
+        className="canvasWorkpad__upload--compressed"
+        initialPromptText="Import workpad JSON file"
+        onChange={([file]) => uploadWorkpad(file, this.onUpload)}
+        accept="application/json"
+        disabled={createPending || !canUserWrite}
+      />
     );
 
     if (!canUserWrite) {

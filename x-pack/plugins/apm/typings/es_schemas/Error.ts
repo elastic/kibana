@@ -4,24 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2, ContextService, Stackframe } from './APMDoc';
-
-interface Agent {
-  hostname: string;
-  type: string;
-  version: string;
-}
+import { APMDoc } from './APMDoc';
+import { Container } from './fields/Container';
+import { Context } from './fields/Context';
+import { Host } from './fields/Host';
+import { Http } from './fields/Http';
+import { Kubernetes } from './fields/Kubernetes';
+import { Process } from './fields/Process';
+import { Service } from './fields/Service';
+import { IStackframe } from './fields/Stackframe';
+import { Url } from './fields/Url';
+import { User } from './fields/User';
 
 interface Processor {
   name: 'error';
   event: 'error';
-}
-
-interface Context {
-  process?: {
-    pid: number;
-  };
-  service: ContextService;
 }
 
 interface Exception {
@@ -31,7 +28,7 @@ interface Exception {
   module?: string;
   attributes?: unknown;
   handled?: boolean;
-  stacktrace?: Stackframe[];
+  stacktrace?: IStackframe[];
 }
 
 interface Log {
@@ -39,46 +36,34 @@ interface Log {
   param_message?: string;
   logger_name?: string;
   level?: string;
-  stacktrace?: Stackframe[];
-}
-
-interface ErrorV1 extends APMDocV1 {
-  version: 'v1';
-  agent: Agent;
-  processor: Processor;
-  context: Context;
-  transaction?: {
-    id: string; // transaction ID is not required in v1
-  };
-  error: {
-    id?: string; // ID is not required in v1
-    timestamp: string;
-    culprit: string;
-    grouping_key: string;
-    // either exception or log are given
-    exception?: Exception;
-    log?: Log;
-  };
-}
-
-interface ErrorV2 extends APMDocV2 {
-  version: 'v2';
-  agent: Agent;
-  processor: Processor;
-  context: Context;
-  transaction: {
-    id: string; // transaction ID is required in v2
-  };
-  error: {
-    id: string; // ID is required in v2
-    timestamp: string;
-    culprit: string;
-    grouping_key: string;
-    // either exception or log are given
-    exception?: Exception;
-    log?: Log;
-  };
+  stacktrace?: IStackframe[];
 }
 
 // Not calling it "Error" to avoid clashes with types for native Error
-export type APMError = ErrorV1 | ErrorV2;
+export interface APMError extends APMDoc {
+  processor: Processor;
+  transaction: {
+    id: string;
+    sampled?: boolean;
+    type?: string;
+  };
+  error: {
+    id: string;
+    culprit: string;
+    grouping_key: string;
+    // either exception or log are given
+    exception?: Exception[];
+    log?: Log;
+  };
+
+  // Shared by errors and transactions
+  container?: Container;
+  context?: Context;
+  host?: Host;
+  http?: Http;
+  kubernetes?: Kubernetes;
+  process?: Process;
+  service: Service;
+  url?: Url;
+  user?: User;
+}

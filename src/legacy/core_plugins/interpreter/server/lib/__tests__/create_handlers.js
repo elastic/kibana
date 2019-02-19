@@ -75,7 +75,6 @@ describe('server createHandlers', () => {
   it('provides helper methods and properties', () => {
     expect(handlers).to.have.property('environment', 'server');
     expect(handlers).to.have.property('serverUri');
-    expect(handlers).to.have.property('httpHeaders', mockRequest.headers);
     expect(handlers).to.have.property('elasticsearchClient');
   });
 

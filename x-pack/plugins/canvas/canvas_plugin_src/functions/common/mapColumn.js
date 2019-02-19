@@ -49,8 +49,11 @@ export const mapColumn = () => ({
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
       const type = getType(rows[0][args.name]);
       const newColumn = { name: args.name, type };
-      if (existingColumnIndex === -1) columns.push(newColumn);
-      else columns[existingColumnIndex] = newColumn;
+      if (existingColumnIndex === -1) {
+        columns.push(newColumn);
+      } else {
+        columns[existingColumnIndex] = newColumn;
+      }
 
       return {
         type: 'datatable',

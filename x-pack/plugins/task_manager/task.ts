@@ -53,7 +53,7 @@ export interface RunResult {
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
    */
-  state?: object;
+  state: object;
 }
 
 export const validateRunResult = Joi.object({
@@ -99,7 +99,7 @@ export interface TaskDefinition {
    * the task takes longer than this, Kibana will send it a kill command and
    * the task will be re-attempted.
    */
-  timeOut?: string;
+  timeout?: string;
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
@@ -125,8 +125,10 @@ export const validateTaskDefinition = Joi.object({
   type: Joi.string().required(),
   title: Joi.string().optional(),
   description: Joi.string().optional(),
-  timeOut: Joi.string().default('5m'),
-  numWorkers: Joi.number().default(1),
+  timeout: Joi.string().default('5m'),
+  numWorkers: Joi.number()
+    .min(1)
+    .default(1),
   createTaskRunner: Joi.func().required(),
 }).default();
 
@@ -157,6 +159,12 @@ export interface TaskInstance {
   taskType: string;
 
   /**
+   * The date and time that this task was originally scheduled. This is used
+   * for convenience to task run functions, and for troubleshooting.
+   */
+  scheduledAt?: Date;
+
+  /**
    * The date and time that this task is scheduled to be run. It is not
    * guaranteed to run at this time, but it is guaranteed not to run earlier
    * than this. Defaults to immediately.
@@ -179,7 +187,7 @@ export interface TaskInstance {
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  state?: object;
+  state: object;
 
   /**
    * The id of the user who scheduled this task.
@@ -190,7 +198,7 @@ export interface TaskInstance {
    * Used to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',
    * and then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks.
    */
-  scope?: string | string[];
+  scope?: string[];
 }
 
 /**
@@ -204,9 +212,20 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * The version of the Elaticsearch document.
+   * The sequence number from the Elaticsearch document.
    */
-  version: number;
+  sequenceNumber: number;
+
+  /**
+   * The primary term from the Elaticsearch document.
+   */
+  primaryTerm: number;
+
+  /**
+   * The date and time that this task was originally scheduled. This is used
+   * for convenience to task run functions, and for troubleshooting.
+   */
+  scheduledAt: Date;
 
   /**
    * The number of unsuccessful attempts since the last successful run. This

@@ -28,7 +28,7 @@ At a high-level, the task manager works like this:
 
 ## Pooling
 
-Each task manager instance runs tasks in a pool which ensures that at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `numWorkers` which tells the system how many workers are consumed by a single running instance of a task. This effectively limits how many tasks of a given type can be run at once.
+Each task manager instance runs tasks in a pool which ensures that at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task type definition can have `numWorkers` specified, which tells the system how many workers are consumed by a single running instance of a task. This effectively limits how many tasks of a given type can be run at once.
 
 For example, we may have a system with a `max_workers` of 10, but a super expensive task (such as `reporting`) which specifies a `numWorkers` of 10. In this case, `reporting` tasks will run one at a time.
 
@@ -67,7 +67,7 @@ taskManager.registerTaskDefinitions({
     // Optional, how long, in minutes, the system should wait before
     // a running instance of this task is considered to be timed out.
     // This defaults to 5 minutes.
-    timeOut: '5m',
+    timeout: '5m',
 
     // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
     // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
@@ -204,7 +204,7 @@ The data stored for a task instance looks something like this:
 
   // An application-specific designation, allowing different Kibana
   // plugins / apps to query for only those tasks they care about.
-  scope: 'alerting',
+  scope: ['alerting'],
 }
 ```
 
@@ -222,7 +222,7 @@ const task = await taskManager.schedule({
   runAt,
   interval,
   params,
-  scope: 'my-fanci-app',
+  scope: ['my-fanci-app'],
 });
 
 // Removes the specified task

@@ -33,9 +33,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
-import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -52,7 +51,7 @@ function updateSourceFiltersTable($scope, $state) {
       }
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <SourceFiltersTable
             indexPattern={$scope.indexPattern}
             filterFilter={$scope.fieldFilter}
@@ -63,7 +62,7 @@ function updateSourceFiltersTable($scope, $state) {
               $scope.$apply();
             }}
           />
-        </I18nProvider>,
+        </I18nContext>,
         node,
       );
     });
@@ -87,7 +86,7 @@ function updateScriptedFieldsTable($scope, $state) {
       }
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <ScriptedFieldsTable
             indexPattern={$scope.indexPattern}
             fieldFilter={$scope.fieldFilter}
@@ -104,7 +103,7 @@ function updateScriptedFieldsTable($scope, $state) {
               $scope.refreshFilters();
             }}
           />
-        </I18nProvider>,
+        </I18nContext>,
         node,
       );
     });
@@ -127,7 +126,7 @@ function updateIndexedFieldsTable($scope, $state) {
       }
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <IndexedFieldsTable
             fields={$scope.fields}
             indexPattern={$scope.indexPattern}
@@ -142,7 +141,7 @@ function updateIndexedFieldsTable($scope, $state) {
               getFieldInfo: $scope.getFieldInfo,
             }}
           />
-        </I18nProvider>,
+        </I18nContext>,
         node,
       );
     });
@@ -157,32 +156,20 @@ function destroyIndexedFieldsTable() {
 }
 
 uiRoutes
-  .when('/management/kibana/indices/:indexPatternId', {
+  .when('/management/kibana/index_patterns/:indexPatternId', {
     template,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns
           .get($route.current.params.indexPatternId)
-          .catch(redirectWhenMissing('/management/kibana/index'));
+          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
   });
 
-uiRoutes
-  .when('/management/kibana/indices', {
-    redirectTo() {
-      const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
-      if (defaultIndex) {
-        return `/management/kibana/indices/${defaultIndex}`;
-      }
-
-      return '/management/kibana/index';
-    }
-  });
-
 uiModules.get('apps/management')
-  .controller('managementIndicesEdit', function (
+  .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
@@ -275,7 +262,7 @@ uiModules.get('apps/management')
 
         indexPatterns.delete($scope.indexPattern)
           .then(function () {
-            $location.url('/management/kibana/index');
+            $location.url('/management/kibana/index_patterns');
           })
           .catch(fatalError);
       }

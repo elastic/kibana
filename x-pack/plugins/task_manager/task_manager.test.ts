@@ -66,7 +66,7 @@ describe('TaskManager', () => {
       beforeRun: async (runOpts: any) => runOpts,
     };
 
-    $test.afterPluginsInit();
+    await $test.afterPluginsInit();
 
     expect(() => client.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
@@ -74,6 +74,9 @@ describe('TaskManager', () => {
   });
 
   function testOpts() {
+    const callCluster = sinon.stub();
+    callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
+
     const $test = {
       events: {} as any,
       afterPluginsInit: _.noop,
@@ -99,7 +102,7 @@ describe('TaskManager', () => {
         plugins: {
           elasticsearch: {
             getCluster() {
-              return { callWithInternalUser: _.noop };
+              return { callWithInternalUser: callCluster };
             },
             status: {
               on(eventName: string, callback: () => any) {

@@ -7,9 +7,26 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskPoller } from './task_poller';
+import { TaskStore } from './task_store';
 import { mockLogger, resolvable, sleep } from './test_utils';
 
+let store: TaskStore;
+
 describe('TaskPoller', () => {
+  beforeEach(() => {
+    const callCluster = sinon.stub();
+    callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
+    const getKibanaUuid = sinon.stub().returns('kibana-123-uuid-test');
+    store = new TaskStore({
+      callCluster,
+      getKibanaUuid,
+      logger: mockLogger(),
+      index: 'tasky',
+      maxAttempts: 2,
+      supportedTypes: ['a', 'b', 'c'],
+    });
+  });
+
   describe('interval tests', () => {
     let clock: sinon.SinonFakeTimers;
 
@@ -27,12 +44,13 @@ describe('TaskPoller', () => {
         return Promise.resolve();
       });
       const poller = new TaskPoller({
+        store,
         pollInterval,
         work,
         logger: mockLogger(),
       });
 
-      poller.start();
+      await poller.start();
 
       sinon.assert.calledOnce(work);
       await done;
@@ -49,6 +67,7 @@ describe('TaskPoller', () => {
     const logger = mockLogger();
     const doneWorking = resolvable();
     const poller = new TaskPoller({
+      store,
       logger,
       pollInterval: 1,
       work: async () => {
@@ -79,6 +98,7 @@ describe('TaskPoller', () => {
     });
 
     const poller = new TaskPoller({
+      store,
       logger: mockLogger(),
       pollInterval: 1,
       work,
@@ -97,12 +117,13 @@ describe('TaskPoller', () => {
       await doneWorking;
     });
     const poller = new TaskPoller({
+      store,
       pollInterval: 1,
       logger: mockLogger(),
       work,
     });
 
-    poller.start();
+    await poller.start();
     poller.start();
     poller.start();
     poller.start();
@@ -122,6 +143,7 @@ describe('TaskPoller', () => {
       doneWorking.resolve();
     });
     const poller = new TaskPoller({
+      store,
       pollInterval: 1,
       logger: mockLogger(),
       work,
@@ -131,5 +153,20 @@ describe('TaskPoller', () => {
     await doneWorking;
 
     sinon.assert.calledOnce(work);
+  });
+
+  test('start method passes through error from store.init', async () => {
+    store.init = () => {
+      throw new Error('test error');
+    };
+
+    const poller = new TaskPoller({
+      store,
+      pollInterval: 1,
+      logger: mockLogger(),
+      work: sinon.stub(),
+    });
+
+    await expect(poller.start()).rejects.toMatchInlineSnapshot(`[Error: test error]`);
   });
 });

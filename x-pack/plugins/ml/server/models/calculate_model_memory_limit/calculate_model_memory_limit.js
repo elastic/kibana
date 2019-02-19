@@ -41,7 +41,6 @@ export function calculateModelMemoryLimitProvider(callWithRequest) {
       function splitFieldCardinality() {
         return fieldsService.getCardinalityOfFields(
           indexPattern,
-          [],
           [splitFieldName],
           query,
           timeFieldName,
@@ -54,7 +53,6 @@ export function calculateModelMemoryLimitProvider(callWithRequest) {
       function influencerCardinality(influencerName) {
         return fieldsService.getCardinalityOfFields(
           indexPattern,
-          [],
           [influencerName],
           query,
           timeFieldName,

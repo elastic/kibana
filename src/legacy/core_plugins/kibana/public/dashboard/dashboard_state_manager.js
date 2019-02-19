@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import moment from 'moment';
 
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
@@ -39,6 +38,7 @@ import {
   updateFilters,
   updateQuery,
   closeContextMenu,
+  requestReload,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -143,13 +143,11 @@ export class DashboardStateManager {
    * or a relative time (now-15m), or a moment object
    * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
    * moment object
-   * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
     store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
-      mode: newTimeFilter.mode,
     }));
   }
 
@@ -220,6 +218,10 @@ export class DashboardStateManager {
     )) {
       store.dispatch(updateFilters(dashboardFilters));
     }
+  }
+
+  requestReload() {
+    store.dispatch(requestReload());
   }
 
   _handleStoreChanges() {
@@ -364,15 +366,6 @@ export class DashboardStateManager {
     this.saveState();
   }
 
-  getDarkTheme() {
-    return this.appState.options.darkTheme;
-  }
-
-  setDarkTheme(darkTheme) {
-    this.appState.options.darkTheme = darkTheme;
-    this.saveState();
-  }
-
   getTimeRestore() {
     return this.appState.timeRestore;
   }
@@ -477,7 +470,7 @@ export class DashboardStateManager {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
-    return this.isDirty || hasTimeFilterChanged;
+    return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
   }
 
   getPanels() {
@@ -547,30 +540,17 @@ export class DashboardStateManager {
    * @param {Object} timeFilter
    * @param {func} timeFilter.setTime
    * @param {func} timeFilter.setRefreshInterval
-   * @param quickTimeRanges
    */
-  syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
+  syncTimefilterWithDashboard(timeFilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
       throw new Error(i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
         defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
       }));
     }
 
-    let mode;
-    const isMoment = moment(this.savedDashboard.timeTo).isValid();
-    if (isMoment) {
-      mode = 'absolute';
-    } else {
-      const quickTime = _.find(
-        quickTimeRanges,
-        (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
-
-      mode = quickTime ? 'quick' : 'relative';
-    }
     timeFilter.setTime({
       from: this.savedDashboard.timeFrom,
       to: this.savedDashboard.timeTo,
-      mode
     });
 
     if (this.savedDashboard.refreshInterval) {

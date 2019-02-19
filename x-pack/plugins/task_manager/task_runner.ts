@@ -35,9 +35,9 @@ export interface TaskRunner {
 }
 
 interface Updatable {
+  readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<RemoveResult>;
-  getMaxAttempts(): number;
 }
 
 interface Opts {
@@ -88,9 +88,10 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Gets how many workers are occupied by this task instance.
+   * Per Joi validation logic, this will return a number >= 1
    */
   public get numWorkers() {
-    return this.definition.numWorkers || 1;
+    return this.definition.numWorkers;
   }
 
   /**
@@ -125,7 +126,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Returns a log-friendly representation of this task.
    */
   public toString() {
-    return `${this.instance.taskType} "${this.instance.id}"`;
+    return `${this.taskType} "${this.id}"`;
   }
 
   /**
@@ -137,20 +138,23 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<RunResult>}
    */
   public async run(): Promise<RunResult> {
-    try {
-      this.logger.debug(`Running task ${this}`);
-      const modifiedContext = await this.beforeRun({
-        kbnServer: this.kbnServer,
-        taskInstance: this.instance,
-      });
-      const task = this.definition.createTaskRunner(modifiedContext);
-      this.task = task;
-      return this.processResult(this.validateResult(await this.task.run()));
-    } catch (error) {
-      this.logger.warning(`Task ${this} failed ${error.stack}`);
-      this.logger.debug(`Task ${JSON.stringify(this.instance)} failed ${error.stack}`);
+    this.logger.debug(`Running task ${this}`);
+    const modifiedContext = await this.beforeRun({
+      kbnServer: this.kbnServer,
+      taskInstance: this.instance,
+    });
 
-      return this.processResult({ error });
+    try {
+      this.task = this.definition.createTaskRunner(modifiedContext);
+      const result = await this.task.run();
+      const validatedResult = this.validateResult(result);
+      return this.processResult(validatedResult);
+    } catch (err) {
+      this.logger.error(`Task ${this} failed: ${err}`);
+
+      // in error scenario, we can not get the RunResult
+      // re-use modifiedContext's state, which is correct as of beforeRun
+      return this.processResult({ error: err, state: modifiedContext.taskInstance.state });
     }
   }
 
@@ -167,7 +171,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
-        runAt: intervalFromNow(this.definition.timeOut)!,
+        runAt: intervalFromNow(this.definition.timeout)!,
       });
 
       return true;
@@ -202,49 +206,60 @@ export class TaskManagerRunner implements TaskRunner {
       this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
     }
 
-    return result || {};
+    return result || { state: {} };
   }
 
-  private async processResult(result: RunResult): Promise<RunResult> {
-    const recurring = result.runAt || this.instance.interval || result.error;
-    if (recurring) {
-      // recurring task: update the task instance
-      const state = result.state || this.instance.state || {};
-      const status = this.instance.attempts < this.store.getMaxAttempts() ? 'idle' : 'failed';
+  private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
+    // recurring task: update the task instance
+    const state = result.state || this.instance.state || {};
+    const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
 
-      let runAt;
-      if (status === 'failed') {
-        // task run errored, keep the same runAt
-        runAt = this.instance.runAt;
-      } else {
-        runAt =
-          result.runAt ||
-          intervalFromNow(this.instance.interval) ||
-          minutesFromNow((this.instance.attempts + 1) * 5);
-      }
-
-      await this.store.update({
-        ...this.instance,
-        runAt,
-        state,
-        status,
-        attempts: result.error ? this.instance.attempts + 1 : 0,
-      });
+    let runAt;
+    if (status === 'failed') {
+      // task run errored, keep the same runAt
+      runAt = this.instance.runAt;
     } else {
-      // not a recurring task: clean up by removing the task instance from store
-      try {
-        await this.store.remove(this.instance.id);
-      } catch (err) {
-        if (err.statusCode === 404) {
-          this.logger.warning(
-            `Task cleanup of ${this} failed in processing. Was remove called twice?`
-          );
-        } else {
-          throw err;
-        }
+      runAt =
+        result.runAt ||
+        intervalFromNow(this.instance.interval) ||
+        // when result.error is truthy, then we're retrying because it failed
+        minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
+    }
+
+    await this.store.update({
+      ...this.instance,
+      runAt,
+      state,
+      status,
+      attempts: result.error ? this.instance.attempts + 1 : 0,
+    });
+
+    return result;
+  }
+
+  private async processResultWhenDone(result: RunResult): Promise<RunResult> {
+    // not a recurring task: clean up by removing the task instance from store
+    try {
+      await this.store.remove(this.instance.id);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        this.logger.warning(
+          `Task cleanup of ${this} failed in processing. Was remove called twice?`
+        );
+      } else {
+        throw err;
       }
     }
 
+    return result;
+  }
+
+  private async processResult(result: RunResult): Promise<RunResult> {
+    if (result.runAt || this.instance.interval || result.error) {
+      await this.processResultForRecurringTask(result);
+    } else {
+      await this.processResultWhenDone(result);
+    }
     return result;
   }
 }

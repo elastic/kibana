@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 
-import { SavedObjectsService } from 'src/server/saved_objects';
+import { SavedObjectsService } from 'src/legacy/server/saved_objects';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -44,7 +44,7 @@ export const spaces = (kibana: any) =>
 
     uiExports: {
       chromeNavControls: ['plugins/spaces/views/nav_control'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/spaces/views/management'],
       apps: [
         {

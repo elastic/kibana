@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 
@@ -35,7 +36,7 @@ export function buildNodeParams(fieldName, points) {
 export function toElasticsearchQuery(node, indexPattern) {
   const [ fieldNameArg, ...points ] = node.arguments;
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.find(field => field.name === fieldName);
+  const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
   const queryParams = {
     points: points.map(ast.toElasticsearchQuery)
   };
