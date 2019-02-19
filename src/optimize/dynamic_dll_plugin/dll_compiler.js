@@ -258,6 +258,18 @@ export class DllCompiler {
               // node_module or no?
               if (notInNodeModules(reason.module.resource)) {
                 notAllowedModules.push(module.resource);
+                return;
+              }
+
+              // Even when the reason for the module comes from
+              // node_modules directory, assure it's not from
+              // node_modules/x-pack source code but from a real node_module
+              const dirs = reason.module.resource.split(path.sep);
+              const nodeModuleName = dirs[dirs.lastIndexOf('node_modules') + 1];
+              const inXpackSource = nodeModuleName === 'x-pack';
+
+              if (inXpackSource) {
+                notAllowedModules.push(module.resource);
               }
             });
           }
