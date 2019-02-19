@@ -19,31 +19,34 @@
 
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { findObjectByTitle } from '../find_object_by_title';
 import { SimpleSavedObject } from '../simple_saved_object';
 
-describe('findObjectByTitle', () => {
-  const sandbox = sinon.createSandbox();
-  const savedObjectsClient = {};
+describe('SimpleSavedObject', () => {
+  it('persists type and id', () => {
+    const id = 'logstash-*';
+    const type = 'index-pattern';
 
-  beforeEach(() => {
-    savedObjectsClient.find = sandbox.stub();
+    const client = sinon.stub();
+    const savedObject = new SimpleSavedObject(client, { id, type });
+
+    expect(savedObject.id).to.be(id);
+    expect(savedObject.type).to.be(type);
   });
 
-  afterEach(() => sandbox.restore());
+  it('persists attributes', () => {
+    const attributes = { title: 'My title' };
 
-  it('returns undefined if title is not provided', async () => {
-    const match = await findObjectByTitle(savedObjectsClient, 'index-pattern');
-    expect(match).to.be(undefined);
+    const client = sinon.stub();
+    const savedObject = new SimpleSavedObject(client, { attributes });
+
+    expect(savedObject.attributes).to.be(attributes);
   });
 
-  it('matches any case', async () => {
-    const indexPattern = new SimpleSavedObject(savedObjectsClient, { attributes: { title: 'foo' } });
-    savedObjectsClient.find.returns(Promise.resolve({
-      savedObjects: [indexPattern]
-    }));
+  it('persists version', () => {
+    const version = 2;
 
-    const match = await findObjectByTitle(savedObjectsClient, 'index-pattern', 'FOO');
-    expect(match).to.eql(indexPattern);
+    const client = sinon.stub();
+    const savedObject = new SimpleSavedObject(client, { version });
+    expect(savedObject._version).to.be(version);
   });
 });
