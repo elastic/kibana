@@ -79,9 +79,8 @@ export class UpgradeAssistantTabsUI extends React.Component<
                 <p>
                   <FormattedMessage
                     id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
-                    defaultMessage="This Elasticsearch Cluster contains nodes with a different version of
-                      Elasticsearch. After all nodes are upgraded, upgrade Kibana to use the Upgrade
-                      Assistant."
+                    defaultMessage="One or more Elasticsearch nodes have a newer version of
+                      Elasticsearch than Kibana. Once all your nodes are upgraded, install the latest version of Kibana."
                   />
                 </p>
               }
