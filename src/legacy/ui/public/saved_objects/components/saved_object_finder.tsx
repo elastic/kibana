@@ -82,7 +82,8 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
     noItemsMessage: PropTypes.node,
     savedObjectType: PropTypes.oneOf(['visualization', 'search', 'index-pattern']).isRequired,
     visTypes: PropTypes.object,
-    pagination: PropTypes.object,
+    initialPageSize: PropTypes.oneOf([5, 10, 15]),
+    fixedPageSize: PropTypes.number,
   };
 
   private isComponentMounted: boolean = false;
