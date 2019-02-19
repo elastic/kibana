@@ -33,7 +33,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   public version: string;
 
   constructor(private server: Legacy.Server) {
-    this.version = server.plugins.kibana.status.plugin.version;
+    this.version = server.config().get('pkg.version');
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
