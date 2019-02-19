@@ -3,7 +3,7 @@
 experimental[]
 
 You can build https://vega.github.io/vega/examples/[Vega] and
-https://vega.github.io/vega-lite/examples/[VegaLite] data visualizations
+https://vega.github.io/vega-lite/examples/[Vega-Lite] data visualizations
 into Kibana, either standalone, or on top of a map.  To see Vega in action,
 watch this
 https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
