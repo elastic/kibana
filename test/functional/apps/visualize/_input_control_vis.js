@@ -47,11 +47,13 @@ export default function ({ getService, getPageObjects }) {
       await inspector.expectIsNotEnabled();
     });
 
-    it('should show the default index pattern when clicking "Add filter"', async () => {
-      await testSubjects.click('addFilter');
-      const fields = await filterBar.getFilterEditorFields();
-      await filterBar.ensureFieldEditorModalIsClosed();
-      expect(fields.length).to.be.greaterThan(0);
+    describe('filter bar', () => {
+      it('should show the default index pattern when clicking "Add filter"', async () => {
+        await testSubjects.click('addFilter');
+        const fields = await filterBar.getFilterEditorFields();
+        await filterBar.ensureFieldEditorModalIsClosed();
+        expect(fields.length).to.be.greaterThan(0);
+      });
     });
 
     describe('updateFiltersOnChange is false', () => {
