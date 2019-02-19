@@ -8,13 +8,10 @@ into Kibana, either standalone, or on top of a map.  To see Vega in action,
 watch this
 https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
 
-<<<<<<< HEAD
-=======
-Currently Vega version 4.3 and Vega-Lite version 2.6 are supported.
+{kib} 6.7 supports Vega version 3.3.
 
 NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals as data urls. This is not supported in Kibana as all data is fetched at once prior to passing it to the Vega renderer.
 
->>>>>>> e1c072db78... [Docs]Fixes links in Vega docs (#31283)
 
 [[vega-quick-demo]]
 === Getting Started with Vega
