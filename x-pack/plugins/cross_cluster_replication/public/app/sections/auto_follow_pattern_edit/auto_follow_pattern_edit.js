@@ -104,6 +104,7 @@ export class AutoFollowPatternEdit extends PureComponent {
               {...routing.getRouterLinkProps('/auto_follow_patterns')}
               iconType="arrowLeft"
               flush="left"
+              data-test-subj="ccrAutoFollowPatternFormViewListLink"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewAutoFollowPatternsButtonLabel"

@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import React from 'react';
-import { CreateButton } from '../create_button';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { uiModules } from '../../modules';
+import saveObjectSaveAsCheckboxTemplate from './saved_object_save_as_checkbox.html';
 
-export const Header = ({
-  indexPatternCreationOptions
-}) => (
-  <CreateButton options={indexPatternCreationOptions}>
-    <FormattedMessage
-      id="kbn.management.indexPatternList.header.createIndexPatternButtonLabel"
-      defaultMessage="Create index pattern"
-    />
-  </CreateButton>
-);
+uiModules
+  .get('kibana')
+  .directive('savedObjectSaveAsCheckBox', function () {
+    return {
+      restrict: 'E',
+      template: saveObjectSaveAsCheckboxTemplate,
+      replace: true,
+      scope: {
+        savedObject: '='
+      }
+    };
+  });
