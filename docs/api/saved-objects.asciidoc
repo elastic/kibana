@@ -18,6 +18,7 @@ NOTE: You cannot access these endpoints via the Console in Kibana.
 * <<saved-objects-api-bulk-create>>
 * <<saved-objects-api-update>>
 * <<saved-objects-api-delete>>
+* <<saved-objects-api-export>>
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
