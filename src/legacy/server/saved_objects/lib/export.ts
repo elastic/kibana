@@ -25,26 +25,26 @@ interface ObjectToExport {
   type: string;
 }
 
-interface ExportDocumentOptions {
+interface ExportObjectsOptions {
   types: string[];
   objects?: ObjectToExport[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
 }
 
-export async function getExportDocuments({
+export async function getSortedObjectsForExport({
   types,
   objects,
   savedObjectsClient,
   exportSizeLimit,
-}: ExportDocumentOptions) {
-  let docsToExport: SavedObject[] = [];
+}: ExportObjectsOptions) {
+  let objectsToExport: SavedObject[] = [];
   if (objects) {
     objects = objects.filter(obj => types.includes(obj.type));
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
-    ({ saved_objects: docsToExport } = await savedObjectsClient.bulkGet(objects));
+    ({ saved_objects: objectsToExport } = await savedObjectsClient.bulkGet(objects));
   } else {
     const findResponse = await savedObjectsClient.find({
       type: types,
@@ -53,39 +53,42 @@ export async function getExportDocuments({
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
-    ({ saved_objects: docsToExport } = findResponse);
+    ({ saved_objects: objectsToExport } = findResponse);
   }
-  docsToExport = sortDocs(docsToExport);
-  return docsToExport;
+  return sortObjects(objectsToExport);
 }
 
-export function sortDocs(docs: SavedObject[]) {
-  const array = [...docs];
-  let moveCounts = 0; // Used for detecting infinite loops
-  for (let i = 0; i < array.length; i++) {
-    const doc = array[i];
-    const references = doc.references || [];
-    let hasMovedDocs = false;
-    for (const reference of references) {
-      const referenceIndex = array.findIndex(
-        item => item.type === reference.type && item.id === reference.id
-      );
-      if (referenceIndex > i) {
-        const referenceDoc = array[referenceIndex];
-        array.splice(referenceIndex, 1);
-        array.splice(i, 0, referenceDoc);
-        moveCounts++;
-        hasMovedDocs = true;
+export function sortObjects(savedObjects: SavedObject[]) {
+  const path = new Set();
+  const sorted = new Set();
+  const objectsByTypeId = new Map(
+    savedObjects.map(object => [`${object.type}:${object.id}`, object] as [string, SavedObject])
+  );
+
+  function includeObjects(objects: SavedObject[]) {
+    for (const object of objects) {
+      if (path.has(object)) {
+        throw Boom.badRequest(
+          `circular reference: ${[...path, object]
+            .map(obj => `[${obj.type}:${obj.id}]`)
+            .join(' ref-> ')}`
+        );
       }
-    }
-    if (hasMovedDocs) {
-      // Lets scan the docs that got moved ahead at current index
-      i--;
-    }
-    if (moveCounts > array.length) {
-      // We'll consider it a circular dependencies when all the items had to move up in the array
-      throw Boom.badRequest('Circular dependency');
+
+      const refdObjects = object.references
+        .map(ref => objectsByTypeId.get(`${ref.type}:${ref.id}`))
+        .filter(ref => !!ref) as SavedObject[];
+
+      if (refdObjects.length) {
+        path.add(object);
+        includeObjects(refdObjects);
+        path.delete(object);
+      }
+
+      sorted.add(object);
     }
   }
-  return array;
+
+  includeObjects(savedObjects);
+  return [...sorted];
 }

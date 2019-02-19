@@ -17,17 +17,19 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import { MockServer } from './_mock_server';
 import { createExportRoute } from './export';
 
 describe('GET /api/saved_objects/_export', () => {
-  const server = MockServer();
+  let server: Hapi.Server;
   const savedObjectsClient = {
     find: jest.fn(),
     bulkGet: jest.fn(),
   };
 
   beforeEach(() => {
+    server = MockServer();
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -130,7 +132,7 @@ Array [
     };
     savedObjectsClient.find.mockResolvedValueOnce({
       total: objectsToRequest.length,
-      saved_objects: objectsToRequest,
+      saved_objects: objectsToRequest.map(obj => ({ ...obj, references: [] })),
     });
 
     const { statusCode } = await server.inject(request);
@@ -151,7 +153,7 @@ Array [
     };
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       total: objectsToRequest.length,
-      saved_objects: objectsToRequest,
+      saved_objects: objectsToRequest.map(obj => ({ ...obj, references: [] })),
     });
     const { statusCode } = await server.inject(request);
     expect(statusCode).toBe(200);

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { getExportDocuments, sortDocs } from './export';
+import { getSortedObjectsForExport, sortObjects } from './export';
 
-describe('getExportDocuments', () => {
+describe('getSortedObjectsForExport()', () => {
   const savedObjectsClient = {
     errors: {} as any,
     find: jest.fn(),
@@ -62,7 +62,7 @@ describe('getExportDocuments', () => {
         },
       ],
     });
-    const response = await getExportDocuments({
+    const response = await getSortedObjectsForExport({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
@@ -131,7 +131,7 @@ Array [
       ],
     });
     await expect(
-      getExportDocuments({
+      getSortedObjectsForExport({
         savedObjectsClient,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
@@ -159,7 +159,7 @@ Array [
         },
       ],
     });
-    const response = await getExportDocuments({
+    const response = await getSortedObjectsForExport({
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern', 'search'],
@@ -235,7 +235,7 @@ Array [
         },
       ],
     };
-    await expect(getExportDocuments(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't export more than 1 objects"`
     );
   });
@@ -250,7 +250,7 @@ Array [
         },
       ],
     });
-    const response = await getExportDocuments({
+    const response = await getSortedObjectsForExport({
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern'],
@@ -297,9 +297,9 @@ Array [
   });
 });
 
-describe('sortDocs()', () => {
+describe('sortObjects()', () => {
   test('should return on empty array', () => {
-    expect(sortDocs([])).toEqual([]);
+    expect(sortObjects([])).toEqual([]);
   });
 
   test('should not change sorted array', () => {
@@ -323,7 +323,7 @@ describe('sortDocs()', () => {
         ],
       },
     ];
-    expect(sortDocs(docs)).toMatchInlineSnapshot(`
+    expect(sortObjects(docs)).toMatchInlineSnapshot(`
 Array [
   Object {
     "attributes": Object {},
@@ -368,7 +368,7 @@ Array [
         references: [],
       },
     ];
-    expect(sortDocs(docs)).toMatchInlineSnapshot(`
+    expect(sortObjects(docs)).toMatchInlineSnapshot(`
 Array [
   Object {
     "attributes": Object {},
@@ -476,25 +476,13 @@ Array [
         references: [],
       },
     ];
-    expect(sortDocs(docs)).toMatchInlineSnapshot(`
+    expect(sortObjects(docs)).toMatchInlineSnapshot(`
 Array [
   Object {
     "attributes": Object {},
     "id": "1",
     "references": Array [],
     "type": "index-pattern",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "4",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "visualization",
   },
   Object {
     "attributes": Object {},
@@ -516,6 +504,18 @@ Array [
         "id": "2",
         "name": "ref1",
         "type": "search",
+      },
+    ],
+    "type": "visualization",
+  },
+  Object {
+    "attributes": Object {},
+    "id": "4",
+    "references": Array [
+      Object {
+        "id": "1",
+        "name": "ref1",
+        "type": "index-pattern",
       },
     ],
     "type": "visualization",
@@ -568,6 +568,8 @@ Array [
         ],
       },
     ];
-    expect(() => sortDocs(docs)).toThrowErrorMatchingInlineSnapshot(`"Circular dependency"`);
+    expect(() => sortObjects(docs)).toThrowErrorMatchingInlineSnapshot(
+      `"circular reference: [foo:1] ref-> [foo:2] ref-> [foo:1]"`
+    );
   });
 });

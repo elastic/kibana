@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import { getExportDocuments } from '../lib/export';
+import { getSortedObjectsForExport } from '../lib/export';
 
 const EXPORT_SIZE_LIMIT = 10000;
 
@@ -49,7 +49,7 @@ export const createExportRoute = (prereqs: any) => ({
       const types =
         request.query.type ||
         request.server.savedObjects.types.filter((type: string) => type !== 'space');
-      const docsToExport = await getExportDocuments({
+      const docsToExport = await getSortedObjectsForExport({
         types,
         objects: request.query.objects,
         savedObjectsClient,
