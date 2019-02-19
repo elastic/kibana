@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Provider } from 'react-redux';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test';
 
+import { registerTestBed } from '../../../../common/lib';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
@@ -34,34 +32,7 @@ const defaultProps = {
   isLoading: false
 };
 
-const registerTestSubjExists = component => testSubject => Boolean(findTestSubjectHelper(component, testSubject).length);
-
-const initTestBed = (props, store = rollupJobsStore) => {
-  const wrapped = mountWithIntl(
-    <Provider store={store}>
-      <JobList
-        {...defaultProps}
-        {...props}
-      />
-    </Provider>
-  );
-
-  const component = wrapped.find(JobList);
-
-  const setProps = (props) => wrapped.setProps({
-    children: (
-      <JobList
-        {...defaultProps}
-        {...props}
-      />
-    )
-  });
-
-  const testSubjectExists = registerTestSubjExists(component);
-  const findTestSubject = testSubject => findTestSubjectHelper(component, testSubject);
-
-  return { component, testSubjectExists, findTestSubject, setProps };
-};
+const initTestBed = registerTestBed(JobList, mountWithIntl, defaultProps, rollupJobsStore);
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
