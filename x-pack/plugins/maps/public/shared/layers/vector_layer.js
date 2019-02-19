@@ -49,7 +49,7 @@ export class VectorLayer extends AbstractLayer {
     this._joins =  [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
-        this._joins.push(new LeftInnerJoin(joinDescriptor));
+        this._joins.push(new LeftInnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
       });
     }
   }
