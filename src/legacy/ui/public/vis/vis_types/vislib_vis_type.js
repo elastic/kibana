@@ -92,6 +92,10 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         if (this.vis.params.addLegend) {
           this.$scope.refreshLegend++;
           this.$scope.$digest();
+
+          // re-render after the legend is initialized to correctly take
+          // the legend height into account
+          this.vis.vislibVis.render(esResponse, this.vis.getUiState());
         }
       });
     }
