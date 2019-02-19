@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isObject, isNumber } from 'lodash';
 import { VislibComponentsZeroInjectionFlattenDataProvider } from './flatten_data';
 
 export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
@@ -32,7 +32,7 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
    */
 
   return function (obj) {
-    if (!_.isObject(obj)) {
+    if (!isObject(obj)) {
       throw new TypeError('UniqueXValuesUtilService expects an object');
     }
 
@@ -54,22 +54,27 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
       return chart.ordered;
     });
 
-    flattenedData.forEach(function (d, i) {
+    // Populate `uniqueXValues` with the preserved x key order from the
+    // original tabified data. `flattenedData` only contains the first
+    // non-zero values in each series, and therefore is not guaranteed
+    // to match the order that came back from ES.
+    obj.xAxisOrderedValues.forEach((key, index) => {
+      uniqueXValues.set(key, {
+        index,
+        isDate,
+        isOrdered,
+        isNumber: isNumber(key),
+        sum: 0,
+      });
+    });
+
+    // Generate a sum for each value
+    flattenedData.forEach(function (d) {
       const key = d.x;
       const prev = uniqueXValues.get(key);
-      let sum = d.y;
-
-      if (prev) {
-        i = Math.min(i, prev.index);
-        sum += prev.sum;
-      }
-
       uniqueXValues.set(key, {
-        index: i,
-        isDate: isDate,
-        isOrdered: isOrdered,
-        isNumber: _.isNumber(key),
-        sum: sum
+        ...prev,
+        sum: prev.sum + d.y,
       });
     });
 

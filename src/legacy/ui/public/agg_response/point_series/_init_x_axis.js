@@ -17,9 +17,14 @@
  * under the License.
  */
 
+import { uniq } from 'lodash';
+import { makeFakeXAspect } from './_fake_x_aspect';
 
-export function initXAxis(chart) {
+export function initXAxis(chart, table) {
   const x = chart.aspects.x[0];
+  chart.xAxisOrderedValues = x.accessor === -1
+    ? [makeFakeXAspect().params.defaultValue]
+    : uniq(table.rows.map(r => r[x.accessor]));
   chart.xAxisFormat = x.format;
   chart.xAxisLabel = x.title;
   if (x.params.date) {
