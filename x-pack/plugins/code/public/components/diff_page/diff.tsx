@@ -166,12 +166,12 @@ export class DiffPage extends React.Component<Props> {
       const [p1, p2] = parents;
       parentsLinks = (
         <React.Fragment>
-          <Link to={`/commit/${repoUri}/${p1}`}>{p1}</Link>+
-          <Link to={`/commit/${repoUri}/${p2}`}>{p2}</Link>
+          <Link to={`/${repoUri}/commit/${p1}`}>{p1}</Link>+
+          <Link to={`/${repoUri}/commit/${p2}`}>{p2}</Link>
         </React.Fragment>
       );
     } else if (parents.length === 1) {
-      parentsLinks = <Link to={`/commit/${repoUri}/${parents[0]}`}>{parents[0]}</Link>;
+      parentsLinks = <Link to={`/${repoUri}/commit/${parents[0]}`}>{parents[0]}</Link>;
     }
     const topBar = (
       <TopBarContainer>
