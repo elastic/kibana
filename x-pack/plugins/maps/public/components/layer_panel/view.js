@@ -35,7 +35,6 @@ export class LayerPanel  extends React.Component {
         displayName: '',
         immutableSourceProps: [],
         hasLoadedSourcePropsForLayer: false,
-        hasStateChanged: false,
         prevId: nextId,
       };
     }
