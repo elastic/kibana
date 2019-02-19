@@ -73,7 +73,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
       savedVisualization: savedObject,
       editUrl,
       loader,
-      indexPattern,
+      indexPatterns: [indexPattern],
     });
   }
 }

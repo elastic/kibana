@@ -54,14 +54,14 @@ export class VisualizeEmbeddable extends Embeddable {
   constructor({
     onEmbeddableStateChanged,
     savedVisualization,
-    indexPattern,
+    indexPatterns,
     editUrl,
     loader,
   }: VisualizeEmbeddableConfiguration) {
     super({
       title: savedVisualization.title,
       editUrl,
-      indexPattern,
+      indexPatterns,
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
