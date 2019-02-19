@@ -55,8 +55,8 @@ export function SpanFlyout({
 
   const stackframes = span.span.stacktrace;
   const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
-  const dbContext = idx(span, _ => _.context.db);
-  const httpContext = idx(span, _ => _.context.http);
+  const dbContext = idx(span, _ => _.span.db);
+  const httpContext = idx(span, _ => _.span.http);
   const labels = span.labels;
   const tags = keys(labels).map(key => ({
     key,
@@ -100,6 +100,8 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
+          <HttpContext httpContext={httpContext} />
+          <DatabaseContext dbContext={dbContext} />
           <EuiTabbedContent
             tabs={[
               {
@@ -113,8 +115,6 @@ export function SpanFlyout({
                 content: (
                   <Fragment>
                     <EuiSpacer size="l" />
-                    <HttpContext httpContext={httpContext} />
-                    <DatabaseContext dbContext={dbContext} />
                     <Stacktrace
                       stackframes={stackframes}
                       codeLanguage={codeLanguage}
