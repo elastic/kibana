@@ -259,7 +259,7 @@ Before you do any of that, there are two other things that will make all steps o
 
 The new platform does not _require_ plugins to be built with TypeScript, but all subsequent steps of this plan of action are more straightforward and carry a great deal less risk if the code is already converted to TypeScript.
 
-TypeScript is a superset of JavaScript, so if your goal is the least possible effort, you can move to TypeScript with very few code changes mostly by adding `any` types all over the place. This isn't really any better than regular JavaScript, but simply having your code to `.ts` files means you can at least take advantage of the types that are exported from core and other plugins. This bare minimum approach won't help you much for the architectural shifts, but it could be a great help to you in reliably switching over to new platform services.
+TypeScript is a superset of JavaScript, so if your goal is the least possible effort, you can move to TypeScript with very few code changes mostly by adding `any` types all over the place. This isn't really any better than regular JavaScript, but simply having your code in `.ts` files means you can at least take advantage of the types that are exported from core and other plugins. This bare minimum approach won't help you much for the architectural shifts, but it could be a great help to you in reliably switching over to new platform services.
 
 ### De-angular
 
