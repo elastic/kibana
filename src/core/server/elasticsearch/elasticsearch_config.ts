@@ -22,6 +22,8 @@ import { Duration } from 'moment';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
+export const DEFAULT_API_VERSION = 'master';
+
 const configSchema = schema.object({
   sniffOnStart: schema.boolean({ defaultValue: false }),
   sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], { defaultValue: false }),
@@ -54,7 +56,7 @@ const configSchema = schema.object({
     keyPassphrase: schema.maybe(schema.string()),
     alwaysPresentCertificate: schema.boolean({ defaultValue: true }),
   }),
-  apiVersion: schema.string({ defaultValue: 'master' }),
+  apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
 });
 
