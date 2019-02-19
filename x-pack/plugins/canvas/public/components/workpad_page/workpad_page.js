@@ -38,8 +38,6 @@ export class WorkpadPage extends PureComponent {
     width: PropTypes.number.isRequired,
     isEditable: PropTypes.bool.isRequired,
     onDoubleClick: PropTypes.func,
-    onKeyDown: PropTypes.func,
-    onKeyUp: PropTypes.func,
     onMouseDown: PropTypes.func,
     onMouseMove: PropTypes.func,
     onMouseUp: PropTypes.func,
@@ -71,9 +69,6 @@ export class WorkpadPage extends PureComponent {
       width,
       isEditable,
       onDoubleClick,
-      onKeyDown,
-      onKeyPress,
-      onKeyUp,
       onMouseDown,
       onMouseMove,
       onMouseUp,
@@ -88,6 +83,8 @@ export class WorkpadPage extends PureComponent {
       bringToFront,
       sendBackward,
       sendToBack,
+      groupElements,
+      ungroupElements,
     } = this.props;
 
     const keyHandler = (action, event) => {
@@ -120,6 +117,12 @@ export class WorkpadPage extends PureComponent {
         case 'SEND_TO_BACK':
           sendToBack();
           break;
+        case 'GROUP':
+          groupElements();
+          break;
+        case 'UNGROUP':
+          ungroupElements();
+          break;
       }
     };
 
@@ -140,9 +143,6 @@ export class WorkpadPage extends PureComponent {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseDown={onMouseDown}
-        onKeyDown={onKeyDown}
-        onKeyPress={onKeyPress}
-        onKeyUp={onKeyUp}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}

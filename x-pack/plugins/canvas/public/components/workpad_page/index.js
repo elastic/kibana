@@ -217,6 +217,16 @@ export const WorkpadPage = compose(
       };
     }
   ), // Updates states; needs to have both local and global
+  withHandlers({
+    groupElements: ({ commit }) => () =>
+      commit('actionEvent', {
+        event: 'group',
+      }),
+    ungroupElements: ({ commit }) => () =>
+      commit('actionEvent', {
+        event: 'ungroup',
+      }),
+  }),
   withHandlers(eventHandlers) // Captures user intent, needs to have reconciled state
 )(Component);
 
