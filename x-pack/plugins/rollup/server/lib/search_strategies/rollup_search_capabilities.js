@@ -4,6 +4,7 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 import { get } from 'lodash';
+import { unitsMap } from '@elastic/datemath';
 
 const leastCommonInterval = (num = 0, base = 0) => Math.max(Math.ceil(num / base) * base, base);
 
@@ -13,6 +14,8 @@ const getDateHistogramAggregation = (fieldsCapabilities, rollupIndex) => {
   // there is also only one valid date_histogram field
   return Object.values(dateHistogramField)[0];
 };
+
+const isCalendarInterval = ({ unit, value }) => value === 1 && ['calendar', 'mixed'].includes(unitsMap[unit].type);
 
 export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
@@ -31,11 +34,20 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
       return get(this.dateHistogram, 'time_zone', null);
     }
 
-    getValidTimeInterval(intervalString) {
-      const { unit, value } = this.parseInterval(this.defaultTimeInterval);
-      const parsedIntervalString = this.convertIntervalToUnit(intervalString, unit);
-      const commonInterval = leastCommonInterval(parsedIntervalString.value, value);
+    getValidTimeInterval(userIntervalString) {
+      const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
+      const parsedUserInterval = this.parseInterval(userIntervalString);
 
-      return `${commonInterval}${unit}`;
+      let { unit } = parsedRollupJobInterval;
+      let { value } = this.convertIntervalToUnit(userIntervalString, unit);
+
+      if (isCalendarInterval(parsedRollupJobInterval) && isCalendarInterval(parsedUserInterval)) {
+        unit = value > 1 ? parsedUserInterval.unit : parsedRollupJobInterval.unit;
+        value = 1;
+      } else {
+        value = leastCommonInterval(value, parsedRollupJobInterval.value);
+      }
+
+      return `${value}${unit}`;
     }
   });

@@ -57,19 +57,59 @@ describe('Rollup Search Capabilities', () => {
 
   describe('getValidTimeInterval', () => {
     let parsedDefaultInterval;
-    let parsedIntervalString;
+    let parsedUserIntervalString;
+    let convertedIntervalIntoDefaultUnit;
 
     beforeEach(() => {
-      rollupSearchCaps.parseInterval = jest.fn(() => parsedDefaultInterval);
-      rollupSearchCaps.convertIntervalToUnit = jest.fn(() => parsedIntervalString);
+      convertedIntervalIntoDefaultUnit = null;
+
+      rollupSearchCaps.parseInterval = jest.fn()
+        .mockImplementationOnce(() => parsedDefaultInterval)
+        .mockImplementationOnce(() => parsedUserIntervalString);
+      rollupSearchCaps.convertIntervalToUnit = jest
+        .fn(() => convertedIntervalIntoDefaultUnit || parsedUserIntervalString);
     });
 
-    test('should return 2y as common interval for 0.1y(user interval) and 2y(rollup interval)', () => {
+    test('should return 1w as common interval for 1w(user interval) and 1d(rollup interval) - calendar intervals', () => {
+      parsedDefaultInterval = {
+        value: 1,
+        unit: 'd',
+      };
+      parsedUserIntervalString = {
+        value: 1,
+        unit: 'w',
+      };
+      convertedIntervalIntoDefaultUnit = {
+        value: 7,
+        unit: 'd',
+      };
+
+      expect(rollupSearchCaps.getValidTimeInterval()).toBe('1w');
+    });
+
+    test('should return 1w as common interval for 1d(user interval) and 1w(rollup interval) - calendar intervals', () => {
+      parsedDefaultInterval = {
+        value: 1,
+        unit: 'w',
+      };
+      parsedUserIntervalString = {
+        value: 1,
+        unit: 'd',
+      };
+      convertedIntervalIntoDefaultUnit = {
+        value: 1 / 7,
+        unit: 'w',
+      };
+
+      expect(rollupSearchCaps.getValidTimeInterval()).toBe('1w');
+    });
+
+    test('should return 2y as common interval for 0.1y(user interval) and 2y(rollup interval) - fixed intervals', () => {
       parsedDefaultInterval = {
         value: 2,
         unit: 'y',
       };
-      parsedIntervalString = {
+      parsedUserIntervalString = {
         value: 0.1,
         unit: 'y',
       };
@@ -77,12 +117,12 @@ describe('Rollup Search Capabilities', () => {
       expect(rollupSearchCaps.getValidTimeInterval()).toBe('2y');
     });
 
-    test('should return 3h as common interval for 2h(user interval) and 3h(rollup interval)', () => {
+    test('should return 3h as common interval for 2h(user interval) and 3h(rollup interval) - fixed intervals', () => {
       parsedDefaultInterval = {
         value: 3,
         unit: 'h',
       };
-      parsedIntervalString = {
+      parsedUserIntervalString = {
         value: 2,
         unit: 'h',
       };
@@ -90,12 +130,12 @@ describe('Rollup Search Capabilities', () => {
       expect(rollupSearchCaps.getValidTimeInterval()).toBe('3h');
     });
 
-    test('should return 6m as common interval for 4m(user interval) and 3m(rollup interval)', () => {
+    test('should return 6m as common interval for 4m(user interval) and 3m(rollup interval) - fixed intervals', () => {
       parsedDefaultInterval = {
         value: 3,
         unit: 'm',
       };
-      parsedIntervalString = {
+      parsedUserIntervalString = {
         value: 4,
         unit: 'm',
       };
