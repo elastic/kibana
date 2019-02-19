@@ -27,12 +27,12 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       (bucket: HostBucket) => ({
         ...head(bucket.host.hits.hits),
         cursor: bucket.key!.host_name,
-        firstSeen: bucket.firstSeen!.value_as_string,
+        firstSeen: bucket.firstSeen.value_as_string,
       })
     );
     const hostsEdges = hits.map(hit => formatHostsData(options.fields, hit, hostsFieldsMap));
     const hasNextPage = hostsEdges.length === limit + 1;
-    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
+    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = hostsEdges.splice(beginning, limit - beginning);
 
     return {
