@@ -156,7 +156,7 @@ export default function PointSeriesVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.area.segmentTitle', { defaultMessage: 'X-Axis' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -164,7 +164,7 @@ export default function PointSeriesVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.area.groupTitle', { defaultMessage: 'Split Series' }),
           min: 0,
           max: 3,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -172,7 +172,7 @@ export default function PointSeriesVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.area.splitTitle', { defaultMessage: 'Split Chart' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     }
