@@ -81,6 +81,113 @@ const isSelectedAnimation = ({ isSelected, animation }) => {
   };
 };
 
+const calculateHandlers = ({
+  aeroelastic,
+  page,
+  insertNodes,
+  removeElements,
+  selectElement,
+  elementLayer,
+}) => {
+  const { shapes, selectedPrimaryShapes = [] } = aeroelastic.currentScene;
+  const recurseGroupTree = shapeId => {
+    return [
+      shapeId,
+      ...flatten(
+        shapes
+          .filter(s => s.parent === shapeId && s.type !== 'annotation')
+          .map(s => s.id)
+          .map(recurseGroupTree)
+      ),
+    ];
+  };
+
+  const selectedPrimaryShapeObjects = selectedPrimaryShapes.map(id =>
+    shapes.find(s => s.id === id)
+  );
+  const selectedPersistentPrimaryShapes = flatten(
+    selectedPrimaryShapeObjects.map(shape =>
+      shape.subtype === 'adHocGroup'
+        ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
+        : [shape.id]
+    )
+  );
+  const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
+  const selectedElements = [];
+  return {
+    removeElements: () => {
+      // currently, handle the removal of one element, exploiting multiselect subsequently
+      if (selectedElementIds.length) {
+        removeElements(page.id)(selectedElementIds);
+      }
+    },
+    copyElements: () => {
+      if (selectedElements.length) {
+        setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
+        notify.success('Copied element to clipboard');
+      }
+    },
+    cutElements: () => {
+      if (selectedElements.length) {
+        setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
+        removeElements(page.id)(selectedElementIds);
+        notify.success('Copied element to clipboard');
+      }
+    },
+    // TODO: This is slightly different from the duplicateElements function in sidebar/index.js. Should they be doing the same thing?
+    // This should also be abstracted.
+    duplicateElements: () => {
+      const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
+      if (clonedElements) {
+        insertNodes(page.id)(clonedElements);
+        if (selectedPrimaryShapes.length) {
+          if (selectedElements.length > 1) {
+            // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
+            // new adHocGroup - todo)
+            selectElement(clonedElements[0].id);
+          } else {
+            // single element or single persistentGroup branch
+            selectElement(
+              clonedElements[selectedElements.findIndex(s => s.id === selectedPrimaryShapes[0])].id
+            );
+          }
+        }
+      }
+    },
+    pasteElements: () => {
+      const { selectedElements, rootShapes } = JSON.parse(getClipboardData()) || {};
+      const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
+      if (clonedElements) {
+        // first clone and persist the new node(s)
+        insertNodes(page.id)(clonedElements);
+        // then select the cloned node
+        if (rootShapes.length) {
+          if (selectedElements.length > 1) {
+            // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
+            // new adHocGroup - todo)
+            selectElement(clonedElements[0].id);
+          } else {
+            // single element or single persistentGroup branch
+            selectElement(
+              clonedElements[selectedElements.findIndex(s => s.id === rootShapes[0])].id
+            );
+          }
+        }
+      }
+    },
+    // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
+    // Note: these layer actions only work when a single element is selected
+    bringForward: () =>
+      selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], 1),
+    bringToFront: () =>
+      selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], Infinity),
+    sendBackward: () =>
+      selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], -1),
+    sendToBack: () =>
+      selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], -Infinity),
+  };
+};
+
 export const WorkpadPage = compose(
   connect(
     mapStateToProps,
@@ -88,192 +195,100 @@ export const WorkpadPage = compose(
   ),
   withProps(isSelectedAnimation),
   withState('aeroelastic', 'setAeroelastic', componentLayoutLocalState),
-  withProps(
-    ({
+  withState('handlers', 'setHandlers', calculateHandlers),
+  withProps(props => {
+    const {
       aeroelastic,
       setAeroelastic,
+      handlers,
+      setHandlers,
       page,
       elements: pageElements,
       addElement,
       setMultiplePositions,
-      insertNodes,
       removeElements,
-      selectElement,
-      elementLayer,
-    }) => {
-      const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.currentScene;
-      const elementLookup = new Map(pageElements.map(element => [element.id, element]));
-      const recurseGroupTree = shapeId => {
-        return [
-          shapeId,
-          ...flatten(
-            shapes
-              .filter(s => s.parent === shapeId && s.type !== 'annotation')
-              .map(s => s.id)
-              .map(recurseGroupTree)
-          ),
-        ];
+    } = props;
+    const { shapes, cursor } = aeroelastic.currentScene;
+    const elementLookup = new Map(pageElements.map(element => [element.id, element]));
+    const elements = shapes.map(shape => {
+      const element = elementLookup.has(shape.id) && elementLookup.get(shape.id);
+      // instead of just combining `element` with `shape`, we make property transfer explicit
+      const result = {
+        ...(element ? { ...shape, filter: element.filter } : shape),
+        width: shape.a * 2,
+        height: shape.b * 2,
       };
-
-      const selectedPrimaryShapeObjects = selectedPrimaryShapes.map(id =>
-        shapes.find(s => s.id === id)
-      );
-      const selectedPersistentPrimaryShapes = flatten(
-        selectedPrimaryShapeObjects.map(shape =>
-          shape.subtype === 'adHocGroup'
-            ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
-            : [shape.id]
-        )
-      );
-      const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
-      const selectedElements = [];
-      const elements = shapes.map(shape => {
-        let element = null;
-        if (elementLookup.has(shape.id)) {
-          element = elementLookup.get(shape.id);
-          if (selectedElementIds.indexOf(shape.id) > -1) {
-            selectedElements.push({ ...element, id: shape.id });
-          }
-        }
-        // instead of just combining `element` with `shape`, we make property transfer explicit
-        const result = {
-          ...(element ? { ...shape, filter: element.filter } : shape),
-          width: shape.a * 2,
-          height: shape.b * 2,
-        };
-        return result;
-      });
-      return {
-        elements,
-        cursor,
-        commit: (type, payload) => {
-          setAeroelastic(state => {
-            const currentScene = nextScene({
-              ...state,
-              primaryUpdate: { type, payload: { ...payload, uid: makeUid() } },
-            });
-            if (currentScene.gestureEnd) {
-              // annotations don't need Redux persisting
-              const primaryShapes = currentScene.shapes.filter(
-                shape => shape.type !== 'annotation'
-              );
-
-              // persistent groups
-              const persistableGroups = primaryShapes.filter(s => s.subtype === 'persistentGroup');
-
-              // remove all group elements
-              const elementsToRemove = pageElements.filter(
-                e => e.position.type === 'group' && !persistableGroups.find(p => p.id === e.id)
-              );
-              if (elementsToRemove.length) {
-                console.log('removing groups', elementsToRemove.map(e => e.id).join(', '));
-                removeElements(page.id)(elementsToRemove.map(e => e.id));
-              }
-
-              // create all needed groups
-              persistableGroups
-                .filter(p => !pageElements.find(e => p.id === e.id))
-                .forEach(g => {
-                  const partialElement = {
-                    id: g.id,
-                    filter: undefined,
-                    expression: 'shape fill="rgba(255,255,255,0)" | render',
-                    position: {
-                      ...shapeToElement(g),
-                    },
-                  };
-                  console.log('adding group', g.id);
-                  addElement(page.id)(partialElement);
-                });
-
-              // update the position of possibly changed elements
-              updateGlobalPositions(
-                positions => setMultiplePositions(positions.map(p => ({ ...p, pageId: page.id }))),
-                currentScene,
-                pageElements
-              );
-            }
-
-            return {
-              ...state,
-              currentScene,
-            };
+      return result;
+    });
+    return {
+      elements,
+      cursor,
+      commit: (type, payload) => {
+        setAeroelastic(state => {
+          const currentScene = nextScene({
+            ...state,
+            primaryUpdate: { type, payload: { ...payload, uid: makeUid() } },
           });
-        },
-        removeElements: () => {
-          // currently, handle the removal of one element, exploiting multiselect subsequently
-          if (selectedElementIds.length) {
-            removeElements(page.id)(selectedElementIds);
-          }
-        },
-        copyElements: () => {
-          if (selectedElements.length) {
-            setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
-            notify.success('Copied element to clipboard');
-          }
-        },
-        cutElements: () => {
-          if (selectedElements.length) {
-            setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
-            removeElements(page.id)(selectedElementIds);
-            notify.success('Copied element to clipboard');
-          }
-        },
-        // TODO: This is slightly different from the duplicateElements function in sidebar/index.js. Should they be doing the same thing?
-        // This should also be abstracted.
-        duplicateElements: () => {
-          const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
-          if (clonedElements) {
-            insertNodes(page.id)(clonedElements);
-            if (selectedPrimaryShapes.length) {
-              if (selectedElements.length > 1) {
-                // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
-                // new adHocGroup - todo)
-                selectElement(clonedElements[0].id);
-              } else {
-                // single element or single persistentGroup branch
-                selectElement(
-                  clonedElements[selectedElements.findIndex(s => s.id === selectedPrimaryShapes[0])]
-                    .id
-                );
-              }
+          if (currentScene.gestureEnd) {
+            // annotations don't need Redux persisting
+            const primaryShapes = currentScene.shapes.filter(shape => shape.type !== 'annotation');
+
+            // persistent groups
+            const persistableGroups = primaryShapes.filter(s => s.subtype === 'persistentGroup');
+
+            // remove all group elements
+            const elementsToRemove = pageElements.filter(
+              e => e.position.type === 'group' && !persistableGroups.find(p => p.id === e.id)
+            );
+            if (elementsToRemove.length) {
+              // console.log('removing groups', elementsToRemove.map(e => e.id).join(', '));
+              removeElements(page.id)(elementsToRemove.map(e => e.id));
             }
+
+            // create all needed groups
+            persistableGroups
+              .filter(p => !pageElements.find(e => p.id === e.id))
+              .forEach(g => {
+                const partialElement = {
+                  id: g.id,
+                  filter: undefined,
+                  expression: 'shape fill="rgba(255,255,255,0)" | render', // https://github.com/elastic/kibana/pull/28796
+                  position: shapeToElement(g),
+                };
+                addElement(page.id)(partialElement);
+              });
+
+            // update the position of possibly changed elements
+            updateGlobalPositions(
+              positions => setMultiplePositions(positions.map(p => ({ ...p, pageId: page.id }))),
+              currentScene,
+              pageElements
+            );
+
+            // handlers can only change if there's change to Redux (checked by proxy of putting it in
+            // the if(currentScene.gestureEnd) {...}
+            // todo consider somehow putting it in or around `connect`, to more directly tie it to Redux change
+            setHandlers(() =>
+              calculateHandlers({
+                aeroelastic,
+                page,
+                insertNodes,
+                removeElements,
+                selectElement,
+                elementLayer,
+              })
+            );
           }
-        },
-        pasteElements: () => {
-          const { selectedElements, rootShapes } = JSON.parse(getClipboardData()) || {};
-          const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
-          if (clonedElements) {
-            // first clone and persist the new node(s)
-            insertNodes(page.id)(clonedElements);
-            // then select the cloned node
-            if (rootShapes.length) {
-              if (selectedElements.length > 1) {
-                // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
-                // new adHocGroup - todo)
-                selectElement(clonedElements[0].id);
-              } else {
-                // single element or single persistentGroup branch
-                selectElement(
-                  clonedElements[selectedElements.findIndex(s => s.id === rootShapes[0])].id
-                );
-              }
-            }
-          }
-        },
-        // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
-        // Note: these layer actions only work when a single element is selected
-        bringForward: () =>
-          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], 1),
-        bringToFront: () =>
-          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], Infinity),
-        sendBackward: () =>
-          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], -1),
-        sendToBack: () =>
-          selectedElements.length === 1 && elementLayer(page.id, selectedElements[0], -Infinity),
-      };
-    }
-  ), // Updates states; needs to have both local and global
+
+          return {
+            ...state,
+            currentScene,
+          };
+        });
+      },
+      ...handlers,
+    };
+  }), // Updates states; needs to have both local and global
   withHandlers(eventHandlers) // Captures user intent, needs to have reconciled state
 )(Component);
 
