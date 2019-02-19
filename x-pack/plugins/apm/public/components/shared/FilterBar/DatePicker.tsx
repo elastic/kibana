@@ -43,7 +43,8 @@ interface QueryG {
   };
 }
 
-// TODO move into EUI as PR
+// TODO this can be removed when EUI PR lands:
+// https://github.com/elastic/eui/pull/1574
 declare module '@elastic/eui' {
   interface OnTimeChangeProps {
     start: string;
@@ -86,8 +87,7 @@ class DatePickerComponent extends React.Component<Props, State> {
     isPaused: true,
     refreshInterval: 0
   };
-  public lastRefresh = 0;
-  public nextRefreshRafId = 0;
+  public refreshTimeoutId: NodeJS.Timeout | null = null;
 
   public componentDidMount() {
     // read from query string to initialize, or set defaults
@@ -96,12 +96,17 @@ class DatePickerComponent extends React.Component<Props, State> {
   }
 
   public componentWillUnmount() {
-    cancelAnimationFrame(this.nextRefreshRafId);
+    this.clearRefreshTimeout();
+  }
+
+  public clearRefreshTimeout() {
+    if (this.refreshTimeoutId) {
+      clearTimeout(this.refreshTimeoutId);
+    }
   }
 
   public componentDidUpdate(prevProps: Props) {
     if (prevProps.location.search !== this.props.location.search) {
-      // TODO do we need to check for this
       const currentG = this.getG(this.props.location.search);
       const previousG = this.getG(prevProps.location.search);
       if (currentG !== previousG) {
@@ -115,22 +120,27 @@ class DatePickerComponent extends React.Component<Props, State> {
     return risonSafeDecode(_g) as QueryG | undefined;
   }
 
-  public refresh = (min: string, max: string) => {
-    cancelAnimationFrame(this.nextRefreshRafId);
-    const { isPaused, refreshInterval } = this.state;
-    const now = new Date().getTime();
+  public updateRefresh = ({
+    min,
+    max,
+    isPaused,
+    refreshInterval
+  }: {
+    min: string;
+    max: string;
+    isPaused: boolean;
+    refreshInterval: number;
+  }) => {
+    this.clearRefreshTimeout();
 
-    if (isPaused || !refreshInterval) {
-      return;
-    }
-    if (!this.lastRefresh) {
-      this.lastRefresh = now;
-    }
-    if (now - this.lastRefresh >= refreshInterval) {
-      this.props.dispatchUpdateTimePicker({ min, max });
-      this.lastRefresh = now;
-    }
-    requestAnimationFrame(() => this.refresh(min, max));
+    const refresh = () => {
+      if (!isPaused) {
+        this.props.dispatchUpdateTimePicker({ min, max });
+      }
+      this.refreshTimeoutId = setTimeout(refresh, refreshInterval);
+    };
+
+    this.refreshTimeoutId = setTimeout(refresh, refreshInterval);
   };
 
   public updateStateFromUrl(g: QueryG = {}) {
@@ -152,7 +162,7 @@ class DatePickerComponent extends React.Component<Props, State> {
     const max = parsed.to.toISOString();
     this.props.dispatchUpdateTimePicker({ min, max });
     this.setState({ from, to, isPaused: pause, refreshInterval: value }, () => {
-      this.refresh(min, max);
+      this.updateRefresh({ min, max, isPaused: pause, refreshInterval: value });
     });
   }
 
@@ -188,6 +198,7 @@ class DatePickerComponent extends React.Component<Props, State> {
     if (this.state.from === '' || this.state.to === '') {
       return null;
     }
+
     return (
       <EuiSuperDatePicker
         start={this.state.from}
