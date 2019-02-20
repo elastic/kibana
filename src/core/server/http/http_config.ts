@@ -53,6 +53,12 @@ const createHttpSchema = schema.object(
       defaultValue: 'localhost',
       hostname: true,
     }),
+    keepaliveTimeout: schema.number({
+      defaultValue: 120000,
+    }),
+    socketTimeout: schema.number({
+      defaultValue: 120000,
+    }),
     maxPayload: schema.byteSize({
       defaultValue: '1048576b',
     }),
@@ -93,6 +99,8 @@ export class HttpConfig {
 
   public autoListen: boolean;
   public host: string;
+  public keepaliveTimeout: number;
+  public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
   public maxPayload: ByteSizeValue;
@@ -107,6 +115,8 @@ export class HttpConfig {
   constructor(config: HttpConfigType, env: Env) {
     this.autoListen = config.autoListen;
     this.host = config.host;
+    this.keepaliveTimeout = config.keepaliveTimeout;
+    this.socketTimeout = config.socketTimeout;
     this.port = config.port;
     this.cors = config.cors;
     this.maxPayload = config.maxPayload;
