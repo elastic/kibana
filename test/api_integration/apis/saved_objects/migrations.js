@@ -26,9 +26,9 @@ import { assert } from 'chai';
 import {
   DocumentMigrator,
   IndexMigrator,
-} from '../../../../src/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/server/saved_objects/schema';
+} from '../../../../src/legacy/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/legacy/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/legacy/server/saved_objects/schema';
 
 export default ({ getService }) => {
   const es = getService('es');
@@ -66,7 +66,42 @@ export default ({ getService }) => {
       await createIndex({ callCluster, index });
       await createDocs({ callCluster, index, docs: originalDocs });
 
-      const result = await migrateIndex({ callCluster, index, migrations, mappingProperties });
+      // Test that unrelated index templates are unaffected
+      await callCluster('indices.putTemplate', {
+        name: 'migration_test_a_template',
+        body: {
+          index_patterns: 'migration_test_a',
+          mappings: {
+            dynamic: 'strict',
+            properties: { baz: { type: 'text' } },
+          },
+        },
+      });
+
+      // Test that obsolete index templates get removed
+      await callCluster('indices.putTemplate', {
+        name: 'migration_a_template',
+        body: {
+          index_patterns: index,
+          mappings: {
+            dynamic: 'strict',
+            properties: { baz: { type: 'text' } },
+          },
+        },
+      });
+
+      assert.isTrue(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
+
+      const result = await migrateIndex({
+        callCluster,
+        index,
+        migrations,
+        mappingProperties,
+        obsoleteIndexTemplatePattern: 'migration_a*',
+      });
+
+      assert.isFalse(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
+      assert.isTrue(await callCluster('indices.existsTemplate', { name: 'migration_test_a_template' }));
 
       assert.deepEqual(_.omit(result, 'elapsedMs'), {
         destIndex: '.migration-a_2',
@@ -236,7 +271,7 @@ async function createDocs({ callCluster, index, docs }) {
   await callCluster('indices.refresh', { index });
 }
 
-async function migrateIndex({ callCluster, index, migrations, mappingProperties, validateDoc }) {
+async function migrateIndex({ callCluster, index, migrations, mappingProperties, validateDoc, obsoleteIndexTemplatePattern }) {
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
     migrations,
@@ -244,15 +279,16 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
   });
 
   const migrator = new IndexMigrator({
-    batchSize: 10,
     callCluster,
     documentMigrator,
     index,
-    log: _.noop,
+    obsoleteIndexTemplatePattern,
     mappingProperties,
+    batchSize: 10,
+    log: _.noop,
     pollInterval: 50,
     scrollDuration: '5m',
-    serializer: new SavedObjectsSerializer(new SavedObjectsSchema())
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
   });
 
   return await migrator.migrate();

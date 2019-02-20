@@ -35,7 +35,6 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             name: i18n.translate('xpack.uptime.errorList.errorTypeColumnLabel', {
               defaultMessage: 'Error type',
             }),
-            sortable: true,
           },
           {
             field: 'monitorId',
@@ -43,7 +42,6 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
               defaultMessage: 'Monitor ID',
             }),
             render: (id: string) => <Link to={`/monitor/${id}`}>{id}</Link>,
-            sortable: true,
             width: '25%',
           },
           {
@@ -51,14 +49,12 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
               defaultMessage: 'Count',
             }),
-            sortable: true,
           },
           {
             field: 'timestamp',
             name: i18n.translate('xpack.uptime.errorList.latestErrorColumnLabel', {
               defaultMessage: 'Latest error',
             }),
-            sortable: true,
             render: (timestamp: string) => moment(timestamp).fromNow(),
           },
           {
@@ -66,18 +62,15 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
               defaultMessage: 'Status code',
             }),
-            sortable: true,
           },
           {
             field: 'latestMessage',
             name: i18n.translate('xpack.uptime.errorList.latestMessageColumnLabel', {
               defaultMessage: 'Latest message',
             }),
-            sortable: true,
             width: '40%',
           },
         ]}
-        sorting={true}
         pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
       />
     </EuiPanel>

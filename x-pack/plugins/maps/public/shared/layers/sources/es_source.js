@@ -8,7 +8,7 @@ import { AbstractVectorSource } from './vector_source';
 import {
   fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
-  inspectorAdapters, SearchSource
+  SearchSource
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
@@ -19,10 +19,6 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 export class AbstractESSource extends AbstractVectorSource {
 
   static icon = 'logoElasticsearch';
-
-  constructor(descriptor) {
-    super(descriptor);
-  }
 
   isFieldAware() {
     return true;
@@ -41,12 +37,13 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
+    this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
   async _runEsQuery(layerName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: layerName,
         requestId: this._descriptor.id,

@@ -51,7 +51,7 @@ function runServerFunctions(server) {
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
-                context: Joi.object().default({}),
+                context: Joi.object().allow(null).default({}),
               }),
           ).required(),
         }).required(),
@@ -69,8 +69,21 @@ function runServerFunctions(server) {
             if (Boom.isBoom(err)) {
               return { err, statusCode: err.statusCode, message: err.output.payload };
             }
-            return {  err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
+            return { err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
           });
+
+        if (result == null) {
+          const { functionName } = fnCall;
+          return {
+            id,
+            result: {
+              err: `No result from '${functionName}'`,
+              statusCode: 500,
+              message: `Function '${functionName}' did not return anything`
+            }
+          };
+        }
+
         return { id, result };
       }));
 
@@ -88,7 +101,7 @@ function getServerFunctions(server) {
     method: 'GET',
     path: `${API_ROUTE}/fns`,
     handler() {
-      return server.plugins.interpreter.serverFunctions.toJS();
+      return server.plugins.interpreter.registries().serverFunctions.toJS();
     },
   });
 }
@@ -101,10 +114,11 @@ function getServerFunctions(server) {
  * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
  */
 async function runFunction(server, handlers, fnCall) {
+  const registries = server.plugins.interpreter.registries();
   const { functionName, args, context } = fnCall;
-  const types = server.plugins.interpreter.types.toJS();
+  const types = registries.types.toJS();
   const { deserialize } = serializeProvider(types);
-  const fnDef = server.plugins.interpreter.serverFunctions.toJS()[functionName];
+  const fnDef = registries.serverFunctions.toJS()[functionName];
 
   if (!fnDef) {
     throw Boom.notFound(`Function "${functionName}" could not be found.`);
