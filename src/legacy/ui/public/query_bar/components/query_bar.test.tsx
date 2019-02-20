@@ -192,7 +192,7 @@ describe('QueryBar', () => {
     const mockStorage = createMockStorage();
     const mockCallback = jest.fn();
 
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={mockCallback}
@@ -204,7 +204,10 @@ describe('QueryBar', () => {
       />
     );
 
-    component.find(QueryLanguageSwitcher).simulate('selectLanguage', 'lucene');
+    component
+      .find(QueryLanguageSwitcher)
+      .props()
+      .onSelectLanguage('lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({
       dateRange: {
