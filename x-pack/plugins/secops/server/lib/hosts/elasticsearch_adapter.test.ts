@@ -16,7 +16,7 @@ describe('hosts elasticsearch_adapter', () => {
       _id: 'id-123',
       _score: 10,
       _source: {
-        '@timestamp': 'time-1',
+        '@timestamp': 'time-2',
         host: {
           name: 'host-name-1',
           os: {
@@ -25,11 +25,12 @@ describe('hosts elasticsearch_adapter', () => {
           },
         },
       },
+      firstSeen: 'time-1',
       cursor: 'cursor-1',
       sort: [0],
     };
 
-    test('it formats a host with a source of firstSeen correctly', () => {
+    test('it formats a host with firstSeen correctly', () => {
       const fields: ReadonlyArray<string> = ['firstSeen'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
       const expected: HostsEdges = {
@@ -46,6 +47,24 @@ describe('hosts elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
+    test('it formats a host with a source of lastBeat correctly', () => {
+      const fields: ReadonlyArray<string> = ['lastBeat'];
+      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const expected: HostsEdges = {
+        cursor: {
+          tiebreaker: null,
+          value: 'cursor-1',
+        },
+        node: {
+          firstSeen: 'time-1',
+          lastBeat: 'time-2',
+          _id: 'id-123',
+        },
+      };
+
+      expect(data).toEqual(expected);
+    });
+
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
@@ -55,6 +74,7 @@ describe('hosts elasticsearch_adapter', () => {
           value: 'cursor-1',
         },
         node: {
+          firstSeen: 'time-1',
           host: {
             name: 'host-name-1',
           },
@@ -74,6 +94,7 @@ describe('hosts elasticsearch_adapter', () => {
           value: 'cursor-1',
         },
         node: {
+          firstSeen: 'time-1',
           host: {
             os: {
               name: 'os-name-1',
@@ -95,6 +116,7 @@ describe('hosts elasticsearch_adapter', () => {
           value: 'cursor-1',
         },
         node: {
+          firstSeen: 'time-1',
           host: {
             os: {
               version: 'version-1',
@@ -107,8 +129,8 @@ describe('hosts elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a host with a source of name and firstSeen correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name', 'firstSeen'];
+    test('it formats a host with a source of name correctly', () => {
+      const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
       const expected: HostsEdges = {
         cursor: {
@@ -127,9 +149,9 @@ describe('hosts elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a host with a source of name, firstSeen, os, and version correctly', () => {
+    test('it formats a host with a source of name, lastBeat, os, and version correctly', () => {
       const fields: ReadonlyArray<string> = [
-        'firstSeen',
+        'lastBeat',
         'host.name',
         'host.os.name',
         'host.os.version',
@@ -150,6 +172,7 @@ describe('hosts elasticsearch_adapter', () => {
             },
           },
           firstSeen: 'time-1',
+          lastBeat: 'time-2',
         },
       };
 

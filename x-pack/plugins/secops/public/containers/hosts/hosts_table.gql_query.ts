@@ -21,6 +21,7 @@ export const HostsTableQuery = gql`
           node {
             _id
             firstSeen
+            lastBeat
             host {
               id
               name

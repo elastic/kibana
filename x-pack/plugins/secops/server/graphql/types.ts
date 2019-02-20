@@ -340,6 +340,8 @@ export interface HostItem {
   firstSeen?: string | null;
 
   host?: HostEcsFields | null;
+
+  lastBeat?: string | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1580,6 +1582,8 @@ export namespace HostItemResolvers {
     firstSeen?: FirstSeenResolver<string | null, TypeParent, Context>;
 
     host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
+
+    lastBeat?: LastBeatResolver<string | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SecOpsContext> = Resolver<
@@ -1594,6 +1598,11 @@ export namespace HostItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = HostEcsFields | null,
+    Parent = HostItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type LastBeatResolver<
+    R = string | null,
     Parent = HostItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

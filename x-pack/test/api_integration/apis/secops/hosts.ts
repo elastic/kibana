@@ -42,7 +42,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           const hosts = resp.data.source.Hosts;
           expect(hosts.edges.length).to.be(1);
           expect(hosts.totalCount).to.be(2);
-          expect(hosts.pageInfo.endCursor!.value).to.equal('aa7ca589f1b8220002f2fc61c64cfbf1');
+          expect(hosts.pageInfo.endCursor!.value).to.equal('1');
         });
     });
 
@@ -59,7 +59,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 2,
-              cursor: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+              cursor: '1',
             },
           },
         })
@@ -76,8 +76,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
       const expectedHost: GetHostSummaryQuery.Host = {
         architecture: 'x86_64',
         id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-        ip: null,
-        mac: null,
+        ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
+        mac: ['42:01:0a:8e:00:07'],
         name: 'siem-kibana',
         os: {
           family: 'debian',

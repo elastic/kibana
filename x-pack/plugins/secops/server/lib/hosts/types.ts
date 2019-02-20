@@ -20,6 +20,7 @@ export interface HostHit extends Hit {
     host: HostEcsFields;
   };
   cursor?: string;
+  firstSeen?: string;
   sort?: StringOrNumber[];
 }
 
@@ -28,6 +29,10 @@ export type HostHits = Hits<number, HostHit>;
 export interface HostBucket {
   key?: { host_name: string };
   host: HostHits;
+  firstSeen: {
+    value: number;
+    value_as_string: string;
+  };
 }
 
 export interface HostData extends SearchHit {

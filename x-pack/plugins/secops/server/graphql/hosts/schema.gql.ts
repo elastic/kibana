@@ -11,6 +11,7 @@ export const hostsSchema = gql`
     _id: String
     firstSeen: String
     host: HostEcsFields
+    lastBeat: String
   }
 
   type HostsEdges {

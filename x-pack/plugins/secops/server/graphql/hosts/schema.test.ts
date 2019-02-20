@@ -27,6 +27,7 @@ const testCaseSource = {
             node {
               _id
               firstSeen
+              lastBeat
               host {
                 name
                 os {

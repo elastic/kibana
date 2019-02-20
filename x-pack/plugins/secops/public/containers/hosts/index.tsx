@@ -89,7 +89,7 @@ class HostsComponentQuery extends QueryTemplate<
             variables: {
               pagination: {
                 cursor: newCursor,
-                limit,
+                limit: limit + parseInt(newCursor, 10),
               },
             },
             updateQuery: (prev, { fetchMoreResult }) => {

@@ -21,6 +21,7 @@ export const HostSummaryQuery = gql`
           node {
             _id
             firstSeen
+            lastBeat
             host {
               architecture
               id
