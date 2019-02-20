@@ -8,6 +8,7 @@ This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
 
 * <<breaking_70_setting_changes>>
+* <<breaking_70_ems_changes>>
 
 See also <<release-highlights>> and <<release-notes>>.
 
@@ -385,3 +386,43 @@ the `path.data` directory when the node or instance starts.
 `kibana.yml` file has been removed. 
 
 *Impact:* Use `xpack.xpack_main.telemetry.enabled` instead.
+
+[float]
+==== `management/kibana/(index|indices)` => `management/kibana/index_pattern(?s)`
+
+*Details:* Kibana management URLs pertaining to index patterns have been changed
+to accurately reflect their content, from `management/kibana/index` or
+`management/kibana/indices` to `managemen/kibana/index_pattern` or
+`management/kibana/index_patterns`. 
+
+*Impact:* References to these URLs will need to be updated.
+
+[float]
+=== Removed support for deeply nested table splits in data table visualizations
+*Details:* Previously a user was able to create multiple "split table" aggregations in one table on arbitrary levels.
+The potential for deeply nested tables posed maintenance and accessibility challenges, and was inconsistent with other
+visualizations that only allow one table split. This change does not limit the number of split rows a user can put into
+a table; it only restricts the number of split tables to one.
+
+*Impact:* To prevent breaking existing visualizations, saved objects containing nested table splits will be automatically
+migrated to contain only one split table, converting any existing split tables beyond the first to split rows. No action
+should be required as a result of this change, but be aware that users with saved data table visualizations that contain
+multiple split tables will now see those tables rendered differently.
+
+[float]
+[[breaking_70_ems_changes]]
+=== Elastic Maps Service changes
+
+[float]
+==== Removed overseas territories from France Departments vector layer
+
+*Details:* Overseas territories in the France Departments vector layer have been removed. These territories have no ISO 3166-2 or INSEE codes to join to Elasticsearch data.
+
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the France Departments layer will not show overseas territories. 
+
+[float]
+==== USA Zip Codes vector layer updated with latest US Census data
+
+*Details:* The USA Zip Codes layer has been updated based on the https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been generalized from the source data for visualization and locations are approximate.
+
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip Codes layer will appear differently. ZCTA boundaries have changed dramatically in some areas. Also, some zip codes have been deprecated and new ones have been added.

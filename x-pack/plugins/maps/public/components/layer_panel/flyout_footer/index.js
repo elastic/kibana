@@ -7,30 +7,23 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { promoteTemporaryStyles, clearTemporaryStyles, clearTemporaryLayers,
-  setSelectedLayer, removeSelectedLayer, promoteTemporaryLayers } from '../../../actions/store_actions';
-import { getSelectedLayer } from '../../../selectors/map_selectors';
+import {
+  setSelectedLayer,
+  removeSelectedLayer,
+  rollbackToTrackedLayerStateForSelectedLayer,
+  removeTrackedLayerStateForSelectedLayer
+} from '../../../actions/store_actions';
 
-const mapStateToProps = state => {
-  const selectedLayer = getSelectedLayer(state);
+const mapDispatchToProps = (dispatch) => {
   return {
-    isNewLayer: selectedLayer.isTemporary()
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    cancelLayerPanel: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(clearTemporaryStyles());
-      dispatch(clearTemporaryLayers());
+    cancelLayerPanel: async () => {
+      await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
+      await dispatch(setSelectedLayer(null));
     },
-    saveLayerEdits: isNewLayer => {
+    saveLayerEdits: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(promoteTemporaryStyles());
-      if (isNewLayer) {
-        dispatch(promoteTemporaryLayers());
-      }
+      dispatch(removeTrackedLayerStateForSelectedLayer());
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {
@@ -41,5 +34,5 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-const connectedFlyoutFooter = connect(mapStateToProps, mapDispatchToProps)(FlyoutFooter);
+const connectedFlyoutFooter = connect(null, mapDispatchToProps)(FlyoutFooter);
 export { connectedFlyoutFooter as FlyoutFooter };

@@ -40,7 +40,7 @@ export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, 
   const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
 
   const popoverButton = handleClick => (
-    <EuiButtonEmpty size="s" onClick={handleClick}>
+    <EuiButtonEmpty onClick={handleClick}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {inFlight && (
           <Fragment>

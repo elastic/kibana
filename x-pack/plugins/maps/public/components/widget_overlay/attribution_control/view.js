@@ -15,11 +15,8 @@ import {
 
 export class AttributionControl  extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      uniqueAttributions: []
-    };
+  state = {
+    uniqueAttributions: []
   }
 
   componentDidMount() {

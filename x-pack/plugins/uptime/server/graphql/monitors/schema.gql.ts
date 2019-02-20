@@ -23,16 +23,11 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
-  type HistogramSeries {
-    monitorId: String
-    data: [HistogramDataPoint!]
-  }
-
   type Snapshot {
     up: Int
     down: Int
     total: Int
-    histogram: [HistogramSeries!]
+    histogram: [HistogramDataPoint!]!
   }
 
   type DataPoint {

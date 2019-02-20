@@ -25,7 +25,7 @@ export interface BaseOptions {
 
 export interface CreateOptions extends BaseOptions {
   id?: string;
-  override?: boolean;
+  overwrite?: boolean;
   references?: SavedObjectReference[];
 }
 

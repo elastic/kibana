@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/courier';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import {
   getTimeFilters,
   getMapZoom,
@@ -18,6 +18,7 @@ import {
   getQuery,
 } from '../../selectors/map_selectors';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
+import { copyPersistentState } from '../../store/util';
 
 const module = uiModules.get('app/maps');
 
@@ -67,12 +68,7 @@ module.factory('SavedGisMap', function (Private) {
 
   SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
-    // Layer list from store contains requested data.
-    // We do not want to store this in the saved object so it is getting removed
-    const layerListConfigOnly = layerList.map(layer => {
-      delete layer.dataRequests;
-      return layer;
-    });
+    const layerListConfigOnly = copyPersistentState(layerList);
     this.layerListJSON = JSON.stringify(layerListConfigOnly);
 
     this.mapStateJSON = JSON.stringify({
@@ -90,3 +86,4 @@ module.factory('SavedGisMap', function (Private) {
 
   return SavedGisMap;
 });
+
