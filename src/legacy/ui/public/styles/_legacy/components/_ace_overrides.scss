@@ -1,10 +1,11 @@
 @import '@elastic/eui/src/components/call_out/variables';
 @import '@elastic/eui/src/components/call_out/mixins';
 
-// SASSTODO: Coloring uses EUI code block variables.
-// However, the naming does not currently line up (selector to variable).
-// This is so that there is no drastic visual difference for the user.
-// Eventually, we can update this to match all other editors.
+// SASSTODO: Replace with an EUI editor
+// Intentionally not using the EuiCodeBlock colors here because they actually change
+// hue from light to dark theme. So some colors would change while others wouldn't.
+// Seemed weird, so just hexing all the colors but using the `makeHighContrastColor()`
+// function to ensure accessible contrast.
 
 // In order to override the TM (Textmate) theme of Ace/Brace, everywhere,
 // it is being scoped by a known outer selector
@@ -52,17 +53,17 @@
     }
 
     .ace_method {
-      color: makeHighContrastColor($euiCodeBlockStringColor, $aceBackground);
+      color: makeHighContrastColor(#DD0A73, $aceBackground);
     }
 
     .ace_url,
     .ace_start_triple_quote,
     .ace_end_triple_quote {
-      color: makeHighContrastColor($euiCodeBlockNumberColor, $aceBackground);
+      color: makeHighContrastColor(#00A69B, $aceBackground);
     }
 
     .ace_multi_string {
-      color: makeHighContrastColor($euiCodeBlockRegexpColor, $aceBackground);
+      color: makeHighContrastColor(#009926, $aceBackground);
       font-style: italic;
     }
 
@@ -90,11 +91,11 @@
 
     .ace_storage,
     .ace_keyword {
-      color: makeHighContrastColor($euiCodeBlockTagColor, $aceBackground);
+      color: makeHighContrastColor(#0079A5, $aceBackground);
     }
 
     .ace_constant {
-      color: makeHighContrastColor($euiCodeBlockTitleColor, $aceBackground);
+      color: makeHighContrastColor(#900, $aceBackground);
     }
 
     .ace_constant.ace_buildin {
@@ -106,7 +107,7 @@
     }
 
     .ace_constant.ace_library {
-      color: makeHighContrastColor($euiCodeBlockRegexpColor, $aceBackground);
+      color: makeHighContrastColor(#009926, $aceBackground);
     }
 
     .ace_invalid {
@@ -119,7 +120,7 @@
     }
 
     .ace_support.ace_constant {
-      color: makeHighContrastColor($euiCodeBlockRegexpColor, $aceBackground);
+      color: makeHighContrastColor(#009926, $aceBackground);
     }
 
     .ace_support.ace_type,
@@ -132,7 +133,7 @@
     }
 
     .ace_string {
-      color: makeHighContrastColor($euiCodeBlockRegexpColor, $aceBackground);
+      color: makeHighContrastColor(#009926, $aceBackground);
     }
 
     .ace_comment {
@@ -140,7 +141,7 @@
     }
 
     .ace_comment.ace_doc {
-      color: makeHighContrastColor($euiCodeBlockTagColor, $aceBackground);
+      color: makeHighContrastColor(#0079A5, $aceBackground);
     }
 
     .ace_comment.ace_doc.ace_tag {
@@ -148,11 +149,11 @@
     }
 
     .ace_constant.ace_numeric {
-      color: makeHighContrastColor($euiCodeBlockTagColor, $aceBackground);
+      color: makeHighContrastColor(#0079A5, $aceBackground);
     }
 
     .ace_variable {
-      color: makeHighContrastColor($euiCodeBlockTypeColor, $aceBackground);
+      color: makeHighContrastColor(#0079A5, $aceBackground);
     }
 
     .ace_xml-pe {
