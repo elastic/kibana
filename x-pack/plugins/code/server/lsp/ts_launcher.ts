@@ -10,7 +10,6 @@ import { resolve } from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { promiseTimeout } from '../utils/timeout';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
@@ -72,24 +71,28 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
       };
       let child = spawnTs();
       log.info(`Launch Typescript Language Server at port ${port}, pid:${child.pid}`);
-      const reconnect = () => {
-        log.info('reconnecting');
-        promiseTimeout(3000, proxy.connect()).then(
-          () => {
-            log.info('connected');
-          },
-          () => {
-            log.error('unable to connect within 3s, respawn ts server.');
-            child.kill();
-            child = spawnTs();
-            setTimeout(reconnect, 1000);
-          }
-        );
-      };
+      // TODO: how to properly implement timeout socket connection? maybe config during socket connection
+      // const reconnect = () => {
+      //   log.debug('reconnecting');
+      // promiseTimeout(3000, proxy.connect()).then(
+      //   () => {
+      //     log.info('connected');
+      //   },
+      //   () => {
+      //     log.error('unable to connect within 3s, respawn ts server.');
+      //     child.kill();
+      //     child = spawnTs();
+      //     setTimeout(reconnect, 1000);
+      //   }
+      // );
+      // };
       proxy.onDisconnected(() => {
         if (!proxy.isClosed) {
-          log.warn('language server disconnected, reconnecting');
-          setTimeout(reconnect, 1000);
+          log.info('waiting language server to be connected');
+          if (!this.isRunning) {
+            log.error('detect language server killed, respawn ts server.');
+            child = spawnTs();
+          }
         } else {
           child.kill();
         }
