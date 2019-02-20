@@ -17,16 +17,4 @@
  * under the License.
  */
 
-export default {
-  '_default_': {
-    'dynamic': 'strict'
-  },
-  config: {
-    dynamic: true,
-    properties: {
-      buildNum: {
-        type: 'keyword'
-      }
-    }
-  }
-};
+export { SearchSelection } from './search_selection';

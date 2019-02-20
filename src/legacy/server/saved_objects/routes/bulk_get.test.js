@@ -91,5 +91,4 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     const args = savedObjectsClient.bulkGet.getCall(0).args;
     expect(args[0]).toEqual(docs);
   });
-
 });
