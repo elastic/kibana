@@ -163,11 +163,7 @@ export class AddLayerPanel extends Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => {
-                  if (this.state.layer) {
-                    this.props.closeFlyout();
-                  }
-                }}
+                onClick={this.props.closeFlyout}
                 flush="left"
               >
                 Cancel
