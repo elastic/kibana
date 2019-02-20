@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+import Boom from 'boom';
 
 export const registerUserActionRoute = (server) => {
-  const isEsError = isEsErrorFactory(server);
-
   /*
    * Increment a count on an object representing a specific user action.
    */
@@ -45,11 +42,8 @@ export const registerUserActionRoute = (server) => {
         );
 
         return {};
-      } catch(err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-        throw wrapUnknownError(err);
+      } catch(error) {
+        return new Boom('Something went wrong', { statusCode: error.status });
       }
     },
   });
