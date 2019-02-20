@@ -10,6 +10,45 @@ import { GetTimelineQuery } from '../../../../plugins/secops/public/graphql/type
 
 import { KbnTestProvider } from './types';
 
+// typical values that have to change after an update from "scripts/es_archiver"
+const HOST_NAME = 'suricata-sensor-amsterdam';
+const TOTAL_COUNT = 18;
+const EDGE_LENGTH = 2;
+const CURSOR_ID = '1550605006333';
+const LTE = new Date('2019-02-19T20:00:00.000Z').valueOf();
+const GTE = new Date('2019-02-19T00:00:00.000Z').valueOf();
+
+const FILTER_VALUE = {
+  bool: {
+    filter: [
+      {
+        bool: {
+          should: [{ match_phrase: { 'host.name': HOST_NAME } }],
+          minimum_should_match: 1,
+        },
+      },
+      {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ range: { '@timestamp': { gte: GTE } } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [{ range: { '@timestamp': { lte: LTE } } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
 const timelineTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
@@ -24,8 +63,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
           query: timelineQuery,
           variables: {
             sourceId: 'default',
-            filterQuery:
-              '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1483306065535}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1546554465535}}}],"minimum_should_match":1}}]}}]}}',
+            filterQuery: JSON.stringify(FILTER_VALUE),
             pagination: {
               limit: 2,
               cursor: null,
@@ -39,9 +77,9 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const events = resp.data.source.Events;
-          expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(494);
-          expect(events.pageInfo.endCursor!.value).to.equal('1546483081822');
+          expect(events.edges.length).to.be(EDGE_LENGTH);
+          expect(events.totalCount).to.be(TOTAL_COUNT);
+          expect(events.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
         });
     });
 
@@ -51,11 +89,10 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
           query: timelineQuery,
           variables: {
             sourceId: 'default',
-            filterQuery:
-              '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1483306065535}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1546554465535}}}],"minimum_should_match":1}}]}}]}}',
+            filterQuery: JSON.stringify(FILTER_VALUE),
             pagination: {
               limit: 2,
-              cursor: '1546483081822',
+              cursor: CURSOR_ID,
               tiebreaker: '191',
             },
             sortField: {
@@ -67,9 +104,9 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const events = resp.data.source.Events;
 
-          expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(494);
-          expect(events.edges[0]!.node.host!.name).to.be('siem-kibana');
+          expect(events.edges.length).to.be(EDGE_LENGTH);
+          expect(events.totalCount).to.be(TOTAL_COUNT);
+          expect(events.edges[0]!.node.host!.name).to.be(HOST_NAME);
         });
     });
   });

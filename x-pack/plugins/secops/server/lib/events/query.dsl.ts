@@ -41,7 +41,7 @@ export const buildQuery = (options: RequestOptions) => {
     ? {
         count_event_type: {
           terms: {
-            field: 'event.type',
+            field: 'event.action',
             size: 5,
             order: {
               _count: 'desc',
@@ -52,7 +52,7 @@ export const buildQuery = (options: RequestOptions) => {
     : {};
 
   const queryMust = options.fields.includes('kpiEventType')
-    ? [{ match_all: {} }, { exists: { field: 'event.type' } }]
+    ? [{ match_all: {} }, { exists: { field: 'event.action' } }]
     : [{ match_all: {} }];
 
   const getSortField = (sortField: SortField) => {
