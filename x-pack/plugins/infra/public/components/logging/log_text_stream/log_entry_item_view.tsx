@@ -13,7 +13,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { LogEntry } from '../../../../common/log_entry';
 import { SearchResult } from '../../../../common/log_search_result';
 import { TextScale } from '../../../../common/log_text_scale';
-import { formatTime } from '../../../../common/time';
+import { FormattedTime } from '../../formatted_time';
 import { LogTextStreamItemDateField } from './item_date_field';
 import { LogTextStreamItemMessageField } from './item_message_field';
 
@@ -78,7 +78,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
             isHovered={isHovered}
             scale={scale}
           >
-            {formatTime(logEntry.fields.time)}
+            <FormattedTime time={logEntry.fields.time} />
           </LogTextStreamItemDateField>
           <LogTextStreamIconDiv isHovered={isHovered}>
             {isHovered ? (

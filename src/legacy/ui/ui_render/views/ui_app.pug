@@ -137,7 +137,4 @@ block content
     // intentional as we check for the existence of __kbnCspNotEnforced__ in
     // bootstrap.
     window.__kbnCspNotEnforced__ = true;
-  script(nonce=nonce).
-    window.__kbnStrictCsp__ = !{strictCsp};
-    window.__kbnNonce__ = '!{nonce}';
   script(src=bootstrapScriptUrl, nonce=nonce)

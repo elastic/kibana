@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { getStore } from '../store/store';
+import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
 import {
   setSelectedLayer,
@@ -19,6 +19,7 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
+  clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
   enableFullScreen,
@@ -27,9 +28,10 @@ import {
   FLYOUT_STATE
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
-import { inspectorAdapters, indexPatternService } from '../kibana_services';
+import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
@@ -48,7 +50,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   const savedMap = $scope.map = $route.current.locals.map;
   let unsubscribe;
 
-  inspectorAdapters.requests.reset();
+  const store = createMapStore();
 
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
     if (diff.includes('time')) {
@@ -100,7 +102,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.time = dateRange;
     syncAppAndGlobalState();
 
-    getStore().dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
@@ -109,12 +111,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     };
     syncAppAndGlobalState();
 
-    getStore().dispatch(setRefreshConfig($scope.refreshConfig));
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
   function renderMap() {
-    const store = getStore();
-
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -206,7 +206,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   ]);
 
   async function doSave(saveOptions) {
-    savedMap.syncWithStore(getStore().getState());
+    await store.dispatch(clearTransientLayerStateAndCloseFlyout());
+    savedMap.syncWithStore(store.getState());
     const docTitle = Private(DocTitleProvider);
     let id;
 
@@ -246,13 +247,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     description: 'full screen',
     testId: 'mapsFullScreenMode',
     run() {
-      getStore().dispatch(enableFullScreen());
+      store.dispatch(enableFullScreen());
     }
   }, {
     key: 'inspect',
     description: 'Open Inspector',
     testId: 'openInspectorButton',
     run() {
+      const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
   }, {

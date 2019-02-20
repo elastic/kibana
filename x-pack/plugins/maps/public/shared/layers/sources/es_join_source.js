@@ -10,7 +10,6 @@ import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
   SearchSource,
 } from '../../../kibana_services';
 import { AggConfigs } from 'ui/vis/agg_configs';
@@ -74,10 +73,6 @@ export class ESJoinSource extends AbstractESSource {
     return false;
   }
 
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
-  }
-
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
   }
@@ -111,6 +106,7 @@ export class ESJoinSource extends AbstractESSource {
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
       resp = await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
         requestId: this._descriptor.id,
