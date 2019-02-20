@@ -76,9 +76,8 @@ describe('Saved object does not have layer list', () => {
         "properties": {},
         "type": "TILE",
       },
-      "temporary": false,
-      "type": "TILE",
-      "visible": true,
+      'type': 'TILE',
+      'visible': true,
     }]);
   });
 
@@ -105,7 +104,6 @@ describe('Saved object does not have layer list', () => {
         properties: {},
         type: 'TILE',
       },
-      temporary: false,
       type: 'TILE',
       visible: true,
     }]);
@@ -134,7 +132,6 @@ describe('Saved object does not have layer list', () => {
         properties: {},
         type: 'TILE',
       },
-      temporary: false,
       type: 'TILE',
       visible: true,
     }]);
