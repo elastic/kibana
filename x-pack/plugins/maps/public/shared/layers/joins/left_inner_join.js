@@ -7,6 +7,7 @@
 
 import { ESJoinSource } from '../sources/es_join_source';
 import { VectorStyle } from '../styles/vector_style';
+import { filterPropertiesForTooltip } from '../util';
 
 export class LeftInnerJoin {
 
@@ -79,20 +80,21 @@ export class LeftInnerJoin {
 
   filterAndFormatPropertiesForTooltip(properties) {
     const joinFields = this.getJoinFields();
-    const tooltipProps = {};
-    joinFields.forEach((joinField) => {
-      console.log('jf', joinField);
-      for (const key in properties) {
-        if (properties.hasOwnProperty(key)) {
-          if (joinField.name === key) {
-            tooltipProps[joinField.label] = properties[key];
-          }
-        }
-      }
-    });
+    // const tooltipProps = {};
+    // joinFields.forEach((joinField) => {
+    //   for (const key in properties) {
+    //     if (properties.hasOwnProperty(key)) {
+    //       if (joinField.name === key) {
+    //         tooltipProps[joinField.label] = properties[key];
+    //       }
+    //     }
+    //   }
+    // });
+    //
+    // console.log('ttp', tooltipProps);
+    // return tooltipProps;
+    return filterPropertiesForTooltip(joinFields, properties);
 
-    console.log('ttp', tooltipProps);
-    return tooltipProps;
   }
 
   getIndexPatternIds() {

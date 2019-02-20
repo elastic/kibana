@@ -82,10 +82,10 @@ export class ESJoinSource extends AbstractESSource {
     return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
   }
 
-  _formatMetricLabel(metric) {
-    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
-  }
+  // _formatMetricLabel(metric) {
+  //   const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
+  //   return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
+  // }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
 

@@ -19,8 +19,9 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { filterPropertiesForTooltip } from '../../util';
 
-const COUNT_PROP_LABEL = 'Count';
+const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -301,18 +302,27 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatProperties(properties) {
-    console.log('filter and format', properties);
-    properties = await super.filterAndFormatProperties(properties);
-    const allProps = {};
-    for  (const key in properties) {
-      if (key !== 'geohash_meta') {
-        allProps[key] = properties[key];
-      }
-    }
+    console.log('filter and format es geogrid', properties);
+    // properties = await super.filterAndFormatProperties(properties);
+    // const allProps = {};
+    // for  (const key in properties) {
+    //   if (key !== 'geohash_meta') {
+    //     allProps[key] = properties[key];
+    //   }
+    // }
+    //
+    //
+    // console.log('filtered and formatted', allProps);
+    //
+    // return allProps;
 
 
-    console.log('filtered and formatted', allProps);
+    const metricFields = this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+      return { label, name };
+    });
 
-    return allProps;
+    return filterPropertiesForTooltip(metricFields, properties);
+
+
   }
 }
