@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { callWithInternalUserFactory } from '../../lib/call_with_internal_user_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 
@@ -35,7 +34,7 @@ export const registerUserActionRoute = (server) => {
 
       try {
         const { getSavedObjectsRepository } = server.savedObjects;
-        const callWithInternalUser = callWithInternalUserFactory(server);
+        const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
         const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
         // This object is created if it doesn't already exist.
