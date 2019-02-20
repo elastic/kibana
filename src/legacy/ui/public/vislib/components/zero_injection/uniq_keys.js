@@ -46,19 +46,15 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
       charts = [obj];
     }
 
-    const isDate = charts.every(function (chart) {
+    const isDate = charts.every(chart => {
       return chart.ordered && chart.ordered.date;
     });
 
-    const isOrdered = charts.every(function (chart) {
+    const isOrdered = charts.every(chart => {
       return chart.ordered;
     });
 
-    // Populate `uniqueXValues` with the preserved x key order from the
-    // original tabified data. `flattenedData` only contains the first
-    // non-zero values in each series, and therefore is not guaranteed
-    // to match the order that came back from ES.
-    obj.xAxisOrderedValues.forEach((key, index) => {
+    const initXValue = (key, index) => {
       uniqueXValues.set(key, {
         index,
         isDate,
@@ -66,12 +62,26 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
         isNumber: isNumber(key),
         sum: 0,
       });
-    });
+    };
+
+    // Populate `uniqueXValues` with the preserved x key order from the
+    // original tabified data. `flattenedData` only contains the first
+    // non-zero values in each series, and therefore is not guaranteed
+    // to match the order that came back from ES.
+    if (obj.xAxisOrderedValues) {
+      obj.xAxisOrderedValues.forEach(initXValue);
+    }
 
     // Generate a sum for each value
-    flattenedData.forEach(function (d) {
+    flattenedData.forEach(d => {
       const key = d.x;
-      const prev = uniqueXValues.get(key);
+      let prev = uniqueXValues.get(key);
+      if (!prev) {
+        // Value doesn't exist in xAxisOrderedValues, so we create it
+        // and index it at the end.
+        initXValue(key, uniqueXValues.size);
+        prev = uniqueXValues.get(key);
+      }
       uniqueXValues.set(key, {
         ...prev,
         sum: prev.sum + d.y,
