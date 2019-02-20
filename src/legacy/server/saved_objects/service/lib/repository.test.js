@@ -26,6 +26,7 @@ import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
+import { getRootPropertiesObjects } from '../../../mappings/lib/get_root_properties_objects';
 import { encodeHitVersion } from '../../version';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -190,6 +191,21 @@ describe('SavedObjectsRepository', () => {
 
   const mappings = {
     properties: {
+      'config': {
+        properties: {
+          type: 'keyword'
+        },
+      },
+      'foo': {
+        properties: {
+          type: 'keyword',
+        },
+      },
+      'bar': {
+        properties: {
+          type: 'keyword',
+        },
+      },
       'index-pattern': {
         properties: {
           someField: {
@@ -210,11 +226,23 @@ describe('SavedObjectsRepository', () => {
             type: 'keyword'
           }
         }
-      }
-    }
+      },
+      'hiddenType': {
+        properties: {
+          someField: {
+            type: 'keyword'
+          }
+        }
+      },
+    },
   };
 
-  const schema = new SavedObjectsSchema({ globaltype: { isNamespaceAgnostic: true } });
+  const schema = new SavedObjectsSchema({
+    globaltype: { isNamespaceAgnostic: true },
+    foo: { isNamespaceAgnostic: true },
+    bar: { isNamespaceAgnostic: true },
+    hiddenType: { isNamespaceAgnostic: true, hidden: true },
+  });
 
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
@@ -225,6 +253,9 @@ describe('SavedObjectsRepository', () => {
     };
 
     const serializer = new SavedObjectsSerializer(schema);
+    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+    const allowedTypes = [...new Set(allTypes.filter(type => !schema.isHiddenType(type)))];
+
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
@@ -232,6 +263,7 @@ describe('SavedObjectsRepository', () => {
       migrator,
       schema,
       serializer,
+      allowedTypes,
       onBeforeWrite
     });
 
@@ -437,7 +469,12 @@ describe('SavedObjectsRepository', () => {
   describe('#bulkCreate', () => {
     it('waits until migrations are complete before proceeding', async () => {
       migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'index-pattern:two', _primary_term: 1, _seq_no: 1 } },
+        ]
+      });
 
       await expect(savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -448,7 +485,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('formats Elasticsearch request', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
+          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
+        ]
+      });
 
       await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
@@ -557,7 +599,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [{ create: { type: 'foo', id: 'bar', _primary_term: 1, _seq_no: 1 } }]
+      });
 
       await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
       sinon.assert.calledOnce(callAdminCluster);
@@ -677,7 +721,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          { create: { _type: '_doc', _id: 'foo-namespace:config:one', _primary_term: 1, _seq_no: 2 } },
+          { create: { _type: '_doc', _id: 'foo-namespace:index-pattern:two', _primary_term: 1, _seq_no: 2 } }
+        ]
+      });
       await savedObjectsRepository.bulkCreate(
         [
           { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -712,7 +761,24 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns(
+        Promise.resolve({
+          errors: false,
+          items: [{
+            create: {
+              _type: '_doc',
+              _id: 'config:one',
+              ...mockVersionProps
+            }
+          }, {
+            create: {
+              _type: '_doc',
+              _id: 'index-pattern:two',
+              ...mockVersionProps
+            }
+          }]
+        })
+      );
       await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
@@ -730,7 +796,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [{ create: { _type: '_doc', _id: 'globaltype:one', _primary_term: 1, _seq_no: 2 } }]
+      });
       await savedObjectsRepository.bulkCreate(
         [
           { type: 'globaltype', id: 'one', attributes: { title: 'Test One' } },
@@ -747,6 +815,10 @@ describe('SavedObjectsRepository', () => {
         ]
       }));
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('should return objects in the same order regardless of type', () => {
+
     });
   });
 
@@ -861,7 +933,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, {
         namespace: 'my-namespace',
-        type: ['index-pattern', 'dashboard']
+        type: ['config', 'index-pattern', 'dashboard']
       });
 
       sinon.assert.calledWithExactly(callAdminCluster, 'deleteByQuery', {
@@ -1214,6 +1286,31 @@ describe('SavedObjectsRepository', () => {
       expect(response.saved_objects).toHaveLength(0);
       sinon.assert.notCalled(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
+    });
+
+    it('handles missing ids gracefully', async () => {
+      callAdminCluster.returns(Promise.resolve({
+        docs: [{
+          _type: '_doc',
+          _id: 'config:good',
+          found: true,
+          ...mockVersionProps,
+          _source: { ...mockTimestampFields, config: { title: 'Test' } }
+        }, {
+          _type: '_doc',
+          _id: 'config:bad',
+          found: false
+        }]
+      }));
+
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
+        [{ id: 'good', type: 'config' }, { type: 'config' }]
+      );
+
+      expect(savedObjects[1]).toEqual({
+        type: 'config',
+        error: { statusCode: 404, message: 'Not found' }
+      });
     });
 
     it('reports error on missed objects', async () => {
@@ -1647,7 +1744,7 @@ describe('SavedObjectsRepository', () => {
       onBeforeWrite.returns(delay(500));
       callAdminCluster.returns({ result: 'deleted', found: true });
 
-      const deletePromise = savedObjectsRepository.delete('type', 'id');
+      const deletePromise = savedObjectsRepository.delete('foo', 'id');
       await delay(100);
       sinon.assert.calledOnce(onBeforeWrite);
       sinon.assert.notCalled(callAdminCluster);
@@ -1664,12 +1761,190 @@ describe('SavedObjectsRepository', () => {
       onBeforeWrite.throws(es401);
 
       try {
-        await savedObjectsRepository.delete('type', 'id');
+        await savedObjectsRepository.delete('foo', 'id');
       } catch (error) {
         sinon.assert.calledOnce(onBeforeWrite);
         expect(error).toBe(es401);
         expect(errors.isNotAuthorizedError(error)).toBe(true);
       }
+    });
+  });
+
+  describe('unsupported types', () => {
+    it('should error when attempting to \'update\' an unsupported type', async () => {
+      await expect(savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' }))
+        .rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
+    });
+
+    it('should error when attempting to \'get\' an unsupported type', async () => {
+      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Not Found'));
+    });
+
+    it('should return an error object when attempting to \'create\' an unsupported type', async () => {
+      await expect(savedObjectsRepository.create('hiddenType', { title: 'some title' }))
+        .rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
+    });
+
+    it('should return an error object when attempting to \'bulkGet\' an unsupported type', async () => {
+      callAdminCluster.returns({
+        docs: [
+          {
+            id: 'one',
+            type: 'config',
+            _primary_term: 1,
+            _seq_no: 1,
+            found: true,
+            _source: {
+              updated_at: mockTimestamp
+            }
+          }, {
+            id: 'bad',
+            type: 'config',
+            found: false,
+          }
+        ]
+      });
+      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
+        { id: 'one', type: 'config' },
+        { id: 'bad', type: 'config' },
+        { id: 'four', type: 'hiddenType' },
+      ]);
+      expect(savedObjects).toEqual([
+        {
+          id: 'one',
+          type: 'config',
+          updated_at: mockTimestamp,
+          references: [],
+          version: 'WzEsMV0=',
+        }, {
+          error: {
+            message: 'Not found',
+            statusCode: 404,
+          },
+          id: 'bad',
+          type: 'config',
+        }, {
+          id: 'four',
+          error: {
+            error: 'Bad Request',
+            message: 'Unsupported saved object type: \'hiddenType\': Bad Request',
+            statusCode: 400,
+          },
+          type: 'hiddenType',
+        }
+      ]);
+    });
+
+    it('should not return hidden saved ojects when attempting to \'find\' support and unsupported types', async () => {
+      callAdminCluster.returns({
+        hits: {
+          total: 1,
+          hits: [{
+            _id: 'one',
+            _source: {
+              updated_at: mockTimestamp,
+              type: 'config',
+            },
+            references: [],
+          }]
+        }
+      });
+      const results = await savedObjectsRepository.find({ type: ['hiddenType', 'config'] });
+      expect(results).toEqual({
+        total: 1,
+        saved_objects: [{
+          id: 'one',
+          references: [],
+          type: 'config',
+          updated_at: mockTimestamp,
+        }],
+        page: 1,
+        per_page: 20,
+      });
+    });
+
+    it('should return empty results when attempting to \'find\' an unsupported type', async () => {
+      callAdminCluster.returns({
+        hits: {
+          total: 0,
+          hits: [],
+        }
+      });
+      const results = await savedObjectsRepository.find({ type: 'hiddenType' });
+      expect(results).toEqual({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+      });
+    });
+
+    it('should return empty results when attempting to \'find\' more than one unsupported types', async () => {
+      const findParams = { type: ['hiddenType', 'hiddenType2'] };
+      callAdminCluster.returns({
+        status: 200,
+        hits: {
+          total: 0,
+          hits: [],
+        }
+      });
+      const results = await savedObjectsRepository.find(findParams);
+      expect(results).toEqual({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+      });
+    });
+
+    it('should error when attempting to \'delete\' hidden types', async () => {
+      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Not Found'));
+    });
+
+    it('should error when attempting to \'bulkCreate\' an unsupported type', async () => {
+      callAdminCluster.returns({
+        items: [
+          {
+            index: {
+              _id: 'one',
+              _seq_no: 1,
+              _primary_term: 1,
+              _type: 'config',
+              attributes: {
+                title: 'Test One'
+              }
+            }
+          }
+        ]
+      });
+      const results = await savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
+      expect(results).toEqual({
+        saved_objects: [{
+          type: 'config',
+          id: 'one',
+          attributes: { title: 'Test One' },
+          references: [],
+          version: 'WzEsMV0=',
+          updated_at: mockTimestamp,
+        }, {
+          error: {
+            error: 'Bad Request',
+            message: 'Unsupported saved object type: \'hiddenType\': Bad Request',
+            statusCode: 400,
+          },
+          id: 'two',
+          type: 'hiddenType',
+        }],
+      });
+    });
+
+    it('should error when attempting to \'incrementCounter\' for an unsupported type', async () => {
+      await expect(
+        savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
+      ).rejects.toEqual(new Error('Unsupported saved object type: \'hiddenType\': Bad Request'));
     });
   });
 });
