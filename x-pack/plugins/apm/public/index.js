@@ -15,8 +15,6 @@ import 'ui/autoload/all';
 import 'uiExports/autocompleteProviders';
 import 'react-vis/dist/style.css';
 import './style/global_overrides.css';
-import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import template from './templates/index.html';
 import Main from './components/app/Main';
@@ -25,6 +23,7 @@ import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
+import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 
 import { history } from './components/shared/Links/url_helpers';
 
@@ -32,18 +31,7 @@ import { I18nContext } from 'ui/i18n';
 
 // render APM feedback link in global help menu
 chrome.helpExtension.set(domElement => {
-  ReactDOM.render(
-    <EuiLink
-      href="https://discuss.elastic.co/c/apm"
-      target="_blank"
-      rel="noopener"
-    >
-      {i18n.translate('xpack.apm.feedbackMenu.provideFeedbackTitle', {
-        defaultMessage: 'Give APM Feedback'
-      })}
-    </EuiLink>,
-    domElement
-  );
+  ReactDOM.render(<GlobalHelpExtension />, domElement);
   return () => {
     ReactDOM.unmountComponentAtNode(domElement);
   };
