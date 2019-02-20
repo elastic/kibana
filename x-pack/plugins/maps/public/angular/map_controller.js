@@ -42,6 +42,7 @@ import { getInitialRefreshConfig } from './get_initial_refresh_config';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
+
 const app = uiModules.get('app/maps', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState, Private) => {

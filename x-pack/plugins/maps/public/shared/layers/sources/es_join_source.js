@@ -82,11 +82,6 @@ export class ESJoinSource extends AbstractESSource {
     return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
   }
 
-  // _formatMetricLabel(metric) {
-  //   const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-  //   return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
-  // }
-
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {
@@ -159,18 +154,6 @@ export class ESJoinSource extends AbstractESSource {
     joinStatement.push(`for metrics ${metrics.join(',')}`);
     return `Elasticsearch terms aggregation request for ${joinStatement.join(' ')}`;
   }
-
-  // getMetricFields() {
-  //   return this._getValidMetrics().map(metric => {
-  //     const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-  //     const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-  //     return {
-  //       ...metric,
-  //       propertyKey: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-  //       propertyLabel: `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`,
-  //     };
-  //   });
-  // }
 
   _makeAggConfigs() {
     const metricAggConfigs = this.getMetricFields().map(metric => {

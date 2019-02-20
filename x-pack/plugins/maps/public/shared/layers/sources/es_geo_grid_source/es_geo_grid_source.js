@@ -195,20 +195,6 @@ export class ESGeoGridSource extends AbstractESSource {
     return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
-  //
-  //
-  // getMetricFields() {
-  //   return this._getValidMetrics().map(metric => {
-  //     const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
-  //     const metricLabel = metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
-  //     return {
-  //       ...metric,
-  //       propertyKey: metricKey,
-  //       propertyLabel: metricLabel
-  //     };
-  //   });
-  // }
-
   _makeAggConfigs(precision) {
     const metricAggConfigs = this.getMetricFields().map(metric => {
       const metricAggConfig = {
@@ -302,27 +288,10 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatProperties(properties) {
-    console.log('filter and format es geogrid', properties);
-    // properties = await super.filterAndFormatProperties(properties);
-    // const allProps = {};
-    // for  (const key in properties) {
-    //   if (key !== 'geohash_meta') {
-    //     allProps[key] = properties[key];
-    //   }
-    // }
-    //
-    //
-    // console.log('filtered and formatted', allProps);
-    //
-    // return allProps;
-
-
     const metricFields = this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
-
     return filterPropertiesForTooltip(metricFields, properties);
-
 
   }
 }

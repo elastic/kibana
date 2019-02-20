@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export function filterPropertiesForTooltip(fields, properties) {
   const tooltipProps = {};
   fields.forEach((field) => {
@@ -17,7 +15,5 @@ export function filterPropertiesForTooltip(fields, properties) {
       }
     }
   });
-
-  console.log('ttp', tooltipProps);
   return tooltipProps;
 }

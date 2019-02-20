@@ -80,19 +80,6 @@ export class LeftInnerJoin {
 
   filterAndFormatPropertiesForTooltip(properties) {
     const joinFields = this.getJoinFields();
-    // const tooltipProps = {};
-    // joinFields.forEach((joinField) => {
-    //   for (const key in properties) {
-    //     if (properties.hasOwnProperty(key)) {
-    //       if (joinField.name === key) {
-    //         tooltipProps[joinField.label] = properties[key];
-    //       }
-    //     }
-    //   }
-    // });
-    //
-    // console.log('ttp', tooltipProps);
-    // return tooltipProps;
     return filterPropertiesForTooltip(joinFields, properties);
 
   }
