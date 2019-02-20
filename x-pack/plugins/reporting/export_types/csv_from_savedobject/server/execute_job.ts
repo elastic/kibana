@@ -18,7 +18,7 @@ interface JobDocOutputPseudo {
  */
 function executeJobFn(server: KbnServer) {
   return async function executeJob(job: JobDocPayload): Promise<JobDocOutputPseudo> {
-    // get the job params to detect if it was immediate
+    // FIXME get the job params to detect if it was immediate
     console.log({ job });
     // if job was created with "immediate", just return the data in the job doc
     return {

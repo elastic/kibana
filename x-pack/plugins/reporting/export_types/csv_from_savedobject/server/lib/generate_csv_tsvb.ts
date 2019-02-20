@@ -9,6 +9,8 @@ import { Request } from 'hapi';
 import { KbnServer } from '../../../../types';
 import { TsvbAggregationCell, TsvbAggregationRow, TsvbPanel, TsvbTableData } from '../../types';
 
+const JOB_DATA_TYPE = 'CSV from TSVB table visualization';
+
 export async function generateCsvTsvb(
   req: Request,
   server: KbnServer,
@@ -17,7 +19,7 @@ export async function generateCsvTsvb(
 ) {
   if (!isImmediate) {
     return {
-      type: 'incomplete something but it willb good',
+      type: JOB_DATA_TYPE,
       rows: null,
     }; // FIXME better incomplete indicator?;
   }
@@ -59,7 +61,7 @@ export async function generateCsvTsvb(
   }
 
   return {
-    type: 'something good in the hood',
+    type: JOB_DATA_TYPE,
     rows: csvRows,
   };
 }

@@ -72,9 +72,12 @@ export function registerGenerateCsvFromVis(
       const getDocumentPayload = getDocumentPayloadFactory(server);
       const result: HandlerResult = await getResult(request, h, { immediate: true });
 
+      // FIXME this should still work if authentication does not grant job
+      // creation privilege!
+
       const docSource: JobDoc = get(result, 'source.job');
       if (docSource == null) {
-        throw new Error('');
+        throw new Error(''); // FIXME
       }
 
       // FIXME this is a bit ugly

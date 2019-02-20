@@ -24,10 +24,7 @@ export async function generateCsv(
 ): Promise<CsvResult> {
   switch (visType) {
     case 'metrics':
-      // @ts-ignore Type 'TsvbPanel | TimelionPanel' is not assignable to
-      // type 'TsvbPanel'.  Type 'TimelionPanel' is not assignable to type
-      // 'TsvbPanel'.    Property 'filter' is missing in type
-      // 'TimelionPanel'.
+      // @ts-ignore
       const tsvbPanel: TsvbPanel = panel;
       return await generateCsvTsvb(req, server, tsvbPanel, isImmediate);
     case 'timelion':
