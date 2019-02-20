@@ -17,7 +17,6 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     const params = {
       id: `enrollment_token:${enrollmentToken}`,
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
     await this.database.delete(user, params);
@@ -31,7 +30,6 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       id: `enrollment_token:${tokenString}`,
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
     const response = await this.database.get(user, params);
@@ -66,7 +64,6 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
 
     if (result.errors) {

@@ -109,6 +109,29 @@ describe('DocumentMigrator', () => {
     });
   });
 
+  it(`doesn't mutate the original document`, () => {
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      migrations: {
+        user: {
+          '1.2.3': (doc: RawSavedObjectDoc) => {
+            _.set(doc, 'attributes.name', 'Mike');
+            return doc;
+          },
+        },
+      },
+    });
+    const originalDoc = {
+      id: 'me',
+      type: 'user',
+      attributes: {},
+      migrationVersion: {},
+    };
+    const migratedDoc = migrator.migrate(originalDoc);
+    expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
+    expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
+  });
+
   it('migrates meta properties', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),

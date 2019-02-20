@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/courier';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import {
   getTimeFilters,
   getMapZoom,
@@ -18,6 +18,7 @@ import {
   getQuery,
 } from '../../selectors/map_selectors';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
+import { copyPersistentState } from '../../store/util';
 
 const module = uiModules.get('app/maps');
 
@@ -86,16 +87,3 @@ module.factory('SavedGisMap', function (Private) {
   return SavedGisMap;
 });
 
-
-function copyPersistentState(input) {
-  if (typeof input !== 'object' && input !== null) {//primitive
-    return input;
-  }
-  const copyInput = Array.isArray(input) ? [] : {};
-  for(const key in input) {
-    if (!key.startsWith('__')) {
-      copyInput[key] = copyPersistentState(input[key]);
-    }
-  }
-  return copyInput;
-}
