@@ -119,7 +119,7 @@ export interface ReportingJob {
 export interface JobDocPayload {
   basePath: string;
   headers: string;
-  objects: string;
+  objects: string | null; // string if completed job; null if incomplete job
   title: string;
   type: string;
 }

@@ -9,21 +9,35 @@ import { Request } from 'hapi';
 import { KbnServer } from '../../../../types';
 import { TsvbAggregationCell, TsvbAggregationRow, TsvbPanel, TsvbTableData } from '../../types';
 
-export async function generateCsvTsvb(req: Request, server: KbnServer, tsvbPanel: TsvbPanel) {
+export async function generateCsvTsvb(
+  req: Request,
+  server: KbnServer,
+  tsvbPanel: TsvbPanel,
+  isImmediate: boolean
+) {
+  if (!isImmediate) {
+    return {
+      type: 'incomplete something but it willb good',
+      rows: null,
+    }; // FIXME better incomplete indicator?;
+  }
+
+  // FIXME hoist this out to be called from executeJob if need be
   const { getTableData: getTableDataTSVB } = server.plugins.metrics; // FIXME: don't crash if config has tsvb disabled
   const tableDataTSVB: TsvbTableData = await getTableDataTSVB(req, tsvbPanel);
 
   if (!tableDataTSVB) {
     throw new Error('Metrics plugin returned no data for the request!');
   }
-  const { type: mtype } = tableDataTSVB;
+
+  let dataSet: TsvbAggregationRow[] = [];
+  let mtype: string;
+  ({ type: mtype, series: dataSet } = tableDataTSVB);
   if (mtype !== 'table') {
     throw badRequest(
       `The Visual Builder visualization type is required to be [table]. Found: [${mtype}]`
     );
   }
-
-  const dataSet: TsvbAggregationRow[] = tableDataTSVB.series;
 
   // form the header from the first row's column labels
   // FIXME labels' chars need to be escaped
@@ -45,7 +59,7 @@ export async function generateCsvTsvb(req: Request, server: KbnServer, tsvbPanel
   }
 
   return {
-    type: 'CSV from Metrics Visualization',
+    type: 'something good in the hood',
     rows: csvRows,
   };
 }

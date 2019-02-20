@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
 import { get } from 'lodash';
@@ -117,8 +116,7 @@ export function registerGenerateCsvFromVis(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      // return getResult(request, h, { immediate: false });
-      throw badRequest('The new queueing API endpoint is not yet supported');
+      return getResult(request, h, { immediate: false });
     },
   });
 }

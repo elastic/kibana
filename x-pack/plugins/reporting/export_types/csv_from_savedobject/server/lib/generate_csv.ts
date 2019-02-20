@@ -10,12 +10,18 @@ import { KbnServer } from '../../../../types';
 import { TimelionPanel, TsvbPanel } from '../../types';
 import { generateCsvTsvb } from './generate_csv_tsvb';
 
+interface CsvResult {
+  type: string;
+  rows: string[] | null;
+}
+
 export async function generateCsv(
   req: Request,
   server: KbnServer,
   visType: string,
-  panel: TsvbPanel | TimelionPanel
-) {
+  panel: TsvbPanel | TimelionPanel,
+  isImmediate: boolean
+): Promise<CsvResult> {
   switch (visType) {
     case 'metrics':
       // @ts-ignore Type 'TsvbPanel | TimelionPanel' is not assignable to
@@ -23,7 +29,7 @@ export async function generateCsv(
       // 'TsvbPanel'.    Property 'filter' is missing in type
       // 'TimelionPanel'.
       const tsvbPanel: TsvbPanel = panel;
-      return await generateCsvTsvb(req, server, tsvbPanel);
+      return await generateCsvTsvb(req, server, tsvbPanel, isImmediate);
     case 'timelion':
       throw notImplemented('Timelion is not yet supported by this API');
     default:
