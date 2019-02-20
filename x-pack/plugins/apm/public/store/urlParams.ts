@@ -93,7 +93,7 @@ export function urlParamsReducer(state = {}, action: Action) {
   }
 }
 
-function toNumber(value?: string | string[]) {
+export function toNumber(value?: string | string[]) {
   if (value !== undefined && !Array.isArray(value)) {
     return parseInt(value, 10);
   }

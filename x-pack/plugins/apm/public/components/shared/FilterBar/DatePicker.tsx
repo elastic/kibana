@@ -14,7 +14,10 @@ import { memoize } from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { updateTimePicker } from 'x-pack/plugins/apm/public/store/urlParams';
+import {
+  toNumber,
+  updateTimePicker
+} from 'x-pack/plugins/apm/public/store/urlParams';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 interface Props extends RouteComponentProps {
@@ -61,23 +64,29 @@ const APM_DEFAULT_TIME_OPTIONS: DatePickerParams = {
   refreshInterval: 0
 };
 
+function toBoolean(value?: string | boolean) {
+  if (value === 'true' || value === true) {
+    return true;
+  }
+  if (value === 'false' || value === false) {
+    return false;
+  }
+}
+
 class DatePickerComponent extends React.Component<Props> {
   public refreshTimeoutId = 0;
 
   public getParamsFromSearch = memoize((search: string) => {
     const query = toQuery(search);
-    const converted = {
-      ...query,
-      refreshPaused:
-        query.refreshPaused === 'true' || query.refreshPaused === true,
-      refreshInterval:
-        typeof query.refreshInterval === 'undefined'
-          ? undefined
-          : Number(query.refreshInterval)
-    };
+    if ('refreshPaused' in query) {
+      query.refreshPaused = toBoolean(query.refreshPaused);
+    }
+    if ('refreshInterval' in query) {
+      query.refreshInterval = toNumber(query.refreshInterval);
+    }
     return {
       ...APM_DEFAULT_TIME_OPTIONS,
-      ...converted
+      ...query
     } as DatePickerParams;
   });
 
@@ -135,21 +144,25 @@ class DatePickerComponent extends React.Component<Props> {
       this.props.location.search
     );
 
-    if (!refreshPaused) {
-      this.dispatchTimeRangeUpdate();
+    this.clearRefreshTimeout();
+
+    if (refreshPaused) {
+      return;
     }
+
+    this.dispatchTimeRangeUpdate();
     this.refreshTimeoutId = window.setTimeout(this.refresh, refreshInterval);
   };
 
   public restartRefreshCycle = () => {
     this.clearRefreshTimeout();
-    const {
-      refreshInterval: initialRefreshInterval
-    } = this.getParamsFromSearch(this.props.location.search);
-    this.refreshTimeoutId = window.setTimeout(
-      this.refresh,
-      initialRefreshInterval
+    const { refreshInterval, refreshPaused } = this.getParamsFromSearch(
+      this.props.location.search
     );
+    if (refreshPaused) {
+      return;
+    }
+    this.refreshTimeoutId = window.setTimeout(this.refresh, refreshInterval);
   };
 
   public updateUrl(nextSearch: {
@@ -190,7 +203,6 @@ class DatePickerComponent extends React.Component<Props> {
       refreshPaused,
       refreshInterval
     } = this.getParamsFromSearch(this.props.location.search);
-
     return (
       <EuiSuperDatePicker
         start={rangeFrom}
