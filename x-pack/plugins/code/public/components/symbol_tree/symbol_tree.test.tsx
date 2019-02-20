@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { MemoryRouter } from 'react-router';
 import renderer from 'react-test-renderer';
 import { mockFunction } from '../../utils/test_utils';
 import { CodeSymbolTree } from './code_symbol_tree';
@@ -13,12 +14,14 @@ import { props } from './props';
 test('render symbol tree correctly', () => {
   const tree = renderer
     .create(
-      <CodeSymbolTree
-        structureTree={props.structureTree}
-        closedPaths={[]}
-        openSymbolPath={mockFunction}
-        closeSymbolPath={mockFunction}
-      />
+      <MemoryRouter>
+        <CodeSymbolTree
+          structureTree={props.structureTree}
+          closedPaths={[]}
+          openSymbolPath={mockFunction}
+          closeSymbolPath={mockFunction}
+        />
+      </MemoryRouter>
     )
     .toJSON();
   expect(tree).toMatchSnapshot();

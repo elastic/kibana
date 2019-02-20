@@ -69,12 +69,17 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     [FileTreeItemType.Submodule]: 'submodule',
   };
   const nodes = props.nodes.map(n => (
-    <DirectoryNode key={n.path}>
-      <Link to={props.getUrl(n.path!)} data-test-subj={`codeFileExplorerNode-${n.name}`}>
+    <Link
+      className="code-link"
+      key={n.path}
+      to={props.getUrl(n.path!)}
+      data-test-subj={`codeFileExplorerNode-${n.name}`}
+    >
+      <DirectoryNode>
         <EuiIcon type={typeIconMap[n.type]} color="black" />
         <NodeName>{n.name}</NodeName>
-      </Link>
-    </DirectoryNode>
+      </DirectoryNode>
+    </Link>
   ));
   return (
     <Container>
