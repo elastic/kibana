@@ -5,13 +5,13 @@
 [float]
 === System Setup
 
-{reporting} is automatically enabled in {kib}. The first time Kibana runs, it downloads binary files for the Chromium web browser, which
+{reporting} is automatically enabled in {kib}. The first time Kibana runs, it extracts a custom build for the Chromium web browser, which
 runs in a "headless" mode to render the Kibana charts.
 
-Chromium is an open-source project not related to Elastic, but the Chromium binary for Kibana was custom-built by Elastic to ensure it works
-with minimal setup. However, there still may be additional dependencies needed on your OS for it to run. See the
-<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies for
-different operating systems.
+Chromium is an open-source project not related to Elastic, but the Chromium binary for Kibana has custom-built by Elastic to ensure it
+works with minimal setup. However, the Kibana server OS might still require additional dependencies for Chromium. See the
+<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies
+for different operating systems.
 
 [float]
 === Generating a Report Manually
