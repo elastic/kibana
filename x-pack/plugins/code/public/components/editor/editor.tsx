@@ -64,10 +64,10 @@ export class EditorComponent extends React.Component<IProps> {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
+        if (this.props.showBlame) {
+          this.loadBlame(this.props.blames);
+        }
       });
-    }
-    if (this.props.showBlame) {
-      this.loadBlame(this.props.blames);
     }
   }
 
@@ -111,9 +111,8 @@ export class EditorComponent extends React.Component<IProps> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <EuiFlexItem
+        <div
           tabIndex={0}
-          grow={1}
           className="code-editor-container"
           id="mainEditor"
           style={{ paddingLeft: this.props.showBlame ? 300 : 0 }}
@@ -124,8 +123,11 @@ export class EditorComponent extends React.Component<IProps> {
   }
 
   public loadBlame(blames: GitBlame[]) {
+    if (this.blameWidgets) {
+      this.destroyBlameWidgets();
+    }
     this.blameWidgets = blames.map((b, index) => {
-      return new BlameWidget(b, index === 0, this.editor!);
+      return new BlameWidget(b, index === 0, this.monaco!.editor!);
     });
   }
 
