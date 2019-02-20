@@ -55,6 +55,7 @@ import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { documentationLinks } from 'ui/documentation_links';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -86,6 +87,7 @@ app.directive('dashboardApp', function ($injector) {
       $rootScope,
       $route,
       $routeParams,
+      $window,
       getAppState,
       dashboardConfig,
       localStorage,
@@ -364,6 +366,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
+      navActions[TopNavIds.DOCUMENTATION] = () => $window.open(documentationLinks.kibana.dashboard);
       navActions[TopNavIds.FULL_SCREEN] = () =>
         dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);

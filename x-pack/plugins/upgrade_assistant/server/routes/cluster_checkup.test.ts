@@ -24,7 +24,7 @@ describe('cluster checkup API', () => {
       getCluster: () => ({ callWithRequest: jest.fn() } as any),
     } as any,
     cloud: {
-      isCloudEnabled: false,
+      config: { isCloudEnabled: false },
     },
   } as any;
   server.config = () => ({ get: () => '' } as any);

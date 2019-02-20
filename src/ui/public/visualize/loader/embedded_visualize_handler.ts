@@ -37,6 +37,7 @@ import { VisualizeDataLoader } from './visualize_data_loader';
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
+import { queryGeohashBounds } from './utils';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
@@ -141,6 +142,16 @@ export class EmbeddedVisualizeHandler {
     if (autoFetch) {
       timefilter.on('autoRefreshFetch', this.reload);
     }
+
+    // This is a hack to give maps visualizations access to data in the
+    // globalState, since they can no longer access it via searchSource.
+    // TODO: Remove this as a part of elastic/kibana#30593
+    this.vis.API.getGeohashBounds = () => {
+      return queryGeohashBounds(this.vis, {
+        filters: this.dataLoaderParams.filters,
+        query: this.dataLoaderParams.query,
+      });
+    };
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);

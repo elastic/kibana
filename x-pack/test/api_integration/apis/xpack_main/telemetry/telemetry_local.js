@@ -42,7 +42,6 @@ export default function ({ getService }) {
   describe('/api/telemetry/v1/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await new Promise(r => setTimeout(r, 1000));
     });
 
     it('should pull local stats and validate data types', async () => {
