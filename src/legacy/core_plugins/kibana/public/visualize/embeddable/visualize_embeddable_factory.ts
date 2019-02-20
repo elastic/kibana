@@ -68,7 +68,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     }
 
     const indexPattern = await getIndexPattern(savedObject);
-    const indexPatterns = indexPattern ? [indexPattern] : null;
+    const indexPatterns = indexPattern ? [indexPattern] : [];
     return new VisualizeEmbeddable({
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
