@@ -39,7 +39,6 @@ export class AbstractLayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.temporary = _.get(options, 'temporary', false);
     layerDescriptor.style = _.get(options, 'style',  {});
     return layerDescriptor;
   }
@@ -119,10 +118,6 @@ export class AbstractLayer {
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
-  }
-
-  isTemporary() {
-    return this._descriptor.temporary;
   }
 
   getSupportedStyles() {

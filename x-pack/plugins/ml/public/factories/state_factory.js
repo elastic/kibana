@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 
-import { listenerFactoryProvider } from './listener_factory';
+import { Subject } from 'rxjs';
 
 // A data store to be able to share persistent state across directives
 // in services more conveniently when the structure of angular directives
@@ -55,9 +53,7 @@ export function stateFactoryProvider(AppState) {
 
     let appState = initializeAppState(stateName, defaultState);
 
-    // () two times here, because the Provider first returns
-    // the Factory, which then returns the actual listener
-    const listener = listenerFactoryProvider()();
+    const listener = new Subject();
 
     let changed = false;
 
@@ -89,13 +85,14 @@ export function stateFactoryProvider(AppState) {
         }
         return state;
       },
-      watch: listener.watch,
-      unwatch: listener.unwatch,
+      watch(l) {
+        return listener.subscribe(l);
+      },
       // wrap the listener's changed() method to only fire it
       // if the state changed.
-      changed(...args) {
+      changed(d) {
         if (changed) {
-          listener.changed(...args);
+          listener.next(d);
           changed = false;
         }
       }
