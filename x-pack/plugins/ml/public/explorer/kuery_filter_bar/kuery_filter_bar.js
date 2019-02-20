@@ -20,7 +20,7 @@ function convertKueryToEsQuery(kuery, indexPattern) {
 async function getSuggestions(
   query,
   selectionStart,
-  apmIndexPattern,
+  indexPattern,
   boolFilter
 ) {
   const autocompleteProvider = getAutocompleteProvider('kuery');
@@ -33,7 +33,7 @@ async function getSuggestions(
 
   const getAutocompleteSuggestions = autocompleteProvider({
     config,
-    indexPatterns: [apmIndexPattern],
+    indexPatterns: [indexPattern],
     boolFilter
   });
   return getAutocompleteSuggestions({
@@ -87,7 +87,7 @@ export class KueryFilterBar extends Component {
     const filteredFields = [];
 
     try {
-      const ast = fromKueryExpression(inputValue);
+      const ast = fromKueryExpression(inputValue); // ast.function = 'and'
       const query = convertKueryToEsQuery(inputValue, indexPattern);
 
       if (!query) {

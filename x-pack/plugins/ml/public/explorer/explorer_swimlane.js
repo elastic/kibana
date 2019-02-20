@@ -323,7 +323,14 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     d3LanesEnter.append('div')
       .classed('lane-label', true)
       .style('width', `${laneLabelWidth}px`)
-      .html(label => mlEscape(label))
+      .html(label => {
+        const showFilterContext = filterActive === true && label === 'Overall';
+        if (showFilterContext) {
+          return `${label} (unfiltered)`;
+        } else {
+          return mlEscape(label);
+        }
+      })
       .on('click', () => {
         if (selection && typeof selection.lanes !== 'undefined') {
           swimlaneCellClick({});

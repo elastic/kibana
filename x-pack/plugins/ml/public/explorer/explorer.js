@@ -1099,6 +1099,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                             defaultMessage="(Sorted by max anomaly score)"
                           />
                         )}
+                        {filterActive === true &&
+                          swimlaneViewByFieldName === 'job ID' && (
+                          <FormattedMessage
+                            id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
+                            defaultMessage="(Job score across all influencers)"
+                          />
+                        )}
                       </div>
                     </EuiFormRow>
                   </EuiFlexItem>
