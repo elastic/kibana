@@ -18,7 +18,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { Filters, Query, TimeRange } from 'ui/embeddable';
+import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { KibanaAction } from '../../selectors/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId } from '../selectors';
