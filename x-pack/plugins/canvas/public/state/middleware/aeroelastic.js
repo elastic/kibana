@@ -50,9 +50,11 @@ const aeroelasticConfiguration = {
   rotationEpsilon: 0.001,
   rotationHandleName: 'rotationHandle',
   rotationHandleSize: 14,
+  rotationTooltipName: 'rotationTooltip',
   shortcuts: false,
   singleSelect: false,
   snapConstraint: true,
+  tooltipZ: 1100,
 };
 
 const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
