@@ -24,12 +24,12 @@ export async function getAnnotationRequestParams(req, panel, annotation, esQuery
   const bodies = [];
   const esShardTimeout = getEsShardTimeout(req);
   const indexPattern = annotation.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
-      index: indexPattern,
+      index: indexPatternString,
       ignoreUnavailable: true,
     });
   }

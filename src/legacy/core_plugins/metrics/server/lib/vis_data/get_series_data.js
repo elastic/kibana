@@ -24,9 +24,9 @@ import { SearchStrategiesRegister } from '../search_strategies/search_strategies
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 
 export async function getSeriesData(req, panel) {
-  const indexPattern = panel.index_pattern;
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
+  const panelIndexPattern = panel.index_pattern;
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
 
   const bodiesPromises = panel.series.map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));

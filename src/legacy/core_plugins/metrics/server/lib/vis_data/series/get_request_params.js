@@ -23,13 +23,13 @@ import { getIndexPatternObject } from '../helpers/get_index_pattern';
 export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
   const bodies = [];
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities);
   const esShardTimeout = getEsShardTimeout(req);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
-      index: indexPattern,
+      index: indexPatternString,
     });
   }
 

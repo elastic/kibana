@@ -28,8 +28,8 @@ function validAnnotation(annotation) {
 }
 
 export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
-  const indexPattern = panel.index_pattern;
-  const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
+  const panelIndexPattern = panel.index_pattern;
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const annotations = panel.annotations.filter(validAnnotation);
 
   const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));

@@ -26,11 +26,11 @@ import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
-  const indexPattern = panel.index_pattern;
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
+  const panelIndexPattern = panel.index_pattern;
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
-  const indexPatternObject = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
   const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
 
   try {

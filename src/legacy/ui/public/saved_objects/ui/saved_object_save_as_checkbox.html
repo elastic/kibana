@@ -2,10 +2,10 @@
   <div
     ng-hide="!savedObject.isTitleChanged() || savedObject.copyOnSave"
     class="kuiLocalDropdownWarning kuiVerticalRhythmSmall"
-    i18n-id="common.ui.courier.savedObject.howToSaveAsNewDescription"
+    i18n-id="common.ui.savedObjects.howToSaveAsNewDescription"
     i18n-default-message="In previous versions of Kibana, changing the name of a {savedObjectName} would make a copy with the new name. Use the 'Save as a new {savedObjectName}' checkbox to do this now."
     i18n-values="{ savedObjectName: savedObject.getDisplayName() }"
-    i18n-description="'Save as a new {savedObjectName}' refers to common.ui.courier.savedObject.saveAsNewLabel and should be the same text."
+    i18n-description="'Save as a new {savedObjectName}' refers to common.ui.savedObjects.saveAsNewLabel and should be the same text."
   ></div>
 
   <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
@@ -19,7 +19,7 @@
 
     <span
       class="kuiCheckBoxLabel__text"
-      i18n-id="common.ui.courier.savedObject.saveAsNewLabel"
+      i18n-id="common.ui.savedObjects.saveAsNewLabel"
       i18n-default-message="Save as a new {savedObjectName}"
       i18n-values="{ savedObjectName: savedObject.getDisplayName() }"
     ></span>
