@@ -9,24 +9,12 @@ import { get } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 
-const requiredFields = ['host', 'port'];
-const optionalFields = [
-  'scheme',
-  'path',
-  'method',
-  'headers',
-  'params',
-  'auth',
-  'body',
-  'proxy',
-  'connection_timeout',
-  'read_timeout',
-  'url'
-];
+const requiredFields = ['fields'];
+const optionalFields = ['account', 'proxy'];
 
 const allFields = [...requiredFields, ...optionalFields];
 
-export class WebhookAction extends BaseAction {
+export class JiraAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
@@ -34,9 +22,6 @@ export class WebhookAction extends BaseAction {
     allFields.forEach((field) => {
       this.fields[field] = get(props, field);
     });
-
-    const { url, host, port, path } = this.fields;
-    this.fullPath = url ? url : host + port + path;
   }
 
   get upstreamJson() {
@@ -58,34 +43,28 @@ export class WebhookAction extends BaseAction {
   }
 
   get description() {
-    return i18n.translate('xpack.watcher.models.webhookAction.description', {
-      defaultMessage: 'Webhook will trigger a {method} request on {fullPath}',
+    return i18n.translate('xpack.watcher.models.jiraAction.description', {
+      defaultMessage: '{issueName} will be created in Jira',
       values: {
-        method: this.method,
-        fullPath: this.fullPath
+        issueName: get(this.fields, 'fields.issue.issuetype.name', ''),
       }
     });
   }
 
   get simulateMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateMessage', {
-      defaultMessage: 'Sample request sent to {fullPath}',
-      values: {
-        fullPath: this.fullPath
-      }
+    return i18n.translate('xpack.watcher.models.jiraAction.simulateMessage', {
+      defaultMessage: 'Jira issue has been created.',
     });
   }
 
   get simulateFailMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send request to {fullPath}.',
-      values: {
-        fullPath: this.fullPath
-      }
+    return i18n.translate('xpack.watcher.models.jiraAction.simulateFailMessage', {
+      defaultMessage: 'Failed to create Jira issue.',
     });
   }
 
   static fromUpstreamJson(upstreamAction) {
-    return new WebhookAction(upstreamAction);
+    return new JiraAction(upstreamAction);
   }
 }
+
