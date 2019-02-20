@@ -64,7 +64,8 @@ user has the execute permission, and if applicable, that the filesystem is mount
 
 [NOTE]
 --
-The Chromium binary is located in the Kibana installation directory as `data/headless_shell-OS_TYPE/headless_shell`.
+The Chromium binary is located in the Kibana installation directory as `data/headless_shell-OS_TYPE/headless_shell`. The full path is logged
+the first time Kibana starts when verbose logging is enabled.
 --
 
 [float]
