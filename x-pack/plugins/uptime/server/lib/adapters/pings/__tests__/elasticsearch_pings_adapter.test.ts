@@ -152,7 +152,6 @@ describe('ElasticsearchPingsAdapter class', () => {
       getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetLatestSearchParams = {
         index: 'heartbeat-6*',
-        rest_total_hits_as_int: true,
         body: {
           query: {
             bool: {
