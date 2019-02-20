@@ -20,6 +20,7 @@
 import React from 'react';
 
 import { EuiFlyout } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
 
@@ -104,9 +105,11 @@ export function openFlyout(
   };
 
   ReactDOM.render(
-    <EuiFlyout {...flyoutProps} onClose={onClose}>
-      {flyoutChildren}
-    </EuiFlyout>,
+    <I18nProvider>
+      <EuiFlyout {...flyoutProps} onClose={onClose}>
+        {flyoutChildren}
+      </EuiFlyout>
+    </I18nProvider>,
     container
   );
 
