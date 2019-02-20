@@ -15,16 +15,18 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { unique } from 'lodash';
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { Repository } from '../../../../model';
 import { SearchOptions as ISearchOptions } from '../../../actions';
 
 const SelectedRepo = styled.div`
-  max-width: 60%;
+  max-width: 90%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -36,7 +38,7 @@ const Icon = styled(EuiIcon)`
 
 interface State {
   isFlyoutOpen: boolean;
-  repoScopes: any[];
+  repoScope: Repository[];
 }
 
 interface Props {
@@ -50,30 +52,35 @@ interface Props {
 export class SearchOptions extends Component<Props, State> {
   public state: State = {
     isFlyoutOpen: false,
-    repoScopes: this.props.searchOptions.repoScopes,
+    repoScope: this.props.searchOptions.repoScope,
   };
 
   public applyAndClose = () => {
-    this.props.saveSearchOptions({ repoScopes: this.state.repoScopes });
+    this.props.saveSearchOptions({ repoScope: this.state.repoScope });
     this.setState({ isFlyoutOpen: false });
   };
 
   public removeRepoScope = (r: string) => () => {
     this.setState(prevState => ({
-      repoScopes: prevState.repoScopes.filter(rs => rs !== r),
+      repoScope: prevState.repoScope.filter(rs => rs.uri !== r),
     }));
   };
 
   public render() {
     let optionsFlyout;
     if (this.state.isFlyoutOpen) {
-      const selectedRepos = this.state.repoScopes.map((r: string) => {
+      const selectedRepos = this.state.repoScope.map(r => {
         return (
-          <div key={r}>
+          <div key={r.uri}>
             <EuiPanel paddingSize="s">
-              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                <SelectedRepo>{r}</SelectedRepo>
-                <Icon type="cross" onClick={this.removeRepoScope(r)} />
+              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+                <SelectedRepo>
+                  <EuiText>
+                    <EuiTextColor color="subdued">{r.org}/</EuiTextColor>
+                    <b>{r.name}</b>
+                  </EuiText>
+                </SelectedRepo>
+                <Icon type="cross" onClick={this.removeRepoScope(r.uri)} />
               </EuiFlexGroup>
             </EuiPanel>
             <EuiSpacer size="s" />
@@ -98,9 +105,7 @@ export class SearchOptions extends Component<Props, State> {
               placeholder="Search to add repos"
               async={true}
               options={this.props.repoSearchResults.map(repo => ({
-                id: repo.name,
                 label: repo.name,
-                uri: repo.uri,
               }))}
               selectedOptions={[]}
               isLoading={this.props.searchLoading}
@@ -134,13 +139,18 @@ export class SearchOptions extends Component<Props, State> {
   }
 
   private onRepoSearchChange = (searchValue: string) => {
-    this.props.repositorySearch({ query: searchValue });
+    if (searchValue) {
+      this.props.repositorySearch({ query: searchValue });
+    }
   };
 
   private onRepoChange = (repos: any) => {
-    this.setState({
-      repoScopes: unique(repos.map((r: any) => r.uri)),
-    });
+    this.setState(prevState => ({
+      repoScope: unique([
+        ...prevState.repoScope,
+        ...repos.map((r: any) => this.props.repoSearchResults.find(rs => rs.name === r.label)),
+      ]),
+    }));
   };
 
   private toggleOptionsFlyout = () => {

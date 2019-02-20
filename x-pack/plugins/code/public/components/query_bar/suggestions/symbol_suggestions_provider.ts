@@ -23,11 +23,19 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
     return scope === SearchScope.DEFAULT || scope === SearchScope.SYMBOL;
   }
 
-  protected async fetchSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
+  protected async fetchSuggestions(
+    query: string,
+    repoScope?: string[]
+  ): Promise<AutocompleteSuggestionGroup> {
+    const queryParams: { q: string; repoScope?: string } = { q: query };
+    if (repoScope) {
+      const qs = repoScope.join('&repoScope=');
+      queryParams.repoScope = qs;
+    }
     const res = await kfetch({
       pathname: `../api/code/suggestions/symbol`,
       method: 'get',
-      query: { q: query },
+      query: queryParams,
     });
     const suggestions = Array.from(res.symbols as DetailSymbolInformation[])
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)

@@ -90,6 +90,7 @@ interface Props extends RouteComponentProps<{ resource: string; org: string; rep
   commit: CommitDiff | null;
   query: string;
   onSearchScopeChanged: (s: SearchScope) => void;
+  repoScope: string[];
 }
 
 export enum DiffLayout {
@@ -192,6 +193,7 @@ export class DiffPage extends React.Component<Props> {
     return (
       <div>
         <SearchBar
+          repoScope={this.props.repoScope}
           query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
         />
@@ -229,6 +231,7 @@ export class DiffPage extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   commit: state.commit.commit,
   query: state.search.query,
+  repoScope: state.search.searchOptions.repoScope.map(r => r.uri),
 });
 
 const mapDispatchToProps = {

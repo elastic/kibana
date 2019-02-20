@@ -33,13 +33,14 @@ export interface SearchState {
   error?: Error;
   documentSearchResults?: DocumentSearchResult;
   repositorySearchResults?: any;
-  searchOptions?: SearchOptions;
+  searchOptions: SearchOptions;
 }
 
 const initialState: SearchState = {
   query: '',
   isLoading: false,
   scope: SearchScope.DEFAULT,
+  searchOptions: { repoScope: [] },
 };
 
 export const search = handleActions<SearchState, any>(
