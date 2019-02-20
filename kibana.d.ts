@@ -40,6 +40,19 @@ export namespace Legacy {
   export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
   export type Server = LegacyKibanaServer.Server;
 
+  export type InitPluginFunction = (server: Server) => void;
+  export interface UiExports {
+    injectDefaultVars: (server: Server) => { [key: string]: any };
+  }
+
+  export interface PluginFactoryConfig {
+    id: string;
+    require: string[];
+    publicDir: string;
+    uiExports?: UiExports;
+    init: InitPluginFunction;
+  }
+
   export namespace Plugins {
     export namespace elasticsearch {
       export type Plugin = LegacyElasticsearch.ElasticsearchPlugin;
