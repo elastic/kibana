@@ -79,6 +79,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
             <Node
               scope={$scope}
               kbnUrl={kbnUrl}
+              nodeName={this.nodeName}
               onBrush={this.onBrush}
               {...data}
             />

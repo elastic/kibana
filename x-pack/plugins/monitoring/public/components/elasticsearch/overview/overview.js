@@ -15,6 +15,7 @@ export function ElasticsearchOverview({
   clusterStatus,
   metrics,
   logs,
+  cluster,
   shardActivity,
   ...props
 }) {
@@ -47,7 +48,7 @@ export function ElasticsearchOverview({
         </EuiPageContent>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <Logs logs={logs}/>
+          <Logs logs={logs} clusterUuid={cluster.cluster_uuid}/>
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>

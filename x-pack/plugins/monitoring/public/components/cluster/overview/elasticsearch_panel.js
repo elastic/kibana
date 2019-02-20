@@ -306,6 +306,12 @@ function ElasticsearchPanelUi(props) {
                   </EuiDescriptionListDescription>
                 </Fragment>
               ))}
+              {props.logs.length === 0
+                ? (
+                  <span>No logs found. Follow these instructions to get them setup</span>
+                )
+                : null
+              }
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>

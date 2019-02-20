@@ -46,8 +46,27 @@ const columns = [
   },
 ];
 
+function getLogsUiLink(clusterUuid, nodeUuid) {
+  const base = `${chrome.getBasePath()}/app/infra#/logs`;
+  const params = [];
+  if (clusterUuid) {
+    params.push(`elasticsearch.cluster.uuid:${clusterUuid}`);
+  }
+  if (nodeUuid) {
+    params.push(`elasticsearch.node.id:${nodeUuid}`);
+  }
+
+  if (params.length === 0) {
+    return base;
+  }
+
+  return `${base}?filter=${params.join(',')}`;
+}
+
 export class Logs extends PureComponent {
   render() {
+    const { clusterUuid, nodeUuid, logs }  = this.props;
+
     return (
       <div>
         <EuiTitle>
@@ -58,7 +77,7 @@ export class Logs extends PureComponent {
         </EuiText>
         <EuiSpacer size="m"/>
         <EuiBasicTable
-          items={this.props.logs || []}
+          items={logs || []}
           columns={columns}
         />
         <EuiSpacer size="m"/>
@@ -68,7 +87,7 @@ export class Logs extends PureComponent {
           iconType="loggingApp"
         >
           <p>
-            Visit the <EuiLink href={`${chrome.getBasePath()}/app/infra#/logs`}>Logs UI</EuiLink> to dive deeper.
+            Visit the <EuiLink href={getLogsUiLink(clusterUuid, nodeUuid)}>Logs UI</EuiLink> to dive deeper.
           </p>
         </EuiCallOut>
       </div>
