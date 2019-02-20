@@ -116,12 +116,21 @@ export interface ReportingJob {
   objects?: [any];
 }
 
+// params that come into a request
+export interface JobParams {
+  savedObjectType: string;
+  savedObjectId: string;
+  immediate: boolean;
+  panel?: any; // if applicable, may have to be resolved by the request handler
+}
+
 export interface JobDocPayload {
   basePath: string;
   headers: string;
   objects: string | null; // string if completed job; null if incomplete job
   title: string;
   type: string;
+  jobParams: JobParams;
 }
 
 export interface JobDocOutput {

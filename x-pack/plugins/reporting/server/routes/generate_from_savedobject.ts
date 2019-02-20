@@ -8,8 +8,7 @@ import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
 import { get } from 'lodash';
 import { API_BASE_URL_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { JobParams } from '../../export_types/csv_from_savedobject';
-import { JobDoc, JobDocOutput, KbnServer } from '../../types';
+import { JobDoc, JobParams, JobDocOutput, KbnServer } from '../../types';
 // @ts-ignore
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';

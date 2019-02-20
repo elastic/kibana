@@ -9,15 +9,8 @@ import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
 import { cryptoFactory, oncePerServer } from '../../../server/lib';
-import { JobDocPayload, KbnServer } from '../../../types';
-import {
-  JobParams,
-  SavedObject,
-  SavedObjectServiceError,
-  TimelionPanel,
-  TsvbPanel,
-  VisState,
-} from '../types';
+import { JobDocPayload, JobParams, KbnServer } from '../../../types';
+import { SavedObject, SavedObjectServiceError, TimelionPanel, TsvbPanel, VisState } from '../types';
 import { generateCsv } from './lib/generate_csv';
 
 interface VisData {
@@ -61,6 +54,7 @@ function createJobFn(server: KbnServer) {
     const csvRows = rows ? rows.join('\n') : rows;
 
     return {
+      jobParams: { ...jobParams, panel },
       title,
       type,
       objects: csvRows,

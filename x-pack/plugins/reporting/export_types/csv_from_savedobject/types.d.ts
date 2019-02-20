@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface JobParams {
-  savedObjectType: string;
-  savedObjectId: string;
-  immediate: boolean;
-}
-
 export interface SavedObjectServiceError {
   statusCode: number;
   error?: string;

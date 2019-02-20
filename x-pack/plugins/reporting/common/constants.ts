@@ -12,10 +12,12 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
 export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 
+export const CONTENT_TYPE_CSV = 'text/csv';
+
 export const WHITELISTED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
-  'text/csv',
+  CONTENT_TYPE_CSV,
   'image/png',
 ];
 
