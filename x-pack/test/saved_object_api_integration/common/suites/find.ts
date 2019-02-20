@@ -125,7 +125,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response));
 
-      it(`not space aware type should return ${tests.spaceAwareType.statusCode} with ${
+      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
         tests.notSpaceAwareType.description
       }`, async () =>
         await supertest
@@ -165,7 +165,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           tests.unknownSearchField.description
         }`, async () =>
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
             .auth(user.username, user.password)
             .expect(tests.unknownSearchField.statusCode)
             .then(tests.unknownSearchField.response));
