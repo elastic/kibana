@@ -124,5 +124,5 @@ describe('POST /api/saved_objects/_bulk_create', () => {
 
     const args = savedObjectsClient.bulkCreate.getCall(0).args;
     expect(args[1]).toEqual({ overwrite: true });
-  })
+  });
 });
