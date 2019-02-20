@@ -69,3 +69,9 @@ export const LOCALSTORAGE_KEY = 'xpack.data';
  * Link to the Elastic Telemetry privacy statement.
  */
 export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-privacy-statement`;
+
+/**
+ * The type name used within the Monitoring index to publish localization stats.
+ * @type {string}
+ */
+export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';

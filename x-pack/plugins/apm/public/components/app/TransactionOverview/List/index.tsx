@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function TransactionList({ items, serviceName, ...rest }: Props) {
-  const columns: ITableColumn[] = [
+  const columns: Array<ITableColumn<ITransactionGroup>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
@@ -36,7 +36,7 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
       }),
       width: '50%',
       sortable: true,
-      render: (transactionName, data) => {
+      render: (transactionName: string, data) => {
         const encodedType = legacyEncodeURIComponent(
           data.sample.transaction.type
         );
@@ -65,7 +65,7 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
       ),
       sortable: true,
       dataType: 'number',
-      render: value => asMillis(value)
+      render: (value: number) => asMillis(value)
     },
     {
       field: 'p95',
@@ -77,7 +77,7 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
       ),
       sortable: true,
       dataType: 'number',
-      render: value => asMillis(value)
+      render: (value: number) => asMillis(value)
     },
     {
       field: 'transactionsPerMinute',
@@ -89,7 +89,7 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
       ),
       sortable: true,
       dataType: 'number',
-      render: value =>
+      render: (value: number) =>
         `${asDecimal(value)} ${i18n.translate(
           'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
           {
@@ -104,7 +104,7 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
       }),
       sortable: true,
       dataType: 'number',
-      render: value => <ImpactBar value={value} />
+      render: (value: number) => <ImpactBar value={value} />
     }
   ];
 

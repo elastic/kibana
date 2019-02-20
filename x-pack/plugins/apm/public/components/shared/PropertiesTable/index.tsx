@@ -116,7 +116,7 @@ export function PropertiesTable({
   propKey,
   agentName
 }: {
-  propData?: StringMap<any>;
+  propData?: StringMap;
   propKey: string;
   agentName?: string;
 }) {

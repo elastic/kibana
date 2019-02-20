@@ -7,16 +7,14 @@
 import { ESFilter } from 'elasticsearch';
 import chrome from 'ui/chrome';
 import {
+  getMlJobId,
+  getMlPrefix
+} from 'x-pack/plugins/apm/common/ml_job_constants';
+import {
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
 import { callApi } from './callApi';
-
-export function getMlPrefix(serviceName: string, transactionType?: string) {
-  return `${serviceName}-${
-    transactionType ? transactionType + '-' : ''
-  }`.toLowerCase();
-}
 
 interface MlResponseItem {
   id: string;
@@ -71,14 +69,12 @@ export interface MLJobApiResponse {
   count: number;
   jobs: Array<{
     job_id: string;
-    [key: string]: any;
   }>;
 }
 
 export async function getMLJob({
   serviceName,
-  transactionType,
-  anomalyName = 'high_mean_response_time'
+  transactionType
 }: {
   serviceName: string;
   transactionType?: string;
@@ -86,9 +82,9 @@ export async function getMLJob({
 }) {
   return callApi<MLJobApiResponse>({
     method: 'GET',
-    pathname: `/api/ml/anomaly_detectors/${getMlPrefix(
+    pathname: `/api/ml/anomaly_detectors/${getMlJobId(
       serviceName,
       transactionType
-    )}${anomalyName}`
+    )}`
   });
 }
