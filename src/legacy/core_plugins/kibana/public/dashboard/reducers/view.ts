@@ -21,7 +21,7 @@ import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
 import { ViewActions, ViewActionTypeKeys } from '../actions';
 
-import { Filters, Query, TimeRange } from 'ui/embeddable';
+import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { QueryLanguageType } from 'ui/embeddable/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId, ViewState } from '../selectors';
@@ -61,6 +61,11 @@ const updateTimeRange = (view: ViewState, timeRange: TimeRange) => ({
   timeRange,
 });
 
+const updateRefreshConfig = (view: ViewState, refreshConfig: RefreshConfig) => ({
+  ...view,
+  refreshConfig,
+});
+
 const updateFilters = (view: ViewState, filters: Filters) => ({
   ...view,
   filters: cloneDeep(filters),
@@ -88,6 +93,7 @@ export const viewReducer: Reducer<ViewState> = (
     isFullScreenMode: false,
     query: { language: QueryLanguageType.LUCENE, query: '' },
     timeRange: { to: 'now', from: 'now-15m' },
+    refreshConfig: { isPaused: true, interval: 0 },
     useMargins: true,
     viewMode: DashboardViewMode.VIEW,
   },
@@ -106,6 +112,8 @@ export const viewReducer: Reducer<ViewState> = (
       return updateHidePanelTitles(view, action.payload);
     case ViewActionTypeKeys.UPDATE_TIME_RANGE:
       return updateTimeRange(view, action.payload);
+    case ViewActionTypeKeys.UPDATE_REFRESH_CONFIG:
+      return updateRefreshConfig(view, action.payload);
     case ViewActionTypeKeys.UPDATE_USE_MARGINS:
       return updateUseMargins(view, action.payload);
     case ViewActionTypeKeys.UPDATE_VIEW_MODE:
