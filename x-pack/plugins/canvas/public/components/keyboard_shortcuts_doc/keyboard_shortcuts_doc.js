@@ -24,14 +24,19 @@ const getPrettyShortcut = shortcut => {
   if (!shortcut) {
     return '';
   }
+
   let result = shortcut.replace(/command/i, '⌘');
   result = result.replace(/option/i, '⌥');
-  result = result.replace(/\+/gi, ' + ');
+  result = result.replace(/left/i, '←');
+  result = result.replace(/right/i, '→');
+  result = result.replace(/up/i, '↑');
+  result = result.replace(/down/i, '↓');
+
   return (
     <span key={getId('span')}>
       {result
         .split(/(\+)/g) //splits the array by '+' and keeps the '+'s as elements in the array
-        .map(key => (key === '+' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
+        .map(key => (key === '+' ? ` ${key} ` : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
     </span>
   );
 };
