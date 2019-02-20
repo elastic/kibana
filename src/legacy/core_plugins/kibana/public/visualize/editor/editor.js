@@ -121,6 +121,7 @@ function VisEditor(
   AppState,
   $window,
   $injector,
+  indexPatterns,
   kbnUrl,
   redirectWhenMissing,
   Private,
@@ -330,7 +331,14 @@ function VisEditor(
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
-    $scope.indexPattern = vis.indexPattern;
+    if (vis.indexPattern) {
+      $scope.indexPattern = vis.indexPattern;
+    } else {
+      indexPatterns.getDefault().then(defaultIndexPattern => {
+        $scope.indexPattern = defaultIndexPattern;
+      });
+    }
+
     $scope.searchSource = searchSource;
     $scope.state = $state;
 
