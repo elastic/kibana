@@ -6,7 +6,7 @@
 === System Setup
 
 {reporting} is automatically enabled in {kib}. The first time Kibana runs, it extracts a custom build for the Chromium web browser, which
-runs in a "headless" mode to render the Kibana charts.
+runs on the server in headless mode to load Kibana and capture the rendered Kibana charts as images.
 
 Chromium is an open-source project not related to Elastic, but the Chromium binary for Kibana has custom-built by Elastic to ensure it
 works with minimal setup. However, the Kibana server OS might still require additional dependencies for Chromium. See the

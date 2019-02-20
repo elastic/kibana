@@ -8,10 +8,25 @@
 Having trouble? Here are solutions to common problems you might encounter while using Reporting.
 
 [float]
+=== Verbose Logging
+Kibana's server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
+all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+logging.verbose: true
+--------------------------------------------------------------------------------
+
+For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
+
+[float]
 [[reporting-troubleshooting-system-dependencies]]
 === System Dependencies
-Reporting launches a "headless" web browser called Chromium on the Kibana server, and it has dependencies on some system packages. Make sure
-the system has the appropriate packages installed for the distribution.
+Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
+project, and it is intended to have minimal dependencies on OS libraries. However, the Kibana server OS might still require additional
+dependencies for Chromium.
+
+Make sure Kibana server OS has the appropriate packages installed for the distribution.
 
 [float]
 ==== On CentOS/RHEL systems, the following packages should be installed:
