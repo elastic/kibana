@@ -171,8 +171,12 @@ function fetchUserActions(server, actionTypes) {
   const savedObjectsClient = new SavedObjectsClient(internalRepository);
 
   async function fetchUserAction(actionType) {
-    const savedObject = await savedObjectsClient.get('user-action', `rollup_job_wizard:${actionType}`);
-    return { actionType, count: savedObject.attributes.count };
+    try {
+      const savedObject = await savedObjectsClient.get('user-action', `rollup_job_wizard:${actionType}`);
+      return { actionType, count: savedObject.attributes.count };
+    } catch (error) {
+      return undefined;
+    }
   }
 
   return Promise.all(actionTypes.map(actionType => fetchUserAction(actionType)));
@@ -200,8 +204,11 @@ export function registerRollupUsageCollector(server) {
       ]);
 
       const userActionsByActionType = userActions.reduce((byActionType, userAction) => {
-        const { actionType, count } = userAction;
-        byActionType[actionType] = count;
+        // User action is undefined if nobody has performed this action on the client yet.
+        if (userAction !== undefined) {
+          const { actionType, count } = userAction;
+          byActionType[actionType] = count;
+        }
         return byActionType;
       }, {});
 
