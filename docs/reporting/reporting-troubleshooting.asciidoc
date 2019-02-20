@@ -45,14 +45,6 @@ Make sure Kibana server OS has the appropriate packages installed for the distri
 * `fonts-liberation`
 * `libfontconfig1`
 
-Also, ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
-user has the execute permission, and if applicable, that the filesystem is mounted with the `exec` option.
-
-[NOTE]
---
-The Chromium binary is located in the Kibana installation directory as `data/headless_shell-OS_TYPE/headless_shell`.
---
-
 [float]
 === Text is Not rendered correctly in generated reports
 
@@ -64,6 +56,16 @@ If the report is missing certain Chinese, Japanese or Korean characters, ensure 
 === Data Table Visualization does not show all data in PDF reports
 There is currently a known limitation with the Data Table visualization that only the first page of data rows, which are the only data
 visible on the screen, are shown in PDF reports.
+
+[float]
+=== File Permissions
+Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
+user has the execute permission, and if applicable, that the filesystem is mounted with the `exec` option.
+
+[NOTE]
+--
+The Chromium binary is located in the Kibana installation directory as `data/headless_shell-OS_TYPE/headless_shell`.
+--
 
 [float]
 [[reporting-troubleshooting-error-messages]]
