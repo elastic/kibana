@@ -192,32 +192,37 @@ describe('<JobTable />', () => {
   describe('action menu', () => {
     let findTestSubject;
     let testSubjectExists;
-    let row;
-    let job;
-    let checkBox;
+    let selectJob;
+    let jobs;
+    let tableRows;
 
     beforeEach(() => {
-      const jobs = getJobs();
+      jobs = getJobs();
       ({ findTestSubject, testSubjectExists } = initTestBed({ jobs }));
-      const tableRows = findTestSubject('jobTableRow');
+      tableRows = findTestSubject('jobTableRow');
 
-      row = tableRows.first();
-      job = jobs[0];
-      checkBox = row.find(`[data-test-subj="indexTableRowCheckbox-${job.id}"]`).hostNodes();
+      selectJob = (index = 0) => {
+        const job = jobs[index];
+        const row = tableRows.at(index);
+        const checkBox = row.find(`[data-test-subj="indexTableRowCheckbox-${job.id}"]`).hostNodes();
+        checkBox.simulate('change', { target: { checked: true } });
+      };
     });
 
     it('should be visible when a job is selected', () => {
       expect(testSubjectExists('jobActionMenuButton')).toBeFalsy();
 
-      checkBox.simulate('change', { target: { checked: true } });
+      selectJob();
 
       expect(testSubjectExists('jobActionMenuButton')).toBeTruthy();
     });
 
     it('should have a "start" and "delete" action for a job that is stopped', () => {
-      expect(job.status).toEqual('stopped'); // make sure the job is stopped
+      const index = 0;
+      const job = jobs[index];
+      job.status = 'stopped';
 
-      checkBox.simulate('change', { target: { checked: true } });
+      selectJob(index);
       const menuButton = findTestSubject('jobActionMenuButton');
       menuButton.simulate('click'); // open the context menu
 
@@ -225,10 +230,36 @@ describe('<JobTable />', () => {
       expect(contextMenu.length).toBeTruthy();
 
       const contextMenuButtons = contextMenu.find('button');
-      expect(contextMenuButtons.length).toEqual(2);
+      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
+      expect(buttonsLabel).toEqual(['Start job', 'Delete job']);
+    });
 
-      const texts = contextMenuButtons.map(btn => btn.text());
-      expect(texts).toEqual(['Start job', 'Delete job']);
+    it('should only have a "stop" action when the job is started', () => {
+      const index = 0;
+      const job = jobs[index];
+      job.status = 'started';
+
+      selectJob(index);
+      findTestSubject('jobActionMenuButton').simulate('click');
+
+      const contextMenuButtons = findTestSubject('jobActionContextMenu').find('button');
+      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
+      expect(buttonsLabel).toEqual(['Stop job']);
+    });
+
+    it('should offer both "start" and "stop" actions when selecting job with different a status', () => {
+      const job1 = jobs[0];
+      const job2 = jobs[1];
+      job1.status = 'started';
+      job2.status = 'stopped';
+
+      selectJob(0);
+      selectJob(1);
+      findTestSubject('jobActionMenuButton').simulate('click');
+
+      const contextMenuButtons = findTestSubject('jobActionContextMenu').find('button');
+      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
+      expect(buttonsLabel).toEqual(['Start jobs', 'Stop jobs']);
     });
   });
 });
