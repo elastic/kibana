@@ -23,7 +23,8 @@ export const Node = ({
   nodeSummary,
   metrics,
   logs,
-  nodeName,
+  nodeId,
+  clusterUuid,
   scope,
   kbnUrl,
   ...props
@@ -59,7 +60,7 @@ export const Node = ({
         </EuiPageContent>
         <EuiSpacer size="m"/>
         <EuiPanel>
-          <Logs logs={logs} nodeUuid={nodeName} />
+          <Logs logs={logs} nodeId={nodeId} clusterUuid={clusterUuid} />
         </EuiPanel>
         <EuiSpacer size="m"/>
         <EuiPanel>
