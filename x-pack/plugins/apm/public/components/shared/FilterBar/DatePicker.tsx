@@ -11,6 +11,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
+  toBoolean,
   toNumber,
   updateTimePicker
 } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -34,15 +35,6 @@ const APM_DEFAULT_TIME_OPTIONS: DatePickerParams = {
   refreshInterval: 0
 };
 
-function toBoolean(value?: string | boolean) {
-  if (value === 'true' || value === true) {
-    return true;
-  }
-  if (value === 'false' || value === false) {
-    return false;
-  }
-}
-
 class DatePickerComponent extends React.Component<Props> {
   public refreshTimeoutId = 0;
 
@@ -52,7 +44,7 @@ class DatePickerComponent extends React.Component<Props> {
       query.refreshPaused = toBoolean(query.refreshPaused);
     }
     if ('refreshInterval' in query) {
-      query.refreshInterval = toNumber(query.refreshInterval);
+      query.refreshInterval = toNumber(query.refreshInterval as string);
     }
     return {
       ...APM_DEFAULT_TIME_OPTIONS,

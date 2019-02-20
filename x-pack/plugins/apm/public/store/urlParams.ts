@@ -111,6 +111,15 @@ function toString(str?: string | string[]) {
   return str;
 }
 
+export function toBoolean(value?: string | boolean) {
+  if (value === 'true' || value === true) {
+    return true;
+  }
+  if (value === 'false' || value === false) {
+    return false;
+  }
+}
+
 function getPathAsArray(pathname: string) {
   return compact(pathname.split('/'));
 }
