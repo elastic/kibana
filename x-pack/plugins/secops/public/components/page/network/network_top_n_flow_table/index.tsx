@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { get, has } from 'lodash/fp';
-import moment from 'moment';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
+import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { NetworkTopNFlowEdges, NetworkTopNFlowType } from '../../../../graphql/types';
+import {
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowEdges,
+  NetworkTopNFlowType,
+} from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
-import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
+import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { getNetworkTopNFlowColumns } from './columns';
+import { SelectDirection } from './select_direction';
+import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -31,20 +32,25 @@ interface OwnProps {
   loadMore: (cursor: string) => void;
   startDate: number;
   type: networkModel.NetworkType;
-  networkTopNFlowType: NetworkTopNFlowType;
 }
 
 interface NetworkTopNFlowTableReduxProps {
   limit: number;
+  topNFlowDirection: NetworkTopNFlowDirection;
+  topNFlowType: NetworkTopNFlowType;
 }
 
 interface NetworkTopNFlowTableDispatchProps {
-  updateDestinationLimitPagination: ActionCreator<{
+  updateTopNFlowDirection: ActionCreator<{
+    topNFlowDirection: NetworkTopNFlowDirection;
+    networkType: networkModel.NetworkType;
+  }>;
+  updateTopNFlowLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
   }>;
-  updateSourceLimitPagination: ActionCreator<{
-    limit: number;
+  updateTopNFlowType: ActionCreator<{
+    topNFlowType: NetworkTopNFlowType;
     networkType: networkModel.NetworkType;
   }>;
 }
@@ -72,196 +78,94 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkTopNFlowTableComponent = pure<NetworkTopNFlowTableProps>(
-  ({
-    data,
-    hasNextPage,
-    limit,
-    loading,
-    loadMore,
-    totalCount,
-    nextCursor,
-    networkTopNFlowType,
-    updateDestinationLimitPagination,
-    updateSourceLimitPagination,
-    startDate,
-    type,
-  }) => (
-    <LoadMoreTable
-      columns={getNetworkTopNFlowColumns(startDate, networkTopNFlowType)}
-      loadingTitle={
-        networkTopNFlowType === NetworkTopNFlowType.source ? i18n.SOURCE : i18n.DESTINATION
-      }
-      loading={loading}
-      pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
-      limit={limit}
-      hasNextPage={hasNextPage}
-      itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => {
-        if (networkTopNFlowType === NetworkTopNFlowType.destination) {
-          return updateDestinationLimitPagination({ limit: newLimit, networkType: type });
-        } else if (networkTopNFlowType === NetworkTopNFlowType.source) {
-          return updateSourceLimitPagination({ limit: newLimit, networkType: type });
+const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
+
+class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
+  public render() {
+    const {
+      data,
+      hasNextPage,
+      limit,
+      loading,
+      loadMore,
+      totalCount,
+      nextCursor,
+      updateTopNFlowLimit,
+      startDate,
+      topNFlowDirection,
+      topNFlowType,
+      type,
+    } = this.props;
+    return (
+      <LoadMoreTable
+        columns={getNetworkTopNFlowColumns(startDate, topNFlowDirection, topNFlowType, type)}
+        loadingTitle={i18n.TOP_TALKERS}
+        loading={loading}
+        pageOfItems={data}
+        loadMore={() => loadMore(nextCursor)}
+        limit={limit}
+        hasNextPage={hasNextPage}
+        itemsPerRow={rowItems}
+        updateLimitPagination={newLimit =>
+          updateTopNFlowLimit({ limit: newLimit, networkType: type })
         }
-      }}
-      title={
-        <h3>
-          {networkTopNFlowType === NetworkTopNFlowType.source && i18n.SOURCE}
-          {networkTopNFlowType === NetworkTopNFlowType.destination && i18n.DESTINATION}
-          <EuiBadge color="hollow">{totalCount}</EuiBadge>
-        </h3>
-      }
-    />
-  )
-);
+        title={
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <h3>
+                    {i18n.TOP_TALKERS}
+                    <CountBadge color="hollow">{totalCount}</CountBadge>
+                  </h3>
+                </EuiFlexItem>
+                <SelectTypeItem grow={false}>
+                  <SelectType
+                    selectedDirection={topNFlowDirection}
+                    selectedType={topNFlowType}
+                    onChangeType={this.onChangeTopNFlowType}
+                    isLoading={loading}
+                  />
+                </SelectTypeItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SelectDirection
+                selectedDirection={topNFlowDirection}
+                onChangeDirection={this.onChangeTopNFlowDirection}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
+    );
+  }
+
+  private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
+    this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
+
+  private onChangeTopNFlowDirection = (topNFlowDirection: NetworkTopNFlowDirection) =>
+    this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
+}
 
 const makeMapStateToProps = () => {
-  const getNetworkTopDestinationFlowSelector = networkSelectors.topDestinationSelector();
-  const getNetworkTopSourceFlowSelector = networkSelectors.topSourceSelector();
-  const mapStateToProps = (state: State, { networkTopNFlowType, type }: OwnProps) => {
-    if (networkTopNFlowType === NetworkTopNFlowType.source) {
-      return getNetworkTopSourceFlowSelector(state, type);
-    } else if (networkTopNFlowType === NetworkTopNFlowType.destination) {
-      return getNetworkTopDestinationFlowSelector(state, type);
-    }
-  };
+  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) =>
+    getNetworkTopNFlowSelector(state, type);
   return mapStateToProps;
 };
 
 export const NetworkTopNFlowTable = connect(
   makeMapStateToProps,
   {
-    updateSourceLimitPagination: networkActions.updateTopSourceLimit,
-    updateDestinationLimitPagination: networkActions.updateTopDestinationLimit,
+    updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
+    updateTopNFlowType: networkActions.updateTopNFlowType,
+    updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
   }
 )(NetworkTopNFlowTableComponent);
 
-const getNetworkTopNFlowColumns = (
-  startDate: number,
-  networkTopNFlowType: NetworkTopNFlowType
-): Array<Columns<NetworkTopNFlowEdges>> => [
-  {
-    name: networkTopNFlowType === NetworkTopNFlowType.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const domainAttr =
-        networkTopNFlowType === NetworkTopNFlowType.source ? 'source.domain' : 'destination.domain';
-      const sourceIpAttr =
-        networkTopNFlowType === NetworkTopNFlowType.source ? 'source.ip' : 'destination.ip';
-      const ip: string | null = get(sourceIpAttr, node);
-      const domain: string | null = get(domainAttr, node);
-      if (ip != null) {
-        return (
-          <DraggableWrapper
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id: escapeDataProviderId(
-                `networkTopNFlow-table-${domain}-${networkTopNFlowType}-ip-${ip}`
-              ),
-              name: ip,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: sourceIpAttr,
-                value: ip,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                defaultToEmptyTag(ip)
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
-  },
-  {
-    name: i18n.DOMAIN,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const domainAttr =
-        networkTopNFlowType === NetworkTopNFlowType.source ? 'source.domain' : 'destination.domain';
-      const sourceIpAttr =
-        networkTopNFlowType === NetworkTopNFlowType.source ? 'source.ip' : 'destination.ip';
-      const domain: string | null = get(domainAttr, node);
-      const ip: string | null = get(sourceIpAttr, node);
-      if (domain != null) {
-        return (
-          <DraggableWrapper
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id: escapeDataProviderId(
-                `networkTopNFlow-table-${ip}-${networkTopNFlowType}-domain-${domain}`
-              ),
-              name: domain,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: domainAttr,
-                value: domain,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                defaultToEmptyTag(domain)
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
-  },
-  {
-    name: i18n.BYTES,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) =>
-      has('network.bytes', node)
-        ? numeral(node.network!.bytes).format('0.000b')
-        : getEmptyTagValue(),
-  },
-  {
-    name: i18n.PACKETS,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) =>
-      has('network.packets', node)
-        ? numeral(node.network!.packets).format('0,000.00')
-        : getEmptyTagValue(),
-  },
-  {
-    name: i18n.DURATION,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) =>
-      has('event.duration', node)
-        ? moment.duration(node.event!.duration! / 1000000, 'ms').humanize()
-        : getEmptyTagValue(),
-  },
-];
+const SelectTypeItem = styled(EuiFlexItem)`
+  min-width: 180px;
+`;

@@ -8,10 +8,11 @@ import { getOr } from 'lodash/fp';
 
 import {
   NetworkTopNFlowData,
+  NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
   NetworkTopNFlowType,
 } from '../../graphql/types';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { NetworkTopNFlowRequestOptions } from './index';
 import { buildQuery } from './query.dsl';
@@ -30,37 +31,9 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
       buildQuery(options)
     );
     const { cursor, limit } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.network_top_n_flow_count.value', response);
-    const buckets = getOr([], 'aggregations.network_top_n_flow.buckets', response);
-    const networkTopNFlowItemAttr =
-      options.networkTopNFlowType === NetworkTopNFlowType.source ? 'source' : 'destination';
-    const networkTopNFlowEdges: NetworkTopNFlowEdges[] = buckets.map(
-      (bucket: NetworkTopNFlowBuckets) => ({
-        node:
-          bucket.domain.buckets.length > 0
-            ? {
-                _id: bucket.key,
-                [networkTopNFlowItemAttr]: {
-                  domain:
-                    bucket.domain.buckets[0].key === '__missing__'
-                      ? ''
-                      : bucket.domain.buckets[0].key,
-                  ip: bucket.key,
-                },
-                event: { duration: bucket.domain.buckets[0].event_duration.value },
-                network: {
-                  bytes: bucket.domain.buckets[0].network_bytes.value,
-                  packets: bucket.domain.buckets[0].network_packets.value,
-                },
-              }
-            : {},
-        cursor: {
-          value: bucket.key,
-          tiebreaker: null,
-        },
-      })
-    );
-    const hasNextPage = networkTopNFlowEdges.length === limit + 1;
+    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
+    const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
+    const hasNextPage = networkTopNFlowEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
     const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
 
@@ -77,3 +50,44 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
     };
   }
 }
+
+const getTopNFlowEdges = (
+  response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
+  options: NetworkTopNFlowRequestOptions
+): NetworkTopNFlowEdges[] => {
+  if (options.networkTopNFlowDirection === NetworkTopNFlowDirection.uniDirectional) {
+    return formatTopNFlowEgdes(
+      getOr([], 'aggregations.top_uni_flow.buckets', response),
+      options.networkTopNFlowType
+    );
+  }
+  return formatTopNFlowEgdes(
+    getOr([], 'aggregations.top_bi_flow.buckets', response),
+    options.networkTopNFlowType
+  );
+};
+
+const formatTopNFlowEgdes = (
+  buckets: NetworkTopNFlowBuckets[],
+  networkTopNFlowType: NetworkTopNFlowType
+): NetworkTopNFlowEdges[] =>
+  buckets.map((bucket: NetworkTopNFlowBuckets) => ({
+    node: {
+      _id: bucket.key,
+      timestamp: bucket.timestamp.value_as_string,
+      [networkTopNFlowType]: {
+        count: bucket.ip_count.value || null,
+        domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key) || null,
+        ip: bucket.key,
+      },
+      network: {
+        bytes: bucket.bytes.value || null,
+        packets: bucket.packets.value || null,
+        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key) || null,
+      },
+    },
+    cursor: {
+      value: bucket.key,
+      tiebreaker: null,
+    },
+  }));

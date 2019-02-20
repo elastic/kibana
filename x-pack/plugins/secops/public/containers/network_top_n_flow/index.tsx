@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 
 import {
   GetNetworkTopNFlowQuery,
+  NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
   NetworkTopNFlowType,
   PageInfo,
@@ -32,12 +33,13 @@ export interface NetworkTopNFlowArgs {
 
 export interface OwnProps extends QueryTemplateProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
-  networkTopNFlowType: NetworkTopNFlowType;
   type: networkModel.NetworkType;
 }
 
 export interface NetworkTopNFlowComponentReduxProps {
   limit: number;
+  topNFlowDirection: NetworkTopNFlowDirection;
+  topNFlowType: NetworkTopNFlowType;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
@@ -52,12 +54,13 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       id = 'networkTopNFlowQuery',
       children,
       filterQuery,
-      networkTopNFlowType,
       sourceId,
       startDate,
       endDate,
       limit,
       poll,
+      topNFlowDirection,
+      topNFlowType,
     } = this.props;
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
@@ -72,7 +75,8 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          type: networkTopNFlowType,
+          direction: topNFlowDirection,
+          type: topNFlowType,
           pagination: {
             limit,
             cursor: null,
@@ -111,7 +115,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             },
           }));
           return children({
-            id: `${id}${networkTopNFlowType}`,
+            id: `${id}`,
             refetch,
             loading,
             totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),
@@ -126,15 +130,10 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
 }
 
 const makeMapStateToProps = () => {
-  const getNetworkTopDestinationFlowSelector = networkSelectors.topDestinationSelector();
-  const getNetworkTopSourceFlowSelector = networkSelectors.topSourceSelector();
-  const mapStateToProps = (state: State, { networkTopNFlowType, type }: OwnProps) => {
-    if (networkTopNFlowType === NetworkTopNFlowType.source) {
-      return getNetworkTopSourceFlowSelector(state, type);
-    } else if (networkTopNFlowType === NetworkTopNFlowType.destination) {
-      return getNetworkTopDestinationFlowSelector(state, type);
-    }
-  };
+  const getNetworktopNFlowSelectorSelector = networkSelectors.topNFlowSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) =>
+    getNetworktopNFlowSelectorSelector(state, type);
+
   return mapStateToProps;
 };
 

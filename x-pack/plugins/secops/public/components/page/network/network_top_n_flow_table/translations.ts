@@ -6,30 +6,40 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SOURCE = i18n.translate('xpack.secops.networkTopNFlowTable.source.title', {
-  defaultMessage: 'Top Uni-Directional Flow Sources',
-});
-
-export const DESTINATION = i18n.translate('xpack.secops.networkTopNFlowTable.destination.title', {
-  defaultMessage: 'Top Uni-Directional Flow Destinations',
+export const TOP_TALKERS = i18n.translate('xpack.secops.networkTopNFlowTable.title', {
+  defaultMessage: 'Top Talkers',
 });
 
 export const SOURCE_IP = i18n.translate(
   'xpack.secops.networkTopNFlowTable.source.ip.column.title',
   {
-    defaultMessage: 'Source Ip',
+    defaultMessage: 'Source IP',
   }
 );
 
 export const DESTINATION_IP = i18n.translate(
   'xpack.secops.networkTopNFlowTable.destination.ip.column.title',
   {
-    defaultMessage: 'Destination Ip',
+    defaultMessage: 'Destination IP',
+  }
+);
+
+export const CLIENT_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.client.ip.column.title',
+  {
+    defaultMessage: 'Client IP',
+  }
+);
+
+export const SERVER_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.server.ip.column.title',
+  {
+    defaultMessage: 'Server IP',
   }
 );
 
 export const DOMAIN = i18n.translate('xpack.secops.networkTopNFlowTable.domain.column.title', {
-  defaultMessage: 'Domain',
+  defaultMessage: 'Last Domain',
 });
 
 export const BYTES = i18n.translate('xpack.secops.networkTopNFlowTable.bytes.column.title', {
@@ -40,9 +50,47 @@ export const PACKETS = i18n.translate('xpack.secops.networkTopNFlowTable.packets
   defaultMessage: 'Packets',
 });
 
-export const DURATION = i18n.translate('xpack.secops.networkTopNFlowTable.duration.column.title', {
-  defaultMessage: 'Duration',
-});
+export const DIRECTION = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.direction.column.title',
+  {
+    defaultMessage: 'Direction',
+  }
+);
+
+export const UNIQUE_SOURCE_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.uniqueSourceIps.column.title',
+  {
+    defaultMessage: 'Unique Source IPs',
+  }
+);
+
+export const UNIQUE_DESTINATION_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.uniqueDestinationIps.column.title',
+  {
+    defaultMessage: 'Unique Destination IPs',
+  }
+);
+
+export const UNIQUE_CLIENT_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.uniqueClientIps.column.title',
+  {
+    defaultMessage: 'Unique Client IPs',
+  }
+);
+
+export const UNIQUE_SERVER_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.uniqueServerIps.column.title',
+  {
+    defaultMessage: 'Unique Server IPs',
+  }
+);
+
+export const FILTER_TO_KQL = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.filterToKQL.description',
+  {
+    defaultMessage: 'Add to KQL',
+  }
+);
 
 export const ROWS_5 = i18n.translate('xpack.secops.networkTopNFlowTable.rows', {
   values: { numRows: 5 },

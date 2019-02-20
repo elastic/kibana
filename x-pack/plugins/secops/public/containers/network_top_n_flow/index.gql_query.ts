@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
+    $direction: NetworkTopNFlowDirection!
     $type: NetworkTopNFlowType!
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
@@ -18,6 +19,7 @@ export const networkTopNFlowQuery = gql`
       id
       NetworkTopNFlow(
         type: $type
+        direction: $direction
         timerange: $timerange
         pagination: $pagination
         filterQuery: $filterQuery
@@ -26,18 +28,28 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
+              count
               ip
               domain
             }
             destination {
+              count
               ip
               domain
             }
-            event {
-              duration
+            client {
+              count
+              ip
+              domain
+            }
+            server {
+              count
+              ip
+              domain
             }
             network {
               bytes
+              direction
               packets
             }
           }

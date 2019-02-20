@@ -17,29 +17,42 @@ injectGlobal`
   }
 `;
 
+type Position = 'relative' | 'absolute';
+
+type ZIndex = number | '-moz-initial' | 'inherit' | 'initial' | 'revert' | 'unset' | 'auto';
+
 interface LoadingProps {
   text: string;
   height: number | string;
   showBorder?: boolean;
   width: number | string;
+  zIndex?: ZIndex;
+  position?: Position;
 }
 
 export const LoadingPanel = pure<LoadingProps>(
-  ({ height = 'auto', showBorder = true, text, width }) => (
-    <InfraLoadingStaticPanel style={{ height, width }}>
-      <InfraLoadingStaticContentPanel>
+  ({
+    height = 'auto',
+    showBorder = true,
+    text,
+    width,
+    position = 'relative',
+    zIndex = 'inherit',
+  }) => (
+    <LoadingStaticPanel className="app-loading" style={{ height, width, position, zIndex }}>
+      <LoadingStaticContentPanel>
         <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
           <EuiLoadingChart size="m" />
           <EuiText>
             <p>{text}</p>
           </EuiText>
         </EuiPanel>
-      </InfraLoadingStaticContentPanel>
-    </InfraLoadingStaticPanel>
+      </LoadingStaticContentPanel>
+    </LoadingStaticPanel>
   )
 );
 
-export const InfraLoadingStaticPanel = styled.div`
+export const LoadingStaticPanel = styled.div`
   position: relative;
   overflow: hidden;
   display: flex;
@@ -47,7 +60,7 @@ export const InfraLoadingStaticPanel = styled.div`
   justify-content: center;
 `;
 
-export const InfraLoadingStaticContentPanel = styled.div`
+export const LoadingStaticContentPanel = styled.div`
   flex: 0 0 auto;
   align-self: center;
   text-align: center;

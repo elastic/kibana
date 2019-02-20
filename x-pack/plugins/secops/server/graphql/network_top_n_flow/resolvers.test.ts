@@ -6,7 +6,7 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { omit } from 'lodash/fp';
 
-import { NetworkTopNFlowType, Source } from '../../graphql/types';
+import { NetworkTopNFlowDirection, NetworkTopNFlowType, Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { NetworkTopNFlow } from '../../lib/network_top_n_flow';
 import { NetworkTopNFlowAdapter } from '../../lib/network_top_n_flow/types';
@@ -83,6 +83,7 @@ describe('Test Source Resolvers', () => {
           cursor: null,
         },
         type: NetworkTopNFlowType.source,
+        direction: NetworkTopNFlowDirection.uniDirectional,
       },
       context,
       {} as GraphQLResolveInfo

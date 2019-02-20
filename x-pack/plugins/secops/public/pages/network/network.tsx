@@ -16,7 +16,7 @@ import { NetworkTopNFlowTable } from '../../components/page/network';
 import { GlobalTime } from '../../containers/global_time';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { IndexType, NetworkTopNFlowType } from '../../graphql/types';
+import { IndexType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
 import { NetworkKql } from './kql';
@@ -33,7 +33,7 @@ interface NetworkComponentReduxProps {
 type NetworkComponentProps = NetworkComponentReduxProps;
 
 const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT]}>
+  <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
     {({ filebeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
         <>
@@ -46,7 +46,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                     <NetworkTopNFlowQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      networkTopNFlowType={NetworkTopNFlowType.source}
                       poll={poll}
                       sourceId="default"
                       startDate={from}
@@ -68,41 +67,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                           loading={loading}
                           loadMore={loadMore}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          networkTopNFlowType={NetworkTopNFlowType.source}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          startDate={from}
-                          totalCount={totalCount}
-                          type={networkModel.NetworkType.page}
-                        />
-                      )}
-                    </NetworkTopNFlowQuery>
-                    <NetworkTopNFlowQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      networkTopNFlowType={NetworkTopNFlowType.destination}
-                      poll={poll}
-                      sourceId="default"
-                      startDate={from}
-                      type={networkModel.NetworkType.page}
-                    >
-                      {({
-                        totalCount,
-                        loading,
-                        networkTopNFlow,
-                        pageInfo,
-                        loadMore,
-                        id,
-                        refetch,
-                      }) => (
-                        <NetworkTopNFlowTableManage
-                          data={networkTopNFlow}
-                          id={id}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loading={loading}
-                          loadMore={loadMore}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          networkTopNFlowType={NetworkTopNFlowType.destination}
                           refetch={refetch}
                           setQuery={setQuery}
                           startDate={from}

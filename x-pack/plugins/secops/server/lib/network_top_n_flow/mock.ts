@@ -5,7 +5,7 @@
  */
 
 import { NetworkTopNFlowRequestOptions } from '.';
-import { NetworkTopNFlowType } from '../../graphql/types';
+import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../graphql/types';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
   sourceConfiguration: {
@@ -48,6 +48,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     '__typename',
   ],
   networkTopNFlowType: NetworkTopNFlowType.source,
+  networkTopNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
 };
 
 export const mockRequest = {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowData } from '../../../../graphql/types';
+import { NetworkDirectionEcs, NetworkTopNFlowData } from '../../../../graphql/types';
 
 export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
   NetworkTopNFlow: {
@@ -14,15 +14,14 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
         node: {
           source: {
             ip: '8.8.8.8',
-            domain: 'test.domain.com',
+            domain: ['test.domain.com'],
+            count: 1,
           },
           destination: null,
-          event: {
-            duration: 84712891000000,
-          },
           network: {
             bytes: 3826633497,
             packets: 4185805,
+            direction: [NetworkDirectionEcs.inbound],
           },
         },
         cursor: {
@@ -33,15 +32,13 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
         node: {
           source: {
             ip: '9.9.9.9',
-            domain: 'test.domain.net',
+            domain: ['test.domain.net'],
           },
           destination: null,
-          event: {
-            duration: 602171000000,
-          },
           network: {
             bytes: 325909849,
             packets: 221494,
+            direction: [NetworkDirectionEcs.inbound],
           },
         },
         cursor: {

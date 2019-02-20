@@ -132,7 +132,7 @@ const PageHeader = styled(EuiPageHeader)`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   position: fixed;
   width: calc(100% - 75px);
-  z-index: 1;
+  z-index: 10;
   padding: 6px 0px 6px 0px;
   margin-bottom: 0px;
   margin-left: -1px;

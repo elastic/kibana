@@ -47,6 +47,7 @@ interface BasicTableProps<T> {
 }
 
 interface BasicTableState {
+  isEmptyTable: boolean;
   isPopoverOpen: boolean;
   paginationLoading: boolean;
 }
@@ -63,17 +64,24 @@ export interface Columns<T> {
 
 export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
   public readonly state = {
+    isEmptyTable: true,
     isPopoverOpen: false,
     paginationLoading: false,
   };
 
   public componentDidUpdate(prevProps: BasicTableProps<T>) {
-    const { paginationLoading } = this.state;
-    const { loading } = this.props;
+    const { paginationLoading, isEmptyTable } = this.state;
+    const { loading, pageOfItems } = this.props;
     if (paginationLoading && prevProps.loading && !loading) {
       this.setState({
         ...this.state,
         paginationLoading: false,
+      });
+    }
+    if (isEmpty(prevProps.pageOfItems) && !isEmpty(pageOfItems) && isEmptyTable) {
+      this.setState({
+        ...this.state,
+        isEmptyTable: false,
       });
     }
   }
@@ -90,9 +98,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       limit,
       updateLimitPagination,
     } = this.props;
-    const { paginationLoading } = this.state;
+    const { isEmptyTable, paginationLoading } = this.state;
 
-    if (loading && !paginationLoading) {
+    if (loading && isEmptyTable) {
       return (
         <LoadingPanel
           height="auto"
@@ -132,6 +140,19 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
 
     return (
       <BasicTableContainer>
+        {!paginationLoading && loading && (
+          <>
+            <BackgroundRefetch />
+            <LoadingPanel
+              height="100%"
+              width="100%"
+              text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+              position="absolute"
+              zIndex={3}
+              data-test-subj="LoadingPanelLoadMoreTable"
+            />
+          </>
+        )}
         <EuiTitle size="s">{title}</EuiTitle>
         <EuiBasicTable items={pageOfItems} columns={columns} />
         {hasNextPage && (
@@ -209,9 +230,21 @@ export const BasicTableContainer = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   height: auto;
+  position: relative;
 `;
 
 const FooterAction = styled.div`
   margin-top: 0.5rem;
   width: 100%;
+`;
+
+const BackgroundRefetch = styled.div`
+  background-color: ${props => props.theme.eui.euiColorLightShade};
+  margin: -5px;
+  height: calc(100% + 10px);
+  opacity: 0.7;
+  width: calc(100% + 10px);
+  position: absolute;
+  z-index: 3;
+  border-radius: 5px;
 `;

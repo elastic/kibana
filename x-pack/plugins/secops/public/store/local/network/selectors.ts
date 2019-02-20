@@ -14,16 +14,10 @@ import { GenericNetworkModel, NetworkType } from './model';
 const selectNetwork = (state: State, networkType: NetworkType): GenericNetworkModel =>
   get(networkType, state.local.network);
 
-export const topSourceSelector = () =>
+export const topNFlowSelector = () =>
   createSelector(
     selectNetwork,
-    network => network.queries!.topSource
-  );
-
-export const topDestinationSelector = () =>
-  createSelector(
-    selectNetwork,
-    network => network.queries!.topDestination
+    network => network.queries!.topNFlow
   );
 
 export const networkFilterQueryExpression = () =>

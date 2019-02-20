@@ -156,7 +156,7 @@ export interface SourceEcsFields {
 
   port?: number | null;
 
-  domain?: string | null;
+  domain?: (string | null)[] | null;
 }
 
 export interface HostEcsFields {
@@ -250,7 +250,7 @@ export interface DestinationEcsFields {
 
   port?: number | null;
 
-  domain?: string | null;
+  domain?: (string | null)[] | null;
 }
 
 export interface EventEcsFields {
@@ -334,35 +334,33 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  source?: NetworkTopNFlowSource | null;
+  timestamp?: string | null;
 
-  destination?: NetworkTopNFlowDestination | null;
+  source?: TopNFlowItem | null;
 
-  event?: NetworkTopNFlowEvent | null;
+  destination?: TopNFlowItem | null;
 
-  network?: NetworkTopNFlowNetwork | null;
+  client?: TopNFlowItem | null;
+
+  server?: TopNFlowItem | null;
+
+  network?: NetworkEcsField | null;
 }
 
-export interface NetworkTopNFlowSource {
+export interface TopNFlowItem {
+  count?: number | null;
+
+  domain?: string[] | null;
+
   ip?: string | null;
-
-  domain?: string | null;
 }
 
-export interface NetworkTopNFlowDestination {
-  ip?: string | null;
-
-  domain?: string | null;
-}
-
-export interface NetworkTopNFlowEvent {
-  duration?: number | null;
-}
-
-export interface NetworkTopNFlowNetwork {
+export interface NetworkEcsField {
   bytes?: number | null;
 
   packets?: number | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface UncommonProcessesData {
@@ -418,12 +416,6 @@ export interface Thread {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
-}
-
-export interface NetworkEcsField {
-  bytes?: number | null;
-
-  packets?: number | null;
 }
 
 // ====================================================
@@ -490,6 +482,8 @@ export interface HostsSourceArgs {
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
 
+  direction: NetworkTopNFlowDirection;
+
   type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
@@ -525,9 +519,24 @@ export enum Direction {
   descending = 'descending',
 }
 
+export enum NetworkTopNFlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
+}
+
 export enum NetworkTopNFlowType {
-  source = 'source',
+  client = 'client',
   destination = 'destination',
+  server = 'server',
+  source = 'source',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  unknown = 'unknown',
 }
 
 // ====================================================
@@ -1054,6 +1063,7 @@ export namespace GetKpiEventsQuery {
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
+    direction: NetworkTopNFlowDirection;
     type: NetworkTopNFlowType;
     timerange: TimerangeInput;
     pagination: PaginationInput;
@@ -1099,37 +1109,59 @@ export namespace GetNetworkTopNFlowQuery {
 
     destination?: Destination | null;
 
-    event?: Event | null;
+    client?: Client | null;
+
+    server?: Server | null;
 
     network?: Network | null;
   };
 
   export type _Source = {
-    __typename?: 'NetworkTopNFlowSource';
+    __typename?: 'TopNFlowItem';
+
+    count?: number | null;
 
     ip?: string | null;
 
-    domain?: string | null;
+    domain?: string[] | null;
   };
 
   export type Destination = {
-    __typename?: 'NetworkTopNFlowDestination';
+    __typename?: 'TopNFlowItem';
+
+    count?: number | null;
 
     ip?: string | null;
 
-    domain?: string | null;
+    domain?: string[] | null;
   };
 
-  export type Event = {
-    __typename?: 'NetworkTopNFlowEvent';
+  export type Client = {
+    __typename?: 'TopNFlowItem';
 
-    duration?: number | null;
+    count?: number | null;
+
+    ip?: string | null;
+
+    domain?: string[] | null;
+  };
+
+  export type Server = {
+    __typename?: 'TopNFlowItem';
+
+    count?: number | null;
+
+    ip?: string | null;
+
+    domain?: string[] | null;
   };
 
   export type Network = {
-    __typename?: 'NetworkTopNFlowNetwork';
+    __typename?: 'NetworkEcsField';
 
     bytes?: number | null;
+
+    direction?: NetworkDirectionEcs[] | null;
 
     packets?: number | null;
   };

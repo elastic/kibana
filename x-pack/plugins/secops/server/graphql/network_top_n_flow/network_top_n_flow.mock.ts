@@ -19,18 +19,16 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
         },
         node: {
           _id: '1.1.1.1',
-          event: {
-            duration: 10546999000000,
-          },
           network: {
             bytes: 1532853382,
             packets: 1025631,
           },
           source: {
-            domain: 'test.1.net',
+            domain: ['test.1.net'],
             ip: '1.1.1.1',
+            count: 1,
           },
-          destination: { domain: 'Hello World', ip: 'Hello World' },
+          destination: { domain: ['Hello World'], ip: 'Hello World' },
         },
       },
       {
@@ -39,18 +37,16 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
         },
         node: {
           _id: '2.2.2.2',
-          event: {
-            duration: 6905047000000,
-          },
           network: {
             bytes: 4208518310,
             packets: 2811441,
           },
           source: {
-            domain: 'test.2.net',
+            domain: ['test.2.net'],
             ip: '2.2.2.2',
+            count: 1,
           },
-          destination: { domain: 'Hello World', ip: 'Hello World' },
+          destination: { domain: ['Hello World'], ip: 'Hello World' },
         },
       },
     ],
