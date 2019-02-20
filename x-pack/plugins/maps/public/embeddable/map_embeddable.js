@@ -21,6 +21,7 @@ import {
   replaceLayerList,
   setQuery,
 } from '../actions/store_actions';
+import { setReadOnly } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 
 export class MapEmbeddable extends Embeddable {
@@ -62,6 +63,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {ContainerState} containerState
    */
   render(domNode, containerState) {
+    this.store.dispatch(setReadOnly(true));
     // todo get center and zoom from embeddable UI state
     if (this.savedMap.mapStateJSON) {
       const mapState = JSON.parse(this.savedMap.mapStateJSON);

@@ -69,6 +69,12 @@ export function enableFullScreen() {
     isFullScreen: true
   };
 }
+export function setReadOnly(isReadOnly) {
+  return {
+    type: SET_READ_ONLY,
+    isReadOnly
+  };
+}
 
 // Selectors
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
