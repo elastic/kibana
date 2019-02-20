@@ -20,11 +20,13 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { TableListView } from './../../table_list_view';
 
 import {
   EuiIcon,
+  EuiBetaBadge,
   EuiLink,
   EuiButton,
   EuiEmptyPrompt,
@@ -86,7 +88,7 @@ class VisualizeListingTableUi extends Component {
             onClick={() => this.props.editItem(record)}
             data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
           >
-            {this.renderFlaskIcon(record)}{field}
+            {field}
           </EuiLink>
         )
       },
@@ -101,6 +103,7 @@ class VisualizeListingTableUi extends Component {
           <span>
             {this.renderItemTypeIcon(record)}
             {record.type.title}
+            {this.getExperimentalBadge(record)}
           </span>
         )
       }
@@ -194,13 +197,19 @@ class VisualizeListingTableUi extends Component {
     return icon;
   }
 
-  renderFlaskIcon(item) {
+  getExperimentalBadge(item) {
     return item.type.shouldMarkAsExperimentalInUI() && (
-      <EuiIcon
-        className="visListingTable__typeIcon"
-        aria-hidden="true"
-        type="beaker"
-        size="m"
+      <EuiBetaBadge
+        className="visListingTable__experimentalIcon"
+        label="E"
+        title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
+          defaultMessage: 'Experimental',
+        })}
+        tooltipContent={
+          i18n.translate('kbn.visualize.listing.experimentalTooltip', {
+            defaultMessage: 'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+          })
+        }
       />
     );
   }
