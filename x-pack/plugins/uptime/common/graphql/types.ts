@@ -358,6 +358,8 @@ export interface FilterBar {
   scheme?: string[] | null;
 
   status?: string[] | null;
+
+  type?: string[] | null;
 }
 
 export interface ErrorListItem {

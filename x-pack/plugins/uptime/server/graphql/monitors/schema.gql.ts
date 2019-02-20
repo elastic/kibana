@@ -12,6 +12,7 @@ export const monitorsSchema = gql`
     port: [Int!]
     scheme: [String!]
     status: [String!]
+    type: [String!]
   }
 
   type HistogramDataPoint {
