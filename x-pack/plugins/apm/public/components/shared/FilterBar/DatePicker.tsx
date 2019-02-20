@@ -5,11 +5,7 @@
  */
 
 import datemath from '@elastic/datemath';
-import {
-  CommonProps,
-  EuiSuperDatePicker,
-  EuiSuperDatePickerProps
-} from '@elastic/eui';
+import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
 import { memoize } from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -29,32 +25,6 @@ interface DatePickerParams {
   rangeTo: string;
   refreshPaused: boolean;
   refreshInterval: number;
-}
-
-// TODO this can be removed when EUI PR lands: https://github.com/elastic/eui/pull/1574
-declare module '@elastic/eui' {
-  interface OnTimeChangeProps {
-    start: string;
-    end: string;
-    isInvalid: boolean;
-    isQuickSelection: boolean;
-  }
-
-  interface OnRefreshChangeProps {
-    isPaused: boolean;
-    refreshInterval: number;
-  }
-
-  export type EuiSuperDatePickerProps = CommonProps & {
-    start?: string;
-    end?: string;
-    isPaused?: boolean;
-    refreshInterval?: number;
-    onTimeChange: (props: OnTimeChangeProps) => void;
-    onRefreshChange?: (props: OnRefreshChangeProps) => void;
-    showUpdateButton?: boolean;
-  };
-  export const EuiSuperDatePicker: React.SFC<EuiSuperDatePickerProps>;
 }
 
 const APM_DEFAULT_TIME_OPTIONS: DatePickerParams = {
