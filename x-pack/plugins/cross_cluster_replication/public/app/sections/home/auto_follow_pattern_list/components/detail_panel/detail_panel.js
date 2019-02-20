@@ -172,6 +172,7 @@ export class DetailPanel extends Component {
 
             <EuiLink
               href={indexManagementUri}
+              data-test-subj="ccrAutoFollowPatternDetailsViewIndexManagementButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.viewIndicesLink"
@@ -304,6 +305,8 @@ export class DetailPanel extends Component {
               iconType="cross"
               flush="left"
               onClick={closeDetailPanel}
+              data-test-subj="ccrAutoFollowPatternDetailsFlyoutCloseButton"
+
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.closeButtonLabel"
@@ -321,6 +324,7 @@ export class DetailPanel extends Component {
                       <EuiButtonEmpty
                         color="danger"
                         onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
+                        data-test-subj="ccrAutoFollowPatternDetailsDeleteActionButton"
                       >
                         <FormattedMessage
                           id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
@@ -336,6 +340,7 @@ export class DetailPanel extends Component {
                     fill
                     color="primary"
                     href={routing.getAutoFollowPatternPath(autoFollowPattern.name)}
+                    data-test-subj="ccrAutoFollowPatternDetailsEditActionButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
@@ -356,7 +361,7 @@ export class DetailPanel extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="autoFollowPatternDetailsFlyout"
+        data-test-subj="ccrAutoFollowPatternDetailsFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="autoFollowPatternDetailsFlyoutTitle"
         size="m"
