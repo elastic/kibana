@@ -68,12 +68,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     }
 
     const indexPattern = await getIndexPattern(savedObject);
+    const indexPatterns = indexPattern ? [indexPattern] : null;
     return new VisualizeEmbeddable({
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
       editUrl,
       loader,
-      indexPatterns: [indexPattern],
+      indexPatterns,
     });
   }
 }

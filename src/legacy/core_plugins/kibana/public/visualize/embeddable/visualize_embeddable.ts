@@ -34,7 +34,7 @@ import {
 export interface VisualizeEmbeddableConfiguration {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedVisualization: VisSavedObject;
-  indexPattern?: StaticIndexPattern;
+  indexPatterns?: StaticIndexPattern[];
   editUrl?: string;
   loader: VisualizeLoader;
 }
