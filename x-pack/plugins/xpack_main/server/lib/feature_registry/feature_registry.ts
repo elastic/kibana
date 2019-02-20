@@ -131,6 +131,10 @@ function validateFeature(feature: Feature) {
   const { app = [], management = {}, catalogue = [] } = feature;
 
   Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
+    if (!privilegeDefinition) {
+      return;
+    }
+
     const unknownAppEntries = _.difference(privilegeDefinition.app || [], app);
     if (unknownAppEntries.length > 0) {
       throw new Error(

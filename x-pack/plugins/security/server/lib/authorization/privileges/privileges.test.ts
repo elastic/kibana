@@ -381,7 +381,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          },
+          } as any, // we're using `as any` here because for the short-term we aren't allowing arbitrary privilege names via TS
         },
       ];
 
@@ -524,7 +524,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          },
+          } as any, // we're using `as any` here because for the short-term we aren't allowing arbitrary privilege names via TS
         },
       ];
 
@@ -604,7 +604,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          },
+          } as any, // we're using `as any` here because for the short-term we aren't allowing arbitrary privilege names via TS
         },
       ];
 
