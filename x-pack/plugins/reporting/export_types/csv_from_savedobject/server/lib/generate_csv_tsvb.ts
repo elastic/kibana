@@ -11,20 +11,7 @@ import { TsvbAggregationCell, TsvbAggregationRow, TsvbPanel, TsvbTableData } fro
 
 const JOB_DATA_TYPE = 'CSV from TSVB table visualization';
 
-export async function generateCsvTsvb(
-  req: Request,
-  server: KbnServer,
-  tsvbPanel: TsvbPanel,
-  isImmediate: boolean
-) {
-  if (!isImmediate) {
-    return {
-      type: JOB_DATA_TYPE,
-      rows: null,
-    }; // FIXME better incomplete indicator?;
-  }
-
-  // FIXME hoist this out to be called from executeJob if need be
+export async function generateCsvTsvb(req: Request, server: KbnServer, tsvbPanel: TsvbPanel) {
   const { getTableData: getTableDataTSVB } = server.plugins.metrics; // FIXME: don't crash if config has tsvb disabled
   const tableDataTSVB: TsvbTableData = await getTableDataTSVB(req, tsvbPanel);
 
