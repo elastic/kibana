@@ -149,7 +149,6 @@ export class WorkpadPage extends PureComponent {
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}
-        tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
         {isEditable && (
           <Shortcuts
