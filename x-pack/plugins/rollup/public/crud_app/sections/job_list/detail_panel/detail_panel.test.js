@@ -111,4 +111,65 @@ describe('<DetailPanel />', () => {
       });
     });
   });
+
+  describe('job detail', () => {
+    describe('summary Tab', () => {
+      const panelType = JOB_DETAILS_TAB_SUMMARY;
+      const { findTestSubject } = initTestBed({ panelType });
+      const tabContent = findTestSubject('rollupJobDetailTabContent');
+      const titles = tabContent.find('EuiTitle');
+
+      const sectionExist = (sectionTitle) => {
+        let doesExist = false;
+        titles.forEach(title => {
+          if (title.text() === sectionTitle) {
+            doesExist = true;
+          }
+        });
+        return doesExist;
+      };
+
+      describe('Logistics section', () => {
+        const LOGISTICS_SUBSECTIONS = ['Index pattern', 'Rollup index', 'Cron ', 'Delay'];
+
+        const logisticsSubSections = findTestSubject('rollupJobDetailSummaryLogisticItem')
+          .map(item => ({
+            title: item.childAt(0).text(),
+            description: item.childAt(1).text(),
+          }));
+
+        it('should exist', () => {
+          expect(sectionExist('Logistics')).toBeTruthy();
+        });
+
+        it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
+          expect(logisticsSubSections.map(i => i.title)).toEqual(LOGISTICS_SUBSECTIONS);
+        });
+
+        it('should set the correct job value for each of the subsection', () => {
+          LOGISTICS_SUBSECTIONS.forEach((section) => {
+            const { description } = logisticsSubSections.find(({ title }) => title === section);
+
+            switch(section) {
+              case 'Index pattern':
+                expect(description).toEqual(defaultJob.indexPattern);
+                break;
+              case 'Cron ':
+                expect(description).toEqual(defaultJob.rollupCron);
+                break;
+              case 'Delay':
+                expect(description).toEqual(defaultJob.rollupDelay);
+                break;
+              case 'Rollup index':
+                expect(description).toEqual(defaultJob.rollupIndex);
+                break;
+              default:
+                // Should never get here... if it does a section is missing in the constant
+                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+            }
+          });
+        });
+      });
+    });
+  });
 });

@@ -138,7 +138,7 @@ export class DetailPanelUi extends Component {
 
     return (
       <Fragment>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody data-test-subj="rollupJobDetailTabContent">
           <EuiErrorBoundary>
             <JobDetails
               tab={panelType}
