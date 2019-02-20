@@ -32,7 +32,7 @@ export const SPAN_SUBTYPE = 'span.subtype';
 export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
-export const SPAN_SQL = 'context.db.statement';
+export const SPAN_SQL = 'span.db.statement';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
