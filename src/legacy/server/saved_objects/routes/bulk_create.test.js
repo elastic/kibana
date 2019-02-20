@@ -18,11 +18,11 @@
  */
 
 import sinon from 'sinon';
-import { createBulkGetRoute } from './bulk_get';
+import { createBulkCreateRoute } from './bulk_create';
 import { MockServer } from './_mock_server';
 
-describe('POST /api/saved_objects/_bulk_get', () => {
-  const savedObjectsClient = { bulkGet: sinon.stub().returns('') };
+describe('POST /api/saved_objects/_bulk_create', () => {
+  const savedObjectsClient = { bulkCreate: sinon.stub().returns('') };
   let server;
 
   beforeEach(() => {
@@ -37,20 +37,23 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       },
     };
 
-    server.route(createBulkGetRoute(prereqs));
+    server.route(createBulkCreateRoute(prereqs));
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkGet.resetHistory();
+    savedObjectsClient.bulkCreate.resetHistory();
   });
 
   it('formats successful response', async () => {
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_bulk_get',
+      url: '/api/saved_objects/_bulk_create',
       payload: [{
         id: 'abc123',
-        type: 'index-pattern'
+        type: 'index-pattern',
+        attributes: {
+          title: 'my_title',
+        },
       }]
     };
 
@@ -59,12 +62,12 @@ describe('POST /api/saved_objects/_bulk_get', () => {
         id: 'abc123',
         type: 'index-pattern',
         title: 'logstash-*',
-        version: 'foo',
+        version: 2,
         references: [],
       }]
     };
 
-    savedObjectsClient.bulkGet.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.bulkCreate.returns(Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -73,22 +76,53 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     expect(response).toEqual(clientResponse);
   });
 
-  it('calls upon savedObjectClient.bulkGet', async () => {
+  it('calls upon savedObjectClient.bulkCreate', async () => {
     const docs = [{
       id: 'abc123',
-      type: 'index-pattern'
+      type: 'index-pattern',
+      attributes: {
+        title: 'foo',
+      },
+      references: [],
+    }, {
+      id: 'abc1234',
+      type: 'index-pattern',
+      attributes: {
+        title: 'bar',
+      },
+      references: [],
     }];
 
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_bulk_get',
-      payload: docs
+      url: '/api/saved_objects/_bulk_create',
+      payload: docs,
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.bulkGet.calledOnce).toBe(true);
+    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
 
-    const args = savedObjectsClient.bulkGet.getCall(0).args;
+    const args = savedObjectsClient.bulkCreate.getCall(0).args;
     expect(args[0]).toEqual(docs);
+  });
+
+  it('passes along the overwrite option', async () => {
+    await server.inject({
+      method: 'POST',
+      url: '/api/saved_objects/_bulk_create?overwrite=true',
+      payload: [{
+        id: 'abc1234',
+        type: 'index-pattern',
+        attributes: {
+          title: 'bar',
+        },
+        references: [],
+      }]
+    });
+
+    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
+
+    const args = savedObjectsClient.bulkCreate.getCall(0).args;
+    expect(args[1]).toEqual({ overwrite: true });
   });
 });
