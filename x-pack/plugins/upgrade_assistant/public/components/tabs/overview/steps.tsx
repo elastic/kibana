@@ -75,7 +75,7 @@ const START_UPGRADE_STEP = {
               values={{
                 instructionButton: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html"
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/setup-upgrade.html"
                     target="_blank"
                   >
                     <FormattedMessage
@@ -236,7 +236,7 @@ export const StepsUI: StatelessComponent<
                     values={{
                       deprecationLogsDocButton: (
                         <EuiLink
-                          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging"
+                          href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/logging.html#deprecation-logging"
                           target="_blank"
                         >
                           <FormattedMessage
