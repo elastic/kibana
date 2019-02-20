@@ -24,6 +24,30 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('export', () => {
+    describe('object ordering', () => {
+      before(() => esArchiver.load('saved_objects/basic'));
+      after(() => esArchiver.unload('saved_objects/basic'));
+
+      it('should return objects in dependency order', async () => {
+        await supertest
+          .get('/api/saved_objects/_export')
+          .query({
+            type: ['index-pattern', 'search', 'visualization', 'dashboard'],
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = resp.text.split('\n').map(JSON.parse);
+            expect(objects).to.have.length(3);
+            expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+            expect(objects[0]).to.have.property('type', 'index-pattern');
+            expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+            expect(objects[1]).to.have.property('type', 'visualization');
+            expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+            expect(objects[2]).to.have.property('type', 'dashboard');
+          });
+      });
+    });
+
     describe('10,000 objects', () => {
       before(() => esArchiver.load('saved_objects/10k'));
       after(() => esArchiver.unload('saved_objects/10k'));

@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import stringify from 'json-stable-stringify';
 import { getSortedObjectsForExport } from '../lib/export';
 
 const EXPORT_SIZE_LIMIT = 10000;
@@ -54,7 +55,7 @@ export const createExportRoute = (prereqs: any) => ({
         exportSizeLimit: EXPORT_SIZE_LIMIT,
       });
       return h
-        .response(docsToExport.map(doc => JSON.stringify(doc)).join('\n'))
+        .response(docsToExport.map(doc => stringify(doc)).join('\n'))
         .header('Content-Disposition', `attachment; filename="export.ndjson"`)
         .header('Content-Type', 'application/ndjson');
     },
