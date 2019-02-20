@@ -14,6 +14,7 @@ import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
+import { isTextInput } from '../../lib/is_text_input';
 
 // NOTE: the data-shared-* attributes here are used for reporting
 export class WorkpadPage extends PureComponent {
@@ -88,41 +89,43 @@ export class WorkpadPage extends PureComponent {
     } = this.props;
 
     const keyHandler = (action, event) => {
-      event.preventDefault();
-      switch (action) {
-        case 'COPY':
-          copyElements();
-          break;
-        case 'CLONE':
-          duplicateElements();
-          break;
-        case 'CUT':
-          cutElements();
-          break;
-        case 'DELETE':
-          removeElements();
-          break;
-        case 'PASTE':
-          pasteElements();
-          break;
-        case 'BRING_FORWARD':
-          bringForward();
-          break;
-        case 'BRING_TO_FRONT':
-          bringToFront();
-          break;
-        case 'SEND_BACKWARD':
-          sendBackward();
-          break;
-        case 'SEND_TO_BACK':
-          sendToBack();
-          break;
-        case 'GROUP':
-          groupElements();
-          break;
-        case 'UNGROUP':
-          ungroupElements();
-          break;
+      if (!isTextInput(event.target)) {
+        event.preventDefault();
+        switch (action) {
+          case 'COPY':
+            copyElements();
+            break;
+          case 'CLONE':
+            duplicateElements();
+            break;
+          case 'CUT':
+            cutElements();
+            break;
+          case 'DELETE':
+            removeElements();
+            break;
+          case 'PASTE':
+            pasteElements();
+            break;
+          case 'BRING_FORWARD':
+            bringForward();
+            break;
+          case 'BRING_TO_FRONT':
+            bringToFront();
+            break;
+          case 'SEND_BACKWARD':
+            sendBackward();
+            break;
+          case 'SEND_TO_BACK':
+            sendToBack();
+            break;
+          case 'GROUP':
+            groupElements();
+            break;
+          case 'UNGROUP':
+            ungroupElements();
+            break;
+        }
       }
     };
 
