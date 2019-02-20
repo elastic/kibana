@@ -23,26 +23,25 @@ import {
 
 export class AddLayerPanel extends Component {
 
-  constructor() {
-    super();
-
-    this.state = {
-      sourceType: null,
-    };
+  state = {
+    sourceType: null,
+    isLoading: false,
+    hasLayerSelected: false,
+    layer: null
   }
 
   _previewLayer = (source) => {
-    this.layer = source.createDefaultLayer({
-      temporary: true,
-    });
-    this.props.previewLayer(this.layer);
+    this.setState({
+      layer: source.createDefaultLayer({})
+    },
+    () => this.props.previewLayer(this.state.layer));
   };
 
   _clearSource = () => {
     this.setState({ sourceType: null });
 
-    if (this.layer) {
-      this.props.removeLayer(this.layer.getId());
+    if (this.state.layer) {
+      this.props.removeTransientLayer();
     }
   }
 
@@ -55,17 +54,16 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const { layerLoading, temporaryLayers, nextAction } = this.props;
+    const {  hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
     return (
       <EuiButton
-        disabled={!temporaryLayers || layerLoading}
-        isLoading={layerLoading}
+        disabled={!hasLayerSelected}
+        isLoading={hasLayerSelected && isLoading}
         iconSide="right"
         iconType={'sortRight'}
         onClick={() => {
-          const layerId = this.layer.getId();
-          this.layer = null;
-          return nextAction(layerId);
+          this.setState({ layer: null });
+          selectLayerAndAdd();
         }}
         fill
       >
@@ -164,7 +162,11 @@ export class AddLayerPanel extends Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={this.props.closeFlyout}
+                onClick={() => {
+                  if (this.state.layer) {
+                    this.props.closeFlyout();
+                  }
+                }}
                 flush="left"
               >
                 Cancel
