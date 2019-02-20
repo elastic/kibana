@@ -120,8 +120,9 @@ export interface ReportingJob {
 export interface JobParams {
   savedObjectType: string;
   savedObjectId: string;
-  immediate: boolean;
-  panel?: any; // if applicable, may have to be resolved by the request handler
+  isImmediate: boolean;
+  panel?: any; // has to be resolved by the request handler
+  visType?: string; // has to be resolved by the request handler
 }
 
 export interface JobDocPayload {

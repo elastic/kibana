@@ -20,18 +20,16 @@ interface JobDocOutputPseudo {
  * @return {Object}: pseudo-JobDocOutput. See interface JobDocOutput
  */
 function executeJobFn(server: KbnServer) {
-  // WTH why are the job params not passed in here?
   return async function executeJob(job: JobDocPayload): Promise<JobDocOutputPseudo> {
-    const { objects, headers, jobParams } = job;
-    if (objects == null) {
-      // FIXME use fake req
-      const req = { headers };
-      const { panel } = jobParams;
+    const { objects, headers, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
+    const { isImmediate, panel, visType } = jobParams;
+    if (!isImmediate) {
+      const req = { headers }; // FIXME use fake req
 
       return {
         content_type: CONTENT_TYPE_CSV,
         // @ts-ignore
-        content: await generateCsv(req, server, jobParams.savedObjectType, panel, false), // FIXME use fake req and actual job params
+        content: await generateCsv(req, server, visType, panel),
       };
     }
 
@@ -39,7 +37,7 @@ function executeJobFn(server: KbnServer) {
     // FIXME how would this work if they never had privilege to create a job
     return {
       content_type: CONTENT_TYPE_CSV,
-      content: job.objects,
+      content: objects,
     };
   };
 }

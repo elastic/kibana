@@ -27,7 +27,7 @@ function createJobFn(server: KbnServer) {
     headers: any,
     req: Request
   ): Promise<JobDocPayload> {
-    const { savedObjectType, savedObjectId, immediate: isImmediate } = jobParams;
+    const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
     const client = req.getSavedObjectsClient();
 
@@ -50,11 +50,11 @@ function createJobFn(server: KbnServer) {
         throw new Error(`Unable to retrieve saved object! Error: ${err}`);
       });
 
-    const { type, rows } = await generateCsv(req, server, visType, panel, isImmediate);
+    const { type, rows } = await generateCsv(req, server, visType, panel);
     const csvRows = rows ? rows.join('\n') : rows;
 
     return {
-      jobParams: { ...jobParams, panel },
+      jobParams: { ...jobParams, panel, visType },
       title,
       type,
       objects: csvRows,

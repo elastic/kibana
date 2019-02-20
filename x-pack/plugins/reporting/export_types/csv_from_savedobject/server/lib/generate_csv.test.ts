@@ -35,7 +35,6 @@ const getMockPanel = (): TsvbPanel => ({
   pivot_rows: 100,
 });
 const getMockReq = (): any => ({});
-const IMMEDIATE = true;
 
 describe('Generate CSV from Saved Object ID', () => {
   beforeEach(() => {
@@ -46,7 +45,7 @@ describe('Generate CSV from Saved Object ID', () => {
   });
 
   test('Gets empty CSV from empty Metrics Table Data', async () => {
-    const csv = await generateCsv(mockReq, mockServer, mockVisType, mockPanel, IMMEDIATE);
+    const csv = await generateCsv(mockReq, mockServer, mockVisType, mockPanel);
     expect(csv.rows).toMatchInlineSnapshot(`Array []`);
   });
 
@@ -60,7 +59,7 @@ describe('Generate CSV from Saved Object ID', () => {
       ],
     };
     mockServer = getMockServer(mockTableData);
-    const csv = await generateCsv(mockReq, mockServer, mockVisType, mockPanel, IMMEDIATE);
+    const csv = await generateCsv(mockReq, mockServer, mockVisType, mockPanel);
 
     expect(csv.rows).toMatchInlineSnapshot(`
 Array [
@@ -82,7 +81,7 @@ Array [
       ],
     };
     mockServer = getMockServer(mockTableData);
-    const csv = await generateCsv(mockReq, mockServer, mockVisType, mockPanel, IMMEDIATE);
+    const csv = await generateCsv(mockReq, mockServer, mockVisType, mockPanel);
 
     expect(csv.rows).toMatchInlineSnapshot(`
 Array [

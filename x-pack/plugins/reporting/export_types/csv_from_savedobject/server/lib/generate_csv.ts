@@ -19,14 +19,13 @@ export async function generateCsv(
   req: Request,
   server: KbnServer,
   visType: string,
-  panel: TsvbPanel | TimelionPanel,
-  isImmediate: boolean
+  panel: TsvbPanel | TimelionPanel
 ): Promise<CsvResult> {
   switch (visType) {
     case 'metrics':
       // @ts-ignore
       const tsvbPanel: TsvbPanel = panel;
-      return await generateCsvTsvb(req, server, tsvbPanel, isImmediate);
+      return await generateCsvTsvb(req, server, tsvbPanel);
     case 'timelion':
       throw notImplemented('Timelion is not yet supported by this API');
     default:

@@ -8,7 +8,7 @@ import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
 import { get } from 'lodash';
 import { API_BASE_URL_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { JobDoc, JobParams, JobDocOutput, KbnServer } from '../../types';
+import { JobDoc, JobDocOutput, JobParams, KbnServer } from '../../types';
 // @ts-ignore
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
@@ -49,12 +49,16 @@ export function registerGenerateCsvFromVis(
   const getResult = async (
     request: Request,
     h: ResponseToolkit,
-    options: { immediate: boolean }
+    options: { isImmediate: boolean }
   ): Promise<HandlerResult> => {
     const { savedObjectType, savedObjectId } = request.params;
     let result: HandlerResult;
     try {
-      const jobParams: JobParams = { savedObjectType, savedObjectId, immediate: options.immediate };
+      const jobParams: JobParams = {
+        savedObjectType,
+        savedObjectId,
+        isImmediate: options.isImmediate,
+      };
       result = await handler(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
     } catch (err) {
       throw handleError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
@@ -69,7 +73,7 @@ export function registerGenerateCsvFromVis(
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
       const getDocumentPayload = getDocumentPayloadFactory(server);
-      const result: HandlerResult = await getResult(request, h, { immediate: true });
+      const result: HandlerResult = await getResult(request, h, { isImmediate: true });
 
       // FIXME this should still work if authentication does not grant job
       // creation privilege!
@@ -118,7 +122,7 @@ export function registerGenerateCsvFromVis(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      return getResult(request, h, { immediate: false });
+      return getResult(request, h, { isImmediate: false });
     },
   });
 }
