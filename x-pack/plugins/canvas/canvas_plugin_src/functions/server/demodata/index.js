@@ -32,6 +32,7 @@ export const demodata = () => ({
     if (args.type === 'ci') {
       set = {
         columns: [
+          { name: '@timestamp', type: 'date' },
           { name: 'time', type: 'date' },
           { name: 'cost', type: 'number' },
           { name: 'username', type: 'string' },

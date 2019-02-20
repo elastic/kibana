@@ -33,19 +33,35 @@ describe('ReindexProgress', () => {
     Array [
       Object {
         "status": "incomplete",
-        "title": "Setting old index to read-only",
+        "title": <FormattedMessage
+          defaultMessage="Setting old index to read-only"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Creating new index",
+        "title": <FormattedMessage
+          defaultMessage="Creating new index"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Reindexing documents",
+        "title": <FormattedMessage
+          defaultMessage="Reindexing documents"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Swapping original index with alias",
+        "title": <FormattedMessage
+          defaultMessage="Swapping original index with alias"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+          values={Object {}}
+        />,
       },
     ]
   }
@@ -116,27 +132,51 @@ describe('ReindexProgress', () => {
     Array [
       Object {
         "status": "inProgress",
-        "title": "Pausing Machine Learning jobs",
+        "title": <FormattedMessage
+          defaultMessage="Pausing Machine Learning jobs"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.pauseMlStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Setting old index to read-only",
+        "title": <FormattedMessage
+          defaultMessage="Setting old index to read-only"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Creating new index",
+        "title": <FormattedMessage
+          defaultMessage="Creating new index"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Reindexing documents",
+        "title": <FormattedMessage
+          defaultMessage="Reindexing documents"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Swapping original index with alias",
+        "title": <FormattedMessage
+          defaultMessage="Swapping original index with alias"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+          values={Object {}}
+        />,
       },
       Object {
         "status": "incomplete",
-        "title": "Resuming Machine Learning jobs",
+        "title": <FormattedMessage
+          defaultMessage="Resuming Machine Learning jobs"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.resumeMlStepTitle"
+          values={Object {}}
+        />,
       },
     ]
   }

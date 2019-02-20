@@ -19,6 +19,7 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
+  clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
   enableFullScreen,
@@ -27,9 +28,10 @@ import {
   FLYOUT_STATE
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
-import { inspectorAdapters, indexPatternService } from '../kibana_services';
+import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
@@ -49,7 +51,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   let unsubscribe;
 
   const store = createMapStore();
-  inspectorAdapters.requests.reset();
 
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
     if (diff.includes('time')) {
@@ -205,6 +206,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   ]);
 
   async function doSave(saveOptions) {
+    await store.dispatch(clearTransientLayerStateAndCloseFlyout());
     savedMap.syncWithStore(store.getState());
     const docTitle = Private(DocTitleProvider);
     let id;
@@ -252,6 +254,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     description: 'Open Inspector',
     testId: 'openInspectorButton',
     run() {
+      const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
   }, {

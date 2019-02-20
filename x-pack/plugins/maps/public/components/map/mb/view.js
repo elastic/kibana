@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
-import { inspectorAdapters } from '../../../kibana_services';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 
@@ -217,7 +216,7 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady || !inspectorAdapters.map) {
+    if (!this.props.isMapReady || !this.props.inspectorAdapters.map) {
       return;
     }
 
@@ -226,7 +225,7 @@ export class MBMapContainer extends React.Component {
       zoom: this._mbMap.getZoom(),
 
     };
-    inspectorAdapters.map.setMapState({
+    this.props.inspectorAdapters.map.setMapState({
       stats,
       style: this._mbMap.getStyle(),
     });
