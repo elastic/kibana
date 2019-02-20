@@ -2,9 +2,19 @@
 [[reporting-getting-started]]
 == Getting Started
 
-{reporting} is automatically enabled in {kib}.
+[float]
+=== System Setup
 
-To manually generate a report:
+{reporting} is automatically enabled in {kib}. The first time Kibana runs, it extracts a custom build for the Chromium web browser, which
+runs on the server in headless mode to load Kibana and capture the rendered Kibana charts as images.
+
+Chromium is an open-source project not related to Elastic, but the Chromium binary for Kibana has been custom-built by Elastic to ensure it
+works with minimal setup. However, the Kibana server OS might still require additional dependencies for Chromium. See the
+<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies
+for different operating systems.
+
+[float]
+=== Generating a Report Manually
 
 . Open {kib} in your web browser and log in. If you are running {kib}
 locally, go to `http://localhost:5601`. To access {kib} and generate
@@ -34,6 +44,9 @@ image:reporting/images/share-button.png["Reporting Button",link="share-button.pn
   ... Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
 
   ... Click the *Generate PDF* button.
+
+[float]
+=== Generating a Report Automatically
 
 If you want to automatically generate reports from a script or with
 {watcher}, use the displayed Generation URL. For more information, see
