@@ -55,8 +55,9 @@ export class LibraryStackFrames extends React.Component<Props, State> {
             {i18n.translate(
               'xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel',
               {
-                defaultMessage: '{stackframesLength} library frames',
-                values: { stackframesLength: stackframes.length }
+                defaultMessage:
+                  '{count, plural, one {# library frame} other {# library frames}}',
+                values: { count: stackframes.length }
               }
             )}
           </EuiLink>
