@@ -8,6 +8,35 @@ import _ from 'lodash';
 
 import { Subject } from 'rxjs';
 
+export function initializeAppState(AppState, stateName, defaultState) {
+  const appState = new AppState();
+  appState.fetch();
+
+  // Store the state to the AppState so that it's
+  // restored on page refresh.
+  if (appState[stateName] === undefined) {
+    appState[stateName] = _.cloneDeep(defaultState) || {};
+    appState.save();
+  }
+
+  // If defaultState is defined, check if the keys of the defaultState
+  // match the one from appState, if not, fall back to the defaultState.
+  // If we didn't do this, the structure of an out-of-date appState
+  // might break some follow up code. Note that this will not catch any
+  // deeper nested inconsistencies.
+  if (typeof defaultState !== 'undefined' && appState[stateName] !== defaultState) {
+    if (!_.isEqual(
+      Object.keys(defaultState).sort(),
+      Object.keys(appState[stateName]).sort()
+    )) {
+      appState[stateName] = _.cloneDeep(defaultState);
+      appState.save();
+    }
+  }
+
+  return appState;
+}
+
 // A data store to be able to share persistent state across directives
 // in services more conveniently when the structure of angular directives
 // doesn't allow the use of controllers to share state.
@@ -17,41 +46,12 @@ import { Subject } from 'rxjs';
 // Have a look at the unit tests which demonstrate basic usage.
 
 export function stateFactoryProvider(AppState) {
-  function initializeAppState(stateName, defaultState) {
-    const appState = new AppState();
-    appState.fetch();
-
-    // Store the state to the AppState so that it's
-    // restored on page refresh.
-    if (appState[stateName] === undefined) {
-      appState[stateName] = _.cloneDeep(defaultState) || {};
-      appState.save();
-    }
-
-    // If defaultState is defined, check if the keys of the defaultState
-    // match the one from appState, if not, fall back to the defaultState.
-    // If we didn't do this, the structure of an out-of-date appState
-    // might break some follow up code. Note that this will not catch any
-    // deeper nested inconsistencies.
-    if (typeof defaultState !== 'undefined' && appState[stateName] !== defaultState) {
-      if (!_.isEqual(
-        Object.keys(defaultState).sort(),
-        Object.keys(appState[stateName]).sort()
-      )) {
-        appState[stateName] = _.cloneDeep(defaultState);
-        appState.save();
-      }
-    }
-
-    return appState;
-  }
-
   return function (stateName, defaultState) {
     if (typeof stateName !== 'string') {
       throw 'stateName needs to be of type `string`';
     }
 
-    let appState = initializeAppState(stateName, defaultState);
+    let appState = initializeAppState(AppState, stateName, defaultState);
 
     const listener = new Subject();
 
@@ -103,7 +103,7 @@ export function stateFactoryProvider(AppState) {
     function updateAppState() {
       appState.fetch();
       if (typeof appState[stateName] === 'undefined') {
-        appState = initializeAppState(stateName, defaultState);
+        appState = initializeAppState(AppState, stateName, defaultState);
         changed = true;
       }
     }

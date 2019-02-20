@@ -4,20 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { distinctUntilChanged } from 'rxjs/operators';
 
-import 'ngreact';
-
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import { initializeAppState } from 'plugins/ml/factories/state_factory';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { mlCheckboxShowChartsService } from './checkbox_showcharts';
+import { showCharts$ } from './checkbox_showcharts';
 
-module.service('mlCheckboxShowChartsService', function (Private) {
-  const stateFactory = Private(stateFactoryProvider);
-  this.state = mlCheckboxShowChartsService.state = stateFactory('mlCheckboxShowCharts', {
-    showCharts: true
+const APP_STATE_NAME = 'mlCheckboxShowCharts';
+
+module.service('mlCheckboxShowChartsService', function (AppState, $rootScope) {
+  const appState = initializeAppState(AppState, APP_STATE_NAME, {
+    showCharts: showCharts$.getValue()
   });
-  mlCheckboxShowChartsService.initialized = true;
+
+  showCharts$.next(appState[APP_STATE_NAME].showCharts);
+
+  showCharts$.pipe(distinctUntilChanged()).subscribe(showCharts => {
+    appState.fetch();
+    appState[APP_STATE_NAME] = { showCharts };
+    appState.save();
+    $rootScope.$applyAsync();
+  });
 });

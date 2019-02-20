@@ -38,10 +38,11 @@ import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { CheckboxShowCharts, mlCheckboxShowChartsService } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
+import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
 import { SelectInterval, mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
 import { SelectLimit, mlSelectLimitService } from './select_limit/select_limit';
 import { SelectSeverity, mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
+import { injectObservablesAsProps } from '../util/observable_utils';
 
 import {
   getClearedSelectedAnomaliesState,
@@ -111,7 +112,8 @@ function mapSwimlaneOptionsToEuiOptions(options) {
   }));
 }
 
-export const Explorer = injectI18n(
+export const Explorer = injectI18n(injectObservablesAsProps(
+  { showCharts: showCharts$ },
   class Explorer extends React.Component {
     static propTypes = {
       appStateHandler: PropTypes.func.isRequired,
@@ -173,7 +175,6 @@ export const Explorer = injectI18n(
     // In componentWillUnmount() they will be unsubscribed again.
     annotationsRefreshSub = null;
     explorerSub = null;
-    showChartsSub = null;
     limitSub = null;
     chartsSeveritySub = null;
     intervalSub = null;
@@ -254,37 +255,9 @@ export const Explorer = injectI18n(
         }
       });
 
-      this.showChartsSub = mlCheckboxShowChartsService.state.watch(() => {
-        const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-        const { selectedCells, selectedJobs } = this.state;
-
-        const bounds = timefilter.getActiveBounds();
-        const timerange = getSelectionTimeRange(
-          selectedCells,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-          bounds,
-        );
-
-        if (showCharts && selectedCells !== null) {
-          this.updateCharts(
-            this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-          );
-        } else {
-          this.updateCharts(
-            [], timerange.earliestMs, timerange.latestMs
-          );
-        }
-      });
-
-      this.limitSub = mlSelectLimitService.state.watch(() => {
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        this.updateExplorer(getClearedSelectedAnomaliesState(), false);
-      });
-
       this.chartsSeveritySub = mlSelectSeverityService.state.watch(() => {
-        const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
         const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
-        if (showCharts && selectedCells !== null) {
+        if (this.props.showCharts && selectedCells !== null) {
           const bounds = timefilter.getActiveBounds();
           const timerange = getSelectionTimeRange(
             selectedCells,
@@ -325,7 +298,6 @@ export const Explorer = injectI18n(
 
     componentWillUnmount() {
       this.explorerSub.unsubscribe();
-      this.showChartsSub.unsubscribe();
       this.limitSub.unsubscribe();
       this.chartsSeveritySub.unsubscribe();
       this.intervalSub.unsubscribe();
@@ -776,7 +748,7 @@ export const Explorer = injectI18n(
 
       this.setState(stateUpdate);
 
-      if (mlCheckboxShowChartsService.state.get('showCharts') && selectedCells !== null) {
+      if (selectedCells !== null) {
         this.updateCharts(
           stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -1123,7 +1095,7 @@ export const Explorer = injectI18n(
             <EuiSpacer size="m" />
 
             <div className="euiText explorer-charts">
-              <ExplorerChartsContainer {...chartsData} />
+              {this.props.showCharts && <ExplorerChartsContainer {...chartsData} />}
             </div>
 
             <AnomaliesTable tableData={tableData} timefilter={timefilter} />
@@ -1132,4 +1104,4 @@ export const Explorer = injectI18n(
       );
     }
   }
-);
+));
