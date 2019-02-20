@@ -12,6 +12,7 @@ import { UMBreadcrumb } from '../../../breadcrumbs';
 import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
+import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -72,6 +73,18 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
 
           // get current persisted state, if any
           const persistedState = this.initializePersistedState();
+
+          /**
+           * We pass this global help setup as a prop to the app, because for
+           * localization it's necessary to have the provider mounted before
+           * we can render our help links, as they rely on i18n.
+           */
+          const renderGlobalHelpControls = () =>
+            // render Uptime feedback link in global help menu
+            chrome.helpExtension.set((element: HTMLDivElement) => () => {
+              ReactDOM.render(renderUptimeKibanaGlobalHelp(), element);
+            });
+
           const {
             autorefreshIsPaused,
             autorefreshInterval,
@@ -91,6 +104,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               initialDateRangeStart: dateRangeStart,
               initialDateRangeEnd: dateRangeEnd,
               persistState: this.updatePersistedState,
+              renderGlobalHelpControls,
             }),
             elem
           );
