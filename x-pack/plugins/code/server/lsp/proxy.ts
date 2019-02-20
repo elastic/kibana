@@ -274,13 +274,13 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       if (this.logger) {
         switch (notification.type) {
           case MessageType.Log:
-            this.logger.info(notification.message);
+            this.logger.debug(notification.message);
             break;
           case MessageType.Info:
-            this.logger.info(notification.message);
+            this.logger.debug(notification.message);
             break;
           case MessageType.Warning:
-            this.logger.warn(notification.message);
+            this.logger.debug(notification.message);
             break;
           case MessageType.Error:
             this.logger.error(notification.message);

@@ -71,7 +71,7 @@ export class Logger implements VsLogger {
       });
     }
 
-    this.server.log([...this.baseTags, 'info', 'stdout'], msg);
+    this.server.log([...this.baseTags, 'debug', 'stdout'], msg);
   }
 
   // Log subprocess stderr
