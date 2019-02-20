@@ -14,10 +14,13 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
+const defaultJob = getJob();
+
 const defaultProps = {
   isOpen: true,
   isLoading: false,
-  job: getJob(),
+  job: defaultJob,
+  jobId: defaultJob.id,
   panelType: JOB_DETAILS_TAB_SUMMARY,
   closeDetailPanel: jest.fn(),
   openDetailPanel: jest.fn(),
@@ -26,6 +29,47 @@ const defaultProps = {
 const initTestBed = registerTestBed(DetailPanel, defaultProps, rollupJobsStore);
 
 describe('<DetailPanel />', () => {
+  describe('layout', () => {
+    let component;
+    let findTestSubject;
+
+    beforeEach(() => {
+      ({ component, findTestSubject } = initTestBed());
+    });
+
+    it('should have the title set to the Job id', () => {
+      const { job } = defaultProps;
+      const title = component.find('#rollupJobDetailsFlyoutTitle').hostNodes();
+      expect(title.length).toBeTruthy();
+      expect(title.text()).toEqual(job.id);
+    });
+
+    it('should have children if it\'s open', () => {
+      expect(component.find('DetailPanelUi').children().length).toBeTruthy();
+    });
+
+    it('should have no content if it\s closed', () => {
+      ({ component } = initTestBed({ isOpen: false }));
+      expect(component.find('DetailPanelUi').children().length).toBeFalsy();
+    });
+
+    it('should show a loading when the job is loading', () => {
+      ({ component, findTestSubject } = initTestBed({ isLoading: true }));
+      const loading = findTestSubject('rollupJobDetailLoading');
+      expect(loading.length).toBeTruthy();
+      expect(loading.text()).toEqual('Loading rollup job...');
+
+      // Make sure the title and the tabs are visible
+      expect(component.find('EuiTab').length).toBeTruthy();
+      expect(component.find('#rollupJobDetailsFlyoutTitle').length).toBeTruthy();
+    });
+
+    it('should display a message when no job is provided', () => {
+      ({ component, findTestSubject } = initTestBed({ job: undefined }));
+      expect(findTestSubject('rollupJobDetailFlyout').find('EuiFlyoutBody').text()).toEqual('Rollup job not found');
+    });
+  });
+
   describe('tabs', () => {
     const tabActive = JOB_DETAILS_TAB_SUMMARY;
     const { component } = initTestBed({ panelType: tabActive });

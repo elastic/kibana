@@ -50,6 +50,7 @@ export class DetailPanelUi extends Component {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
     job: PropTypes.object,
+    jobId: PropTypes.string,
     panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
@@ -186,7 +187,9 @@ export class DetailPanelUi extends Component {
 
     if (isLoading) {
       content = (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailLoading"
+        >
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="center"
