@@ -81,6 +81,7 @@ export class LeftInnerJoin {
     const joinFields = this.getJoinFields();
     const tooltipProps = {};
     joinFields.forEach((joinField) => {
+      console.log('jf', joinField);
       for (const key in properties) {
         if (properties.hasOwnProperty(key)) {
           if (joinField.name === key) {
@@ -90,6 +91,7 @@ export class LeftInnerJoin {
       }
     });
 
+    console.log('ttp', tooltipProps);
     return tooltipProps;
   }
 

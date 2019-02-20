@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
@@ -186,32 +185,28 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
 
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
   }
 
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      return {
-        ...metric,
-        propertyKey: metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME,
-        propertyLabel: metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL,
-      };
-    });
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
+
+  //
+  //
+  // getMetricFields() {
+  //   return this._getValidMetrics().map(metric => {
+  //     const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
+  //     const metricLabel = metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
+  //     return {
+  //       ...metric,
+  //       propertyKey: metricKey,
+  //       propertyLabel: metricLabel
+  //     };
+  //   });
+  // }
 
   _makeAggConfigs(precision) {
     const metricAggConfigs = this.getMetricFields().map(metric => {
@@ -306,6 +301,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatProperties(properties) {
+    console.log('filter and format', properties);
     properties = await super.filterAndFormatProperties(properties);
     const allProps = {};
     for  (const key in properties) {
@@ -313,6 +309,10 @@ export class ESGeoGridSource extends AbstractESSource {
         allProps[key] = properties[key];
       }
     }
+
+
+    console.log('filtered and formatted', allProps);
+
     return allProps;
   }
 }

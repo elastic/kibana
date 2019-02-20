@@ -495,6 +495,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _getPropertiesForTooltip(feature) {
+    console.log('filter and format', feature);
     const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
 
     //add tooltips from joins
