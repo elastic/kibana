@@ -27,14 +27,19 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     tokenString: string
   ): Promise<TokenEnrollmentData> {
     const params = {
-      id: `enrollment_token:${tokenString}`,
       ignore: [404],
       index: INDEX_NAMES.BEATS,
+      query: {
+        match: {
+          'enrollment_token.token': tokenString,
+        },
+      },
     };
 
-    const response = await this.database.get(user, params);
+    const response = await this.database.searchAll(user, params);
+    const tokens = get<any>(response, 'hits.hits', []);
 
-    const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
+    const tokenDetails = get<TokenEnrollmentData>(tokens[0], '_source.enrollment_token', {
       expires_on: '0',
       token: null,
     });
@@ -49,10 +54,10 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     );
   }
 
-  public async upsertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
+  public async insertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
     const body = flatten(
       tokens.map(token => [
-        { index: { _id: `enrollment_token:${token.token}` } },
+        { index: {} },
         {
           enrollment_token: token,
           type: 'enrollment_token',

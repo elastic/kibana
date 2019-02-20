@@ -134,7 +134,7 @@ export class CMTokensDomain {
     }
 
     await Promise.all(
-      chunk(tokens, 100).map(tokenChunk => this.adapter.upsertTokens(user, tokenChunk))
+      chunk(tokens, 100).map(tokenChunk => this.adapter.insertTokens(user, tokenChunk))
     );
 
     return tokens.map(token => token.token);
