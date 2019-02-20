@@ -112,9 +112,10 @@ export const WorkpadPage = compose(
         ];
       };
 
-      const selectedPrimaryShapeObjects = selectedPrimaryShapes.map(id =>
-        shapes.find(s => s.id === id)
-      );
+      const selectedPrimaryShapeObjects = selectedPrimaryShapes
+        .map(id => shapes.find(s => s.id === id))
+        .filter(shape => shape);
+
       const selectedPersistentPrimaryShapes = flatten(
         selectedPrimaryShapeObjects.map(shape =>
           shape.subtype === 'adHocGroup'
