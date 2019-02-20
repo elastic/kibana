@@ -23,7 +23,7 @@ describe('RedirectToLogs component', () => {
   push={false}
   to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))"
 />
-    `);
+`);
   });
 
   it('renders a redirect with the correct user-defined filter', () => {
