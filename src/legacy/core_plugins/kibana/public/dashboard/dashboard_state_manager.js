@@ -240,7 +240,7 @@ export class DashboardStateManager {
       if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
         const embeddableMetadata = getEmbeddableMetadata(store.getState(), panelId);
         if (embeddableMetadata.indexPatterns) {
-          this.panelIndexPatternMapping[panelId] = embeddableMetadata.indexPatterns;
+          this.panelIndexPatternMapping[panelId] = _.compact(embeddableMetadata.indexPatterns);
           this.dirty = true;
         }
       }
@@ -274,9 +274,7 @@ export class DashboardStateManager {
   }
 
   getPanelIndexPatterns() {
-    const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping)).filter(indexPattern => {
-      return indexPattern != null;
-    });
+    const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
     return _.uniq(indexPatterns);
   }
 
