@@ -72,7 +72,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
 
 ```ts
-import { PluginInitializerContext, PluginName, PluginStart, PluginStop } from '../../../core/public';
+import { PluginInitializerContext, PluginStart, PluginStop } from '../../../core/public';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
@@ -102,7 +102,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
 
 ```ts
-import { PluginInitializerContext, PluginName, PluginStart, PluginStop } from '../../../core/server';
+import { PluginInitializerContext, PluginStart, PluginStop } from '../../../core/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
@@ -127,7 +127,7 @@ The various independent domains that make up `core` are represented by a series 
 For example, the core `UiSettings` service exposes a function `get` to all plugin `start` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
 
 ```ts
-import { PluginName, PluginStart } from '../../../core/public';
+import { PluginStart } from '../../../core/public';
 
 export class Plugin {
   public start(core: PluginStart) {
@@ -189,7 +189,7 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 **demo plugin.ts:**
 
 ```ts
-import { PluginName, PluginStart, PluginStop } from '../../../core/server';
+import { PluginStart, PluginStop } from '../../../core/server';
 import { FoobarPluginStart, FoobarPluginStop } from '../../foobar/server';
 
 interface DemoStartDependencies {
@@ -272,3 +272,74 @@ If your plugin is using angular only in the context of its own application, then
 At this poing, keeping angular around is not the recommended approach. If you feel you must do it, then talk to the platform team directly and we can help you craft a plan.
 
 We recommend that _all_ plugins treat moving away from angular as a top-most priority if they haven't done so already.
+
+### Architectural changes with legacy "shim"
+
+The bulk of the migration work for most plugins will be changing the way the plugin is architected so dependencies from core and other plugins flow in via the same entry point. This effort is relatively straightforward on the server, but it can be a tremendous undertaking for client-side code in some plugins.
+
+#### Server-side
+
+Legacy server-side plugins access functionality from core and other plugins at runtime via function arguments, which is similar to how they must be architected to use the new plugin system.
+
+Let's start with a legacy server-side plugin definition that exposes functionality for other plugins to consume and accesses functionality from both core and a different plugin.
+
+```ts
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // access functionality exposed by core
+      server.route({
+        path: '/api/demo_plugin/search',
+        method: 'POST',
+        async handler(request) {
+          const { elasticsearch } = server.plugins;
+          return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
+        }
+      });
+
+      // creates an extension point that other plugins can call
+      server.expose('getDemoBar', () => {
+        // accesses functionality exposed by another plugin
+        return `Demo ${server.plugins.foo.getBar()}`;
+      });
+    }
+  });
+}
+```
+
+If we were to express this same set of capabilities in a shape that's more suitable to the new plugin system, it would look something like this:
+
+```ts
+import { PluginStart } from '../../core/server';
+import { FooPluginStart } from '../foo/server';
+
+interface DemoStartDependencies {
+  foo: FooPluginStart
+}
+
+export type DemoPluginStart = ReturnType<Plugin['start']>;
+
+export class Plugin {
+  public start(core: PluginStart, dependencies: DemoStartDependencies) {
+    // access functionality exposed by core
+    core.http.route({
+      path: '/api/demo_plugin/search',
+      method: 'POST',
+      async handler(request) {
+        const { elasticsearch } = core; // note, elasticsearch is moving to core
+        return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
+      }
+    });
+
+    // creates an extension point that other plugins can call
+    return {
+      getDemoBar() {
+        // accesses functionality exposed by another plugin
+        return `Demo ${dependencies.foo.getBar()}`;
+      }
+    };
+  }
+}
+```
