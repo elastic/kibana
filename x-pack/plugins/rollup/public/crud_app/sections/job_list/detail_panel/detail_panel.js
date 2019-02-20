@@ -37,7 +37,7 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
-const JOB_DETAILS_TABS = [
+export const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
