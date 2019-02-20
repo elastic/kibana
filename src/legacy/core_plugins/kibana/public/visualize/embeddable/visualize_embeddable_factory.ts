@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
@@ -69,7 +68,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     }
 
     const indexPattern = await getIndexPattern(savedObject);
-    const indexPatterns = _.compact([indexPattern]);
+    const indexPatterns = indexPattern ? [indexPattern] : [];
     return new VisualizeEmbeddable({
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
