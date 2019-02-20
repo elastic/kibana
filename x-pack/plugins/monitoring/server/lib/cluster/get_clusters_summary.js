@@ -22,7 +22,8 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
       apm,
       alerts,
       ccs,
-      cluster_settings: clusterSettings,
+      setupDetection,
+      cluster_settings: clusterSettings
     } = cluster;
 
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
@@ -78,7 +79,8 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
         status,
         kibana && kibana.status || null
       ]),
-      isCcrEnabled
+      isCcrEnabled,
+      setupDetection
     };
   });
 }

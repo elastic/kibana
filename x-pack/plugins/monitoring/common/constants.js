@@ -159,3 +159,6 @@ export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*';
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*';
 export const INDEX_ALERTS = '.monitoring-alerts-6';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*';
+
+// This is the unique token that exists in monitoring indices collected by metricbeat
+export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';

@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { clusterRoute } from './cluster';
-export { clustersRoute } from './clusters';
-
+export * from './capabilities';

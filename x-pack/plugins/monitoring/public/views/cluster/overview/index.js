@@ -21,12 +21,19 @@ uiRoutes.when('/overview', {
     },
     cluster(monitoringClusters, globalState) {
       return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
+    },
+    // clusterCapabilities(capabilities, globalState) {
+    //   return capabilities(globalState.cluster_uuid, globalState.ccs);
+    // },
+    clusterMonitoringHosts(monitoringHosts) {
+      return monitoringHosts();
     }
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope, i18n, clusterMonitoringHosts) {
       const kbnUrl = $injector.get('kbnUrl');
       const monitoringClusters = $injector.get('monitoringClusters');
+      const capabilities = $injector.get('capabilities');
       const globalState = $injector.get('globalState');
 
       super({
@@ -34,7 +41,17 @@ uiRoutes.when('/overview', {
           defaultMessage: 'Overview'
         }),
         defaultData: {},
-        getPageData: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+        getPageData: async () => {
+          const [ cluster, clusterCapabilities ] = await Promise.all([
+            monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+            capabilities(globalState.cluster_uuid, globalState.ccs),
+          ]);
+
+          return {
+            ...cluster,
+            clusterCapabilities
+          };
+        },
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
         $injector
@@ -47,10 +64,16 @@ uiRoutes.when('/overview', {
       };
 
       $scope.$watch(() => this.data, data => {
+        if (!data) {
+          return null;
+        }
+
         this.renderReact(
           <I18nContext>
             <Overview
               cluster={data}
+              clusterCapabilities={data.clusterCapabilities}
+              monitoringHosts={clusterMonitoringHosts}
               changeUrl={changeUrl}
               showLicenseExpiration={true}
             />

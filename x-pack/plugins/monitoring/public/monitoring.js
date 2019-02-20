@@ -9,6 +9,8 @@ import chrome from 'ui/chrome';
 import 'ui/autoload/all';
 import 'plugins/monitoring/filters';
 import 'plugins/monitoring/services/clusters';
+import 'plugins/monitoring/services/capabilities';
+import 'plugins/monitoring/services/monitoring_hosts';
 import 'plugins/monitoring/services/features';
 import 'plugins/monitoring/services/executor';
 import 'plugins/monitoring/services/license';

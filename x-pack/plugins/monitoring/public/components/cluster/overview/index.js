@@ -10,10 +10,10 @@ import { KibanaPanel } from './kibana_panel';
 import { LogstashPanel } from './logstash_panel';
 import { AlertsPanel } from './alerts_panel';
 import { BeatsPanel } from './beats_panel';
-
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { MetricbeatMigration } from './metricbeat_migration';
 
 export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -22,6 +22,8 @@ export function Overview(props) {
     <EuiPage>
       <EuiPageBody>
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
+
+        <MetricbeatMigration clusterCapabilities={props.clusterCapabilities} monitoringHosts={props.monitoringHosts}/>
 
         { !isFromStandaloneCluster ?
           (

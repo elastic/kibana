@@ -20,6 +20,7 @@ export {
   clusterRoute,
   clustersRoute,
 } from './cluster';
+export * from './capabilities';
 export {
   esIndexRoute,
   esIndicesRoute,
