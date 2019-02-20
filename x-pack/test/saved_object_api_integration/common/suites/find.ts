@@ -125,7 +125,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response));
 
-      it(`not space aware type should return ${tests.spaceAwareType.statusCode} with ${
+      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
         tests.notSpaceAwareType.description
       }`, async () =>
         await supertest
