@@ -26,7 +26,7 @@ import {
 import { searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
-  const { query, page, languages, repositories } = payload;
+  const { query, page, languages, repositories, repoScope } = payload;
   const queryParams: { [key: string]: string | number | boolean } = {
     q: query,
   };
@@ -41,6 +41,11 @@ function requestDocumentSearch(payload: DocumentSearchPayload) {
 
   if (repositories) {
     queryParams.repos = repositories;
+  }
+
+  if (repoScope) {
+    const qs = repoScope.split(',').join('&repoScope=');
+    queryParams.repoScope = qs;
   }
 
   if (query && query.length > 0) {
@@ -99,7 +104,7 @@ function* handleSearchRouteChange(action: Action<Match>) {
   const { location } = action.payload!;
   const rawSearchStr = location.search.length > 0 ? location.search.substring(1) : '';
   const queryParams = queryString.parse(rawSearchStr);
-  const { q, p, langs, repos, scope } = queryParams;
+  const { q, p, langs, repos, scope, repoScope } = queryParams;
   yield put(changeSearchScope(scope as SearchScope));
   if (scope === SearchScope.REPOSITORY) {
     yield put(repositorySearch({ query: q as string }));
@@ -110,6 +115,7 @@ function* handleSearchRouteChange(action: Action<Match>) {
         page: p as string,
         languages: langs as string,
         repositories: repos as string,
+        repoScope: repoScope as string,
       })
     );
   }

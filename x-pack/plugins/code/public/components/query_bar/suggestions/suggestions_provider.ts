@@ -8,7 +8,11 @@ import { AutocompleteSuggestionGroup, AutocompleteSuggestionType } from '.';
 import { SearchScope } from '../../../../model';
 
 export interface SuggestionsProvider {
-  getSuggestions(query: string, scope: SearchScope): Promise<AutocompleteSuggestionGroup>;
+  getSuggestions(
+    query: string,
+    scope: SearchScope,
+    repoScope?: string[]
+  ): Promise<AutocompleteSuggestionGroup>;
 }
 
 export abstract class AbstractSuggestionsProvider implements SuggestionsProvider {
@@ -16,10 +20,11 @@ export abstract class AbstractSuggestionsProvider implements SuggestionsProvider
 
   public async getSuggestions(
     query: string,
-    scope: SearchScope
+    scope: SearchScope,
+    repoScope?: string[]
   ): Promise<AutocompleteSuggestionGroup> {
     if (this.matchSearchScope(scope)) {
-      return await this.fetchSuggestions(query);
+      return await this.fetchSuggestions(query, repoScope);
     } else {
       // This is an abstract class. Do nothing here. You should override this.
       return new Promise<AutocompleteSuggestionGroup>((resolve, reject) => {
@@ -33,7 +38,10 @@ export abstract class AbstractSuggestionsProvider implements SuggestionsProvider
     }
   }
 
-  protected async fetchSuggestions(_: string): Promise<AutocompleteSuggestionGroup> {
+  protected async fetchSuggestions(
+    query: string,
+    repoScope?: string[]
+  ): Promise<AutocompleteSuggestionGroup> {
     // This is an abstract class. Do nothing here. You should override this.
     return new Promise<AutocompleteSuggestionGroup>((resolve, reject) => {
       resolve({

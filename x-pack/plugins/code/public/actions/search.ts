@@ -5,13 +5,14 @@
  */
 
 import { createAction } from 'redux-actions';
-import { DocumentSearchResult, SearchScope } from '../../model';
+import { DocumentSearchResult, Repository, SearchScope } from '../../model';
 
 export interface DocumentSearchPayload {
   query: string;
   page?: string;
   languages?: string;
   repositories?: string;
+  repoScope?: string;
 }
 
 export interface RepositorySearchPayload {
@@ -19,7 +20,7 @@ export interface RepositorySearchPayload {
 }
 
 export interface SearchOptions {
-  repoScopes: string[];
+  repoScope: Repository[];
 }
 
 // For document search page

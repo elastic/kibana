@@ -24,6 +24,7 @@ const SearchBarContainer = styled.div`
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   onSearchScopeChanged: (s: SearchScope) => void;
+  repoScope: string[];
 }
 
 export class CodeSearchBar extends React.Component<Props> {
@@ -42,10 +43,14 @@ export class CodeSearchBar extends React.Component<Props> {
     if (query.trim().length === 0) {
       return;
     }
+    let qs = '';
+    if (this.props.repoScope) {
+      qs = `&repoScope=${this.props.repoScope.join(',')}`;
+    }
     if (this.state.searchScope === SearchScope.REPOSITORY) {
-      history.push(`/search?q=${query}&scope=${SearchScope.REPOSITORY}`);
+      history.push(`/search?q=${query}&scope=${SearchScope.REPOSITORY}${qs}`);
     } else {
-      history.push(`/search?q=${query}`);
+      history.push(`/search?q=${query}${qs}`);
     }
   };
 

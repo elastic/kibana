@@ -90,6 +90,7 @@ interface Props extends RouteComponentProps<{ resource: string; org: string; rep
   commit: CommitDiff | null;
   query: string;
   onSearchScopeChanged: (s: SearchScope) => void;
+  repoScope: string[];
 }
 
 export enum DiffLayout {
@@ -166,12 +167,12 @@ export class DiffPage extends React.Component<Props> {
       const [p1, p2] = parents;
       parentsLinks = (
         <React.Fragment>
-          <Link to={`/commit/${repoUri}/${p1}`}>{p1}</Link>+
-          <Link to={`/commit/${repoUri}/${p2}`}>{p2}</Link>
+          <Link to={`/${repoUri}/commit/${p1}`}>{p1}</Link>+
+          <Link to={`/${repoUri}/commit/${p2}`}>{p2}</Link>
         </React.Fragment>
       );
     } else if (parents.length === 1) {
-      parentsLinks = <Link to={`/commit/${repoUri}/${parents[0]}`}>{parents[0]}</Link>;
+      parentsLinks = <Link to={`/${repoUri}/commit/${parents[0]}`}>{parents[0]}</Link>;
     }
     const topBar = (
       <TopBarContainer>
@@ -192,6 +193,7 @@ export class DiffPage extends React.Component<Props> {
     return (
       <div>
         <SearchBar
+          repoScope={this.props.repoScope}
           query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
         />
@@ -229,6 +231,7 @@ export class DiffPage extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   commit: state.commit.commit,
   query: state.search.query,
+  repoScope: state.search.searchOptions.repoScope.map(r => r.uri),
 });
 
 const mapDispatchToProps = {

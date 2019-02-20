@@ -18,11 +18,19 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
     return scope === SearchScope.DEFAULT || scope === SearchScope.FILE;
   }
 
-  protected async fetchSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
+  protected async fetchSuggestions(
+    query: string,
+    repoScope: string[]
+  ): Promise<AutocompleteSuggestionGroup> {
+    const queryParams: { q: string; repoScope?: string } = { q: query };
+    if (repoScope) {
+      const qs = repoScope.join('&repoScope=');
+      queryParams.repoScope = qs;
+    }
     const res = await kfetch({
       pathname: `../api/code/suggestions/doc`,
       method: 'get',
-      query: { q: query },
+      query: queryParams,
     });
     const suggestions = Array.from(res.results as SearchResultItem[])
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)

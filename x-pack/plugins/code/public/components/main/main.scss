@@ -7,6 +7,11 @@
   overflow: auto;
 }
 
+.code-auto-overflow-y {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .code-no-overflow {
   overflow: hidden;
 }
@@ -224,4 +229,10 @@
   justify-content: center;
   align-items: center;
   margin-left: $euiSizeXS;
+}
+
+.code-link {
+  &:focus {
+    box-shadow: none;
+  }
 }

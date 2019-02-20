@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const settingsDocumentationLink = "https://stuff.com/docs";
+export const settingsDocumentationLink = 'https://stuff.com/docs';
