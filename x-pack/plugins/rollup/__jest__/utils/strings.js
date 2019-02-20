@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  getRandomString,
-  generateArrayOfLength,
-} from './utils';
+import Chance from 'chance';
 
-export {
-  registerTestBed,
-} from './tests';
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+export const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;

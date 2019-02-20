@@ -6,11 +6,12 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
+import { mountWithIntl } from 'test_utils/enzyme_helpers'; // eslint-disable-line import/no-unresolved
 import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test';
 
 const registerTestSubjExists = component => testSubject => Boolean(findTestSubjectHelper(component, testSubject).length);
 
-export const registerTestBed = (Component, mountWithIntl, defaultProps, store = {}) => (props) => {
+export const registerTestBed = (Component, defaultProps, store = {}) => (props) => {
   const component = mountWithIntl(
     <Provider store={store}>
       <Component

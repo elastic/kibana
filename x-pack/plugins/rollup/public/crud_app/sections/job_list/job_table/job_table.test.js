@@ -5,10 +5,9 @@
  */
 
 import { Pager } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
+import { registerTestBed } from '../../../../../__jest__/utils';
 import { getJobs } from '../../../../../fixtures';
-import { registerTestBed } from '../../../../../common/lib';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
@@ -26,7 +25,7 @@ const defaultProps = {
   sortChanged: () => {},
 };
 
-const initTestBed = registerTestBed(JobTable, mountWithIntl, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(JobTable, defaultProps, rollupJobsStore);
 
 describe('<JobTable />', () => {
   describe('table rows', () => {
