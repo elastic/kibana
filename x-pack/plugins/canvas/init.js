@@ -5,14 +5,13 @@
  */
 
 import { routes } from './server/routes';
-import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
 import { functions } from './canvas_plugin_src/functions/server';
 import { loadSampleData } from './server/sample_data';
 
 export default async function(server /*options*/) {
   const { serverFunctions } = server.plugins.interpreter.register({
-    serverFunctions: commonFunctions.concat(functions),
+    serverFunctions: functions,
   });
 
   server.injectUiAppVars('canvas', async () => {
