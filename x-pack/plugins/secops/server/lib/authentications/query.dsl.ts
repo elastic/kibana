@@ -35,8 +35,8 @@ export const buildQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.category': 'user-login' } },
-    { term: { 'process.exe': '/usr/sbin/sshd' } },
-    { terms: { 'event.type': ['user_login', 'user_start'] } },
+    { term: { 'process.executable': '/usr/sbin/sshd' } },
+    { terms: { 'event.action': ['error', 'logged-in'] } },
     {
       range: {
         [timestamp]: {
@@ -50,7 +50,7 @@ export const buildQuery = ({
   const agg = {
     user_count: {
       cardinality: {
-        field: 'auditd.data.acct',
+        field: 'auditd.summary.actor.secondary',
       },
     },
   };
@@ -65,7 +65,7 @@ export const buildQuery = ({
         group_by_users: {
           terms: {
             size: limit + 1,
-            field: 'auditd.data.acct',
+            field: 'auditd.summary.actor.secondary',
             order: { 'failures.doc_count': 'desc' },
           },
           aggs: {

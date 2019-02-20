@@ -11,6 +11,9 @@ import { kpiEventsQuery } from '../../../../plugins/secops/public/containers/kpi
 import { GetKpiEventsQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
 
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+
 const kpiEventsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
@@ -27,8 +30,8 @@ const kpiEventsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 0,
@@ -46,34 +49,34 @@ const kpiEventsTests: KbnTestProvider = ({ getService }) => {
           expect(events.kpiEventType!.length).to.be(5);
 
           const userLogin: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
-            value: 'user_login',
+            value: 'existing_package',
           }) as GetKpiEventsQuery.KpiEventType;
-          expect(userLogin.value).to.be('user_login');
-          expect(userLogin.count).to.be(12);
+          expect(userLogin.value).to.be('existing_package');
+          expect(userLogin.count).to.be(1244);
 
           const userErr: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
-            value: 'user_err',
+            value: 'existing_process',
           }) as GetKpiEventsQuery.KpiEventType;
-          expect(userErr.value).to.be('user_err');
-          expect(userErr.count).to.be(7);
+          expect(userErr.value).to.be('existing_process');
+          expect(userErr.count).to.be(153);
 
           const userStart: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
-            value: 'user_start',
+            value: 'logged-in',
           }) as GetKpiEventsQuery.KpiEventType;
-          expect(userStart.value).to.be('user_start');
-          expect(userStart.count).to.be(3);
+          expect(userStart.value).to.be('logged-in');
+          expect(userStart.count).to.be(134);
 
           const credAcq: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
-            value: 'cred_acq',
+            value: 'socket_opened',
           }) as GetKpiEventsQuery.KpiEventType;
-          expect(credAcq.value).to.be('cred_acq');
-          expect(credAcq.count).to.be(1);
+          expect(credAcq.value).to.be('socket_opened');
+          expect(credAcq.count).to.be(25);
 
           const credDisp: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
-            value: 'cred_disp',
+            value: 'error',
           }) as GetKpiEventsQuery.KpiEventType;
-          expect(credDisp.value).to.be('cred_disp');
-          expect(credDisp.count).to.be(1);
+          expect(credDisp.value).to.be('error');
+          expect(credDisp.count).to.be(73);
         });
     });
   });

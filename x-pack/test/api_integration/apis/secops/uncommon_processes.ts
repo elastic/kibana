@@ -10,6 +10,12 @@ import { uncommonProcessesQuery } from '../../../../plugins/secops/public/contai
 import { GetUncommonProcessesQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
 
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+
+// typical values that have to change after an update from "scripts/es_archiver"
+const TOTAL_COUNT = 80;
+
 const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
@@ -29,8 +35,8 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           sourceId: 'default',
           timerange: {
             interval: '12h',
-            to: 1546554465535,
-            from: 1483306065535,
+            to: TO,
+            from: FROM,
           },
           pagination: {
             limit: 1,
@@ -51,8 +57,8 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           sourceId: 'default',
           timerange: {
             interval: '12h',
-            to: 1546554465535,
-            from: 1483306065535,
+            to: TO,
+            from: FROM,
           },
           pagination: {
             limit: 2,
@@ -73,15 +79,15 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           sourceId: 'default',
           timerange: {
             interval: '12h',
-            to: 1546554465535,
-            from: 1483306065535,
+            to: TO,
+            from: FROM,
           },
           pagination: {
             limit: 1,
           },
         },
       });
-      expect(UncommonProcesses.totalCount).to.be(6);
+      expect(UncommonProcesses.totalCount).to.be(TOTAL_COUNT);
     });
 
     it('should return a single data set with pagination of 1', async () => {
@@ -95,8 +101,8 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           sourceId: 'default',
           timerange: {
             interval: '12h',
-            to: 1546554465535,
-            from: 1483306065535,
+            to: TO,
+            from: FROM,
           },
           pagination: {
             limit: 1,
@@ -104,22 +110,26 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
         },
       });
       const expected: GetUncommonProcessesQuery.Node = {
-        _id: 'MD2CEWgBiyhPd5Zo9kC_',
-        instances: 2,
+        _id: 'Ax5CB2kBR346wHgnUJ1s',
+        instances: 1,
+        process: {
+          title: null,
+          name: 'Suricata-Main',
+          __typename: 'ProcessEcsFields',
+        },
+        user: {
+          id: 0,
+          name: 'root',
+          __typename: 'UserEcsFields',
+        },
         host: [
           {
-            id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-            name: 'siem-kibana',
+            id: '8cc95778cce5407c809480e8e32ad76b',
+            name: 'suricata-zeek-sensor-toronto',
             __typename: 'HostEcsFields',
           },
         ],
         __typename: 'UncommonProcessItem',
-        process: {
-          __typename: 'ProcessEcsFields',
-          name: 'sshd',
-          title: null,
-        },
-        user: { id: 0, name: 'root', __typename: 'UserEcsFields' },
       };
       expect(UncommonProcesses.edges[0].node).to.eql(expected);
     });

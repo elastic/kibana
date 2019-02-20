@@ -5,10 +5,18 @@
  */
 
 import expect from 'expect.js';
+
 import { authenticationsQuery } from '../../../../plugins/secops/public/containers/authentications/index.gql_query';
 import { GetAuthenticationsQuery } from '../../../../plugins/secops/public/graphql/types';
-
 import { KbnTestProvider } from './types';
+
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+
+// typical values that have to change after an update from "scripts/es_archiver"
+const HOST_NAME = 'suricata-sensor-amsterdam';
+const TOTAL_COUNT = 3;
+const EDGE_LENGTH = 1;
 
 const authenticationsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -26,8 +34,8 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 1,
@@ -37,8 +45,8 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const authentications = resp.data.source.Authentications;
-          expect(authentications.edges.length).to.be(1);
-          expect(authentications.totalCount).to.be(2);
+          expect(authentications.edges.length).to.be(EDGE_LENGTH);
+          expect(authentications.totalCount).to.be(TOTAL_COUNT);
           expect(authentications.pageInfo.endCursor!.value).to.equal('1');
         });
     });
@@ -51,8 +59,8 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 2,
@@ -63,9 +71,9 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const authentications = resp.data.source.Authentications;
 
-          expect(authentications.edges.length).to.be(1);
-          expect(authentications.totalCount).to.be(2);
-          expect(authentications.edges[0]!.node.lastFailure!.host!.name).to.be('siem-kibana');
+          expect(authentications.edges.length).to.be(EDGE_LENGTH);
+          expect(authentications.totalCount).to.be(TOTAL_COUNT);
+          expect(authentications.edges[0]!.node.lastFailure!.host!.name).to.be(HOST_NAME);
         });
     });
   });

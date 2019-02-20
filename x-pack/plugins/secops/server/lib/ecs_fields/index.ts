@@ -31,7 +31,7 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
   'process.ppid': 'process.ppid',
   'process.args': 'process.args',
   // NOTE: This mapping will change soon within auditbeats and then we can change this to be process.executable
-  'process.executable': 'process.exe',
+  'process.executable': 'process.executable',
   'process.title': 'process.title',
   'process.thread': 'process.thread',
   'process.working_directory': 'process.working_directory',

@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+
 import {
   GetHostsTableQuery,
   GetHostSummaryQuery,
@@ -12,6 +13,15 @@ import {
 import { HostSummaryQuery } from './../../../../plugins/secops/public/containers/hosts/host_summary.gql_query';
 import { HostsTableQuery } from './../../../../plugins/secops/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
+
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+
+// typical values that have to change after an update from "scripts/es_archiver"
+const HOST_NAME = 'Ubuntu';
+const TOTAL_COUNT = 6;
+const EDGE_LENGTH = 1;
+const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
 
 const hostsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -29,8 +39,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 1,
@@ -40,8 +50,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const hosts = resp.data.source.Hosts;
-          expect(hosts.edges.length).to.be(1);
-          expect(hosts.totalCount).to.be(2);
+          expect(hosts.edges.length).to.be(EDGE_LENGTH);
+          expect(hosts.totalCount).to.be(TOTAL_COUNT);
           expect(hosts.pageInfo.endCursor!.value).to.equal('1');
         });
     });
@@ -54,8 +64,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 2,
@@ -66,27 +76,27 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const hosts = resp.data.source.Hosts;
 
-          expect(hosts.edges.length).to.be(1);
-          expect(hosts.totalCount).to.be(2);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.be('Debian GNU/Linux');
+          expect(hosts.edges.length).to.be(EDGE_LENGTH);
+          expect(hosts.totalCount).to.be(TOTAL_COUNT);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.be(HOST_NAME);
         });
     });
 
     it('Make sure that we get Host Summary data', () => {
       const expectedHost: GetHostSummaryQuery.Host = {
         architecture: 'x86_64',
-        id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-        ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
-        mac: ['42:01:0a:8e:00:07'],
-        name: 'siem-kibana',
+        id: CURSOR_ID,
+        ip: null,
+        mac: null,
+        name: 'zeek-sensor-san-francisco',
         os: {
           family: 'debian',
-          name: 'Debian GNU/Linux',
-          platform: 'debian',
-          version: '9 (stretch)',
+          name: HOST_NAME,
+          platform: 'ubuntu',
+          version: '18.04.2 LTS (Bionic Beaver)',
           __typename: 'OsEcsFields',
         },
-        type: 'projects/189716325846/machineTypes/n1-standard-1',
+        type: null,
         __typename: 'HostEcsFields',
       };
 
@@ -97,8 +107,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 1,
@@ -106,15 +116,15 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             },
             filterQuery: JSON.stringify({
               term: {
-                'host.id': 'aa7ca589f1b8220002f2fc61c64cfbf1',
+                'host.id': CURSOR_ID,
               },
             }),
           },
         })
         .then(resp => {
           const hosts = resp.data.source.Hosts;
-          expect(hosts.edges.length).to.be(1);
-          expect(hosts.totalCount).to.be(1);
+          expect(hosts.edges.length).to.be(EDGE_LENGTH);
+          expect(hosts.totalCount).to.be(EDGE_LENGTH);
           expect(hosts.edges[0]!.node!.host!).to.eql(expectedHost);
         });
     });

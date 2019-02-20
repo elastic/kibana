@@ -5,10 +5,19 @@
  */
 
 import expect from 'expect.js';
+
 import { eventsQuery } from '../../../../plugins/secops/public/containers/events/index.gql_query';
 import { GetEventsQuery } from '../../../../plugins/secops/public/graphql/types';
-
 import { KbnTestProvider } from './types';
+
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+
+// typical values that have to change after an update from "scripts/es_archiver"
+const HOST_NAME = 'suricata-sensor-amsterdam';
+const TOTAL_COUNT = 1747;
+const EDGE_LENGTH = 2;
+const CURSOR_ID = '1550608953561';
 
 const eventsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -26,8 +35,8 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 2,
@@ -42,9 +51,9 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const events = resp.data.source.Events;
-          expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(586);
-          expect(events.pageInfo.endCursor!.value).to.equal('1546510126039');
+          expect(events.edges.length).to.be(EDGE_LENGTH);
+          expect(events.totalCount).to.be(TOTAL_COUNT);
+          expect(events.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
         });
     });
 
@@ -56,12 +65,12 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             sourceId: 'default',
             timerange: {
               interval: '12h',
-              to: 1546554465535,
-              from: 1483306065535,
+              to: TO,
+              from: FROM,
             },
             pagination: {
               limit: 2,
-              cursor: '1546510126039',
+              cursor: CURSOR_ID,
               tiebreaker: '193',
             },
             sortField: {
@@ -73,9 +82,9 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const events = resp.data.source.Events;
 
-          expect(events.edges.length).to.be(2);
-          expect(events.totalCount).to.be(586);
-          expect(events.edges[0]!.node.host!.name).to.be('siem-kibana');
+          expect(events.edges.length).to.be(EDGE_LENGTH);
+          expect(events.totalCount).to.be(TOTAL_COUNT);
+          expect(events.edges[0]!.node.host!.name).to.be(HOST_NAME);
         });
     });
   });
