@@ -47,12 +47,12 @@ export class LeftInnerJoin {
   }
 
   joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this.getJoinFields();
+    const joinFields = this._rightSource.getMetricFields();
     featureCollection.features.forEach(feature => {
       // Clean up old join property values
-      joinFields.forEach(({ name }) => {
-        delete feature.properties[name];
-        const stylePropertyName = VectorStyle.getComputedFieldName(name);
+      joinFields.forEach(({ propertyKey }) => {
+        delete feature.properties[propertyKey];
+        const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
         delete feature.properties[stylePropertyName];
       });
 
