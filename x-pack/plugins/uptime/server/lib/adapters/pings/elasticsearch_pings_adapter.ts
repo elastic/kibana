@@ -79,7 +79,6 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
-      rest_total_hits_as_int: true,
       body: {
         query: {
           bool: {
