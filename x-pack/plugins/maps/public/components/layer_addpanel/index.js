@@ -28,7 +28,7 @@ function mapStateToProps(state = {}) {
 function mapDispatchToProps(dispatch) {
   return {
     closeFlyout: () => {
-      clearTransientLayerStateAndCloseFlyout();
+      dispatch(clearTransientLayerStateAndCloseFlyout());
     },
     previewLayer: layer => {
       dispatch(addLayer(layer.toLayerDescriptor()));
