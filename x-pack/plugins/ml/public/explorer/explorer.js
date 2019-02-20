@@ -401,8 +401,6 @@ export const Explorer = injectI18n(
           return;
         }
 
-        this.loadOverallDataPreviousArgs = compareArgs;
-
         if (showLoadingIndicator) {
           this.setState({ hasResults: false, loading: true });
         }
@@ -442,6 +440,7 @@ export const Explorer = injectI18n(
             searchBounds,
             interval.asSeconds(),
           );
+          this.loadOverallDataPreviousArgs = compareArgs;
           this.loadOverallDataPreviousData = overallSwimlaneData;
 
           console.log('Explorer overall swimlane data set:', overallSwimlaneData);

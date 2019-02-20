@@ -13,7 +13,7 @@ import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 
 import App from './app';
-import { BASE_PATH } from "../common/constants/base_path";
+import { BASE_PATH } from '../common/constants/base_path';
 
 import routes from 'ui/routes';
 import { XPackInfoProvider as xpackInfoProvider } from 'plugins/xpack_main/services/xpack_info';

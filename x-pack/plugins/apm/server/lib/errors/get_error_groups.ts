@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchParams } from 'elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import {
@@ -15,6 +16,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 interface ErrorResponseItems {
@@ -41,7 +43,7 @@ export async function getErrorGroups({
 }): Promise<ErrorGroupListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params: any = {
+  const params: SearchParams = {
     index: config.get<string>('apm_oss.errorIndices'),
     body: {
       size: 0,
@@ -50,15 +52,7 @@ export async function getErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
+            { range: rangeFilter(start, end) }
           ]
         }
       },

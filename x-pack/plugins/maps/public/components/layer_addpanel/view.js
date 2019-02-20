@@ -23,18 +23,13 @@ import {
 
 export class AddLayerPanel extends Component {
 
-  constructor() {
-    super();
-
-    this.state = {
-      sourceType: null,
-    };
+  state = {
+    sourceType: null,
   }
 
   _previewLayer = (source) => {
-    this.layer = source.createDefaultLayer({
-      temporary: true,
-    });
+    const options = { temporary: true };
+    this.layer = source.createDefaultLayer(options, this.props.mapColors);
     this.props.previewLayer(this.layer);
   };
 
@@ -108,7 +103,8 @@ export class AddLayerPanel extends Component {
 
   _renderSourceEditor() {
     const editorProperties = {
-      onPreviewSource: this._previewLayer
+      onPreviewSource: this._previewLayer,
+      inspectorAdapters: this.props.inspectorAdapters,
     };
 
     const Source = ALL_SOURCES.find((Source) => {
