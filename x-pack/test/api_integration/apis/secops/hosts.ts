@@ -14,9 +14,10 @@ import { HostSummaryQuery } from './../../../../plugins/secops/public/containers
 import { HostsTableQuery } from './../../../../plugins/secops/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
 
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+
 // typical values that have to change after an update from "scripts/es_archiver"
-const FROM = new Date('2019-02-19T00:00:00.000Z').valueOf();
-const TO = new Date('2019-02-19T20:00:00.000Z').valueOf();
 const HOST_NAME = 'Ubuntu';
 const TOTAL_COUNT = 6;
 const EDGE_LENGTH = 1;
@@ -75,7 +76,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         .then(resp => {
           const hosts = resp.data.source.Hosts;
 
-          expect(hosts.edges.length).to.be(2);
+          expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
           expect(hosts.edges[0]!.node.host!.os!.name).to.be(HOST_NAME);
         });

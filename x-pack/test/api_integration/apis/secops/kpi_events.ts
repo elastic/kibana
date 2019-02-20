@@ -11,9 +11,8 @@ import { kpiEventsQuery } from '../../../../plugins/secops/public/containers/kpi
 import { GetKpiEventsQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
 
-// typical values that have to change after an update from "scripts/es_archiver"
-const FROM = new Date('2019-02-19T00:00:00.000Z').valueOf();
-const TO = new Date('2019-02-19T20:00:00.000Z').valueOf();
+const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
 const kpiEventsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -65,19 +64,19 @@ const kpiEventsTests: KbnTestProvider = ({ getService }) => {
             value: 'logged-in',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(userStart.value).to.be('logged-in');
-          expect(userStart.count).to.be(26);
+          expect(userStart.count).to.be(134);
 
           const credAcq: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
-            value: 'existing_socket',
+            value: 'socket_opened',
           }) as GetKpiEventsQuery.KpiEventType;
-          expect(credAcq.value).to.be('existing_socket');
-          expect(credAcq.count).to.be(16);
+          expect(credAcq.value).to.be('socket_opened');
+          expect(credAcq.count).to.be(25);
 
           const credDisp: GetKpiEventsQuery.KpiEventType = find(events.kpiEventType!, {
             value: 'error',
           }) as GetKpiEventsQuery.KpiEventType;
           expect(credDisp.value).to.be('error');
-          expect(credDisp.count).to.be(14);
+          expect(credDisp.count).to.be(73);
         });
     });
   });

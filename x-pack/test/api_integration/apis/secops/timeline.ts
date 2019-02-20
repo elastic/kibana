@@ -5,18 +5,19 @@
  */
 
 import expect from 'expect.js';
+
 import { timelineQuery } from '../../../../plugins/secops/public/containers/timeline/index.gql_query';
 import { GetTimelineQuery } from '../../../../plugins/secops/public/graphql/types';
-
 import { KbnTestProvider } from './types';
+
+const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();
+const GTE = new Date('2000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const HOST_NAME = 'suricata-sensor-amsterdam';
-const TOTAL_COUNT = 18;
+const TOTAL_COUNT = 96;
 const EDGE_LENGTH = 2;
-const CURSOR_ID = '1550605006333';
-const LTE = new Date('2019-02-19T20:00:00.000Z').valueOf();
-const GTE = new Date('2019-02-19T00:00:00.000Z').valueOf();
+const CURSOR_ID = '1550608949681';
 
 const FILTER_VALUE = {
   bool: {
