@@ -78,5 +78,4 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     const args = savedObjectsClient.get.getCall(0).args;
     expect(args).toEqual(['index-pattern', 'logstash-*']);
   });
-
 });
