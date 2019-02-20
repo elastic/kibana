@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function filterPropertiesForTooltip(fields, properties) {
+export function filterPropertiesForTooltip(metricFields, properties) {
   const tooltipProps = {};
-  fields.forEach((field) => {
+  metricFields.forEach((field) => {
     for (const key in properties) {
       if (properties.hasOwnProperty(key)) {
-        if (field.name === key) {
-          tooltipProps[field.label] = properties[key];
+        if (field.propertyKey === key) {
+          tooltipProps[field.propertyLabel] = properties[key];
         }
       }
     }

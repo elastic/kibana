@@ -79,8 +79,8 @@ export class LeftInnerJoin {
   }
 
   filterAndFormatPropertiesForTooltip(properties) {
-    const joinFields = this.getJoinFields();
-    return filterPropertiesForTooltip(joinFields, properties);
+    const metricFields = this._rightSource.getMetricFields();
+    return filterPropertiesForTooltip(metricFields, properties);
 
   }
 

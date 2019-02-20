@@ -288,9 +288,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatProperties(properties) {
-    const metricFields = this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
+    const metricFields = this.getMetricFields();
     return filterPropertiesForTooltip(metricFields, properties);
 
   }
