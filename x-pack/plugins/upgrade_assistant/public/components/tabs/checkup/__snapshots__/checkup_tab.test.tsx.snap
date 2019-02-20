@@ -47,7 +47,7 @@ exports[`CheckupTab render with deprecations 1`] = `
           Object {
             "snapshotRestoreDocsButton": <EuiLink
               color="primary"
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/modules-snapshots.html"
               target="_blank"
               type="button"
             >
@@ -343,7 +343,7 @@ exports[`CheckupTab render with error 1`] = `
           Object {
             "snapshotRestoreDocsButton": <EuiLink
               color="primary"
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/modules-snapshots.html"
               target="_blank"
               type="button"
             >
@@ -420,7 +420,7 @@ exports[`CheckupTab render without deprecations 1`] = `
           Object {
             "snapshotRestoreDocsButton": <EuiLink
               color="primary"
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/modules-snapshots.html"
               target="_blank"
               type="button"
             >

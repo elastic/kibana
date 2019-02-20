@@ -116,7 +116,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
                   values={{
                     snapshotRestoreDocsButton: (
                       <EuiLink
-                        href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+                        href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/modules-snapshots.html"
                         target="_blank"
                       >
                         <FormattedMessage
