@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { spawn } from 'child_process';
-import { chmodSync } from 'fs';
+import { execFile, spawn } from 'child_process';
+import { chmodSync, existsSync } from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -94,27 +94,39 @@ export class JavaLauncher implements ILanguageServerLauncher {
     }
 
     let config = 'config_mac';
+    let bundledJavaHome = `${findJDK('osx')}/Contents/Home`;
     let javaPath = 'java';
     let javaHomePath = '';
     // detect platform
     switch (getOsPlatform()) {
       case 'darwin':
-        javaHomePath = `${findJDK('osx')}/Contents/Home`;
-        javaPath = path.resolve(`${javaHomePath}`, 'bin', 'java');
         break;
       case 'win32':
-        javaHomePath = `${findJDK('windows')}`;
-        javaPath = path.resolve(`${javaHomePath}`, 'bin', 'java.exe');
+        bundledJavaHome = `${findJDK('windows')}`;
         config = 'config_win';
         break;
       case 'linux':
-        javaHomePath = `${findJDK('linux')}`;
-        javaPath = path.resolve(`${javaHomePath}`, 'bin', 'java');
+        bundledJavaHome = `${findJDK('linux')}`;
         config = 'config_linux';
         break;
       default:
         log.error('Unable to find platform for this os');
     }
+
+    if (this.getSystemJavaHome()) {
+      javaHomePath = this.getSystemJavaHome();
+      if (!this.checkJavaVersion(javaHomePath)) {
+        javaHomePath = '';
+      }
+    }
+    if (javaHomePath === '') {
+      javaHomePath = bundledJavaHome;
+    }
+    javaPath = path.resolve(
+      javaHomePath,
+      'bin',
+      process.platform === 'win32' ? 'java.exe' : 'java'
+    );
 
     chmodSync(path.dirname(javaPath), '755');
 
@@ -159,5 +171,72 @@ export class JavaLauncher implements ILanguageServerLauncher {
       }`
     );
     return p;
+  }
+
+  // TODO(pcxu): run /usr/libexec/java_home to get all java homes for macOS
+  private getSystemJavaHome(): string {
+    let javaHome = process.env.JDK_HOME;
+    if (!javaHome) {
+      javaHome = process.env.JAVA_HOME;
+    }
+    if (javaHome) {
+      javaHome = this.expandHomeDir(javaHome);
+      const JAVAC_FILENAME = 'javac' + (process.platform === 'win32' ? '.exe' : '');
+      if (existsSync(javaHome) && existsSync(path.resolve(javaHome, 'bin', JAVAC_FILENAME))) {
+        return javaHome;
+      }
+    }
+    return '';
+  }
+
+  private checkJavaVersion(javaHome: string): boolean {
+    execFile(
+      path.resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java'),
+      ['-version'],
+      {},
+      (error, stdout, stderr) => {
+        const javaVersion = this.parseMajorVersion(stderr);
+        if (javaVersion < 8) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    );
+    return false;
+  }
+
+  private parseMajorVersion(content: string): number {
+    let regexp = /version "(.*)"/g;
+    let match = regexp.exec(content);
+    if (!match) {
+      return 0;
+    }
+    let version = match[1];
+    if (version.startsWith('1.')) {
+      version = version.substring(2);
+    }
+
+    regexp = /\d+/g;
+    match = regexp.exec(version);
+    let javaVersion = 0;
+    if (match) {
+      javaVersion = parseInt(match[0], 10);
+    }
+    return javaVersion;
+  }
+
+  private expandHomeDir(javaHome: string): string {
+    const homeDir = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+    if (!javaHome) {
+      return javaHome;
+    }
+    if (javaHome === '~') {
+      return homeDir!;
+    }
+    if (javaHome.slice(0, 2) !== '~/') {
+      return javaHome;
+    }
+    return path.join(homeDir!, javaHome.slice(2));
   }
 }
