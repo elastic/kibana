@@ -12,10 +12,13 @@
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiSelect,
 } from '@elastic/eui';
+
+import { injectObservablesAsProps } from '../../util/observable_utils';
 
 const optionsMap = {
   '5': 5,
@@ -43,49 +46,25 @@ function optionValueToLimit(value) {
   return limit;
 }
 
-// This service will be populated by the corresponding angularjs based one.
-export const mlSelectLimitService = {
-  initialized: false,
-  state: null
-};
+export const limit$ = new BehaviorSubject(LIMIT_OPTIONS[1]);
 
-class SelectLimit extends Component {
+class SelectLimitUnwrapped extends Component {
   constructor(props) {
     super(props);
-
-    // Restore the limit from the state, or default to 10.
-    if (mlSelectLimitService.initialized) {
-      this.mlSelectLimitService = mlSelectLimitService;
-    }
-
-    this.state = {
-      valueDisplay: LIMIT_OPTIONS[1].display,
-    };
   }
 
   componentDidMount() {
-    // set initial state from service if available
-    if (this.mlSelectLimitService !== undefined) {
-      const limitState = this.mlSelectLimitService.state.get('limit');
-      const limitValue = get(limitState, 'val', 10);
-      const limit = optionValueToLimit(limitValue);
-      // set initial selected option equal to limit value
-      const selectedOption = LIMIT_OPTIONS.find(opt => (opt.val === limit.val));
-      this.mlSelectLimitService.state.set('limit', limit);
-      this.setState({ valueDisplay: selectedOption.display, });
-    }
+    const limitState = limit$.getValue();
+    const limitValue = get(limitState, 'val', 10);
+    const limit = optionValueToLimit(limitValue);
+    // set initial selected option equal to limit value
+    limit$.next(limit);
   }
 
   onChange = (e) => {
     const valueDisplay = e.target.value;
-    this.setState({ valueDisplay });
     const limit = optionValueToLimit(optionsMap[valueDisplay]);
-
-    if (this.mlSelectLimitService !== undefined) {
-      this.mlSelectLimitService.state.set('limit', limit).changed();
-    } else {
-      this.props.onChangeHandler(limit);
-    }
+    limit$.next(limit);
   }
 
   getOptions = () =>
@@ -99,18 +78,22 @@ class SelectLimit extends Component {
       <EuiSelect
         options={this.getOptions()}
         onChange={this.onChange}
-        value={this.state.valueDisplay}
+        value={this.props.limit.display}
       />
     );
   }
 }
 
-SelectLimit.propTypes = {
-  onChangeHandler: PropTypes.func,
+SelectLimitUnwrapped.propTypes = {
+  limit: PropTypes.object,
 };
 
-SelectLimit.defaultProps = {
-  onChangeHandler: () => {},
+SelectLimitUnwrapped.defaultProps = {
+  limit: LIMIT_OPTIONS[1],
 };
+
+const SelectLimit = injectObservablesAsProps({
+  limit: limit$
+}, SelectLimitUnwrapped);
 
 export { SelectLimit };

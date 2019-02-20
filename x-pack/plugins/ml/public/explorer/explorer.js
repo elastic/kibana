@@ -40,7 +40,7 @@ import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
 import { SelectInterval, mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
-import { SelectLimit, mlSelectLimitService } from './select_limit/select_limit';
+import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
 import { injectObservablesAsProps } from '../util/observable_utils';
 
@@ -113,7 +113,10 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 }
 
 export const Explorer = injectI18n(injectObservablesAsProps(
-  { showCharts: showCharts$ },
+  {
+    limit: limit$,
+    showCharts: showCharts$
+  },
   class Explorer extends React.Component {
     static propTypes = {
       appStateHandler: PropTypes.func.isRequired,
@@ -253,6 +256,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (action === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
         }
+      });
+
+      this.limitSub = limit$.subscribe(() => {
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        this.updateExplorer(getClearedSelectedAnomaliesState(), false);
       });
 
       this.chartsSeveritySub = mlSelectSeverityService.state.watch(() => {
@@ -428,7 +436,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     loadViewBySwimlanePreviousArgs = null;
     loadViewBySwimlanePreviousData = null;
     loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName) {
-      const limit = mlSelectLimitService.state.get('limit');
+      const limit = this.props.limit;
       const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
       const compareArgs = {
@@ -531,7 +539,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     topFieldsPreviousData = null;
     loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
-      const limit = mlSelectLimitService.state.get('limit');
+      const limit = this.props.limit;
       const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
       const compareArgs = {

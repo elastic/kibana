@@ -15,6 +15,9 @@ import { showCharts$ } from './checkbox_showcharts';
 
 const APP_STATE_NAME = 'mlCheckboxShowCharts';
 
+// This service should not be consumed anywhere, it's main purpose is to
+// restore an eventual state from the URL and pass that on the observable
+// and then subscribe to changes to the observable to update the URL again.
 module.service('mlCheckboxShowChartsService', function (AppState, $rootScope) {
   const appState = initializeAppState(AppState, APP_STATE_NAME, {
     showCharts: showCharts$.getValue()
