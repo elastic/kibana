@@ -25,7 +25,7 @@ const originalPanelData = {
   embeddableConfig: {},
   gridData: {
     h: 0,
-    id: '0',
+    i: '0',
     w: 0,
     x: 0,
     y: 0,
@@ -47,7 +47,7 @@ describe('UpdatePanel', () => {
       ...originalPanelData,
       gridData: {
         h: 1,
-        id: '1',
+        i: '1',
         w: 10,
         x: 1,
         y: 5,
@@ -60,7 +60,7 @@ describe('UpdatePanel', () => {
     expect(panel.gridData.y).toBe(5);
     expect(panel.gridData.w).toBe(10);
     expect(panel.gridData.h).toBe(1);
-    expect(panel.gridData.id).toBe('1');
+    expect(panel.gridData.i).toBe('1');
   });
 
   test('should allow updating an array that contains fewer values', () => {

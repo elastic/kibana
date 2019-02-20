@@ -29,11 +29,12 @@ import {
   EmbeddableMetadata,
   EmbeddableState,
 } from 'ui/embeddable';
+import { EmbeddableErrorAction } from '../actions';
 import { PanelState } from '../selectors';
 import { PanelError } from './panel_error';
 import { PanelHeader } from './panel_header';
 
-interface DashboardPanelUiProps {
+export interface DashboardPanelUiProps {
   viewOnlyMode: boolean;
   onPanelFocused?: (panel: string) => {};
   onPanelBlurred?: (panel: string) => {};
@@ -41,10 +42,10 @@ interface DashboardPanelUiProps {
   destroy: () => void;
   containerState: ContainerState;
   embeddableFactory: EmbeddableFactory;
-  lastReloadRequestTime: number;
+  lastReloadRequestTime?: number;
   embeddableStateChanged: (embeddableStateChanges: EmbeddableState) => {};
   embeddableIsInitialized: (embeddableIsInitializing: EmbeddableMetadata) => void;
-  embeddableError: (args0: string) => {};
+  embeddableError: (errorMessage: EmbeddableErrorAction) => void;
   embeddableIsInitializing: () => void;
   initialized: boolean;
   panel: PanelState;
@@ -99,7 +100,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
             embeddable.destroy();
           }
         })
-        .catch((error: { message: string }) => {
+        .catch((error: { message: EmbeddableErrorAction }) => {
           if (this.mounted) {
             embeddableError(error.message);
           }

@@ -19,11 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanel } from './dashboard_panel';
-
+import { Action } from 'redux-actions';
 import { ThunkDispatch } from 'redux-thunk';
-
 import {
   ContainerState,
   EmbeddableFactory,
@@ -31,8 +28,6 @@ import {
   EmbeddableState,
 } from 'ui/embeddable';
 import { CoreKibanaState } from '../../selectors';
-
-import { Action } from 'redux-actions';
 import {
   deletePanel,
   embeddableError,
@@ -41,6 +36,7 @@ import {
   embeddableIsInitializing,
   embeddableStateChanged,
 } from '../actions';
+import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   getContainerState,
   getEmbeddable,
@@ -53,16 +49,28 @@ import {
   PanelId,
   PanelState,
 } from '../selectors';
+import { DashboardPanel } from './dashboard_panel';
 
-interface DashboardPanelContainerOwnProps {
+export interface DashboardPanelContainerOwnProps {
   panelId: string | PanelId;
   embeddableFactory: EmbeddableFactory;
-  error: string | object;
+}
+
+interface DashboardPanelContainerStateProps {
+  error?: string | object;
   viewOnlyMode: boolean;
   containerState: ContainerState;
   initialized: boolean;
   panel: PanelState;
-  mounted: boolean;
+  lastReloadRequestTime: number;
+}
+
+export interface DashboardPanelContainerDispatchProps {
+  destroy: () => void;
+  embeddableIsInitializing: () => void;
+  embeddableIsInitialized: (metadata: EmbeddableMetadata) => void;
+  embeddableStateChanged: (embeddableState: EmbeddableState) => void;
+  embeddableError: (errorMessage: EmbeddableErrorAction) => void;
 }
 
 const mapStateToProps = (
@@ -98,7 +106,7 @@ const mapDispatchToProps = (
   { panelId }: DashboardPanelContainerOwnProps,
   {},
   {}
-) => ({
+): DashboardPanelContainerDispatchProps => ({
   destroy: () => dispatch(deletePanel(panelId)),
   embeddableIsInitializing: () => dispatch(embeddableIsInitializing(panelId)),
   embeddableIsInitialized: (metadata: EmbeddableMetadata) =>
@@ -110,8 +118,8 @@ const mapDispatchToProps = (
 });
 
 export const DashboardPanelContainer = connect<
-  {},
-  {},
+  DashboardPanelContainerStateProps,
+  DashboardPanelContainerDispatchProps,
   DashboardPanelContainerOwnProps,
   CoreKibanaState
 >(
