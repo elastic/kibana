@@ -127,7 +127,6 @@ ElasticsearchConfig {
 
     const mockClusterClientInstance = { close: jest.fn() };
     MockClusterClient.mockImplementation(() => mockClusterClientInstance);
-    MockClusterClient.mockClear();
 
     const mockConfig = { logQueries: true };
     const clusterClient = startContract.createClient('some-custom-type', mockConfig as any);

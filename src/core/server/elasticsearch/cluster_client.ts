@@ -113,15 +113,15 @@ export class ClusterClient {
    * @param clientParams A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options Options that affect the way we call the API and process the result.
    */
-  public async callAsInternalUser(
+  public callAsInternalUser = async (
     endpoint: string,
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
-  ) {
+  ) => {
     this.assertIsNotClosed();
 
     return await callAPI(this.client, endpoint, clientParams, options);
-  }
+  };
 
   /**
    * Closes the cluster client. After that client cannot be used and one should
@@ -168,15 +168,25 @@ export class ClusterClient {
       ? filterHeaders(req.headers, this.config.requestHeadersWhitelist)
       : req.headers;
 
-    return new ScopedClusterClient(
-      (...args) => this.callAsInternalUser(...args),
-      async (...args) => {
-        this.assertIsNotClosed();
-        return await callAPI(this.scopedClient!, ...args);
-      },
-      headers
-    );
+    return new ScopedClusterClient(this.callAsInternalUser, this.callAsCurrentUser, headers);
   }
+
+  /**
+   * Calls specified {@param endpoint} with provided {@param clientParams} on behalf of the
+   * user initiated request to the Kibana server (via HTTP request headers).
+   * @param endpoint String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+   * @param clientParams A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
+   * @param options Options that affect the way we call the API and process the result.
+   */
+  private callAsCurrentUser = async (
+    endpoint: string,
+    clientParams: Record<string, unknown> = {},
+    options?: CallAPIOptions
+  ) => {
+    this.assertIsNotClosed();
+
+    return await callAPI(this.scopedClient!, endpoint, clientParams, options);
+  };
 
   private assertIsNotClosed() {
     if (this.isClosed) {

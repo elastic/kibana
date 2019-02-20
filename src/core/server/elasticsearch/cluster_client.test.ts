@@ -228,11 +228,10 @@ describe('#asScoped', () => {
     } as any;
 
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    jest.clearAllMocks();
   });
 
   test('creates additional Elasticsearch client only once', () => {
-    jest.clearAllMocks();
-
     const firstScopedClusterClient = clusterClient.asScoped({ headers: { one: '1' } });
 
     expect(firstScopedClusterClient).toBeDefined();
@@ -348,10 +347,6 @@ describe('#close', () => {
 
     clusterClient.close();
     expect(mockEsClientInstance.close).toHaveBeenCalledTimes(1);
-    mockEsClientInstance.close.mockClear();
-
-    clusterClient.close();
-    expect(mockEsClientInstance.close).not.toHaveBeenCalled();
   });
 
   test('closes both internal and scoped underlying Elasticsearch clients', () => {
@@ -363,11 +358,17 @@ describe('#close', () => {
     clusterClient.close();
     expect(mockEsClientInstance.close).toHaveBeenCalledTimes(1);
     expect(mockScopedEsClientInstance.close).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not call close on already closed client', () => {
+    clusterClient.asScoped({ headers: { one: '1' } });
+
+    clusterClient.close();
     mockEsClientInstance.close.mockClear();
     mockScopedEsClientInstance.close.mockClear();
 
     clusterClient.close();
     expect(mockEsClientInstance.close).not.toHaveBeenCalled();
-    expect(mockScopedEsClientInstance.close).not.toHaveBeenCalledTimes(1);
+    expect(mockScopedEsClientInstance.close).not.toHaveBeenCalled();
   });
 });

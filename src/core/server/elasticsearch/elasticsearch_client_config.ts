@@ -103,15 +103,15 @@ export function parseElasticsearchClientConfig(
   }
 
   if (config.pingTimeout != null) {
-    esClientConfig.pingTimeout = getDuration(config.pingTimeout);
+    esClientConfig.pingTimeout = getDurationAsMs(config.pingTimeout);
   }
 
   if (config.requestTimeout != null) {
-    esClientConfig.requestTimeout = getDuration(config.requestTimeout);
+    esClientConfig.requestTimeout = getDurationAsMs(config.requestTimeout);
   }
 
   if (config.sniffInterval) {
-    esClientConfig.sniffInterval = getDuration(config.sniffInterval);
+    esClientConfig.sniffInterval = getDurationAsMs(config.sniffInterval);
   }
 
   if (Array.isArray(config.hosts)) {
@@ -140,7 +140,7 @@ export function parseElasticsearchClientConfig(
   }
 
   if (config.ssl === undefined) {
-    return esClientConfig;
+    return cloneDeep(esClientConfig);
   }
 
   esClientConfig.ssl = {};
@@ -183,7 +183,7 @@ export function parseElasticsearchClientConfig(
   return cloneDeep(esClientConfig);
 }
 
-function getDuration(duration: number | Duration) {
+function getDurationAsMs(duration: number | Duration) {
   if (typeof duration === 'number') {
     return duration;
   }
