@@ -61,9 +61,8 @@ export class AbstractESSource extends AbstractVectorSource {
     throw new Error('should implement');
   }
 
-  _formatMetricLabel(metric) {
-    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
+  _formatMetricLabel() {
+    throw new Error('should implement');
   }
 
   getMetricFields() {
