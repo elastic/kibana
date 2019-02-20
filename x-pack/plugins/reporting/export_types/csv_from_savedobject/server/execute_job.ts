@@ -24,7 +24,7 @@ function executeJobFn(server: KbnServer) {
     const { objects, headers, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
     const { isImmediate, panel, visType } = jobParams;
     if (!isImmediate) {
-      const req = { headers }; // FIXME use fake req
+      const req = { headers, server }; // FIXME use fake req
 
       return {
         content_type: CONTENT_TYPE_CSV,
