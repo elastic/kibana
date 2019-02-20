@@ -102,7 +102,7 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__valueTitle--full ~ .visLegend__valueDetails {
-  @include euiTextTruncate;	  z-index: 2; /* 3 */
+  z-index: 2; /* 3 */
 }
 
 .visLegend__valueDetails {
