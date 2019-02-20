@@ -88,6 +88,7 @@ describe('Table Vis Controller', function () {
 
     tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;
+    $rootScope.visParams = vis.params;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
     $rootScope.newScope = function (scope) { $scope = scope; };

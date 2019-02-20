@@ -86,9 +86,10 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
 
-    async  _updateParams(visParams) {
+    async  _updateParams() {
 
-      await super._updateParams(visParams);
+      await super._updateParams();
+      const visParams = this._params;
 
       if (!visParams.selectedJoinField && visParams.selectedLayer) {
         visParams.selectedJoinField = visParams.selectedLayer.fields[0];

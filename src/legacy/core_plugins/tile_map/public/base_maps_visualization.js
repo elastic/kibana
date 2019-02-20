@@ -83,7 +83,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         this._kibanaMap.resize();
       }
       if (status.params || status.aggs) {
-        await this._updateParams(visParams);
+        this._params = visParams;
+        await this._updateParams();
       }
 
       if (this._hasESResponseChanged(esResponse)) {
@@ -220,8 +221,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
     /**
      * called on options change (vis.params change)
      */
-    async _updateParams(visParams) {
-      this._params = visParams;
+    async _updateParams() {
       const mapParams = this._getMapsParams();
       await this._updateBaseLayer();
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
