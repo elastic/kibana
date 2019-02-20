@@ -35,7 +35,7 @@ import { ExplorerSwimlane } from './explorer_swimlane';
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { InfluencersList } from '../components/influencers_list';
-import { mlExplorerDashboardService } from './explorer_dashboard_service';
+import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { CheckboxShowCharts, mlCheckboxShowChartsService } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
@@ -122,16 +122,65 @@ export const Explorer = injectI18n(
 
     state = getExplorerDefaultState();
 
-    // helper to avoid calling `setState()` in the listener for chart updates.
-    _isMounted = false;
-
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     disableDragSelectOnMouseLeave = true;
     // skip listening to clicks on swimlanes while they are loading to avoid race conditions
     skipCellClicks = true;
 
-    updateCharts = explorerChartsContainerServiceFactory((data) => {
-      if (this._isMounted) {
+    // initialize an empty callback, this will be set in componentDidMount()
+    updateCharts = () => {};
+
+    dragSelect = new DragSelect({
+      selectables: document.getElementsByClassName('sl-cell'),
+      callback(elements) {
+        if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
+          elements = [elements[0]];
+        }
+
+        if (elements.length > 0) {
+          dragSelect$.next({
+            action: DRAG_SELECT_ACTION.NEW_SELECTION,
+            elements
+          });
+        }
+
+        this.disableDragSelectOnMouseLeave = true;
+      },
+      onDragStart() {
+        if (ALLOW_CELL_RANGE_SELECTION) {
+          dragSelect$.next({
+            action: DRAG_SELECT_ACTION.DRAG_START
+          });
+          this.disableDragSelectOnMouseLeave = false;
+        }
+      },
+      onElementSelect() {
+        if (ALLOW_CELL_RANGE_SELECTION) {
+          dragSelect$.next({
+            action: DRAG_SELECT_ACTION.ELEMENT_SELECT
+          });
+        }
+      }
+    });
+
+    // Listens to render updates of the swimlanes to update dragSelect
+    swimlaneRenderDoneListener = () => {
+      this.dragSelect.clearSelection();
+      this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
+    };
+
+    // These are observable subscriptions, they get assigned in componentDidMount().
+    // In componentWillUnmount() they will be unsubscribed again.
+    annotationsRefreshSub = null;
+    explorerSub = null;
+    showChartsSub = null;
+    limitSub = null;
+    chartsSeveritySub = null;
+    intervalSub = null;
+    tableSeveritySub = null;
+
+    componentDidMount() {
+      this.updateCharts = explorerChartsContainerServiceFactory((data) => {
         this.setState({
           chartsData: {
             ...getDefaultChartsData(),
@@ -141,180 +190,131 @@ export const Explorer = injectI18n(
             tooManyBuckets: !!data.tooManyBuckets,
           }
         });
-      }
-    });
+      });
 
-    ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
+      this.explorerSub = explorer$.subscribe(({ action, payload = {} }) => {
+        // Listen to the initial loading of jobs
+        if (action === EXPLORER_ACTION.INITIALIZE) {
+          const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
+          let currentSelectedCells = this.state.selectedCells;
+          let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
 
-    dragSelect = new DragSelect({
-      selectables: document.getElementsByClassName('sl-cell'),
-      callback(elements) {
-        if (elements.length > 1 && !this.ALLOW_CELL_RANGE_SELECTION) {
-          elements = [elements[0]];
+          if (selectedCells !== undefined && currentSelectedCells === null) {
+            currentSelectedCells = selectedCells;
+            currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
+          }
+
+          const stateUpdate = {
+            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+            noJobsFound,
+            selectedCells: currentSelectedCells,
+            selectedJobs,
+            swimlaneViewByFieldName: currentSwimlaneViewByFieldName
+          };
+
+          this.updateExplorer(stateUpdate, true);
         }
 
-        if (elements.length > 0) {
-          mlExplorerDashboardService.dragSelect.changed({
-            action: DRAG_SELECT_ACTION.NEW_SELECTION,
-            elements
-          });
+        // Listen for changes to job selection.
+        if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
+          const { selectedJobs } = payload;
+          const stateUpdate = {
+            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+            selectedJobs,
+          };
+
+          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+          Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+
+          if (selectedJobs.length > 1) {
+            this.props.appStateHandler(
+              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+              { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
+            );
+            stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+            // enforce a state update for swimlaneViewByFieldName
+            this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
+              this.updateExplorer(stateUpdate, true);
+            });
+            return;
+          }
+
+          this.updateExplorer(stateUpdate, true);
         }
 
-        this.disableDragSelectOnMouseLeave = true;
-      },
-      onDragStart() {
-        if (this.ALLOW_CELL_RANGE_SELECTION) {
-          mlExplorerDashboardService.dragSelect.changed({
-            action: DRAG_SELECT_ACTION.DRAG_START
-          });
-          this.disableDragSelectOnMouseLeave = false;
-        }
-      },
-      onElementSelect() {
-        if (this.ALLOW_CELL_RANGE_SELECTION) {
-          mlExplorerDashboardService.dragSelect.changed({
-            action: DRAG_SELECT_ACTION.ELEMENT_SELECT
-          });
-        }
-      }
-    });
-
-    dashboardListener = ((action, payload = {}) => {
-      // Listen to the initial loading of jobs
-      if (action === EXPLORER_ACTION.INITIALIZE) {
-        const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
-        let currentSelectedCells = this.state.selectedCells;
-        let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
-
-        if (selectedCells !== undefined && currentSelectedCells === null) {
-          currentSelectedCells = selectedCells;
-          currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
+        // RELOAD reloads full Anomaly Explorer and clears the selection.
+        if (action === EXPLORER_ACTION.RELOAD) {
+          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+          this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
         }
 
-        const stateUpdate = {
-          noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
-          noJobsFound,
-          selectedCells: currentSelectedCells,
-          selectedJobs,
-          swimlaneViewByFieldName: currentSwimlaneViewByFieldName
-        };
-
-        this.updateExplorer(stateUpdate, true);
-      }
-
-      // Listen for changes to job selection.
-      if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-        const { selectedJobs } = payload;
-        const stateUpdate = {
-          noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
-          selectedJobs,
-        };
-
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
-
-        if (selectedJobs.length > 1) {
-          this.props.appStateHandler(
-            APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-            { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
-          );
-          stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-          // enforce a state update for swimlaneViewByFieldName
-          this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
-            this.updateExplorer(stateUpdate, true);
-          });
-          return;
+        // REDRAW reloads Anomaly Explorer and tries to retain the selection.
+        if (action === EXPLORER_ACTION.REDRAW) {
+          this.updateExplorer({}, false);
         }
+      });
 
-        this.updateExplorer(stateUpdate, true);
-      }
+      this.showChartsSub = mlCheckboxShowChartsService.state.watch(() => {
+        const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
+        const { selectedCells, selectedJobs } = this.state;
 
-      // RELOAD reloads full Anomaly Explorer and clears the selection.
-      if (action === EXPLORER_ACTION.RELOAD) {
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
-      }
-
-      // REDRAW reloads Anomaly Explorer and tries to retain the selection.
-      if (action === EXPLORER_ACTION.REDRAW) {
-        this.updateExplorer({}, false);
-      }
-    });
-
-    checkboxShowChartsListener = () => {
-      const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-      const { selectedCells, selectedJobs } = this.state;
-
-      const bounds = timefilter.getActiveBounds();
-      const timerange = getSelectionTimeRange(
-        selectedCells,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-        bounds,
-      );
-
-      if (showCharts && selectedCells !== null) {
-        this.updateCharts(
-          this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-        );
-      } else {
-        this.updateCharts(
-          [], timerange.earliestMs, timerange.latestMs
-        );
-      }
-    };
-
-    anomalyChartsSeverityListener = () => {
-      const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-      const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
-      if (showCharts && selectedCells !== null) {
         const bounds = timefilter.getActiveBounds();
         const timerange = getSelectionTimeRange(
           selectedCells,
           this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
           bounds,
         );
-        this.updateCharts(
-          anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+
+        if (showCharts && selectedCells !== null) {
+          this.updateCharts(
+            this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+          );
+        } else {
+          this.updateCharts(
+            [], timerange.earliestMs, timerange.latestMs
+          );
+        }
+      });
+
+      this.limitSub = mlSelectLimitService.state.watch(() => {
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        this.updateExplorer(getClearedSelectedAnomaliesState(), false);
+      });
+
+      this.chartsSeveritySub = mlSelectSeverityService.state.watch(() => {
+        const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
+        const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
+        if (showCharts && selectedCells !== null) {
+          const bounds = timefilter.getActiveBounds();
+          const timerange = getSelectionTimeRange(
+            selectedCells,
+            this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+            bounds,
+          );
+          this.updateCharts(
+            anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+          );
+        }
+      });
+
+      const tableControlsListener = async () => {
+        const { dateFormatTz } = this.props;
+        const { selectedCells, swimlaneViewByFieldName, selectedJobs } = this.state;
+        const bounds = timefilter.getActiveBounds();
+        const tableData = await loadAnomaliesTableData(
+          selectedCells,
+          selectedJobs,
+          dateFormatTz,
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          bounds,
+          swimlaneViewByFieldName
         );
-      }
-    };
+        this.setState({ tableData });
+      };
 
-    tableControlsListener = async () => {
-      const { dateFormatTz } = this.props;
-      const { selectedCells, swimlaneViewByFieldName, selectedJobs } = this.state;
-      const bounds = timefilter.getActiveBounds();
-      const tableData = await loadAnomaliesTableData(
-        selectedCells,
-        selectedJobs,
-        dateFormatTz,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-        bounds,
-        swimlaneViewByFieldName
-      );
-      this.setState({ tableData });
-    };
+      this.intervalSub = mlSelectIntervalService.state.watch(tableControlsListener);
+      this.tableSeveritySub = mlSelectSeverityService.state.watch(tableControlsListener);
 
-    swimlaneLimitListener = () => {
-      this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-      this.updateExplorer(getClearedSelectedAnomaliesState(), false);
-    };
-
-    // Listens to render updates of the swimlanes to update dragSelect
-    swimlaneRenderDoneListener = () => {
-      this.dragSelect.clearSelection();
-      this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
-    };
-
-    annotationsRefreshSub = null;
-
-    componentDidMount() {
-      this._isMounted = true;
-      mlExplorerDashboardService.explorer.watch(this.dashboardListener);
-      mlCheckboxShowChartsService.state.watch(this.checkboxShowChartsListener);
-      mlSelectLimitService.state.watch(this.swimlaneLimitListener);
-      mlSelectSeverityService.state.watch(this.anomalyChartsSeverityListener);
-      mlSelectIntervalService.state.watch(this.tableControlsListener);
-      mlSelectSeverityService.state.watch(this.tableControlsListener);
       this.annotationsRefreshSub = annotationsRefresh$.subscribe(() => {
         // clear the annotations cache and trigger an update
         this.annotationsTablePreviousArgs = null;
@@ -324,13 +324,12 @@ export const Explorer = injectI18n(
     }
 
     componentWillUnmount() {
-      this._isMounted = false;
-      mlExplorerDashboardService.explorer.unwatch(this.dashboardListener);
-      mlCheckboxShowChartsService.state.unwatch(this.checkboxShowChartsListener);
-      mlSelectLimitService.state.unwatch(this.swimlaneLimitListener);
-      mlSelectSeverityService.state.unwatch(this.anomalyChartsSeverityListener);
-      mlSelectIntervalService.state.unwatch(this.tableControlsListener);
-      mlSelectSeverityService.state.unwatch(this.tableControlsListener);
+      this.explorerSub.unsubscribe();
+      this.showChartsSub.unsubscribe();
+      this.limitSub.unsubscribe();
+      this.chartsSeveritySub.unsubscribe();
+      this.intervalSub.unsubscribe();
+      this.tableSeveritySub.unsubscribe();
       this.annotationsRefreshSub.unsubscribe();
     }
 
