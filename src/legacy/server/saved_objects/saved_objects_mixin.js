@@ -92,7 +92,6 @@ export function savedObjectsMixin(kbnServer, server) {
     });
   };
 
-  // filter hidden types from allTypes by default but add any new types from extraTypes if passed any.
   const provider = new ScopedSavedObjectsClientProvider({
     index: server.config().get('kibana.index'),
     mappings,

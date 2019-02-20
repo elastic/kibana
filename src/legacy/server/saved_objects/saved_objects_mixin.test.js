@@ -90,6 +90,9 @@ describe('Saved Objects Mixin', () => {
       mockKbnServer.pluginSpecs.some = () => false;
       savedObjectsMixin(mockKbnServer, mockServer);
       mockServer.log.calledWithMatch(sinon.match.array, sinon.match.string);
+      mockServer.decorate.calledWithMatch('server', 'kibanaMigrator', sinon.match.object);
+      expect(mockServer.decorate.callCount).toBe(1);
+      expect(mockServer.route.callCount).toBe(0);
     });
   });
 
@@ -142,7 +145,7 @@ describe('Saved Objects Mixin', () => {
       }
     });
 
-    it('should return all types', () => {
+    it('should return all but hidden types', () => {
       expect(service).toBeDefined();
       expect(service.types).toEqual(['config', 'testtype']);
     });
