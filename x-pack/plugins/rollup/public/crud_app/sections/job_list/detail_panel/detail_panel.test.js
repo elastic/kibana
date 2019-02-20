@@ -117,17 +117,12 @@ describe('<DetailPanel />', () => {
       const panelType = JOB_DETAILS_TAB_SUMMARY;
       const { findTestSubject } = initTestBed({ panelType });
       const tabContent = findTestSubject('rollupJobDetailTabContent');
-      const titles = tabContent.find('EuiTitle');
+      const tabSections = tabContent.find('EuiTitle').map(title => title.text());
 
-      const sectionExist = (sectionTitle) => {
-        let doesExist = false;
-        titles.forEach(title => {
-          if (title.text() === sectionTitle) {
-            doesExist = true;
-          }
-        });
-        return doesExist;
-      };
+      it('should have a "Logistics", "Date histogram" and "Stats" section ', () => {
+        const expected = ['Logistics', 'Date histogram', 'Stats'];
+        expect(tabSections).toEqual(expected);
+      });
 
       describe('Logistics section', () => {
         const LOGISTICS_SUBSECTIONS = ['Index pattern', 'Rollup index', 'Cron ', 'Delay'];
@@ -137,10 +132,6 @@ describe('<DetailPanel />', () => {
             title: item.childAt(0).text(),
             description: item.childAt(1).text(),
           }));
-
-        it('should exist', () => {
-          expect(sectionExist('Logistics')).toBeTruthy();
-        });
 
         it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
           expect(logisticsSubSections.map(i => i.title)).toEqual(LOGISTICS_SUBSECTIONS);
@@ -162,6 +153,41 @@ describe('<DetailPanel />', () => {
                 break;
               case 'Rollup index':
                 expect(description).toEqual(defaultJob.rollupIndex);
+                break;
+              default:
+                // Should never get here... if it does a section is missing in the constant
+                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+            }
+          });
+        });
+      });
+
+      describe('Date histogram', () => {
+        const DATE_HISTOGRAMS_SUBSECTIONS = ['Time field', 'Timezone', 'Interval '];
+
+        const dateHistogramSubSections = findTestSubject('rollupJobDetailSummaryDateHistogramItem')
+          .map(item => ({
+            title: item.childAt(0).text(),
+            description: item.childAt(1).text(),
+          }));
+
+        it('should have "Time field", "Timezone", "Interval" subsections', () => {
+          expect(dateHistogramSubSections.map(i => i.title)).toEqual(DATE_HISTOGRAMS_SUBSECTIONS);
+        });
+
+        it('should set the correct job value for each of the subsection', () => {
+          DATE_HISTOGRAMS_SUBSECTIONS.forEach((section) => {
+            const { description } = dateHistogramSubSections.find(({ title }) => title === section);
+
+            switch(section) {
+              case 'Time field':
+                expect(description).toEqual(defaultJob.dateHistogramField);
+                break;
+              case 'Interval ':
+                expect(description).toEqual(defaultJob.dateHistogramInterval);
+                break;
+              case 'Timezone':
+                expect(description).toEqual(defaultJob.dateHistogramTimeZone);
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant

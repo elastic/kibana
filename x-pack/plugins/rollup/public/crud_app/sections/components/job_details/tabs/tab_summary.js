@@ -236,7 +236,7 @@ export class TabSummary extends Component {
 
         <EuiDescriptionList textStyle="reverse">
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="rollupJobDetailSummaryDateHistogramItem">
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.rollupJobs.jobDetails.tabSummary.itemTimeFieldLabel"
@@ -249,7 +249,7 @@ export class TabSummary extends Component {
               </EuiDescriptionListDescription>
             </EuiFlexItem>
 
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="rollupJobDetailSummaryDateHistogramItem">
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.rollupJobs.jobDetails.tabSummary.itemTimezoneLabel"
@@ -264,7 +264,7 @@ export class TabSummary extends Component {
           </EuiFlexGroup>
 
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="rollupJobDetailSummaryDateHistogramItem">
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalLabel"
