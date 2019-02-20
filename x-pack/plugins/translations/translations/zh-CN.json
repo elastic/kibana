@@ -3458,7 +3458,7 @@
     "xpack.apm.servicesTable.transactionsPerMinuteColumnLabel": "每分钟事务数",
     "xpack.apm.servicesTable.transactionsPerMinuteUnitLabel": "tpm",
     "xpack.apm.setupInstructionsButtonLabel": "设置说明",
-    "xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel": "{stackframesLength} 库框架",
+    "xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel": "{count} 库框架",
     "xpack.apm.stacktraceTab.localVariablesToogleButtonLabel": "本地变量",
     "xpack.apm.stacktraceTab.noStacktraceAvailableLabel": "没有可用的堆栈追溯信息。",
     "xpack.apm.topNav.apmFeedbackDescription": "APM 反馈",
