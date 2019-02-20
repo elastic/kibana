@@ -29,3 +29,9 @@ cd "$XPACK_DIR"
 node scripts/jest --ci --no-cache --verbose
 echo ""
 echo ""
+
+echo " -> Running jest integration tests"
+cd "$XPACK_DIR"
+node scripts/jest_integration --ci --no-cache --verbose
+echo ""
+echo ""

@@ -31,7 +31,7 @@ export const hostK8sPodCap: InfraMetricModelCreator = (timeField, indexPattern, 
       id: 'used',
       metrics: [
         {
-          field: 'kubernetes.pod.name',
+          field: 'kubernetes.pod.uid',
           id: 'avg-pod',
           type: InfraMetricModelMetricType.cardinality,
         },

@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from "./server/routes/api/license/";
+import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from './server/routes/api/license/';
 import { createRouter } from '../../server/lib/create_router';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
 

@@ -59,3 +59,20 @@ is if you are running Kibana in Docker because the container runs in a user name
 ==== `Caught error spawning Chromium`
 Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the user has the execute permission,
 and if applicable, that the filesystem is mounted with the `exec` option.
+
+Another possible reason of such error might be the fact the `headless_shell` binary requires dependencies which are not installed at the operating system level.
+
+.On CentOS/RHEL systems, the following packages should be installed:
+* `ipa-gothic-fonts`
+* `xorg-x11-fonts-100dpi`
+* `xorg-x11-fonts-75dpi`
+* `xorg-x11-utils`
+* `xorg-x11-fonts-cyrillic`
+* `xorg-x11-fonts-Type1`
+* `xorg-x11-fonts-misc`
+* `fontconfig`
+* `freetype`
+
+.On Ubuntu/Debian systems, the following packages should be installed:
+* `fonts-liberation`
+* `libfontconfig1`

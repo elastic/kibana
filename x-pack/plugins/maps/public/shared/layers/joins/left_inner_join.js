@@ -14,9 +14,9 @@ export class LeftInnerJoin {
     return JSON.stringify(descriptor);
   }
 
-  constructor(joinDescriptor) {
+  constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
-    this._rightSource = new ESJoinSource(joinDescriptor.right);
+    this._rightSource = new ESJoinSource(joinDescriptor.right, inspectorAdapters);
   }
 
   destroy() {

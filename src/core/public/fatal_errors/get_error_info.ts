@@ -22,7 +22,7 @@ import { inspect } from 'util';
 /**
  * Produce a string version of an error,
  */
-function formatMessage(error: any) {
+function formatErrorMessage(error: any) {
   if (typeof error === 'string') {
     return error;
   }
@@ -70,7 +70,7 @@ function formatStack(err: Error) {
 export function getErrorInfo(error: any, source?: string) {
   const prefix = source ? source + ': ' : '';
   return {
-    message: prefix + formatMessage(error),
+    message: prefix + formatErrorMessage(error),
     stack: formatStack(error),
   };
 }
