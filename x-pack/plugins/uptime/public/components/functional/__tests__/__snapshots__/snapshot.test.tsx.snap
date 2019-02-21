@@ -2,10 +2,10 @@
 
 exports[`Snapshot component renders without errors 1`] = `
 <EuiFlexGroup
-  alignItems="baseline"
+  alignItems="stretch"
   component="div"
   direction="row"
-  gutterSize="xl"
+  gutterSize="s"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -14,88 +14,98 @@ exports[`Snapshot component renders without errors 1`] = `
     component="div"
     grow={4}
   >
-    <EuiTitle
-      size="xs"
-      textTransform="none"
-    >
-      <h5>
-        <FormattedMessage
-          defaultMessage="Endpoint status"
-          id="xpack.uptime.snapshot.endpointStatusTitle"
-          values={Object {}}
-        />
-      </h5>
-    </EuiTitle>
     <EuiPanel
       grow={true}
       hasShadow={false}
-      paddingSize="m"
+      paddingSize="s"
+      style={
+        Object {
+          "height": 170,
+        }
+      }
     >
       <EuiFlexGroup
         alignItems="stretch"
         component="div"
-        direction="row"
-        gutterSize="xl"
-        justifyContent="spaceEvenly"
+        direction="column"
+        gutterSize="l"
+        justifyContent="flexStart"
         responsive={true}
         wrap={false}
       >
         <EuiFlexItem
           component="div"
-          grow={true}
+          grow={false}
         >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+          <EuiTitle
+            size="xs"
+            textTransform="none"
           >
-            <EuiStat
-              description="Up"
-              reverse={false}
-              textAlign="center"
-              title={8}
-              titleColor="primary"
-              titleSize="l"
-            />
-          </EuiPanel>
+            <h5>
+              <FormattedMessage
+                defaultMessage="Current status"
+                id="xpack.uptime.snapshot.endpointStatusTitle"
+                values={Object {}}
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
         </EuiFlexItem>
         <EuiFlexItem
           component="div"
           grow={true}
         >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+          <EuiFlexGroup
+            alignItems="stretch"
+            component="div"
+            direction="row"
+            gutterSize="s"
+            justifyContent="spaceEvenly"
+            responsive={true}
+            wrap={false}
           >
-            <EuiStat
-              description="Down"
-              reverse={false}
-              textAlign="center"
-              title={2}
-              titleColor="danger"
-              titleSize="l"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
-          >
-            <EuiStat
-              description="Total"
-              reverse={false}
-              textAlign="center"
-              title={10}
-              titleColor="subdued"
-              titleSize="l"
-            />
-          </EuiPanel>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiStat
+                description="Up"
+                reverse={false}
+                textAlign="center"
+                title={8}
+                titleColor="secondary"
+                titleSize="l"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiStat
+                description="Down"
+                reverse={false}
+                textAlign="center"
+                title={2}
+                titleColor="danger"
+                titleSize="l"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiStat
+                description="Total"
+                reverse={false}
+                textAlign="center"
+                title={10}
+                titleColor="subdued"
+                titleSize="l"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -103,35 +113,32 @@ exports[`Snapshot component renders without errors 1`] = `
   <EuiFlexItem
     component="div"
     grow={8}
-    style={
-      Object {
-        "paddingRight": "12px",
-        "paddingTop": "12px",
-      }
-    }
   >
-    <EuiTitle
-      size="xs"
-      textTransform="none"
-    >
-      <h5>
-        <FormattedMessage
-          defaultMessage="Status over time"
-          id="xpack.uptime.snapshot.statusOverTimeTitle"
-          values={Object {}}
-        />
-      </h5>
-    </EuiTitle>
     <EuiPanel
       grow={true}
       hasShadow={false}
       paddingSize="s"
       style={
         Object {
-          "maxHeight": "137px",
+          "height": 170,
         }
       }
     >
+      <EuiTitle
+        size="xs"
+        textTransform="none"
+      >
+        <h5>
+          <FormattedMessage
+            defaultMessage="Status over time"
+            id="xpack.uptime.snapshot.statusOverTimeTitle"
+            values={Object {}}
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
       <Component
         dangerColor="#F050F0"
         histogram={
@@ -215,7 +222,6 @@ exports[`Snapshot component renders without errors 1`] = `
             },
           ]
         }
-        primaryColor="#000000"
         windowWidth={1600}
       />
     </EuiPanel>
