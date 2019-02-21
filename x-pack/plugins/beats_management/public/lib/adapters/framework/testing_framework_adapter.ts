@@ -28,7 +28,7 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
 
   // We dont really want to have this, but it's needed to conditionaly render for k7 due to
   // when that data is needed.
-  public getUISetting(key: 'k7design'): boolean {
+  public getUISetting(key: string): boolean {
     return this.settings[key];
   }
 

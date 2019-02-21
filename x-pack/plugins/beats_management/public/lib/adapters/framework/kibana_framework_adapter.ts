@@ -49,19 +49,11 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
-
-    this.settingSubscription = uiSettings.getUpdate$().subscribe({
-      next: ({ key, newValue }: { key: string; newValue: boolean }) => {
-        if (key === 'k7design' && this.xpackInfo) {
-          this.xpackInfo.k7Design = newValue;
-        }
-      },
-    });
   }
 
   // We dont really want to have this, but it's needed to conditionaly render for k7 due to
   // when that data is needed.
-  public getUISetting(key: 'k7design'): boolean {
+  public getUISetting(key: string): boolean {
     return this.uiSettings.get(key);
   }
 
@@ -86,7 +78,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
-        k7Design: this.uiSettings.get('k7design'),
         license: {
           type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
           expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
