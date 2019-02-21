@@ -37,7 +37,7 @@ describe('<DetailPanel />', () => {
       ({ component, findTestSubject } = initTestBed());
     });
 
-    it('should have the title set to the Job id', () => {
+    it('should have the title set to the current Job "id"', () => {
       const { job } = defaultProps;
       const title = component.find('#rollupJobDetailsFlyoutTitle').hostNodes();
       expect(title.length).toBeTruthy();
@@ -48,7 +48,7 @@ describe('<DetailPanel />', () => {
       expect(component.find('DetailPanelUi').children().length).toBeTruthy();
     });
 
-    it('should have no content if it\s closed', () => {
+    it('should *not* have children if it\s closed', () => {
       ({ component } = initTestBed({ isOpen: false }));
       expect(component.find('DetailPanelUi').children().length).toBeFalsy();
     });
@@ -91,7 +91,7 @@ describe('<DetailPanel />', () => {
       expect(tabsLabel).toEqual(expected);
     });
 
-    it('should set default selected tab to the "panelType" provided', () => {
+    it('should set default selected tab to the "panelType" prop provided', () => {
       const tab = getTab(tabActive);
       expect(tab.props().isSelected).toEqual(true);
     });
@@ -113,15 +113,22 @@ describe('<DetailPanel />', () => {
   });
 
   describe('job detail', () => {
-    describe('summary Tab', () => {
+    describe('summary Tab content', () => {
+      // Init testBed on the SUMMARY tab
       const panelType = JOB_DETAILS_TAB_SUMMARY;
       const { findTestSubject } = initTestBed({ panelType });
-      const tabContent = findTestSubject('rollupJobDetailTabContent');
-      const tabSections = tabContent.find('EuiTitle').map(title => title.text());
+
+      const tabContentSections = ['Logistics', 'DateHistogram', 'Stats']
+        .map((section) => findTestSubject(`rollupJobDetailSummary${section}Section`))
+        .filter(s => !!s.length)
+        .map(section => ({
+          title: section.find('EuiTitle').text(),
+          reactWrapper: section,
+        }));
 
       it('should have a "Logistics", "Date histogram" and "Stats" section ', () => {
-        const expected = ['Logistics', 'Date histogram', 'Stats'];
-        expect(tabSections).toEqual(expected);
+        const expectedTitles = ['Logistics', 'Date histogram', 'Stats'];
+        expect(tabContentSections.map(section => section.title)).toEqual(expectedTitles);
       });
 
       describe('Logistics section', () => {
@@ -134,7 +141,8 @@ describe('<DetailPanel />', () => {
           }));
 
         it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
-          expect(logisticsSubSections.map(i => i.title)).toEqual(LOGISTICS_SUBSECTIONS);
+          const logisticsSubsectionsTitles = logisticsSubSections.map(subSection => subSection.title);
+          expect(logisticsSubsectionsTitles).toEqual(LOGISTICS_SUBSECTIONS);
         });
 
         it('should set the correct job value for each of the subsection', () => {
@@ -194,6 +202,49 @@ describe('<DetailPanel />', () => {
                 throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
             }
           });
+        });
+      });
+
+      describe('Stats', () => {
+        const STATS_SUBSECTIONS = ['Documents processed', 'Pages processed', 'Rollups indexed', 'Trigger count'];
+
+        const statsSubSections = findTestSubject('rollupJobDetailSummaryStatsItem')
+          .map(item => ({
+            title: item.childAt(0).text(),
+            description: item.childAt(1).text(),
+          }));
+
+        it('should have "Documents processed", "Pages processed", "Rollups indexed" and "Trigger count" subsections', () => {
+          expect(statsSubSections.map(i => i.title)).toEqual(STATS_SUBSECTIONS);
+        });
+
+        it('should set the correct job value for each of the subsection', () => {
+          STATS_SUBSECTIONS.forEach((section) => {
+            const { description } = statsSubSections.find(({ title }) => title === section);
+
+            switch(section) {
+              case 'Documents processed':
+                expect(description).toEqual(defaultJob.documentsProcessed.toString());
+                break;
+              case 'Pages processed':
+                expect(description).toEqual(defaultJob.pagesProcessed.toString());
+                break;
+              case 'Rollups indexed':
+                expect(description).toEqual(defaultJob.rollupsIndexed.toString());
+                break;
+              case 'Trigger count':
+                expect(description).toEqual(defaultJob.triggerCount.toString());
+                break;
+              default:
+                // Should never get here... if it does a section is missing in the constant
+                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+            }
+          });
+        });
+
+        it('should display the job status', () => {
+          const statsSection = tabContentSections.find(section => section.title === 'Stats');
+          expect(statsSection.reactWrapper.find('EuiHealth').text()).toEqual('Stopped');
         });
       });
     });
