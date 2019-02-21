@@ -7,7 +7,7 @@ import Joi from 'joi';
 import { omit } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { CMBeat } from '../../../common/domain_types';
-import { ReturnTypeCreate } from '../../../common/return_types';
+import { BaseReturnType, ReturnTypeCreate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { BeatEnrollmentStatus, CMServerLibs } from '../../lib/types';
 
@@ -32,7 +32,9 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest, h: any): Promise<ReturnTypeCreate<CMBeat>> => {
+  handler: async (
+    request: FrameworkRequest
+  ): Promise<BaseReturnType | ReturnTypeCreate<CMBeat>> => {
     const { beatId } = request.params;
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 
@@ -45,20 +47,23 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
 
     switch (status) {
       case BeatEnrollmentStatus.ExpiredEnrollmentToken:
-        return h
-          .response({
-            message: BeatEnrollmentStatus.ExpiredEnrollmentToken,
-          })
-          .code(400);
+        return {
+          error: { message: BeatEnrollmentStatus.ExpiredEnrollmentToken, code: 400 },
+          success: false,
+        };
+
       case BeatEnrollmentStatus.InvalidEnrollmentToken:
-        return h
-          .response({
-            message: BeatEnrollmentStatus.InvalidEnrollmentToken,
-          })
-          .code(400);
+        return {
+          error: { message: BeatEnrollmentStatus.InvalidEnrollmentToken, code: 400 },
+          success: false,
+        };
       case BeatEnrollmentStatus.Success:
       default:
-        return h.response({ access_token: accessToken }).code(201);
+        return {
+          item: accessToken,
+          action: 'created',
+          success: true,
+        };
     }
   },
 });

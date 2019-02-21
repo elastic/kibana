@@ -70,6 +70,8 @@ export interface ReturnTypeBulkUpsert extends BaseReturnType {
 // list
 export interface ReturnTypeList<T> extends BaseReturnType {
   list: T[];
+  page: number;
+  total: number;
 }
 
 // get
@@ -100,7 +102,7 @@ export interface ReturnTypeAction extends BaseReturnType {
 
 // bulk action -- e.g. assign tags to beats
 export interface ReturnTypeBulkAction extends BaseReturnType {
-  result?: Array<{
+  results?: Array<{
     success: boolean;
     result?: {
       [key: string]: any;

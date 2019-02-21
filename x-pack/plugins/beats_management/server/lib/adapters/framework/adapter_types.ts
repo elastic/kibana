@@ -5,7 +5,6 @@
  */
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
-import { BaseReturnType } from 'x-pack/plugins/beats_management/common/return_types';
 import { LicenseType } from '../../../../common/constants/security';
 
 export const internalAuthData = Symbol('internalAuthData');
@@ -155,7 +154,7 @@ export interface FrameworkRequest<
 
 export interface FrameworkRouteOptions<
   RouteRequest extends FrameworkRequest = FrameworkRequest,
-  RouteResponse extends FrameworkResponse = BaseReturnType
+  RouteResponse extends FrameworkResponse = any
 > {
   path: string;
   method: string | string[];

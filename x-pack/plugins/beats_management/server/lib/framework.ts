@@ -11,8 +11,6 @@ import {
   BackendFrameworkAdapter,
   FrameworkRequest,
   FrameworkResponse,
-  FrameworkRouteHandler,
-  FrameworkRouteOptions,
 } from './adapters/framework/adapter_types';
 
 export class BackendFrameworkLib {
@@ -27,7 +25,15 @@ export class BackendFrameworkLib {
   public registerRoute<
     RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
-  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+  >(route: {
+    path: string;
+    method: string | string[];
+    vhost?: string;
+    licenseRequired?: string[];
+    requiredRoles?: string[];
+    handler: (request: FrameworkRequest<RouteRequest>) => Promise<BaseReturnType>;
+    config?: {};
+  }) {
     this.adapter.registerRoute({
       ...route,
       handler: this.wrapErrors(
@@ -70,11 +76,11 @@ export class BackendFrameworkLib {
   }
 
   private wrapRouteWithSecurity(
-    handler: FrameworkRouteHandler<any, any>,
+    handler: (request: FrameworkRequest<any>) => Promise<BaseReturnType>,
     requiredLicense: string[],
     requiredRoles?: string[]
-  ): (request: FrameworkRequest, h: ResponseToolkit) => Promise<BaseReturnType> {
-    return async (request: FrameworkRequest, h: ResponseToolkit) => {
+  ): (request: FrameworkRequest) => Promise<BaseReturnType> {
+    return async (request: FrameworkRequest) => {
       if (
         requiredLicense.length > 0 &&
         (this.license.expired || !requiredLicense.includes(this.license.type))
@@ -117,15 +123,15 @@ export class BackendFrameworkLib {
           };
         }
       }
-      return await handler(request, h);
+      return await handler(request);
     };
   }
   private wrapErrors(
-    handler: FrameworkRouteHandler<any, any>
+    handler: (request: FrameworkRequest<any>) => Promise<BaseReturnType>
   ): (request: FrameworkRequest, h: ResponseToolkit) => Promise<ResponseObject> {
     return async (request: FrameworkRequest, h: ResponseToolkit) => {
       try {
-        const result = await handler(request, h);
+        const result = await handler(request);
         if (!result.error) {
           return h.response(result);
         }

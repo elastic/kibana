@@ -5,7 +5,8 @@
  */
 import Joi from 'joi';
 import { ConfigurationBlock } from '../../../common/domain_types';
-import { ReturnTypeList } from '../../../common/return_types';
+import { BaseReturnType, ReturnTypeList } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
 export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
@@ -19,7 +20,9 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     },
     auth: false,
   },
-  handler: async (request: any, h: any): Promise<ReturnTypeList<ConfigurationBlock>> => {
+  handler: async (
+    request: FrameworkRequest
+  ): Promise<BaseReturnType | ReturnTypeList<ConfigurationBlock>> => {
     const beatId = request.params.beatId;
     const accessToken = request.headers['kbn-beats-access-token'];
 
@@ -27,12 +30,12 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     let configurationBlocks: ConfigurationBlock[];
     beat = await libs.beats.getById(libs.framework.internalUser, beatId);
     if (beat === null) {
-      return h.response({ message: `Beat "${beatId}" not found` }).code(404);
+      return { error: { message: `Beat "${beatId}" not found`, code: 404 }, success: false };
     }
 
     const isAccessTokenValid = beat.access_token === accessToken;
     if (!isAccessTokenValid) {
-      return h.response({ message: 'Invalid access token' }).code(401);
+      return { error: { message: 'Invalid access token', code: 401 }, success: false };
     }
 
     await libs.beats.update(libs.framework.internalUser, beat.id, {
@@ -52,7 +55,8 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     }
 
     return {
-      configuration_blocks: configurationBlocks,
+      list: configurationBlocks,
+      success: true,
     };
   },
 });

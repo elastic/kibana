@@ -6,7 +6,8 @@
 
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ConfigurationBlock } from '../../../common/domain_types';
-import { ReturnTypeBulkGet } from '../../../common/return_types';
+import { ReturnTypeList } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
@@ -15,18 +16,17 @@ export const createGetConfigurationBlocksRoute = (libs: CMServerLibs): Framework
   path: '/api/beats/configurations/{tagIds}/{page?}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: any): Promise<ReturnTypeBulkGet<ConfigurationBlock>> => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<ConfigurationBlock>> => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
-    let tags;
-    tags = await libs.configurationBlocks.getForTags(
+    const result = await libs.configurationBlocks.getForTags(
       request.user,
       tagIds,
       parseInt(request.params.page, 10),
       5
     );
 
-    return tags;
+    return { page: result.page, total: result.total, list: result.blocks, success: true };
   },
 });

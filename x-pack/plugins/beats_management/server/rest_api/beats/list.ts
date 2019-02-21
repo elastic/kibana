@@ -55,6 +55,6 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
         break;
     }
 
-    return { beats };
+    return { list: beats, success: true };
   },
 });

@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { CMBeat } from 'x-pack/plugins/beats_management/common/domain_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
-import { ReturnTypeUpdate } from '../../../common/return_types';
+import { BaseReturnType, ReturnTypeUpdate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
@@ -39,16 +39,22 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }),
     },
   },
-  handler: async (request: FrameworkRequest, h: any): Promise<ReturnTypeUpdate<CMBeat>> => {
+  handler: async (
+    request: FrameworkRequest
+  ): Promise<BaseReturnType | ReturnTypeUpdate<CMBeat>> => {
     const { beatId } = request.params;
     const accessToken = request.headers['kbn-beats-access-token'];
     const remoteAddress = request.info.remoteAddress;
     const userOrToken = accessToken || request.user;
 
     if (request.user.kind === 'unauthenticated' && request.payload.active !== undefined) {
-      return h
-        .response({ message: 'access-token is not a valid auth type to change beat status' })
-        .code(401);
+      return {
+        error: {
+          message: 'access-token is not a valid auth type to change beat status',
+          code: 401,
+        },
+        success: false,
+      };
     }
 
     const status = await libs.beats.update(userOrToken, beatId, {
@@ -58,11 +64,29 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
 
     switch (status) {
       case 'beat-not-found':
-        return h.response({ message: 'Beat not found', success: false }).code(404);
+        return {
+          error: {
+            message: 'Beat not found',
+            code: 404,
+          },
+          success: false,
+        };
       case 'invalid-access-token':
-        return h.response({ message: 'Invalid access token', success: false }).code(401);
+        return {
+          error: {
+            message: 'Invalid access token',
+            code: 401,
+          },
+          success: false,
+        };
     }
 
-    return h.response({ success: true }).code(204);
+    const beat = await libs.beats.getById(userOrToken, beatId);
+
+    return {
+      item: beat,
+      action: 'updated',
+      success: true,
+    };
   },
 });

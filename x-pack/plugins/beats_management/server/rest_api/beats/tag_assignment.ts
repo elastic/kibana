@@ -33,6 +33,10 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
     const { assignments }: { assignments: BeatsTagAssignment[] } = request.payload;
 
     const response = await libs.beats.assignTagsToBeats(request.user, assignments);
-    return response;
+
+    return {
+      results: response,
+      success: true,
+    };
   },
 });

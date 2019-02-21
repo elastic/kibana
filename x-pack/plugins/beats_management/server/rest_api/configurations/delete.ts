@@ -6,6 +6,7 @@
 
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkDelete } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
 export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
@@ -13,7 +14,7 @@ export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/configurations/{ids}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: any): Promise<ReturnTypeBulkDelete> => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkDelete> => {
     const idString: string = request.params.ids;
     const ids = idString.split(',').filter((id: string) => id.length > 0);
 

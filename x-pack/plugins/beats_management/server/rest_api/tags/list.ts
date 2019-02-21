@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
@@ -25,7 +26,7 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  handler: async (request: any): Promise<ReturnTypeList<BeatTag>> => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
     let tags: BeatTag[];
     tags = await libs.tags.getAll(
       request.user,

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { BeatEvent } from '../../../common/domain_types';
-import { ReturnTypeCreate } from '../../../common/return_types';
+import { BaseReturnType, ReturnTypeBulkAction } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
 export const beatEventsRoute = (libs: CMServerLibs) => ({
@@ -19,25 +19,26 @@ export const beatEventsRoute = (libs: CMServerLibs) => ({
     },
     auth: false,
   },
-  handler: async (request: any, h: any): Promise<ReturnTypeCreate<BeatEvent>> => {
+  handler: async (request: FrameworkRequest): Promise<BaseReturnType | ReturnTypeBulkAction> => {
     const beatId = request.params.beatId;
     const events = request.payload;
     const accessToken = request.headers['kbn-beats-access-token'];
 
     const beat = await libs.beats.getById(libs.framework.internalUser, beatId);
     if (beat === null) {
-      return h.response({ message: `Beat "${beatId}" not found` }).code(400);
+      return { error: { message: `Beat "${beatId}" not found`, code: 400 }, success: false };
     }
 
     const isAccessTokenValid = beat.access_token === accessToken;
     if (!isAccessTokenValid) {
-      return h.response({ message: 'Invalid access token' }).code(401);
+      return { error: { message: `Invalid access token`, code: 401 }, success: false };
     }
 
     const results = await libs.beatEvents.log(libs.framework.internalUser, beat.id, events);
 
     return {
-      response: results,
+      results,
+      success: true,
     };
   },
 });

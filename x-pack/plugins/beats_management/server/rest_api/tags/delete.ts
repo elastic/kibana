@@ -6,6 +6,7 @@
 
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkDelete } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
 export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
@@ -13,7 +14,7 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/tags/{tagIds}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: any): Promise<ReturnTypeBulkDelete> => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkDelete> => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 

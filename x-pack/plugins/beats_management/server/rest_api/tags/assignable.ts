@@ -8,6 +8,7 @@ import { flatten } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeBulkGet } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
 export const createAssignableTagsRoute = (libs: CMServerLibs) => ({
@@ -15,7 +16,7 @@ export const createAssignableTagsRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/tags/assignable/{beatIds}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: any): Promise<ReturnTypeBulkGet<BeatTag>> => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkGet<BeatTag>> => {
     const beatIdString: string = request.params.beatIds;
     const beatIds = beatIdString.split(',').filter((id: string) => id.length > 0);
 
