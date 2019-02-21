@@ -4,28 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
 import {
-  defaultToEmpty,
   defaultToEmptyTag,
+  getEmptyString,
+  getEmptyStringTag,
   getEmptyTagValue,
   getEmptyValue,
-  getOrEmpty,
   getOrEmptyTag,
 } from '.';
 
 describe('EmptyValue', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
   describe('#getEmptyValue', () =>
     test('should return an empty value', () => expect(getEmptyValue()).toBe('--')));
+
+  describe('#getEmptyString', () => {
+    test('should turn into an empty string place holder', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <p>{getEmptyString()}</p>
+        </ThemeProvider>
+      );
+      expect(wrapper.text()).toBe('(Empty String)');
+    });
+  });
 
   describe('#getEmptyTagValue', () => {
     const wrapper = mount(<p>{getEmptyTagValue()}</p>);
     test('should return an empty tag value', () => expect(wrapper.text()).toBe('--'));
   });
 
-  describe('#getOrEmpty', () => {
-    test('should default empty value when a deep rooted value is null', () => {
+  describe('#getEmptyStringTag', () => {
+    test('should turn into an span that has length of 1', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <p>{getEmptyStringTag()}</p>
+        </ThemeProvider>
+      );
+      expect(wrapper.find('span')).toHaveLength(1);
+    });
+
+    test('should turn into an empty string tag place holder', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <p>{getEmptyStringTag()}</p>
+        </ThemeProvider>
+      );
+      expect(wrapper.text()).toBe(getEmptyString());
+    });
+  });
+
+  describe('#defaultToEmptyTag', () => {
+    test('should default to an empty value when a deep rooted value is null', () => {
       const test = {
         a: {
           b: {
@@ -33,10 +70,11 @@ describe('EmptyValue', () => {
           },
         },
       };
-      expect(getOrEmpty('a.b.c', test)).toBe(getEmptyValue());
+      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
-    test('should default empty value when a deep rooted value is undefined', () => {
+    test('should default to an empty value when a deep rooted value is undefined', () => {
       const test = {
         a: {
           b: {
@@ -44,16 +82,8 @@ describe('EmptyValue', () => {
           },
         },
       };
-      expect(getOrEmpty('a.b.c', test)).toBe(getEmptyValue());
-    });
-
-    test('should default empty value when a deep rooted value is missing', () => {
-      const test = {
-        a: {
-          b: {},
-        },
-      };
-      expect(getOrEmpty('a.b.c', test)).toBe(getEmptyValue());
+      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('should return a deep path value', () => {
@@ -64,7 +94,8 @@ describe('EmptyValue', () => {
           },
         },
       };
-      expect(getOrEmpty('a.b.c', test)).toBe(1);
+      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+      expect(wrapper.text()).toBe('1');
     });
   });
 
@@ -112,79 +143,6 @@ describe('EmptyValue', () => {
         },
       };
       const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
-      expect(wrapper.text()).toBe('1');
-    });
-  });
-
-  describe('#defaultToEmpty', () => {
-    test('should default to an empty value when a deep rooted value is null', () => {
-      const test = {
-        a: {
-          b: {
-            c: null,
-          },
-        },
-      };
-      expect(defaultToEmpty(test.a.b.c)).toBe(getEmptyValue());
-    });
-
-    test('should default to an empty value when a deep rooted value is undefined', () => {
-      const test = {
-        a: {
-          b: {
-            c: undefined,
-          },
-        },
-      };
-      expect(defaultToEmpty(test.a.b.c)).toBe(getEmptyValue());
-    });
-
-    test('should return a deep path value', () => {
-      const test = {
-        a: {
-          b: {
-            c: 1,
-          },
-        },
-      };
-      expect(defaultToEmpty(test.a.b.c)).toBe(1);
-    });
-  });
-
-  describe('#defaultToEmptyTag', () => {
-    test('should default to an empty value when a deep rooted value is null', () => {
-      const test = {
-        a: {
-          b: {
-            c: null,
-          },
-        },
-      };
-      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
-      expect(wrapper.text()).toBe(getEmptyValue());
-    });
-
-    test('should default to an empty value when a deep rooted value is undefined', () => {
-      const test = {
-        a: {
-          b: {
-            c: undefined,
-          },
-        },
-      };
-      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
-      expect(wrapper.text()).toBe(getEmptyValue());
-    });
-
-    test('should return a deep path value', () => {
-      const test = {
-        a: {
-          b: {
-            c: 1,
-          },
-        },
-      };
-      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
       expect(wrapper.text()).toBe('1');
     });
   });

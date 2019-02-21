@@ -23,6 +23,9 @@ export const buildQuery = ({
   const hostFields = reduceFields(fields, hostFieldsMap);
   const filter = [
     ...createQueryFilterClauses(filterQuery),
+    { term: { 'event.kind': 'state' } },
+    { term: { 'event.module': 'system' } },
+    { term: { 'event.dataset': 'process' } },
     {
       range: {
         [timestamp]: {

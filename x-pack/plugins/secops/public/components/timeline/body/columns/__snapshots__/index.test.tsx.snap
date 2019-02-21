@@ -127,7 +127,7 @@ exports[`Columns it renders the expected columns 1`] = `
         >
           <EuiFlexGroup
             alignItems="stretch"
-            className="sc-elJkPf dgypyI"
+            className="sc-jtRfpW erLKZH"
             component="div"
             data-test-subj="data-driven-columns"
             direction="row"
@@ -137,7 +137,7 @@ exports[`Columns it renders the expected columns 1`] = `
             wrap={false}
           >
             <div
-              className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive sc-elJkPf dgypyI"
+              className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive sc-jtRfpW erLKZH"
               data-test-subj="data-driven-columns"
             >
               <EuiFlexItem
@@ -155,7 +155,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW QTOGJ"
+                      className="sc-kTUwUJ hUSEpG"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -445,7 +445,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"
@@ -581,7 +581,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW gyqzql"
+                      className="sc-kTUwUJ gSTrkX"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -871,7 +871,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"
@@ -1007,7 +1007,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW QTOGJ"
+                      className="sc-kTUwUJ hUSEpG"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -1297,7 +1297,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"
@@ -1433,7 +1433,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW gyqzql"
+                      className="sc-kTUwUJ gSTrkX"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -1723,7 +1723,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"
@@ -1859,7 +1859,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW QTOGJ"
+                      className="sc-kTUwUJ hUSEpG"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -2149,7 +2149,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"
@@ -2285,7 +2285,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW gyqzql"
+                      className="sc-kTUwUJ gSTrkX"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -2575,7 +2575,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"
@@ -2711,7 +2711,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-jtRfpW QTOGJ"
+                      className="sc-kTUwUJ hUSEpG"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -3001,7 +3001,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                   >
                                                     <div
                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                      className="sc-kafWEX gzsLki"
+                                                      className="sc-feJyhm UVzzi"
                                                       data-react-beautiful-dnd-drag-handle="0"
                                                       data-react-beautiful-dnd-draggable="0"
                                                       data-test-subj="providerContainer"

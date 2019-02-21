@@ -17,7 +17,7 @@ import { NetworkTopNFlowEdges, NetworkTopNFlowType } from '../../../../graphql/t
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -146,21 +146,26 @@ const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const attr =
+      const domainAttr =
+        networkTopNFlowType === NetworkTopNFlowType.source ? 'source.domain' : 'destination.domain';
+      const sourceIpAttr =
         networkTopNFlowType === NetworkTopNFlowType.source ? 'source.ip' : 'destination.ip';
-      const ip: string | null = get(attr, node);
+      const ip: string | null = get(sourceIpAttr, node);
+      const domain: string | null = get(domainAttr, node);
       if (ip != null) {
         return (
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`networkTopNFlow-table-${networkTopNFlowType}-ip-${ip}`),
+              id: escapeDataProviderId(
+                `networkTopNFlow-table-${domain}-${networkTopNFlowType}-ip-${ip}`
+              ),
               name: ip,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: attr,
+                field: domainAttr,
                 value: ip,
               },
               queryDate: {
@@ -174,7 +179,7 @@ const getNetworkTopNFlowColumns = (
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                ip
+                defaultToEmptyTag(ip)
               )
             }
           />
@@ -189,9 +194,12 @@ const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const attr =
+      const domainAttr =
         networkTopNFlowType === NetworkTopNFlowType.source ? 'source.domain' : 'destination.domain';
-      const domain: string | null = get(attr, node);
+      const sourceIpAttr =
+        networkTopNFlowType === NetworkTopNFlowType.source ? 'source.ip' : 'destination.ip';
+      const domain: string | null = get(domainAttr, node);
+      const ip: string | null = get(sourceIpAttr, node);
       if (domain != null) {
         return (
           <DraggableWrapper
@@ -199,13 +207,13 @@ const getNetworkTopNFlowColumns = (
               and: [],
               enabled: true,
               id: escapeDataProviderId(
-                `networkTopNFlow-table-${networkTopNFlowType}-domain-${domain}`
+                `networkTopNFlow-table-${ip}-${networkTopNFlowType}-domain-${domain}`
               ),
               name: domain,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: attr,
+                field: sourceIpAttr,
                 value: domain,
               },
               queryDate: {
@@ -219,7 +227,7 @@ const getNetworkTopNFlowColumns = (
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                domain
+                defaultToEmptyTag(domain)
               )
             }
           />

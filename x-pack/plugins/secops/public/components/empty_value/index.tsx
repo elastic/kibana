@@ -4,18 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, get } from 'lodash/fp';
+import { get, isString } from 'lodash/fp';
 import React from 'react';
+import styled from 'styled-components';
+import * as i18n from './translations';
 
-export const getEmptyTagValue = () => <>{getEmptyValue()}</>;
+const EmptyString = styled.span`
+  color: ${({
+    theme: {
+      eui: { euiColorMediumShade },
+    },
+  }) => euiColorMediumShade};
+`;
 
 export const getEmptyValue = () => '--';
+export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
-export const getOrEmptyTag = (path: string, item: unknown) => <>{getOrEmpty(path, item)}</>;
+export const getEmptyTagValue = () => <>{getEmptyValue()}</>;
+export const getEmptyStringTag = () => <EmptyString>{getEmptyString()}</EmptyString>;
 
-export const getOrEmpty = (path: string, item: unknown) =>
-  get(path, item) != null ? get(path, item) : getEmptyValue();
+export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
+  if (item == null) {
+    return getEmptyTagValue();
+  } else if (isString(item) && item != null && item === '') {
+    return getEmptyStringTag();
+  } else {
+    return <>{item}</>;
+  }
+};
 
-export const defaultToEmptyTag = <T extends unknown>(item: T) => <>{defaultToEmpty(item)}</>;
-
-export const defaultToEmpty = <T extends unknown>(item: T) => defaultTo(getEmptyValue(), item);
+export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
+  const text = get(path, item);
+  if (text == null) {
+    return getEmptyTagValue();
+  } else if (text != null && text === '') {
+    return getEmptyStringTag();
+  } else {
+    return <>{text}</>;
+  }
+};

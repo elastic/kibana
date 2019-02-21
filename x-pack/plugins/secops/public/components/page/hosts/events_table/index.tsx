@@ -15,7 +15,7 @@ import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyTagValue, getEmptyValue, getOrEmpty, getOrEmptyTag } from '../../../empty_value';
+import { getEmptyStringTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -168,7 +168,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatSafely('source.ip', node)} : {getOrEmpty('source.port', node)}
+        {formatSafely('source.ip', node)} : {getOrEmptyTag('source.port', node)}
       </>
     ),
   },
@@ -178,7 +178,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatSafely('destination.ip', node)} : {getOrEmpty('destination.port', node)}
+        {formatSafely('destination.ip', node)} : {getOrEmptyTag('destination.port', node)}
       </>
     ),
   },
@@ -188,16 +188,20 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {getOrEmpty('geo.region_name', node)} : {getOrEmpty('geo.country_iso_code', node)}
+        {getOrEmptyTag('geo.region_name', node)} : {getOrEmptyTag('geo.country_iso_code', node)}
       </>
     ),
   },
 ];
 
-export const formatSafely = (path: string, data: Ecs) => {
+export const formatSafely = (path: string, data: Ecs): JSX.Element => {
   if (has(path, data)) {
-    const txt = getOrEmpty(path, data);
-    return txt && txt.slice ? txt.slice(0, 12) : txt;
+    const txt = get(path, data);
+    if (txt === '') {
+      return getEmptyStringTag();
+    } else {
+      return txt && txt.slice ? <>{txt.slice(0, 12)}</> : <>{txt}</>;
+    }
   }
-  return getEmptyValue();
+  return getEmptyTagValue();
 };
