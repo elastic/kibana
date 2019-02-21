@@ -36,7 +36,8 @@ See also <<release-highlights>> and <<release-notes>>.
 *Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
 
 Example structure before:
-```
+[source,js]
+--------------------------------------------------
 {
   ...
   "attributes": {
@@ -48,10 +49,12 @@ Example structure before:
     }]
   }
 }
-```
+--------------------------------------------------
 
 Example structure after:
-```
+[source,js]
+--------------------------------------------------
+{
 {
   ...
   "attributes": {
@@ -67,7 +70,7 @@ Example structure after:
     "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
   }]
 }
-```
+--------------------------------------------------
 
 *Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
 
