@@ -12,12 +12,11 @@ See also <<release-highlights>> and <<release-notes>>.
 * <<breaking_70_api_changes>>
 * <<breaking_70_browser_support_changes>>
 * <<breaking_70_ems_changes>>
-* <<breaking_70_kibana_yml_changes>>
-* <<breaking_70_management_advanced_settings_changes>>
 * <<breaking_70_packaging_changes>>
 * <<breaking_70_plugin_changes>>
 * <<breaking_70_security_changes>>
 * <<breaking_70_setting_changes>>
+* <<breaking_70_advanced_settings_changes>>
 * <<breaking_70_UI_changes>>
 
 
@@ -139,48 +138,6 @@ generalized from the source data for visualization and locations are approximate
 Codes layer will appear differently. ZCTA boundaries have changed dramatically 
 in some areas. Also, some zip codes have been deprecated and new ones have been added.
 
-
-[float]
-[[breaking_70_kibana_yml_changes]]
-=== kibana.yml setting changes
-
-[float]
-==== Removed support for tribe nodes
-*Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
-
-*Impact:* You must remove any tribe node configurations in Kibana. 
-Consider using <<management-cross-cluster-search>> instead, which does not 
-require kibana.yml configurations in Kibana.
-
-
-[float]
-[[breaking_70_management_advanced_settings_changes]]
-=== Management advanced settings changes
-
-[float]
-==== Advanced setting query:queryString:options no longer applies to filters
-*Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
-and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
-conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
-users can have full control over their custom filters.
-
-*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on
-`query:queryString:options`.
-
-[float]
-==== Advanced setting query:queryString:options no longer applies `default_field: *` by default
-*Details:* Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
-up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
-inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
-to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
-so we no longer need this workaround.
-
-*Impact:* Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
-will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
-If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
-to Kibana's advanced setting.
-
-
 [float]
 [[breaking_70_packaging_changes]]
 === Packaging changes
@@ -218,6 +175,14 @@ should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies u
 [float]
 [[breaking_70_setting_changes]]
 === Settings changes
+
+[float]
+==== Removed support for tribe nodes
+*Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
+
+*Impact:* You must remove any tribe node configurations in Kibana. 
+Consider using <<management-cross-cluster-search>> instead, which does not 
+require kibana.yml configurations in Kibana.
 
 [float]
 ==== `elasticsearch.ssl.ca` is no longer valid
@@ -470,6 +435,33 @@ to accurately reflect their content, from `management/kibana/index` or
 `management/kibana/index_patterns`.
 
 *Impact:* References to these URLs will need to be updated.
+
+[float]
+[[breaking_70_advanced_settings_changes]]
+=== Advanced settings changes
+
+[float]
+==== Advanced setting query:queryString:options no longer applies to filters
+*Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
+and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
+conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
+users can have full control over their custom filters.
+
+*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on
+`query:queryString:options`.
+
+[float]
+==== Advanced setting query:queryString:options no longer applies `default_field: *` by default
+*Details:* Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
+up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
+inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
+to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
+so we no longer need this workaround.
+
+*Impact:* Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
+will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
+If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
+to Kibana's advanced setting.
 
 
 [float]
