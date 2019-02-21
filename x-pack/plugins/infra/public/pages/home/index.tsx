@@ -7,6 +7,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
 
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
@@ -25,99 +26,107 @@ import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../containers
 
 interface HomePageProps {
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
 }
 
-export const HomePage = injectI18n(
-  class extends React.Component<HomePageProps, {}> {
-    public static displayName = 'HomePage';
+export const HomePage = injectUICapabilities(
+  injectI18n(
+    class extends React.Component<HomePageProps, {}> {
+      public static displayName = 'HomePage';
 
-    public render() {
-      const { intl } = this.props;
+      public render() {
+        const { intl, uiCapabilities } = this.props;
 
-      return (
-        <ColumnarPage>
-          <Header
-            breadcrumbs={[
-              {
-                href: '#/',
-                text: intl.formatMessage({
-                  id: 'xpack.infra.header.infrastructureTitle',
-                  defaultMessage: 'Infrastructure',
-                }),
-              },
-            ]}
-          />
-          <SourceConfigurationFlyout />
-          <WithSource>
-            {({
-              derivedIndexPattern,
-              hasFailed,
-              isLoading,
-              lastFailureMessage,
-              load,
-              metricIndicesExist,
-            }) =>
-              isLoading ? (
-                <SourceLoadingPage />
-              ) : metricIndicesExist ? (
-                <>
-                  <WithWaffleTimeUrlState />
-                  <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
-                  <WithWaffleOptionsUrlState />
-                  <HomeToolbar />
-                  <HomePageContent />
-                </>
-              ) : hasFailed ? (
-                <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
-              ) : (
-                <WithKibanaChrome>
-                  {({ basePath }) => (
-                    <NoIndices
-                      title={intl.formatMessage({
-                        id: 'xpack.infra.homePage.noMetricsIndicesTitle',
-                        defaultMessage: "Looks like you don't have any metrics indices.",
-                      })}
-                      message={intl.formatMessage({
-                        id: 'xpack.infra.homePage.noMetricsIndicesDescription',
-                        defaultMessage: "Let's add some!",
-                      })}
-                      actions={
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <EuiButton
-                              href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
-                              color="primary"
-                              fill
-                            >
-                              {intl.formatMessage({
-                                id: 'xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel',
-                                defaultMessage: 'View setup instructions',
-                              })}
-                            </EuiButton>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <WithSourceConfigurationFlyoutState>
-                              {({ enable }) => (
-                                <EuiButton color="primary" onClick={enable}>
-                                  {intl.formatMessage({
-                                    id: 'xpack.infra.configureSourceActionLabel',
-                                    defaultMessage: 'Change source configuration',
-                                  })}
-                                </EuiButton>
-                              )}
-                            </WithSourceConfigurationFlyoutState>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      data-test-subj="noMetricsIndicesPrompt"
-                    />
-                  )}
-                </WithKibanaChrome>
-              )
-            }
-          </WithSource>
-        </ColumnarPage>
-      );
+        return (
+          <ColumnarPage>
+            <Header
+              breadcrumbs={[
+                {
+                  href: '#/',
+                  text: intl.formatMessage({
+                    id: 'xpack.infra.header.infrastructureTitle',
+                    defaultMessage: 'Infrastructure',
+                  }),
+                },
+              ]}
+            />
+            <SourceConfigurationFlyout
+              shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}
+            />
+            <WithSource>
+              {({
+                derivedIndexPattern,
+                hasFailed,
+                isLoading,
+                lastFailureMessage,
+                load,
+                metricIndicesExist,
+              }) =>
+                isLoading ? (
+                  <SourceLoadingPage />
+                ) : metricIndicesExist ? (
+                  <>
+                    <WithWaffleTimeUrlState />
+                    <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
+                    <WithWaffleOptionsUrlState />
+                    <HomeToolbar />
+                    <HomePageContent />
+                  </>
+                ) : hasFailed ? (
+                  <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
+                ) : (
+                  <WithKibanaChrome>
+                    {({ basePath }) => (
+                      <NoIndices
+                        title={intl.formatMessage({
+                          id: 'xpack.infra.homePage.noMetricsIndicesTitle',
+                          defaultMessage: "Looks like you don't have any metrics indices.",
+                        })}
+                        message={intl.formatMessage({
+                          id: 'xpack.infra.homePage.noMetricsIndicesDescription',
+                          defaultMessage: "Let's add some!",
+                        })}
+                        actions={
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EuiButton
+                                href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                                color="primary"
+                                fill
+                              >
+                                {intl.formatMessage({
+                                  id:
+                                    'xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel',
+                                  defaultMessage: 'View setup instructions',
+                                })}
+                              </EuiButton>
+                            </EuiFlexItem>
+                            {uiCapabilities.infrastructure.configureSource ? (
+                              <EuiFlexItem>
+                                <WithSourceConfigurationFlyoutState>
+                                  {({ enable }) => (
+                                    <EuiButton color="primary" onClick={enable}>
+                                      {intl.formatMessage({
+                                        id: 'xpack.infra.configureSourceActionLabel',
+                                        defaultMessage: 'Change source configuration',
+                                      })}
+                                    </EuiButton>
+                                  )}
+                                </WithSourceConfigurationFlyoutState>
+                              </EuiFlexItem>
+                            ) : null}
+                          </EuiFlexGroup>
+                        }
+                        data-test-subj="noMetricsIndicesPrompt"
+                      />
+                    )}
+                  </WithKibanaChrome>
+                )
+              }
+            </WithSource>
+          </ColumnarPage>
+        );
+      }
     }
-  }
+  )
 );

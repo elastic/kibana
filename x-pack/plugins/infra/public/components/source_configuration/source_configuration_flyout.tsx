@@ -19,8 +19,6 @@ import {
 import React from 'react';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { WithSource } from '../../containers/with_source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
@@ -30,15 +28,13 @@ import { WithSourceConfigurationFormState } from './source_configuration_form_st
 
 const noop = () => undefined;
 
-const isDisabled = (uiCapabilities: UICapabilities) => !uiCapabilities.infrastructure.save;
-
 interface SourceConfigurationFlyoutProps {
   intl: InjectedIntl;
-  uiCapabilities: UICapabilities;
+  shouldAllowEdit: boolean;
 }
 
-export const SourceConfigurationFlyout = injectUICapabilities(
-  injectI18n(({ intl, uiCapabilities }: SourceConfigurationFlyoutProps) => (
+export const SourceConfigurationFlyout = injectI18n(
+  ({ intl, shouldAllowEdit }: SourceConfigurationFlyoutProps) => (
     <WithSourceConfigurationFlyoutState>
       {({ disable: close, value: isVisible }) =>
         isVisible ? (
@@ -78,15 +74,15 @@ export const SourceConfigurationFlyout = injectUICapabilities(
                       <EuiFlyoutHeader>
                         <EuiTitle>
                           <h2 id="sourceConfigurationTitle">
-                            {isDisabled(uiCapabilities) ? (
-                              <FormattedMessage
-                                id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
-                                defaultMessage="View source"
-                              />
-                            ) : (
+                            {shouldAllowEdit ? (
                               <FormattedMessage
                                 id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
                                 defaultMessage="Configure source"
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
+                                defaultMessage="View source"
                               />
                             )}
                           </h2>
@@ -95,13 +91,13 @@ export const SourceConfigurationFlyout = injectUICapabilities(
                       <EuiFlyoutBody>
                         <NameConfigurationPanel
                           isLoading={isLoading}
-                          disabled={isDisabled(uiCapabilities)}
+                          disabled={!shouldAllowEdit}
                           nameFieldProps={getNameFieldProps()}
                         />
                         <EuiSpacer />
                         <IndicesConfigurationPanel
                           isLoading={isLoading}
-                          disabled={isDisabled(uiCapabilities)}
+                          disabled={!shouldAllowEdit}
                           logAliasFieldProps={getLogAliasFieldProps()}
                           metricAliasFieldProps={getMetricAliasFieldProps()}
                         />
@@ -110,7 +106,7 @@ export const SourceConfigurationFlyout = injectUICapabilities(
                           containerFieldProps={getFieldFieldProps('container')}
                           hostFieldProps={getFieldFieldProps('host')}
                           isLoading={isLoading}
-                          disabled={isDisabled(uiCapabilities)}
+                          disabled={!shouldAllowEdit}
                           podFieldProps={getFieldFieldProps('pod')}
                           tiebreakerFieldProps={getFieldFieldProps('tiebreaker')}
                           timestampFieldProps={getFieldFieldProps('timestamp')}
@@ -148,7 +144,7 @@ export const SourceConfigurationFlyout = injectUICapabilities(
                             )}
                           </EuiFlexItem>
                           <EuiFlexItem />
-                          {!isDisabled(uiCapabilities) && (
+                          {!!shouldAllowEdit && (
                             <EuiFlexItem grow={false}>
                               {isLoading ? (
                                 <EuiButton color="primary" isLoading fill>
@@ -184,5 +180,5 @@ export const SourceConfigurationFlyout = injectUICapabilities(
         ) : null
       }
     </WithSourceConfigurationFlyoutState>
-  ))
+  )
 );

@@ -86,7 +86,7 @@ export function apm(kibana) {
               all: [],
               read: ['config']
             },
-            ui: []
+            ui: ['show']
           }
         },
         privilegesTooltip: i18n.translate('xpack.apm.privileges.tooltip', {
