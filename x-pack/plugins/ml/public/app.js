@@ -15,7 +15,6 @@ import 'ui/persisted_log';
 import 'ui/autoload/all';
 
 import 'plugins/ml/access_denied';
-import 'plugins/ml/factories/listener_factory';
 import 'plugins/ml/factories/state_factory';
 import 'plugins/ml/lib/angular_bootstrap_patch';
 import 'plugins/ml/jobs';

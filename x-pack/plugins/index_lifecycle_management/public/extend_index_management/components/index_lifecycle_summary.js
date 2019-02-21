@@ -142,7 +142,7 @@ export class IndexLifecycleSummary extends Component {
         <EuiDescriptionListTitle key={fieldName}>
           <strong>{headers[fieldName]}</strong>
         </EuiDescriptionListTitle>,
-        <EuiDescriptionListDescription key={fieldName + "_desc"}>
+        <EuiDescriptionListDescription key={fieldName + '_desc'}>
           {content}
         </EuiDescriptionListDescription>
       ];

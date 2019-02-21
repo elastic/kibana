@@ -23,26 +23,23 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiBetaBadge,
 } from '@elastic/eui';
 
 export const EMPTY_FILTER = '';
 
 export class MapListing extends React.Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      hasInitialFetchReturned: false,
-      isFetchingItems: false,
-      showDeleteModal: false,
-      showLimitError: false,
-      filter: EMPTY_FILTER,
-      items: [],
-      selectedIds: [],
-      page: 0,
-      perPage: 20,
-    };
+  state = {
+    hasInitialFetchReturned: false,
+    isFetchingItems: false,
+    showDeleteModal: false,
+    showLimitError: false,
+    filter: EMPTY_FILTER,
+    items: [],
+    selectedIds: [],
+    page: 0,
+    perPage: 20,
   }
 
   componentWillMount() {
@@ -339,13 +336,22 @@ export class MapListing extends React.Component {
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>
-                Maps
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="l">
+                <h1>
+                  Maps
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label="Beta"
+                tooltipContent="Maps is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           {createButton}
 

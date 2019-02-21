@@ -91,7 +91,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           }
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.existOrFail('newDashboardLink');
+        await testSubjects.existOrFail('newItemButton');
       });
 
       it(`create new dashboard shows addNew button`, async () => {
@@ -219,7 +219,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           }
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.missingOrFail('newDashboardLink');
+        await testSubjects.missingOrFail('newItemButton');
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
