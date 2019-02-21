@@ -6,7 +6,6 @@
 
 import datemath from '@elastic/datemath';
 import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
-import { memoize } from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -21,36 +20,20 @@ interface Props extends RouteComponentProps {
   dispatchUpdateTimePicker: typeof updateTimePicker;
 }
 
-interface DatePickerParams {
-  rangeFrom: string;
-  rangeTo: string;
-  refreshPaused: boolean;
-  refreshInterval: number;
-}
-
-const APM_DEFAULT_TIME_OPTIONS: DatePickerParams = {
-  rangeFrom: 'now-24h',
-  rangeTo: 'now',
-  refreshPaused: true,
-  refreshInterval: 0
-};
-
 class DatePickerComponent extends React.Component<Props> {
   public refreshTimeoutId = 0;
 
-  public getParamsFromSearch = memoize((search: string) => {
-    const query = toQuery(search);
-    if ('refreshPaused' in query) {
-      query.refreshPaused = toBoolean(query.refreshPaused);
-    }
-    if ('refreshInterval' in query) {
-      query.refreshInterval = toNumber(query.refreshInterval as string);
-    }
+  public getParamsFromSearch = (search: string) => {
+    const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = toQuery(
+      search
+    );
     return {
-      ...APM_DEFAULT_TIME_OPTIONS,
-      ...query
-    } as DatePickerParams;
-  });
+      rangeFrom: rangeFrom || 'now-24h',
+      rangeTo: rangeTo || 'now',
+      refreshPaused: toBoolean(refreshPaused),
+      refreshInterval: toNumber(refreshInterval) || 0
+    };
+  };
 
   public componentDidMount() {
     this.dispatchTimeRangeUpdate();

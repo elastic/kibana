@@ -9,10 +9,12 @@ import {
   getAPMIndexPattern,
   ISavedObject
 } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
-import { QueryParamsDecoded } from '../url_helpers';
+import { APMQueryParams, RisonDecoded } from '../url_helpers';
+
+type Query = APMQueryParams & RisonDecoded;
 
 export function getQueryWithIndexPattern(
-  query: QueryParamsDecoded,
+  query: Query,
   indexPattern?: ISavedObject
 ) {
   if ((query._a && query._a.index) || !indexPattern) {
@@ -20,7 +22,6 @@ export function getQueryWithIndexPattern(
   }
 
   const id = indexPattern && indexPattern.id;
-
   return {
     ...query,
     _a: {
@@ -31,8 +32,8 @@ export function getQueryWithIndexPattern(
 }
 
 interface Props {
-  query: QueryParamsDecoded;
-  children: (query: QueryParamsDecoded) => ReactElement<unknown>;
+  query: Query;
+  children: (query: Query) => ReactElement<unknown>;
 }
 
 interface State {

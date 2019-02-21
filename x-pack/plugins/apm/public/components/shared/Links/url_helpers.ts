@@ -13,16 +13,19 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 
-export function toQuery(search?: string): QueryParams {
+export function toQuery(search?: string): APMQueryParamsRaw & RisonEncoded {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
-export function fromQuery(query: QueryParams) {
+export function fromQuery(query: APMQueryParams & RisonEncoded) {
   const encodedQuery = encodeQuery(query, ['_g', '_a']);
   return stringifyWithoutEncoding(encodedQuery);
 }
 
-export function encodeQuery(query: QueryParams, exclude: string[] = []) {
+export function encodeQuery(
+  query: APMQueryParams & RisonEncoded,
+  exclude: string[] = []
+) {
   return mapValues(query, (value, key) => {
     if (exclude.includes(key as string)) {
       return encodeURI(value);
@@ -31,7 +34,7 @@ export function encodeQuery(query: QueryParams, exclude: string[] = []) {
   });
 }
 
-function stringifyWithoutEncoding(query: QueryParams) {
+function stringifyWithoutEncoding(query: APMQueryParams & RisonEncoded) {
   return qs.stringify(query, undefined, undefined, {
     encodeURIComponent: (v: string) => v
   });
@@ -94,7 +97,7 @@ export interface KibanaHrefArgs {
   location: Location;
   pathname?: string;
   hash?: string;
-  query?: QueryParamsDecoded;
+  query?: APMQueryParams & RisonDecoded;
 }
 
 export function getKibanaHref({
@@ -116,7 +119,7 @@ export function getKibanaHref({
   return href;
 }
 
-interface APMQueryParams {
+interface APMQueryParamsRaw {
   transactionId?: string;
   traceId?: string;
   detailTab?: string;
@@ -124,6 +127,23 @@ interface APMQueryParams {
   waterfallItemId?: string;
   spanId?: string;
   page?: string;
+  sortDirection?: string;
+  sortField?: string;
+  kuery?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshPaused?: string;
+  refreshInterval?: string;
+}
+
+export interface APMQueryParams {
+  transactionId?: string;
+  traceId?: string;
+  detailTab?: string;
+  flyoutDetailTab?: string;
+  waterfallItemId?: string;
+  spanId?: string;
+  page?: string | number;
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
@@ -138,13 +158,10 @@ interface RisonEncoded {
   _a?: string;
 }
 
-interface RisonDecoded {
+export interface RisonDecoded {
   _g?: StringMap<any>;
   _a?: StringMap<any>;
 }
-
-export type QueryParams = APMQueryParams & RisonEncoded;
-export type QueryParamsDecoded = APMQueryParams & RisonDecoded;
 
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.

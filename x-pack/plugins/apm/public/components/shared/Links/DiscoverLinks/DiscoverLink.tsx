@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { KibanaLink } from '../KibanaLink';
-import { QueryParamsDecoded } from '../url_helpers';
+import { APMQueryParams, RisonDecoded } from '../url_helpers';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
-  query: QueryParamsDecoded;
+  query: APMQueryParams | RisonDecoded;
   children: React.ReactNode;
 }
 

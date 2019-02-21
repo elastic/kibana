@@ -74,7 +74,7 @@ export function urlParamsReducer(state = {}, action: Action) {
         detailTab: toString(detailTab),
         flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
-        kuery: legacyDecodeURIComponent(kuery as string | undefined),
+        kuery: legacyDecodeURIComponent(kuery),
 
         // path params
         processorEvent,
@@ -93,8 +93,8 @@ export function urlParamsReducer(state = {}, action: Action) {
   }
 }
 
-export function toNumber(value?: string | string[]) {
-  if (value !== undefined && !Array.isArray(value)) {
+export function toNumber(value?: string) {
+  if (value !== undefined) {
     return parseInt(value, 10);
   }
 }
@@ -111,13 +111,8 @@ function toString(str?: string | string[]) {
   return str;
 }
 
-export function toBoolean(value?: string | boolean) {
-  if (value === 'true' || value === true) {
-    return true;
-  }
-  if (value === 'false' || value === false) {
-    return false;
-  }
+export function toBoolean(value?: string) {
+  return value === 'true';
 }
 
 function getPathAsArray(pathname: string) {
