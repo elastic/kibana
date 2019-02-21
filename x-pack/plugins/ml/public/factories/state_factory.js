@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 
-import { Subject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 export function initializeAppState(AppState, stateName, defaultState) {
@@ -51,79 +50,4 @@ export function subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STAT
     appState.save();
     $rootScope.$applyAsync();
   });
-}
-
-// A data store to be able to share persistent state across directives
-// in services more conveniently when the structure of angular directives
-// doesn't allow the use of controllers to share state.
-
-// Offers set()/get() to store and fetch automatically persisted data
-// Includes watch()/unwatch()/changed() to be able to subscribe to data changes
-// Have a look at the unit tests which demonstrate basic usage.
-
-export function stateFactoryProvider(AppState) {
-  return function (stateName, defaultState) {
-    if (typeof stateName !== 'string') {
-      throw 'stateName needs to be of type `string`';
-    }
-
-    let appState = initializeAppState(AppState, stateName, defaultState);
-
-    const listener = new Subject();
-
-    let changed = false;
-
-    // the state's API: a getter/setter/resetter as well as the methods
-    // watch/unwatch/changed to be able to create and use listeners
-    // on the state.
-    const state = {
-      get(name) {
-        updateAppState();
-        return appState[stateName][name];
-      },
-      // only if value doesn't match the existing one, the state gets updated
-      // and saved.
-      set(name, value) {
-        updateAppState();
-        if (!_.isEqual(appState[stateName][name], value)) {
-          appState[stateName][name] = value;
-          appState.save();
-          changed = true;
-        }
-        return state;
-      },
-      reset() {
-        updateAppState();
-        if (!_.isEqual(appState[stateName], defaultState)) {
-          appState[stateName] = _.cloneDeep(defaultState);
-          appState.save();
-          changed = true;
-        }
-        return state;
-      },
-      watch(l) {
-        return listener.subscribe(l);
-      },
-      // wrap the listener's changed() method to only fire it
-      // if the state changed.
-      changed(d) {
-        if (changed) {
-          listener.next(d);
-          changed = false;
-        }
-      }
-    };
-
-    // gets the current state of AppState, if for whatever reason this custom
-    // state isn't part of AppState anymore, reinitialize it
-    function updateAppState() {
-      appState.fetch();
-      if (typeof appState[stateName] === 'undefined') {
-        appState = initializeAppState(AppState, stateName, defaultState);
-        changed = true;
-      }
-    }
-
-    return state;
-  };
 }
