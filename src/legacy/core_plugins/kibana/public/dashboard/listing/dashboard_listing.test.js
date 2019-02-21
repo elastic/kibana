@@ -146,8 +146,10 @@ describe('after fetch', () => {
 
   test('hideWriteControls with dashboards', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 1)}
-      delete={() => {}}
+      findItems={find.bind(null, 1)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
       listingLimit={1}
       hideWriteControls={true}
     />);
