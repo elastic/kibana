@@ -62,32 +62,34 @@ export const createSummaryEffectsEpic = <State>(): Epic<
     withLatestFrom(filterQuery$, (filterQuery, filterQueryString) => filterQueryString)
   );
 
-  return merge(
-    shouldLoadBetweenNewInterval$.pipe(
-      withLatestFrom(filterQuery$),
-      exhaustMap(([{ start, end, bucketSize }, filterQuery]) => [
-        loadSummary({
-          start,
-          end,
-          sourceId: 'default',
-          bucketSize,
-          filterQuery,
-        }),
-      ])
-    ),
-    shouldLoadWithNewFilter$.pipe(
-      withLatestFrom(summaryInterval$),
-      exhaustMap(([filterQuery, { start, end, bucketSize }]) => [
-        loadSummary({
-          start,
-          end,
-          sourceId: 'default',
-          bucketSize: (end - start) / LOAD_BUCKETS_PER_PAGE,
-          filterQuery,
-        }),
-      ])
-    )
-  );
+  return action$.pipe(filter(() => false));
+
+  // return merge(
+  //   shouldLoadBetweenNewInterval$.pipe(
+  //     withLatestFrom(filterQuery$),
+  //     exhaustMap(([{ start, end, bucketSize }, filterQuery]) => [
+  //       loadSummary({
+  //         start,
+  //         end,
+  //         sourceId: 'default',
+  //         bucketSize,
+  //         filterQuery,
+  //       }),
+  //     ])
+  //   ),
+  //   shouldLoadWithNewFilter$.pipe(
+  //     withLatestFrom(summaryInterval$),
+  //     exhaustMap(([filterQuery, { start, end, bucketSize }]) => [
+  //       loadSummary({
+  //         start,
+  //         end,
+  //         sourceId: 'default',
+  //         bucketSize: (end - start) / LOAD_BUCKETS_PER_PAGE,
+  //         filterQuery,
+  //       }),
+  //     ])
+  //   )
+  // );
 };
 
 const getLoadParameters = (start: number, end: number) => ({

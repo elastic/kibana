@@ -4,19 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useContext } from 'react';
 import { connect } from 'react-redux';
 
-import { logSummaryActions, logSummarySelectors, State } from '../../store';
-import { asChildFunctionRenderer } from '../../utils/typed_react';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
+import { logFilterSelectors, logPositionSelectors, State } from '../../store';
+import { RendererFunction } from '../../utils/typed_react';
+import { LogSummaryBuckets, useLogSummary } from './log_summary';
+import { LogViewConfiguration } from './log_view_configuration';
 
-export const withSummary = connect(
-  (state: State) => ({
-    buckets: logSummarySelectors.selectSummaryBuckets(state),
-  }),
-  bindPlainActionCreators({
-    load: logSummaryActions.loadSummary,
-  })
+export const WithSummary = connect((state: State) => ({
+  visibleMidpointTime: logPositionSelectors.selectVisibleMidpointOrTargetTime(state),
+  filterQuery: logFilterSelectors.selectLogFilterQueryAsJson(state),
+}))(
+  ({
+    children,
+    filterQuery,
+    visibleMidpointTime,
+  }: {
+    children: RendererFunction<{ buckets: LogSummaryBuckets }>;
+    filterQuery: string | null;
+    visibleMidpointTime: number | null;
+  }) => {
+    const { intervalSize } = useContext(LogViewConfiguration.Context);
+
+    const { buckets } = useLogSummary('default', visibleMidpointTime, intervalSize, filterQuery);
+
+    return children({ buckets });
+  }
 );
-
-export const WithSummary = asChildFunctionRenderer(withSummary);
