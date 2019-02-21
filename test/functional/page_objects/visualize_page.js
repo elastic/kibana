@@ -43,11 +43,96 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       };
     }
 
+    async gotoVisualizationLandingPage() {
+      log.debug('gotoVisualizationLandingPage');
+      await PageObjects.common.navigateToApp('visualize');
+    }
+
+    async checkListingSelectAllCheckbox() {
+      const element = await testSubjects.find('checkboxSelectAll');
+      const isSelected = await element.isSelected();
+      if (!isSelected) {
+        log.debug(`checking checkbox "checkboxSelectAll"`);
+        await testSubjects.click('checkboxSelectAll');
+      }
+    }
+
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');
-      await testSubjects.click('createNewVis');
+      await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
+    }
+
+    async clickNewVisualization() {
+      // newItemButton button is only visible when there are items in the listing table is displayed.
+      let exists = await testSubjects.exists('newItemButton');
+      if (exists) {
+        return await testSubjects.click('newItemButton');
+      }
+
+      exists = await testSubjects.exists('createVisualizationPromptButton');
+      // no viz exist, click createVisualizationPromptButton to create new dashboard
+      return await this.createVisualizationPromptButton();
+    }
+
+    async deleteAllVisualizations() {
+      await this.checkListingSelectAllCheckbox();
+      await this.clickDeleteSelected();
+      await PageObjects.common.clickConfirmOnModal();
+    }
+
+    async createSimpleMarkdownViz(vizName) {
+      await this.gotoVisualizationLandingPage();
+      await this.navigateToNewVisualization();
+      await this.clickMarkdownWidget();
+      await this.setMarkdownTxt(vizName);
+      await this.clickGo();
+      await this.saveVisualization(vizName);
+    }
+
+    async createVisualizationPromptButton() {
+      await testSubjects.click('createVisualizationPromptButton');
+    }
+
+    async getSearchFilter() {
+      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      return searchFilter[0];
+    }
+
+    async clearFilter() {
+      const searchFilter = await this.getSearchFilter();
+      await searchFilter.clearValue();
+      await searchFilter.click();
+    }
+
+    async searchForItemWithName(name) {
+      log.debug(`searchForItemWithName: ${name}`);
+
+      await retry.try(async () => {
+        const searchFilter = await this.getSearchFilter();
+        await searchFilter.clearValue();
+        await searchFilter.click();
+        // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+        await searchFilter.type(name.replace('-', ' '));
+        await PageObjects.common.pressEnterKey();
+      });
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickDeleteSelected() {
+      await testSubjects.click('deleteSelectedItems');
+    }
+
+    async getCreatePromptExists() {
+      log.debug('getCreatePromptExists');
+      return await testSubjects.exists('createVisualizationPromptButton');
+    }
+
+    async getCountOfItemsInListingTable() {
+      const elements = await find.allByCssSelector('[data-test-subj^="visListingTitleLink"]');
+      return elements.length;
     }
 
     async waitForVisualizationSelectPage() {
@@ -307,12 +392,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
-      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickSavedSearch(savedSearchName) {
-      await find.clickByPartialLinkText(savedSearchName);
+      await testSubjects.click('savedSearchesTab');
+      await testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -713,7 +799,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      return find.clickByPartialLinkText(vizName);
+      return find.clickByButtonText(vizName);
     }
 
     async loadSavedVisualization(vizName, { navigateToVisualize = true } = {}) {

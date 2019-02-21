@@ -105,4 +105,24 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     const args = savedObjectsClient.bulkCreate.getCall(0).args;
     expect(args[0]).toEqual(docs);
   });
+
+  it('passes along the overwrite option', async () => {
+    await server.inject({
+      method: 'POST',
+      url: '/api/saved_objects/_bulk_create?overwrite=true',
+      payload: [{
+        id: 'abc1234',
+        type: 'index-pattern',
+        attributes: {
+          title: 'bar',
+        },
+        references: [],
+      }]
+    });
+
+    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
+
+    const args = savedObjectsClient.bulkCreate.getCall(0).args;
+    expect(args[1]).toEqual({ overwrite: true });
+  });
 });

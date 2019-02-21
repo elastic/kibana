@@ -6,6 +6,7 @@
 
 import {
   SET_SELECTED_LAYER,
+  SET_TRANSIENT_LAYER,
   UPDATE_LAYER_ORDER,
   LAYER_DATA_LOAD_STARTED,
   LAYER_DATA_LOAD_ENDED,
@@ -15,7 +16,6 @@ import {
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
-  PROMOTE_TEMPORARY_LAYERS,
   TOGGLE_LAYER_VISIBLE,
   MAP_EXTENT_CHANGED,
   MAP_READY,
@@ -96,6 +96,7 @@ const INITIAL_STATE = {
     refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
+  __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
 };
@@ -221,8 +222,11 @@ export function map(state = INITIAL_STATE, action) {
         }
       };
     case SET_SELECTED_LAYER:
-      const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
-      return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
+      const selectedMatch = state.layerList.find(layer => layer.id === action.selectedLayerId);
+      return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
+    case SET_TRANSIENT_LAYER:
+      const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
+      return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case UPDATE_LAYER_PROP:
@@ -265,13 +269,6 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         waitingForMapReadyLayerList: []
       };
-    //TODO: Handle more than one
-    case PROMOTE_TEMPORARY_LAYERS:
-      const tempLayer = state.layerList.find(({ temporary }) => temporary);
-      return tempLayer
-        ? updateLayerInList(state, tempLayer.id, 'temporary', false)
-        : state;
-    // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:

@@ -209,6 +209,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/leadfoot_element_wrapper/scroll_into_view_if_necessary.js',
+        '**/browser_exec_scripts/**/*',
       ],
       rules: {
         'prefer-object-spread/prefer-object-spread': 'off',
@@ -220,6 +221,7 @@ module.exports = {
           'ArrowFunctionExpression',
           'AwaitExpression',
           'ClassDeclaration',
+          'ImportDeclaration',
           'RestElement',
           'SpreadElement',
           'YieldExpression',

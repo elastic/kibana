@@ -20,5 +20,7 @@
 export { SavedObjectsClient } from './saved_objects_client';
 export { SavedObjectRegistryProvider } from './saved_object_registry';
 export { SavedObjectsClientProvider } from './saved_objects_client_provider';
-export { SavedObject } from './saved_object';
+// @ts-ignore
+export { SavedObjectLoader } from './saved_object_loader';
+export { SimpleSavedObject } from './simple_saved_object';
 export { findObjectByTitle } from './find_object_by_title';
