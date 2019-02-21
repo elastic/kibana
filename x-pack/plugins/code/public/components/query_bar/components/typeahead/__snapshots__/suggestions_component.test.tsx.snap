@@ -139,13 +139,30 @@ exports[`render full suggestions component 1`] = `
               onScroll={[Function]}
               role="listbox"
             >
-              <styled.div>
+              <EuiFlexGroup
+                alignItems="stretch"
+                className="codeSearch-suggestion__group-header"
+                component="div"
+                direction="row"
+                gutterSize="l"
+                justifyContent="spaceBetween"
+                responsive={true}
+                wrap={false}
+              >
                 <div
-                  className="sc-htoDjs chDvrV"
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                 >
-                  <styled.div>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    component="div"
+                    direction="row"
+                    gutterSize="none"
+                    justifyContent="flexStart"
+                    responsive={true}
+                    wrap={false}
+                  >
                     <div
-                      className="sc-dnqmqq iFsitv"
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiToken
                         displayOptions={Object {}}
@@ -185,25 +202,25 @@ exports[`render full suggestions component 1`] = `
                           </EuiIcon>
                         </div>
                       </EuiToken>
-                      <styled.span>
-                        <span
-                          className="sc-iwsKbI eRUloI"
+                      <EuiText
+                        className="codeSearch-suggestion__group-title"
+                        grow={true}
+                        size="m"
+                      >
+                        <div
+                          className="euiText euiText--medium codeSearch-suggestion__group-title"
                         >
                           Symbols
-                        </span>
-                      </styled.span>
+                        </div>
+                      </EuiText>
                     </div>
-                  </styled.div>
-                  <styled.div>
-                    <div
-                      className="sc-gZMcBi doiTLD"
-                    >
-                      1
-                       Result
-                    </div>
-                  </styled.div>
+                  </EuiFlexGroup>
+                  <div>
+                    1
+                     Result
+                  </div>
                 </div>
-              </styled.div>
+              </EuiFlexGroup>
               <Component
                 ariaId="suggestion-0-0"
                 innerRef={[Function]}
@@ -223,112 +240,80 @@ exports[`render full suggestions component 1`] = `
                   }
                 }
               >
-                <styled.div
-                  active={true}
+                <div
                   aria-selected={true}
+                  className="codeSearch__suggestion-item codeSearch__suggestion-item--active"
                   id="suggestion-0-0"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
-                    aria-selected={true}
-                    className="sc-htpNat hJjmYy"
-                    id="suggestion-0-0"
-                    onClick={[Function]}
-                    onMouseEnter={[Function]}
-                    role="option"
+                    className="codeSearch-suggestion--inner"
                   >
-                    <styled.div>
-                      <div
-                        className="sc-bxivhb jzTuee"
+                    <div
+                      className="codeSearch-suggestion__token"
+                    >
+                      <EuiToken
+                        displayOptions={Object {}}
+                        iconType="tokenClass"
+                        size="s"
                       >
-                        <Styled(styled.div)>
-                          <styled.div
-                            className="sc-EHOje iMawIB"
+                        <div
+                          className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="tokenClass"
                           >
-                            <div
-                              className="sc-EHOje iMawIB sc-ifAKCX bMxzXt"
+                            <tokenClass
+                              className="euiIcon euiIcon--medium"
+                              focusable="false"
+                              height="16"
+                              style={null}
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <EuiToken
-                                displayOptions={Object {}}
-                                iconType="tokenClass"
-                                size="s"
+                              <svg
+                                className="euiIcon euiIcon--medium"
+                                focusable="false"
+                                height="16"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <div
-                                  className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
-                                >
-                                  <EuiIcon
-                                    size="m"
-                                    type="tokenClass"
-                                  >
-                                    <tokenClass
-                                      className="euiIcon euiIcon--medium"
-                                      focusable="false"
-                                      height="16"
-                                      style={null}
-                                      viewBox="0 0 16 16"
-                                      width="16"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <svg
-                                        className="euiIcon euiIcon--medium"
-                                        focusable="false"
-                                        height="16"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <path
-                                          d="M11.333 7.027H9.375c-.056-.708-.48-1.187-1.222-1.187-.972 0-1.5.806-1.5 2.16 0 1.43.545 2.16 1.486 2.16.708 0 1.139-.415 1.236-1.08l1.958.015C11.236 10.418 10.181 12 8.097 12c-1.958 0-3.43-1.41-3.43-4 0-2.6 1.514-4 3.43-4 1.792 0 3.084 1.095 3.236 3.027z"
-                                          fillRule="evenodd"
-                                        />
-                                      </svg>
-                                    </tokenClass>
-                                  </EuiIcon>
-                                </div>
-                              </EuiToken>
-                            </div>
-                          </styled.div>
-                        </Styled(styled.div)>
-                        <div>
-                          <Styled(styled.div)
-                            data-test-subj="codeTypeaheadItem"
-                          >
-                            <styled.div
-                              className="sc-bZQynM iALzZw"
-                              data-test-subj="codeTypeaheadItem"
-                            >
-                              <div
-                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
-                                data-test-subj="codeTypeaheadItem"
-                              >
-                                <span>
-                                  java.lang.
-                                  <strong>
-                                    String
-                                  </strong>
-                                </span>
-                              </div>
-                            </styled.div>
-                          </Styled(styled.div)>
-                          <Styled(styled.div)>
-                            <styled.div
-                              className="sc-gzVnrw kzVDXi"
-                            >
-                              <div
-                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
-                              >
-                                elastic/elasticsearch &gt; src/foo/bar.java
-                              </div>
-                            </styled.div>
-                          </Styled(styled.div)>
+                                <path
+                                  d="M11.333 7.027H9.375c-.056-.708-.48-1.187-1.222-1.187-.972 0-1.5.806-1.5 2.16 0 1.43.545 2.16 1.486 2.16.708 0 1.139-.415 1.236-1.08l1.958.015C11.236 10.418 10.181 12 8.097 12c-1.958 0-3.43-1.41-3.43-4 0-2.6 1.514-4 3.43-4 1.792 0 3.084 1.095 3.236 3.027z"
+                                  fillRule="evenodd"
+                                />
+                              </svg>
+                            </tokenClass>
+                          </EuiIcon>
                         </div>
+                      </EuiToken>
+                    </div>
+                    <div>
+                      <div
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
+                      >
+                        <span>
+                          java.lang.
+                          <strong>
+                            String
+                          </strong>
+                        </span>
                       </div>
-                    </styled.div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      >
+                        elastic/elasticsearch &gt; src/foo/bar.java
+                      </div>
+                    </div>
                   </div>
-                </styled.div>
+                </div>
               </Component>
             </div>
             <div
@@ -339,13 +324,30 @@ exports[`render full suggestions component 1`] = `
               onScroll={[Function]}
               role="listbox"
             >
-              <styled.div>
+              <EuiFlexGroup
+                alignItems="stretch"
+                className="codeSearch-suggestion__group-header"
+                component="div"
+                direction="row"
+                gutterSize="l"
+                justifyContent="spaceBetween"
+                responsive={true}
+                wrap={false}
+              >
                 <div
-                  className="sc-htoDjs chDvrV"
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                 >
-                  <styled.div>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    component="div"
+                    direction="row"
+                    gutterSize="none"
+                    justifyContent="flexStart"
+                    responsive={true}
+                    wrap={false}
+                  >
                     <div
-                      className="sc-dnqmqq iFsitv"
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiToken
                         displayOptions={Object {}}
@@ -385,25 +387,25 @@ exports[`render full suggestions component 1`] = `
                           </EuiIcon>
                         </div>
                       </EuiToken>
-                      <styled.span>
-                        <span
-                          className="sc-iwsKbI eRUloI"
+                      <EuiText
+                        className="codeSearch-suggestion__group-title"
+                        grow={true}
+                        size="m"
+                      >
+                        <div
+                          className="euiText euiText--medium codeSearch-suggestion__group-title"
                         >
                           Files
-                        </span>
-                      </styled.span>
+                        </div>
+                      </EuiText>
                     </div>
-                  </styled.div>
-                  <styled.div>
-                    <div
-                      className="sc-gZMcBi doiTLD"
-                    >
-                      1
-                       Result
-                    </div>
-                  </styled.div>
+                  </EuiFlexGroup>
+                  <div>
+                    1
+                     Result
+                  </div>
                 </div>
-              </styled.div>
+              </EuiFlexGroup>
               <Component
                 ariaId="suggestion-1-0"
                 innerRef={[Function]}
@@ -423,58 +425,32 @@ exports[`render full suggestions component 1`] = `
                   }
                 }
               >
-                <styled.div
-                  active={false}
+                <div
                   aria-selected={false}
+                  className="codeSearch__suggestion-item "
                   id="suggestion-1-0"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
-                    aria-selected={false}
-                    className="sc-htpNat kxKXpI"
-                    id="suggestion-1-0"
-                    onClick={[Function]}
-                    onMouseEnter={[Function]}
-                    role="option"
+                    className="codeSearch-suggestion--inner"
                   >
-                    <styled.div>
+                    <div>
                       <div
-                        className="sc-bxivhb jzTuee"
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
                       >
-                        <div>
-                          <Styled(styled.div)
-                            data-test-subj="codeTypeaheadItem"
-                          >
-                            <styled.div
-                              className="sc-bZQynM iALzZw"
-                              data-test-subj="codeTypeaheadItem"
-                            >
-                              <div
-                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
-                                data-test-subj="codeTypeaheadItem"
-                              >
-                                src/foo/bar.java
-                              </div>
-                            </styled.div>
-                          </Styled(styled.div)>
-                          <Styled(styled.div)>
-                            <styled.div
-                              className="sc-gzVnrw kzVDXi"
-                            >
-                              <div
-                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
-                              >
-                                This is a file
-                              </div>
-                            </styled.div>
-                          </Styled(styled.div)>
-                        </div>
+                        src/foo/bar.java
                       </div>
-                    </styled.div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      >
+                        This is a file
+                      </div>
+                    </div>
                   </div>
-                </styled.div>
+                </div>
               </Component>
             </div>
             <div
@@ -485,13 +461,30 @@ exports[`render full suggestions component 1`] = `
               onScroll={[Function]}
               role="listbox"
             >
-              <styled.div>
+              <EuiFlexGroup
+                alignItems="stretch"
+                className="codeSearch-suggestion__group-header"
+                component="div"
+                direction="row"
+                gutterSize="l"
+                justifyContent="spaceBetween"
+                responsive={true}
+                wrap={false}
+              >
                 <div
-                  className="sc-htoDjs chDvrV"
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                 >
-                  <styled.div>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    component="div"
+                    direction="row"
+                    gutterSize="none"
+                    justifyContent="flexStart"
+                    responsive={true}
+                    wrap={false}
+                  >
                     <div
-                      className="sc-dnqmqq iFsitv"
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <EuiToken
                         displayOptions={Object {}}
@@ -532,26 +525,26 @@ exports[`render full suggestions component 1`] = `
                           </EuiIcon>
                         </div>
                       </EuiToken>
-                      <styled.span>
-                        <span
-                          className="sc-iwsKbI eRUloI"
+                      <EuiText
+                        className="codeSearch-suggestion__group-title"
+                        grow={true}
+                        size="m"
+                      >
+                        <div
+                          className="euiText euiText--medium codeSearch-suggestion__group-title"
                         >
                           Repos
-                        </span>
-                      </styled.span>
+                        </div>
+                      </EuiText>
                     </div>
-                  </styled.div>
-                  <styled.div>
-                    <div
-                      className="sc-gZMcBi doiTLD"
-                    >
-                      2
-                       Result
-                      s
-                    </div>
-                  </styled.div>
+                  </EuiFlexGroup>
+                  <div>
+                    2
+                     Result
+                    s
+                  </div>
                 </div>
-              </styled.div>
+              </EuiFlexGroup>
               <Component
                 ariaId="suggestion-2-0"
                 innerRef={[Function]}
@@ -571,56 +564,30 @@ exports[`render full suggestions component 1`] = `
                   }
                 }
               >
-                <styled.div
-                  active={false}
+                <div
                   aria-selected={false}
+                  className="codeSearch__suggestion-item "
                   id="suggestion-2-0"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
-                    aria-selected={false}
-                    className="sc-htpNat kxKXpI"
-                    id="suggestion-2-0"
-                    onClick={[Function]}
-                    onMouseEnter={[Function]}
-                    role="option"
+                    className="codeSearch-suggestion--inner"
                   >
-                    <styled.div>
+                    <div>
                       <div
-                        className="sc-bxivhb jzTuee"
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
                       >
-                        <div>
-                          <Styled(styled.div)
-                            data-test-subj="codeTypeaheadItem"
-                          >
-                            <styled.div
-                              className="sc-bZQynM iALzZw"
-                              data-test-subj="codeTypeaheadItem"
-                            >
-                              <div
-                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
-                                data-test-subj="codeTypeaheadItem"
-                              >
-                                elastic/kibana
-                              </div>
-                            </styled.div>
-                          </Styled(styled.div)>
-                          <Styled(styled.div)>
-                            <styled.div
-                              className="sc-gzVnrw kzVDXi"
-                            >
-                              <div
-                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
-                              />
-                            </styled.div>
-                          </Styled(styled.div)>
-                        </div>
+                        elastic/kibana
                       </div>
-                    </styled.div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      />
+                    </div>
                   </div>
-                </styled.div>
+                </div>
               </Component>
               <Component
                 ariaId="suggestion-2-1"
@@ -641,88 +608,52 @@ exports[`render full suggestions component 1`] = `
                   }
                 }
               >
-                <styled.div
-                  active={false}
+                <div
                   aria-selected={false}
+                  className="codeSearch__suggestion-item "
                   id="suggestion-2-1"
                   onClick={[Function]}
                   onMouseEnter={[Function]}
                   role="option"
                 >
                   <div
-                    aria-selected={false}
-                    className="sc-htpNat kxKXpI"
-                    id="suggestion-2-1"
-                    onClick={[Function]}
-                    onMouseEnter={[Function]}
-                    role="option"
+                    className="codeSearch-suggestion--inner"
                   >
-                    <styled.div>
+                    <div>
                       <div
-                        className="sc-bxivhb jzTuee"
+                        className="codeSearch__suggestion-text"
+                        data-test-subj="codeTypeaheadItem"
                       >
-                        <div>
-                          <Styled(styled.div)
-                            data-test-subj="codeTypeaheadItem"
-                          >
-                            <styled.div
-                              className="sc-bZQynM iALzZw"
-                              data-test-subj="codeTypeaheadItem"
-                            >
-                              <div
-                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
-                                data-test-subj="codeTypeaheadItem"
-                              >
-                                elastic/elasticsearch
-                              </div>
-                            </styled.div>
-                          </Styled(styled.div)>
-                          <Styled(styled.div)>
-                            <styled.div
-                              className="sc-gzVnrw kzVDXi"
-                            >
-                              <div
-                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
-                              />
-                            </styled.div>
-                          </Styled(styled.div)>
-                        </div>
+                        elastic/elasticsearch
                       </div>
-                    </styled.div>
+                      <div
+                        className="codeSearch-suggestion__description"
+                      />
+                    </div>
                   </div>
-                </styled.div>
-              </Component>
-              <styled.div>
-                <div
-                  className="sc-gqjmRU bqMCCt"
-                >
-                  <Link
-                    replace={false}
-                    to="/search?q=string"
-                  >
-                    <a
-                      href="/search?q=string"
-                      onClick={[Function]}
-                    >
-                      View More
-                    </a>
-                  </Link>
                 </div>
-              </styled.div>
-            </div>
-            <styled.div>
+              </Component>
               <div
-                className="sc-VigVT hKgARx"
+                className="codeSearch-suggestion__link"
               >
-                <styled.div>
-                  <div
-                    className="sc-jTzLTM eaoLEj"
+                <Link
+                  replace={false}
+                  to="/search?q=string"
+                >
+                  <a
+                    href="/search?q=string"
+                    onClick={[Function]}
                   >
-                    Press ⮐ Return for Full Text Search
-                  </div>
-                </styled.div>
+                    View More
+                  </a>
+                </Link>
               </div>
-            </styled.div>
+            </div>
+            <div
+              className="codeSearch__full-text-button"
+            >
+              Press ⮐ Return for Full Text Search
+            </div>
           </div>
         </div>
       </div>
