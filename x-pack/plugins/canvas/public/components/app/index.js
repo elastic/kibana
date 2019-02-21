@@ -14,17 +14,15 @@ import { appReady, appError } from '../../state/actions/app';
 import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
-import { elementSpecs } from '../../../canvas_plugin_src/elements';
-import { renderFunctions } from '../../../canvas_plugin_src/renderers';
-import { transformSpecs } from '../../../canvas_plugin_src/uis/transforms';
-import { modelSpecs } from '../../../canvas_plugin_src/uis/models';
-import { viewSpecs } from '../../../canvas_plugin_src/uis/views';
-import { datasourceSpecs } from '../../../canvas_plugin_src/uis/datasources';
-import { args as argSpecs } from '../../../canvas_plugin_src/uis/arguments';
-import { tagSpecs } from '../../../canvas_plugin_src/uis/tags';
-import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
-import { functions as commonPluginFunctions } from '../../../canvas_plugin_src/functions/common';
-import { templateSpecs } from '../../../canvas_plugin_src/templates';
+import { elementSpecs } from '../../elements';
+import { renderFunctions } from '../../renderers';
+import { transformSpecs } from '../../uis/transforms';
+import { modelSpecs } from '../../uis/models';
+import { viewSpecs } from '../../uis/views';
+import { datasourceSpecs } from '../../uis/datasources';
+import { args as argSpecs } from '../../uis/arguments';
+import { tagSpecs } from '../../uis/tags';
+import { templateSpecs } from '../../templates';
 import { commonFunctions } from '../../../common/functions';
 import { clientFunctions } from '../../functions';
 
@@ -67,10 +65,7 @@ register(registries, {
   viewUIs: viewSpecs,
   datasourceUIs: datasourceSpecs,
   argumentUIs: argSpecs,
-  browserFunctions: browserFunctions
-    .concat(commonFunctions)
-    .concat(clientFunctions)
-    .concat(commonPluginFunctions),
+  browserFunctions: clientFunctions.concat(commonFunctions),
   templates: templateSpecs,
   tagUIs: tagSpecs,
 });
