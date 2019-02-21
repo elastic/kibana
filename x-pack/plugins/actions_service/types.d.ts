@@ -4,16 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface ActionHandler {
-  name: string;
-  handler: () => void;
-}
-
 interface ActionConfigParameter {
   name: string;
   type: string;
 }
 
-interface ActionInstance {
+interface ActionType {
+  name: string;
   initParams: ActionConfigParameter[];
+  executionParams: ActionConfigParameter[];
+}
+
+interface ActionConnector {
+  actionType: string;
+  connectorType: string;
+  handler: (params: any) => Promise<void>;
+}
+
+interface ActionExecution {
+  action: string;
+  actionType: string;
+  params: any;
+}
+
+interface ActionSavedObjectInstance {
+  name: string;
+  actionType: string;
+  instanceParams: any;
+}
+
+interface ActionInstance {
+  name: string;
+  actionType: string;
+  connectorType: string;
+  params: any;
+  connectorParams: any;
 }

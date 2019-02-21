@@ -9,8 +9,8 @@ import { Item } from './item';
 
 export const List = (props) => {
   let list = [];
-  if(props.secrets) {
-    list = props.secrets.map((it) => {
+  if(props.connectors) {
+    list = props.connectors.map((it) => {
       return <Item {...it} />;
     });
   }

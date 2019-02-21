@@ -24,7 +24,7 @@ export class Main extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      secrets: [],
+      connectors: [],
     };
   }
 
@@ -38,8 +38,8 @@ export class Main extends React.Component {
       this.setState({ time: resp.data.time });
     });
 
-    httpClient.get('../api/secrets-tester/list').then((resp) => {
-      this.setState({ secrets: resp.data.saved_objects });
+    httpClient.get('../api/actions/connectors').then((resp) => {
+      this.setState({ connectors: resp.data.saved_objects });
     });
   }
   render() {
@@ -84,7 +84,7 @@ export class Main extends React.Component {
                     values={{ time: this.state.time || 'NO API CALL YET' }}
                   />
                 </p>
-                <List secrets={this.state.secrets} />
+                <List connectors={this.state.connectors} />
                 <SecretsForm token={chrome.getXsrfToken()} httpClient={this.props.httpClient}/>
               </EuiText>
             </EuiPageContentBody>
