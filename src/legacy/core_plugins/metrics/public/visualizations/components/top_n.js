@@ -19,7 +19,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { EuiToolTip } from '@elastic/eui';
 import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
@@ -60,14 +59,7 @@ class TopN extends Component {
           onClick={this.handleClick({ lastValue, ...item })}
           style={styles.row}
         >
-          <td className="tvbVisTopN__label">
-            <EuiToolTip
-              position="right"
-              content={item.label}
-            >
-              <span>{ item.label }</span>
-            </EuiToolTip>
-          </td>
+          <td title={item.label} className="tvbVisTopN__label">{ item.label }</td>
           <td width="100%" className="tvbVisTopN__bar">
             <div
               className="tvbVisTopN__innerBar"
