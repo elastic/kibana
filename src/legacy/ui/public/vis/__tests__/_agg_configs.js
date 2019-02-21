@@ -401,7 +401,9 @@ describe('AggConfigs', function () {
 
       const topLevelDsl = vis.aggs.toDsl(vis.isHierarchical())['2'];
       expect(topLevelDsl.aggs).to.have.keys(['1', '1-bucket']);
+      expect(topLevelDsl.aggs['1'].avg_bucket).to.have.property('buckets_path', '1-bucket>_count');
       expect(topLevelDsl.aggs['3'].aggs).to.have.keys(['1', '1-bucket']);
+      expect(topLevelDsl.aggs['3'].aggs['1'].avg_bucket).to.have.property('buckets_path', '1-bucket>_count');
     });
   });
 });
