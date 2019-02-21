@@ -46,7 +46,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
 
   public render() {
     const {
-      colors: { darkShade, lightShade, danger, success },
+      colors: { range, mean, danger, success },
       dateRangeStart,
       dateRangeEnd,
       monitorId,
@@ -120,7 +120,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                       animateData={false}
                     >
                       <EuiAreaSeries
-                        color={lightShade}
+                        color={range}
                         name={i18n.translate(
                           'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
                           {
@@ -131,7 +131,8 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                         curve="curveBasis"
                       />
                       <EuiLineSeries
-                        color={darkShade}
+                        color={mean}
+                        lineSize={2}
                         name={i18n.translate(
                           'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
                           {

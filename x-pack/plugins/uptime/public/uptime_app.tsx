@@ -33,8 +33,8 @@ import { MonitorPage, OverviewPage } from './pages';
 interface UptimeAppColors {
   danger: string;
   success: string;
-  lightShade: string;
-  darkShade: string;
+  range: string;
+  mean: string;
 }
 
 // TODO: these props are global to this app, we should put them in a context
@@ -107,15 +107,15 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     if (darkMode) {
       colors = {
         success: euiDarkVars.euiColorSuccess,
-        lightShade: euiDarkVars.euiColorLightShade,
-        darkShade: euiDarkVars.euiColorDarkShade,
+        range: euiDarkVars.euiFocusBackgroundColor,
+        mean: euiDarkVars.euiColorPrimary,
         danger: euiDarkVars.euiColorDanger,
       };
     } else {
       colors = {
         success: euiLightVars.euiColorSuccess,
-        lightShade: euiLightVars.euiColorLightShade,
-        darkShade: euiLightVars.euiColorDarkShade,
+        range: euiLightVars.euiFocusBackgroundColor,
+        mean: euiLightVars.euiColorPrimary,
         danger: euiLightVars.euiColorDanger,
       };
     }
