@@ -155,7 +155,7 @@ export const PingList = ({
               </EuiFlexItem>
               {!!total && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>{total}</EuiBadge>
+                  <EuiBadge color="hollow">{total}</EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

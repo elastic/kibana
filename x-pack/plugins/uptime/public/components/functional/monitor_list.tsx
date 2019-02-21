@@ -44,7 +44,7 @@ const monitorListPagination = {
 
 export const MonitorList = ({ dangerColor, loading, monitors, successColor }: MonitorListProps) => (
   <EuiPanel paddingSize="s">
-    <EuiTitle size="xxs">
+    <EuiTitle size="xs">
       <h5>
         <FormattedMessage
           id="xpack.uptime.monitorList.monitoringStatusTitle"

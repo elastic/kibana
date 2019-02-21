@@ -43,11 +43,11 @@ export const Snapshot = ({
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
+            <EuiTitle size="xs">
               <h5>
                 <FormattedMessage
                   id="xpack.uptime.snapshot.endpointStatusTitle"
-                  defaultMessage="Endpoint status"
+                  defaultMessage="Current status"
                 />
               </h5>
             </EuiTitle>
@@ -92,7 +92,7 @@ export const Snapshot = ({
     </EuiFlexItem>
     <EuiFlexItem grow={8}>
       <EuiPanel paddingSize="s">
-        <EuiTitle size="xxs">
+        <EuiTitle size="xs">
           <h5>
             <FormattedMessage
               id="xpack.uptime.snapshot.statusOverTimeTitle"
