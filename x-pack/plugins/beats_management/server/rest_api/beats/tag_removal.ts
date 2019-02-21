@@ -32,6 +32,15 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
     const { removals } = request.payload;
 
     const response = await libs.beats.removeTagsFromBeats(request.user, removals);
-    return response;
+
+    return {
+      success: true,
+      results: response.removals.map(removal => ({
+        success: removal.status && removal.status >= 200 && removal.status < 300,
+        result: {
+          message: removal.result,
+        },
+      })),
+    } as ReturnTypeBulkAction;
   },
 });

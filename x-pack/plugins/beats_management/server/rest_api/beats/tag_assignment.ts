@@ -35,8 +35,13 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
     const response = await libs.beats.assignTagsToBeats(request.user, assignments);
 
     return {
-      results: response,
       success: true,
-    };
+      results: response.assignments.map(assignment => ({
+        success: assignment.status && assignment.status >= 200 && assignment.status < 300,
+        result: {
+          message: assignment.result,
+        },
+      })),
+    } as ReturnTypeBulkAction;
   },
 });
