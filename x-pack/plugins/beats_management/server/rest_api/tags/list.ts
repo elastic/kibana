@@ -33,6 +33,6 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
       request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
     );
 
-    return tags;
+    return { list: tags, success: true, page: -1, total: -1 };
   },
 });

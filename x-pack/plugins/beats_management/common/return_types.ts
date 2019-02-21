@@ -22,8 +22,9 @@ export interface ReturnTypeUpdate<T> extends BaseReturnType {
   action: 'updated';
 }
 
-export interface ReturnTypeBulkCreate extends BaseReturnType {
+export interface ReturnTypeBulkCreate<T> extends BaseReturnType {
   results: Array<{
+    item: T;
     success: boolean;
     action: 'created';
     error?: {

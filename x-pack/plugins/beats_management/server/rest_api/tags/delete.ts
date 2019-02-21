@@ -21,6 +21,12 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
     let success: boolean;
     success = await libs.tags.delete(request.user, tagIds);
 
-    return { success };
+    return {
+      results: tagIds.map(() => ({
+        success,
+        action: 'deleted',
+      })),
+      success,
+    } as ReturnTypeBulkDelete;
   },
 });

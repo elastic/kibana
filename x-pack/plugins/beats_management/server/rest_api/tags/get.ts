@@ -23,6 +23,9 @@ export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOpt
     let tags: BeatTag[];
     tags = await libs.tags.getWithIds(request.user, tagIds);
 
-    return tags;
+    return {
+      items: tags,
+      success: true,
+    };
   },
 });

@@ -27,6 +27,9 @@ export const createAssignableTagsRoute = (libs: CMServerLibs) => ({
       flatten(beats.map(beat => beat.tags))
     );
 
-    return tags;
+    return {
+      items: tags,
+      success: true,
+    };
   },
 });
