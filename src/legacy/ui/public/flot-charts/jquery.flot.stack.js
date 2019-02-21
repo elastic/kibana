@@ -46,10 +46,8 @@ charts or filled areas).
             for (var i = 0; i < allseries.length; ++i) {
                 if (s == allseries[i])
                     break;
-
-                var seriesId = s.id.split(':')[0];
                 
-                if (allseries[i].stack == s.stack && allseries[i].id.indexOf(seriesId) === 0)
+                if (allseries[i].stack == s.stack)
                     res = allseries[i];
             }
             

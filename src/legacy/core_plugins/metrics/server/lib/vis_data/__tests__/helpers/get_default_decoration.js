@@ -22,6 +22,31 @@ import getDefaultDecoration from '../../helpers/get_default_decoration';
 
 describe('getDefaultDecoration', () => {
 
+  describe('stack option', () => {
+
+    it('should set a stack option to false', () => {
+      const series = {
+        id: 'test_id'
+      };
+      expect(getDefaultDecoration(series))
+        .to.have.property('stack', false);
+
+      series.stacked = 'none';
+      expect(getDefaultDecoration(series))
+        .to.have.property('stack', false);
+    });
+
+    it('should set a stack option to true', () => {
+      const series = {
+        stacked: true,
+        id: 'test_id'
+      };
+
+      expect(getDefaultDecoration(series))
+        .to.have.property('stack', series.id);
+    });
+  });
+
   describe('lines', () => {
     it('return decoration for lines', () => {
       const series = {

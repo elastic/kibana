@@ -21,7 +21,7 @@ export default series => {
   const pointSize = series.point_size != null ? Number(series.point_size) : Number(series.line_width);
   const showPoints = series.chart_type === 'line' && pointSize !== 0;
   return {
-    stack: series.stacked && series.stacked !== 'none' || false,
+    stack: series.stacked && series.stacked !== 'none' ? series.id : false,
     lines: {
       show: series.chart_type === 'line' && series.line_width !== 0,
       fill: Number(series.fill),
