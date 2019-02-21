@@ -28,7 +28,7 @@ export const RedirectToLogs = injectI18n(({ location, intl }: RedirectToLogsProp
         return (
           <LoadingPage
             message={intl.formatMessage({
-              id: 'xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage',
+              id: 'xpack.infra.redirectToLogs.loadingLogsMessage',
               defaultMessage: 'Loading logs',
             })}
           />
