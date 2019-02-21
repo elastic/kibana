@@ -145,6 +145,7 @@ export class LayerTocActions extends Component {
               size="m"
             />
           ),
+          'data-test-subj': 'fitToBoundsButton',
           toolTipContent: this.state.supportsFitToBounds ? null : 'Layer does not support fit to data',
           disabled: !this.state.supportsFitToBounds,
           onClick: () => {
