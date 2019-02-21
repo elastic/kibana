@@ -39,8 +39,7 @@ Alternatively, you can download other Docker images that contain only features
 available under the Apache 2.0 license. To download the images, go to
 https://www.docker.elastic.co[www.docker.elastic.co].
 
-=== Running Kibana from the command line
-==== Development mode
+=== Running Kibana on Docker for development
 Kibana can be quickly started and connected to a local Elasticsearch container for development
 or testing use with the following command:
 --------------------------------------------
