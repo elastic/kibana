@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timeFormat } from 'd3-time-format';
-
-const formatDate = timeFormat('%Y-%m-%d %H:%M:%S.%L');
-
-export function formatTime(time: number) {
-  return formatDate(new Date(time));
-}
+export const mockedEsVersionPrecheckMethod = jest.fn().mockResolvedValue(true);
+export const EsVersionPrecheck = {
+  assign: 'esVersionCheck',
+  method: mockedEsVersionPrecheckMethod,
+};

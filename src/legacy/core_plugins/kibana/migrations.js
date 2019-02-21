@@ -58,6 +58,13 @@ function migrateIndexPattern(doc) {
 }
 
 export const migrations = {
+  'index-pattern': {
+    '6.5.0': (doc) => {
+      doc.attributes.type = doc.attributes.type || undefined;
+      doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
+      return doc;
+    }
+  },
   visualization: {
     '7.0.0': (doc) => {
       // Set new "references" attribute
