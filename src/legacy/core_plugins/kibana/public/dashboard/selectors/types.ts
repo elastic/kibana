@@ -49,7 +49,7 @@ export interface PanelState {
   readonly version: string;
   readonly type: string;
   panelIndex: PanelId;
-  readonly embeddableConfig?: any;
+  readonly embeddableConfig: any;
   readonly gridData: GridData;
   readonly title?: string;
 }

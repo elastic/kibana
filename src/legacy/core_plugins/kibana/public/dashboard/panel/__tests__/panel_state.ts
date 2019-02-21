@@ -19,9 +19,10 @@
 
 // @ts-ignore
 import expect from 'expect.js';
+import { PanelState } from '../../selectors';
 import { createPanelState } from '../panel_state';
 
-function createPanelWithDimensions(x: number, y: number, w: number, h: number) {
+function createPanelWithDimensions(x: number, y: number, w: number, h: number): PanelState {
   return {
     id: 'foo',
     version: '6.3.0',
@@ -35,6 +36,7 @@ function createPanelWithDimensions(x: number, y: number, w: number, h: number) {
       h,
       i: 'an id',
     },
+    embeddableConfig: {},
   };
 }
 

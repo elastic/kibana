@@ -46,13 +46,12 @@ import {
   getPanel,
   getPanelType,
   getViewMode,
-  PanelId,
   PanelState,
 } from '../selectors';
 import { DashboardPanel } from './dashboard_panel';
 
 export interface DashboardPanelContainerOwnProps {
-  panelId: string | PanelId;
+  panelId: string;
   embeddableFactory: EmbeddableFactory;
 }
 
@@ -62,7 +61,7 @@ interface DashboardPanelContainerStateProps {
   containerState: ContainerState;
   initialized: boolean;
   panel: PanelState;
-  lastReloadRequestTime: number;
+  lastReloadRequestTime?: number;
 }
 
 export interface DashboardPanelContainerDispatchProps {
@@ -74,10 +73,9 @@ export interface DashboardPanelContainerDispatchProps {
 }
 
 const mapStateToProps = (
-  coreKibanaState: CoreKibanaState,
+  { dashboard }: CoreKibanaState,
   { embeddableFactory, panelId }: DashboardPanelContainerOwnProps
 ) => {
-  const dashboard = coreKibanaState.dashboard;
   const embeddable = getEmbeddable(dashboard, panelId);
   let error = null;
   if (!embeddableFactory) {
@@ -103,9 +101,7 @@ const mapStateToProps = (
 
 const mapDispatchToProps = (
   dispatch: ThunkDispatch<CoreKibanaState, {}, Action<any>>,
-  { panelId }: DashboardPanelContainerOwnProps,
-  {},
-  {}
+  { panelId }: DashboardPanelContainerOwnProps
 ): DashboardPanelContainerDispatchProps => ({
   destroy: () => dispatch(deletePanel(panelId)),
   embeddableIsInitializing: () => dispatch(embeddableIsInitializing(panelId)),

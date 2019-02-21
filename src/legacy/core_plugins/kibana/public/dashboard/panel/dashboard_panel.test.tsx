@@ -27,18 +27,10 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { store } from '../../store';
 // @ts-ignore: implicit any for JS file
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
-import {
-  embeddableError,
-  embeddableIsInitialized,
-  embeddableIsInitializing,
-  embeddableStateChanged,
-  setPanels,
-  updateTimeRange,
-  updateViewMode,
-} from '../actions';
+import { embeddableIsInitialized, setPanels, updateTimeRange, updateViewMode } from '../actions';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanel } from './dashboard_panel';
-import { DashboardPanelUiProps } from './dashboard_panel';
+import { DashboardPanel, DashboardPanelUiProps } from './dashboard_panel';
+
 import { PanelError } from './panel_error';
 
 function getProps(props = {}): DashboardPanelUiProps {
@@ -47,10 +39,6 @@ function getProps(props = {}): DashboardPanelUiProps {
     viewOnlyMode: false,
     initialized: true,
     lastReloadRequestTime: 0,
-    embeddableIsInitialized,
-    embeddableIsInitializing,
-    embeddableStateChanged,
-    embeddableError,
     embeddableFactory: getEmbeddableFactoryMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);

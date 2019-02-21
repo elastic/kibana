@@ -18,7 +18,7 @@
  */
 
 import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
@@ -30,27 +30,30 @@ import {
   EmbeddableState,
 } from 'ui/embeddable';
 import { EmbeddableErrorAction } from '../actions';
-import { PanelState } from '../selectors';
+import { PanelId, PanelState } from '../selectors';
 import { PanelError } from './panel_error';
 import { PanelHeader } from './panel_header';
 
-export interface DashboardPanelUiProps {
+export interface DashboardPanelProps {
   viewOnlyMode: boolean;
-  onPanelFocused?: (panel: string) => {};
-  onPanelBlurred?: (panel: string) => {};
+  onPanelFocused?: (panelIndex: PanelId) => {};
+  onPanelBlurred?: (panelIndex: PanelId) => {};
   error?: string | object;
   destroy: () => void;
   containerState: ContainerState;
   embeddableFactory: EmbeddableFactory;
   lastReloadRequestTime?: number;
-  embeddableStateChanged: (embeddableStateChanges: EmbeddableState) => {};
+  embeddableStateChanged: (embeddableStateChanges: EmbeddableState) => void;
   embeddableIsInitialized: (embeddableIsInitializing: EmbeddableMetadata) => void;
   embeddableError: (errorMessage: EmbeddableErrorAction) => void;
   embeddableIsInitializing: () => void;
   initialized: boolean;
   panel: PanelState;
-  intl: any;
-  className: string;
+  className?: string;
+}
+
+export interface DashboardPanelUiProps extends DashboardPanelProps {
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -119,14 +122,14 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
   public onFocus = () => {
     const { onPanelFocused, panel } = this.props;
     if (onPanelFocused) {
-      return onPanelFocused(panel.panelIndex);
+      onPanelFocused(panel.panelIndex);
     }
   };
 
   public onBlur = () => {
     const { onPanelBlurred, panel } = this.props;
     if (onPanelBlurred) {
-      return onPanelBlurred(panel.panelIndex);
+      onPanelBlurred(panel.panelIndex);
     }
   };
 
@@ -192,38 +195,4 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
   }
 }
 
-<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/dashboard/panel/dashboard_panel.js
-DashboardPanelUi.propTypes = {
-  viewOnlyMode: PropTypes.bool.isRequired,
-  onPanelFocused: PropTypes.func,
-  onPanelBlurred: PropTypes.func,
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object
-  ]),
-  destroy: PropTypes.func.isRequired,
-  containerState: PropTypes.shape({
-    timeRange: PropTypes.object,
-    refreshConfig: PropTypes.object,
-    filters: PropTypes.array,
-    query: PropTypes.object,
-    embeddableCustomization: PropTypes.object,
-    hidePanelTitles: PropTypes.bool.isRequired,
-  }),
-  embeddableFactory: PropTypes.shape({
-    create: PropTypes.func,
-  }).isRequired,
-  lastReloadRequestTime: PropTypes.number.isRequired,
-  embeddableStateChanged: PropTypes.func.isRequired,
-  embeddableIsInitialized: PropTypes.func.isRequired,
-  embeddableError: PropTypes.func.isRequired,
-  embeddableIsInitializing: PropTypes.func.isRequired,
-  initialized: PropTypes.bool.isRequired,
-  panel: PropTypes.shape({
-    panelIndex: PropTypes.string,
-  }).isRequired,
-};
-
-=======
->>>>>>> typescript dashboard stuff:src/legacy/core_plugins/kibana/public/dashboard/panel/dashboard_panel.tsx
 export const DashboardPanel = injectI18n(DashboardPanelUi);

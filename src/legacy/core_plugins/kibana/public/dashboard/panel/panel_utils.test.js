@@ -76,7 +76,7 @@ test('convertPanelDataPre_6_3 scales panel dimensions', () => {
     },
     version: '6.2.0',
   };
-  const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel, true);
+  const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel, false);
   expect(updatedPanel.gridData.w).toBe(28);
   expect(updatedPanel.gridData.h).toBe(15);
   expect(updatedPanel.gridData.x).toBe(8);

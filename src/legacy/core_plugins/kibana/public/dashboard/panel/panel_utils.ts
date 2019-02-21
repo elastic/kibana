@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import { PanelState } from '../selectors';
+import { GridData, PanelId, PanelState } from '../selectors';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -30,8 +30,8 @@ const PANEL_WIDTH_SCALE_FACTOR = 4;
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
   public static convertPanelDataPre_6_1(panel: {
-    panelIndex: string;
-    gridData: { x: number; y: number; w: number; h: number; i: string };
+    panelIndex: PanelId;
+    gridData: GridData;
     col: number;
     row: number;
     size_x: any;
@@ -142,7 +142,7 @@ export class PanelUtils {
 
   public static getMaxPanelIndex(panels: PanelState[]) {
     let maxId = panels.reduce((id, panel) => {
-      return Math.max(id, Number(panel.panelIndex));
+      return Math.max(id, Number(panel.panelIndex || id));
     }, 0);
     return ++maxId;
   }
