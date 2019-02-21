@@ -1,12 +1,11 @@
 {
   "actionConfiguration": {
     "properties": {
-      "initParams": {
-        "type": "nested",
-        "properties": {
-            "name": { "type": "keyword" },
-            "type": { "type": "keyword" }
-        }
+      "name": { "type": "keyword" },
+      "actionType": { "type": "keyword" },
+      "connectorType": { "type": "keyword" },
+      "instanceParams": {
+        "type": "text"
       }
     }
   }

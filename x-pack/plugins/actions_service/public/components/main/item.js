@@ -9,7 +9,7 @@ import React from 'react';
 export const Item = (props) => {
   return (
     <li>
-      {JSON.stringify(props)}
+      {props.attributes.connector}
     </li>
   );
 };
