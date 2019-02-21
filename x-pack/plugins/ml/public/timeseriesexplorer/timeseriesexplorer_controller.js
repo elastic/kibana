@@ -651,15 +651,15 @@ module.controller('MlTimeSeriesExplorerController', function (
       loadAnomaliesTableData($scope.zoomFrom.getTime(), $scope.zoomTo.getTime());
     }
   };
-  mlSelectIntervalService.state.watch(tableControlsListener);
-  mlSelectSeverityService.state.watch(tableControlsListener);
 
+  const intervalSub = mlSelectIntervalService.state.watch(tableControlsListener);
+  const severitySub = mlSelectSeverityService.state.watch(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
-    mlSelectIntervalService.state.unwatch(tableControlsListener);
-    mlSelectSeverityService.state.unwatch(tableControlsListener);
+    intervalSub.unsubscribe();
+    severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
   });
 
