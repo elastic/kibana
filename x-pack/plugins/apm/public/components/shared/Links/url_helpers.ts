@@ -119,23 +119,6 @@ export function getKibanaHref({
   return href;
 }
 
-interface APMQueryParamsRaw {
-  transactionId?: string;
-  traceId?: string;
-  detailTab?: string;
-  flyoutDetailTab?: string;
-  waterfallItemId?: string;
-  spanId?: string;
-  page?: string;
-  sortDirection?: string;
-  sortField?: string;
-  kuery?: string;
-  rangeFrom?: string;
-  rangeTo?: string;
-  refreshPaused?: string;
-  refreshInterval?: string;
-}
-
 export interface APMQueryParams {
   transactionId?: string;
   traceId?: string;
@@ -152,6 +135,10 @@ export interface APMQueryParams {
   refreshPaused?: string | boolean;
   refreshInterval?: string | number;
 }
+
+// forces every value of T[K] to be type: string
+type StringifyAll<T> = { [K in keyof T]: string };
+type APMQueryParamsRaw = StringifyAll<APMQueryParams>;
 
 interface RisonEncoded {
   _g?: string;
