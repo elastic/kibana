@@ -5,6 +5,12 @@
  */
 
 require('@kbn/plugin-helpers').babelRegister();
+
+// The upgrade_assistant_integration tests are for 5.x -> 6.x scenario and don't apply
+// to the 6.x -> 7.x scenario.
+const isV6 = (process.env.ES_SNAPSHOT_VERSION || '6.').startsWith('6.');
+const v6tests = isV6 ? [require.resolve('../test/upgrade_assistant_integration/config')] : [];
+
 require('@kbn/test').runTestsCli([
   require.resolve('../test/reporting/configs/chromium_api.js'),
   require.resolve('../test/reporting/configs/chromium_functional.js'),
@@ -20,5 +26,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config'),
   require.resolve('../test/saved_object_api_integration/security_only/config'),
   require.resolve('../test/saved_object_api_integration/spaces_only/config'),
-  require.resolve('../test/upgrade_assistant_integration/config'),
+  ...v6tests,
 ]);
