@@ -24,14 +24,17 @@ class DatePickerComponent extends React.Component<Props> {
   public refreshTimeoutId = 0;
 
   public getParamsFromSearch = (search: string) => {
-    const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = toQuery(
-      search
-    );
+    const {
+      rangeFrom = 'now-24h',
+      rangeTo = 'now',
+      refreshPaused = 'true',
+      refreshInterval = '0'
+    } = toQuery(search);
     return {
-      rangeFrom: rangeFrom || 'now-24h',
-      rangeTo: rangeTo || 'now',
+      rangeFrom,
+      rangeTo,
       refreshPaused: toBoolean(refreshPaused),
-      refreshInterval: toNumber(refreshInterval) || 0
+      refreshInterval: toNumber(refreshInterval)
     };
   };
 
