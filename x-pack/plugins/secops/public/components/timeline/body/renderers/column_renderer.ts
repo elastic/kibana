@@ -5,8 +5,9 @@
  */
 
 import { Ecs } from '../../../../graphql/types';
+import { EcsField } from '../../../../lib/ecs';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: Ecs) => boolean;
-  renderColumn: (columnName: string, data: Ecs) => React.ReactNode;
+  renderColumn: (columnName: string, data: Ecs, field?: EcsField) => React.ReactNode;
 }

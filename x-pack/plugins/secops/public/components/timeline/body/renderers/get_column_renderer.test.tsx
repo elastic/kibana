@@ -14,10 +14,13 @@ import { ThemeProvider } from 'styled-components';
 
 import { columnRenderers } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 import { getColumnRenderer } from './get_column_renderer';
+
+const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('get_column_renderer', () => {
   let nonSuricata: Ecs;
@@ -32,7 +35,11 @@ describe('get_column_renderer', () => {
     const store = createStore();
     const columnName = 'event.id';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
-    const column = columnRenderer.renderColumn(columnName, nonSuricata);
+    const column = columnRenderer.renderColumn(
+      columnName,
+      nonSuricata,
+      allFieldsInSchemaByName[columnName]
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -48,7 +55,11 @@ describe('get_column_renderer', () => {
   test('should render CVE text as the event when dealing with a suricata event', () => {
     const columnName = 'event.id';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, suricata);
-    const column = columnRenderer.renderColumn(columnName, suricata);
+    const column = columnRenderer.renderColumn(
+      columnName,
+      suricata,
+      allFieldsInSchemaByName[columnName]
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('CVE-2016-10174');
   });
@@ -57,7 +68,11 @@ describe('get_column_renderer', () => {
     const omitUser = omit('user', nonSuricata);
     const columnName = 'user.name';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, omitUser);
-    const column = columnRenderer.renderColumn(columnName, omitUser);
+    const column = columnRenderer.renderColumn(
+      columnName,
+      omitUser,
+      allFieldsInSchemaByName[columnName]
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
@@ -65,7 +80,11 @@ describe('get_column_renderer', () => {
   test('should render empty value when dealing with an unknown column name', () => {
     const columnName = 'something made up';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
-    const column = columnRenderer.renderColumn(columnName, nonSuricata);
+    const column = columnRenderer.renderColumn(
+      columnName,
+      nonSuricata,
+      allFieldsInSchemaByName[columnName]
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

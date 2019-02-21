@@ -10,8 +10,11 @@ import React from 'react';
 
 import { suricataColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
+const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('suricata_column_renderer', () => {
   let mockDatum: Ecs;
@@ -44,7 +47,11 @@ describe('suricata_column_renderer', () => {
   });
 
   test('should return a value of the CVE if event has a valid suricata value and it is a CVE', () => {
-    const column = suricataColumnRenderer.renderColumn('event.id', mockDatum);
+    const column = suricataColumnRenderer.renderColumn(
+      'event.id',
+      mockDatum,
+      allFieldsInSchemaByName['event.id']
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('CVE-2016-10174');
   });
@@ -55,7 +62,11 @@ describe('suricata_column_renderer', () => {
       'Something without a CVE entry inside of it',
       mockDatum
     );
-    const column = suricataColumnRenderer.renderColumn('event.id', dataumWithValue);
+    const column = suricataColumnRenderer.renderColumn(
+      'event.id',
+      dataumWithValue,
+      allFieldsInSchemaByName['event.id']
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual('4');
   });
@@ -63,13 +74,21 @@ describe('suricata_column_renderer', () => {
   test('should return a value of the empty if no CVE is in the event and the event does not have an id', () => {
     const missingSignature = omit('suricata.eve.alert.signature', mockDatum);
     const missingEventIdAndSignature = omit('event.id', missingSignature);
-    const column = suricataColumnRenderer.renderColumn('event.id', missingEventIdAndSignature);
+    const column = suricataColumnRenderer.renderColumn(
+      'event.id',
+      missingEventIdAndSignature,
+      allFieldsInSchemaByName['event.id']
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return a value if an unknown column name is sent in', () => {
-    const column = suricataColumnRenderer.renderColumn('made up column name', mockDatum);
+    const column = suricataColumnRenderer.renderColumn(
+      'made up column name',
+      mockDatum,
+      allFieldsInSchemaByName['made up column name']
+    );
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

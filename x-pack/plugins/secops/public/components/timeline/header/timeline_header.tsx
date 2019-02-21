@@ -48,7 +48,6 @@ export const TimelineHeader = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
-    sort,
   }) => (
     <TimelineHeaderContainer data-test-subj="timelineHeader">
       <DataProviders

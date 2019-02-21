@@ -13,45 +13,58 @@ export const TIMELINE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const TITLE = i18n.translate('xpack.secops.timeline.properties.title', {
+export const TITLE = i18n.translate('xpack.secops.timeline.properties.titleTitle', {
   defaultMessage: 'Title',
 });
 
-export const FAVORITE = i18n.translate('xpack.secops.timeline.properties.favorite', {
+export const FAVORITE = i18n.translate('xpack.secops.timeline.properties.favoriteTooltip', {
   defaultMessage: 'Favorite',
 });
 
-export const NOT_A_FAVORITE = i18n.translate('xpack.secops.timeline.properties.notAFavorite', {
-  defaultMessage: 'Not a Favorite',
-});
+export const NOT_A_FAVORITE = i18n.translate(
+  'xpack.secops.timeline.properties.notAFavoriteTooltip',
+  {
+    defaultMessage: 'Not a Favorite',
+  }
+);
 
-export const TIMELINE_TITLE = i18n.translate('xpack.secops.timeline.properties.timelineTitle', {
-  defaultMessage: 'Timeline title',
-});
+export const TIMELINE_TITLE = i18n.translate(
+  'xpack.secops.timeline.properties.timelineTitleAriaLabel',
+  {
+    defaultMessage: 'Timeline title',
+  }
+);
 
 export const UNTITLED_TIMELINE = i18n.translate(
-  'xpack.secops.timeline.properties.untitledTimeline',
+  'xpack.secops.timeline.properties.untitledTimelinePlaceholder',
   {
     defaultMessage: 'Untitled Timeline',
   }
 );
 
-export const DESCRIPTION = i18n.translate('xpack.secops.timeline.properties.description', {
-  defaultMessage: 'Description',
-});
+export const DESCRIPTION = i18n.translate(
+  'xpack.secops.timeline.properties.descriptionPlaceholder',
+  {
+    defaultMessage: 'Description',
+  }
+);
 
 export const DESCRIPTION_TOOL_TIP = i18n.translate(
-  'xpack.secops.timeline.properties.descriptionToolTip',
+  'xpack.secops.timeline.properties.descriptionTooltip',
   {
     defaultMessage: 'A summary of the events and notes in this Timeline',
   }
 );
 
-export const HISTORY = i18n.translate('xpack.secops.timeline.properties.history', {
+export const HISTORY = i18n.translate('xpack.secops.timeline.properties.historyLabel', {
   defaultMessage: 'History',
 });
 
-export const NOTES = i18n.translate('xpack.secops.timeline.properties.notes', {
+export const IS_VIEWING = i18n.translate('xpack.secops.timeline.properties.isViewingTooltip', {
+  defaultMessage: 'is viewing this Timeline',
+});
+
+export const NOTES = i18n.translate('xpack.secops.timeline.properties.notesButtonLabel', {
   defaultMessage: 'Notes',
 });
 
@@ -70,13 +83,19 @@ export const STREAM_LIVE_TOOL_TIP = i18n.translate(
   }
 );
 
-export const NEW_TIMELINE = i18n.translate('xpack.secops.timeline.properties.newTimeline', {
-  defaultMessage: 'New Timeline',
-});
+export const NEW_TIMELINE = i18n.translate(
+  'xpack.secops.timeline.properties.newTimelineButtonLabel',
+  {
+    defaultMessage: 'New Timeline',
+  }
+);
 
-export const STREAM_LIVE = i18n.translate('xpack.secops.timeline.properties.streamLive', {
-  defaultMessage: 'Stream Live',
-});
+export const STREAM_LIVE = i18n.translate(
+  'xpack.secops.timeline.properties.streamLiveButtonLabel',
+  {
+    defaultMessage: 'Stream Live',
+  }
+);
 
 export const NEW_TIMELINE_TOOL_TIP = i18n.translate(
   'xpack.secops.timeline.properties.newTimelineToolTip',

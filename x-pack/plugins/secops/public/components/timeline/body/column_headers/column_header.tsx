@@ -12,6 +12,7 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 export interface ColumnHeader {
   id: ColumnId;
   columnHeaderType: ColumnHeaderType;
+  disableTextWrap?: boolean;
   minWidth: number;
   placeholder?: string;
   text: string;

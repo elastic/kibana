@@ -86,7 +86,7 @@ export const FlyoutButton = pure(({ onOpen, show, dataProviders, timelineId }: F
             </Badge>
           )}
           <Button>
-            <Text data-test-subj="flyoutButton">
+            <Text data-test-subj="flyoutButton" size="s">
               {i18n.TIMELINE.toLocaleUpperCase()
                 .split('')
                 .join(' ')}

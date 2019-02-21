@@ -22,6 +22,7 @@ import { FlyoutPane } from './pane';
 
 const testFlyoutHeight = 980;
 const testWidth = 640;
+const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
@@ -43,6 +44,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -69,6 +71,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -95,6 +98,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -116,6 +120,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               >
                 <p>I am a child of flyout</p>
               </Flyout>
@@ -148,6 +153,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -173,6 +179,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -196,6 +203,7 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -216,8 +224,9 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 show={false}
-                timelineId="test"
                 showTimeline={showTimeline}
+                timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -246,8 +255,9 @@ describe('Flyout', () => {
                 flyoutHeight={testFlyoutHeight}
                 headerHeight={flyoutHeaderHeight}
                 show={true}
-                timelineId="test"
                 showTimeline={showTimeline}
+                timelineId="test"
+                usersViewing={usersViewing}
               />
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -275,6 +285,7 @@ describe('Flyout', () => {
                 headerHeight={flyoutHeaderHeight}
                 onClose={closeMock}
                 timelineId={'test'}
+                usersViewing={usersViewing}
                 width={testWidth}
               >
                 <span>I am a child of flyout</span>,
@@ -303,6 +314,7 @@ describe('Flyout', () => {
                 headerHeight={flyoutHeaderHeight}
                 onClose={closeMock}
                 timelineId={'test'}
+                usersViewing={usersViewing}
                 width={testWidth}
               >
                 <span>I am a mock child</span>,
@@ -330,6 +342,7 @@ describe('Flyout', () => {
                 headerHeight={flyoutHeaderHeight}
                 onClose={closeMock}
                 timelineId={'test'}
+                usersViewing={usersViewing}
                 width={testWidth}
               >
                 <span>I am a mock child</span>,

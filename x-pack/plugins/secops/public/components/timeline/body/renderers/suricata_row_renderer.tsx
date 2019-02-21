@@ -12,11 +12,17 @@ import styled, { keyframes } from 'styled-components';
 
 import { createLinkWithSignature, RowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
-import { getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../../../lib/ecs';
+import {
+  getAllFieldsInSchemaByMappedName,
+  getMappedEcsValue,
+  mappedEcsSchemaFieldNames,
+  virtualEcsSchema,
+} from '../../../../lib/ecs';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { Provider } from '../../data_providers/provider';
+import { FormattedField } from './formatted_field';
 import * as i18n from './translations';
 
 export const dropInEffect = keyframes`
@@ -45,8 +51,6 @@ export const dropInEffect = keyframes`
 const SuricataRow = styled.div`
   width: 100%;
   overflow: hidden;
-  padding-top: 5px;
-  padding-bottom: 5px;
   &:hover {
     border: 1px solid ${props => props.theme.eui.euiColorMediumShade};
   }
@@ -77,6 +81,11 @@ const Label = styled.div`
   font-weight: bold;
 `;
 
+const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
+
+export const fieldExists = ({ data, fieldName }: { data: Ecs; fieldName: string }): boolean =>
+  getMappedEcsValue({ data, fieldName }) != null;
+
 const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fieldName }) => {
   const itemDataProvider = {
     enabled: true,
@@ -99,7 +108,10 @@ const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fieldName
     and: [],
   };
 
-  return (
+  const field = allFieldsInSchemaByName[fieldName];
+  const fieldType = field != null ? field.type : '';
+
+  return fieldExists({ data, fieldName }) ? (
     <DraggableWrapper
       key={`suricata-row-render-value-for-${fieldName}-${data._id!}`}
       dataProvider={itemDataProvider}
@@ -109,11 +121,11 @@ const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fieldName
             <Provider dataProvider={dataProvider} />
           </DragEffects>
         ) : (
-          <>{`${getMappedEcsValue({ data, fieldName })}`}</>
+          <FormattedField data={data} fieldName={fieldName} fieldType={fieldType} />
         )
       }
     />
-  );
+  ) : null;
 });
 
 export const ValuesContainer = styled.div`
@@ -144,22 +156,35 @@ export const suricataRowRenderer: RowRenderer = {
               {signature}
             </EuiButton>
             <Details>
-              <LabelValuePairContainer>
-                <Label>{i18n.SOURCE}</Label>
-                <ValuesContainer>
-                  <DraggableValue data={data} fieldName={'source.ip'} />
-                  {':'}
-                  <DraggableValue data={data} fieldName={'source.port'} />
-                </ValuesContainer>
-              </LabelValuePairContainer>
-              <LabelValuePairContainer>
-                <Label>{i18n.DESTINATION}</Label>
-                <ValuesContainer>
-                  <DraggableValue data={data} fieldName={'destination.ip'} />
-                  {':'}
-                  <DraggableValue data={data} fieldName={'destination.port'} />
-                </ValuesContainer>
-              </LabelValuePairContainer>
+              {fieldExists({ data, fieldName: 'source.ip' }) ? (
+                <LabelValuePairContainer>
+                  <Label>{i18n.SOURCE}</Label>
+                  <ValuesContainer>
+                    <DraggableValue
+                      data={data}
+                      data-test-subj="source-ip-and-port"
+                      fieldName={'source.ip'}
+                    />
+                    {fieldExists({ data, fieldName: 'source.port' }) ? ':' : null}
+                    <DraggableValue data={data} fieldName={'source.port'} />
+                  </ValuesContainer>
+                </LabelValuePairContainer>
+              ) : null}
+
+              {fieldExists({ data, fieldName: 'destination.ip' }) ? (
+                <LabelValuePairContainer>
+                  <Label>{i18n.DESTINATION}</Label>
+                  <ValuesContainer>
+                    <DraggableValue
+                      data={data}
+                      data-test-subj="destination-ip-and-port"
+                      fieldName={'destination.ip'}
+                    />
+                    {fieldExists({ data, fieldName: 'destination.port' }) ? ':' : null}
+                    <DraggableValue data={data} fieldName={'destination.port'} />
+                  </ValuesContainer>
+                </LabelValuePairContainer>
+              ) : null}
             </Details>
           </SuricataSignature>
         ) : null}

@@ -4,80 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
-import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
-import { WithHoverActions } from '../with_hover_actions';
+import { NoteCard } from './note_card';
 import * as i18n from './translations';
 
 const Column = pure<{ text: string }>(({ text }) => <span>{text}</span>);
 
-const HoverActionsContainer = styled(EuiPanel)`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  height: 25px;
-  justify-content: center;
-  left: 5px;
-  position: absolute;
-  top: -10px;
-  width: 30px;
-`;
+interface Item {
+  created: Date;
+  note: string;
+  user: string;
+}
 
-const SelectableText = styled.span`
-  user-select: text;
-`;
+interface Column {
+  field: string;
+  name: string;
+  sortable: boolean;
+  truncateText: boolean;
+  render: (value: string, item: Item) => JSX.Element;
+}
 
-export const columns = [
-  {
-    field: 'created',
-    name: i18n.DATE,
-    sortable: false,
-    truncateText: false,
-    render: (date: string) => (
-      <SelectableText>
-        <FormattedRelative value={new Date(date)} />
-      </SelectableText>
-    ),
-  },
-  {
-    field: 'user',
-    name: i18n.USER,
-    sortable: true,
-    truncateText: false,
-    render: (field: string) => (
-      <WithHoverActions
-        hoverContent={
-          <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={field} />
-            </EuiToolTip>
-          </HoverActionsContainer>
-        }
-        render={() => <Column text={field} />}
-      />
-    ),
-  },
+export const columns: Column[] = [
   {
     field: 'note',
     name: i18n.NOTE,
     sortable: true,
     truncateText: false,
-    render: (note: string) => (
-      <WithHoverActions
-        hoverContent={
-          <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={note} />
-            </EuiToolTip>
-          </HoverActionsContainer>
-        }
-        render={() => <Column text={note} />}
-      />
+    render: (_, { created, note, user }) => (
+      <NoteCard created={created} rawNote={note} user={user} />
     ),
   },
 ];

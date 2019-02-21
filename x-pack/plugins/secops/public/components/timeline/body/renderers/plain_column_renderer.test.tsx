@@ -14,9 +14,12 @@ import { ThemeProvider } from 'styled-components';
 
 import { plainColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
+
+const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('plain_column_renderer', () => {
   let mockDatum: Ecs;
@@ -45,7 +48,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of event.category if event.category has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('event.category', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'event.category',
+      mockDatum,
+      allFieldsInSchemaByName['event.category']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -59,7 +66,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of destination.ip if destination.ip has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('destination.ip', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'destination.ip',
+      mockDatum,
+      allFieldsInSchemaByName['destination.ip']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -73,7 +84,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of event.id if event has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('event.id', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'event.id',
+      mockDatum,
+      allFieldsInSchemaByName['event.id']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -87,7 +102,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of geo.region_name if geo.region_name has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('geo.region_name', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'geo.region_name',
+      mockDatum,
+      allFieldsInSchemaByName['geo.region_name']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -101,7 +120,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of event.severity if severity has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('event.severity', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'event.severity',
+      mockDatum,
+      allFieldsInSchemaByName['event.severity']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -115,7 +138,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of source.ip if source.ip has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('source.ip', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'source.ip',
+      mockDatum,
+      allFieldsInSchemaByName['source.ip']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -129,7 +156,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the (unformatted) time if timestamp has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('timestamp', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'timestamp',
+      mockDatum,
+      allFieldsInSchemaByName.timestamp
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -143,7 +174,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the value of event.type if event.type has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('event.type', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'event.type',
+      mockDatum,
+      allFieldsInSchemaByName['event.type']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -157,7 +192,11 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return the of user.name if user.name has a valid value', () => {
-    const column = plainColumnRenderer.renderColumn('user.name', mockDatum);
+    const column = plainColumnRenderer.renderColumn(
+      'user.name',
+      mockDatum,
+      allFieldsInSchemaByName['user.name']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -172,7 +211,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if event.category is empty', () => {
     const missingCategory = omit('event.category', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('event.category', missingCategory);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'event.category',
+      missingCategory,
+      allFieldsInSchemaByName['event.category']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -187,7 +230,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if destination is empty', () => {
     const missingDestination = omit('destination', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('destination', missingDestination);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'destination',
+      missingDestination,
+      allFieldsInSchemaByName.destination
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -202,7 +249,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if destination ip is empty', () => {
     const missingDestination = omit('destination.ip', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('destination.ip', missingDestination);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'destination.ip',
+      missingDestination,
+      allFieldsInSchemaByName['destination.ip']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -217,7 +268,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if event severity is empty', () => {
     const missingSeverity = omit('event.severity', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('event.severity', missingSeverity);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'event.severity',
+      missingSeverity,
+      allFieldsInSchemaByName['event.severity']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -232,7 +287,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if source is empty', () => {
     const missingSource = omit('source', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('source', missingSource);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'source',
+      missingSource,
+      allFieldsInSchemaByName.source
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -247,7 +306,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if source.ip is empty', () => {
     const missingSource = omit('source.ip', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('source.ip', missingSource);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'source.ip',
+      missingSource,
+      allFieldsInSchemaByName['source.ip']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -262,7 +325,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if event.type is empty', () => {
     const missingType = omit('event.type', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('event.type', missingType);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'event.type',
+      missingType,
+      allFieldsInSchemaByName['event.type']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -277,7 +344,11 @@ describe('plain_column_renderer', () => {
 
   test('should return an empty value if user.name is empty', () => {
     const missingUser = omit('user.name', mockDatum);
-    const emptyColumn = plainColumnRenderer.renderColumn('user.name', missingUser);
+    const emptyColumn = plainColumnRenderer.renderColumn(
+      'user.name',
+      missingUser,
+      allFieldsInSchemaByName['user.name']
+    );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>

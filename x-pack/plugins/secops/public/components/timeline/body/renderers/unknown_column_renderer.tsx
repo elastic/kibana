@@ -5,10 +5,9 @@
  */
 
 import { ColumnRenderer } from '.';
-import { Ecs } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
 
 export const unknownColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, data: Ecs) => true,
-  renderColumn: (columnName: string, data: Ecs) => getEmptyTagValue(),
+  isInstance: () => true,
+  renderColumn: () => getEmptyTagValue(),
 };

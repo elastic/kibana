@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiForm, EuiFormRow, EuiIcon, EuiPopover } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import * as React from 'react';
-import { injectGlobal } from 'styled-components';
+import styled, { injectGlobal } from 'styled-components';
 
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
@@ -41,6 +49,10 @@ injectGlobal`
   }
 `;
 
+const Avatar = styled(EuiAvatar)`
+  margin-left: 5px;
+`;
+
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
@@ -57,6 +69,7 @@ interface Props {
   updateIsLive: UpdateIsLive;
   updateTitle: UpdateTitle;
   updateNote: UpdateNote;
+  usersViewing: string[];
   width: number;
 }
 
@@ -65,10 +78,10 @@ interface State {
   showNotes: boolean;
 }
 
-const showDescriptionThreshold = 655;
-const showNotesThreshold = 770;
-const showHistoryThreshold = 910;
-const showStreamLiveThreshold = 1040;
+export const showDescriptionThreshold = 655;
+export const showNotesThreshold = 770;
+export const showHistoryThreshold = 910;
+export const showStreamLiveThreshold = 1040;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export class Properties extends React.PureComponent<Props, State> {
@@ -114,12 +127,13 @@ export class Properties extends React.PureComponent<Props, State> {
       updateIsLive,
       updateTitle,
       updateNote,
+      usersViewing,
       width,
     } = this.props;
 
     return (
       <TimelineProperties data-test-subj="timeline-properties">
-        <PropertiesLeft>
+        <PropertiesLeft data-test-subj="properties-left">
           <StarIcon
             isFavorite={isFavorite}
             timelineId={timelineId}
@@ -137,7 +151,7 @@ export class Properties extends React.PureComponent<Props, State> {
           ) : null}
         </PropertiesLeft>
 
-        <PropertiesRight gutterSize="s" alignItems="center">
+        <PropertiesRight alignItems="center" data-test-subj="properties-right" gutterSize="s">
           {width >= showNotesThreshold ? (
             <EuiFlexItem grow={false}>
               <NotesButton
@@ -148,7 +162,7 @@ export class Properties extends React.PureComponent<Props, State> {
                 showNotes={this.state.showNotes}
                 size="l"
                 text={i18n.NOTES}
-                toggleShowNotes={this.onToggleShowNotes.bind(this)}
+                toggleShowNotes={this.onToggleShowNotes}
                 toolTip={i18n.NOTES_TOOL_TIP}
                 updateNote={updateNote}
               />
@@ -170,16 +184,23 @@ export class Properties extends React.PureComponent<Props, State> {
           <EuiFlexItem grow={false}>
             <EuiPopover
               anchorPosition="downRight"
-              button={<EuiIcon type="gear" size="l" onClick={this.onButtonClick.bind(this)} />}
+              button={
+                <EuiIcon
+                  data-test-subj="settings-gear"
+                  type="gear"
+                  size="l"
+                  onClick={this.onButtonClick}
+                />
+              }
               id="timelineSettingsPopover"
               isOpen={this.state.showActions}
-              closePopover={this.onClosePopover.bind(this)}
+              closePopover={this.onClosePopover}
             >
               <EuiForm>
                 <EuiFormRow>
                   <NewTimeline
                     createTimeline={createTimeline}
-                    onClosePopover={this.onClosePopover.bind(this)}
+                    onClosePopover={this.onClosePopover}
                     timelineId={timelineId}
                   />
                 </EuiFormRow>
@@ -204,7 +225,7 @@ export class Properties extends React.PureComponent<Props, State> {
                       showNotes={this.state.showNotes}
                       size="l"
                       text={i18n.NOTES}
-                      toggleShowNotes={this.onToggleShowNotes.bind(this)}
+                      toggleShowNotes={this.onToggleShowNotes}
                       toolTip={i18n.NOTES_TOOL_TIP}
                       updateNote={updateNote}
                     />
@@ -229,6 +250,19 @@ export class Properties extends React.PureComponent<Props, State> {
               </EuiForm>
             </EuiPopover>
           </EuiFlexItem>
+
+          {title != null && title.length
+            ? usersViewing.map(user => (
+                <EuiFlexItem key={user}>
+                  <EuiToolTip
+                    data-test-subj="timeline-action-pin-tool-tip"
+                    content={`${user} ${i18n.IS_VIEWING}`}
+                  >
+                    <Avatar data-test-subj="avatar" size="s" name={user} />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ))
+            : null}
         </PropertiesRight>
       </TimelineProperties>
     );

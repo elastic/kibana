@@ -14,16 +14,10 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
+import { NOTES_PANEL_HEIGHT, NOTES_PANEL_WIDTH } from '../timeline/properties/helpers';
+import { AddNote } from './add_note';
 import { columns } from './columns';
-import {
-  AddNote,
-  AssociateNote,
-  getItems,
-  GetNewNoteId,
-  NotesCount,
-  search,
-  UpdateNote,
-} from './helpers';
+import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
 
 interface Props {
   associateNote: AssociateNote;
@@ -37,10 +31,17 @@ interface State {
   newNote: string;
 }
 
+const AddNoteContainer = styled.div`
+  margin-bottom: 5px;
+`;
+
 const NotesPanel = styled(EuiPanel)`
-  height: 600px;
-  max-height: 600px;
-  width: 750px;
+  height: ${NOTES_PANEL_HEIGHT}px;
+  width: ${NOTES_PANEL_WIDTH}px;
+
+  & thead {
+    display: none;
+  }
 `;
 
 const NotesContainer = styled.div`
@@ -53,8 +54,6 @@ const InMemoryTable = styled(EuiInMemoryTable)`
   overflow-y: auto;
   height: 220px;
 `;
-
-//   max-height: 220px;
 
 /** A view for entering and reviewing notes */
 export class Notes extends React.PureComponent<Props, State> {
@@ -72,16 +71,18 @@ export class Notes extends React.PureComponent<Props, State> {
         <NotesContainer>
           <NotesCount noteIds={noteIds} />
           <EuiHorizontalRule margin="m" />
-          <AddNote
-            associateNote={associateNote}
-            getNewNoteId={getNewNoteId}
-            newNote={this.state.newNote}
-            updateNewNote={this.updateNewNote}
-            updateNote={updateNote}
-          />
+          <AddNoteContainer>
+            <AddNote
+              associateNote={associateNote}
+              getNewNoteId={getNewNoteId}
+              newNote={this.state.newNote}
+              updateNewNote={this.updateNewNote}
+              updateNote={updateNote}
+            />
+          </AddNoteContainer>
           <InMemoryTable
             data-test-subj="notes-table"
-            items={getItems(noteIds, getNotesByIds)}
+            items={getNotesByIds(noteIds)}
             columns={columns}
             pagination={false}
             search={search}

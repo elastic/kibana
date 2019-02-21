@@ -24,6 +24,7 @@ import { Properties } from '../../timeline/properties';
 
 interface OwnProps {
   timelineId: string;
+  usersViewing: string[];
 }
 
 interface StateReduxProps {
@@ -82,6 +83,7 @@ const statefulFlyoutHeader = pure<Props>(
     updateIsLive,
     updateNote,
     updateTitle,
+    usersViewing,
   }) => (
     <Properties
       associateNote={associateNote!}
@@ -99,6 +101,7 @@ const statefulFlyoutHeader = pure<Props>(
       updateIsLive={updateIsLive!}
       updateTitle={updateTitle!}
       updateNote={updateNote!}
+      usersViewing={usersViewing}
       width={width}
     />
   )

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, has, sortBy } from 'lodash/fp';
+import { get, getOr, has, keyBy, sortBy } from 'lodash/fp';
 
 import { Ecs } from '../../graphql/types';
 import { EcsField } from './ecs_field';
@@ -22,9 +22,12 @@ export { virtualEcsSchema } from './virtual_ecs_schema';
  *
  * A map of `EcsField.name` `->` `ECS.name`
  */
-export const mappedEcsSchemaFieldNames = {
+export const mappedEcsSchemaFieldNames: Readonly<Record<string, string>> = {
   '@timestamp': 'timestamp',
 };
+
+export const getMappedFieldName = (fieldName: string) =>
+  getOr(fieldName, fieldName, mappedEcsSchemaFieldNames); // defaults to the fieldName if there is no override
 
 /**
  * Returns the value of the specified `EcsField` from the `ECS` instance
@@ -41,7 +44,7 @@ export const getMappedEcsValue = ({
   data: Ecs;
   fieldName: string;
 }): string | undefined => {
-  const path = getOr(fieldName, fieldName, mappedEcsSchemaFieldNames); // defaults to the fieldName if there is no override
+  const path = getMappedFieldName(fieldName);
   if (has(path, data)) {
     return get(path, data);
   }
@@ -51,11 +54,24 @@ export const getMappedEcsValue = ({
 /**
  * Returns an `EcsField[]` containing all fields in the `EcsSchema`
  */
-export const allFieldsInSchema = (schema: EcsSchema): EcsField[] =>
-  Object.values(schema).reduce(
+export const getAllFieldsInSchema = (schema: EcsSchema): EcsField[] =>
+  Object.values(schema).reduce<EcsField[]>(
     (acc, namespace) => [...acc, ...Object.values(namespace.fields)],
-    [] as EcsField[]
+    []
   );
+
+export const useMappedFieldName = (field: EcsField): EcsField =>
+  has(field.name, mappedEcsSchemaFieldNames)
+    ? { ...field, name: mappedEcsSchemaFieldNames[field.name] }
+    : field;
+
+/**
+ * Returns an `fieldName -> EcsField` map containing all fields in the `EcsSchema`
+ */
+export const getAllFieldsInSchemaByMappedName = (
+  schema: EcsSchema
+): { [fieldName: string]: EcsField } =>
+  keyBy('name', getAllFieldsInSchema(schema).map(useMappedFieldName));
 
 /**
  * Returns an `EcsField[]`, ordered by `EcsField.name`, that is
@@ -72,5 +88,5 @@ export const getPopulatedMappedFields = ({
 }): EcsField[] =>
   sortBy(
     'name',
-    allFieldsInSchema(schema).filter(f => getMappedEcsValue({ data, fieldName: f.name }) != null)
+    getAllFieldsInSchema(schema).filter(f => getMappedEcsValue({ data, fieldName: f.name }) != null)
   );

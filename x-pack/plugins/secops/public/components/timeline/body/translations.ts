@@ -6,23 +6,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NOTES_TOOLTIP = i18n.translate('xpack.secops.timeline.body.notes.tooltip', {
-  defaultMessage: 'Add or view notes for this event',
-});
+export const NOTES_TOOLTIP = i18n.translate(
+  'xpack.secops.timeline.body.notes.addOrViewNotesForThisEventTooltip',
+  {
+    defaultMessage: 'Add or view notes for this event',
+  }
+);
 
-export const COPY_TO_CLIPBOARD = i18n.translate('xpack.secops.timeline.body.copy.to.clipboard', {
-  defaultMessage: 'Copy to Clipboard',
-});
-
-export const EVENT = i18n.translate('xpack.secops.timeline.body.event', {
-  defaultMessage: 'Event',
-});
+export const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.secops.timeline.body.copyToClipboardButtonLabel',
+  {
+    defaultMessage: 'Copy to Clipboard',
+  }
+);
 
 export const UNPINNED = i18n.translate('xpack.secops.timeline.body.pinning.unpinnedTooltip', {
   defaultMessage: 'This is event is NOT persisted with the timeline',
 });
 
-export const PINNED = i18n.translate('xpack.secops.timeline.body.pinning.pinnnedTooltip', {
+export const PINNED = i18n.translate('xpack.secops.timeline.body.pinning.pinnedTooltip', {
   defaultMessage: 'This event is persisted with the timeline',
 });
 
@@ -33,10 +35,10 @@ export const PINNED_WITH_NOTES = i18n.translate(
   }
 );
 
-export const EXPAND = i18n.translate('xpack.secops.timeline.body.actions.expand', {
+export const EXPAND = i18n.translate('xpack.secops.timeline.body.actions.expandAriaLabel', {
   defaultMessage: 'Expand',
 });
 
-export const COLLAPSE = i18n.translate('xpack.secops.timeline.body.actions.collapse', {
+export const COLLAPSE = i18n.translate('xpack.secops.timeline.body.actions.collapseAriaLabel', {
   defaultMessage: 'Collapse',
 });

@@ -3,9 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { mount } from 'enzyme';
+import { noop } from 'lodash/fp';
+import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
 
 import { getPopulatedMappedFields, virtualEcsSchema } from '../../../public/lib/ecs';
 import { mockEcsData } from '../../mock/mock_ecs';
+import { createStore } from '../../store';
 import { getExampleText, getIconFromType, getItems } from './helpers';
 
 const aField = virtualEcsSchema.event.fields['event.category'];
@@ -117,6 +125,68 @@ describe('helpers', () => {
           populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
         }).find(x => x.field === 'event.category')!.value.key
       ).toMatch(/^event-field-browser-value-for-event.category-\S+$/);
+    });
+
+    describe('formatting data for display', () => {
+      let store = createStore();
+
+      beforeEach(() => {
+        store = createStore();
+      });
+
+      const justDateFields = getItems({
+        data,
+        populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
+      }).filter(item => item.type === 'date');
+
+      const nonDateFields = getItems({
+        data,
+        populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
+      }).filter(item => item.type !== 'date');
+
+      test('it should have at least one date field (a sanity check for inputs to other tests)', () => {
+        expect(justDateFields.length > 0).toEqual(true); // to ensure the tests below run for at least one date field
+      });
+
+      test('it should have at least one NON-date field (a sanity check for inputs to other tests)', () => {
+        expect(nonDateFields.length > 0).toEqual(true); // to ensure the tests below run for at least one NON-date field
+      });
+
+      justDateFields.forEach(field => {
+        test(`it should render a tooltip for the ${field.field} (${field.type}) field`, () => {
+          const wrapper = mount(
+            <ReduxStoreProvider store={store}>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <>{field.value}</>
+                </DragDropContext>
+              </ThemeProvider>
+            </ReduxStoreProvider>
+          );
+
+          expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(true);
+        });
+      });
+
+      nonDateFields.forEach(field => {
+        test(`it should NOT render a tooltip for the NON-date ${field.field} (${
+          field.type
+        }) field`, () => {
+          const wrapper = mount(
+            <ReduxStoreProvider store={store}>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <>{field.value}</>
+                </DragDropContext>
+              </ThemeProvider>
+            </ReduxStoreProvider>
+          );
+
+          expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(
+            false
+          );
+        });
+      });
     });
   });
 });
