@@ -9,9 +9,5 @@ export {
 } from './strings';
 
 export {
-  generateArrayOfLength,
-} from './arrays';
-
-export {
   registerTestBed,
 } from './testbed';

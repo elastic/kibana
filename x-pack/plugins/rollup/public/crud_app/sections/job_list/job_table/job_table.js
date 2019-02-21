@@ -330,6 +330,7 @@ export class JobTableUi extends Component {
     const {
       filterChanged,
       filter,
+      jobs,
       intl,
       closeDetailPanel,
     } = this.props;
@@ -372,27 +373,33 @@ export class JobTableUi extends Component {
 
         <EuiSpacer size="m" />
 
-        <EuiTable>
-          <EuiTableHeader>
-            <EuiTableHeaderCellCheckbox>
-              <EuiCheckbox
-                id="selectAllJobsCheckbox"
-                checked={this.areAllItemsSelected()}
-                onChange={this.toggleAll}
-                type="inList"
-              />
-            </EuiTableHeaderCellCheckbox>
-            {this.buildHeader()}
-          </EuiTableHeader>
+        {jobs.length > 0 ? (
+          <EuiTable>
+            <EuiTableHeader>
+              <EuiTableHeaderCellCheckbox>
+                <EuiCheckbox
+                  id="selectAllJobsCheckbox"
+                  checked={this.areAllItemsSelected()}
+                  onChange={this.toggleAll}
+                  type="inList"
+                />
+              </EuiTableHeaderCellCheckbox>
+              {this.buildHeader()}
+            </EuiTableHeader>
 
-          <EuiTableBody>
-            {this.buildRows()}
-          </EuiTableBody>
-        </EuiTable>
+            <EuiTableBody>
+              {this.buildRows()}
+            </EuiTableBody>
+          </EuiTable>
+        ) : (
+          <div>
+            No rollup jobs to show
+          </div>
+        )}
 
         <EuiSpacer size="m" />
 
-        {this.renderPager()}
+        {jobs.length > 0 ? this.renderPager() : null}
       </Fragment>
     );
   }

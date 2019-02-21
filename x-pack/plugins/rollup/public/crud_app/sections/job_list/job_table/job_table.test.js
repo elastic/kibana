@@ -51,20 +51,17 @@ describe('<JobTable />', () => {
         'metrics'
       ];
 
-      const tableColumns = expectedColumns
-        .map(id => {
-          const col = findTestSubject(`jobTableHeaderCell-${id}`);
-          col.__id__ = id;
-          return col;
-        })
-        .filter(col => !!col.length)
-        .map(col => col.__id__);
+      const tableColumns = expectedColumns.reduce((tableColumns, columnId) => (
+        findTestSubject(`jobTableHeaderCell-${columnId}`).length
+          ? tableColumns.concat(columnId)
+          : tableColumns
+      ), []);
 
       expect(tableColumns).toEqual(expectedColumns);
     });
 
     it('should set the correct job value in each row cell', () => {
-      const fields = [
+      const fieldNames = [
         'id',
         'indexPattern',
         'rollupIndex',
@@ -76,9 +73,9 @@ describe('<JobTable />', () => {
       const getCellText = (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
 
       // Simple fields
-      fields.forEach((field) => {
-        const cellText = getCellText(field);
-        expect(cellText).toEqual(job[field]);
+      fieldNames.forEach((fieldName) => {
+        const cellText = getCellText(fieldName);
+        expect(cellText).toEqual(job[fieldName]);
       });
 
       // Status
@@ -113,7 +110,8 @@ describe('<JobTable />', () => {
 
       linkJobId.simulate('click');
 
-      expect(openDetailPanel.mock.calls[0][0]).toEqual(job.id);
+      expect(openDetailPanel.mock.calls.length).toBe(1);
+      expect(openDetailPanel.mock.calls[0][0]).toBe(job.id);
     });
   });
 

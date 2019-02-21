@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString, generateArrayOfLength } from '../__jest__/utils';
+import { getRandomString } from '../__jest__/utils';
 
 const initialValues = {
   dateHistogramField: 'timestamp',
@@ -42,4 +42,4 @@ const initialValues = {
 
 export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });
 
-export const getJobs = (total = 5) => generateArrayOfLength(total).map(() => getJob());
+export const getJobs = (total = 5) => new Array(total).fill().map(() => getJob());
