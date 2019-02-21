@@ -68,7 +68,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           ReactDOM.render(
             renderComponent({
               darkMode,
-              updateBreadcrumbs: chrome.breadcrumbs.set,
+              setBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
               routerBasename,
               graphQLClient,

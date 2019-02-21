@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -41,9 +41,11 @@ interface UptimeAppColors {
 export interface UptimeCommonProps {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
+  colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
-  colors: UptimeAppColors;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
+  setHeadingText: (text: string) => void;
 }
 
 export interface UptimePersistedState {
@@ -62,7 +64,7 @@ export interface UptimeAppProps {
   initialAutorefreshIsPaused: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
-  updateBreadcrumbs: UMUpdateBreadcrumbs;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
   persistState(state: UptimePersistedState): void;
 }
 
@@ -73,6 +75,7 @@ interface UptimeAppState {
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
+  headingText?: string;
 }
 
 // TODO: when EUI exports types for this, this should be replaced
@@ -98,10 +101,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       initialDateRangeStart: dateRangeStart,
       initialDateRangeEnd: dateRangeEnd,
       kibanaBreadcrumbs,
-      updateBreadcrumbs,
+      setBreadcrumbs,
     } = props;
 
-    this.setBreadcrumbs = updateBreadcrumbs;
+    this.setBreadcrumbs = setBreadcrumbs;
 
     let colors: UptimeAppColors;
     if (darkMode) {
@@ -145,12 +148,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle>
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.uptime.appHeader.uptimeLogoText"
-                          defaultMessage="Uptime"
-                        />
-                      </h2>
+                      <h2>{this.state.headingText}</h2>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -189,8 +187,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     render={props => (
                       <OverviewPage
                         {...props}
+                        {...this.props}
                         {...this.state}
-                        setBreadcrumbs={this.setBreadcrumbs}
+                        setHeadingText={this.setHeadingText}
                       />
                     )}
                   />
@@ -199,8 +198,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     render={props => (
                       <MonitorPage
                         {...props}
+                        {...this.props}
                         {...this.state}
-                        updateBreadcrumbs={this.setBreadcrumbs}
+                        setHeadingText={this.setHeadingText}
+                        query={this.props.graphQLClient.query}
                       />
                     )}
                   />
@@ -212,6 +213,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       </I18nProvider>
     );
   }
+
+  private setHeadingText = (headingText: string): void => {
+    this.setState({ headingText });
+  };
 
   private persistState = (): void => {
     const { autorefreshIsPaused, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.state;

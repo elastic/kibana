@@ -11,12 +11,6 @@ export interface UMBreadcrumb {
   href?: string;
 }
 
-export const monitorBreadcrumb: UMBreadcrumb = {
-  text: i18n.translate('xpack.uptime.breadcrumbs.monitorBreadcrumbText', {
-    defaultMessage: 'Monitor',
-  }),
-};
-
 export const overviewBreadcrumb: UMBreadcrumb = {
   text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
     defaultMessage: 'Uptime',
@@ -26,7 +20,7 @@ export const overviewBreadcrumb: UMBreadcrumb = {
 
 export const getOverviewPageBreadcrumbs = (): UMBreadcrumb[] => [overviewBreadcrumb];
 
-export const getMonitorPageBreadcrumb = (): UMBreadcrumb[] => [
+export const getMonitorPageBreadcrumb = (name: string): UMBreadcrumb[] => [
   overviewBreadcrumb,
-  monitorBreadcrumb,
+  { text: name },
 ];

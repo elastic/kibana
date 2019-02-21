@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
@@ -14,14 +15,9 @@ import {
   MonitorListQuery,
   SnapshotQuery,
 } from '../components/queries';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
-interface OverviewPageProps {
-  setBreadcrumbs: UMUpdateBreadcrumbs;
-}
-
-type Props = OverviewPageProps & UptimeCommonProps;
+type Props = UptimeCommonProps;
 
 interface OverviewPageState {
   currentFilterQuery?: string;
@@ -37,6 +33,12 @@ export class OverviewPage extends React.Component<Props, OverviewPageState> {
 
   public componentWillMount() {
     this.props.setBreadcrumbs(getOverviewPageBreadcrumbs());
+    this.props.setHeadingText(
+      i18n.translate('xpack.uptime.overviewPage.headerText', {
+        defaultMessage: 'Overview',
+        description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+      })
+    );
   }
 
   public render() {

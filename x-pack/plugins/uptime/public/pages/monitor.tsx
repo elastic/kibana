@@ -10,6 +10,8 @@ import {
   // @ts-ignore No typings for EuiSuperSelect
   EuiSuperSelect,
 } from '@elastic/eui';
+import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
+import gql from 'graphql-tag';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import {
@@ -18,40 +20,68 @@ import {
   MonitorStatusBarQuery,
   PingListQuery,
 } from '../components/queries';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
 interface MonitorPageProps {
-  updateBreadcrumbs: UMUpdateBreadcrumbs;
   history: { push: any };
   location: { pathname: string };
   match: { params: { id: string } };
+  // this is the query function provided by Apollo's Client API
+  query: <T, TVariables = OperationVariables>(
+    options: QueryOptions<TVariables>
+  ) => Promise<ApolloQueryResult<T>>;
 }
 
 type Props = MonitorPageProps & UptimeCommonProps;
 
-export class MonitorPage extends React.Component<Props> {
+interface MonitorPageState {
+  monitorId: string;
+}
+
+export class MonitorPage extends React.Component<Props, MonitorPageState> {
   constructor(props: Props) {
     super(props);
+
+    // TODO: this is a hack because the id field's characters mess up react router's
+    // inner params parsing, when we add a synthetic ID for monitors this problem should go away
+    this.state = {
+      monitorId: this.props.location.pathname.replace(/^(\/monitor\/)/, ''),
+    };
   }
 
-  public componentWillMount() {
-    this.props.updateBreadcrumbs(getMonitorPageBreadcrumb());
+  public componentDidMount() {
+    const { query, setBreadcrumbs, setHeadingText } = this.props;
+    const { monitorId } = this.state;
+
+    query({
+      query: gql`
+        query MonitorPageTitle($monitorId: String!) {
+          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+            id
+            url
+            name
+          }
+        }
+      `,
+      variables: { monitorId },
+    }).then((result: any) => {
+      const { name, url, id } = result.data.monitorPageTitle;
+      const heading: string = name || url || id;
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading));
+      setHeadingText(heading);
+    });
   }
 
   public render() {
-    // TODO: this is a hack because the id field's characters mess up react router's
-    // inner params parsing, when we add a synthetic ID for monitors this problem should go away
-    const id = this.props.location.pathname.replace(/^(\/monitor\/)/, '');
     return (
       <Fragment>
-        <MonitorPageTitleQuery monitorId={id} {...this.props} />
+        <MonitorPageTitleQuery {...this.state} {...this.props} />
         <EuiSpacer size="s" />
-        <MonitorStatusBarQuery monitorId={id} {...this.props} />
+        <MonitorStatusBarQuery {...this.state} {...this.props} />
         <EuiSpacer size="s" />
-        <MonitorChartsQuery monitorId={id} {...this.props} />
+        <MonitorChartsQuery {...this.state} {...this.props} />
         <EuiSpacer size="s" />
-        <PingListQuery monitorId={id} {...this.props} />
+        <PingListQuery {...this.state} {...this.props} />
       </Fragment>
     );
   }
