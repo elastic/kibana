@@ -37,7 +37,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/apm/**/*',
   'x-pack/plugins/canvas/tasks/**/*',
-  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/public/lib/flot-charts/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
