@@ -20,18 +20,40 @@ interface JobDocOutputPseudo {
  * @return {Object}: pseudo-JobDocOutput. See interface JobDocOutput
  */
 function executeJobFn(server: KbnServer) {
+  const crypto = cryptoFactory(server);
+  const config = server.config();
+  const serverBasePath = config.get('server.basePath');
+  const logger = {
+    debug: createTaggedLogger(server, ['reporting', 'csv_from_savedobject', 'debug']),
+  };
+
   return async function executeJob(job: JobDocPayload): Promise<JobDocOutputPseudo> {
-    const { objects, headers, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
+    const { basePath, objects, headers: serializedEncryptedHeaders, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
     const { isImmediate, panel, visType } = jobParams;
     if (!isImmediate) {
-      const req = { headers, server }; // FIXME use fake req
+      logger.debug(`Execute job generating [${visType}] csv`);
+
+      let decryptedHeaders;
+      try {
+        decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
+      } catch {
+        throw new Error('Failed to decrypt report job data. Please ensure that `xpack.reporting.encryptionKey` is set and re-generate this report.');
+      }
+
+      const fakeRequest = {
+        headers: decryptedHeaders,
+        getBasePath: () => basePath || serverBasePath,
+        server,
+      };
 
       return {
         content_type: CONTENT_TYPE_CSV,
         // @ts-ignore
-        content: await generateCsv(req, server, visType, panel),
+        content: await generateCsv(fakeRequest, server, visType, panel),
       };
     }
+
+    logger.debug(`Execute job using previously-generated [${visType}] csv`);
 
     // if job was created with "immediate", just return the data in the job doc
     // FIXME how would this work if they never had privilege to create a job
