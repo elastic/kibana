@@ -57,6 +57,7 @@ import {
 } from '../../common/constants/search';
 import { annotationsRefresh$ } from '../services/annotations_service';
 import { interval$ } from '../components/controls/select_interval/select_interval';
+import { severity$ } from '../components/controls/select_severity/select_severity';
 
 
 import chrome from 'ui/chrome';
@@ -84,10 +85,10 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   AppState,
   config,
-  mlSelectSeverityService,
   i18n) {
 
   $injector.get('mlSelectIntervalService');
+  $injector.get('mlSelectSeverityService');
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -656,7 +657,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   const intervalSub = interval$.subscribe(tableControlsListener);
-  const severitySub = mlSelectSeverityService.state.watch(tableControlsListener);
+  const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
@@ -777,7 +778,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       $scope.criteriaFields,
       [],
       interval$.getValue().val,
-      mlSelectSeverityService.state.get('threshold').val,
+      severity$.getValue().val,
       earliestMs,
       latestMs,
       dateFormatTz,

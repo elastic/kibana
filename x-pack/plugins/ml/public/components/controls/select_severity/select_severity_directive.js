@@ -8,22 +8,20 @@
 import 'ngreact';
 
 import { wrapInI18nContext } from 'ui/i18n';
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { SelectSeverity, mlSelectSeverityService } from './select_severity';
+import { subscribeAppStateToObservable } from '../../../factories/state_factory';
+import { SelectSeverity, severity$ } from './select_severity';
 
-module.service('mlSelectSeverityService', function (Private, i18n) {
-  const stateFactory = Private(stateFactoryProvider);
-  this.state = mlSelectSeverityService.state = stateFactory('mlSelectSeverity', {
-    threshold: {
-      display: i18n('xpack.ml.controls.selectSeverity.threshold.warningLabel', { defaultMessage: 'warning' }),
-      val: 0
-    }
-  });
-  mlSelectSeverityService.intialized = true;
+// This service should not be consumed anywhere, it's main purpose is to
+// restore an eventual state from the URL and pass that on the observable
+// and then subscribe to changes to the observable to update the URL again.
+module.service('mlSelectSeverityService', function (AppState, $rootScope) {
+  const APP_STATE_NAME = 'mlSelectSeverity';
+  const APP_STATE_SUB_NAME = 'threshold';
+  subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, severity$, $rootScope);
 })
   .directive('mlSelectSeverity', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

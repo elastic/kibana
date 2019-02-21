@@ -7,11 +7,10 @@
 
 import 'ngreact';
 
-import { subscribeAppStateToObservable } from 'plugins/ml/factories/state_factory';
-
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { subscribeAppStateToObservable } from '../../../factories/state_factory';
 import { SelectInterval, interval$ } from './select_interval';
 
 // This service should not be consumed anywhere, it's main purpose is to

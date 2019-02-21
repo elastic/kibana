@@ -41,7 +41,7 @@ import { LoadingIndicator } from '../components/loading_indicator/loading_indica
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
 import { SelectLimit, limit$ } from './select_limit/select_limit';
-import { SelectSeverity, mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
+import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
 import { injectObservablesAsProps } from '../util/observable_utils';
 
 import {
@@ -117,6 +117,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     limit: limit$,
     showCharts: showCharts$,
     tableInterval: interval$,
+    tableSeverity: severity$,
   },
   class Explorer extends React.Component {
     static propTypes = {
@@ -179,8 +180,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     // In componentWillUnmount() they will be unsubscribed again.
     annotationsRefreshSub = null;
     explorerSub = null;
-    chartsSeveritySub = null;
-    //tableSeveritySub = null;
 
     componentDidMount() {
       this.updateCharts = explorerChartsContainerServiceFactory((data) => {
@@ -257,23 +256,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         }
       });
 
-      this.chartsSeveritySub = mlSelectSeverityService.state.watch(() => {
-        const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
-        if (this.props.showCharts && selectedCells !== null) {
-          const bounds = timefilter.getActiveBounds();
-          const timerange = getSelectionTimeRange(
-            selectedCells,
-            this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-            bounds,
-          );
-          this.updateCharts(
-            anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-          );
-        }
-      });
-
-      //this.tableSeveritySub = mlSelectSeverityService.state.watch(tableControlsListener);
-
       this.annotationsRefreshSub = annotationsRefresh$.subscribe(() => {
         // clear the annotations cache and trigger an update
         this.annotationsTablePreviousArgs = null;
@@ -285,6 +267,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     // inspired by https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
     previousLimit = null;
     previousTableInterval = null;
+    previousTableSeverity = null;
     async componentDidUpdate() {
       if (this.previousLimit !== this.props.limit.val) {
         this.previousLimit = this.props.limit.val;
@@ -293,13 +276,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       } else if (this.previousTableInterval !== this.props.tableInterval.val) {
         this.previousTableInterval = this.props.tableInterval.val;
         this.updateExplorer();
+      } else if (this.previousTableSeverity !== this.props.tableSeverity.val) {
+        this.previousTableSeverity = this.props.tableSeverity.val;
+        this.updateExplorer();
       }
     }
 
     componentWillUnmount() {
       this.explorerSub.unsubscribe();
-      this.chartsSeveritySub.unsubscribe();
-      //this.tableSeveritySub.unsubscribe();
       this.annotationsRefreshSub.unsubscribe();
     }
 
@@ -756,7 +740,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         );
       }
 
-      const { tableInterval } = this.props;
+      const { tableInterval, tableSeverity } = this.props;
       const anomaliesTableCompareArgs = {
         selectedCells,
         selectedJobs,
@@ -766,6 +750,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         boundsMax: bounds.max.valueOf(),
         swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
         tableInterval: tableInterval.val,
+        tableSeverity: tableSeverity.val,
       };
 
       if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
@@ -781,6 +766,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           bounds,
           viewBySwimlaneOptions.swimlaneViewByFieldName,
           tableInterval,
+          tableSeverity,
         );
         this.setState({ tableData });
       }
