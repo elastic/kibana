@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
-import { I18nContext } from 'ui/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -143,9 +143,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <I18nContext>
+        <I18nProvider>
           <GisMap/>
-        </I18nContext>
+        </I18nProvider>
       </Provider>,
       root
     );

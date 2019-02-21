@@ -20,6 +20,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 
 export class AddLayerPanel extends Component {
 
@@ -67,7 +69,10 @@ export class AddLayerPanel extends Component {
         }}
         fill
       >
-        Add layer
+        <FormattedMessage
+          id="xpack.maps.addLayerPanel.addLayerInWizard"
+          defaultMessage="Add layer"
+        />
       </EuiButton>
     );
   }
@@ -125,7 +130,10 @@ export class AddLayerPanel extends Component {
           onClick={this._clearSource}
           iconType="arrowLeft"
         >
-          Change data source
+          <FormattedMessage
+            id="xpack.maps.addLayerPanel.changeDataSourceButton"
+            defaultMessage="Change data source"
+          />
         </EuiButtonEmpty>
         <EuiSpacer size="s" />
         <EuiPanel>
@@ -151,7 +159,12 @@ export class AddLayerPanel extends Component {
       >
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>Add layer</h2>
+            <h2>
+              <FormattedMessage
+                id="xpack.maps.addLayerPanel.addLayerTitleInFlyout"
+                defaultMessage="Add layer"
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
