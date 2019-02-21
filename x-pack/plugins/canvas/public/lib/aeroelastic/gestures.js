@@ -12,10 +12,10 @@ import { select, selectReduce } from './state';
 // It shouldn't fail in testing environments (node.js) either, where it can just return false, no need for
 // actually getting the OS on the server side.
 const appleKeyboard = Boolean(
-  window &&
-    window.navigator &&
-    window.navigator.userAgent &&
-    window.navigator.userAgent.match('Macintosh|iPhone|iPad')
+  global &&
+    global.navigator &&
+    global.navigator.userAgent &&
+    global.navigator.userAgent.match('Macintosh|iPhone|iPad')
 );
 
 /**
