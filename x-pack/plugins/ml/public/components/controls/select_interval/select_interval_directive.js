@@ -7,22 +7,20 @@
 
 import 'ngreact';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import { subscribeAppStateToObservable } from 'plugins/ml/factories/state_factory';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { SelectInterval, mlSelectIntervalService } from './select_interval';
+import { SelectInterval, interval$ } from './select_interval';
 
-module.service('mlSelectIntervalService', function (Private, i18n) {
-  const stateFactory = Private(stateFactoryProvider);
-  this.state = mlSelectIntervalService.state = stateFactory('mlSelectInterval', {
-    interval: {
-      display: i18n('xpack.ml.controls.selectInterval.autoInitLabel', { defaultMessage: 'Auto' }),
-      val: 'auto'
-    }
-  });
-  mlSelectIntervalService.initialized = true;
+// This service should not be consumed anywhere, it's main purpose is to
+// restore an eventual state from the URL and pass that on the observable
+// and then subscribe to changes to the observable to update the URL again.
+module.service('mlSelectIntervalService', function (AppState, $rootScope) {
+  const APP_STATE_NAME = 'mlSelectInterval';
+  const APP_STATE_SUB_NAME = 'interval';
+  subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, interval$, $rootScope);
 })
   .directive('mlSelectInterval', function ($injector) {
     const reactDirective = $injector.get('reactDirective');
