@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -49,46 +50,38 @@ export const PingList = ({
       name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
         defaultMessage: 'Status',
       }),
-      render: (pingStatus: string) => (
-        <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
-          {pingStatus === 'up'
-            ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
-                defaultMessage: 'Up',
-              })
-            : i18n.translate('xpack.uptime.pingList.statusColumnHealthDownLabel', {
-                defaultMessage: 'Down',
-              })}
-        </EuiHealth>
+      render: (pingStatus: string, item: object) => (
+        <div>
+          <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
+            {pingStatus === 'up'
+              ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
+                  defaultMessage: 'Up',
+                })
+              : i18n.translate('xpack.uptime.pingList.statusColumnHealthDownLabel', {
+                  defaultMessage: 'Down',
+                })}
+          </EuiHealth>
+          <EuiText size="xs" color="subdued">
+            Latest was {moment(item.timestamp).fromNow()}
+          </EuiText>
+        </div>
       ),
     },
     {
-      field: 'timestamp',
-      name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
-        defaultMessage: 'Timestamp',
-      }),
-      render: (timestamp: string) => moment(timestamp).fromNow(),
-    },
-    {
       field: 'monitor.ip',
+      dataType: 'number',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
-      field: 'monitor.id',
-      name: i18n.translate('xpack.uptime.pingList.idColumnLabel', {
-        defaultMessage: 'Id',
-      }),
-      dataType: 'string',
-      width: '20%',
-    },
-    {
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
-        defaultMessage: 'Duration ms',
+        defaultMessage: 'Duration',
         description: 'The "ms" in the default message is an abbreviation for milliseconds',
       }),
-      render: (duration: number) => duration / 1000,
+      dataType: 'number',
+      render: (duration: number) => <span>{duration / 1000} ms</span>,
     },
     {
       field: 'error.type',
@@ -110,10 +103,12 @@ export const PingList = ({
             })}
             content={<p>{message}</p>}
           >
-            <div>{message.slice(0, 24)}…</div>
+            <code>{message.slice(0, 24)}…</code>
           </EuiToolTip>
         ) : (
-          message
+          <EuiText size="s">
+            <code>{message}</code>
+          </EuiText>
         ),
     },
   ];
@@ -130,9 +125,11 @@ export const PingList = ({
     if (hasStatus) {
       columns.push({
         field: 'http.response.status_code',
+        align: 'right',
         name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
           defaultMessage: 'Response code',
         }),
+        render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
       });
     }
   }

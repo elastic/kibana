@@ -104,7 +104,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                       <h4>
                         <FormattedMessage
                           id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                          defaultMessage="Monitor Duration ms"
+                          defaultMessage="Monitor duration in milleseconds"
                           description="The 'ms' is an abbreviation for milliseconds."
                         />
                       </h4>
