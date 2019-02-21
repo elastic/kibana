@@ -211,7 +211,7 @@ export class JobListUi extends Component {
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="jobListLoading">
           <EuiText>
             <EuiTextColor color="subdued">
               <FormattedMessage
