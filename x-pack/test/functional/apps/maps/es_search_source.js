@@ -39,9 +39,16 @@ export default function ({ getPageObjects, getService }) {
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
+    describe('inspector', () => {
+      it('should register elasticsearch request in inspector', async () => {
+        const hits = await getHits();
+        expect(hits).to.equal('6');
+      });
+    });
+
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8" OR machine.os.raw : "ios"');
       });
 
       after(async () => {
@@ -53,7 +60,7 @@ export default function ({ getPageObjects, getService }) {
         const requestStats = await inspector.getTableData();
         const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         await inspector.close();
-        expect(hits).to.equal('1');
+        expect(hits).to.equal('3');
       });
 
       it('should re-fetch query when "refresh" is clicked', async () => {
@@ -62,12 +69,15 @@ export default function ({ getPageObjects, getService }) {
         const afterQueryRefreshTimestamp = await getRequestTimestamp();
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
-    });
 
-    describe('inspector', () => {
-      it('should register elasticsearch request in inspector', async () => {
-        const hits = await getHits();
-        expect(hits).to.equal('6');
+      it('should apply query to fit to bounds', async () => {
+        // Set view to other side of world so no matching results
+        await PageObjects.maps.setView(-15, -100, 6);
+        await PageObjects.maps.clickFitToBounds('logstash');
+        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        expect(Math.round(lat)).to.equal(41);
+        expect(Math.round(lon)).to.equal(-102);
+        expect(Math.round(zoom)).to.equal(5);
       });
     });
 
