@@ -85,7 +85,7 @@ export class LogInterceptor extends Stream.Transform {
    *  @param {object} - log event
    */
   downgradeIfEconnreset(event) {
-    return downgradeIfErrorType('ECONNRESET', event);
+    return downgradeIfErrorType('ECONNRESET', event, 'code');
   }
 
   /**
