@@ -7,6 +7,7 @@
 import _ from 'lodash';
 
 import { Subject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 export function initializeAppState(AppState, stateName, defaultState) {
   const appState = new AppState();
@@ -35,6 +36,21 @@ export function initializeAppState(AppState, stateName, defaultState) {
   }
 
   return appState;
+}
+
+export function subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, o$, $rootScope) {
+  const appState = initializeAppState(AppState, APP_STATE_NAME, {
+    [APP_STATE_SUB_NAME]: o$.getValue()
+  });
+
+  o$.next(appState[APP_STATE_NAME][APP_STATE_SUB_NAME]);
+
+  o$.pipe(distinctUntilChanged()).subscribe(payload => {
+    appState.fetch();
+    appState[APP_STATE_NAME] = { [APP_STATE_SUB_NAME]: payload };
+    appState.save();
+    $rootScope.$applyAsync();
+  });
 }
 
 // A data store to be able to share persistent state across directives

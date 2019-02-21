@@ -178,7 +178,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     // In componentWillUnmount() they will be unsubscribed again.
     annotationsRefreshSub = null;
     explorerSub = null;
-    limitSub = null;
     chartsSeveritySub = null;
     intervalSub = null;
     tableSeveritySub = null;
@@ -258,11 +257,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         }
       });
 
-      this.limitSub = limit$.subscribe(() => {
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        this.updateExplorer(getClearedSelectedAnomaliesState(), false);
-      });
-
       this.chartsSeveritySub = mlSelectSeverityService.state.watch(() => {
         const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
         if (this.props.showCharts && selectedCells !== null) {
@@ -304,9 +298,18 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       });
     }
 
+    // inspired by https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
+    previousLimit = null;
+    componentDidUpdate() {
+      if (this.previousLimit !== this.props.limit.val) {
+        this.previousLimit = this.props.limit.val;
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        this.updateExplorer(getClearedSelectedAnomaliesState(), false);
+      }
+    }
+
     componentWillUnmount() {
       this.explorerSub.unsubscribe();
-      this.limitSub.unsubscribe();
       this.chartsSeveritySub.unsubscribe();
       this.intervalSub.unsubscribe();
       this.tableSeveritySub.unsubscribe();

@@ -10,7 +10,6 @@
  * React component for rendering a select element with limit options.
  */
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 import React, { Component } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -46,37 +45,24 @@ function optionValueToLimit(value) {
   return limit;
 }
 
+const EUI_OPTIONS = LIMIT_OPTIONS.map(({ display, val }) => ({
+  value: display,
+  text: val,
+}));
+
 export const limit$ = new BehaviorSubject(LIMIT_OPTIONS[1]);
 
 class SelectLimitUnwrapped extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  componentDidMount() {
-    const limitState = limit$.getValue();
-    const limitValue = get(limitState, 'val', 10);
-    const limit = optionValueToLimit(limitValue);
-    // set initial selected option equal to limit value
-    limit$.next(limit);
-  }
-
   onChange = (e) => {
     const valueDisplay = e.target.value;
     const limit = optionValueToLimit(optionsMap[valueDisplay]);
     limit$.next(limit);
   }
 
-  getOptions = () =>
-    LIMIT_OPTIONS.map(({ display, val }) => ({
-      value: display,
-      text: val,
-    }));
-
   render() {
     return (
       <EuiSelect
-        options={this.getOptions()}
+        options={EUI_OPTIONS}
         onChange={this.onChange}
         value={this.props.limit.display}
       />
