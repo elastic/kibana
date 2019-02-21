@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import expect from 'expect.js';
 import { TestWrapper } from 'typings';
 
