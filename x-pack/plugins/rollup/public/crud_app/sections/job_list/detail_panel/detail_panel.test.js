@@ -11,6 +11,9 @@ import { DetailPanel, JOB_DETAILS_TABS } from './detail_panel';
 import {
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_JSON,
   tabToHumanizedMap,
 } from '../../components';
 
@@ -113,7 +116,7 @@ describe('<DetailPanel />', () => {
   });
 
   describe('job detail', () => {
-    describe('summary Tab content', () => {
+    describe('summary tab content', () => {
       // Init testBed on the SUMMARY tab
       const panelType = JOB_DETAILS_TAB_SUMMARY;
       const { findTestSubject } = initTestBed({ panelType });
@@ -170,7 +173,7 @@ describe('<DetailPanel />', () => {
         });
       });
 
-      describe('Date histogram', () => {
+      describe('Date histogram section', () => {
         const DATE_HISTOGRAMS_SUBSECTIONS = ['Time field', 'Timezone', 'Interval '];
 
         const dateHistogramSubSections = findTestSubject('rollupJobDetailSummaryDateHistogramItem')
@@ -205,7 +208,7 @@ describe('<DetailPanel />', () => {
         });
       });
 
-      describe('Stats', () => {
+      describe('Stats section', () => {
         const STATS_SUBSECTIONS = ['Documents processed', 'Pages processed', 'Rollups indexed', 'Trigger count'];
 
         const statsSubSections = findTestSubject('rollupJobDetailSummaryStatsItem')
@@ -246,6 +249,85 @@ describe('<DetailPanel />', () => {
           const statsSection = tabContentSections.find(section => section.title === 'Stats');
           expect(statsSection.reactWrapper.find('EuiHealth').text()).toEqual('Stopped');
         });
+      });
+    });
+
+    describe('terms tab content', () => {
+      // Init testBed on the TERMS tab
+      const panelType = JOB_DETAILS_TAB_TERMS;
+      const { findTestSubject } = initTestBed({ panelType });
+      const tabContent = findTestSubject('rollupJobDetailTabContent');
+      const getRowsText = () => (
+        tabContent
+          .find('tr')
+          .map(row => row.text())
+          .slice(1) // we remove the first row as it is the table header
+      );
+      it('should list the Job terms fields', () => {
+        const rowsText = getRowsText();
+        const expected = defaultJob.terms.map(term => term.name);
+        expect(rowsText).toEqual(expected);
+      });
+    });
+
+    describe('histogram tab content', () => {
+      // Init testBed on the HISTOGRAM tab
+      const panelType = JOB_DETAILS_TAB_HISTOGRAM;
+      const { findTestSubject } = initTestBed({ panelType });
+      const tabContent = findTestSubject('rollupJobDetailTabContent');
+      const getRowsText = () => (
+        tabContent
+          .find('tr')
+          .map(row => row.text())
+          .slice(1) // we remove the first row as it is the table header
+      );
+
+      it('should list the Job histogram fields', () => {
+        const rowsText = getRowsText();
+        const expected = defaultJob.histogram.map(h => h.name);
+        expect(rowsText).toEqual(expected);
+      });
+    });
+
+    describe('metrics tab content', () => {
+      // Init testBed on the METRICS tab
+      const panelType = JOB_DETAILS_TAB_METRICS;
+      const { findTestSubject } = initTestBed({ panelType });
+      const tabContent = findTestSubject('rollupJobDetailTabContent');
+      const getRows = () => (
+        tabContent
+          .find('tr')
+          .slice(1)
+      );
+      it('should list the Job metrics fields and their types', () => {
+        const rows = getRows();
+
+        rows.forEach((row, i) => {
+          const metric = defaultJob.metrics[i];
+
+          row.find('td').forEach((cell, j) => {
+            if (j === 0) {
+              // field
+              expect(cell.text()).toEqual(metric.name);
+            } else if (j === 1) {
+              // types
+              expect(cell.text()).toEqual(metric.types.join(', '));
+            }
+          });
+        });
+      });
+    });
+
+    describe('JSON tab content', () => {
+      // Init testBed on the JSON tab
+      const panelType = JOB_DETAILS_TAB_JSON;
+      const { findTestSubject } = initTestBed({ panelType });
+      const tabContent = findTestSubject('rollupJobDetailTabContent');
+
+      it('should render the "EuiCodeEditor" with the job "json" data', () => {
+        const euiCodeEditor = tabContent.find('EuiCodeEditor');
+        expect(euiCodeEditor.length).toBeTruthy();
+        expect(JSON.parse(euiCodeEditor.props().value)).toEqual(defaultJob.json);
       });
     });
   });

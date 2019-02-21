@@ -17,10 +17,13 @@ const initialValues = {
   ],
   id: 'test',
   indexPattern: 'kibana*',
+  json: {
+    foo: 'bar',
+  },
   metrics: [
     {
       name: 'dayOfWeek',
-      types: ['avg', 'min']
+      types: ['avg', 'max', 'min']
     },
     {
       name: 'distanceKilometers',
@@ -34,6 +37,7 @@ const initialValues = {
   rollupsIndexed: 2,
   status: 'stopped',
   terms: [
+    { name: 'Dest' },
     { name: 'Carrier' },
     { name: 'DestCountry' },
   ],
