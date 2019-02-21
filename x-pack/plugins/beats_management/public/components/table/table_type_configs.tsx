@@ -177,7 +177,7 @@ export const BeatsTableType: TableType = {
           tooltipText = i18n.translate(
             'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
             {
-              defaultMessage: 'This Beat has not connected to Kibana in over 10 min',
+              defaultMessage: 'This Beat has not connected to Kibana in over 10 min.',
             }
           );
         } else if (beat.status && moment().diff(beat.last_checkin, 'minutes') >= 10) {

@@ -209,7 +209,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   private getNameError = (name: string) => {
     if (name && name !== '' && name.search(/^[a-zA-Z0-9-]+$/) === -1) {
       return i18n.translate('xpack.beatsManagement.tag.tagName.validationErrorMessage', {
-        defaultMessage: 'Tag name can only contain letters, numbers, and dashes',
+        defaultMessage: 'Tag name can only contain letters, numbers, and dashes.',
       });
     } else {
       return false;
