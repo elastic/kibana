@@ -3,9 +3,46 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { labelField } from './helpers';
+
+const commonActionField = [{ constant: '[AuditD][' }, { field: 'event.action' }, { constant: ']' }];
+const commonOutcomeField = [{ constant: ' ' }, { field: 'event.outcome' }];
+
 export const filebeatAuditdRules = [
-  // IPSEC_EVENT Rule
   {
+    // ECS format with outcome
+    when: {
+      exists: ['ecs.version', 'event.action', 'event.outcome', 'auditd.log'],
+    },
+    format: [
+      ...commonActionField,
+      ...commonOutcomeField,
+      ...labelField('user', 'user'),
+      ...labelField('process', 'process'),
+      { constant: ' ' },
+      { field: 'auditd.log' },
+      { constant: ' ' },
+      { field: 'message' },
+    ],
+  },
+  {
+    // ECS format without outcome
+    when: {
+      exists: ['ecs.version', 'event.action', 'auditd.log'],
+    },
+    format: [
+      ...commonActionField,
+      ...labelField('user', 'user'),
+      ...labelField('process', 'process'),
+      { constant: ' ' },
+      { field: 'auditd.log' },
+      { constant: ' ' },
+      { field: 'message' },
+    ],
+  },
+  {
+    // pre-ECS IPSEC_EVENT Rule
     when: {
       exists: ['auditd.log.record_type', 'auditd.log.src', 'auditd.log.dst', 'auditd.log.op'],
       values: {
@@ -23,8 +60,8 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.op' },
     ],
   },
-  // SYSCALL Rule
   {
+    // pre-ECS SYSCALL Rule
     when: {
       exists: [
         'auditd.log.record_type',
@@ -56,8 +93,8 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.ppid' },
     ],
   },
-  // Events with `msg` Rule
   {
+    // pre-ECS Events with `msg` Rule
     when: {
       exists: ['auditd.log.record_type', 'auditd.log.msg'],
     },
@@ -68,8 +105,8 @@ export const filebeatAuditdRules = [
       { field: 'auditd.log.msg' },
     ],
   },
-  // Events with `msg` Rule
   {
+    // pre-ECS Events with `msg` Rule
     when: {
       exists: ['auditd.log.record_type'],
     },
