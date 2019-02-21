@@ -158,6 +158,7 @@ export default function ({ getService }) {
         'stack_stats.kibana.os.platforms.0.count',
         'stack_stats.kibana.os.platforms.0.platform',
         'stack_stats.kibana.plugins.apm.has_any_services',
+        'stack_stats.kibana.plugins.cloud.isCloudEnabled',
         'stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_docker',
         'stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_hosts',
         'stack_stats.kibana.plugins.infraops.last_24_hours.hits.infraops_kubernetes',
