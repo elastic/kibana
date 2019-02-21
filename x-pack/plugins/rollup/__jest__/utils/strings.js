@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface CMTokensAdapter {
-  createEnrollmentTokens(numTokens?: number): Promise<string[]>;
-}
+import Chance from 'chance';
+
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+export const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;
