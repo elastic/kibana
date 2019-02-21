@@ -14,11 +14,11 @@ import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
-
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
 
-function createLayerInstance(layerDescriptor) {
-  const source = createSourceInstance(layerDescriptor.sourceDescriptor);
+function createLayerInstance(layerDescriptor, inspectorAdapters) {
+  const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
   const style = createStyleInstance(layerDescriptor.style);
   switch (layerDescriptor.type) {
     case TileLayer.type:
@@ -32,14 +32,14 @@ function createLayerInstance(layerDescriptor) {
   }
 }
 
-function createSourceInstance(sourceDescriptor) {
+function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   const Source = ALL_SOURCES.find(Source => {
     return Source.type === sourceDescriptor.type;
   });
   if (!Source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new Source(sourceDescriptor);
+  return new Source(sourceDescriptor, inspectorAdapters);
 }
 
 
@@ -69,6 +69,8 @@ export const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 
+export const getTransientLayerId = ({ map }) => map.__transientLayerId;
+
 export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
 export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
@@ -92,10 +94,8 @@ export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {
     // This will evolve as color options are expanded
-    if (!layer.temporary) {
-      const color = _.get(layer, 'style.properties.fillColor.options.color');
-      if (color) accu.push(color);
-    }
+    const color = _.get(layer, 'style.properties.fillColor.options.color');
+    if (color) accu.push(color);
     return accu;
   }, []);
 };
@@ -131,9 +131,10 @@ export const getDataFilters = createSelector(
 
 export const getLayerList = createSelector(
   getLayerListRaw,
-  (layerDescriptorList) => {
+  getInspectorAdapters,
+  (layerDescriptorList, inspectorAdapters) => {
     return layerDescriptorList.map(layerDescriptor =>
-      createLayerInstance(layerDescriptor));
+      createLayerInstance(layerDescriptor, inspectorAdapters));
   });
 
 export const getSelectedLayer = createSelector(
@@ -161,8 +162,6 @@ export const getUniqueIndexPatternIds = createSelector(
     return _.uniq(indexPatternIds);
   }
 );
-
-export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));
 
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some(layerDescriptor => {

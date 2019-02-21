@@ -34,10 +34,10 @@ export class XYZTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({  onPreviewSource }) {
+  static renderEditor({  onPreviewSource, inspectorAdapters }) {
     const previewTMS = (urlTemplate) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);
-      const source = new XYZTMSSource(sourceDescriptor);
+      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
     return (<XYZTMSEditor previewTMS={previewTMS} />);
@@ -76,12 +76,9 @@ export class XYZTMSSource extends AbstractTMSSource {
 
 class XYZTMSEditor extends  React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      tmsInput: '',
-      tmsCanPreview: false
-    };
+  state = {
+    tmsInput: '',
+    tmsCanPreview: false
   }
 
   _handleTMSInputChange(e) {

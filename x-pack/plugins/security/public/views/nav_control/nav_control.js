@@ -48,7 +48,7 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
   };
 
   $scope.logoutLabel = i18n('xpack.security.navControl.logoutLabel', {
-    defaultMessage: "Logout"
+    defaultMessage: 'Logout'
   });
 });
 

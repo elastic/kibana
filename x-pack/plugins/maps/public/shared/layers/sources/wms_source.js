@@ -36,10 +36,10 @@ export class WMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({  onPreviewSource }) {
+  static renderEditor({  onPreviewSource, inspectorAdapters }) {
     const previewWMS = (options) => {
       const sourceDescriptor = WMSSource.createDescriptor(options);
-      const source = new WMSSource(sourceDescriptor);
+      const source = new WMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
     return (<WMSEditor previewWMS={previewWMS} />);
@@ -86,15 +86,11 @@ export class WMSSource extends AbstractTMSSource {
 
 class WMSEditor extends  React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      serviceUrl: '',
-      layers: '',
-      styles: ''
-    };
+  state = {
+    serviceUrl: '',
+    layers: '',
+    styles: ''
   }
-
 
   _previewIfPossible() {
     if (this.state.serviceUrl && this.state.layers) {
@@ -138,12 +134,12 @@ class WMSEditor extends  React.Component {
             onChange={(e) => this._handleServiceUrlChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Layers" helpText={"use comma separated list of layer names"}>
+        <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
           <EuiFieldText
             onChange={(e) => this._handleLayersChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Styles" helpText={"use comma separated list of style names"}>
+        <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
           <EuiFieldText
             onChange={(e) => this._handleStylesChange(e)}
           />
