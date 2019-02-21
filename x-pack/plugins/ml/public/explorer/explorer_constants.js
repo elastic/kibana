@@ -17,6 +17,7 @@ export const DRAG_SELECT_ACTION = {
 };
 
 export const EXPLORER_ACTION = {
+  IDLE: 'idle',
   INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   LOAD_JOBS: 'loadJobs',

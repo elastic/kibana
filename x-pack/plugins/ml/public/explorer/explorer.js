@@ -114,6 +114,8 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 
 export const Explorer = injectI18n(injectObservablesAsProps(
   {
+    annotationsRefresh: annotationsRefresh$,
+    explorer: explorer$,
     limit: limit$,
     showCharts: showCharts$,
     tableInterval: interval$,
@@ -176,11 +178,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
     };
 
-    // These are observable subscriptions, they get assigned in componentDidMount().
-    // In componentWillUnmount() they will be unsubscribed again.
-    annotationsRefreshSub = null;
-    explorerSub = null;
-
     componentDidMount() {
       this.updateCharts = explorerChartsContainerServiceFactory((data) => {
         this.setState({
@@ -193,9 +190,18 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           }
         });
       });
+    }
 
-      this.explorerSub = explorer$.subscribe(({ action, payload = {} }) => {
-        // Listen to the initial loading of jobs
+    // based https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
+    previousLimit = null;
+    previousTableInterval = null;
+    previousTableSeverity = null;
+    async componentDidUpdate() {
+      if (this.props.explorer !== undefined && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
+        explorer$.next({ action: EXPLORER_ACTION.IDLE });
+
+        const { action, payload } = this.props.explorer;
+
         if (action === EXPLORER_ACTION.INITIALIZE) {
           const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
           let currentSelectedCells = this.state.selectedCells;
@@ -254,22 +260,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (action === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
         }
-      });
-
-      this.annotationsRefreshSub = annotationsRefresh$.subscribe(() => {
-        // clear the annotations cache and trigger an update
-        this.annotationsTablePreviousArgs = null;
-        this.annotationsTablePreviousData = null;
-        this.updateExplorer();
-      });
-    }
-
-    // inspired by https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
-    previousLimit = null;
-    previousTableInterval = null;
-    previousTableSeverity = null;
-    async componentDidUpdate() {
-      if (this.previousLimit !== this.props.limit.val) {
+      } else if (this.previousLimit !== this.props.limit.val) {
         this.previousLimit = this.props.limit.val;
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         this.updateExplorer(getClearedSelectedAnomaliesState(), false);
@@ -279,12 +270,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       } else if (this.previousTableSeverity !== this.props.tableSeverity.val) {
         this.previousTableSeverity = this.props.tableSeverity.val;
         this.updateExplorer();
+      } else if (this.props.annotationsRefresh === true) {
+        annotationsRefresh$.next(false);
+        // clear the annotations cache and trigger an update
+        this.annotationsTablePreviousArgs = null;
+        this.annotationsTablePreviousData = null;
+        this.updateExplorer();
       }
-    }
-
-    componentWillUnmount() {
-      this.explorerSub.unsubscribe();
-      this.annotationsRefreshSub.unsubscribe();
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
