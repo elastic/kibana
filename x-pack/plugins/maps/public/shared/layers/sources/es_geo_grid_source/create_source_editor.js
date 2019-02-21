@@ -129,13 +129,17 @@ export class CreateSourceEditor extends Component {
       geoField,
       requestType
     } = this.state;
+
     if (indexPatternId && geoField) {
       this.props.onSelect({
         indexPatternId,
         geoField,
         requestType: requestType.value
       });
+      return;
     }
+
+    this.props.onSelect();
   };
 
   _onNoIndexPatterns = () => {

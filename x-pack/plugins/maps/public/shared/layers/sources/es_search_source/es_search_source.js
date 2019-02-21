@@ -22,12 +22,17 @@ export class ESSearchSource extends AbstractESSource {
   static description = 'Geospatial data from a Kibana index pattern';
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSelect = (layerConfig) => {
-      const layerSource = new ESSearchSource({
+    const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource();
+        return;
+      }
+
+      const source = new ESSearchSource({
         id: uuid(),
-        ...layerConfig
+        ...sourceConfig
       }, inspectorAdapters);
-      onPreviewSource(layerSource);
+      onPreviewSource(source);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
