@@ -80,6 +80,11 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     }
   }
   responsive={true}
+  rowProps={
+    Object {
+      "data-test-subj": "row",
+    }
+  }
   search={
     Object {
       "box": Object {

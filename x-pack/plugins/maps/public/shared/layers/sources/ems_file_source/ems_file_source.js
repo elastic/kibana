@@ -25,17 +25,13 @@ export class EMSFileSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onChange = (selectedId) => {
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
+      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsFileSource);
     };
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
-  }
-
-  constructor(descriptor) {
-    super(descriptor);
   }
 
   async _getEmsVectorFileMeta() {

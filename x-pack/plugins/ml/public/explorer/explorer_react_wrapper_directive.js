@@ -20,7 +20,7 @@ import { I18nContext } from 'ui/i18n';
 import { mapScopeToProps } from './explorer_utils';
 
 import { EXPLORER_ACTION } from './explorer_constants';
-import { mlExplorerDashboardService } from './explorer_dashboard_service';
+import { explorer$ } from './explorer_dashboard_service';
 
 module.directive('mlExplorerReactWrapper', function () {
   function link(scope, element) {
@@ -29,7 +29,8 @@ module.directive('mlExplorerReactWrapper', function () {
       element[0]
     );
 
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.LOAD_JOBS);
+    explorer$.next({ action: EXPLORER_ACTION.LOAD_JOBS });
+
 
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);

@@ -69,8 +69,21 @@ function runServerFunctions(server) {
             if (Boom.isBoom(err)) {
               return { err, statusCode: err.statusCode, message: err.output.payload };
             }
-            return {  err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
+            return { err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
           });
+
+        if (result == null) {
+          const { functionName } = fnCall;
+          return {
+            id,
+            result: {
+              err: `No result from '${functionName}'`,
+              statusCode: 500,
+              message: `Function '${functionName}' did not return anything`
+            }
+          };
+        }
+
         return { id, result };
       }));
 

@@ -27,7 +27,7 @@ import 'ui/private';
 import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { SavedObject } from 'ui/saved_objects';
+import { SimpleSavedObject } from 'ui/saved_objects';
 
 // Load the kibana app dependencies.
 
@@ -91,9 +91,9 @@ describe('discover field chooser directives', function () {
     hits = Private(FixturesHitsProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     indexPatternList = [
-      new SavedObject(undefined, { id: '0', attributes: { title: 'b' } }),
-      new SavedObject(undefined, { id: '1', attributes: { title: 'a' } }),
-      new SavedObject(undefined, { id: '2', attributes: { title: 'c' } })
+      new SimpleSavedObject(undefined, { id: '0', attributes: { title: 'b' } }),
+      new SimpleSavedObject(undefined, { id: '1', attributes: { title: 'a' } }),
+      new SimpleSavedObject(undefined, { id: '2', attributes: { title: 'c' } })
     ];
 
     const fieldCounts = _.transform(hits, function (counts, hit) {
