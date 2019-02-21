@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect';
+import { map } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -71,7 +72,6 @@ import {
   DRAG_SELECT_ACTION,
   APP_STATE_ACTION,
   EXPLORER_ACTION,
-  SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
@@ -116,10 +116,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
   {
     annotationsRefresh: annotationsRefresh$,
     explorer: explorer$,
-    limit: limit$,
     showCharts: showCharts$,
-    tableInterval: interval$,
-    tableSeverity: severity$,
+    swimlaneLimit: limit$.pipe(map(d => d.val)),
+    tableInterval: interval$.pipe(map(d => d.val)),
+    tableSeverity: severity$.pipe(map(d => d.val)),
   },
   class Explorer extends React.Component {
     static propTypes = {
@@ -192,8 +192,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       });
     }
 
-    // based https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
-    previousLimit = null;
+    // based on the pattern described here:
+    // https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
+    // instead of our previous approach using custom listeners, here we react to prop changes
+    // and trigger corresponding updates to the component's state via updateExplorer()
+    previousSwimlaneLimit = null;
     previousTableInterval = null;
     previousTableSeverity = null;
     async componentDidUpdate() {
@@ -260,15 +263,15 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (action === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
         }
-      } else if (this.previousLimit !== this.props.limit.val) {
-        this.previousLimit = this.props.limit.val;
+      } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
+        this.previousSwimlaneLimit = this.props.swimlaneLimit;
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         this.updateExplorer(getClearedSelectedAnomaliesState(), false);
-      } else if (this.previousTableInterval !== this.props.tableInterval.val) {
-        this.previousTableInterval = this.props.tableInterval.val;
+      } else if (this.previousTableInterval !== this.props.tableInterval) {
+        this.previousTableInterval = this.props.tableInterval;
         this.updateExplorer();
-      } else if (this.previousTableSeverity !== this.props.tableSeverity.val) {
-        this.previousTableSeverity = this.props.tableSeverity.val;
+      } else if (this.previousTableSeverity !== this.props.tableSeverity) {
+        this.previousTableSeverity = this.props.tableSeverity;
         this.updateExplorer();
       } else if (this.props.annotationsRefresh === true) {
         annotationsRefresh$.next(false);
@@ -402,8 +405,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     loadViewBySwimlanePreviousArgs = null;
     loadViewBySwimlanePreviousData = null;
     loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName) {
-      const limit = this.props.limit;
-      const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
+      const { swimlaneLimit } = this.props;
 
       const compareArgs = {
         fieldValues,
@@ -505,8 +507,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     topFieldsPreviousData = null;
     loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
-      const limit = this.props.limit;
-      const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
+      const { swimlaneLimit } = this.props;
 
       const compareArgs = {
         earliestMs, latestMs, selectedJobIds, swimlaneLimit, swimlaneViewByFieldName,
@@ -741,8 +742,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         boundsMin: bounds.min.valueOf(),
         boundsMax: bounds.max.valueOf(),
         swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
-        tableInterval: tableInterval.val,
-        tableSeverity: tableSeverity.val,
+        tableInterval,
+        tableSeverity,
       };
 
       if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
