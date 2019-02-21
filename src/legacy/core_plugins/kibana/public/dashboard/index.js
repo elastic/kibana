@@ -74,7 +74,7 @@ uiRoutes
         kbnUrl.redirect(createDashboardEditUrl(id));
       };
       $scope.getEditUrl = ({ id }) => {
-        return createDashboardEditUrl(id);
+        return `#${createDashboardEditUrl(id)}`;
       };
       $scope.delete = (ids) => {
         return services.dashboards.delete(ids);

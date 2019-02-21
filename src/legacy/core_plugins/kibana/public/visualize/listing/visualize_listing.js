@@ -54,11 +54,11 @@ export function VisualizeListingController($injector, createNewVis) {
   };
 
   this.editItem = ({ id }) => {
-    kbnUrl.redirect(createVisualizeEditUrl(id));
+    kbnUrl.change(createVisualizeEditUrl(id));
   };
 
   this.getEditUrl = ({ id }) => {
-    return createVisualizeEditUrl(id);
+    return `#${createVisualizeEditUrl(id)}`;
   };
 
   this.closeNewVisModal = () => {
