@@ -7,7 +7,7 @@
 import boom from 'boom';
 import { oncePerServer } from './once_per_server';
 import { jobsQueryFactory } from './jobs_query';
-import { getDocumentPayloadFactory } from './get_document_payload';
+import { getDocumentPayloadFactory } from '../routes/lib/get_document_payload';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../common/constants';
 
 function jobResponseHandlerFn(server) {
