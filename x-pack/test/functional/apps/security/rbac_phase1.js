@@ -103,19 +103,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.logout();
     });
 
-    it('rbac read only role can not save a visualization', async function () {
-      log.debug('log in as kibanareadonly with rbac_read role');
-      await PageObjects.security.login('kibanareadonly', 'changeme');
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickVerticalBarChart');
-      await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.visualize.expectNoSaveOption();
-      await PageObjects.security.logout();
-
-    });
-
     after(async function () {
       await PageObjects.security.logout();
     });

@@ -53,7 +53,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const editUrl = this.getEditPath(id);
-    const editable = uiCapabilities.discover.save;
+    const editable = uiCapabilities.discover.save as boolean;
 
     // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
     return this.searchLoader.get(id).then(savedObject => {
