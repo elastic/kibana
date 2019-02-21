@@ -12,7 +12,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { subscribeAppStateToObservable } from '../../../factories/state_factory';
+import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { SelectSeverity, severity$ } from './select_severity';
 
 // This service should not be consumed anywhere, it's main purpose is to

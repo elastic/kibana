@@ -12,8 +12,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { subscribeAppStateToObservable } from 'plugins/ml/factories/state_factory';
-
+import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { limit$ } from './select_limit';
 
 // This service should not be consumed anywhere, it's main purpose is to

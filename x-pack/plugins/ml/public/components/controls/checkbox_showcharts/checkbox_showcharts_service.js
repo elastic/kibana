@@ -7,8 +7,7 @@
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { subscribeAppStateToObservable } from 'plugins/ml/factories/state_factory';
-
+import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { showCharts$ } from './checkbox_showcharts';
 
 // This service should not be consumed anywhere, it's main purpose is to
