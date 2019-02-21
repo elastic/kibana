@@ -12,5 +12,6 @@ export default function codeApp({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./manage_repositories'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./explore_repository'));
+    loadTestFile(require.resolve('./code_intelligence'));
   });
 }
