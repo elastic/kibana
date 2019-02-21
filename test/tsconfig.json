@@ -19,7 +19,6 @@
     "node_modules"
   ],
   "include": [
-    "**/*.ts",
-    "**/*.js",
+    "**/*.ts"
   ]
 }
