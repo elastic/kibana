@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { EuiIcon, EuiSideNav } from '@elastic/eui';
+import { EuiIcon, EuiSideNav, EuiText } from '@elastic/eui';
 import classes from 'classnames';
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -16,7 +16,6 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
 const DirectoryNode = styled.span`
   margin-left: ${theme.euiSizeXs};
@@ -93,12 +92,28 @@ export class CodeFileTree extends React.Component<Props> {
             onClick={onClick}
           >
             {forceOpen ? (
-              <FolderOpenTriangle onClick={onFolderClick} />
+              <EuiIcon
+                type="arrowDown"
+                size="s"
+                color="subdued"
+                className="codeFileTree--icon"
+                onClick={onFolderClick}
+              />
             ) : (
-              <FolderClosedTriangle onClick={onFolderClick} />
+              <EuiIcon
+                type="arrowRight"
+                size="s"
+                color="subdued"
+                className="codeFileTree--icon"
+                onClick={onFolderClick}
+              />
             )}
-            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
-            <DirectoryNode>{`${node.name}/`}</DirectoryNode>
+            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} color="subdued" />
+            <DirectoryNode>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                {`${node.name}/`}
+              </EuiText>
+            </DirectoryNode>
           </div>
         );
       }
@@ -110,8 +125,12 @@ export class CodeFileTree extends React.Component<Props> {
             className={classes(className, 'code-file-tree-file')}
             role="button"
           >
-            <EuiIcon type="submodule" />
-            <DirectoryNode>{node.name}</DirectoryNode>
+            <EuiIcon type="submodule" color="subdued" />
+            <DirectoryNode>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                {node.name}
+              </EuiText>
+            </DirectoryNode>
           </div>
         );
       }
@@ -123,8 +142,12 @@ export class CodeFileTree extends React.Component<Props> {
             className={classes(className, 'code-file-tree-file')}
             role="button"
           >
-            <EuiIcon type="symlink" />
-            <DirectoryNode>{node.name}</DirectoryNode>
+            <EuiIcon type="symlink" color="subdued" />
+            <DirectoryNode>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                {node.name}
+              </EuiText>
+            </DirectoryNode>
           </div>
         );
       }
@@ -136,8 +159,12 @@ export class CodeFileTree extends React.Component<Props> {
             className={classes(className, 'code-file-tree-file')}
             role="button"
           >
-            <EuiIcon type="document" />
-            <DirectoryNode>{node.name}</DirectoryNode>
+            <EuiIcon type="document" color="subdued" />
+            <DirectoryNode>
+              <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                {node.name}
+              </EuiText>
+            </DirectoryNode>
           </div>
         );
       }

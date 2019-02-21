@@ -5,11 +5,9 @@
  */
 
 import { EuiTabbedContent } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import { QueryString } from 'ui/utils/query_string';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { FileTree } from '../file_tree/file_tree';
@@ -20,38 +18,6 @@ enum Tabs {
   file = 'file',
   structure = 'structure',
 }
-
-const Container = styled.div`
-  width: calc(256rem / 14);
-  border-right: ${theme.euiBorderThin};
-  display: flex;
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-direction: column;
-  & > div {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    & > div:first-child {
-      flex-shrink: 0;
-      flex-grow: 0;
-    }
-    & > div:not(:first-child) {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      flex-shrink: 1;
-    }
-  }
-`;
-
-const FileTreeContainer = styled.div`
-  flex-grow: 1;
-  flex-shrink: 1;
-  overflow: auto;
-  padding: ${theme.paddingSizes.l} ${theme.paddingSizes.m};
-  background-color: ${theme.euiColorLightestShade};
-`;
 
 class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {
   public get sideTab(): Tabs {
@@ -70,9 +36,9 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
         id: Tabs.file,
         name: 'File',
         content: (
-          <FileTreeContainer>
+          <div className="codeFileTree--container">
             <FileTree />
-          </FileTreeContainer>
+          </div>
         ),
         isSelected: Tabs.file === this.sideTab,
         'data-test-subj': 'codeFileTreeTab',
@@ -97,7 +63,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
 
   public render() {
     return (
-      <Container>
+      <div className="code-navigation__sidebar">
         <EuiTabbedContent
           tabs={this.tabs}
           initialSelectedTab={this.tabs.find(t => t.id === this.sideTab)}
@@ -109,7 +75,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
           help="Toggle tree and symbol view in sidebar"
           onPress={this.toggleTab}
         />
-      </Container>
+      </div>
     );
   }
   private toggleTab = () => {

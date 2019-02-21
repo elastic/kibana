@@ -5,10 +5,7 @@
  */
 
 import { EuiToken, IconType } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { SFC } from 'react';
-import styled from 'styled-components';
-
 import { AutocompleteSuggestion } from '../..';
 
 interface Props {
@@ -20,64 +17,6 @@ interface Props {
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
 }
-
-const SuggestionItem = styled.div`
-  background: ${(props: any) => (props.active ? theme.euiColorHighlight : 'white')};
-  height: calc(48rem / 14);
-  margin: 0 ${theme.euiSize};
-  border-radius: ${theme.euiSizeXs} ${theme.euiSizeXs} ${theme.euiSizeXs} ${theme.euiSizeXs};
-  cursor: pointer;
-`;
-
-const SuggestionItemInner = styled.div`
-  display: flex;
-  align-items: stretch;
-  flex-grow: 1;
-  align-items: center;
-  white-space: nowrap;
-`;
-
-const SuggestionItemBase = styled.div`
-  flex-grow: 1;
-  flex-basis: 0%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const SuggestionItemToken = styled(SuggestionItemBase)`
-  color: ${theme.euiColorFullShade};
-  flex-grow: 0;
-  flex-basis: auto;
-  width: ${theme.euiSizeXl};
-  height: ${theme.euiSizeXl};
-  text-align: center;
-  overflow: hidden;
-  padding: ${theme.euiSizeXs};
-  justify-content: center;
-  align-items: center;
-`;
-
-const SuggestionItemText = styled(SuggestionItemBase)`
-  color: ${theme.euiColorFullShade};
-  flex-grow: 0;
-  flex-basis: auto;
-  font-family: ${theme.euiCodeFontFamily};
-  margin-right: ${theme.euiSizeXl};
-  width: auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: ${theme.euiSizeXs} ${theme.euiSizeS};
-  color: #111;
-  font-size: ${theme.euiFontSizeS};
-`;
-
-const SuggestionItemDescription = styled(SuggestionItemBase)`
-  color: ${theme.euiColorDarkShade};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: ${theme.euiFontSizeXs};
-  padding: ${theme.euiSizeXs} ${theme.euiSizeS};
-`;
 
 export const SuggestionComponent: SFC<Props> = props => {
   const click = () => props.onClick(props.suggestion);
@@ -107,31 +46,35 @@ export const SuggestionComponent: SFC<Props> = props => {
   };
 
   const icon = props.suggestion.tokenType ? (
-    <SuggestionItemToken>
+    <div className="codeSearch-suggestion__token">
       <EuiToken iconType={props.suggestion.tokenType as IconType} />
-    </SuggestionItemToken>
+    </div>
   ) : null;
 
   return (
-    <SuggestionItem
+    <div
+      className={
+        'codeSearch__suggestion-item ' +
+        (props.selected ? 'codeSearch__suggestion-item--active' : '')
+      }
       role="option"
       onClick={click}
-      active={props.selected}
+      // active={props.selected}
       onMouseEnter={props.onMouseEnter}
       // @ts-ignore
       ref={props.innerRef}
       id={props.ariaId}
       aria-selected={props.selected}
     >
-      <SuggestionItemInner>
+      <div className="codeSearch-suggestion--inner">
         {icon}
         <div>
-          <SuggestionItemText data-test-subj={`codeTypeaheadItem`}>
+          <div className="codeSearch__suggestion-text" data-test-subj={`codeTypeaheadItem`}>
             {renderMatchingText(props.suggestion.text)}
-          </SuggestionItemText>
-          <SuggestionItemDescription>{props.suggestion.description}</SuggestionItemDescription>
+          </div>
+          <div className="codeSearch-suggestion__description">{props.suggestion.description}</div>
         </div>
-      </SuggestionItemInner>
-    </SuggestionItem>
+      </div>
+    </div>
   );
 };

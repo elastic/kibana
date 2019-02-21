@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToken, IconType } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiFlexGroup, EuiText, EuiToken, IconType } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import Url from 'url';
 
 import {
@@ -30,46 +28,6 @@ interface Props {
   loadMore: () => void;
 }
 
-const SuggestionGroupHeader = styled.div`
-  border-top: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
-  display: flex;
-  justify-content: space-between;
-  padding: ${theme.euiSize};
-`;
-
-const SuggestionGroupHeaderTitle = styled.div`
-  display: flex;
-`;
-
-const SuggestionGroupHeaderTitleText = styled.span`
-  margin-left: ${theme.euiSizeS};
-`;
-
-const SuggestionGroupHeaderResult = styled.div`
-  color: ${theme.euiColorDarkShade};
-`;
-
-const ViewMore = styled.div`
-  height: ${theme.euiSize};
-  line-height: ${theme.euiSize};
-  text-align: center;
-  font-size: ${theme.euiFontSizeXs};
-  margin: ${theme.euiSizeS};
-`;
-
-const PressReturn = styled.div`
-  border-top: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
-  padding: ${theme.euiSizeS};
-  text-align: center;
-  font-weight: bold;
-`;
-
-const PressReturnText = styled.div`
-  background: ${theme.euiColorLightShade};
-  margin: ${theme.euiSizeS};
-  padding: ${theme.euiSizeS};
-`;
-
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
@@ -84,9 +42,7 @@ export class SuggestionsComponent extends Component<Props> {
         <div className="kbnTypeahead">
           <div className="kbnTypeahead__popover">
             {this.renderSuggestionGroups()}
-            <PressReturn>
-              <PressReturnText>Press ⮐ Return for Full Text Search</PressReturnText>
-            </PressReturn>
+            <div className="codeSearch__full-text-button">Press ⮐ Return for Full Text Search</div>
           </div>
         </div>
       </div>
@@ -129,18 +85,21 @@ export class SuggestionsComponent extends Component<Props> {
         );
 
         const groupHeader = (
-          <SuggestionGroupHeader>
-            <SuggestionGroupHeaderTitle>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            className="codeSearch-suggestion__group-header"
+          >
+            <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
               <EuiToken iconType={this.getGroupTokenType(group.type) as IconType} />
-              <SuggestionGroupHeaderTitleText>
+              <EuiText className="codeSearch-suggestion__group-title">
                 {this.getGroupTitle(group.type)}
-              </SuggestionGroupHeaderTitleText>
-            </SuggestionGroupHeaderTitle>
-            <SuggestionGroupHeaderResult>
+              </EuiText>
+            </EuiFlexGroup>
+            <div>
               {total} Result
               {total === 1 ? '' : 's'}
-            </SuggestionGroupHeaderResult>
-          </SuggestionGroupHeader>
+            </div>
+          </EuiFlexGroup>
         );
 
         const viewMoreUrl = Url.format({
@@ -150,9 +109,9 @@ export class SuggestionsComponent extends Component<Props> {
           },
         });
         const viewMore = (
-          <ViewMore>
+          <div className="codeSearch-suggestion__link">
             <Link to={viewMoreUrl}>View More</Link>
-          </ViewMore>
+          </div>
         );
 
         return (

@@ -22,15 +22,6 @@ import { CommitLink } from '../diff_page/commit_link';
 
 const COMMIT_ID_LENGTH = 8;
 
-const Dot = styled.div`
-  --dotRadius: ${theme.euiSizeS};
-  width: var(--dotRadius);
-  height: var(--dotRadius);
-  border-radius: calc(var(--dotRadius) / 2);
-  background-color: ${theme.euiBorderColor};
-  margin: auto;
-`;
-
 const CommitMessages = styled.div`
   overflow: auto;
   flex: 1;
@@ -43,33 +34,9 @@ const Header = styled.div`
   justify-content: space-between;
 `;
 
-const TimeLine = styled.div`
-  border-left: ${theme.euiBorderThick};
-  margin-left: ${theme.euiSizeXs};
-  padding: ${theme.paddingSizes.s} 0 ${theme.paddingSizes.s} ${theme.paddingSizes.m};
-`;
-
-const CommitRoot = styled(EuiPanel)`
-  &:not(:first-child) {
-    border-top: none;
-  }
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
-const CommitGroupContainer = styled.div`
-  margin: 0 0 ${theme.euiSizeXs} ${theme.euiSizeM};
-`;
-
 const CommitId = styled.div`
-  --height: calc(20rem / 14);
-  width: var(--dotRadius);
-  height: var(--height);
+  height: calc(20rem / 14);
   margin: auto 0;
-  line-height: var(--height);
-  color: black;
-  border: ${theme.euiBorderThin};
   text-align: center;
   flex-shrink: 0;
 `;
@@ -84,12 +51,12 @@ const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) =>
     .slice(0, COMMIT_ID_LENGTH)
     .join('');
   return (
-    <CommitRoot>
+    <EuiPanel className="code-timeline__commit--root">
       <CommitContainer>
-        <EuiText>
+        <EuiText size="s">
           <p>{message}</p>
         </EuiText>
-        <EuiText>
+        <EuiText size="xs">
           <EuiTextColor color="subdued">
             {committer} · {date}
           </EuiTextColor>
@@ -98,7 +65,7 @@ const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) =>
       <CommitId>
         <CommitLink repoUri={props.repoUri} commit={commitId} />
       </CommitId>
-    </CommitRoot>
+    </EuiPanel>
   );
 };
 
@@ -107,10 +74,10 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: stri
     <Commit commit={commit} key={commit.id} date={props.date} repoUri={props.repoUri} />
   ));
   return (
-    <CommitGroupContainer>
+    <div className="code-timeline__commit-container">
       <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <Dot />
+          <div className="code-timeline__marker" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
@@ -120,8 +87,8 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: stri
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <TimeLine>{commitList}</TimeLine>
-    </CommitGroupContainer>
+      <div className="code-timeline">{commitList}</div>
+    </div>
   );
 };
 

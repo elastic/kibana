@@ -5,31 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import styled from 'styled-components';
 import { SearchScope } from '../../../model';
 import { MainRouteParams } from '../../common/types';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from './search_bar';
-
-const TopBarContainer = styled.div`
-  box-sizing: content-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: ${theme.paddingSizes.s};
-  min-height: 80px;
-  border-bottom: ${theme.euiBorderThick};
-  nav {
-    a {
-      display: inline;
-    }
-    div {
-      vertical-align: baseline;
-    }
-  }
-`;
 
 interface Props {
   routeParams: MainRouteParams;
@@ -41,18 +21,20 @@ interface Props {
 export class TopBar extends React.Component<Props> {
   public render() {
     return (
-      <TopBarContainer>
+      <div className="code-top-bar__container">
         <SearchBar
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           repoScope={this.props.repoScope}
         />
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <Breadcrumb routeParams={this.props.routeParams} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{this.props.buttons}</EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ marginRight: '-.5rem' }}>
+            {this.props.buttons}
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </TopBarContainer>
+      </div>
     );
   }
 }

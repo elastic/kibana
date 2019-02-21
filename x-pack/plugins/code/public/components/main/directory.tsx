@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiTitle, IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTitle, IconType } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -46,15 +46,6 @@ const Container = styled.div`
   }
 `;
 
-const DirectoryNode = styled.div`
-  width: calc(200rem / 14);
-  margin: 0 ${theme.euiSizeS} ${theme.euiSizeM};
-  :hover {
-    background-color: ${theme.euiColorHighlight};
-    cursor: pointer;
-  }
-`;
-
 interface DirectoryNodesProps {
   title: string;
   nodes: FileTree[];
@@ -69,17 +60,21 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     [FileTreeItemType.Submodule]: 'submodule',
   };
   const nodes = props.nodes.map(n => (
-    <Link
-      className="code-link"
-      key={n.path}
-      to={props.getUrl(n.path!)}
-      data-test-subj={`codeFileExplorerNode-${n.name}`}
-    >
-      <DirectoryNode>
-        <EuiIcon type={typeIconMap[n.type]} color="black" />
-        <NodeName>{n.name}</NodeName>
-      </DirectoryNode>
-    </Link>
+    <div className="code-directory__node" key={n.path}>
+      <Link
+        className="code-link"
+        key={n.path}
+        to={props.getUrl(n.path!)}
+        data-test-subj={`codeFileExplorerNode-${n.name}`}
+      >
+        <EuiIcon type={typeIconMap[n.type]} color="subdued" />
+        <NodeName>
+          <EuiText size="s" className="eui-displayInlineBlock">
+            {n.name}
+          </EuiText>
+        </NodeName>
+      </Link>
+    </div>
   ));
   return (
     <Container>

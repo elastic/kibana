@@ -80,12 +80,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -98,9 +117,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              android/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                android/
+              </div>
             </span>
           </div>
         </div>
@@ -113,12 +136,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -131,9 +173,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              futures/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                futures/
+              </div>
             </span>
           </div>
         </div>
@@ -146,12 +192,30 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_down-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                xlinkHref="#arrow_down-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -164,9 +228,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              guava/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                guava/
+              </div>
             </span>
           </div>
           <div
@@ -181,12 +249,31 @@ exports[`render correctly 1`] = `
                 onClick={[Function]}
                 role="button"
               >
-                <i
-                  className="sc-bdVaJa fsxEnI"
-                  onClick={[Function]}
-                />
                 <svg
-                  className="euiIcon euiIcon--medium"
+                  className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                  focusable="false"
+                  height="16"
+                  onClick={[Function]}
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_right-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    transform="matrix(0 1 1 0 0 0)"
+                    xlinkHref="#arrow_right-a"
+                  />
+                </svg>
+                <svg
+                  className="euiIcon euiIcon--medium euiIcon--subdued"
                   focusable="false"
                   height="16"
                   style={null}
@@ -199,9 +286,13 @@ exports[`render correctly 1`] = `
                   />
                 </svg>
                 <span
-                  className="sc-htpNat hyFNl"
+                  className="sc-bdVaJa koZkCM"
                 >
-                  javadoc-link/
+                  <div
+                    className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  >
+                    javadoc-link/
+                  </div>
                 </span>
               </div>
             </div>
@@ -215,7 +306,7 @@ exports[`render correctly 1`] = `
                 role="button"
               >
                 <svg
-                  className="euiIcon euiIcon--medium"
+                  className="euiIcon euiIcon--medium euiIcon--subdued"
                   focusable="false"
                   height="16"
                   style={null}
@@ -235,9 +326,13 @@ exports[`render correctly 1`] = `
                   />
                 </svg>
                 <span
-                  className="sc-htpNat hyFNl"
+                  className="sc-bdVaJa koZkCM"
                 >
-                  pom.xml
+                  <div
+                    className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  >
+                    pom.xml
+                  </div>
                 </span>
               </div>
             </div>
@@ -250,12 +345,30 @@ exports[`render correctly 1`] = `
                 onClick={[Function]}
                 role="button"
               >
-                <i
-                  className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
-                  onClick={[Function]}
-                />
                 <svg
-                  className="euiIcon euiIcon--medium"
+                  className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                  focusable="false"
+                  height="16"
+                  onClick={[Function]}
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_down-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#arrow_down-a"
+                  />
+                </svg>
+                <svg
+                  className="euiIcon euiIcon--medium euiIcon--subdued"
                   focusable="false"
                   height="16"
                   style={null}
@@ -268,9 +381,13 @@ exports[`render correctly 1`] = `
                   />
                 </svg>
                 <span
-                  className="sc-htpNat hyFNl"
+                  className="sc-bdVaJa koZkCM"
                 >
-                  src/com/google/
+                  <div
+                    className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                  >
+                    src/com/google/
+                  </div>
                 </span>
               </div>
               <div
@@ -285,12 +402,31 @@ exports[`render correctly 1`] = `
                     onClick={[Function]}
                     role="button"
                   >
-                    <i
-                      className="sc-bdVaJa fsxEnI"
-                      onClick={[Function]}
-                    />
                     <svg
-                      className="euiIcon euiIcon--medium"
+                      className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                      focusable="false"
+                      height="16"
+                      onClick={[Function]}
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                          id="arrow_right-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        transform="matrix(0 1 1 0 0 0)"
+                        xlinkHref="#arrow_right-a"
+                      />
+                    </svg>
+                    <svg
+                      className="euiIcon euiIcon--medium euiIcon--subdued"
                       focusable="false"
                       height="16"
                       style={null}
@@ -303,9 +439,13 @@ exports[`render correctly 1`] = `
                       />
                     </svg>
                     <span
-                      className="sc-htpNat hyFNl"
+                      className="sc-bdVaJa koZkCM"
                     >
-                      common/
+                      <div
+                        className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                      >
+                        common/
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -318,12 +458,31 @@ exports[`render correctly 1`] = `
                     onClick={[Function]}
                     role="button"
                   >
-                    <i
-                      className="sc-bdVaJa fsxEnI"
-                      onClick={[Function]}
-                    />
                     <svg
-                      className="euiIcon euiIcon--medium"
+                      className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                      focusable="false"
+                      height="16"
+                      onClick={[Function]}
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                          id="arrow_right-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        transform="matrix(0 1 1 0 0 0)"
+                        xlinkHref="#arrow_right-a"
+                      />
+                    </svg>
+                    <svg
+                      className="euiIcon euiIcon--medium euiIcon--subdued"
                       focusable="false"
                       height="16"
                       style={null}
@@ -336,9 +495,13 @@ exports[`render correctly 1`] = `
                       />
                     </svg>
                     <span
-                      className="sc-htpNat hyFNl"
+                      className="sc-bdVaJa koZkCM"
                     >
-                      thirdparty/
+                      <div
+                        className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+                      >
+                        thirdparty/
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -355,12 +518,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -373,9 +555,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              guava-bom/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                guava-bom/
+              </div>
             </span>
           </div>
         </div>
@@ -388,12 +574,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -406,9 +611,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              guava-gwt/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                guava-gwt/
+              </div>
             </span>
           </div>
         </div>
@@ -421,12 +630,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -439,9 +667,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              guava-testlib/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                guava-testlib/
+              </div>
             </span>
           </div>
         </div>
@@ -454,12 +686,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -472,9 +723,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              guava-tests/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                guava-tests/
+              </div>
             </span>
           </div>
         </div>
@@ -487,12 +742,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -505,9 +779,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              refactorings/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                refactorings/
+              </div>
             </span>
           </div>
         </div>
@@ -520,12 +798,31 @@ exports[`render correctly 1`] = `
             onClick={[Function]}
             role="button"
           >
-            <i
-              className="sc-bdVaJa fsxEnI"
-              onClick={[Function]}
-            />
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+              focusable="false"
+              height="16"
+              onClick={[Function]}
+              style={null}
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            <svg
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -538,9 +835,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              util/
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                util/
+              </div>
             </span>
           </div>
         </div>
@@ -554,7 +855,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -574,9 +875,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              .gitattributes
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                .gitattributes
+              </div>
             </span>
           </div>
         </div>
@@ -590,7 +895,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -610,9 +915,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              .gitignore
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                .gitignore
+              </div>
             </span>
           </div>
         </div>
@@ -626,7 +935,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -646,9 +955,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              .travis.yml
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                .travis.yml
+              </div>
             </span>
           </div>
         </div>
@@ -662,7 +975,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -682,9 +995,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              CONTRIBUTING.md
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                CONTRIBUTING.md
+              </div>
             </span>
           </div>
         </div>
@@ -698,7 +1015,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -718,9 +1035,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              CONTRIBUTORS
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                CONTRIBUTORS
+              </div>
             </span>
           </div>
         </div>
@@ -734,7 +1055,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -754,9 +1075,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              COPYING
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                COPYING
+              </div>
             </span>
           </div>
         </div>
@@ -770,7 +1095,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -790,9 +1115,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              README.md
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                README.md
+              </div>
             </span>
           </div>
         </div>
@@ -806,7 +1135,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -826,9 +1155,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              cycle_whitelist.txt
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                cycle_whitelist.txt
+              </div>
             </span>
           </div>
         </div>
@@ -842,7 +1175,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -862,9 +1195,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              javadoc-stylesheet.css
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                javadoc-stylesheet.css
+              </div>
             </span>
           </div>
         </div>
@@ -878,7 +1215,7 @@ exports[`render correctly 1`] = `
             role="button"
           >
             <svg
-              className="euiIcon euiIcon--medium"
+              className="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="false"
               height="16"
               style={null}
@@ -898,9 +1235,13 @@ exports[`render correctly 1`] = `
               />
             </svg>
             <span
-              className="sc-htpNat hyFNl"
+              className="sc-bdVaJa koZkCM"
             >
-              pom.xml
+              <div
+                className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
+              >
+                pom.xml
+              </div>
             </span>
           </div>
         </div>
