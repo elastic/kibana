@@ -2,7 +2,7 @@
 
 > We are currently trialing a new RFC process for the Kibana Core team at this time.
 
-Many changes, including bug small to medium features, fixes, and documentation 
+Many changes, including small to medium features, fixes, and documentation 
 improvements can be implemented and reviewed via the normal GitHub pull request 
 workflow.
 
@@ -81,7 +81,7 @@ comments.
 * Eventually, the team will decide whether the RFC is a candidate
 for inclusion in Kibana.
 * RFCs that are candidates for inclusion in Kibana will enter a "final comment
-period" lasting 3 calendar days. The beginning of this period will be signaled with a
+period" lasting at least 3 working days. The beginning of this period will be signaled with a
 comment and tag on the RFCs pull request.
 * An RFC can be modified based upon feedback from the team and community.
 Significant modifications may trigger a new final comment period.
