@@ -38,7 +38,6 @@ export class LayerPanel  extends React.Component {
         prevId: nextId,
       };
     }
-
     return null;
   }
 
@@ -161,7 +160,7 @@ export class LayerPanel  extends React.Component {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter/>
+          <FlyoutFooter hasStateChanged={this.props.hasStateChanged}/>
         </EuiFlyoutFooter>
       </EuiFlexGroup>
     );

@@ -65,8 +65,8 @@ export default async (req, panel, esQueryConfig) => {
 };
 
 async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
-  const indexPatternString = annotation.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const indexPattern = annotation.index_pattern;
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
   const esShardTimeout = getEsShardTimeout(req);
 
