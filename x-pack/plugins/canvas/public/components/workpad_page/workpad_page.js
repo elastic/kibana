@@ -39,6 +39,7 @@ export class WorkpadPage extends PureComponent {
     width: PropTypes.number.isRequired,
     isEditable: PropTypes.bool.isRequired,
     onDoubleClick: PropTypes.func,
+    onKeyDown: PropTypes.func,
     onMouseDown: PropTypes.func,
     onMouseMove: PropTypes.func,
     onMouseUp: PropTypes.func,
@@ -70,6 +71,7 @@ export class WorkpadPage extends PureComponent {
       width,
       isEditable,
       onDoubleClick,
+      onKeyDown,
       onMouseDown,
       onMouseMove,
       onMouseUp,
@@ -143,6 +145,7 @@ export class WorkpadPage extends PureComponent {
           width,
           cursor,
         }}
+        onKeyDown={onKeyDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseDown={onMouseDown}
