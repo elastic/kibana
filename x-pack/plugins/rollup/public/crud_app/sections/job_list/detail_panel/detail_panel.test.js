@@ -202,7 +202,7 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+                throw(new Error('Should not get here. The constant DATE_HISTOGRAMS_SUBSECTIONS is probably missing a new subsection'));
             }
           });
         });
@@ -240,7 +240,7 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+                throw(new Error('Should not get here. The constant STATS_SUBSECTIONS is probably missing a new subsection'));
             }
           });
         });
