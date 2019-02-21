@@ -34,7 +34,7 @@ import { createCSPRuleString, DEFAULT_CSP_RULES, generateCSPNonce } from './';
 test('default CSP rules', () => {
   expect(DEFAULT_CSP_RULES).toMatchInlineSnapshot(`
 Array [
-  "script-src 'unsafe-eval' 'nonce-{nonce}'",
+  "script-src 'unsafe-eval' 'self'",
   "worker-src blob:",
   "child-src blob:",
 ]
