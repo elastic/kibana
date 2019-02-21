@@ -23,7 +23,7 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
       step={step}
       showLabels
       showInput
-      value={`${argValue}`}
+      value={argValue}
       onChange={handleChange}
     />
   );
