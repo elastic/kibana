@@ -42,7 +42,7 @@ export class SnapshotQuery extends React.Component<Props, SnapshotQueryState> {
     const {
       autorefreshIsPaused,
       autorefreshInterval,
-      colors: { primary, danger },
+      colors: { success, danger },
       dateRangeStart,
       dateRangeEnd,
       filters,
@@ -69,7 +69,7 @@ export class SnapshotQuery extends React.Component<Props, SnapshotQueryState> {
           return (
             <Snapshot
               dangerColor={danger}
-              primaryColor={primary}
+              successColor={success}
               snapshot={snapshot}
               windowWidth={this.state.windowWidth}
             />

@@ -29,7 +29,7 @@ import { LatestMonitor } from '../../../common/graphql/types';
 import { formatSparklineCounts } from './format_sparkline_counts';
 
 interface MonitorListProps {
-  primaryColor: string;
+  successColor: string;
   dangerColor: string;
   loading: boolean;
   monitors: LatestMonitor[];
@@ -42,7 +42,7 @@ const monitorListPagination = {
   pageSizeOptions: [5, 10, 20, 50],
 };
 
-export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: MonitorListProps) => (
+export const MonitorList = ({ dangerColor, loading, monitors, successColor }: MonitorListProps) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xxs">
       <h5>
@@ -119,6 +119,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
             const { downSeries } = monitor;
             return (
               <EuiSeriesChart
+                animateData={false}
                 showDefaultAxis={false}
                 width={180}
                 height={70}
@@ -134,13 +135,6 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
                     defaultMessage: 'Down',
                   })}
                   color={dangerColor}
-                />
-                <EuiHistogramSeries
-                  data={formatSparklineCounts(upSeries)}
-                  name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
-                    defaultMessage: 'Up',
-                  })}
-                  color={primaryColor}
                 />
               </EuiSeriesChart>
             );

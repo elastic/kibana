@@ -32,8 +32,9 @@ import { MonitorPage, OverviewPage } from './pages';
 
 interface UptimeAppColors {
   danger: string;
-  primary: string;
-  secondary: string;
+  success: string;
+  lightShade: string;
+  darkShade: string;
 }
 
 // TODO: these props are global to this app, we should put them in a context
@@ -105,14 +106,16 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     let colors: UptimeAppColors;
     if (darkMode) {
       colors = {
-        primary: euiDarkVars.euiColorLightestShade,
-        secondary: euiDarkVars.euiColorVis0,
-        danger: euiDarkVars.euiColorVis9,
+        success: euiDarkVars.euiColorSuccess,
+        lightShade: euiDarkVars.euiColorLightShade,
+        darkShade: euiDarkVars.euiColorDarkShade,
+        danger: euiDarkVars.euiColorDanger,
       };
     } else {
       colors = {
-        primary: euiLightVars.euiColorLightShade,
-        secondary: euiLightVars.euiColorVis0,
+        success: euiLightVars.euiColorSuccess,
+        lightShade: euiLightVars.euiColorLightShade,
+        darkShade: euiLightVars.euiColorDarkShade,
         danger: euiLightVars.euiColorDanger,
       };
     }
@@ -175,7 +178,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           this.persistState
                         );
                       }}
-                      showUpdateButton={false}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

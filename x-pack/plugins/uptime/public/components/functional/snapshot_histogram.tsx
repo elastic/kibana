@@ -12,7 +12,7 @@ import { HistogramDataPoint } from '../../../common/graphql/types';
 
 export interface SnapshotHistogramProps {
   windowWidth: number;
-  primaryColor: string;
+  successColor: string;
   dangerColor: string;
   histogram: HistogramDataPoint[];
 }
@@ -22,21 +22,18 @@ export interface SnapshotHistogramProps {
  * working with our app, so temporarily we will use this ratio to auto-resize
  * the histogram. When we upgrade the charts we will delete this.
  */
-const windowRatio = 0.545238095238095;
 
 export const SnapshotHistogram = ({
   dangerColor,
   histogram,
-  primaryColor,
-  secondaryColor,
-  windowWidth,
+  successColor,
 }: SnapshotHistogramProps) => (
   <EuiSeriesChart
-    width={windowWidth * windowRatio}
     height={120}
     stackBy="y"
     xType={EuiSeriesChartUtils.SCALE.TIME}
     xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+    animateData={false}
   >
     <EuiHistogramSeries
       data={histogram.map(({ x, x0, downCount }) => ({ x, x0, y: downCount }))}
@@ -50,7 +47,7 @@ export const SnapshotHistogram = ({
       name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
         defaultMessage: 'Up',
       })}
-      color={secondaryColor}
+      color={successColor}
     />
   </EuiSeriesChart>
 );

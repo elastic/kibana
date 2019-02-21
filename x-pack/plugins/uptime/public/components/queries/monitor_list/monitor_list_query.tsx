@@ -22,7 +22,7 @@ type Props = MonitorListProps & UptimeCommonProps;
 export const MonitorListQuery = ({
   autorefreshInterval,
   autorefreshIsPaused,
-  colors: { primary, danger },
+  colors: { success, danger },
   dateRangeStart,
   dateRangeEnd,
   filters,
@@ -45,7 +45,7 @@ export const MonitorListQuery = ({
           dangerColor={danger}
           loading={loading}
           monitors={monitors || []}
-          primaryColor={primary}
+          successColor={success}
         />
       );
     }}

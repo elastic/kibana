@@ -46,7 +46,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
 
   public render() {
     const {
-      colors: { primary, secondary, danger },
+      colors: { darkShade, lightShade, danger, success },
       dateRangeStart,
       dateRangeEnd,
       monitorId,
@@ -99,7 +99,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
             <Fragment>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
-                  <EuiPanel paddingSize="s" style={{ maxHeight: 248 }}>
+                  <EuiPanel paddingSize="s" style={{ height: 248 }}>
                     <EuiTitle size="xs">
                       <h4>
                         <FormattedMessage
@@ -117,9 +117,10 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                       yDomain={durationDomainLimits}
                       crosshairValue={this.state.crosshairLocation}
                       onCrosshairUpdate={this.updateCrosshairLocation}
+                      animateData={false}
                     >
                       <EuiAreaSeries
-                        color={secondary}
+                        color={lightShade}
                         name={i18n.translate(
                           'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
                           {
@@ -130,7 +131,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                         curve="curveBasis"
                       />
                       <EuiLineSeries
-                        color={primary}
+                        color={darkShade}
                         name={i18n.translate(
                           'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
                           {
@@ -143,7 +144,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiPanel paddingSize="s" style={{ maxHeight: 248 }}>
+                  <EuiPanel paddingSize="s" style={{ height: 248 }}>
                     <EuiTitle size="xs">
                       <h4>
                         <FormattedMessage
@@ -161,6 +162,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                       crosshairValue={this.state.crosshairLocation}
                       onCrosshairUpdate={this.updateCrosshairLocation}
                       yDomain={checkDomainLimits}
+                      animateData={false}
                     >
                       <EuiAreaSeries
                         name={i18n.translate(
@@ -171,7 +173,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                         )}
                         data={upSeries}
                         curve="curveBasis"
-                        color={primary}
+                        color={success}
                       />
                       <EuiAreaSeries
                         name={i18n.translate(

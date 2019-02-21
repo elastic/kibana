@@ -9,11 +9,11 @@ import {
   EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHealth,
   // @ts-ignore
   EuiInMemoryTable,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -139,46 +139,50 @@ export const PingList = ({
 
   return (
     <Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.uptime.pingList.checkHistoryTitle"
-                defaultMessage="Check History"
-              />
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        {!!total && (
+      <EuiPanel paddingSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{total}</EuiBadge>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.uptime.pingList.checkHistoryTitle"
+                      defaultMessage="History"
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {!!total && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>{total}</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiPanel paddingSize="l">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.uptime.pingList.statusLabel', {
-                defaultMessage: 'Status',
-              })}
-            >
-              <EuiComboBox
-                isClearable={false}
-                singleSelection={{ asPlainText: true }}
-                selectedOptions={[selectedOption]}
-                options={statusOptions}
-                onChange={selectedOptionChanged}
-              />
-            </EuiFormRow>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ minWidth: 200 }}>
+                <EuiComboBox
+                  isClearable={false}
+                  singleSelection={{ asPlainText: true }}
+                  selectedOptions={[selectedOption]}
+                  options={statusOptions}
+                  aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                    defaultMessage: 'Status',
+                  })}
+                  onChange={selectedOptionChanged}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
+          pagination={{ initialPageSize: 20, pageSizeOptions: [5, 10, 20, 100] }}
         />
       </EuiPanel>
     </Fragment>

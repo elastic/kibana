@@ -31,7 +31,7 @@ export const SnapshotLoading = () => (
                 })}
                 textAlign="center"
                 title="-"
-                titleColor="primary"
+                titleColor="success"
               />
             </EuiPanel>
           </EuiFlexItem>

@@ -46,11 +46,11 @@ export class MonitorPage extends React.Component<Props> {
     return (
       <Fragment>
         <MonitorPageTitleQuery monitorId={id} {...this.props} />
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <MonitorStatusBarQuery monitorId={id} {...this.props} />
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <MonitorChartsQuery monitorId={id} {...this.props} />
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <PingListQuery monitorId={id} {...this.props} />
       </Fragment>
     );

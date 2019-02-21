@@ -27,59 +27,65 @@ import { SnapshotHistogram } from './snapshot_histogram';
 
 interface SnapshotProps {
   dangerColor: string;
-  primaryColor: string;
+  successColor: string;
   snapshot: SnapshotType;
   windowWidth: number;
 }
 
 export const Snapshot = ({
   dangerColor,
-  primaryColor,
+  successColor,
   snapshot: { up, down, total, histogram },
   windowWidth,
 }: SnapshotProps) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={4}>
       <EuiPanel paddingSize="s">
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.snapshot.endpointStatusTitle"
-              defaultMessage="Endpoint status"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
-          <EuiFlexItem>
-            <EuiStat
-              description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
-                defaultMessage: 'Up',
-              })}
-              textAlign="center"
-              title={up}
-              titleColor="secondary"
-            />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h5>
+                <FormattedMessage
+                  id="xpack.uptime.snapshot.endpointStatusTitle"
+                  defaultMessage="Endpoint status"
+                />
+              </h5>
+            </EuiTitle>
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiStat
-              description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
-                defaultMessage: 'Down',
-              })}
-              textAlign="center"
-              title={down}
-              titleColor="danger"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiStat
-              description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
-                defaultMessage: 'Total',
-              })}
-              textAlign="center"
-              title={total}
-              titleColor="subdued"
-            />
+            <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
+              <EuiFlexItem>
+                <EuiStat
+                  description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
+                    defaultMessage: 'Up',
+                  })}
+                  textAlign="center"
+                  title={up}
+                  titleColor="secondary"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
+                    defaultMessage: 'Down',
+                  })}
+                  textAlign="center"
+                  title={down}
+                  titleColor="danger"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
+                    defaultMessage: 'Total',
+                  })}
+                  textAlign="center"
+                  title={total}
+                  titleColor="subdued"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -99,7 +105,7 @@ export const Snapshot = ({
           <SnapshotHistogram
             dangerColor={dangerColor}
             histogram={histogram}
-            primaryColor={primaryColor}
+            successColor={successColor}
             windowWidth={windowWidth}
           />
         )}
