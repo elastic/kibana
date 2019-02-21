@@ -97,22 +97,20 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
 
           return (
             <Fragment>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                        defaultMessage="Monitor Duration ms"
-                        description="The 'ms' is an abbreviation for milliseconds."
-                      />
-                    </h4>
-                  </EuiTitle>
-
-                  <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
+                  <EuiPanel paddingSize="s" style={{ maxHeight: 248 }}>
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                          defaultMessage="Monitor Duration ms"
+                          description="The 'ms' is an abbreviation for milliseconds."
+                        />
+                      </h4>
+                    </EuiTitle>
                     <EuiSeriesChart
-                      margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-                      width={500}
+                      margins={{ left: 64, right: 0, top: 16, bottom: 32 }}
                       height={200}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
                       xCrosshairFormat="YYYY-MM-DD hh:mmZ"
@@ -145,18 +143,17 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.uptime.monitorCharts.checkStatus.title"
-                        defaultMessage="Check status"
-                      />
-                    </h4>
-                  </EuiTitle>
-                  <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
+                  <EuiPanel paddingSize="s" style={{ maxHeight: 248 }}>
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="xpack.uptime.monitorCharts.checkStatus.title"
+                          defaultMessage="Check status"
+                        />
+                      </h4>
+                    </EuiTitle>
                     <EuiSeriesChart
-                      margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-                      width={500}
+                      margins={{ left: 64, right: 0, top: 16, bottom: 32 }}
                       height={200}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
                       xCrosshairFormat="YYYY-MM-DD hh:mmZ"
