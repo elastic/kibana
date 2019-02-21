@@ -748,7 +748,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
         this.setState(this.anomaliesTablePreviousData);
       } else {
-
         this.anomaliesTablePreviousArgs = anomaliesTableCompareArgs;
         const tableData = this.anomaliesTablePreviousData = await loadAnomaliesTableData(
           selectedCells,

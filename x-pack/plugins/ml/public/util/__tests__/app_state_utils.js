@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
@@ -50,14 +48,14 @@ describe('ML - subscribeAppStateToObservable', () => {
   it('Initializes a custom state store, sets and gets a test value using events.', (done) => {
     const o$ = new BehaviorSubject({ value: 10 });
 
-    subscribeAppStateToObservable(AppState, 'mlTest', 'sub', o$, $rootScope);
+    subscribeAppStateToObservable(AppState, 'mlTest', o$, $rootScope);
 
     o$.subscribe((payload) => {
       const appState = new AppState();
       appState.fetch();
 
       expect(payload.value).to.be(10);
-      expect(appState.mlTest.sub.value).to.be(10);
+      expect(appState.mlTest.value).to.be(10);
 
       done();
     });

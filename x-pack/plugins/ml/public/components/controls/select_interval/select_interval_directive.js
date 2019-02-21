@@ -13,13 +13,8 @@ const module = uiModules.get('apps/ml', ['react']);
 import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { SelectInterval, interval$ } from './select_interval';
 
-// This service should not be consumed anywhere, it's main purpose is to
-// restore an eventual state from the URL and pass that on the observable
-// and then subscribe to changes to the observable to update the URL again.
 module.service('mlSelectIntervalService', function (AppState, $rootScope) {
-  const APP_STATE_NAME = 'mlSelectInterval';
-  const APP_STATE_SUB_NAME = 'interval';
-  subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, interval$, $rootScope);
+  subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, $rootScope);
 })
   .directive('mlSelectInterval', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

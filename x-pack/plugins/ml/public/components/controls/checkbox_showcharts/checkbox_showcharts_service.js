@@ -10,11 +10,6 @@ const module = uiModules.get('apps/ml', ['react']);
 import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { showCharts$ } from './checkbox_showcharts';
 
-// This service should not be consumed anywhere, it's main purpose is to
-// restore an eventual state from the URL and pass that on the observable
-// and then subscribe to changes to the observable to update the URL again.
 module.service('mlCheckboxShowChartsService', function (AppState, $rootScope) {
-  const APP_STATE_NAME = 'mlCheckboxShowCharts';
-  const APP_STATE_SUB_NAME = 'showCharts';
-  subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, showCharts$, $rootScope);
+  subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, $rootScope);
 });

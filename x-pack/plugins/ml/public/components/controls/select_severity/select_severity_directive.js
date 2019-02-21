@@ -15,13 +15,8 @@ const module = uiModules.get('apps/ml', ['react']);
 import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { SelectSeverity, severity$ } from './select_severity';
 
-// This service should not be consumed anywhere, it's main purpose is to
-// restore an eventual state from the URL and pass that on the observable
-// and then subscribe to changes to the observable to update the URL again.
 module.service('mlSelectSeverityService', function (AppState, $rootScope) {
-  const APP_STATE_NAME = 'mlSelectSeverity';
-  const APP_STATE_SUB_NAME = 'threshold';
-  subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, severity$, $rootScope);
+  subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, $rootScope);
 })
   .directive('mlSelectSeverity', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

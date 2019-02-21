@@ -25,10 +25,15 @@ export function initializeAppState(AppState, stateName, defaultState) {
   // might break some follow up code. Note that this will not catch any
   // deeper nested inconsistencies.
   if (typeof defaultState !== 'undefined' && appState[stateName] !== defaultState) {
-    if (!_.isEqual(
-      Object.keys(defaultState).sort(),
-      Object.keys(appState[stateName]).sort()
-    )) {
+    // if defaultState is an object, check if current appState has the same keys.
+    // if it's not an object, check if defaultState and current appState are of the same type.
+    if (
+      (typeof defaultState === 'object' && !_.isEqual(
+        Object.keys(defaultState).sort(),
+        Object.keys(appState[stateName]).sort()
+      )) ||
+      (typeof defaultState !== typeof appState[stateName])
+    ) {
       appState[stateName] = _.cloneDeep(defaultState);
       appState.save();
     }
@@ -37,16 +42,14 @@ export function initializeAppState(AppState, stateName, defaultState) {
   return appState;
 }
 
-export function subscribeAppStateToObservable(AppState, APP_STATE_NAME, APP_STATE_SUB_NAME, o$, $rootScope) {
-  const appState = initializeAppState(AppState, APP_STATE_NAME, {
-    [APP_STATE_SUB_NAME]: o$.getValue()
-  });
+export function subscribeAppStateToObservable(AppState, appStateName, o$, $rootScope) {
+  const appState = initializeAppState(AppState, appStateName, o$.getValue());
 
-  o$.next(appState[APP_STATE_NAME][APP_STATE_SUB_NAME]);
+  o$.next(appState[appStateName]);
 
   o$.pipe(distinctUntilChanged()).subscribe(payload => {
     appState.fetch();
-    appState[APP_STATE_NAME] = { [APP_STATE_SUB_NAME]: payload };
+    appState[appStateName] = payload;
     appState.save();
     $rootScope.$applyAsync();
   });
