@@ -9,7 +9,6 @@ import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_ty
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -28,14 +27,10 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
   },
   handler: async (request: any): Promise<ReturnTypeList<BeatTag>> => {
     let tags: BeatTag[];
-    try {
-      tags = await libs.tags.getAll(
-        request.user,
-        request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
-      );
-    } catch (err) {
-      return wrapEsError(err);
-    }
+    tags = await libs.tags.getAll(
+      request.user,
+      request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
+    );
 
     return tags;
   },

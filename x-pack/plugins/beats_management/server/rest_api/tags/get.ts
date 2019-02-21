@@ -8,7 +8,6 @@ import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeBulkGet } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
 export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
@@ -21,11 +20,7 @@ export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOpt
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
     let tags: BeatTag[];
-    try {
-      tags = await libs.tags.getWithIds(request.user, tagIds);
-    } catch (err) {
-      return wrapEsError(err);
-    }
+    tags = await libs.tags.getWithIds(request.user, tagIds);
 
     return tags;
   },

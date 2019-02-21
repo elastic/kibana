@@ -10,7 +10,6 @@ import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
@@ -33,12 +32,7 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
   handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkAction> => {
     const { assignments }: { assignments: BeatsTagAssignment[] } = request.payload;
 
-    try {
-      const response = await libs.beats.assignTagsToBeats(request.user, assignments);
-      return response;
-    } catch (err) {
-      // TODO move this to kibana route thing in adapter
-      return wrapEsError(err);
-    }
+    const response = await libs.beats.assignTagsToBeats(request.user, assignments);
+    return response;
   },
 });

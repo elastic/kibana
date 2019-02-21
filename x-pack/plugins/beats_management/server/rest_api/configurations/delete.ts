@@ -7,7 +7,6 @@
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkDelete } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
   method: 'DELETE',
@@ -18,10 +17,6 @@ export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
     const idString: string = request.params.ids;
     const ids = idString.split(',').filter((id: string) => id.length > 0);
 
-    try {
-      return await libs.configurationBlocks.delete(request.user, ids);
-    } catch (err) {
-      return wrapEsError(err);
-    }
+    return await libs.configurationBlocks.delete(request.user, ids);
   },
 });

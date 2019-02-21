@@ -7,7 +7,6 @@ import Joi from 'joi';
 import { ConfigurationBlock } from '../../../common/domain_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -26,34 +25,30 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
 
     let beat;
     let configurationBlocks: ConfigurationBlock[];
-    try {
-      beat = await libs.beats.getById(libs.framework.internalUser, beatId);
-      if (beat === null) {
-        return h.response({ message: `Beat "${beatId}" not found` }).code(404);
-      }
+    beat = await libs.beats.getById(libs.framework.internalUser, beatId);
+    if (beat === null) {
+      return h.response({ message: `Beat "${beatId}" not found` }).code(404);
+    }
 
-      const isAccessTokenValid = beat.access_token === accessToken;
-      if (!isAccessTokenValid) {
-        return h.response({ message: 'Invalid access token' }).code(401);
-      }
+    const isAccessTokenValid = beat.access_token === accessToken;
+    if (!isAccessTokenValid) {
+      return h.response({ message: 'Invalid access token' }).code(401);
+    }
 
-      await libs.beats.update(libs.framework.internalUser, beat.id, {
-        last_checkin: new Date(),
-      });
+    await libs.beats.update(libs.framework.internalUser, beat.id, {
+      last_checkin: new Date(),
+    });
 
-      if (beat.tags) {
-        const result = await libs.configurationBlocks.getForTags(
-          libs.framework.internalUser,
-          beat.tags,
-          -1
-        );
+    if (beat.tags) {
+      const result = await libs.configurationBlocks.getForTags(
+        libs.framework.internalUser,
+        beat.tags,
+        -1
+      );
 
-        configurationBlocks = result.blocks;
-      } else {
-        configurationBlocks = [];
-      }
-    } catch (err) {
-      return wrapEsError(err);
+      configurationBlocks = result.blocks;
+    } else {
+      configurationBlocks = [];
     }
 
     return {

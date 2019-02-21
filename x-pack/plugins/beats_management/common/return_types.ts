@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ReturnType {
+export interface BaseReturnType {
   error?: {
     message: string;
     code?: number;
@@ -12,17 +12,17 @@ export interface ReturnType {
   success: boolean;
 }
 
-export interface ReturnTypeCreate<T> extends ReturnType {
+export interface ReturnTypeCreate<T> extends BaseReturnType {
   item: T;
   action: 'created';
 }
 
-export interface ReturnTypeUpdate<T> extends ReturnType {
+export interface ReturnTypeUpdate<T> extends BaseReturnType {
   item: T;
   action: 'updated';
 }
 
-export interface ReturnTypeBulkCreate extends ReturnType {
+export interface ReturnTypeBulkCreate extends BaseReturnType {
   results: Array<{
     success: boolean;
     action: 'created';
@@ -34,11 +34,11 @@ export interface ReturnTypeBulkCreate extends ReturnType {
 }
 
 // delete
-export interface ReturnTypeDelete extends ReturnType {
+export interface ReturnTypeDelete extends BaseReturnType {
   action: 'deleted';
 }
 
-export interface ReturnTypeBulkDelete extends ReturnType {
+export interface ReturnTypeBulkDelete extends BaseReturnType {
   results: Array<{
     success: boolean;
     action: 'deleted';
@@ -50,13 +50,13 @@ export interface ReturnTypeBulkDelete extends ReturnType {
 }
 
 // upsert
-export interface ReturnTypeUpsert<T> extends ReturnType {
+export interface ReturnTypeUpsert<T> extends BaseReturnType {
   item: T;
   action: 'created' | 'updated';
 }
 
 // upsert bulk
-export interface ReturnTypeBulkUpsert extends ReturnType {
+export interface ReturnTypeBulkUpsert extends BaseReturnType {
   results: Array<{
     success: boolean;
     action: 'created' | 'updated';
@@ -68,21 +68,21 @@ export interface ReturnTypeBulkUpsert extends ReturnType {
 }
 
 // list
-export interface ReturnTypeList<T> extends ReturnType {
+export interface ReturnTypeList<T> extends BaseReturnType {
   list: T[];
 }
 
 // get
-export interface ReturnTypeGet<T> extends ReturnType {
+export interface ReturnTypeGet<T> extends BaseReturnType {
   item: T;
 }
 
-export interface ReturnTypeBulkGet<T> extends ReturnType {
+export interface ReturnTypeBulkGet<T> extends BaseReturnType {
   items: T[];
 }
 
 // action -- e.g. validate config block. Like ES simulate endpoint
-export interface ReturnTypeAction extends ReturnType {
+export interface ReturnTypeAction extends BaseReturnType {
   result: {
     [key: string]: any;
   };
@@ -99,7 +99,7 @@ export interface ReturnTypeAction extends ReturnType {
 // }
 
 // bulk action -- e.g. assign tags to beats
-export interface ReturnTypeBulkAction extends ReturnType {
+export interface ReturnTypeBulkAction extends BaseReturnType {
   result?: Array<{
     success: boolean;
     result?: {

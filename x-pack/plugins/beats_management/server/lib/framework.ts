@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { ResponseObject, ResponseToolkit } from 'hapi';
 import { difference } from 'lodash';
+import { BaseReturnType } from '../../common/return_types';
 import {
   BackendFrameworkAdapter,
   FrameworkRequest,
@@ -29,10 +30,8 @@ export class BackendFrameworkLib {
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     this.adapter.registerRoute({
       ...route,
-      handler: this.wrapRouteWithSecurity(
-        route.handler,
-        route.licenseRequired || [],
-        route.requiredRoles
+      handler: this.wrapErrors(
+        this.wrapRouteWithSecurity(route.handler, route.licenseRequired || [], route.requiredRoles)
       ),
     });
   }
@@ -74,22 +73,32 @@ export class BackendFrameworkLib {
     handler: FrameworkRouteHandler<any, any>,
     requiredLicense: string[],
     requiredRoles?: string[]
-  ) {
-    return async (request: FrameworkRequest, h: any) => {
+  ): (request: FrameworkRequest, h: ResponseToolkit) => Promise<BaseReturnType> {
+    return async (request: FrameworkRequest, h: ResponseToolkit) => {
       if (
         requiredLicense.length > 0 &&
         (this.license.expired || !requiredLicense.includes(this.license.type))
       ) {
-        return Boom.forbidden(
-          `Your ${
-            this.license.type
-          } license does not support this API or is expired. Please upgrade your license.`
-        );
+        return {
+          error: {
+            message: `Your ${
+              this.license.type
+            } license does not support this API or is expired. Please upgrade your license.`,
+            code: 403,
+          },
+          success: false,
+        };
       }
 
       if (requiredRoles) {
         if (request.user.kind !== 'authenticated') {
-          return h.response().code(403);
+          return {
+            error: {
+              message: `Request must be authenticated`,
+              code: 403,
+            },
+            success: false,
+          };
         }
 
         if (
@@ -97,10 +106,59 @@ export class BackendFrameworkLib {
           !request.user.roles.includes('superuser') &&
           difference(requiredRoles, request.user.roles).length !== 0
         ) {
-          return h.response().code(403);
+          return {
+            error: {
+              message: `Request must be authenticated by a user with one of the following user roles: ${requiredRoles.join(
+                ','
+              )}`,
+              code: 403,
+            },
+            success: false,
+          };
         }
       }
       return await handler(request, h);
+    };
+  }
+  private wrapErrors(
+    handler: FrameworkRouteHandler<any, any>
+  ): (request: FrameworkRequest, h: ResponseToolkit) => Promise<ResponseObject> {
+    return async (request: FrameworkRequest, h: ResponseToolkit) => {
+      try {
+        const result = await handler(request, h);
+        if (!result.error) {
+          return h.response(result);
+        }
+        return h
+          .response({
+            error: result.error,
+            success: false,
+          })
+          .code(result.error.code || 400);
+      } catch (err) {
+        const statusCode = err.statusCode;
+        if (statusCode === 403) {
+          return h
+            .response({
+              error: {
+                message: 'Insufficient user permissions for managing Beats configuration',
+                code: 403,
+              },
+              success: false,
+            })
+            .code(403);
+        }
+
+        return h
+          .response({
+            error: {
+              message: err.message,
+              code: statusCode,
+            },
+            success: false,
+          })
+          .code(statusCode);
+      }
     };
   }
 }

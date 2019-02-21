@@ -7,7 +7,6 @@
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkDelete } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
   method: 'DELETE',
@@ -19,11 +18,7 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
     let success: boolean;
-    try {
-      success = await libs.tags.delete(request.user, tagIds);
-    } catch (err) {
-      return wrapEsError(err);
-    }
+    success = await libs.tags.delete(request.user, tagIds);
 
     return { success };
   },

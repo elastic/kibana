@@ -10,7 +10,6 @@ import { CMBeat } from '../../../common/domain_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -40,27 +39,22 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
       listByValue = listByAndValueParts[1];
     }
 
-    try {
-      let beats: CMBeat[];
+    let beats: CMBeat[];
 
-      switch (listBy) {
-        case 'tag':
-          beats = await libs.beats.getAllWithTag(request.user, listByValue || '');
-          break;
+    switch (listBy) {
+      case 'tag':
+        beats = await libs.beats.getAllWithTag(request.user, listByValue || '');
+        break;
 
-        default:
-          beats = await libs.beats.getAll(
-            request.user,
-            request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
-          );
+      default:
+        beats = await libs.beats.getAll(
+          request.user,
+          request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
+        );
 
-          break;
-      }
-
-      return { beats };
-    } catch (err) {
-      // FIXME move this to kibana route thing in adapter
-      return wrapEsError(err);
+        break;
     }
+
+    return { beats };
   },
 });

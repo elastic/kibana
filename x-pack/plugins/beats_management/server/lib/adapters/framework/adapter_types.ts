@@ -5,6 +5,7 @@
  */
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
+import { BaseReturnType } from 'x-pack/plugins/beats_management/common/return_types';
 import { LicenseType } from '../../../../common/constants/security';
 
 export const internalAuthData = Symbol('internalAuthData');
@@ -154,7 +155,7 @@ export interface FrameworkRequest<
 
 export interface FrameworkRouteOptions<
   RouteRequest extends FrameworkRequest = FrameworkRequest,
-  RouteResponse extends FrameworkResponse = any
+  RouteResponse extends FrameworkResponse = BaseReturnType
 > {
   path: string;
   method: string | string[];
@@ -168,6 +169,6 @@ export interface FrameworkRouteOptions<
 export type FrameworkRouteHandler<
   RouteRequest extends KibanaServerRequest,
   RouteResponse extends FrameworkResponse
-> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => void;
+> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
 
 export type FrameworkResponse = Lifecycle.ReturnValue;

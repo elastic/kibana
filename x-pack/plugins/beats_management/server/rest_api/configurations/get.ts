@@ -8,7 +8,6 @@ import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ConfigurationBlock } from '../../../common/domain_types';
 import { ReturnTypeBulkGet } from '../../../common/return_types';
 import { CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
 export const createGetConfigurationBlocksRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
@@ -21,16 +20,12 @@ export const createGetConfigurationBlocksRoute = (libs: CMServerLibs): Framework
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
     let tags;
-    try {
-      tags = await libs.configurationBlocks.getForTags(
-        request.user,
-        tagIds,
-        parseInt(request.params.page, 10),
-        5
-      );
-    } catch (err) {
-      return wrapEsError(err);
-    }
+    tags = await libs.configurationBlocks.getForTags(
+      request.user,
+      tagIds,
+      parseInt(request.params.page, 10),
+      5
+    );
 
     return tags;
   },
