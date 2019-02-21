@@ -264,6 +264,8 @@ export interface EventEcsFields {
 
   severity?: number | null;
 
+  action?: string | null;
+
   type?: string | null;
 }
 
@@ -747,7 +749,7 @@ export namespace GetEventsQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    type?: string | null;
+    action?: string | null;
 
     severity?: number | null;
 
@@ -1295,7 +1297,7 @@ export namespace GetTimelineQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    type?: string | null;
+    action?: string | null;
 
     severity?: number | null;
 

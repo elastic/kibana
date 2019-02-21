@@ -157,11 +157,11 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     },
   },
   {
-    name: i18n.EVENT_TYPE,
+    name: i18n.EVENT_ACTION,
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: ({ node }) => getOrEmptyTag('event.type', node),
+    render: ({ node }) => getOrEmptyTag('event.action', node),
   },
   {
     name: i18n.SOURCE,

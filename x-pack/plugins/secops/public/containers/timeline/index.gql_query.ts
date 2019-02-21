@@ -30,7 +30,7 @@ export const timelineQuery = gql`
             _index
             timestamp
             event {
-              type
+              action
               severity
               module
               category

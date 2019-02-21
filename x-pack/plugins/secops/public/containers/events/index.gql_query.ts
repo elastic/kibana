@@ -36,7 +36,7 @@ export const eventsQuery = gql`
             _index
             timestamp
             event {
-              type
+              action
               severity
               module
               category

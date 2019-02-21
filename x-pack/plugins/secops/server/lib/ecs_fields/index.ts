@@ -30,7 +30,6 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
   'process.name': 'process.name',
   'process.ppid': 'process.ppid',
   'process.args': 'process.args',
-  // NOTE: This mapping will change soon within auditbeats and then we can change this to be process.executable
   'process.executable': 'process.executable',
   'process.title': 'process.title',
   'process.thread': 'process.thread',
@@ -80,14 +79,15 @@ export const geoFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
-  'event.category': 'suricata.eve.alert.category',
+  'event.action': 'event.action',
+  'event.category': 'event.category',
   'event.duration': 'event.duration',
   // NOTE: This is only for the index filebeat. If you're using auditbeat, then this needs to be changed out for 'event.id': 'event.id'
   'event.id': 'suricata.eve.flow_id',
   'event.module': 'event.module',
-  'event.type': 'event.type',
   // NOTE: This is only for the index filebeat. If you're using auditbeat, this doesn't matter as auditbeat does not have severities yet.
   'event.severity': 'suricata.eve.alert.severity',
+  'event.type': 'event.type',
 };
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {

@@ -293,6 +293,8 @@ export interface EventEcsFields {
 
   severity?: number | null;
 
+  action?: string | null;
+
   type?: string | null;
 }
 
@@ -1419,6 +1421,8 @@ export namespace EventEcsFieldsResolvers {
 
     severity?: SeverityResolver<number | null, TypeParent, Context>;
 
+    action?: ActionResolver<string | null, TypeParent, Context>;
+
     type?: TypeResolver<string | null, TypeParent, Context>;
   }
 
@@ -1444,6 +1448,11 @@ export namespace EventEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type SeverityResolver<
     R = number | null,
+    Parent = EventEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ActionResolver<
+    R = string | null,
     Parent = EventEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

@@ -16,8 +16,8 @@ export const mockEcsData: Ecs[] = [
     },
     event: {
       id: 1,
+      action: 'Action',
       category: 'Access',
-      type: 'HTTP Request',
       module: 'nginx',
       severity: 3,
     },

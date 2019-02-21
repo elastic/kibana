@@ -1712,6 +1712,14 @@
             "deprecationReason": null
           },
           {
+            "name": "action",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "type",
             "description": "",
             "args": [],

@@ -35,9 +35,9 @@ exports[`Columns it renders the expected columns 1`] = `
             },
             Object {
               "columnHeaderType": "not-filtered",
-              "id": "event.type",
+              "id": "event.action",
               "minWidth": 120,
-              "text": "Type",
+              "text": "Action",
             },
             Object {
               "columnHeaderType": "not-filtered",
@@ -93,11 +93,11 @@ exports[`Columns it renders the expected columns 1`] = `
               "port": 6343,
             },
             "event": Object {
+              "action": "Action",
               "category": "Access",
               "id": 1,
               "module": "nginx",
               "severity": 3,
-              "type": "HTTP Request",
             },
             "geo": Object {
               "country_iso_code": "xx",
@@ -205,6 +205,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               },
                             }
                           }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
+                              },
+                            }
+                          }
                           id-timeline-column-event_category-for-event-1={
                             Object {
                               "and": Array [],
@@ -230,20 +244,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -474,11 +474,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -513,11 +513,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",
@@ -631,6 +631,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               },
                             }
                           }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
+                              },
+                            }
+                          }
                           id-timeline-column-event_category-for-event-1={
                             Object {
                               "and": Array [],
@@ -656,20 +670,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -900,11 +900,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -939,11 +939,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",
@@ -995,7 +995,7 @@ exports[`Columns it renders the expected columns 1`] = `
               <EuiFlexItem
                 component="div"
                 grow={true}
-                key="event.type"
+                key="event.action"
               >
                 <div
                   className="euiFlexItem"
@@ -1016,16 +1016,16 @@ exports[`Columns it renders the expected columns 1`] = `
                             "and": Array [],
                             "enabled": true,
                             "excluded": false,
-                            "id": "id-timeline-column-event_type-for-event-1",
+                            "id": "id-timeline-column-event_action-for-event-1",
                             "kqlQuery": "",
-                            "name": "event.type: HTTP Request",
+                            "name": "event.action: Action",
                             "queryMatch": Object {
-                              "field": "event.type",
-                              "value": "HTTP Request",
+                              "field": "event.action",
+                              "value": "Action",
                             },
                           }
                         }
-                        key="timeline-draggable-column-event.type-for-event-1"
+                        key="timeline-draggable-column-event.action-for-event-1"
                         render={[Function]}
                       >
                         <DraggableWrapperComponent
@@ -1034,12 +1034,12 @@ exports[`Columns it renders the expected columns 1`] = `
                               "and": Array [],
                               "enabled": true,
                               "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
+                              "id": "id-timeline-column-event_action-for-event-1",
                               "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
+                              "name": "event.action: Action",
                               "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
+                                "field": "event.action",
+                                "value": "Action",
                               },
                             }
                           }
@@ -1054,6 +1054,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "destination.ip",
                                 "value": "192.168.0.3",
+                              },
+                            }
+                          }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
                               },
                             }
                           }
@@ -1082,20 +1096,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -1150,7 +1150,7 @@ exports[`Columns it renders the expected columns 1`] = `
                           >
                             <Connect(Droppable)
                               direction="vertical"
-                              droppableId="droppableId.content.id-timeline-column-event_type-for-event-1"
+                              droppableId="droppableId.content.id-timeline-column-event_action-for-event-1"
                               ignoreContainerClipping={false}
                               isDropDisabled={true}
                               type="DEFAULT"
@@ -1159,7 +1159,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                 direction="vertical"
                                 dispatch={[Function]}
                                 draggingOverWith={null}
-                                droppableId="droppableId.content.id-timeline-column-event_type-for-event-1"
+                                droppableId="droppableId.content.id-timeline-column-event_action-for-event-1"
                                 ignoreContainerClipping={false}
                                 isDraggingOver={false}
                                 isDropDisabled={true}
@@ -1168,7 +1168,7 @@ exports[`Columns it renders the expected columns 1`] = `
                               >
                                 <DroppableDimensionPublisher
                                   direction="vertical"
-                                  droppableId="droppableId.content.id-timeline-column-event_type-for-event-1"
+                                  droppableId="droppableId.content.id-timeline-column-event_action-for-event-1"
                                   getDroppableRef={[Function]}
                                   ignoreContainerClipping={false}
                                   isDropDisabled={true}
@@ -1179,15 +1179,15 @@ exports[`Columns it renders the expected columns 1`] = `
                                   >
                                     <Connect(Draggable)
                                       disableInteractiveElementBlocking={false}
-                                      draggableId="draggableId.content.id-timeline-column-event_type-for-event-1"
+                                      draggableId="draggableId.content.id-timeline-column-event_action-for-event-1"
                                       index={0}
                                       isDragDisabled={false}
-                                      key="id-timeline-column-event_type-for-event-1"
+                                      key="id-timeline-column-event_action-for-event-1"
                                     >
                                       <Draggable
                                         dimension={null}
                                         disableInteractiveElementBlocking={false}
-                                        draggableId="draggableId.content.id-timeline-column-event_type-for-event-1"
+                                        draggableId="draggableId.content.id-timeline-column-event_action-for-event-1"
                                         draggingOver={null}
                                         drop={[Function]}
                                         dropAnimationFinished={[Function]}
@@ -1212,11 +1212,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                         shouldAnimateDragMovement={false}
                                       >
                                         <DraggableDimensionPublisher
-                                          draggableId="draggableId.content.id-timeline-column-event_type-for-event-1"
-                                          droppableId="droppableId.content.id-timeline-column-event_type-for-event-1"
+                                          draggableId="draggableId.content.id-timeline-column-event_action-for-event-1"
+                                          droppableId="droppableId.content.id-timeline-column-event_action-for-event-1"
                                           getDraggableRef={[Function]}
                                           index={0}
-                                          key="draggableId.content.id-timeline-column-event_type-for-event-1"
+                                          key="draggableId.content.id-timeline-column-event_action-for-event-1"
                                           type="DEFAULT"
                                         >
                                           <Moveable
@@ -1267,7 +1267,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                     }
                                                   }
                                                   canDragInteractiveElements={false}
-                                                  draggableId="draggableId.content.id-timeline-column-event_type-for-event-1"
+                                                  draggableId="draggableId.content.id-timeline-column-event_action-for-event-1"
                                                   getDraggableRef={[Function]}
                                                   isDragging={false}
                                                   isDropAnimating={false}
@@ -1326,11 +1326,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -1353,7 +1353,7 @@ exports[`Columns it renders the expected columns 1`] = `
                                                             },
                                                           }
                                                         }
-                                                        fieldName="event.type"
+                                                        fieldName="event.action"
                                                         fieldType="keyword"
                                                       >
                                                         <Component
@@ -1365,11 +1365,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",
@@ -1392,10 +1392,10 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               },
                                                             }
                                                           }
-                                                          fieldName="event.type"
+                                                          fieldName="event.action"
                                                           fieldType="keyword"
                                                         >
-                                                          HTTP Request
+                                                          Action
                                                         </Component>
                                                       </pure(Component)>
                                                     </div>
@@ -1483,6 +1483,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               },
                             }
                           }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
+                              },
+                            }
+                          }
                           id-timeline-column-event_category-for-event-1={
                             Object {
                               "and": Array [],
@@ -1508,20 +1522,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -1752,11 +1752,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -1791,11 +1791,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",
@@ -1909,6 +1909,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               },
                             }
                           }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
+                              },
+                            }
+                          }
                           id-timeline-column-event_category-for-event-1={
                             Object {
                               "and": Array [],
@@ -1934,20 +1948,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -2178,11 +2178,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -2217,11 +2217,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",
@@ -2335,6 +2335,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               },
                             }
                           }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
+                              },
+                            }
+                          }
                           id-timeline-column-event_category-for-event-1={
                             Object {
                               "and": Array [],
@@ -2360,20 +2374,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -2604,11 +2604,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -2643,11 +2643,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",
@@ -2761,6 +2761,20 @@ exports[`Columns it renders the expected columns 1`] = `
                               },
                             }
                           }
+                          id-timeline-column-event_action-for-event-1={
+                            Object {
+                              "and": Array [],
+                              "enabled": true,
+                              "excluded": false,
+                              "id": "id-timeline-column-event_action-for-event-1",
+                              "kqlQuery": "",
+                              "name": "event.action: Action",
+                              "queryMatch": Object {
+                                "field": "event.action",
+                                "value": "Action",
+                              },
+                            }
+                          }
                           id-timeline-column-event_category-for-event-1={
                             Object {
                               "and": Array [],
@@ -2786,20 +2800,6 @@ exports[`Columns it renders the expected columns 1`] = `
                               "queryMatch": Object {
                                 "field": "event.severity",
                                 "value": 3,
-                              },
-                            }
-                          }
-                          id-timeline-column-event_type-for-event-1={
-                            Object {
-                              "and": Array [],
-                              "enabled": true,
-                              "excluded": false,
-                              "id": "id-timeline-column-event_type-for-event-1",
-                              "kqlQuery": "",
-                              "name": "event.type: HTTP Request",
-                              "queryMatch": Object {
-                                "field": "event.type",
-                                "value": "HTTP Request",
                               },
                             }
                           }
@@ -3030,11 +3030,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                               "port": 6343,
                                                             },
                                                             "event": Object {
+                                                              "action": "Action",
                                                               "category": "Access",
                                                               "id": 1,
                                                               "module": "nginx",
                                                               "severity": 3,
-                                                              "type": "HTTP Request",
                                                             },
                                                             "geo": Object {
                                                               "country_iso_code": "xx",
@@ -3069,11 +3069,11 @@ exports[`Columns it renders the expected columns 1`] = `
                                                                 "port": 6343,
                                                               },
                                                               "event": Object {
+                                                                "action": "Action",
                                                                 "category": "Access",
                                                                 "id": 1,
                                                                 "module": "nginx",
                                                                 "severity": 3,
-                                                                "type": "HTTP Request",
                                                               },
                                                               "geo": Object {
                                                                 "country_iso_code": "xx",

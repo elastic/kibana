@@ -173,11 +173,11 @@ describe('plain_column_renderer', () => {
     expect(wrapper.text()).toEqual(mockDatum.timestamp!);
   });
 
-  test('should return the value of event.type if event.type has a valid value', () => {
+  test('should return the value of event.action if event.action has a valid value', () => {
     const column = plainColumnRenderer.renderColumn(
-      'event.type',
+      'event.action',
       mockDatum,
-      allFieldsInSchemaByName['event.type']
+      allFieldsInSchemaByName['event.action']
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -188,7 +188,7 @@ describe('plain_column_renderer', () => {
         </ReduxStoreProvider>
       </ThemeProvider>
     );
-    expect(wrapper.text()).toEqual('HTTP Request');
+    expect(wrapper.text()).toEqual('Action');
   });
 
   test('should return the of user.name if user.name has a valid value', () => {
@@ -323,12 +323,12 @@ describe('plain_column_renderer', () => {
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
-  test('should return an empty value if event.type is empty', () => {
-    const missingType = omit('event.type', mockDatum);
+  test('should return an empty value if event.action is empty', () => {
+    const missingType = omit('event.action', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn(
-      'event.type',
+      'event.action',
       missingType,
-      allFieldsInSchemaByName['event.type']
+      allFieldsInSchemaByName['event.action']
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
