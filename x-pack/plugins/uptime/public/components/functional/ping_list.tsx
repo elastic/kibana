@@ -50,7 +50,7 @@ export const PingList = ({
       name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
         defaultMessage: 'Status',
       }),
-      render: (pingStatus: string, item: object) => (
+      render: (pingStatus: string, item: Ping) => (
         <div>
           <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
             {pingStatus === 'up'
@@ -125,6 +125,7 @@ export const PingList = ({
     if (hasStatus) {
       columns.push({
         field: 'http.response.status_code',
+        // @ts-ignore "align" property missing on type definition for column type
         align: 'right',
         name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
           defaultMessage: 'Response code',

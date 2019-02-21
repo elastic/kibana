@@ -10,7 +10,7 @@ import { SnapshotHistogram, SnapshotHistogramProps } from '../snapshot_histogram
 
 describe('SnapshotHistogram component', () => {
   const props: SnapshotHistogramProps = {
-    primaryColor: '#FEFEFE',
+    successColor: '#FEFEFE',
     dangerColor: '#FF00FF',
     windowWidth: 1200,
     histogram: [

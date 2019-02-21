@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorListItem } from '../../../common/graphql/types';
+import { ErrorListItem, Ping } from '../../../common/graphql/types';
 
 interface ErrorListProps {
   loading: boolean;
@@ -43,7 +43,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
             defaultMessage: 'Frequency',
           }),
-          render: (count: number, item: object) => (
+          render: (count: number, item: Ping) => (
             <div>
               <EuiText size="s">
                 <EuiTextColor color="danger">{count}</EuiTextColor> errors
@@ -83,7 +83,12 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           width: '40%',
           render: (message: string) => (
             <div>
-              <EuiCodeBlock transparentBackground size="xs" paddingSize="none">
+              <EuiCodeBlock
+                transparentBackground
+                // @ts-ignore "size" prop missing on type EuiCodeBlock
+                size="xs"
+                paddingSize="none"
+              >
                 {message}
               </EuiCodeBlock>
             </div>

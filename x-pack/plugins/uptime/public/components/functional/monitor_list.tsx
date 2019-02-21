@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -73,7 +74,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, successColor }: Mo
                     })}
               </EuiHealth>
               <EuiText size="xs" color="subdued">
-                {moment(monitor.ping.monitor.timestamp).fromNow()}
+                {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
               </EuiText>
             </div>
           ),

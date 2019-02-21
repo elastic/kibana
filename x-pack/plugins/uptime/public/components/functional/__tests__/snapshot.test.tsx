@@ -33,7 +33,7 @@ describe('Snapshot component', () => {
     const wrapper = shallowWithIntl(
       <Snapshot
         dangerColor="#F050F0"
-        primaryColor="#000000"
+        successColor="#000000"
         snapshot={snapshot}
         windowWidth={1600}
       />
