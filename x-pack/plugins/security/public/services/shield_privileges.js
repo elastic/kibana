@@ -29,6 +29,7 @@ module.constant('shieldPrivileges', {
     'manage_rollup',
     'manage_token',
     'manage_saml',
+    'create_snapshot',
   ],
   indices: [
     'all',

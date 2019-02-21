@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timeFormat } from 'd3-time-format';
+import Chance from 'chance';
 
-const formatDate = timeFormat('%Y-%m-%d %H:%M:%S.%L');
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
 
-export function formatTime(time: number) {
-  return formatDate(new Date(time));
-}
+export const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;

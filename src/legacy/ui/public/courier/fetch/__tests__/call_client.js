@@ -183,20 +183,6 @@ describe('callClient', () => {
   });
 
   describe('aborting at different points in the request lifecycle:', () => {
-    it(`when searchSource's _flatten method throws an error resolves with an ABORTED response`, () => {
-      const searchRequest = createSearchRequest(1, {
-        source: {
-          _flatten: () => { throw new Error(); },
-        },
-      });
-
-      searchRequests = [ searchRequest ];
-
-      return callClient(searchRequests).then(results => {
-        // The result is ABORTED because it was never included in the body sent to es.msearch().
-        expect(results).to.eql([ ABORTED ]);
-      });
-    });
 
     it('while the search body is being formed resolves with an ABORTED response', () => {
       const searchRequest = createSearchRequest(1, {
