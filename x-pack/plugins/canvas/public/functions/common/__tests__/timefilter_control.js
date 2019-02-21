@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { timefilterControl } from '../timefilterControl';
+import { timefilterControl } from '../timefilter_control';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 
 describe('timefilterControl', () => {

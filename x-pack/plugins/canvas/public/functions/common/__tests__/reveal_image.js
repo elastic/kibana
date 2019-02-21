@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { revealImage } from '../revealImage';
+import { revealImage } from '../reveal_image';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { elasticLogo } from '../../../lib/elastic_logo';

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { staticColumn } from '../staticColumn';
+import { staticColumn } from '../static_column';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from './fixtures/test_tables';
 

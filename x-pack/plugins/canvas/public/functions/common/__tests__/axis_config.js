@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { axisConfig } from '../axisConfig';
+import { axisConfig } from '../axis_config';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from '../__tests__/fixtures/test_tables';
 

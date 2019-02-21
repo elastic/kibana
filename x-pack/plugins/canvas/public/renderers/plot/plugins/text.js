@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import $ from 'jquery';
 import { get } from 'lodash';
+import $ from 'jquery';
 
 /*
   FreeBSD-License

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { containerStyle } from '../containerStyle';
+import { containerStyle } from '../container_style';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticLogo } from '../../../lib/elastic_logo';
 

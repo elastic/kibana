@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { rowCount } from '../rowCount';
+import { rowCount } from '../row_count';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyTable, testTable } from './fixtures/test_tables';
 

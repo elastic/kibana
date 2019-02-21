@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { repeatImage } from '../repeatImage';
+import { repeatImage } from '../repeat_image';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { elasticLogo } from '../../../lib/elastic_logo';

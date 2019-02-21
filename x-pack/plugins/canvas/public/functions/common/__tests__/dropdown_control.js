@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { dropdownControl } from '../dropdownControl';
+import { dropdownControl } from '../dropdown_control';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from './fixtures/test_tables';
 

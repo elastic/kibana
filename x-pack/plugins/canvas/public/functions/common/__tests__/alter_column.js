@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { alterColumn } from '../alterColumn';
+import { alterColumn } from '../alter_column';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyTable, testTable } from './fixtures/test_tables';
 

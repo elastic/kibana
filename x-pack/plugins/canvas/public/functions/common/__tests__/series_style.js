@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { seriesStyle } from '../seriesStyle';
+import { seriesStyle } from '../series_style';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 
 describe('seriesStyle', () => {

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { getCell } from '../getCell';
+import { getCell } from '../get_cell';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyTable, testTable } from './fixtures/test_tables';
 
