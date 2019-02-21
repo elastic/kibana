@@ -88,6 +88,7 @@ export class KueryFilterBar extends Component {
 
     try {
       const ast = fromKueryExpression(inputValue); // ast.function = 'and'
+      const isAndOperator = ast.function === 'and';
       const query = convertKueryToEsQuery(inputValue, indexPattern);
 
       if (!query) {
@@ -113,7 +114,12 @@ export class KueryFilterBar extends Component {
 
       }
 
-      onSubmit(query, filteredFields, inputValue);
+      onSubmit({
+        influencersFilterQuery: query,
+        filteredFields,
+        queryString: inputValue,
+        isAndOperator
+      });
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
       this.setState({ error: (e.message ? e.message : 'Invalid query syntax') });

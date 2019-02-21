@@ -95,6 +95,7 @@ function getExplorerDefaultState() {
     filteredFields: [],
     filterPlaceHolder: undefined,
     influencersFilterQuery: undefined,
+    isAndOperator: false,
     hasResults: false,
     influencers: {},
     loading: true,
@@ -216,7 +217,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         const { action, payload } = this.props.explorer;
 
         if (action === EXPLORER_ACTION.INITIALIZE) {
-          const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
+          const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName, filterData } = payload;
           let currentSelectedCells = this.state.selectedCells;
           let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
 
@@ -235,6 +236,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobs,
             swimlaneViewByFieldName: currentSwimlaneViewByFieldName
           };
+
+          if (filterData.influencersFilterQuery !== undefined) {
+            Object.assign(stateUpdate, { ...filterData });
+          }
+
           this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
           this.updateExplorer(stateUpdate, true);
         }
@@ -247,6 +253,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobs,
           };
 
+          this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
           Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
 
@@ -894,8 +901,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    applyInfluencersFilterQuery = (influencersFilterQuery, filteredFields, queryString) => {
-      const { swimlaneViewByFieldName } = this.state;
+    applyInfluencersFilterQuery = ({
+      influencersFilterQuery,
+      filteredFields,
+      queryString,
+      isAndOperator }) => {
+      const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
+      let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
@@ -904,6 +916,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             filterActive: false,
             filteredFields: [],
             influencersFilterQuery: undefined,
+            isAndOperator: false,
             maskAll: false,
             queryString: undefined,
           },
@@ -912,17 +925,32 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         this.updateExplorer(stateUpdate, false);
       } else {
+        // Set View by dropdown to first relevant fieldName based on incoming filter
+        for (let i = 0; i < filteredFields.length; i++) {
+          if (viewBySwimlaneOptions.includes(filteredFields[i])) {
+            selectedViewByFieldName = filteredFields[i];
+            this.props.appStateHandler(
+              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+              { swimlaneViewByFieldName: selectedViewByFieldName },
+            );
+            break;
+          }
+        }
+
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
           { influencersFilterQuery, filterActive: true, filteredFields, queryString });
 
-        this.updateExplorer({
-          filterActive: true,
-          filteredFields,
-          influencersFilterQuery,
-          queryString,
-          maskAll: (swimlaneViewByFieldName === VIEW_BY_JOB_LABEL ||
-            filteredFields.includes(swimlaneViewByFieldName) === false)
-        }, false);
+        this.setState({ swimlaneViewByFieldName: selectedViewByFieldName }, () => {
+          this.updateExplorer({
+            filterActive: true,
+            filteredFields,
+            influencersFilterQuery,
+            isAndOperator,
+            queryString,
+            maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
+              filteredFields.includes(selectedViewByFieldName) === false)
+          }, false);
+        });
       }
     }
 
@@ -938,6 +966,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         chartsData,
         filterActive,
         filterPlaceHolder,
+        isAndOperator,
         maskAll,
         influencers,
         hasResults,
@@ -953,7 +982,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         viewBySwimlaneDataLoading,
         viewBySwimlaneOptions,
       } = this.state;
-
       const loading = this.props.loading || this.state.loading;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
@@ -1136,7 +1164,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 )}
 
                 {!showViewBySwimlane && !viewBySwimlaneDataLoading && swimlaneViewByFieldName !== null && (
-                  <ExplorerNoInfluencersFound swimlaneViewByFieldName={swimlaneViewByFieldName} />
+                  <ExplorerNoInfluencersFound
+                    swimlaneViewByFieldName={swimlaneViewByFieldName}
+                    showFilterMessage={(filterActive === true && isAndOperator === true)}
+                  />
                 )}
               </React.Fragment>
             )}

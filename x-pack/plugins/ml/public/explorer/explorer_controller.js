@@ -85,7 +85,13 @@ module.controller('MlExplorerController', function (
 
   let resizeTimeout = null;
 
-  function jobSelectionUpdate(action, { fullJobs, filterData, selectedCells, selectedJobIds, swimlaneViewByFieldName }) {
+  function jobSelectionUpdate(action, {
+    fullJobs,
+    filterData,
+    selectedCells,
+    selectedJobIds,
+    swimlaneViewByFieldName
+  }) {
     const jobs = createJobs(fullJobs).map((job) => {
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
