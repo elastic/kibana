@@ -451,7 +451,7 @@ describe('events elasticsearch_adapter', () => {
     test('it formats a event data if fields are empty', () => {
       const fields: ReadonlyArray<string> = [];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: {} };
+      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: { _id: '' } };
 
       expect(data).toEqual(expected);
     });

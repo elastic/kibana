@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { cloneDeep, noop, omit } from 'lodash/fp';
+import { cloneDeep, noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -35,8 +35,8 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return isInstance false if source is empty', () => {
-    const missingSource = omit('source', mockDatum);
-    expect(plainColumnRenderer.isInstance('source', missingSource)).toBe(false);
+    delete mockDatum.source;
+    expect(plainColumnRenderer.isInstance('source', mockDatum)).toBe(false);
   });
 
   test('should return isInstance true if source is NOT empty', () => {
@@ -210,10 +210,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if event.category is empty', () => {
-    const missingCategory = omit('event.category', mockDatum);
+    delete mockDatum!.event!.category;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'event.category',
-      missingCategory,
+      mockDatum,
       allFieldsInSchemaByName['event.category']
     );
     const wrapper = mount(
@@ -229,10 +229,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if destination is empty', () => {
-    const missingDestination = omit('destination', mockDatum);
+    delete mockDatum.destination;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'destination',
-      missingDestination,
+      mockDatum,
       allFieldsInSchemaByName.destination
     );
     const wrapper = mount(
@@ -248,10 +248,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if destination ip is empty', () => {
-    const missingDestination = omit('destination.ip', mockDatum);
+    delete mockDatum.destination!.ip;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'destination.ip',
-      missingDestination,
+      mockDatum,
       allFieldsInSchemaByName['destination.ip']
     );
     const wrapper = mount(
@@ -267,10 +267,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if event severity is empty', () => {
-    const missingSeverity = omit('event.severity', mockDatum);
+    delete mockDatum.event!.severity;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'event.severity',
-      missingSeverity,
+      mockDatum,
       allFieldsInSchemaByName['event.severity']
     );
     const wrapper = mount(
@@ -286,10 +286,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if source is empty', () => {
-    const missingSource = omit('source', mockDatum);
+    delete mockDatum.source;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'source',
-      missingSource,
+      mockDatum,
       allFieldsInSchemaByName.source
     );
     const wrapper = mount(
@@ -305,10 +305,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if source.ip is empty', () => {
-    const missingSource = omit('source.ip', mockDatum);
+    delete mockDatum.source!.ip;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'source.ip',
-      missingSource,
+      mockDatum,
       allFieldsInSchemaByName['source.ip']
     );
     const wrapper = mount(
@@ -324,10 +324,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if event.action is empty', () => {
-    const missingType = omit('event.action', mockDatum);
+    delete mockDatum.event!.action;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'event.action',
-      missingType,
+      mockDatum,
       allFieldsInSchemaByName['event.action']
     );
     const wrapper = mount(
@@ -343,10 +343,10 @@ describe('plain_column_renderer', () => {
   });
 
   test('should return an empty value if user.name is empty', () => {
-    const missingUser = omit('user.name', mockDatum);
+    delete mockDatum.user!.name;
     const emptyColumn = plainColumnRenderer.renderColumn(
       'user.name',
-      missingUser,
+      mockDatum,
       allFieldsInSchemaByName['user.name']
     );
     const wrapper = mount(

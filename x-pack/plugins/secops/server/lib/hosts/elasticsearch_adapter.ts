@@ -52,22 +52,23 @@ export const formatHostsData = (
   fields: ReadonlyArray<string>,
   hit: HostHit,
   fieldMap: Readonly<Record<string, string>>
-): HostsEdges => {
-  const init: HostsEdges = {
-    node: {},
-    cursor: {
-      value: '',
-      tiebreaker: null,
+): HostsEdges =>
+  fields.reduce<HostsEdges>(
+    (flattenedFields, fieldName) => {
+      flattenedFields.node._id = hit._id;
+      if (hit.cursor) {
+        flattenedFields.cursor.value = hit.cursor;
+      }
+      if (hit.firstSeen) {
+        flattenedFields.node.firstSeen = hit.firstSeen;
+      }
+      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
     },
-  };
-  return fields.reduce((flattenedFields, fieldName) => {
-    flattenedFields.node._id = hit._id;
-    if (hit.cursor) {
-      flattenedFields.cursor.value = hit.cursor;
+    {
+      node: {},
+      cursor: {
+        value: '',
+        tiebreaker: null,
+      },
     }
-    if (hit.firstSeen) {
-      flattenedFields.node.firstSeen = hit.firstSeen;
-    }
-    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-  }, init);
-};
+  );

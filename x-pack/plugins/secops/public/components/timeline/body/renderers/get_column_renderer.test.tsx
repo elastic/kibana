@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { cloneDeep, noop, omit } from 'lodash/fp';
+import { cloneDeep, noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -65,12 +65,12 @@ describe('get_column_renderer', () => {
   });
 
   test('should render empty value when dealing with an empty value of user', () => {
-    const omitUser = omit('user', nonSuricata);
+    delete nonSuricata.user;
     const columnName = 'user.name';
-    const columnRenderer = getColumnRenderer(columnName, columnRenderers, omitUser);
+    const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn(
       columnName,
-      omitUser,
+      nonSuricata,
       allFieldsInSchemaByName[columnName]
     );
     const wrapper = mount(<span>{column}</span>);

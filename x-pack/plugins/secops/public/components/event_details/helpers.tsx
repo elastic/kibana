@@ -88,7 +88,7 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] =>
   populatedFields.map(field => {
     const itemDataProvider = {
       enabled: true,
-      id: escapeDataProviderId(`id-event-field-browser-value-for-${field.name}-${data._id!}`),
+      id: escapeDataProviderId(`id-event-field-browser-value-for-${field.name}-${data._id}`),
       name: `${field.name}: ${getMappedEcsValue({
         data,
         fieldName: field.name,
@@ -117,7 +117,7 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] =>
       })}`,
       value: (
         <DraggableWrapper
-          key={`event-field-browser-value-for-${field.name}-${data._id!}`}
+          key={`event-field-browser-value-for-${field.name}-${data._id}`}
           dataProvider={itemDataProvider}
           render={(dataProvider, _, snapshot) =>
             snapshot.isDragging ? (

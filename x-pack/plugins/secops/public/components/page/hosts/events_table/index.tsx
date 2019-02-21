@@ -125,7 +125,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`events-table-${node._id!}-hostName-${hostName}`),
+              id: escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`),
               name: hostName,
               excluded: false,
               kqlQuery: '',

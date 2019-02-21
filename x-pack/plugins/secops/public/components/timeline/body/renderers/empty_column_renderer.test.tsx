@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import { cloneDeep, omit } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { emptyColumnRenderer } from '.';
@@ -23,8 +23,8 @@ describe('empty_column_renderer', () => {
   });
 
   test('should return isInstance true if source is empty', () => {
-    const missingSource = omit('source', mockDatum);
-    expect(emptyColumnRenderer.isInstance('source', missingSource)).toBe(true);
+    delete mockDatum.source;
+    expect(emptyColumnRenderer.isInstance('source', mockDatum)).toBe(true);
   });
 
   test('should return isInstance false if source is NOT empty', () => {
@@ -32,8 +32,8 @@ describe('empty_column_renderer', () => {
   });
 
   test('should return isInstance true if source.ip is empty', () => {
-    const missingSource = omit('source.ip', mockDatum);
-    expect(emptyColumnRenderer.isInstance('source.ip', missingSource)).toBe(true);
+    delete mockDatum.source!.ip;
+    expect(emptyColumnRenderer.isInstance('source.ip', mockDatum)).toBe(true);
   });
 
   test('should return isInstance false if source.ip is NOT empty', () => {
@@ -45,10 +45,10 @@ describe('empty_column_renderer', () => {
   });
 
   test('should return an empty value', () => {
-    const missingSource = omit('source', mockDatum);
+    delete mockDatum.source;
     const emptyColumn = emptyColumnRenderer.renderColumn(
       'source',
-      missingSource,
+      mockDatum,
       allFieldsInSchemaByName.source
     );
     const wrapper = mount(<span>{emptyColumn}</span>);

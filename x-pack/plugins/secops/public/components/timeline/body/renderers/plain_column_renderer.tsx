@@ -25,7 +25,7 @@ export const plainColumnRenderer: ColumnRenderer = {
   renderColumn: (columnName: string, data: Ecs, field?: EcsField) => {
     const itemDataProvider = {
       enabled: true,
-      id: escapeDataProviderId(`id-timeline-column-${columnName}-for-event-${data._id!}`),
+      id: escapeDataProviderId(`id-timeline-column-${columnName}-for-event-${data._id}`),
       name: `${columnName}: ${getMappedEcsValue({
         data,
         fieldName: columnName,
@@ -48,7 +48,7 @@ export const plainColumnRenderer: ColumnRenderer = {
 
     return (
       <DraggableWrapper
-        key={`timeline-draggable-column-${columnName}-for-event-${data._id!}`}
+        key={`timeline-draggable-column-${columnName}-for-event-${data._id}`}
         dataProvider={itemDataProvider}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (

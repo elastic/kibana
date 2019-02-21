@@ -224,7 +224,7 @@ export interface EcsEdges {
 }
 
 export interface Ecs {
-  _id?: string | null;
+  _id: string;
 
   _index?: string | null;
 
@@ -727,7 +727,7 @@ export namespace GetEventsQuery {
   export type Node = {
     __typename?: 'ECS';
 
-    _id?: string | null;
+    _id: string;
 
     _index?: string | null;
 
@@ -1275,7 +1275,7 @@ export namespace GetTimelineQuery {
   export type Node = {
     __typename?: 'ECS';
 
-    _id?: string | null;
+    _id: string;
 
     _index?: string | null;
 

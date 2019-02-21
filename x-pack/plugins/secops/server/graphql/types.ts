@@ -253,7 +253,7 @@ export interface EcsEdges {
 }
 
 export interface Ecs {
-  _id?: string | null;
+  _id: string;
 
   _index?: string | null;
 
@@ -1310,7 +1310,7 @@ export namespace EcsEdgesResolvers {
 
 export namespace EcsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = Ecs> {
-    _id?: IdResolver<string | null, TypeParent, Context>;
+    _id?: IdResolver<string, TypeParent, Context>;
 
     _index?: IndexResolver<string | null, TypeParent, Context>;
 
@@ -1331,7 +1331,7 @@ export namespace EcsResolvers {
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
   }
 
-  export type IdResolver<R = string | null, Parent = Ecs, Context = SecOpsContext> = Resolver<
+  export type IdResolver<R = string, Parent = Ecs, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context

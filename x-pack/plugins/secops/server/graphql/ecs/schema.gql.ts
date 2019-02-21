@@ -99,7 +99,7 @@ export const ecsSchema = gql`
   }
 
   type ECS {
-    _id: String
+    _id: String!
     _index: String
     destination: DestinationEcsFields
     event: EventEcsFields
