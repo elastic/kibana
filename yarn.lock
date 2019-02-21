@@ -2776,13 +2776,6 @@
     text-table "^0.2.0"
     webpack-log "^1.1.2"
 
-"@welldone-software/why-did-you-render@^2.5.2":
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/@welldone-software/why-did-you-render/-/why-did-you-render-2.5.2.tgz#68f578ac47ba3a040a51c09150ed7e8e38ed4e63"
-  integrity sha512-3xvByqgiBxKwK5ODh02UGXWeVD7iJC2IMWW+4ekjp4/CcLNp0znb08r8UzN94PNw8+m3tFxx6wfERdpOQ7ZHFg==
-  dependencies:
-    lodash "^4.0.0"
-
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@xtuc/ieee754/-/ieee754-1.2.0.tgz#eef014a3145ae477a1cbc00cd1e552336dceb790"
