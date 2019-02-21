@@ -16,11 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry } from './actions';
-export {
-  EmbeddableFactory,
-  OnEmbeddableStateChanged,
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddables';
-export * from './context_menu_actions';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange } from './types';
+
+import { Embeddable } from '../embeddables';
+
+export interface ExecuteOptions<C, A> {
+  embeddable: Embeddable<C, any>;
+  containerContext: C;
+  actionContext: A;
+}
+
+export abstract class Action<C, A> {
+  public readonly id: string;
+  constructor({ id }: { id: string }) {
+    this.id = id;
+  }
+  public abstract execute(executeOptions: ExecuteOptions<C, A>): void;
+  public abstract isCompatable({
+    embeddable,
+    containerContext,
+  }: {
+    embeddable: Embeddable<C, any>;
+    containerContext: C;
+  }): Promise<boolean>;
+}

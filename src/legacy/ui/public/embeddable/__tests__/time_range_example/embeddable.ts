@@ -17,13 +17,33 @@
  * under the License.
  */
 
-// @ts-ignore: implicit any for JS file
-import { uiRegistry } from '../registry/_registry';
+import { TimeRange } from 'ui/embeddable/types';
+import { Embeddable } from '../../embeddables';
 
-/**
- * Registry of functions (EmbeddableFactoryProviders) which return an EmbeddableFactory.
- */
-export const EmbeddableFactoriesRegistryProvider = uiRegistry({
-  index: ['name'],
-  name: 'embeddableFactories',
-});
+interface ContainerContext {
+  timeRange: TimeRange;
+}
+
+export class ClockEmbeddable extends Embeddable<ContainerContext, TimeRange> {
+  private timeRange: TimeRange;
+
+  constructor({ id, initialState }: { id: string; initialState: TimeRange }) {
+    super({
+      id,
+      type: 'ClockEmbeddable',
+    });
+    this.timeRange = initialState;
+  }
+
+  public getOutput() {
+    return this.timeRange;
+  }
+
+  public render() {
+    return;
+  }
+
+  protected onInputChange(input: ContainerContext) {
+    this.timeRange = input.timeRange;
+  }
+}

@@ -16,11 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry } from './actions';
-export {
-  EmbeddableFactory,
-  OnEmbeddableStateChanged,
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddables';
-export * from './context_menu_actions';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange } from './types';
+
+import { Container } from 'ui/embeddable/containers';
+import { TimeRange } from 'ui/embeddable/types';
+
+interface SampleContainerState {
+  timeRange: TimeRange;
+}
+
+export class TimeRangeContainer extends Container<SampleContainerState> {
+  constructor(timeRange: TimeRange) {
+    super({
+      initialState: {
+        timeRange,
+      },
+    });
+  }
+
+  public changeTime(timeRange: TimeRange) {
+    this.onStateChange({ timeRange });
+  }
+}

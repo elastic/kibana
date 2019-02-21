@@ -16,11 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry } from './actions';
-export {
-  EmbeddableFactory,
-  OnEmbeddableStateChanged,
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddables';
-export * from './context_menu_actions';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange } from './types';
+
+export { Embeddable } from './embeddable';
+export { EmbeddableFactory, OnEmbeddableStateChanged } from './embeddable_factory';
+
+export { EmbeddableFactoriesRegistryProvider } from './embeddable_factories_registry';

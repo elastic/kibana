@@ -16,11 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry } from './actions';
-export {
-  EmbeddableFactory,
-  OnEmbeddableStateChanged,
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddables';
-export * from './context_menu_actions';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange } from './types';
+
+export abstract class Migrator<S> {
+  public readonly id: string;
+  // determines order of execution of migrators;
+  constructor({ id }: { id: string }) {
+    this.id = id;
+  }
+  public abstract migrate(input: S): S;
+}
+
+export function migrateState<I>(input: I, migrators: { [key: string]: Migrator<I> }) {
+  const ret = Object.values(migrators).reduce((acc: I, migrator: Migrator<I>) => {
+    const post = migrator.migrate(acc);
+    return post;
+  }, input);
+  return ret;
+}

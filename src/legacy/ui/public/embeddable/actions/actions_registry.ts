@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry } from './actions';
-export {
-  EmbeddableFactory,
-  OnEmbeddableStateChanged,
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddables';
-export * from './context_menu_actions';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange } from './types';
+
+import { Action } from './action';
+
+class ActionsRegistry {
+  private actions: { [key: string]: Action<any, any> } = {};
+
+  public registerAction(action: Action<any, any>) {
+    this.actions[action.id] = action;
+  }
+
+  public getActionById(id: string) {
+    return this.actions[id];
+  }
+}
+
+export const actionRegistry = new ActionsRegistry();

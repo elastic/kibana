@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { actionRegistry } from './actions';
-export {
-  EmbeddableFactory,
-  OnEmbeddableStateChanged,
-  EmbeddableFactoriesRegistryProvider,
-} from './embeddables';
-export * from './context_menu_actions';
-export { ContainerState, EmbeddableState, Query, Filters, TimeRange } from './types';
+
+// @ts-ignore: implicit any for JS file
+import { uiRegistry } from '../../registry/_registry';
+
+/**
+ * Registry of functions (EmbeddableFactoryProviders) which return an EmbeddableFactory.
+ */
+export const EmbeddableFactoriesRegistryProvider = uiRegistry({
+  index: ['name'],
+  name: 'embeddableFactories',
+});

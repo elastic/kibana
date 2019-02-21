@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { EmbeddableState } from '../types';
 import { Embeddable } from './embeddable';
-import { EmbeddableState } from './types';
 export interface EmbeddableInstanceConfiguration {
   id: string;
 }
