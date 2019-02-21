@@ -7,9 +7,16 @@
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
 import {
+  getIsReadOnly,
   updateFlyout,
-  FLYOUT_STATE
+  FLYOUT_STATE,
 } from '../../../store/ui';
+
+function mapStateToProps(state = {}) {
+  return {
+    isReadOnly: getIsReadOnly(state),
+  };
+}
 
 function mapDispatchToProps(dispatch) {
   return {
@@ -19,5 +26,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedLayerControl = connect(null, mapDispatchToProps)(LayerControl);
+const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
 export { connectedLayerControl as LayerControl };
