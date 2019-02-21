@@ -5,10 +5,7 @@
  */
 
 import { EuiToken, IconType } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { SFC } from 'react';
-import styled from 'styled-components';
-
 import { AutocompleteSuggestion } from '../..';
 
 interface Props {

@@ -11,7 +11,6 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { COLORS } from '@elastic/eui/src/components/icon/icon';
 
 const Root = styled.div`
   padding: ${theme.paddingSizes.m};
@@ -44,15 +43,6 @@ const Title = styled(EuiTitle)`
 const Container = styled.div`
   &:not(:first-child) {
     margin-top: calc(20rem / 14);
-  }
-`;
-
-const DirectoryNode = styled.div`
-  width: calc(200rem / 14);
-  margin: 0 ${theme.euiSizeS} ${theme.euiSizeM};
-  :hover {
-    background-color: ${theme.euiColorHighlight};
-    cursor: pointer;
   }
 `;
 

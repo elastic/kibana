@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, IconType } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiFlexGroup, EuiText, EuiToken, IconType } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import Url from 'url';
 
 import {

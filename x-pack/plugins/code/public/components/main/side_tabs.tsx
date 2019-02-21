@@ -5,11 +5,9 @@
  */
 
 import { EuiTabbedContent } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import { QueryString } from 'ui/utils/query_string';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { FileTree } from '../file_tree/file_tree';
