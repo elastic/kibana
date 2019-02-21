@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oncePerServer } from './once_per_server';
+// @ts-ignore
+import contentDisposition from 'content-disposition';
+// @ts-ignore
+import { oncePerServer } from '../../lib/once_per_server';
 
-function getDocumentPayloadFn(server) {
+const DEFAULT_TITLE = 'report';
+
+const getTitle = (exportType: any, title?: string): string =>
+  `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
+
+function getDocumentPayloadFn(server: any) {
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
-  function encodeContent(content, exportType) {
+  function encodeContent(content: string, exportType: any) {
     switch (exportType.jobContentEncoding) {
       case 'base64':
         return Buffer.from(content, 'base64');
@@ -18,42 +26,44 @@ function getDocumentPayloadFn(server) {
     }
   }
 
-  function getCompleted(output, jobType, title) {
-    const exportType = exportTypesRegistry.get(item => item.jobType === jobType);
+  function getCompleted(output: any, jobType: string, title: any) {
+    const exportType = exportTypesRegistry.get((item: any) => item.jobType === jobType);
+    const filename = getTitle(exportType, title);
+
     return {
       statusCode: 200,
       content: encodeContent(output.content, exportType),
       contentType: output.content_type,
       headers: {
-        'Content-Disposition': `inline; filename="${title || 'report'}.${exportType.jobContentExtension}"`
-      }
+        'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
+      },
     };
   }
 
-  function getFailure(output) {
+  function getFailure(output: any) {
     return {
       statusCode: 500,
       content: {
         message: 'Reporting generation failed',
-        reason: output.content
+        reason: output.content,
       },
-      contentType: 'application/json'
+      contentType: 'application/json',
     };
   }
 
-  function getIncomplete(status) {
+  function getIncomplete(status: any) {
     return {
       statusCode: 503,
       content: status,
       contentType: 'application/json',
       headers: {
-        'retry-after': 30
-      }
+        'retry-after': 30,
+      },
     };
   }
 
-  return function getDocumentPayload(doc) {
-    const { status, output, jobtype: jobType, payload: { title } = {} } = doc._source;
+  return function getDocumentPayload(doc: any) {
+    const { status, output, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
 
     if (status === 'completed') {
       return getCompleted(output, jobType, title);
@@ -69,4 +79,3 @@ function getDocumentPayloadFn(server) {
 }
 
 export const getDocumentPayloadFactory = oncePerServer(getDocumentPayloadFn);
-
