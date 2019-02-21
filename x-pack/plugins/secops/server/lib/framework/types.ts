@@ -120,7 +120,7 @@ export interface RequestBasicOptions {
 }
 
 export interface RequestOptions extends RequestBasicOptions {
-  pagination: PaginationInput;
+  pagination?: PaginationInput | null;
   fields: string[];
   sortField?: SortField;
 }

@@ -20,7 +20,7 @@ export type FieldNodes = Pick<GraphQLResolveInfo, 'fieldNodes'>;
 // and sortField won't be optional and might support multi-sort
 export interface Args {
   timerange?: TimerangeInput | null;
-  pagination: PaginationInput;
+  pagination?: PaginationInput | null;
   filterQuery?: string | null;
   sortField?: SortField | null;
 }

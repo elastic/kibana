@@ -9,48 +9,15 @@ import gql from 'graphql-tag';
 export const kpiNetworkQuery = gql`
   query GetKpiNetworkQuery(
     $sourceId: ID!
-    $type: KpiNetworkType!
     $timerange: TimerangeInput!
-    $pagination: PaginationInput!
     $filterQuery: String
   ) {
     source(id: $sourceId) {
       id
-      KpiNetwork(
-        type: $type
-        timerange: $timerange
-        pagination: $pagination
-        filterQuery: $filterQuery
-      ) {
-        totalCount
-        edges {
-          node {
-            source {
-              ip
-              domain
-            }
-            destination {
-              ip
-              domain
-            }
-            event {
-              duration
-            }
-            network {
-              bytes
-              packets
-            }
-          }
-          cursor {
-            value
-          }
-        }
-        pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
-        }
+      KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {
+        networkEvents
+        uniqueFlowId
+        activeAgents
       }
     }
   }

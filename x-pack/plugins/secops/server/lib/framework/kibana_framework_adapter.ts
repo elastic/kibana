@@ -43,14 +43,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     const internalRequest = req[internalFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
-    console.log('internalRequest-----------')
-    console.log(internalRequest)
-    console.log('endpoint-----------')
-    console.log(endpoint)
-    console.log('params-----------')
-    console.log(params)
-    console.log('callWithRequest------')
-    console.log(callWithRequest)
     const fields = await callWithRequest(internalRequest, endpoint, params, ...rest);
     return fields;
   }

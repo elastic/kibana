@@ -23,12 +23,12 @@ export const createKpiNetworkResolvers = (
   libs: KpiNetworkResolversDeps
 ): {
   Source: {
-    kpiNetwork: QueryKipNetWorkResolver;
+    KpiNetwork: QueryKipNetWorkResolver;
   };
 } => ({
   Source: {
-    async kpiNetwork(source, args, { req }, info) {
-      const options = { ...createOptions(source, args, info), kpiNetworkType: args.type };
+    async KpiNetwork(source, args, { req }, info) {
+      const options = { ...createOptions(source, args, info) };
       return libs.kpiNetwork.getKpiNetwork(req, options);
     },
   },

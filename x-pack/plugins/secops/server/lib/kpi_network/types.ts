@@ -17,7 +17,7 @@ export interface KpiNetworkHit extends SearchHit {
       value: number;
     };
     active_agents: {
-      value: number;
+      value: number | null;
     };
   };
 }

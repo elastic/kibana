@@ -1,5 +1,3 @@
-import { KpiNetworkData } from '../../server/graphql/types';
-
 /* tslint:disable */
 /*
      * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -43,12 +41,12 @@ export interface Source {
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
-
-  KpiNetwork: KpiNetworkData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: SayMyName | null;
+
+  KpiNetwork?: KpiNetworkData | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -335,54 +333,6 @@ export interface NetworkTopNFlowData {
   pageInfo: PageInfo;
 }
 
-export interface KpiNetworkData {
-  edges: KpiNetworkEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-}
-
-export interface KpiNetworkEdges {
-  node: KpiNetworkItem;
-
-  cursor: CursorType;
-}
-
-export interface KpiNetworkItem {
-  _id?: string | null;
-
-  source?: KpiNetworkSource | null;
-
-  destination?: KpiNetworkDestination | null;
-
-  event?: KpiNetworkEvent | null;
-
-  network?: KpiNetworkNetwork | null;
-}
-
-export interface KpiNetworkSource {
-  ip?: string | null;
-
-  domain?: string | null;
-}
-
-export interface KpiNetworkDestination {
-  ip?: string | null;
-
-  domain?: string | null;
-}
-
-export interface KpiNetworkEvent {
-  duration?: number | null;
-}
-
-export interface KpiNetworkNetwork {
-  bytes?: number | null;
-
-  packets?: number | null;
-}
-
 export interface NetworkTopNFlowEdges {
   node: NetworkTopNFlowItem;
 
@@ -476,6 +426,15 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface KpiNetworkData {
+  /** The id of the source */
+  networkEvents: number;
+
+  uniqueFlowId: number;
+
+  activeAgents?: number | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -557,6 +516,13 @@ export interface UncommonProcessesSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface IndexFieldsSourceStatusArgs {
   indexTypes?: IndexType[] | null;
 }
@@ -595,11 +561,6 @@ export enum NetworkDirectionEcs {
   internal = 'internal',
   external = 'external',
   unknown = 'unknown',
-}
-
-export enum KpiNetworkType {
-  source = 'source',
-  destination = 'destination',
 }
 
 // ====================================================
@@ -1123,13 +1084,10 @@ export namespace GetKpiEventsQuery {
   };
 }
 
-export namespace GetNetworkTopNFlowQuery {
+export namespace GetKpiNetworkQuery {
   export type Variables = {
     sourceId: string;
-    direction: NetworkTopNFlowDirection;
-    type: NetworkTopNFlowType;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
     filterQuery?: string | null;
   };
 
@@ -1144,116 +1102,24 @@ export namespace GetNetworkTopNFlowQuery {
 
     id: string;
 
-    NetworkTopNFlow: NetworkTopNFlow;
+    KpiNetwork?: KpiNetwork | null;
   };
 
-  export type NetworkTopNFlow = {
-    __typename?: 'NetworkTopNFlowData';
+  export type KpiNetwork = {
+    __typename?: 'kpiNetworkData';
 
-    totalCount: number;
+    networkEvents: number;
 
-    edges: Edges[];
+    uniqueFlowId: number;
 
-    pageInfo: PageInfo;
-  };
-
-  export type Edges = {
-    __typename?: 'NetworkTopNFlowEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'NetworkTopNFlowItem';
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    client?: Client | null;
-
-    server?: Server | null;
-
-    network?: Network | null;
-  };
-
-  export type _Source = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Destination = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Client = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Server = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Network = {
-    __typename?: 'NetworkEcsField';
-
-    bytes?: number | null;
-
-    direction?: NetworkDirectionEcs[] | null;
-
-    packets?: number | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: string;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfo';
-
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activeAgents?: number | null;
   };
 }
 
-export namespace GetKpiNetworkQuery {
+export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
-    type: KpiNetworkType;
+    type: NetworkTopNFlowType;
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;

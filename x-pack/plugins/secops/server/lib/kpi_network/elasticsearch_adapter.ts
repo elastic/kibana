@@ -27,7 +27,7 @@ export class ElasticsearchKpiNetworkAdapter implements KpiNetworkAdapter {
     return {
       networkEvents: getOr(0, 'hits.total.value', response),
       uniqueFlowId: getOr(0, 'aggregations.unique_flow_id.value', response),
-      activateAgents: getOr(0, 'aggregations.active_agents.value', response),
+      activeAgents: getOr(0, 'aggregations.active_agents.value', response),
     };
   }
 }

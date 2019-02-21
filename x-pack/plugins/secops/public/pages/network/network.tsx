@@ -12,13 +12,12 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { manageQuery } from '../../components/page/manage_query';
-import { NetworkTopNFlowTable } from '../../components/page/network';
+import { NetworkTopNFlowTable, KpiNetworkComponent } from '../../components/page/network';
 import { GlobalTime } from '../../containers/global_time';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType, NetworkTopNFlowType } from '../../graphql/types';
-import { KpiNetworkType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
 import { NetworkKql } from './kql';
@@ -48,22 +47,16 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                     <KpiNetworkQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      kpiNetworkType={KpiNetworkType.source}
                       poll={poll}
                       sourceId="default"
                       startDate={from}
-                      type={networkModel.NetworkType.page}
                     >
                       {({
-                        totalCount,
                         loading,
                         kpiNetwork,
-                        pageInfo,
-                        loadMore,
                         id,
-                        refetch,
                       }) => (
-                        <div>{`totalCount=${totalCount}, loading=${loading}, kpiNetwork=${kpiNetwork}`}</div>
+                        <KpiNetworkComponent data={kpiNetwork} loading={loading} />
                       )}
                     </KpiNetworkQuery>
                     <NetworkTopNFlowQuery
