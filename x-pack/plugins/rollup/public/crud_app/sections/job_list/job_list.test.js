@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-
-import { registerTestBed } from '../../../../common/lib';
+import { registerTestBed } from '../../../../__jest__/utils';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
@@ -32,7 +30,7 @@ const defaultProps = {
   isLoading: false
 };
 
-const initTestBed = registerTestBed(JobList, mountWithIntl, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(JobList, defaultProps, rollupJobsStore);
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
