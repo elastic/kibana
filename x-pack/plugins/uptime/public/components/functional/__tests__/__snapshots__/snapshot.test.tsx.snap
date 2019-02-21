@@ -222,6 +222,7 @@ exports[`Snapshot component renders without errors 1`] = `
             },
           ]
         }
+        successColor="#000000"
         windowWidth={1600}
       />
     </EuiPanel>
