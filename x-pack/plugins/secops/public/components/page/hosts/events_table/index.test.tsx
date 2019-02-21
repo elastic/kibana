@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
+import { cloneDeep, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -86,6 +86,18 @@ describe('Load More Events Table Component', () => {
 
       expect(wrapperSourceIp.text()).toBe(getEmptyValue());
       expect(wrapperHostName.text()).toBe(getEmptyValue());
+    });
+
+    test('formatSafely not happy with IP ranges that are of a particular size', () => {
+      const ecs = cloneDeep(mockData.Events.edges[0].node);
+      ecs.source!.ip = '255.255.255.255';
+      const wrapperSourceIp = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <p>{formatSafely('source.ip', ecs)}</p>
+        </ThemeProvider>
+      );
+
+      expect(wrapperSourceIp.text()).toBe('255.255.255.255');
     });
   });
 });

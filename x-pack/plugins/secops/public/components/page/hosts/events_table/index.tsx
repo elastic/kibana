@@ -200,7 +200,7 @@ export const formatSafely = (path: string, data: Ecs): JSX.Element => {
     if (txt === '') {
       return getEmptyStringTag();
     } else {
-      return txt && txt.slice ? <>{txt.slice(0, 12)}</> : <>{txt}</>;
+      return txt && txt.slice ? <>{txt.slice(0, 45)}</> : <>{txt}</>;
     }
   }
   return getEmptyTagValue();
