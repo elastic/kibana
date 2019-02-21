@@ -13,7 +13,7 @@ import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { ErrorToast } from '../components/error_toast';
 import { AppFrontendLibs } from '../lib/lib';
@@ -25,7 +25,7 @@ export const startApp = async (libs: AppFrontendLibs) => {
 
   libs.framework.render(
     <EuiErrorBoundary>
-      <I18nProvider>
+      <I18nContext>
         <ReduxStoreProvider store={store}>
           <ApolloProvider client={libs.apolloClient}>
             <ThemeProvider
@@ -39,7 +39,7 @@ export const startApp = async (libs: AppFrontendLibs) => {
             <ErrorToast />
           </ApolloProvider>
         </ReduxStoreProvider>
-      </I18nProvider>
+      </I18nContext>
     </EuiErrorBoundary>
   );
 };
