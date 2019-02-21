@@ -289,6 +289,7 @@
     "@types/listr": "^0.13.0",
     "@types/lodash": "^3.10.1",
     "@types/minimatch": "^2.0.29",
+    "@types/mocha": "^5.2.6",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
     "@types/node": "^10.12.12",
