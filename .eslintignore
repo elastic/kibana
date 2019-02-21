@@ -31,6 +31,6 @@ bower_components
 /x-pack/plugins/**/__tests__/fixtures/**
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /x-pack/plugins/canvas/canvas_plugin
-/x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
+/x-pack/plugins/canvas/public/lib/flot-charts
 **/*.js.snap
 !/.eslintrc.js
