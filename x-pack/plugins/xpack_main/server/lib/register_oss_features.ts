@@ -19,7 +19,7 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['search'],
+          all: ['search', 'url'],
           read: ['config', 'index-pattern'],
         },
         ui: ['show', 'save'],
@@ -27,7 +27,7 @@ const kibanaFeatures: Feature[] = [
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'search'],
+          read: ['config', 'index-pattern', 'search', 'url'],
         },
         ui: ['show'],
       },
