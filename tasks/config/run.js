@@ -179,8 +179,7 @@ module.exports = function (grunt) {
     },
 
     apiIntegrationTests: {
-      //cmd: process.execPath,
-      cmd: 'node_modules/.bin/ts-node',
+      cmd: process.execPath,
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
@@ -204,7 +203,8 @@ module.exports = function (grunt) {
     },
 
     pluginFunctionalTestsRelease: {
-      cmd: process.execPath,
+      // cmd: process.execPath,
+      cmd: 'node_modules/.bin/ts-node',
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
