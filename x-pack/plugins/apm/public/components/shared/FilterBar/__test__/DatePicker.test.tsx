@@ -10,8 +10,6 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 // @ts-ignore
 import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
-// @ts-ignore
-import { mockMoment } from 'x-pack/plugins/apm/public/utils/testHelpers';
 import { DatePicker } from '../DatePicker';
 
 function mountPicker(search?: string) {
@@ -30,14 +28,10 @@ function mountPicker(search?: string) {
   return { mounted, store };
 }
 
-async function wait(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 describe('DatePicker', () => {
   describe('date calculations', () => {
     const fakeNow = new Date('2019-02-15T12:00:00.000Z');
-    const realDateNow = global.Date.now;
+    const realDateNow = global.Date.now.bind(global.Date);
 
     beforeAll(() => {
       global.Date.now = jest.fn(() => fakeNow);
@@ -83,15 +77,23 @@ describe('DatePicker', () => {
   });
 
   describe('refresh cycle', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should refresh the store once per refresh interval', async () => {
       const { store } = mountPicker(
         'rangeFrom=now-15m&rangeTo=now&refreshPaused=false&refreshInterval=200'
       );
       const listener = jest.fn();
       store.subscribe(listener);
-      await wait(600);
-      // waiting for refreshes is slightly flaky so we can't be 100% sure about exact number of refreshes
-      expect(listener.mock.calls.length).toBeGreaterThan(1);
+      jest.advanceTimersByTime(1100);
+
+      expect(listener).toHaveBeenCalledTimes(5);
     });
 
     it('should not refresh when paused', async () => {
@@ -100,7 +102,7 @@ describe('DatePicker', () => {
       );
       const listener = jest.fn();
       store.subscribe(listener);
-      await wait(600);
+      jest.advanceTimersByTime(1100);
 
       expect(listener).not.toHaveBeenCalled();
     });
@@ -111,7 +113,7 @@ describe('DatePicker', () => {
       );
       const listener = jest.fn();
       store.subscribe(listener);
-      await wait(600);
+      jest.advanceTimersByTime(1100);
 
       expect(listener).not.toHaveBeenCalled();
     });
@@ -123,7 +125,7 @@ describe('DatePicker', () => {
       const listener = jest.fn();
       store.subscribe(listener);
       mounted.unmount();
-      await wait(600);
+      jest.advanceTimersByTime(1100);
 
       expect(listener).not.toHaveBeenCalled();
     });
