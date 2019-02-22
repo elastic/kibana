@@ -75,6 +75,7 @@ export const NodeContextMenu = injectUICapabilities(
               { nodeType }
             ),
             href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
+            'data-test-subj': 'viewApmTracesContextMenuItem',
           }
         : undefined;
 
@@ -91,7 +92,7 @@ export const NodeContextMenu = injectUICapabilities(
                       defaultMessage: 'View logs',
                     }),
                     href: nodeLogsUrl,
-                    'data-test-subj': 'viewLogsContentMenuItem',
+                    'data-test-subj': 'viewLogsContextMenuItem',
                   },
                 ]
               : []),

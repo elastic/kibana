@@ -60,7 +60,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`Shows link to view logs`, async () => {
         await testSubjects.click('nodeContainer');
-        await testSubjects.existOrFail('viewLogsContentMenuItem');
+        await testSubjects.existOrFail('viewLogsContextMenuItem');
       });
     });
 

@@ -30,7 +30,9 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
         {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
         {uiCapabilities.infrastructure.show && <Route path="/home" component={HomePage} />}
         <Route path="/link-to" component={LinkToPage} />
-        <Route path="/metrics/:type/:node" component={MetricDetail} />
+        {uiCapabilities.infrastructure.show && (
+          <Route path="/metrics/:type/:node" component={MetricDetail} />
+        )}
         <Route component={NotFoundPage} />
       </Switch>
     </Router>

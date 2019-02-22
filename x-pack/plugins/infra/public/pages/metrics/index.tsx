@@ -114,7 +114,7 @@ export const MetricDetail = withTheme(
                         <ColumnarPage>
                           <Header breadcrumbs={breadcrumbs} />
                           <WithMetricsTimeUrlState />
-                          <DetailPageContent>
+                          <DetailPageContent data-test-subj="infraMetricsPage">
                             <WithMetrics
                               layouts={filteredLayouts}
                               sourceId={sourceId}

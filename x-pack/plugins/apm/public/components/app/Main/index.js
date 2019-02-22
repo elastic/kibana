@@ -21,7 +21,7 @@ const MainContainer = styled.div`
 
 export default function Main() {
   return (
-    <MainContainer>
+    <MainContainer data-test-subj="apmMainContainer">
       <UpdateBreadcrumbs />
       <Route component={ConnectRouterToRedux} />
       <Route component={ScrollToTopOnPathChange} />

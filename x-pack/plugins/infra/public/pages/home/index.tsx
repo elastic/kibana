@@ -93,6 +93,7 @@ export const HomePage = injectUICapabilities(
                                 href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                                 color="primary"
                                 fill
+                                data-test-subj="infraViewSetupInstructionsButton"
                               >
                                 {intl.formatMessage({
                                   id:
@@ -105,7 +106,11 @@ export const HomePage = injectUICapabilities(
                               <EuiFlexItem>
                                 <WithSourceConfigurationFlyoutState>
                                   {({ enable }) => (
-                                    <EuiButton color="primary" onClick={enable}>
+                                    <EuiButton
+                                      color="primary"
+                                      onClick={enable}
+                                      data-test-subj="infraChangeSourceConfigurationButton"
+                                    >
                                       {intl.formatMessage({
                                         id: 'xpack.infra.configureSourceActionLabel',
                                         defaultMessage: 'Change source configuration',
