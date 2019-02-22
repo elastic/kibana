@@ -56,6 +56,8 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
 import { annotationsRefresh$ } from '../services/annotations_service';
+import { interval$ } from '../components/controls/select_interval/select_interval';
+import { severity$ } from '../components/controls/select_severity/select_severity';
 
 
 import chrome from 'ui/chrome';
@@ -77,14 +79,16 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlTimeSeriesExplorerController', function (
+  $injector,
   $scope,
   $timeout,
   Private,
   AppState,
   config,
-  mlSelectIntervalService,
-  mlSelectSeverityService,
   i18n) {
+
+  $injector.get('mlSelectIntervalService');
+  $injector.get('mlSelectSeverityService');
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -652,8 +656,8 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
   };
 
-  const intervalSub = mlSelectIntervalService.state.watch(tableControlsListener);
-  const severitySub = mlSelectSeverityService.state.watch(tableControlsListener);
+  const intervalSub = interval$.subscribe(tableControlsListener);
+  const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
@@ -773,8 +777,8 @@ module.controller('MlTimeSeriesExplorerController', function (
       [$scope.selectedJob.job_id],
       $scope.criteriaFields,
       [],
-      mlSelectIntervalService.state.get('interval').val,
-      mlSelectSeverityService.state.get('threshold').val,
+      interval$.getValue().val,
+      severity$.getValue().val,
       earliestMs,
       latestMs,
       dateFormatTz,
