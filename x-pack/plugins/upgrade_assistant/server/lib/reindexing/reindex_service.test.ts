@@ -534,10 +534,11 @@ describe('reindexService', () => {
             // Mock call to /_ml/set_upgrade_mode?enabled=true
             .mockResolvedValueOnce({ acknowledged: true });
 
-          const updatedOp = await service.processNextStep({
+          const mlReindexedOp = {
             id: '2',
             attributes: { ...reindexOp.attributes, indexName: '.reindexed-v7-ml-anomalies' },
-          });
+          } as ReindexSavedObject;
+          const updatedOp = await service.processNextStep(mlReindexedOp);
 
           expect(updatedOp.attributes.lastCompletedStep).toEqual(
             ReindexStep.indexGroupServicesStopped
