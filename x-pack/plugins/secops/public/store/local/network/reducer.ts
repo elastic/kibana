@@ -15,6 +15,7 @@ import {
   updateTopNFlowLimit,
   updateTopNFlowType,
 } from './actions';
+import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel } from './model';
 
 export type NetworkState = NetworkModel;
@@ -60,7 +61,10 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         ...state[networkType].queries,
         topNFlow: {
           ...state[networkType].queries!.topNFlow,
-          topNFlowDirection,
+          ...helperUpdateTopNFlowDirection(
+            state[networkType].queries!.topNFlow.topNFlowType,
+            topNFlowDirection
+          ),
         },
       },
     },
