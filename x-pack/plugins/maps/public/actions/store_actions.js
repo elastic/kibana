@@ -445,6 +445,7 @@ export function removeSelectedLayer() {
     const state = getState();
     const layerId = getSelectedLayerId(state);
     dispatch(removeLayer(layerId));
+    dispatch(setSelectedLayer(null));
   };
 }
 
