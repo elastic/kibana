@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import $ from 'jquery-flot'; // webpackShim
+import $ from 'plugins/xpack_main/jquery_flot';
 import { eventBus } from './event_bus';
 import { getChartOptions } from './get_chart_options';
 
