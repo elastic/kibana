@@ -59,14 +59,18 @@ describe('kuery node types', function () {
         expect(result).to.be('foo*bar');
       });
 
-      it('should escape query_string query special characters other than wildcard and backslash', function () {
+      it('should escape query_string query special characters other than wildcard and backslash followed by space', function () {
         const node = wildcard.buildNode('+foo*bar');
         const result = wildcard.toQueryStringQuery(node);
         expect(result).to.be('\\+foo*bar');
 
-        const backslashNode = wildcard.buildNode('+foo\bar');
+        const backslashNode = wildcard.buildNode('+foo\\bar');
         const backslashResult = wildcard.toQueryStringQuery(backslashNode);
-        expect(backslashResult).to.be('\\+foo\bar');
+        expect(backslashResult).to.be('\\+foo\\\\bar');
+
+        const backslashWithSpaceNode = wildcard.buildNode('+foo\\ bar');
+        const backslashWithSpaceResult = wildcard.toQueryStringQuery(backslashWithSpaceNode);
+        expect(backslashWithSpaceResult).to.be('\\+foo\\ bar');
       });
 
     });

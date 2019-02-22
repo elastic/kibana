@@ -28,7 +28,10 @@ function escapeRegExp(string) {
 
 // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
 function escapeQueryString(string) {
-  return string.replace(/[+-=&|><!(){}[\]^"~*?:/]/g, '\\$&'); // $& means the whole matched string
+  // We want to allow escaping spaces for the query_string query, which is why
+  // we only escape backslashes not followed by a space
+  return string.replace(/\\(?! )/g, '\\\\') // Only escape backslashes not followed by a space
+    .replace(/[+-=&|><!(){}[\]^"~*?:/]/g, '\\$&'); // $& means the whole matched string
 }
 
 export function buildNode(value) {
