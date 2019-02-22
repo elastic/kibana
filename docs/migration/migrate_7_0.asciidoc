@@ -7,34 +7,78 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
 
-* <<breaking_70_setting_changes>>
-* <<breaking_70_ems_changes>>
-
 See also <<release-highlights>> and <<release-notes>>.
 
-[float]
-=== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
-*Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
-should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies upon direct index privileges logs into Kibana, a deprecation warning is logged. If you are using the `kibana_user` or `kibana_dashboard_only_user` role to grant access to Kibana, or a custom role using <<kibana-privileges>>, no changes are required.
-
-*Impact:* You must change any roles which grant access to Kibana using index privileges to instead use <<kibana-privileges>>. Watcher jobs using the Reporting attachment type must be updated as well.
-
-[float]
-=== Removed support for tribe nodes
-*Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
-
-*Impact:* You must remove any tribe node configurations in Kibana. Consider using <<management-cross-cluster-search>> instead, which does not require kibana.yml configurations in Kibana.
-
+* <<breaking_70_api_changes>>
+* <<breaking_70_browser_support_changes>>
+* <<breaking_70_ems_changes>>
+* <<breaking_70_packaging_changes>>
+* <<breaking_70_plugin_changes>>
+* <<breaking_70_security_changes>>
+* <<breaking_70_setting_changes>>
+* <<breaking_70_advanced_settings_changes>>
+* <<breaking_70_UI_changes>>
 
 [float]
-=== Removed support for running Kibana with a global Node.js installation
-*Details:* Previous versions of Kibana would fallback to using a global installation of Node.js if the distribution included with Kibana was not found.
-Kibana 7.0 will only use the Node.js distribution included in the package.
-
-*Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
+[[breaking_70_api_changes]]
+=== API changes
 
 [float]
-=== Removed support for using PhantomJS browser for screenshots in Reporting
+==== Deprecated API `/shorten` has been removed
+*Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
+
+*Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
+
+[float]
+==== Saved object structure change
+*Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
+
+Example structure before:
+[source,js]
+--------------------------------------------------
+{
+  ...
+  "attributes": {
+    ...
+    "panelsJSON": [{
+      ...
+      "type": "visualization",
+      "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
+    }]
+  }
+}
+--------------------------------------------------
+
+
+Example structure after:
+[source,js]
+--------------------------------------------------
+{
+  ...
+  "attributes": {
+    ...
+    "panelsJSON": [{
+      ...
+      "panelRefName": "panel_0"
+    }]
+  },
+  "references": [{
+    "name": "panel_0",
+    "type": "visualization",
+    "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
+  }]
+}
+--------------------------------------------------
+
+
+*Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
+
+[float]
+[[breaking_70_browser_support_changes]]
+=== Browser support changes
+
+[float]
+==== Removed support for using PhantomJS browser for screenshots in Reporting
 *Details:* Since the first release of Kibana Reporting, PhantomJS was used as
 the headless browser to capture screenshots of Kibana dashboards and
 visualizations. In that short time, Chromium has started offering a new
@@ -57,43 +101,9 @@ RHEL 6 must upgrade to RHEL 7 to use Kibana Reporting starting with version
 7.0.0 of the Elastic stack.
 ============
 
-[float]
-=== Advanced setting query:queryString:options no longer applies to filters
-*Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
-and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
-conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
-users can have full control over their custom filters.
-
-*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on
-`query:queryString:options`.
 
 [float]
-=== Advanced setting query:queryString:options no longer applies `default_field: *` by default.
-*Details:* Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
-up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
-inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
-to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
-so we no longer need this workaround.
-
-*Impact:* Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
-will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
-If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
-to Kibana's advanced setting.
-
-[float]
-=== Deprecated API `/shorten` has been removed
-*Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
-
-*Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
-
-[float]
-=== Optimization step deferred until server start
-*Details:* Prior versions of Kibana would run the optimization step after each plugin installation.  This is now run on server start when necessary.
-
-*Impact:* Users can trigger a standalone optimization after all plugins have been installed with `bin/kibana --optimize` or let the server manage it on startup.
-
-[float]
-=== Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
+==== Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
 *Details:* Kibana now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
 browsers like Internet Explorer 11 do not support CSP, we show them a warning message whenever they load Kibana.
 
@@ -101,49 +111,76 @@ browsers like Internet Explorer 11 do not support CSP, we show them a warning me
 that you set `csp.strict: true` in your kibana.yml to block access to those browsers entirely. If your organization requires
 users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your kibana.yml.
 
+
 [float]
-=== Saved object structure change
-*Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
+[[breaking_70_ems_changes]]
+=== Elastic Maps Service changes
 
-Example structure before:
-```
-{
-  ...
-  "attributes": {
-    ...
-    "panelsJSON": [{
-      ...
-      "type": "visualization",
-      "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
-    }]
-  }
-}
-```
+[float]
+==== Removed overseas territories from France Departments vector layer
 
-Example structure after:
-```
-{
-  ...
-  "attributes": {
-    ...
-    "panelsJSON": [{
-      ...
-      "panelRefName": "panel_0"
-    }]
-  },
-  "references": [{
-    "name": "panel_0",
-    "type": "visualization",
-    "id": "dbf71bb0-ffad-11e8-acfd-d359b3d9069"
-  }]
-}
-```
+*Details:* Overseas territories in the France Departments vector layer have 
+been removed. These territories have no ISO 3166-2 or INSEE codes to join to 
+{es} data.
 
-*Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the France 
+Departments layer will not show overseas territories. 
+
+[float]
+==== USA Zip Codes vector layer updated with latest US Census data
+
+*Details:* The USA Zip Codes layer has been updated based on the 
+https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation 
+Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been 
+generalized from the source data for visualization and locations are approximate.
+
+*Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip 
+Codes layer will appear differently. ZCTA boundaries have changed dramatically 
+in some areas. Also, some zip codes have been deprecated and new ones have been added.
+
+[float]
+[[breaking_70_packaging_changes]]
+=== Packaging changes
+
+[float]
+==== Removed support for running Kibana with a global Node.js installation
+*Details:* Previous versions of Kibana would fallback to using a global installation of Node.js if the distribution included with Kibana was not found.
+Kibana 7.0 will only use the Node.js distribution included in the package.
+
+*Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
+
+[float]
+[[breaking_70_plugin_changes]]
+=== Plugin changes
+
+[float]
+==== Optimization step deferred until server start
+*Details:* Prior versions of Kibana would run the optimization step after each plugin installation.  This is now run on server start when necessary.
+
+*Impact:* Users can trigger a standalone optimization after all plugins have been installed with `bin/kibana --optimize` or let the server manage it on startup.
+
+[float]
+[[breaking_70_security_changes]]
+=== Security changes
+
+[float]
+==== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
+*Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies upon direct index privileges logs into Kibana, a deprecation warning is logged. If you are using the `kibana_user` or `kibana_dashboard_only_user` role to grant access to Kibana, or a custom role using <<kibana-privileges>>, no changes are required.
+
+*Impact:* You must change any roles which grant access to Kibana using index privileges to instead use <<kibana-privileges>>. Watcher jobs using the Reporting attachment type must be updated as well.
+
 
 [float]
 [[breaking_70_setting_changes]]
 === Settings changes
+
+[float]
+==== Removed support for tribe nodes
+*Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
+
+*Impact:* You must remove any tribe node configurations in Kibana. Consider using <<management-cross-cluster-search>> instead, which does not require kibana.yml configurations in Kibana.
+
 
 [float]
 ==== `elasticsearch.ssl.ca` is no longer valid
@@ -398,7 +435,60 @@ to accurately reflect their content, from `management/kibana/index` or
 *Impact:* References to these URLs will need to be updated.
 
 [float]
-=== Removed support for deeply nested table splits in data table visualizations
+[[breaking_70_advanced_settings_changes]]
+=== Advanced settings changes
+
+
+[float]
+==== Advanced setting query:queryString:options no longer applies to filters
+*Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
+and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
+conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
+users can have full control over their custom filters.
+
+*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on
+`query:queryString:options`.
+
+[float]
+==== Advanced setting query:queryString:options no longer applies `default_field: *` by default.
+*Details:* Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
+up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
+inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
+to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
+so we no longer need this workaround.
+
+*Impact:* Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
+will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
+If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
+to Kibana's advanced setting.
+
+[float]
+[[breaking_70_UI_changes]]
+=== UI changes
+
+[float]
+==== Dark mode is now global
+*Details:* Both the Dashboard and Maps applications offer "Dark Mode" options which have been removed in favor of a global dark mode advanced setting. This means that instead of having to turn on dark mode in many places, users can choose to turn on the `theme:darkMode` advanced setting and it will apply to all applications.
+
+*Impact:* The dark mode setting for Dashboards and Maps will be ignored and the global setting will be used instead.
+
+
+[float]
+==== KQL is now the default query language in the global search bar
+*Details:* Language enhancements that were introduced in 6.3 on an opt-in basis are now turned on by default. This
+is considered a breaking change because the enhancements include a simplifed syntax that has some small incompatibilities
+with the old Lucene syntax. 
+
+*Impact:* Users simply need to familiarize themselves with the new syntax. Existing saved searches, visualizations, and dashboards
+that use the old Lucene syntax will continue to work, but users should consider migrating them to KQL to enjoy the other benefits
+that come along with it. For the time being, individual users can still opt-out of KQL under the options menu in the query bar
+and admins can still change the global default using the `search:queryLanguage` advanced setting.
+
+
+
+
+[float]
+==== Removed support for deeply nested table splits in data table visualizations
 *Details:* Previously a user was able to create multiple "split table" aggregations in one table on arbitrary levels.
 The potential for deeply nested tables posed maintenance and accessibility challenges, and was inconsistent with other
 visualizations that only allow one table split. This change does not limit the number of split rows a user can put into
@@ -410,19 +500,11 @@ should be required as a result of this change, but be aware that users with save
 multiple split tables will now see those tables rendered differently.
 
 [float]
-[[breaking_70_ems_changes]]
-=== Elastic Maps Service changes
+==== Imported Kibana dashboards might require small grid layout adjustments due to design changes
+*Details:* Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
 
-[float]
-==== Removed overseas territories from France Departments vector layer
+*Impact:* Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
 
-*Details:* Overseas territories in the France Departments vector layer have been removed. These territories have no ISO 3166-2 or INSEE codes to join to Elasticsearch data.
 
-*Impact:* Region Map, Vega, and Maps plugin visualizations using the France Departments layer will not show overseas territories. 
 
-[float]
-==== USA Zip Codes vector layer updated with latest US Census data
 
-*Details:* The USA Zip Codes layer has been updated based on the https://www.census.gov/geo/reference/zctas.html[2018 Zip Code Tabulation Areas (ZCTAs)] distributed by the US Census Bureau. ZCTA boundaries have been generalized from the source data for visualization and locations are approximate.
-
-*Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip Codes layer will appear differently. ZCTA boundaries have changed dramatically in some areas. Also, some zip codes have been deprecated and new ones have been added.
