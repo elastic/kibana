@@ -113,9 +113,9 @@ describe('DashboardState', function () {
       initDashboardState();
     });
 
-    function simulateNewEmbeddableWithIndexPattern({ panelId, indexPattern }) {
+    function simulateNewEmbeddableWithIndexPatterns({ panelId, indexPatterns }) {
       store.dispatch(setPanels({ [panelId]: { panelIndex: panelId } }));
-      const metadata = { title: 'my embeddable title', editUrl: 'editme', indexPattern };
+      const metadata = { title: 'my embeddable title', editUrl: 'editme', indexPatterns };
       store.dispatch(embeddableIsInitialized({ metadata, panelId: panelId }));
     }
 
@@ -124,19 +124,19 @@ describe('DashboardState', function () {
     });
 
     test('registers index pattern when an embeddable is initialized with one', async () => {
-      simulateNewEmbeddableWithIndexPattern({ panelId: 'foo1', indexPattern: mockIndexPattern });
+      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo1', indexPatterns: [mockIndexPattern] });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });
 
     test('registers unique index patterns', async () => {
-      simulateNewEmbeddableWithIndexPattern({ panelId: 'foo2', indexPattern: mockIndexPattern });
+      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo2', indexPatterns: [mockIndexPattern] });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });
 
     test('does not register undefined index pattern for panels with no index pattern', async () => {
-      simulateNewEmbeddableWithIndexPattern({ panelId: 'foo2' });
+      simulateNewEmbeddableWithIndexPatterns({ panelId: 'foo2' });
       await new Promise(resolve => process.nextTick(resolve));
       expect(dashboardState.getPanelIndexPatterns().length).toBe(1);
     });
