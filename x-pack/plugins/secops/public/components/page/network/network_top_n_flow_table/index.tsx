@@ -165,7 +165,7 @@ const getNetworkTopNFlowColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: domainAttr,
+                field: sourceIpAttr,
                 value: ip,
               },
               queryDate: {
@@ -213,7 +213,7 @@ const getNetworkTopNFlowColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: sourceIpAttr,
+                field: domainAttr,
                 value: domain,
               },
               queryDate: {
