@@ -38,7 +38,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_infrastructure_all_user',
@@ -53,7 +53,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
           security.user.delete('global_infrastructure_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -143,7 +143,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_infrastructure_read_user',
@@ -158,7 +158,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
           security.user.delete('global_infrastructure_read_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 

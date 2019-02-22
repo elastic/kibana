@@ -37,7 +37,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_logs_all_user', 'global_logs_all_user-password', {
           expectSpaceSelector: false,
@@ -48,7 +48,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_logs_all_role'),
           security.user.delete('global_logs_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -94,7 +94,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_logs_read_user',
@@ -109,7 +109,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_logs_read_role'),
           security.user.delete('global_logs_read_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -155,7 +155,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_logs_no_privileges_user',
@@ -170,7 +170,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_logs_no_privileges_role'),
           security.user.delete('global_logs_no_privileges_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
