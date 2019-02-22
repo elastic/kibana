@@ -67,6 +67,7 @@ import { awsMetricsSpecProvider } from './aws_metrics';
 import { mssqlMetricsSpecProvider } from './mssql_metrics';
 import { natsMetricsSpecProvider } from './nats_metrics';
 import { natsLogsSpecProvider } from './nats_logs';
+import { zeekLogsSpecProvider } from './zeek_logs';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -119,4 +120,5 @@ export function registerTutorials(server) {
   server.registerTutorial(mssqlMetricsSpecProvider);
   server.registerTutorial(natsMetricsSpecProvider);
   server.registerTutorial(natsLogsSpecProvider);
+  server.registerTutorial(zeekLogsSpecProvider);
 }
