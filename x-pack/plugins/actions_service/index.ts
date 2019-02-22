@@ -59,7 +59,7 @@ export const actionsService = (kibana: any) => {
         }
       };
 
-      const instance = async (instDef: ActionInstance) => {
+      const instance = async <T>(instDef: ActionInstance<T>) => {
         const { name, actionType, connectorType, params, connectorParams } = instDef;
         const saved = await so.create(
           'actionConfiguration',
@@ -123,8 +123,10 @@ export const actionsService = (kibana: any) => {
       };
 
       server.expose('actions', {
-        registrar,
+        registerActionType,
+        registerConnector,
         instance,
+        fire,
       });
 
       registerActionType({
