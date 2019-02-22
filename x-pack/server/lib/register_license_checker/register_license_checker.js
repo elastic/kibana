@@ -7,7 +7,7 @@
 import { mirrorPluginStatus } from '../mirror_plugin_status';
 import { checkLicense } from '../check_license';
 
-export function registerLicenseChecker(server, pluginId, validLicenseModes) {
+export function registerLicenseChecker(server, pluginId, pluginName, minimumLicenseRequired) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const thisPlugin = server.plugins[pluginId];
 
@@ -16,7 +16,7 @@ export function registerLicenseChecker(server, pluginId, validLicenseModes) {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
     xpackMainPlugin.info.feature(pluginId).registerLicenseCheckResultsGenerator((xpackLicenseInfo) => {
-      return checkLicense(pluginId, validLicenseModes, xpackLicenseInfo);
+      return checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo);
     });
   });
 }

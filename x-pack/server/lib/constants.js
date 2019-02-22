@@ -6,3 +6,16 @@
 
 export const XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING = 'xPack:defaultAdminEmail';
 export const XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS = 30001; // 30 seconds
+export const RANKED_LICENSE_TYPES = [
+  'basic',
+  'standard',
+  'gold',
+  'platinum',
+  'trial',
+];
+export const LICENSE_STATUS = {
+  UNAVAILABLE: 'UNAVAILABLE',
+  INVALID: 'INVALID',
+  INACTIVE: 'INACTIVE',
+  VALID: 'VALID',
+};

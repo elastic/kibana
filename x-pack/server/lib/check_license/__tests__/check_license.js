@@ -10,6 +10,8 @@ import { checkLicense } from '../check_license';
 
 describe('check_license', function () {
 
+  const pluginName = 'Foo';
+  const minimumLicenseRequired = 'basic';
   let mockLicenseInfo;
   beforeEach(() => mockLicenseInfo = {});
 
@@ -17,19 +19,15 @@ describe('check_license', function () {
     beforeEach(() => mockLicenseInfo = undefined);
 
     it('should set isAvailable to false', () => {
-      expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).isAvailable).to.be(false);
     });
 
-    it('should set showLinks to true', () => {
-      expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
-    });
-
-    it('should set enableLinks to false', () => {
-      expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
+    it('should set status to unavailable', () => {
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).to.be('UNAVAILABLE');
     });
 
     it('should set a message', () => {
-      expect(checkLicense(mockLicenseInfo).message).to.not.be(undefined);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).to.not.be(undefined);
     });
   });
 
@@ -37,19 +35,15 @@ describe('check_license', function () {
     beforeEach(() => mockLicenseInfo.isAvailable = () => false);
 
     it('should set isAvailable to false', () => {
-      expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).isAvailable).to.be(false);
     });
 
-    it('should set showLinks to true', () => {
-      expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
-    });
-
-    it('should set enableLinks to false', () => {
-      expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
+    it('should set status to unavailable', () => {
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).to.be('UNAVAILABLE');
     });
 
     it('should set a message', () => {
-      expect(checkLicense(mockLicenseInfo).message).to.not.be(undefined);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).to.not.be(undefined);
     });
   });
 
@@ -66,19 +60,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
         it('should set isAvailable to true', () => {
-          expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).isAvailable).to.be(true);
         });
 
-        it ('should set showLinks to true', () => {
-          expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
-        });
-
-        it ('should set enableLinks to true', () => {
-          expect(checkLicense(mockLicenseInfo).enableLinks).to.be(true);
+        it('should set status to valid', () => {
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).to.be('VALID');
         });
 
         it('should not set a message', () => {
-          expect(checkLicense(mockLicenseInfo).message).to.be(undefined);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).to.be(undefined);
         });
       });
 
@@ -86,19 +76,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
         it('should set isAvailable to false', () => {
-          expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).isAvailable).to.be(false);
         });
 
-        it ('should set showLinks to true', () => {
-          expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
-        });
-
-        it ('should set enableLinks to false', () => {
-          expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
+        it('should set status to inactive', () => {
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).to.be('INACTIVE');
         });
 
         it('should set a message', () => {
-          expect(checkLicense(mockLicenseInfo).message).to.not.be(undefined);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).to.not.be(undefined);
         });
       });
     });
@@ -110,19 +96,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
         it('should set isAvailable to true', () => {
-          expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).isAvailable).to.be(true);
         });
 
-        it ('should set showLinks to true', () => {
-          expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
-        });
-
-        it ('should set enableLinks to true', () => {
-          expect(checkLicense(mockLicenseInfo).enableLinks).to.be(true);
+        it('should set status to valid', () => {
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).to.be('VALID');
         });
 
         it('should not set a message', () => {
-          expect(checkLicense(mockLicenseInfo).message).to.be(undefined);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).to.be(undefined);
         });
       });
 
@@ -130,15 +112,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
         it('should set isAvailable to false', () => {
-          expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).isAvailable).to.be(false);
         });
 
-        it ('should set showLinks to true', () => {
-          expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
+        it('should set status to inactive', () => {
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).to.be('INACTIVE');
         });
 
         it('should set a message', () => {
-          expect(checkLicense(mockLicenseInfo).message).to.not.be(undefined);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).to.not.be(undefined);
         });
       });
     });

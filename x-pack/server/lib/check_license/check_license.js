@@ -4,28 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function checkLicense(pluginId, validLicenseModes = [], xpackLicenseInfo) {
+import { RANKED_LICENSE_TYPES, LICENSE_STATUS } from '../constants';
+
+export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo) {
+  if(!RANKED_LICENSE_TYPES.includes(minimumLicenseRequired)) {
+    throw new Error(`Invalid license type supplied to checkLicense: ${minimumLicenseRequired}`);
+  }
+
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable
   if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
     return {
       isAvailable: false,
-      showLinks: true,
-      enableLinks: false,
-      message: `You cannot use ${pluginId} because license information is not available at this time.`
+      status: LICENSE_STATUS.UNAVAILABLE,
+      message: `You cannot use ${pluginName} because license information is not available at this time.`
     };
   }
 
-  const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(validLicenseModes);
-  const isLicenseActive = xpackLicenseInfo.license.isActive();
-  const licenseType = xpackLicenseInfo.license.getType();
+  const { license } = xpackLicenseInfo;
+  const isLicenseModeValid = license.isOneOf([...RANKED_LICENSE_TYPES].splice(RANKED_LICENSE_TYPES.indexOf(minimumLicenseRequired)));
+  const isLicenseActive = license.isActive();
+  const licenseType = license.getType();
 
   // License is not valid
   if (!isLicenseModeValid) {
     return {
       isAvailable: false,
-      showLinks: false,
-      message: `Your ${licenseType} license does not support ${pluginId}. Please upgrade your license.`
+      status: LICENSE_STATUS.INVALID,
+      message: `Your ${licenseType} license does not support ${pluginName}. Please upgrade your license.`
     };
   }
 
@@ -33,16 +39,14 @@ export function checkLicense(pluginId, validLicenseModes = [], xpackLicenseInfo)
   if (!isLicenseActive) {
     return {
       isAvailable: false,
-      showLinks: true,
-      enableLinks: false,
-      message: `You cannot use ${pluginId} because your ${licenseType} license has expired.`
+      status: LICENSE_STATUS.INACTIVE,
+      message: `You cannot use ${pluginName} because your ${licenseType} license has expired.`
     };
   }
 
   // License is valid and active
   return {
     isAvailable: true,
-    showLinks: true,
-    enableLinks: true
+    status: LICENSE_STATUS.VALID,
   };
 }

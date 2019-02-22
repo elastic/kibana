@@ -6,11 +6,6 @@
 
 export const PLUGIN = {
   ID: 'license_management',
-  VALID_LICENSE_MODES: [
-    'trial',
-    'basic',
-    'standard',
-    'gold',
-    'platinum'
-  ],
+  NAME: 'License Management',
+  MINIMUM_LICENSE_REQUIRED: 'basic',
 };

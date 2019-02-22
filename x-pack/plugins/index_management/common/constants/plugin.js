@@ -6,11 +6,6 @@
 
 export const PLUGIN = {
   ID: 'index_management',
-  VALID_LICENSE_MODES: [
-    'trial',
-    'basic',
-    'standard',
-    'gold',
-    'platinum'
-  ],
+  NAME: 'Index Management',
+  MINIMUM_LICENSE_REQUIRED: 'basic',
 };
