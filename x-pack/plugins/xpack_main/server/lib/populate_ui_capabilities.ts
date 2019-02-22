@@ -45,10 +45,6 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
   }
 
   Object.values(feature.privileges).forEach(privilege => {
-    if (!privilege) {
-      return;
-    }
-
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
       ...privilege.ui.reduce(
