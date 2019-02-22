@@ -17,12 +17,21 @@
  * under the License.
  */
 
-require('angular');
-require('ui/angular-bootstrap');
-var uiModules = require('ui/modules').uiModules;
+import path from 'path';
 
-var kibana = uiModules.get('kibana', ['ui.bootstrap']);
+export function notInNodeModules(checkPath) {
+  return !checkPath.includes(`${path.sep}node_modules${path.sep}`);
+}
 
-module.exports = kibana.config(function ($tooltipProvider) {
-  $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
-});
+export function notInNodeModulesOrWebpackShims(checkPath) {
+  return notInNodeModules(checkPath)
+    && !checkPath.includes(`${path.sep}webpackShims${path.sep}`);
+}
+
+export function inPluginNodeModules(checkPath) {
+  return checkPath.match(/[\/\\]plugins.*[\/\\]node_modules/);
+}
+
+export function inDllPluginPublic(checkPath) {
+  return checkPath.includes(`${path.sep}dynamic_dll_plugin/public${path.sep}`);
+}
