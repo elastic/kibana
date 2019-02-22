@@ -83,6 +83,7 @@ export const monitorsSchema = gql`
     count: Int
     statusCode: String
     timestamp: String
+    name: String
   }
 
   type MonitorPageTitle {

@@ -478,6 +478,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
           const timestamp = get(source, '@timestamp', null);
+          const name = get(source, 'monitor.name', null);
           errorsList.push({
             latestMessage: errorMessage,
             monitorId,
@@ -485,6 +486,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             count,
             statusCode,
             timestamp,
+            name,
           });
         });
       }

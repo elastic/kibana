@@ -414,6 +414,8 @@ export interface ErrorListItem {
   statusCode?: string | null;
 
   timestamp?: string | null;
+
+  name?: string | null;
 }
 
 export interface MonitorPageTitle {

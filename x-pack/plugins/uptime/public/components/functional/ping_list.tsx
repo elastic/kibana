@@ -37,9 +37,7 @@ interface PingListProps {
 
 export const PingList = ({
   loading,
-  maxSearchSize,
   pingResults,
-  searchSizeOnBlur,
   selectedOption,
   selectedOptionChanged,
   statusOptions,

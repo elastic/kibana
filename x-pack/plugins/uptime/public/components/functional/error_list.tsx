@@ -65,7 +65,9 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
             defaultMessage: 'Monitor ID',
           }),
-          render: (id: string) => <Link to={`/monitor/${id}`}>{id}</Link>,
+          render: (id: string, { name }: ErrorListItem) => (
+            <Link to={`/monitor/${id}`}>{name || id}</Link>
+          ),
           width: '25%',
         },
         {
