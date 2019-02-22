@@ -21785,11 +21785,6 @@ uglifyjs-webpack-plugin@^1.2.4:
     webpack-sources "^1.1.0"
     worker-farm "^1.5.2"
 
-ui-select@0.19.4:
-  version "0.19.4"
-  resolved "https://registry.yarnpkg.com/ui-select/-/ui-select-0.19.4.tgz#f5702c90cd91eca094202188a7fdbc9483e58797"
-  integrity sha1-9XAskM2R7KCUICGIp/28lIPlh5c=
-
 ui-select@0.19.6:
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/ui-select/-/ui-select-0.19.6.tgz#9a824ec9d5b04c3fdc7483fa4746dd3c528d87ab"
