@@ -19,8 +19,8 @@ const layerListJSON = {
     withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${ES_GEO_GRID}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
   },
   join: {
-    withIndexPatternId: '[{\"sourceDescriptor\":{\"joins\":[{\"right\":{\"indexPatternId\":\"e20b2a30-f735-11e8-8ce0-9723965e01e3\"}}]}}]',
-    withIndexPatternRef: '[{\"sourceDescriptor\":{\"joins\":[{\"right\":{\"indexPatternRefName\":\"layer_0_join_0_index_pattern\"}}]}}]',
+    withIndexPatternId: '[{\"joins\":[{\"right\":{\"indexPatternId\":\"e20b2a30-f735-11e8-8ce0-9723965e01e3\"}}]}]',
+    withIndexPatternRef: '[{\"joins\":[{\"right\":{\"indexPatternRefName\":\"layer_0_join_0_index_pattern\"}}]}]',
   }
 };
 

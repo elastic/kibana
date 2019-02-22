@@ -37,7 +37,7 @@ export function extractReferences({ attributes, references = [] }) {
     }
 
     // Extract index-pattern references from join
-    const joins = _.get(layer, 'sourceDescriptor.joins', []);
+    const joins = _.get(layer, 'joins', []);
     joins.forEach((join, joinIndex) => {
       if (_.has(join, 'right.indexPatternId')) {
         const refName = `layer_${layerIndex}_join_${joinIndex}_index_pattern`;
@@ -85,7 +85,7 @@ export function injectReferences({ attributes, references }) {
     }
 
     // Inject index-pattern references into join
-    const joins = _.get(layer, 'sourceDescriptor.joins', []);
+    const joins = _.get(layer, 'joins', []);
     joins.forEach((join) => {
       if (_.has(join, 'right.indexPatternRefName')) {
         const reference = findReference(join.right.indexPatternRefName, references);
