@@ -203,8 +203,7 @@ module.exports = function (grunt) {
     },
 
     pluginFunctionalTestsRelease: {
-      // cmd: process.execPath,
-      cmd: 'node_modules/.bin/ts-node',
+      cmd: process.execPath,
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
