@@ -119,7 +119,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.10.2",
+    "@elastic/eui": "6.10.3",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
@@ -229,6 +229,7 @@
     "react-datetime": "^2.14.0",
     "react-dom": "^16.6.0",
     "react-dropzone": "^4.2.9",
+    "react-fast-compare": "^2.0.4",
     "react-markdown-renderer": "^1.4.0",
     "react-portal": "^3.2.0",
     "react-redux": "^5.0.7",

@@ -7,6 +7,7 @@
 
 import { ESJoinSource } from '../sources/es_join_source';
 import { VectorStyle } from '../styles/vector_style';
+import { filterPropertiesForTooltip } from '../util';
 
 export class LeftInnerJoin {
 
@@ -46,12 +47,12 @@ export class LeftInnerJoin {
   }
 
   joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this.getJoinFields();
+    const joinFields = this._rightSource.getMetricFields();
     featureCollection.features.forEach(feature => {
       // Clean up old join property values
-      joinFields.forEach(({ name }) => {
-        delete feature.properties[name];
-        const stylePropertyName = VectorStyle.getComputedFieldName(name);
+      joinFields.forEach(({ propertyKey }) => {
+        delete feature.properties[propertyKey];
+        const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
         delete feature.properties[stylePropertyName];
       });
 
@@ -78,19 +79,9 @@ export class LeftInnerJoin {
   }
 
   filterAndFormatPropertiesForTooltip(properties) {
-    const joinFields = this.getJoinFields();
-    const tooltipProps = {};
-    joinFields.forEach((joinField) => {
-      for (const key in properties) {
-        if (properties.hasOwnProperty(key)) {
-          if (joinField.name === key) {
-            tooltipProps[joinField.label] = properties[key];
-          }
-        }
-      }
-    });
+    const metricFields = this._rightSource.getMetricFields();
+    return filterPropertiesForTooltip(metricFields, properties);
 
-    return tooltipProps;
   }
 
   getIndexPatternIds() {
