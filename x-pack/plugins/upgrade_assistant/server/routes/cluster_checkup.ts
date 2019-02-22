@@ -8,6 +8,7 @@ import Boom from 'boom';
 import { Legacy } from 'kibana';
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
+import { EsVersionPrecheck } from '../lib/es_version_precheck';
 
 export function registerClusterCheckupRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
@@ -16,6 +17,9 @@ export function registerClusterCheckupRoutes(server: Legacy.Server) {
   server.route({
     path: '/api/upgrade_assistant/status',
     method: 'GET',
+    options: {
+      pre: [EsVersionPrecheck],
+    },
     async handler(request) {
       try {
         return await getUpgradeAssistantStatus(callWithRequest, request, isCloudEnabled);
