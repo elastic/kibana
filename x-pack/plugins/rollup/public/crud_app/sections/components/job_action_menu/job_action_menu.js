@@ -257,7 +257,11 @@ class JobActionMenuUi extends Component {
           anchorPosition={anchorPosition}
           repositionOnScroll
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
+          <EuiContextMenu
+            data-test-subj="jobActionContextMenu"
+            initialPanelId={0}
+            panels={panels}
+          />
         </EuiPopover>
       </div>
     );
