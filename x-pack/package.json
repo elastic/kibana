@@ -279,7 +279,7 @@
     "turf": "3.0.14",
     "typescript-fsa": "^2.5.0",
     "typescript-fsa-reducers": "^0.4.5",
-    "ui-select": "0.19.4",
+    "ui-select": "0.19.6",
     "unbzip2-stream": "1.0.9",
     "unstated": "^2.1.1",
     "uuid": "3.0.1",
