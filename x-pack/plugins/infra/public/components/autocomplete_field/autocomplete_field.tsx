@@ -86,7 +86,9 @@ export class AutocompleteField extends React.Component<
   }
 
   public componentDidMount() {
-    this.inputElement.focus();
+    if (this.inputElement) {
+      this.inputElement.focus();
+    }
   }
 
   public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
