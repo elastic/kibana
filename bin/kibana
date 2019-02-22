@@ -14,8 +14,6 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-echo "***********"
-echo "${DIR}"
 NODE="${DIR}/node/bin/node"
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
