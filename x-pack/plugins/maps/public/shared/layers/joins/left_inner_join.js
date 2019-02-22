@@ -59,10 +59,6 @@ export class LeftInnerJoin {
       const joinKey = feature.properties[this._descriptor.leftField];
       if (propertiesMap.has(joinKey)) {
         Object.assign(feature.properties,  propertiesMap.get(joinKey));
-        // feature.properties = {
-        //   ...feature.properties,
-        //   ...propertiesMap.get(joinKey),
-        // };
       }
     });
 
@@ -70,7 +66,6 @@ export class LeftInnerJoin {
     //We use a reference check to determine whether the feature collection has changed and needs to be updated on the mapbox-gl source.
     //We need to update because mapbox creates copies of the property object, that it then dispatches on tooltip-events.
     return { ...featureCollection };
-    // window._fcAfterJoin = featureCollection;
   }
 
   getJoinSource() {
