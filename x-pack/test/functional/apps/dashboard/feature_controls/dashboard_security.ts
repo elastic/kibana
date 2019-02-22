@@ -231,7 +231,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -305,7 +305,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 20000);
+        await testSubjects.existOrFail('homeApp', 10000);
       });
 
       it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
