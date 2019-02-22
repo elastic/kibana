@@ -26,7 +26,7 @@ const defaultProps = {
   loadJobs: () => {},
   refreshJobs: () => {},
   openDetailPanel: () => {},
-  jobs: [],
+  hasJobs: false,
   isLoading: false
 };
 
@@ -47,7 +47,7 @@ describe('<JobList />', () => {
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
-    const { component, testSubjectExists } = initTestBed({ jobs: [{ foo: 'bar' }] });
+    const { component, testSubjectExists } = initTestBed({ hasJobs: true });
 
     expect(testSubjectExists('jobListLoading')).toBeFalsy();
     expect(component.find('JobTableUi').length).toBeTruthy();
