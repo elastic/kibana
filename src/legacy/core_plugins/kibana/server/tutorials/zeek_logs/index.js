@@ -41,7 +41,7 @@ export function zeekLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    //euiIconType: 'logoSuricata',
+    //euiIconType: 'logoZeek',
     artifacts: {
       dashboards: [
         {
