@@ -39,6 +39,6 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"
+node scripts/functional_tests --verbose --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"
 echo ""
 echo ""
