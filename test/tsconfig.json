@@ -7,7 +7,7 @@
     "baseUrl": "./",
     "paths": {
       "ui/*": [
-        "../src/legacy/ui/public/*"
+        "../src/legacy/ui/public/*/*"
       ],
     },
     "types": [
