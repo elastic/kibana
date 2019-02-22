@@ -60,7 +60,7 @@ export default function uiCapabilitesTests({
     loadTestFile(require.resolve('./dev_tools'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./graph'));
-    loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./infrastructure'));
     loadTestFile(require.resolve('./logs'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./nav_links'));

@@ -16,7 +16,7 @@ import { UserAtSpaceScenarios } from '../scenarios';
 export default function logsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('logs-ui', () => {
+  describe('logs', () => {
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
@@ -35,7 +35,7 @@ export default function logsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
-              save: true,
+              configureSource: true,
             });
             break;
           // these users have a read only view of Logs
@@ -46,7 +46,7 @@ export default function logsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: true,
-              save: false,
+              configureSource: false,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -62,7 +62,7 @@ export default function logsTests({ getService }: KibanaFunctionalTestDefaultPro
             expect(uiCapabilities.value).to.have.property('logs');
             expect(uiCapabilities.value!.logs).to.eql({
               show: false,
-              save: false,
+              configureSource: false,
             });
             break;
           // if we don't have access at the space itself, we're

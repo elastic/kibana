@@ -35,7 +35,7 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.value).to.have.property('infrastructure');
             expect(uiCapabilities.value!.infrastructure).to.eql({
               show: true,
-              save: true,
+              configureSource: true,
             });
             break;
           case 'dual_privileges_read':
@@ -45,7 +45,7 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.value).to.have.property('infrastructure');
             expect(uiCapabilities.value!.infrastructure).to.eql({
               show: true,
-              save: false,
+              configureSource: false,
             });
             break;
           case 'legacy_all':
@@ -59,7 +59,7 @@ export default function advancedSettingsTests({
             expect(uiCapabilities.value).to.have.property('infrastructure');
             expect(uiCapabilities.value!.infrastructure).to.eql({
               show: false,
-              save: false,
+              configureSource: false,
             });
             break;
         }
