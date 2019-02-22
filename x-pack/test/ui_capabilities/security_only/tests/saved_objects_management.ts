@@ -52,6 +52,7 @@ export default function savedObjectsManagementTests({
                   'search',
                   'dashboard',
                   'timelion-sheet',
+                  'url',
                 ],
               })
             );
@@ -71,6 +72,7 @@ export default function savedObjectsManagementTests({
                   'search',
                   'dashboard',
                   'timelion-sheet',
+                  'url',
                 ],
               })
             );
@@ -179,7 +181,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.only({
-                all: 'search',
+                all: ['search', 'url'],
                 read: ['config', 'index-pattern'],
               })
             );
@@ -189,7 +191,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.only({
-                read: ['search', 'config', 'index-pattern'],
+                read: ['search', 'config', 'index-pattern', 'url'],
               })
             );
             break;

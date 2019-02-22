@@ -59,6 +59,7 @@ export default function savedObjectsManagementTests({
                   'search',
                   'dashboard',
                   'timelion-sheet',
+                  'url',
                 ],
               })
             );
@@ -83,6 +84,7 @@ export default function savedObjectsManagementTests({
                   'search',
                   'dashboard',
                   'timelion-sheet',
+                  'url',
                 ],
               })
             );
