@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
-import { HttpService } from './loading_count_service';
+import { HttpService } from './http_service';
 
 function setup() {
   const service = new HttpService();

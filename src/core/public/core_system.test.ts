@@ -20,10 +20,10 @@
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
+import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
-import { HttpService } from './loading_count';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
@@ -84,7 +84,7 @@ const MockHttpService = jest.fn<HttpService>(function _MockNotificationsService(
   this.start = jest.fn().mockReturnValue(mockHttpContract);
   this.stop = jest.fn();
 });
-jest.mock('./loading_count', () => ({
+jest.mock('./http', () => ({
   HttpService: MockHttpService,
 }));
 

@@ -21,9 +21,9 @@ import angular from 'angular';
 import { BasePathStartContract } from '../base_path';
 import { ChromeStartContract } from '../chrome';
 import { FatalErrorsStartContract } from '../fatal_errors';
+import { HttpStartContract } from '../http';
 import { I18nStartContract } from '../i18n';
 import { InjectedMetadataStartContract } from '../injected_metadata';
-import { HttpStartContract } from '../loading_count';
 import { NotificationsStartContract } from '../notifications';
 import { UiSettingsClient } from '../ui_settings';
 

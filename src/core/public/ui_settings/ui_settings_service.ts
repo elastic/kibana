@@ -18,8 +18,8 @@
  */
 
 import { BasePathStartContract } from '../base_path';
+import { HttpStartContract } from '../http';
 import { InjectedMetadataStartContract } from '../injected_metadata';
-import { HttpStartContract } from '../loading_count';
 import { NotificationsStartContract } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
