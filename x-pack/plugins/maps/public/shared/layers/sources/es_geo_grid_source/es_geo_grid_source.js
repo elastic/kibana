@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
@@ -20,8 +19,9 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { filterPropertiesForTooltip } from '../../util';
 
-const COUNT_PROP_LABEL = 'Count';
+const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -50,7 +50,7 @@ const aggSchemas = new Schemas([
 export class ESGeoGridSource extends AbstractESSource {
 
   static type = 'ES_GEO_GRID';
-  static title = 'Elasticsearch grid aggregation';
+  static title = 'Grid aggregation';
   static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
@@ -64,10 +64,10 @@ export class ESGeoGridSource extends AbstractESSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
       const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor);
+      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 
@@ -186,31 +186,13 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
 
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
   }
 
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      return {
-        ...metric,
-        propertyKey: metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME,
-        propertyLabel: metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL,
-      };
-    });
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   _makeAggConfigs(precision) {
@@ -306,13 +288,8 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatProperties(properties) {
-    properties = await super.filterAndFormatProperties(properties);
-    const allProps = {};
-    for  (const key in properties) {
-      if (key !== 'geohash_meta') {
-        allProps[key] = properties[key];
-      }
-    }
-    return allProps;
+    const metricFields = this.getMetricFields();
+    return filterPropertiesForTooltip(metricFields, properties);
+
   }
 }

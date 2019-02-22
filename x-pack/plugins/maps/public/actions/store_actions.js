@@ -12,17 +12,19 @@ import {
   getDataFilters,
   getSelectedLayerId,
   getMapReady,
-  getWaitingForMapReadyLayerListRaw
+  getWaitingForMapReadyLayerListRaw,
+  getTransientLayerId,
 } from '../selectors/map_selectors';
+import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
+export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
 export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
-export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const MAP_READY = 'MAP_READY';
@@ -112,8 +114,6 @@ export function replaceLayerList(newLayerList) {
 
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
-    dispatch(clearTemporaryLayers());
-
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
       dispatch({
@@ -165,7 +165,6 @@ export function toggleLayerVisible(layerId) {
 
 export function setSelectedLayer(layerId) {
   return async (dispatch, getState) => {
-
     const oldSelectedLayer = getSelectedLayerId(getState());
     if (oldSelectedLayer) {
       await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
@@ -180,26 +179,35 @@ export function setSelectedLayer(layerId) {
   };
 }
 
+export function removeTransientLayer() {
+  return async (dispatch, getState) => {
+    const transientLayerId = getTransientLayerId(getState());
+    if (transientLayerId) {
+      await dispatch(removeLayer(transientLayerId));
+      await dispatch(setTransientLayer(null));
+    }
+  };
+}
+
+export function setTransientLayer(layerId) {
+  return  {
+    type: SET_TRANSIENT_LAYER,
+    transientLayerId: layerId,
+  };
+}
+
+export function clearTransientLayerStateAndCloseFlyout() {
+  return async dispatch => {
+    await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    await dispatch(setSelectedLayer(null));
+    await dispatch(removeTransientLayer());
+  };
+}
+
 export function updateLayerOrder(newLayerOrder) {
   return {
     type: UPDATE_LAYER_ORDER,
     newLayerOrder
-  };
-}
-
-export function promoteTemporaryLayers() {
-  return {
-    type: PROMOTE_TEMPORARY_LAYERS
-  };
-}
-
-export function clearTemporaryLayers() {
-  return (dispatch, getState) => {
-    getLayerListRaw(getState()).forEach(({ temporary, id }) => {
-      if (temporary) {
-        dispatch(removeLayer(id));
-      }
-    });
   };
 }
 
@@ -513,14 +521,13 @@ export function clearMissingStyleProperties(layerId) {
   };
 }
 
-export function updateLayerStyle(layerId, styleDescriptor, temporary = true) {
+export function updateLayerStyle(layerId, styleDescriptor) {
   return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_STYLE,
       layerId,
       style: {
-        ...styleDescriptor,
-        temporary
+        ...styleDescriptor
       },
     });
 
@@ -529,13 +536,13 @@ export function updateLayerStyle(layerId, styleDescriptor, temporary = true) {
   };
 }
 
-export function updateLayerStyleForSelectedLayer(styleDescriptor, temporary = true) {
+export function updateLayerStyleForSelectedLayer(styleDescriptor) {
   return (dispatch, getState) => {
     const selectedLayerId = getSelectedLayerId(getState());
     if (!selectedLayerId) {
       return;
     }
-    dispatch(updateLayerStyle(selectedLayerId, styleDescriptor, temporary));
+    dispatch(updateLayerStyle(selectedLayerId, styleDescriptor));
   };
 }
 

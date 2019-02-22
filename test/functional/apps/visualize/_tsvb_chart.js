@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('dark mode', () => {
+    describe.skip('dark mode', () => {
       it('uses dark mode flag', async () => {
         await kibanaServer.uiSettings.update({
           'theme:darkMode': true

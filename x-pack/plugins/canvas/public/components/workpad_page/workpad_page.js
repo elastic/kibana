@@ -10,9 +10,11 @@ import { Shortcuts } from 'react-shortcuts';
 import { ElementWrapper } from '../element_wrapper';
 import { AlignmentGuide } from '../alignment_guide';
 import { HoverAnnotation } from '../hover_annotation';
+import { TooltipAnnotation } from '../tooltip_annotation';
 import { RotationHandle } from '../rotation_handle';
 import { BorderConnection } from '../border_connection';
 import { BorderResizeHandle } from '../border_resize_handle';
+import { isTextInput } from '../../lib/is_text_input';
 
 // NOTE: the data-shared-* attributes here are used for reporting
 export class WorkpadPage extends PureComponent {
@@ -38,7 +40,6 @@ export class WorkpadPage extends PureComponent {
     isEditable: PropTypes.bool.isRequired,
     onDoubleClick: PropTypes.func,
     onKeyDown: PropTypes.func,
-    onKeyUp: PropTypes.func,
     onMouseDown: PropTypes.func,
     onMouseMove: PropTypes.func,
     onMouseUp: PropTypes.func,
@@ -46,7 +47,13 @@ export class WorkpadPage extends PureComponent {
     resetHandler: PropTypes.func,
     copyElements: PropTypes.func,
     cutElements: PropTypes.func,
+    duplicateElements: PropTypes.func,
     pasteElements: PropTypes.func,
+    removeElements: PropTypes.func,
+    bringForward: PropTypes.func,
+    bringToFront: PropTypes.func,
+    sendBackward: PropTypes.func,
+    sendToBack: PropTypes.func,
   };
 
   componentWillUnmount() {
@@ -65,29 +72,62 @@ export class WorkpadPage extends PureComponent {
       isEditable,
       onDoubleClick,
       onKeyDown,
-      onKeyPress,
-      onKeyUp,
       onMouseDown,
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
       onWheel,
+      removeElements,
       copyElements,
       cutElements,
+      duplicateElements,
       pasteElements,
+      bringForward,
+      bringToFront,
+      sendBackward,
+      sendToBack,
+      groupElements,
+      ungroupElements,
     } = this.props;
 
-    const keyHandler = action => {
-      switch (action) {
-        case 'COPY':
-          copyElements();
-          break;
-        case 'CUT':
-          cutElements();
-          break;
-        case 'PASTE':
-          pasteElements();
-          break;
+    const keyHandler = (action, event) => {
+      if (!isTextInput(event.target)) {
+        event.preventDefault();
+        switch (action) {
+          case 'COPY':
+            copyElements();
+            break;
+          case 'CLONE':
+            duplicateElements();
+            break;
+          case 'CUT':
+            cutElements();
+            break;
+          case 'DELETE':
+            removeElements();
+            break;
+          case 'PASTE':
+            pasteElements();
+            break;
+          case 'BRING_FORWARD':
+            bringForward();
+            break;
+          case 'BRING_TO_FRONT':
+            bringToFront();
+            break;
+          case 'SEND_BACKWARD':
+            sendBackward();
+            break;
+          case 'SEND_TO_BACK':
+            sendToBack();
+            break;
+          case 'GROUP':
+            groupElements();
+            break;
+          case 'UNGROUP':
+            ungroupElements();
+            break;
+        }
       }
     };
 
@@ -105,16 +145,13 @@ export class WorkpadPage extends PureComponent {
           width,
           cursor,
         }}
+        onKeyDown={onKeyDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseDown={onMouseDown}
-        onKeyDown={onKeyDown}
-        onKeyPress={onKeyPress}
-        onKeyUp={onKeyUp}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}
-        tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
         {isEditable && (
           <Shortcuts
@@ -136,6 +173,7 @@ export class WorkpadPage extends PureComponent {
                 transformMatrix: element.transformMatrix,
                 width: element.width,
                 height: element.height,
+                text: element.text,
               };
 
               switch (element.subtype) {
@@ -150,6 +188,8 @@ export class WorkpadPage extends PureComponent {
                   return <BorderResizeHandle {...props} />;
                 case 'resizeConnector':
                   return <BorderConnection {...props} />;
+                case 'rotationTooltip':
+                  return <TooltipAnnotation {...props} />;
                 default:
                   return [];
               }
