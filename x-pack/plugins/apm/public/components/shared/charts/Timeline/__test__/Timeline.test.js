@@ -44,4 +44,27 @@ describe('Timeline', () => {
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
+
+  it('should not crash if traceRootDuration is 0', () => {
+    const props = {
+      traceRootDuration: 0,
+      width: 1000,
+      duration: 0,
+      height: 116,
+      margins: {
+        top: 100,
+        left: 50,
+        right: 50,
+        bottom: 0
+      }
+    };
+
+    const wrapper = mount(
+      <StickyContainer>
+        <Timeline {...props} />
+      </StickyContainer>
+    );
+
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 });
