@@ -73,7 +73,8 @@ function Visualization(props) {
         onUiState: props.onUiState,
         uiState: props.uiState,
         visData: visData.type === model.type ? visData : {},
-        getConfig: props.getConfig
+        getConfig: props.getConfig,
+        fields: props.fields
       })
     );
   }

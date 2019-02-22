@@ -118,7 +118,7 @@ class VisEditor extends Component {
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
           uiState={this.props.vis.getUiState()}
-          fields={this.state.visFields}
+          fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData}
           getConfig={this.getConfig}
@@ -172,11 +172,11 @@ class VisEditor extends Component {
   async componentDidMount() {
     await this.setDefaultIndexPattern();
     await this.fetchIndexPatternFields();
-    this.props.renderComplete();
+    this.props.renderComplete(this.state.visFields);
   }
 
   componentDidUpdate() {
-    this.props.renderComplete();
+    this.props.renderComplete(this.state.visFields);
   }
 }
 
