@@ -16,7 +16,7 @@ import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { SelectSeverity, severity$ } from './select_severity';
 
 module.service('mlSelectSeverityService', function (AppState, $rootScope) {
-  subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, $rootScope);
+  subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync());
 })
   .directive('mlSelectSeverity', function ($injector) {
     const reactDirective = $injector.get('reactDirective');

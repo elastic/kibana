@@ -16,5 +16,5 @@ import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { limit$ } from './select_limit';
 
 module.service('mlSelectLimitService', function (AppState, $rootScope) {
-  subscribeAppStateToObservable(AppState, 'mlSelectLimit', limit$, $rootScope);
+  subscribeAppStateToObservable(AppState, 'mlSelectLimit', limit$, () => $rootScope.$applyAsync());
 });

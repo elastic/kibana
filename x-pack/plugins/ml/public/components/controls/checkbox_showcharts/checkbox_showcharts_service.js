@@ -11,5 +11,5 @@ import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
 import { showCharts$ } from './checkbox_showcharts';
 
 module.service('mlCheckboxShowChartsService', function (AppState, $rootScope) {
-  subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, $rootScope);
+  subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync());
 });

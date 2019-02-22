@@ -50,7 +50,7 @@ export function initializeAppState(AppState, stateName, defaultState) {
   return appState;
 }
 
-export function subscribeAppStateToObservable(AppState, appStateName, o$, $rootScope) {
+export function subscribeAppStateToObservable(AppState, appStateName, o$, callback) {
   const appState = initializeAppState(AppState, appStateName, o$.getValue());
 
   o$.next(appState[appStateName]);
@@ -59,6 +59,6 @@ export function subscribeAppStateToObservable(AppState, appStateName, o$, $rootS
     appState.fetch();
     appState[appStateName] = payload;
     appState.save();
-    $rootScope.$applyAsync();
+    callback(payload);
   });
 }

@@ -14,7 +14,7 @@ import { initializeAppState, subscribeAppStateToObservable } from '../app_state_
 describe('ML - initializeAppState', () => {
   let AppState;
 
-  beforeEach(ngMock.module('kibana', function (stateManagementConfigProvider) {
+  beforeEach(ngMock.module('kibana', (stateManagementConfigProvider) => {
     stateManagementConfigProvider.enable();
   }));
 
@@ -36,7 +36,7 @@ describe('ML - subscribeAppStateToObservable', () => {
   let AppState;
   let $rootScope;
 
-  beforeEach(ngMock.module('kibana', function (stateManagementConfigProvider) {
+  beforeEach(ngMock.module('kibana', (stateManagementConfigProvider) => {
     stateManagementConfigProvider.enable();
   }));
 
@@ -48,7 +48,7 @@ describe('ML - subscribeAppStateToObservable', () => {
   it('Initializes a custom state store, sets and gets a test value using events.', (done) => {
     const o$ = new BehaviorSubject({ value: 10 });
 
-    subscribeAppStateToObservable(AppState, 'mlTest', o$, $rootScope);
+    subscribeAppStateToObservable(AppState, 'mlTest', o$, () => $rootScope.$applyAsync());
 
     o$.subscribe((payload) => {
       const appState = new AppState();
