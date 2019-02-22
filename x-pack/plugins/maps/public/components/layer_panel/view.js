@@ -29,7 +29,7 @@ import {
 export class LayerPanel  extends React.Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const nextId = nextProps.selectedLayer.getId();
+    const nextId = nextProps.selectedLayer ? nextProps.selectedLayer.getId() : null;
     if (nextId !== prevState.prevId) {
       return {
         displayName: '',
@@ -59,6 +59,10 @@ export class LayerPanel  extends React.Component {
   }
 
   loadDisplayName = async () => {
+    if (!this.props.selectedLayer) {
+      return;
+    }
+
     const displayName = await this.props.selectedLayer.getDisplayName();
     if (!this._isMounted || displayName === this.state.displayName) {
       return;
@@ -68,7 +72,7 @@ export class LayerPanel  extends React.Component {
   }
 
   loadImmutableSourceProperties = async () => {
-    if (this.state.hasLoadedSourcePropsForLayer) {
+    if (this.state.hasLoadedSourcePropsForLayer || !this.props.selectedLayer) {
       return;
     }
 
@@ -115,6 +119,10 @@ export class LayerPanel  extends React.Component {
 
   render() {
     const { selectedLayer } = this.props;
+
+    if (!selectedLayer) {
+      return null;
+    }
 
     return (
       <EuiFlexGroup
