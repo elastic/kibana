@@ -149,6 +149,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     /*
      * Layer TOC (table to contents) utility functions
      */
+    async clickAddLayer() {
+      log.debug('Click add layer');
+      await testSubjects.click('addLayerButton');
+    }
+
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
@@ -196,6 +201,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
+      layerName = layerName.replace(' ', '_');
       log.debug(`Open layer panel, layer: ${layerName}`);
       return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
     }
