@@ -208,8 +208,10 @@ declare module '@elastic/eui' {
     onChange?: (value: any) => void;
     disabled?: boolean;
     isLoading?: boolean;
-  }
+    itemClassName?: any;
+    hasDividers?: boolean;
+    itemLayoutAlign?: any;
+  };
 
   export const EuiSuperSelect: React.SFC<EuiSuperSelectProps>;
-
 }
