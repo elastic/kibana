@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import tickFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
@@ -48,10 +49,9 @@ class TableVis extends Component {
     this.renderRow = this.renderRow.bind(this);
   }
 
-  renderRow(row) {
-    const { model } = this.props;
-    const rowId = row.key;
-    let rowDisplay = rowId;
+  renderRow = (isDateTypeField = false) => row => {
+    const { model, dateFormat } = this.props;
+    let rowDisplay = isDateTypeField ? moment(row.key).format(dateFormat) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = (<a href={url}>{rowDisplay}</a>);
@@ -72,14 +72,14 @@ class TableVis extends Component {
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
+        <td key={`${row.key}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
           <span>{ value }</span>
           {trend}
         </td>
       );
     });
     return (
-      <tr key={rowId}>
+      <tr key={row.key}>
         <td>{rowDisplay}</td>
         {columns}
       </tr>
@@ -172,12 +172,16 @@ class TableVis extends Component {
   }
 
   render() {
-    const { visData, model } = this.props;
+    const { visData, model, fields } = this.props;
     const header = this.renderHeader();
     let rows;
 
     if (_.isArray(visData.series) && visData.series.length) {
-      rows = visData.series.map(this.renderRow);
+      const field = fields[model.index_pattern] &&
+        fields[model.index_pattern].find(field => field.name === model.pivot_id);
+      const isDateTypeField = field && field.type === 'date';
+
+      rows = visData.series.map(this.renderRow(isDateTypeField));
     } else {
       const message = model.pivot_id ?
         (<FormattedMessage
