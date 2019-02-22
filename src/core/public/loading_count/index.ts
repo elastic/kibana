@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { LoadingCountService, LoadingCountStartContract } from './loading_count_service';
+export { HttpService, HttpStartContract } from './loading_count_service';

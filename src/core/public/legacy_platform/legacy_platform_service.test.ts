@@ -70,11 +70,11 @@ jest.mock('ui/notify/toasts', () => {
   };
 });
 
-const mockLoadingCountInit = jest.fn();
+const mockHttpInit = jest.fn();
 jest.mock('ui/chrome/api/loading_count', () => {
   mockLoadOrder.push('ui/chrome/api/loading_count');
   return {
-    __newPlatformInit__: mockLoadingCountInit,
+    __newPlatformInit__: mockHttpInit,
   };
 });
 
@@ -154,9 +154,11 @@ const injectedMetadataStartContract: any = {
   getLegacyMetadata: jest.fn(),
 };
 
-const loadingCountStartContract = {
-  add: jest.fn(),
-  getCount$: jest.fn().mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
+const httpStartContract = {
+  addLoadingCount: jest.fn(),
+  getLoadingCount$: jest
+    .fn()
+    .mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
 };
 
 const basePathStartContract = {
@@ -181,7 +183,7 @@ const defaultStartDeps = {
   fatalErrors: fatalErrorsStartContract,
   injectedMetadata: injectedMetadataStartContract,
   notifications: notificationsStartContract,
-  loadingCount: loadingCountStartContract,
+  http: httpStartContract,
   basePath: basePathStartContract,
   uiSettings: uiSettingsStartContract,
   chrome: chromeStartContract,
@@ -243,15 +245,15 @@ describe('#start()', () => {
       expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStartContract.toasts);
     });
 
-    it('passes loadingCount service to ui/chrome/api/loading_count', () => {
+    it('passes http service to ui/chrome/api/loading_count', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });
 
       legacyPlatform.start(defaultStartDeps);
 
-      expect(mockLoadingCountInit).toHaveBeenCalledTimes(1);
-      expect(mockLoadingCountInit).toHaveBeenCalledWith(loadingCountStartContract);
+      expect(mockHttpInit).toHaveBeenCalledTimes(1);
+      expect(mockHttpInit).toHaveBeenCalledWith(httpStartContract);
     });
 
     it('passes basePath service to ui/chrome/api/base_path', () => {
