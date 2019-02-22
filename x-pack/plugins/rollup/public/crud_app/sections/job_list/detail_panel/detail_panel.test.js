@@ -7,7 +7,7 @@
 import { registerTestBed } from '../../../../../__jest__/utils';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
-import { DetailPanel, JOB_DETAILS_TABS } from './detail_panel';
+import { DetailPanel } from './detail_panel';
 import {
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
@@ -35,6 +35,7 @@ describe('<DetailPanel />', () => {
   describe('layout', () => {
     let component;
     let findTestSubject;
+    let testSubjectExists;
 
     beforeEach(() => {
       ({ component, findTestSubject } = initTestBed());
@@ -42,8 +43,8 @@ describe('<DetailPanel />', () => {
 
     it('should have the title set to the current Job "id"', () => {
       const { job } = defaultProps;
-      const title = component.find('#rollupJobDetailsFlyoutTitle').hostNodes();
-      expect(title.length).toBeTruthy();
+      const title = findTestSubject('rollupJobDetailsFlyoutTitle');
+      expect(title.length).toBe(1);
       expect(title.text()).toEqual(job.id);
     });
 
@@ -57,19 +58,19 @@ describe('<DetailPanel />', () => {
     });
 
     it('should show a loading when the job is loading', () => {
-      ({ component, findTestSubject } = initTestBed({ isLoading: true }));
+      ({ component, findTestSubject, testSubjectExists } = initTestBed({ isLoading: true }));
       const loading = findTestSubject('rollupJobDetailLoading');
       expect(loading.length).toBeTruthy();
       expect(loading.text()).toEqual('Loading rollup job...');
 
       // Make sure the title and the tabs are visible
-      expect(component.find('EuiTab').length).toBeTruthy();
-      expect(component.find('#rollupJobDetailsFlyoutTitle').length).toBeTruthy();
+      expect(testSubjectExists('detailPanelTabSelected')).toBeTruthy();
+      expect(testSubjectExists('rollupJobDetailsFlyoutTitle')).toBeTruthy();
     });
 
     it('should display a message when no job is provided', () => {
       ({ component, findTestSubject } = initTestBed({ job: undefined }));
-      expect(findTestSubject('rollupJobDetailFlyout').find('EuiFlyoutBody').text()).toEqual('Rollup job not found');
+      expect(findTestSubject('rollupJobDetailJobNotFound').text()).toEqual('Rollup job not found');
     });
   });
 
@@ -78,20 +79,16 @@ describe('<DetailPanel />', () => {
     const { component } = initTestBed({ panelType: tabActive });
     const tabs = component.find('EuiTab');
     const getTab = (id) => {
-      let selectedTab;
-      tabs.forEach((tab) => {
-        if (tab.text() === tabToHumanizedMap[id].props.defaultMessage) {
-          selectedTab = tab;
-        }
+      const found = tabs.findWhere((tab) => {
+        return tab.text() === tabToHumanizedMap[id].props.defaultMessage;
       });
-      return selectedTab;
+      return found.first();
     };
 
     it('should have 5 tabs visible', () => {
-      const expected = JOB_DETAILS_TABS.map(id => tabToHumanizedMap[id].props.defaultMessage);
       const tabsLabel = tabs.map(tab => tab.text());
 
-      expect(tabsLabel).toEqual(expected);
+      expect(tabsLabel).toEqual(['Summary', 'Terms', 'Histogram', 'Metrics', 'JSON']);
     });
 
     it('should set default selected tab to the "panelType" prop provided', () => {
@@ -102,8 +99,6 @@ describe('<DetailPanel />', () => {
     it('should select the tab when clicking on it', () => {
       const { job, openDetailPanel } = defaultProps;
       const termsTab = getTab(JOB_DETAILS_TAB_TERMS);
-
-      expect(termsTab.props().isSelected).toEqual(false);
 
       termsTab.simulate('click');
 
@@ -124,12 +119,12 @@ describe('<DetailPanel />', () => {
       const tabContentSections = ['Logistics', 'DateHistogram', 'Stats']
         .map((section) => findTestSubject(`rollupJobDetailSummary${section}Section`))
         .filter(s => !!s.length)
-        .map(section => ({
-          title: section.find('EuiTitle').text(),
-          reactWrapper: section,
+        .map(reactWrapper => ({
+          title: reactWrapper.find('EuiTitle').text(),
+          reactWrapper,
         }));
 
-      it('should have a "Logistics", "Date histogram" and "Stats" section ', () => {
+      it('should have a "Logistics", "Date histogram" and "Stats" section', () => {
         const expectedTitles = ['Logistics', 'Date histogram', 'Stats'];
         expect(tabContentSections.map(section => section.title)).toEqual(expectedTitles);
       });

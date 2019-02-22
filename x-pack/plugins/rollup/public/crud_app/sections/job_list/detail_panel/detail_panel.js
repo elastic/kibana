@@ -216,7 +216,9 @@ export class DetailPanelUi extends Component {
       content = this.renderJob();
     } else {
       content = (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailJobNotFound"
+        >
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="center"
@@ -250,7 +252,11 @@ export class DetailPanelUi extends Component {
         maxWidth={400}
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
+          <EuiTitle
+            size="m"
+            id="rollupJobDetailsFlyoutTitle"
+            data-test-subj="rollupJobDetailsFlyoutTitle"
+          >
             <h2>{jobId}</h2>
           </EuiTitle>
 
