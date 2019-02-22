@@ -66,6 +66,11 @@ export class ESGeoGridSource extends AbstractESSource {
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
       const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
       const source = new ESGeoGridSource(sourceDescriptor);
       onPreviewSource(source);
