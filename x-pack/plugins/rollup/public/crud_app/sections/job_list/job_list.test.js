@@ -26,7 +26,7 @@ const defaultProps = {
   loadJobs: () => {},
   refreshJobs: () => {},
   openDetailPanel: () => {},
-  hasJobs: true,
+  hasJobs: false,
   isLoading: false
 };
 
