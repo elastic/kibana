@@ -22,14 +22,6 @@ import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, n
 export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards) {
   const queryASTs = queries.map(query => {
     try {
-      fromKueryExpression(query.query, { allowLeadingWildcards, parseLucene: true });
-    } catch (error) {
-      if (error.message.startsWith('Lucene')) {
-        console.log(error);
-      }
-    }
-
-    try {
       return fromKueryExpression(query.query, { allowLeadingWildcards });
     } catch (parseError) {
       try {

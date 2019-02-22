@@ -5,7 +5,7 @@
 
 // Initialization block
 {
-  const { parseLucene, parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
+  const { errorOnLuceneSyntax, parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
@@ -26,7 +26,7 @@ start
   }
 
 OrQuery
-  = &{ return parseLucene; } LuceneQuery
+  = &{ return errorOnLuceneSyntax; } LuceneQuery
   / left:AndQuery Or right:OrQuery {
     const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
@@ -173,15 +173,15 @@ Value
 
 Or
   = Space+ 'or'i Space+
-  / &{ return parseLucene; } LuceneOr
+  / &{ return errorOnLuceneSyntax; } LuceneOr
 
 And
   = Space+ 'and'i Space+
-  / &{ return parseLucene; } LuceneAnd
+  / &{ return errorOnLuceneSyntax; } LuceneAnd
 
 Not
   = 'not'i Space+
-  / &{ return parseLucene; } LuceneNot
+  / &{ return errorOnLuceneSyntax; } LuceneNot
 
 Literal
   = QuotedString / UnquotedLiteral

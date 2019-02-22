@@ -61,3 +61,12 @@ export function toElasticsearchQuery(node, indexPattern) {
 
   return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern);
 }
+
+export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
+  try {
+    fromExpression(expression, { errorOnLuceneSyntax: true }, parseKuery);
+    return null;
+  } catch (e) {
+    return (e.message.startsWith('Lucene'));
+  }
+}

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
@@ -38,12 +39,20 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
 
 // @ts-ignore
 import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { documentationLinks } from 'ui/documentation_links';
+import { toastNotifications } from 'ui/notify';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -462,6 +471,8 @@ export class QueryBarUI extends Component<Props, State> {
       preventDefault();
     }
 
+    this.handleLuceneSyntaxWarning();
+
     if (this.persistedLog) {
       this.persistedLog.add(this.state.query.query);
     }
@@ -684,6 +695,36 @@ export class QueryBarUI extends Component<Props, State> {
         />
       </EuiFlexItem>
     );
+  }
+
+  private handleLuceneSyntaxWarning() {
+    const { intl } = this.props;
+    const { query, language } = this.state.query;
+    if (language === 'kuery' && doesKueryExpressionHaveLuceneSyntaxError(query)) {
+      toastNotifications.addWarning({
+        title: intl.formatMessage({
+          id: 'kbn.kql.luceneSyntaxWarningTitle',
+          defaultMessage: 'Lucene syntax warning',
+        }),
+        text: (
+          <FormattedMessage
+            id="kbn.kql.luceneSyntaxWarningMessage"
+            defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
+             have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
+            values={{
+              link: (
+                <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                  <FormattedMessage
+                    id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                    defaultMessage="here"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
+      });
+    }
   }
 }
 
