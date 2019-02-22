@@ -81,11 +81,9 @@
           class="kbnDocViewer__field">
       </td>
       <td>
-        <span ng-if="enableDocValueCollapse(field)" aria-expanded="{{!!fieldRowOpen[field]}}">
-          <button class="discover-table-open-button" ng-click="toggleViewer(field)" aria-label="Toggle field details" tooltip="Toggle field details">
-            <span class="kuiIcon" ng-class="{ 'fa-caret-down': fieldRowOpen[field], 'fa-caret-right': !fieldRowOpen[field] }"></span>
-          </button>
-        </span>
+        <button ng-if="enableDocValueCollapse(field)" aria-expanded="{{!!fieldRowOpen[field]}}" class="discover-table-open-button" ng-click="toggleViewer(field)" aria-label="Toggle field details" tooltip="Toggle field details">
+          <span class="kuiIcon" ng-class="{ 'fa-caret-down': fieldRowOpen[field], 'fa-caret-right': !fieldRowOpen[field] }"></span>
+        </button>
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"
           tooltip="{{ ::'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip' | i18n: {
