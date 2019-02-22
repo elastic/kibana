@@ -12,9 +12,7 @@ interface Props extends RouteProps {
   routeChange: (match: Match) => void;
 }
 class CSRoute extends ReactRoute<Props> {
-  public componentWillMount() {
-    // @ts-ignore
-    super.componentWillMount();
+  public UNSAFE_componentWillMount() {
     this.props.routeChange({ ...this.state.match, location: this.props.location });
   }
 
