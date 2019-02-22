@@ -47,7 +47,7 @@ const columns = [
 ];
 
 function getLogsUiLink(clusterUuid, nodeId) {
-  const base = `${chrome.getBasePath()}/app/infra#/logs/`;
+  const base = `${chrome.getBasePath()}/app/infra#/link-to/logs`;
 
   const params = [];
   if (clusterUuid) {
@@ -61,7 +61,7 @@ function getLogsUiLink(clusterUuid, nodeId) {
     return base;
   }
 
-  return `${base}?logFilter=(expression:'${params.join(' and ')}',kind:kuery)`;
+  return `${base}?filter=${params.join(' and ')}`;
 }
 
 export class Logs extends PureComponent {
