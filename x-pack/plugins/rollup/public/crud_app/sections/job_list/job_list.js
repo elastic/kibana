@@ -197,37 +197,33 @@ export class JobListUi extends Component {
     );
   }
 
+  renderLoading() {
+    return (
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.loadingTitle"
+                defaultMessage="Loading rollup jobs..."
+              />
+            </EuiTextColor>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   renderList() {
     const { isLoading } = this.props;
-
-    let table;
-
-    if (isLoading) {
-      table = (
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobList.loadingTitle"
-                  defaultMessage="Loading rollup jobs..."
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    } else {
-      table = <JobTable />;
-    }
 
     return (
       <Fragment>
@@ -244,7 +240,7 @@ export class JobListUi extends Component {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 
-        {table}
+        {isLoading ? this.renderLoading() : <JobTable />}
 
         <DetailPanel />
       </Fragment>

@@ -14,11 +14,17 @@ import {
 } from '@elastic/eui';
 import { LayerTOC } from './layer_toc';
 
-export function LayerControl(props) {
-  const addLayer = (
-    <EuiButtonEmpty size="xs" flush="right" onClick={props.showAddLayerWizard}>
-      Add layer
-    </EuiButtonEmpty>);
+export function LayerControl({ isReadOnly, showAddLayerWizard }) {
+  let addLayer;
+  if (!isReadOnly) {
+    addLayer = (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="xs" flush="right" onClick={showAddLayerWizard}>
+          Add layer
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
@@ -34,9 +40,7 @@ export function LayerControl(props) {
               <h2>Layers</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {addLayer}
-          </EuiFlexItem>
+          {addLayer}
         </EuiFlexGroup>
       </EuiFlexItem>
 

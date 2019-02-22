@@ -80,7 +80,7 @@ export const WorkpadHeader = ({
             <EuiFlexItem grow={false}>
               <FullscreenControl>
                 {({ toggleFullscreen }) => (
-                  <EuiToolTip position="bottom" content="Toggle fullscreen mode">
+                  <EuiToolTip position="bottom" content="Enter fullscreen mode">
                     <EuiButtonIcon
                       iconType="fullScreen"
                       aria-label="View fullscreen"
