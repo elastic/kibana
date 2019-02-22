@@ -26,7 +26,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-export class LayerPanel  extends React.Component {
+export class LayerPanel extends React.Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextId = nextProps.selectedLayer ? nextProps.selectedLayer.getId() : null;
