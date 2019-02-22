@@ -173,7 +173,6 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                           }
                         )}
                         data={upSeries}
-                        curve="curveBasis"
                         color={success}
                       />
                       <EuiAreaSeries
