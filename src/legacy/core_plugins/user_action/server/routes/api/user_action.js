@@ -24,20 +24,21 @@ export const registerUserActionRoute = (server) => {
    * Increment a count on an object representing a specific user action.
    */
   server.route({
-    path: '/api/user_action/{app}/{action_type}',
+    path: '/api/user_action/{appName}/{actionType}',
     method: 'POST',
     handler: async (request) => {
-      const { app, action_type: actionType } = request.params;
+      const { appName, actionType } = request.params;
 
       try {
         const { getSavedObjectsRepository } = server.savedObjects;
         const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
         const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+        const savedObjectId = `${appName}:${actionType}`;
 
         // This object is created if it doesn't already exist.
         await internalRepository.incrementCounter(
           'user-action',
-          `${app}:${actionType}`,
+          savedObjectId,
           'count',
         );
 

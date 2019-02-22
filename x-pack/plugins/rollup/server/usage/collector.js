@@ -5,7 +5,7 @@
 */
 
 import { get } from 'lodash';
-import { callWithInternalUserFactory } from '../lib/call_with_internal_user_factory';
+import { fetchUserActions } from '../../../../server/lib/user_action';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
@@ -164,24 +164,6 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
   };
 }
 
-function fetchUserActions(server, actionTypes) {
-  const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-  const callWithInternalUser = callWithInternalUserFactory(server);
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-  const savedObjectsClient = new SavedObjectsClient(internalRepository);
-
-  async function fetchUserAction(actionType) {
-    try {
-      const savedObject = await savedObjectsClient.get('user-action', `rollup_job_wizard:${actionType}`);
-      return { actionType, count: savedObject.attributes.count };
-    } catch (error) {
-      return undefined;
-    }
-  }
-
-  return Promise.all(actionTypes.map(actionType => fetchUserAction(actionType)));
-}
-
 export function registerRollupUsageCollector(server) {
   const kibanaIndex = server.config().get('kibana.index');
 
@@ -199,8 +181,8 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
 
-      const userActions = await fetchUserActions(server, [
-        'create_rollup_job',
+      const userActions = await fetchUserActions(server, 'rollup-job-wizard', [
+        'create-rollup-job',
       ]);
 
       const userActionsByActionType = userActions.reduce((byActionType, userAction) => {
