@@ -24,7 +24,7 @@ export class ESSearchSource extends AbstractESSource {
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
       if (!sourceConfig) {
-        onPreviewSource();
+        onPreviewSource(null);
         return;
       }
 
