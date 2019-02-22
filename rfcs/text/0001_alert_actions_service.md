@@ -141,7 +141,7 @@ Why should we *not* do this? Please consider:
 There are tradeoffs to choosing any path. Attempt to identify them here.
 
 The relationship between *action types* and *connetors* is a bit complex as well
-as the supported parameter meta types. 
+as the supported parameter meta types.
 
 Another downside to this design is that an alert must be changed in order to support
 *action types*. So as new action types to meet user needs are discovered alerts
