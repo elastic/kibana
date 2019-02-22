@@ -753,14 +753,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       if (selectionInfluencers.length === 0) {
         stateUpdate.influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
-        // TODO: update every time diff job is selected or only initial load?
-        if (stateUpdate.influencers !== undefined && this.state.filterPlaceHolder === undefined && !noInfluencersConfigured) {
-          let first = true;
-          for (const influencerName in stateUpdate.influencers) {
-            if (first && stateUpdate.influencers[influencerName][0] && stateUpdate.influencers[influencerName][0].influencerFieldValue) {
-              stateUpdate.filterPlaceHolder = `${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue}`;
-              first = false;
-            }
+      }
+
+      if (stateUpdate.influencers !== undefined && !noInfluencersConfigured) {
+        for (const influencerName in stateUpdate.influencers) {
+          if (stateUpdate.influencers[influencerName][0] && stateUpdate.influencers[influencerName][0].influencerFieldValue) {
+            stateUpdate.filterPlaceHolder = `${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue}`;
+            break;
           }
         }
       }
