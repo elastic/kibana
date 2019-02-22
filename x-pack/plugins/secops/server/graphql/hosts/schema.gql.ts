@@ -9,9 +9,9 @@ import gql from 'graphql-tag';
 export const hostsSchema = gql`
   type HostItem {
     _id: String
-    firstSeen: String
+    firstSeen: Date
     host: HostEcsFields
-    lastBeat: String
+    lastBeat: Date
   }
 
   type HostsEdges {

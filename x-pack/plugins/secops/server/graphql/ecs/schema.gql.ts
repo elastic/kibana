@@ -106,7 +106,7 @@ export const ecsSchema = gql`
     host: HostEcsFields
     source: SourceEcsFields
     suricata: SuricataEcsFields
-    timestamp: String
+    timestamp: Date
     user: UserEcsFields
   }
 

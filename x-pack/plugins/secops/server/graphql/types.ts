@@ -39,6 +39,12 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // ====================================================
 
 // ====================================================
+// Scalars
+// ====================================================
+
+export type Date = any;
+
+// ====================================================
 // Types
 // ====================================================
 
@@ -341,7 +347,7 @@ export interface HostItem {
 
   host?: HostEcsFields | null;
 
-  lastBeat?: string | null;
+  lastBeat?: Date | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -1583,7 +1589,7 @@ export namespace HostItemResolvers {
 
     host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
 
-    lastBeat?: LastBeatResolver<string | null, TypeParent, Context>;
+    lastBeat?: LastBeatResolver<Date | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SecOpsContext> = Resolver<
@@ -1602,7 +1608,7 @@ export namespace HostItemResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type LastBeatResolver<
-    R = string | null,
+    R = Date | null,
     Parent = HostItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

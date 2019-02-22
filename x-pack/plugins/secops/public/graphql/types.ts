@@ -10,6 +10,12 @@
 // ====================================================
 
 // ====================================================
+// Scalars
+// ====================================================
+
+export type Date = any;
+
+// ====================================================
 // Types
 // ====================================================
 
@@ -312,7 +318,7 @@ export interface HostItem {
 
   host?: HostEcsFields | null;
 
-  lastBeat?: string | null;
+  lastBeat?: Date | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -864,7 +870,7 @@ export namespace GetHostSummaryQuery {
 
     firstSeen?: string | null;
 
-    lastBeat?: string | null;
+    lastBeat?: Date | null;
 
     host?: Host | null;
   };
@@ -967,7 +973,7 @@ export namespace GetHostsTableQuery {
 
     firstSeen?: string | null;
 
-    lastBeat?: string | null;
+    lastBeat?: Date | null;
 
     host?: Host | null;
   };

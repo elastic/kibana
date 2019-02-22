@@ -24,6 +24,7 @@ const BREADCRUMBS_ELEMENT_ID = 'react-secops-breadcrumbs';
 
 export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   public dateFormat?: string;
+  public dateFormatTz?: string;
   public darkMode?: boolean;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
@@ -130,6 +131,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
       this.dateFormat = config.get('dateFormat');
+      this.dateFormatTz = config.get('dateFormat:tz');
       try {
         this.darkMode = config.get('theme:darkMode');
       } catch (e) {
