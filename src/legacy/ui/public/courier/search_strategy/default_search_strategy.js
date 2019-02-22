@@ -68,6 +68,12 @@ export const defaultSearchStrategy = {
       failedSearchRequests,
     } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
 
+    if (serializedFetchParams.trim() === '') {
+      return {
+        failedSearchRequests,
+      };
+    }
+
     const msearchParams = {
       rest_total_hits_as_int: true,
       // If we want to include frozen indexes we need to specify ignore_throttled: false

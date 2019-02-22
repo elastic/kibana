@@ -19,6 +19,45 @@
 
 import { migrations } from './migrations';
 
+describe('index-pattern', () => {
+  describe('6.5.0', () => {
+    const migrate = doc => migrations['index-pattern']['6.5.0'](doc);
+
+    it('adds "type" and "typeMeta" properties to object when not declared', () => {
+      expect(
+        migrate({
+          attributes: {},
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": undefined,
+    "typeMeta": undefined,
+  },
+}
+`);
+    });
+
+    it('keeps "type" and "typeMeta" properties as is when declared', () => {
+      expect(
+        migrate({
+          attributes: {
+            type: '123',
+            typeMeta: '123',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": "123",
+    "typeMeta": "123",
+  },
+}
+`);
+    });
+  });
+});
+
 describe('visualization', () => {
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
@@ -354,7 +393,7 @@ Object {
   "type": "visualization",
 }
 `);
-    /* eslint-enable max-len */
+      /* eslint-enable max-len */
     });
 
     it('skips extracting savedSearchId when missing', () => {

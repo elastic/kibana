@@ -22,19 +22,17 @@ import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { UICapabilities } from './ui_capabilities';
 
-uiRoutes.addSetupWork((uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any) => {
-  console.log('Doing the setup work');
-  const route = get($route, 'current.$$route') as any;
-  if (!route.requireUICapability) {
-    console.log(`Route doesn't require ui capability`);
-    return;
-  }
+uiRoutes.addSetupWork(
+  (uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any, kbnUrl: any) => {
+    const route = get($route, 'current.$$route') as any;
+    if (!route.requireUICapability) {
+      return;
+    }
 
-  if (!get(uiCapabilities, route.requireUICapability)) {
-    console.log(`Redirecting`);
-    const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
-    window.location.href = url;
-  } else {
-    console.log(`We're good`);
+    if (!get(uiCapabilities, route.requireUICapability)) {
+      const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
+      kbnUrl.redirect(url);
+      throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
+    }
   }
-});
+);
