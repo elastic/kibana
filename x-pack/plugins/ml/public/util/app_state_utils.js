@@ -59,6 +59,8 @@ export function subscribeAppStateToObservable(AppState, appStateName, o$, callba
     appState.fetch();
     appState[appStateName] = payload;
     appState.save();
-    callback(payload);
+    if (typeof callback === 'function') {
+      callback(payload);
+    }
   });
 }
