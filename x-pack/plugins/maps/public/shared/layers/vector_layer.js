@@ -314,7 +314,7 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState) {
+  _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return false;
     }
@@ -322,27 +322,30 @@ export class VectorLayer extends AbstractLayer {
       return false;
     }
 
-    joinState.join.joinPropertiesToFeatureCollection(
+    const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
+
+    updateSourceData(updatedFeatureCollection);
+
     return true;
   }
 
-  async _performJoins(sourceResult, joinStates) {
+  async _performJoins(sourceResult, joinStates, updateSourceData) {
     const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState);
+      return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
 
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
     const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults);
+    const shouldRefresh = await this._performJoins(sourceResult, joinResults, updateSourceData);
     if (shouldRefresh) {
       onRefreshStyle();
     }
@@ -387,9 +390,9 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
-    // if (shouldRefresh) {
+    if (shouldRefresh) {
       mbGeoJSONSource.setData(featureCollection);
-    // }
+    }
   }
 
   _setMbPointsProperties(mbMap) {
