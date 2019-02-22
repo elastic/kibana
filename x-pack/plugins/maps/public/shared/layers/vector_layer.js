@@ -387,9 +387,9 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
-    if (shouldRefresh) {
+    // if (shouldRefresh) {
       mbGeoJSONSource.setData(featureCollection);
-    }
+    // }
   }
 
   _setMbPointsProperties(mbMap) {
