@@ -179,6 +179,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('layerVisibilityToggleButton');
     }
 
+    async clickFitToBounds(layerName) {
+      log.debug(`Fit to bounds, layer: ${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('fitToBoundsButton');
+      await this.waitForLayersToLoad();
+    }
+
     async openLayerTocActionsPanel(layerName) {
       const cleanLayerName = layerName.split(' ').join('');
       const isOpen = await testSubjects.exists(`layerTocActionsPanel${cleanLayerName}`);
