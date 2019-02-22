@@ -1,0 +1,40 @@
+[role="xpack"]
+[[uptime-overview]]
+
+== Uptime Overview page
+
+The Overview page is intended to help you quickly identify and diagnose outages and
+other connectivity issues within your network or environment. There is a date range
+selection that is global to the Uptime UI; you can use this selection to highlight
+an absolute date range, or a relative one, similar to other areas of Kibana.
+
+=== Filter bar
+SCREENSHOT
+
+This control allows you to use automated filter options, as well as input custom filter
+text to select specific monitors by field, URL, ID, and other attributes.
+
+=== Snapshot view
+SCREENSHOT
+
+From this view you can see the total number of detected monitors within the selected
+Uptime date range. In addition to the total, the counts for the number of monitors
+in an `up` or `down` state are displayed, based on the last check reported by Heartbeat
+for each monitor.
+
+Next to the counts, there is a histogram displaying the change over time throughout the
+selected date range.
+
+=== Monitor list
+SCREENSHOT
+
+The Monitor list displays information on individual monitors. This table includes
+information like the most recent status, when the monitor was last checked, its
+ID and URL, its IP address, and a dedicated sparkline showing its check status
+over time.
+
+=== Error list
+SCREENSHOT
+
+The Error list displays aggregations of errors that Heartbeat has logged. Errors are
+displayed by Error type, monitor ID, and message. Clicking a monitor's ID from this view will take you to the corresponding Monitor page.
