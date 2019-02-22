@@ -7,6 +7,12 @@
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
 import _ from 'lodash';
+import { ES_GEO_GRID, ES_SEARCH } from '../constants';
+
+function doesSourceUseIndexPattern(layerDescriptor) {
+  const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
+  return sourceType === ES_GEO_GRID || sourceType === ES_SEARCH;
+}
 
 export function extractReferences({ attributes, references = [] }) {
   if (!attributes.layerListJSON) {
@@ -19,8 +25,8 @@ export function extractReferences({ attributes, references = [] }) {
   layerList.forEach((layer, layerIndex) => {
 
     // Extract index-pattern references from source descriptor
-    if (_.has(layer, 'sourceDescriptor.indexPatternId')) {
-      const refName = `layer_${layerIndex}_index_pattern`;
+    if (doesSourceUseIndexPattern(layer) && _.has(layer, 'sourceDescriptor.indexPatternId')) {
+      const refName = `layer_${layerIndex}_source_index_pattern`;
       extractedReferences.push({
         name: refName,
         type: 'index-pattern',
@@ -64,7 +70,7 @@ export function injectReferences({ attributes, references }) {
   layerList.forEach((layer) => {
 
     // Inject index-pattern references into source descriptor
-    if (_.has(layer, 'sourceDescriptor.indexPatternRefName')) {
+    if (doesSourceUseIndexPattern(layer) && _.has(layer, 'sourceDescriptor.indexPatternRefName')) {
       const reference = references.find(reference => reference.name === layer.sourceDescriptor.indexPatternRefName);
       if (!reference) {
         throw new Error(`Could not find reference "${layer.sourceDescriptor.indexPatternRefName}"`);
