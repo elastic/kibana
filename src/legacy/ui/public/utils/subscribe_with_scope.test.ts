@@ -43,7 +43,7 @@ it('subscribes to the passed observable, returns subscription', () => {
   const $scope = new Scope();
 
   const unsubSpy = jest.fn();
-  const subSpy = jest.fn(() => unsubSpy);
+  const subSpy = jest.fn<any, any>(() => unsubSpy);
   const observable = new Rx.Observable(subSpy);
 
   const subscription = subscribeWithScope($scope as any, observable);

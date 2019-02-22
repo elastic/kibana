@@ -27,10 +27,10 @@ const timestamp = new Date(Date.UTC(2012, 1, 1));
 const mockConsoleLog = jest.spyOn(global.console, 'log').mockImplementation(() => {
   // noop
 });
-jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
+jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
 
 import { createWriteStream } from 'fs';
-const mockCreateWriteStream = createWriteStream as jest.Mock<typeof createWriteStream>;
+const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
 
 import { LoggingConfig, LoggingService } from '.';
 

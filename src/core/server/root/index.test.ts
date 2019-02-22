@@ -178,7 +178,7 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
 test('stops services if consequent logger upgrade fails', async () => {
   const onShutdown = new BehaviorSubject<string | null>(null);
-  const mockOnShutdown = jest.fn(() => {
+  const mockOnShutdown = jest.fn<any, any>(() => {
     onShutdown.next('completed');
     onShutdown.complete();
   });

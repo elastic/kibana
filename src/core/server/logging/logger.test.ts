@@ -27,7 +27,7 @@ let appenderMocks: Appender[];
 let logger: BaseLogger;
 
 const timestamp = new Date(2012, 1, 1);
-jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
+jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
 
 beforeEach(() => {
   appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
