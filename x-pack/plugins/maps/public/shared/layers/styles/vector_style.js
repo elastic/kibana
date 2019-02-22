@@ -13,6 +13,7 @@ import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -133,7 +134,7 @@ export class VectorStyle extends AbstractStyle {
       }
 
       const field = _.get(properties[propertyName], 'options.field', {});
-      if (field.origin === 'source' && field.name) {
+      if (field.origin === SOURCE_DATA_ID_ORIGIN && field.name) {
         fieldNames.push(field.name);
       }
     });

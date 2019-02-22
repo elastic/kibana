@@ -38,6 +38,7 @@ import {
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
+import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
@@ -319,7 +320,7 @@ function updateSourceDataRequest(state, action) {
     return state;
   }
   const dataRequest =   layerDescriptor.__dataRequests.find(dataRequest => {
-    return dataRequest.dataId === 'source';
+    return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
   });
   if (!dataRequest) {
     return state;

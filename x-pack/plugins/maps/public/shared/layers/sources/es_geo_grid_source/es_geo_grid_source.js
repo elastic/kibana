@@ -20,6 +20,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../../../common/constants';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -263,7 +264,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: 'source'
+            origin: SOURCE_DATA_ID_ORIGIN
           },
           color: 'Blues'
         }
@@ -274,7 +275,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: 'source'
+            origin: SOURCE_DATA_ID_ORIGIN
           },
           minSize: 4,
           maxSize: 32,

@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import { FeatureTooltip } from '../../components/map/feature_tooltip';
 import _ from 'lodash';
 
@@ -125,7 +125,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         label,
         name,
-        origin: 'source'
+        origin: SOURCE_DATA_ID_ORIGIN
       };
     });
     const joinFields = [];
@@ -282,11 +282,10 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
     const searchFilters = this._getSearchFilters(dataFilters);
-    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
       const sourceDataRequest = this.getSourceDataRequest();
       return {
@@ -296,18 +295,18 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
       }, searchFilters);
-      stopLoading(sourceDataId, requestToken, data, meta);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, meta);
       return {
         refreshed: true,
         featureCollection: data
       };
     } catch (error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
       return  {
         refreshed: false
       };
