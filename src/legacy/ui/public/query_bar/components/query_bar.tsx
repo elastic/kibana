@@ -85,7 +85,9 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (
+    { isPaused, refreshInterval }: { isPaused: boolean; refreshInterval: number }
+  ) => void;
 }
 
 interface State {
