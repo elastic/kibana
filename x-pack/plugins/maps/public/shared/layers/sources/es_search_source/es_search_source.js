@@ -71,6 +71,10 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  getMetricFields() {
+    return [];
+  }
+
   getFieldNames() {
     return [
       this._descriptor.geoField,
