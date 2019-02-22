@@ -32,88 +32,92 @@ function setup() {
   return { service, fatalErrors, startContract };
 }
 
-it('subscribes to sources passed to add(), unsubscribes on stop', () => {
-  const { service, startContract } = setup();
+describe('addLoadingCount()', async () => {
+  it('subscribes to passed in sources, unsubscribes on stop', () => {
+    const { service, startContract } = setup();
 
-  const unsubA = jest.fn();
-  const subA = jest.fn().mockReturnValue(unsubA);
-  startContract.addLoadingCount(new Rx.Observable(subA));
-  expect(subA).toHaveBeenCalledTimes(1);
-  expect(unsubA).not.toHaveBeenCalled();
+    const unsubA = jest.fn();
+    const subA = jest.fn().mockReturnValue(unsubA);
+    startContract.addLoadingCount(new Rx.Observable(subA));
+    expect(subA).toHaveBeenCalledTimes(1);
+    expect(unsubA).not.toHaveBeenCalled();
 
-  const unsubB = jest.fn();
-  const subB = jest.fn().mockReturnValue(unsubB);
-  startContract.addLoadingCount(new Rx.Observable(subB));
-  expect(subB).toHaveBeenCalledTimes(1);
-  expect(unsubB).not.toHaveBeenCalled();
+    const unsubB = jest.fn();
+    const subB = jest.fn().mockReturnValue(unsubB);
+    startContract.addLoadingCount(new Rx.Observable(subB));
+    expect(subB).toHaveBeenCalledTimes(1);
+    expect(unsubB).not.toHaveBeenCalled();
 
-  service.stop();
+    service.stop();
 
-  expect(subA).toHaveBeenCalledTimes(1);
-  expect(unsubA).toHaveBeenCalledTimes(1);
-  expect(subB).toHaveBeenCalledTimes(1);
-  expect(unsubB).toHaveBeenCalledTimes(1);
+    expect(subA).toHaveBeenCalledTimes(1);
+    expect(unsubA).toHaveBeenCalledTimes(1);
+    expect(subB).toHaveBeenCalledTimes(1);
+    expect(unsubB).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds a fatal error if source observables emit an error', async () => {
+    const { startContract, fatalErrors } = setup();
+
+    startContract.addLoadingCount(Rx.throwError(new Error('foo bar')));
+    expect(fatalErrors.add.mock.calls).toMatchSnapshot();
+  });
+
+  it('adds a fatal error if source observable emits a negative number', async () => {
+    const { startContract, fatalErrors } = setup();
+
+    startContract.addLoadingCount(Rx.of(1, 2, 3, 4, -9));
+    expect(fatalErrors.add.mock.calls).toMatchSnapshot();
+  });
 });
 
-it('emits 0 initially, the right count when sources emit their own count, and ends with zero', async () => {
-  const { service, startContract } = setup();
+describe('getLoadingCount$()', async () => {
+  it('emits 0 initially, the right count when sources emit their own count, and ends with zero', async () => {
+    const { service, startContract } = setup();
 
-  const countA$ = new Rx.Subject<number>();
-  const countB$ = new Rx.Subject<number>();
-  const countC$ = new Rx.Subject<number>();
-  const promise = startContract
-    .getLoadingCount$()
-    .pipe(toArray())
-    .toPromise();
+    const countA$ = new Rx.Subject<number>();
+    const countB$ = new Rx.Subject<number>();
+    const countC$ = new Rx.Subject<number>();
+    const promise = startContract
+      .getLoadingCount$()
+      .pipe(toArray())
+      .toPromise();
 
-  startContract.addLoadingCount(countA$);
-  startContract.addLoadingCount(countB$);
-  startContract.addLoadingCount(countC$);
+    startContract.addLoadingCount(countA$);
+    startContract.addLoadingCount(countB$);
+    startContract.addLoadingCount(countC$);
 
-  countA$.next(100);
-  countB$.next(10);
-  countC$.next(1);
-  countA$.complete();
-  countB$.next(20);
-  countC$.complete();
-  countB$.next(0);
+    countA$.next(100);
+    countB$.next(10);
+    countC$.next(1);
+    countA$.complete();
+    countB$.next(20);
+    countC$.complete();
+    countB$.next(0);
 
-  service.stop();
-  expect(await promise).toMatchSnapshot();
-});
+    service.stop();
+    expect(await promise).toMatchSnapshot();
+  });
 
-it('only emits when loading count changes', async () => {
-  const { service, startContract } = setup();
+  it('only emits when loading count changes', async () => {
+    const { service, startContract } = setup();
 
-  const count$ = new Rx.Subject<number>();
-  const promise = startContract
-    .getLoadingCount$()
-    .pipe(toArray())
-    .toPromise();
+    const count$ = new Rx.Subject<number>();
+    const promise = startContract
+      .getLoadingCount$()
+      .pipe(toArray())
+      .toPromise();
 
-  startContract.addLoadingCount(count$);
-  count$.next(0);
-  count$.next(0);
-  count$.next(0);
-  count$.next(0);
-  count$.next(0);
-  count$.next(1);
-  count$.next(1);
-  service.stop();
+    startContract.addLoadingCount(count$);
+    count$.next(0);
+    count$.next(0);
+    count$.next(0);
+    count$.next(0);
+    count$.next(0);
+    count$.next(1);
+    count$.next(1);
+    service.stop();
 
-  expect(await promise).toMatchSnapshot();
-});
-
-it('adds a fatal error if count observables emit an error', async () => {
-  const { startContract, fatalErrors } = setup();
-
-  startContract.addLoadingCount(Rx.throwError(new Error('foo bar')));
-  expect(fatalErrors.add.mock.calls).toMatchSnapshot();
-});
-
-it('adds a fatal error if count observable emits a negative number', async () => {
-  const { startContract, fatalErrors } = setup();
-
-  startContract.addLoadingCount(Rx.of(1, 2, 3, 4, -9));
-  expect(fatalErrors.add.mock.calls).toMatchSnapshot();
+    expect(await promise).toMatchSnapshot();
+  });
 });
