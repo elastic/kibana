@@ -66,13 +66,13 @@ export class Node extends React.PureComponent<Props, State> {
             <SquareOuter color={color}>
               <SquareInner color={color}>
                 {valueMode ? (
-                  <ValueInner>
+                  <ValueInner aria-label={`${node.name}, click to open menu`}>
                     <Label color={color}>{node.name}</Label>
                     <Value color={color}>{value}</Value>
                   </ValueInner>
                 ) : (
                   ellipsisMode && (
-                    <ValueInner>
+                    <ValueInner aria-label={`${node.name}, click to open menu`}>
                       <Label color={color}>...</Label>
                     </ValueInner>
                   )
@@ -126,7 +126,7 @@ const SquareInner = styled<ColorProps, 'div'>('div')`
   background-color: ${props => props.color};
 `;
 
-const ValueInner = styled.div`
+const ValueInner = styled.button`
   position: absolute;
   top: 0;
   left: 0;
@@ -139,6 +139,13 @@ const ValueInner = styled.div`
   padding: 1em;
   overflow: hidden;
   flex-wrap: wrap;
+  width: 100%;
+  border: none;
+  &:focus {
+    outline: none !important;
+    border: 3px solid ${params => params.theme.eui.euiFocusRingColor};
+    box-shadow: none;
+  }
 `;
 
 const Value = styled<ColorProps, 'div'>('div')`
