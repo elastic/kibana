@@ -24,6 +24,8 @@ import {
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
+const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
+const WATCHER_INDICES = ['.watches', '.triggered-watches'];
 
 export interface ReindexService {
   /**
@@ -654,10 +656,10 @@ export const reindexServiceFactory = (
 
 export const isMlIndex = (indexName: string) => {
   const sourceName = sourceNameForIndex(indexName);
-  return sourceName === '.ml-state' || sourceName === '.ml-anomalies';
+  return ML_INDICES.indexOf(sourceName) >= 0;
 };
 
 export const isWatcherIndex = (indexName: string) => {
   const sourceName = sourceNameForIndex(indexName);
-  return sourceName === '.watches' || sourceName === '.triggered-watches';
+  return WATCHER_INDICES.indexOf(sourceName) >= 0;
 };

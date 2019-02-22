@@ -464,11 +464,13 @@ describe('reindexService', () => {
     it('is true for ML indices', () => {
       expect(isMlIndex('.ml-state')).toBe(true);
       expect(isMlIndex('.ml-anomalies')).toBe(true);
+      expect(isMlIndex('.ml-config')).toBe(true);
     });
 
     it('is true for ML re-indexed indices', () => {
       expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-state`)).toBe(true);
       expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-anomalies`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-config`)).toBe(true);
     });
   });
 
