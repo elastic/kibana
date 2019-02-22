@@ -79,19 +79,13 @@ export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, se
               <WithSummary>
                 {({ buckets }) => (
                   <WithLogPosition>
-                    {({
-                      jumpToTargetPosition,
-                      reportVisibleSummary,
-                      visibleMidpointTime,
-                      visibleTimeInterval,
-                    }) => (
+                    {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
                       <LogMinimap
                         height={height}
                         width={width}
                         highlightedInterval={visibleTimeInterval}
                         intervalSize={intervalSize}
                         jumpToTarget={jumpToTargetPosition}
-                        reportVisibleInterval={reportVisibleSummary}
                         summaryBuckets={buckets}
                         target={visibleMidpointTime}
                       />
