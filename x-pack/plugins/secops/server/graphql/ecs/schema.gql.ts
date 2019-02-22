@@ -13,6 +13,7 @@ export const ecsSchema = gql`
     id: Float
     module: String
     severity: Float
+    action: String
     type: String
   }
 
@@ -98,7 +99,7 @@ export const ecsSchema = gql`
   }
 
   type ECS {
-    _id: String
+    _id: String!
     _index: String
     destination: DestinationEcsFields
     event: EventEcsFields

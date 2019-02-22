@@ -224,7 +224,7 @@ export interface EcsEdges {
 }
 
 export interface Ecs {
-  _id?: string | null;
+  _id: string;
 
   _index?: string | null;
 
@@ -263,6 +263,8 @@ export interface EventEcsFields {
   module?: string | null;
 
   severity?: number | null;
+
+  action?: string | null;
 
   type?: string | null;
 }
@@ -725,7 +727,7 @@ export namespace GetEventsQuery {
   export type Node = {
     __typename?: 'ECS';
 
-    _id?: string | null;
+    _id: string;
 
     _index?: string | null;
 
@@ -747,7 +749,7 @@ export namespace GetEventsQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    type?: string | null;
+    action?: string | null;
 
     severity?: number | null;
 
@@ -1273,7 +1275,7 @@ export namespace GetTimelineQuery {
   export type Node = {
     __typename?: 'ECS';
 
-    _id?: string | null;
+    _id: string;
 
     _index?: string | null;
 
@@ -1295,7 +1297,7 @@ export namespace GetTimelineQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    type?: string | null;
+    action?: string | null;
 
     severity?: number | null;
 

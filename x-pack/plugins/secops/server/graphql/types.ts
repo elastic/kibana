@@ -253,7 +253,7 @@ export interface EcsEdges {
 }
 
 export interface Ecs {
-  _id?: string | null;
+  _id: string;
 
   _index?: string | null;
 
@@ -292,6 +292,8 @@ export interface EventEcsFields {
   module?: string | null;
 
   severity?: number | null;
+
+  action?: string | null;
 
   type?: string | null;
 }
@@ -1308,7 +1310,7 @@ export namespace EcsEdgesResolvers {
 
 export namespace EcsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = Ecs> {
-    _id?: IdResolver<string | null, TypeParent, Context>;
+    _id?: IdResolver<string, TypeParent, Context>;
 
     _index?: IndexResolver<string | null, TypeParent, Context>;
 
@@ -1329,7 +1331,7 @@ export namespace EcsResolvers {
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
   }
 
-  export type IdResolver<R = string | null, Parent = Ecs, Context = SecOpsContext> = Resolver<
+  export type IdResolver<R = string, Parent = Ecs, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context
@@ -1419,6 +1421,8 @@ export namespace EventEcsFieldsResolvers {
 
     severity?: SeverityResolver<number | null, TypeParent, Context>;
 
+    action?: ActionResolver<string | null, TypeParent, Context>;
+
     type?: TypeResolver<string | null, TypeParent, Context>;
   }
 
@@ -1444,6 +1448,11 @@ export namespace EventEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type SeverityResolver<
     R = number | null,
+    Parent = EventEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ActionResolver<
+    R = string | null,
     Parent = EventEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

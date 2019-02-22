@@ -81,26 +81,27 @@ export const formatUncommonProcessesData = (
   fields: ReadonlyArray<string>,
   hit: UncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
-): UncommonProcessesEdges => {
-  const init: UncommonProcessesEdges = {
-    node: {
-      _id: '',
-      instances: 0,
-      process: {},
-      host: [],
+): UncommonProcessesEdges =>
+  fields.reduce<UncommonProcessesEdges>(
+    (flattenedFields, fieldName) => {
+      flattenedFields.node._id = hit._id;
+      flattenedFields.node.instances = getOr(0, 'total.value', hit);
+      flattenedFields.node.host = hit.host;
+      if (hit.cursor) {
+        flattenedFields.cursor.value = hit.cursor;
+      }
+      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
     },
-    cursor: {
-      value: '',
-      tiebreaker: null,
-    },
-  };
-  return fields.reduce((flattenedFields, fieldName) => {
-    flattenedFields.node._id = hit._id;
-    flattenedFields.node.instances = getOr(0, 'total.value', hit);
-    flattenedFields.node.host = hit.host;
-    if (hit.cursor) {
-      flattenedFields.cursor.value = hit.cursor;
+    {
+      node: {
+        _id: '',
+        instances: 0,
+        process: {},
+        host: [],
+      },
+      cursor: {
+        value: '',
+        tiebreaker: null,
+      },
     }
-    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-  }, init);
-};
+  );

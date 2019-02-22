@@ -150,7 +150,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                processName
+                defaultToEmptyTag(processName)
               )
             }
           />

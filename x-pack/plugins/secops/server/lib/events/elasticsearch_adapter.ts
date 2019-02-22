@@ -56,21 +56,22 @@ export const formatEventsData = (
   fields: ReadonlyArray<string>,
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
-) => {
-  const init: EcsEdges = {
-    node: {},
-    cursor: {
-      value: '',
-      tiebreaker: null,
+) =>
+  fields.reduce<EcsEdges>(
+    (flattenedFields, fieldName) => {
+      flattenedFields.node._id = hit._id;
+      flattenedFields.node._index = hit._index;
+      if (hit.sort && hit.sort.length > 1) {
+        flattenedFields.cursor.value = hit.sort[0];
+        flattenedFields.cursor.tiebreaker = hit.sort[1];
+      }
+      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
     },
-  };
-  return fields.reduce((flattenedFields, fieldName) => {
-    flattenedFields.node._id = hit._id;
-    flattenedFields.node._index = hit._index;
-    if (hit.sort && hit.sort.length > 1) {
-      flattenedFields.cursor.value = hit.sort[0];
-      flattenedFields.cursor.tiebreaker = hit.sort[1];
+    {
+      node: { _id: '' },
+      cursor: {
+        value: '',
+        tiebreaker: null,
+      },
     }
-    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-  }, init);
-};
+  );

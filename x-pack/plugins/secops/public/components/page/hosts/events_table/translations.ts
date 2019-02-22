@@ -6,27 +6,31 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EVENTS = i18n.translate('xpack.secops.eventsTable.events', {
+export const EVENTS = i18n.translate('xpack.secops.eventsTable.eventsTitle', {
   defaultMessage: 'Events',
 });
 
-export const HOST_NAME = i18n.translate('xpack.secops.eventsTable.hostsName', {
+export const HOST_NAME = i18n.translate('xpack.secops.eventsTable.hostsNameTitle', {
   defaultMessage: 'Host Name',
 });
 
-export const EVENT_TYPE = i18n.translate('xpack.secops.eventsTable.eventType', {
+export const EVENT_ACTION = i18n.translate('xpack.secops.eventsTable.eventTypeAction', {
+  defaultMessage: 'Event Action',
+});
+
+export const EVENT_TYPE = i18n.translate('xpack.secops.eventsTable.eventTypeTitle', {
   defaultMessage: 'Event type',
 });
 
-export const SOURCE = i18n.translate('xpack.secops.eventsTable.source', {
+export const SOURCE = i18n.translate('xpack.secops.eventsTable.sourceTitle', {
   defaultMessage: 'Source',
 });
 
-export const DESTINATION = i18n.translate('xpack.secops.eventsTable.destination', {
+export const DESTINATION = i18n.translate('xpack.secops.eventsTable.destinationTitle', {
   defaultMessage: 'Destination',
 });
 
-export const LOCATION = i18n.translate('xpack.secops.eventsTable.location', {
+export const LOCATION = i18n.translate('xpack.secops.eventsTable.locationTitle', {
   defaultMessage: 'Location',
 });
 

@@ -23,8 +23,7 @@ import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types
 
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getOrEmptyStringTag } from '../../../empty_string';
-import { getEmptyValue } from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
@@ -131,7 +130,7 @@ export const createDraggable = (
             <FormattedRelative value={new Date(summaryValue)} />
           </EuiToolTip>
         ) : (
-          <>{getOrEmptyStringTag(summaryValue)}</>
+          <>{defaultToEmptyTag(summaryValue)}</>
         )
       }
     />

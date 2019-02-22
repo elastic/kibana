@@ -7,10 +7,8 @@
 export const extendMap = (
   path: string,
   map: Readonly<Record<string, string>>
-): Readonly<Record<string, string>> => {
-  const init: Record<string, string> = {};
-  return Object.entries(map).reduce((accum, [key, value]) => {
+): Readonly<Record<string, string>> =>
+  Object.entries(map).reduce<Record<string, string>>((accum, [key, value]) => {
     accum[`${path}.${key}`] = `${path}.${value}`;
     return accum;
-  }, init);
-};
+  }, {});

@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { cloneDeep, noop, omit } from 'lodash/fp';
+import { cloneDeep, noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -67,8 +67,8 @@ describe('suricata_row_renderer', () => {
   });
 
   test('should render a suricata row even if it does not have a suricata signature', () => {
-    const withoutSignature = omit('suricata.eve.alert.signature', suricata);
-    const children = suricataRowRenderer.renderRow(withoutSignature, <span>some children</span>);
+    delete suricata!.suricata!.eve!.alert!.signature;
+    const children = suricataRowRenderer.renderRow(suricata, <span>some children</span>);
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
