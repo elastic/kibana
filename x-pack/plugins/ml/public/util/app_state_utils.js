@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
 import { distinctUntilChanged } from 'rxjs/operators';
+
+function hasEqualKeys(a, b) {
+  return isEqual(
+    Object.keys(a).sort(),
+    Object.keys(b).sort()
+  );
+}
 
 export function initializeAppState(AppState, stateName, defaultState) {
   const appState = new AppState();
@@ -15,28 +22,29 @@ export function initializeAppState(AppState, stateName, defaultState) {
   // Store the state to the AppState so that it's
   // restored on page refresh.
   if (appState[stateName] === undefined) {
-    appState[stateName] = _.cloneDeep(defaultState) || {};
+    appState[stateName] = cloneDeep(defaultState);
     appState.save();
+  }
+
+  // if defaultState isn't defined or if defaultState matches the current value
+  // stored in the URL in appState then return appState as is.
+  if (defaultState === undefined || appState[stateName] === defaultState) {
+    return appState;
   }
 
   // If defaultState is defined, check if the keys of the defaultState
   // match the one from appState, if not, fall back to the defaultState.
   // If we didn't do this, the structure of an out-of-date appState
   // might break some follow up code. Note that this will not catch any
-  // deeper nested inconsistencies.
-  if (typeof defaultState !== 'undefined' && appState[stateName] !== defaultState) {
-    // if defaultState is an object, check if current appState has the same keys.
-    // if it's not an object, check if defaultState and current appState are of the same type.
-    if (
-      (typeof defaultState === 'object' && !_.isEqual(
-        Object.keys(defaultState).sort(),
-        Object.keys(appState[stateName]).sort()
-      )) ||
-      (typeof defaultState !== typeof appState[stateName])
-    ) {
-      appState[stateName] = _.cloneDeep(defaultState);
-      appState.save();
-    }
+  // deeper nested inconsistencies. this does two checks:
+  // - if defaultState is an object, check if current appState has the same keys.
+  // - if it's not an object, check if defaultState and current appState are of the same type.
+  if (
+    (typeof defaultState === 'object' && !hasEqualKeys(defaultState, appState[stateName])) ||
+    (typeof defaultState !== typeof appState[stateName])
+  ) {
+    appState[stateName] = cloneDeep(defaultState);
+    appState.save();
   }
 
   return appState;
