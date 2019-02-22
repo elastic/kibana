@@ -64,6 +64,21 @@ const getOptions = (
   return OPTIONS[nodeType];
 };
 
+const isEuiBadgeInnerIconElement = (el: any): boolean => {
+  if (
+    el.className &&
+    el.className.baseVal &&
+    el.className.baseVal.includes('euiIcon') &&
+    el.className.baseVal.includes('euiBadge__icon')
+  ) {
+    if (el.tabIndex > -1) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const initialState = {
   isPopoverOpen: false,
 };
@@ -74,6 +89,13 @@ export const WaffleGroupByControls = injectI18n(
   class extends React.PureComponent<Props, State> {
     public static displayName = 'WaffleGroupByControls';
     public readonly state: State = initialState;
+    public isRemovingGroupItem: boolean = false;
+
+    public componentDidUpdate = (prevProps: Props) => {
+      if (this.props.groupBy.length !== prevProps.groupBy.length) {
+        this.isRemovingGroupItem = false;
+      }
+    };
 
     public render() {
       const { nodeType, groupBy, intl } = this.props;
@@ -138,22 +160,32 @@ export const WaffleGroupByControls = injectI18n(
             // In this map the `o && o.field` is totally unnecessary but Typescript is
             // too stupid to realize that the filter above prevents the next map from being null
             .map(o => (
-              <EuiBadge
-                key={o && o.field}
-                iconType="cross"
-                iconOnClick={this.handleRemove((o && o.field) || '')}
-                iconOnClickAriaLabel={intl.formatMessage(
-                  {
-                    id: 'xpack.infra.waffle.removeGroupingItemAriaLabel',
-                    defaultMessage: 'Remove {groupingItem} grouping',
-                  },
-                  {
-                    groupingItem: o && o.text,
-                  }
-                )}
+              // This buffer exists to capture events and *potentially* stop propagation so that A) the
+              // EuiFilterButton onClick handler doesn't cancel out the keyUp handler that eventually
+              // invokes "iconOnClick", and B) the context menu doesn't open / close just because an item is removed.
+              // Detailed writeup: https://github.com/elastic/kibana/issues/28159
+              // tslint:disable-next-line
+              <span
+                onKeyDown={this.handleGroupItemKeyEvent}
+                onClick={this.handleGroupItemClickEvent}
               >
-                {o && o.text}
-              </EuiBadge>
+                <EuiBadge
+                  key={o && o.field}
+                  iconType="cross"
+                  iconOnClick={this.handleRemove((o && o.field) || '')}
+                  iconOnClickAriaLabel={intl.formatMessage(
+                    {
+                      id: 'xpack.infra.waffle.removeGroupingItemAriaLabel',
+                      defaultMessage: 'Remove {groupingItem} grouping',
+                    },
+                    {
+                      groupingItem: o && o.text,
+                    }
+                  )}
+                >
+                  {o && o.text}
+                </EuiBadge>
+              </span>
             ))
         ) : (
           <FormattedMessage id="xpack.infra.waffle.groupByAllTitle" defaultMessage="All" />
@@ -188,9 +220,25 @@ export const WaffleGroupByControls = injectI18n(
       this.props.onChange(groupBy.filter(g => g.field !== field));
       const options = this.props.customOptions.filter(g => g.field !== field);
       this.props.onChangeCustomOptions(options);
+
       // We need to close the panel after we rmeove the pill icon otherwise
       // it will remain open because the click is still captured by the EuiFilterButton
       setTimeout(() => this.handleClose());
+    };
+
+    private handleGroupItemKeyEvent = (e: React.KeyboardEvent<HTMLSpanElement>) => {
+      const element = e.target;
+      const keyCodes = [13, 32]; // Enter, Spacebar
+      if (keyCodes.includes(e.which) && isEuiBadgeInnerIconElement(element)) {
+        this.isRemovingGroupItem = true;
+      }
+    };
+
+    private handleGroupItemClickEvent = (e: React.MouseEvent<HTMLSpanElement>) => {
+      const element = e.target;
+      if (isEuiBadgeInnerIconElement(element)) {
+        e.stopPropagation();
+      }
     };
 
     private handleClose = () => {
@@ -198,6 +246,10 @@ export const WaffleGroupByControls = injectI18n(
     };
 
     private handleToggle = () => {
+      if (this.isRemovingGroupItem) {
+        return;
+      }
+
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
     };
 
