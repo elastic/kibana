@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter } from 'react-router-dom';
 import renderer from 'react-test-renderer';
 import { mockFunction } from '../../utils/test_utils';
 import { CodeSymbolTree } from './code_symbol_tree';

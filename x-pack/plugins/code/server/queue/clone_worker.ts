@@ -17,7 +17,6 @@ import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
-import { SocketService } from '../socket_service';
 import { AbstractGitWorker } from './abstract_git_worker';
 import { IndexWorker } from './index_worker';
 import { Job } from './job';
@@ -31,8 +30,7 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
     private readonly indexWorker: IndexWorker,
-    private readonly repoServiceFactory: RepositoryServiceFactory,
-    private readonly socketService?: SocketService
+    private readonly repoServiceFactory: RepositoryServiceFactory
   ) {
     super(queue, log, client, serverOptions);
   }
@@ -44,23 +42,12 @@ export class CloneWorker extends AbstractGitWorker {
     const repo = RepositoryUtils.buildRepository(url);
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
       this.updateProgress(repo.uri, progress, cloneProgress);
-      if (this.socketService) {
-        this.socketService.broadcastCloneProgress(repo.uri, progress, cloneProgress);
-      }
     });
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     this.log.info(`Clone job done for ${res.repo.uri}`);
     await super.onJobCompleted(job, res);
-
-    if (this.socketService) {
-      this.socketService.broadcastCloneProgress(
-        res.repo.uri,
-        WorkerReservedProgress.COMPLETED,
-        undefined
-      );
-    }
 
     // Throw out a repository index request after 1 second.
     return delay(async () => {

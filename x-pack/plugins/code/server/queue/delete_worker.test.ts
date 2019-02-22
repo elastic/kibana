@@ -7,12 +7,10 @@
 import sinon from 'sinon';
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
 
-import { WorkerReservedProgress } from '../../model';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
-import { SocketService } from '../socket_service';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
 import { DeleteWorker } from './delete_worker';
@@ -30,13 +28,6 @@ afterEach(() => {
 });
 
 test('Execute delete job.', async () => {
-  // Setup SocketService
-  const broadcastDeleteProgressSpy = sinon.spy();
-  const socketService = {
-    broadcastDeleteProgress: emptyAsyncFunc,
-  };
-  socketService.broadcastDeleteProgress = broadcastDeleteProgressSpy;
-
   // Setup RepositoryService
   const removeSpy = sinon.fake.returns(Promise.resolve());
   const repoService = {
@@ -81,8 +72,7 @@ test('Execute delete job.', async () => {
     {} as ServerOptions,
     (cancellationService as any) as CancellationSerivce,
     (lspService as any) as LspService,
-    (repoServiceFactory as any) as RepositoryServiceFactory,
-    (socketService as any) as SocketService
+    (repoServiceFactory as any) as RepositoryServiceFactory
   );
 
   await deleteWorker.executeJob({
@@ -91,10 +81,6 @@ test('Execute delete job.', async () => {
     },
     options: {},
   });
-
-  expect(broadcastDeleteProgressSpy.calledTwice).toBeTruthy();
-  expect(broadcastDeleteProgressSpy.getCall(0).args[1]).toEqual(WorkerReservedProgress.INIT);
-  expect(broadcastDeleteProgressSpy.getCall(1).args[1]).toEqual(WorkerReservedProgress.COMPLETED);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
 
@@ -121,8 +107,7 @@ test('On delete job enqueued.', async () => {
     {} as ServerOptions,
     {} as CancellationSerivce,
     {} as LspService,
-    {} as RepositoryServiceFactory,
-    {} as SocketService
+    {} as RepositoryServiceFactory
   );
 
   await deleteWorker.onJobEnqueued({
@@ -150,8 +135,7 @@ test('On delete job completed.', async () => {
     {} as ServerOptions,
     {} as CancellationSerivce,
     {} as LspService,
-    {} as RepositoryServiceFactory,
-    {} as SocketService
+    {} as RepositoryServiceFactory
   );
 
   await deleteWorker.onJobCompleted(

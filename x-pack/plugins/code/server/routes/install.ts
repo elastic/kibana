@@ -10,18 +10,12 @@ import { InstallationType } from '../../common/installation';
 import { InstallManager } from '../lsp/install_manager';
 import { LanguageServerDefinition, LanguageServers } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
-import { ServerOptions } from '../server_options';
-import { SocketService } from '../socket_service';
 
 export function installRoute(
   server: Server,
-  socketService: SocketService,
   lspService: LspService,
-  installManager: InstallManager,
-  serverOptions: ServerOptions
+  installManager: InstallManager
 ) {
-  installManager.on(socketService.broadcastInstallProgress);
-
   const status = (def: LanguageServerDefinition) => ({
     name: def.name,
     status: lspService.languageServerStatus(def.name),

@@ -10,7 +10,6 @@ import { WorkerReservedProgress } from '../../model';
 import { IndexerFactory } from '../indexer';
 import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
-import { SocketService } from '../socket_service';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
@@ -28,13 +27,6 @@ afterEach(() => {
 });
 
 test('Execute index job.', async () => {
-  // Setup SocketService
-  const broadcastIndexProgressSpy = sinon.spy();
-  const socketService = {
-    broadcastIndexProgress: emptyAsyncFunc,
-  };
-  socketService.broadcastIndexProgress = broadcastIndexProgressSpy;
-
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
   const registerIndexJobTokenSpy = sinon.spy();
@@ -67,8 +59,7 @@ test('Execute index job.', async () => {
     log,
     {} as EsClient,
     [(indexerFactory as any) as IndexerFactory],
-    (cancellationService as any) as CancellationSerivce,
-    (socketService as any) as SocketService
+    (cancellationService as any) as CancellationSerivce
   );
 
   await indexWorker.executeJob({
@@ -79,10 +70,6 @@ test('Execute index job.', async () => {
     cancellationToken: cToken,
   });
 
-  expect(broadcastIndexProgressSpy.calledTwice).toBeTruthy();
-  expect(broadcastIndexProgressSpy.getCall(0).args[1]).toEqual(WorkerReservedProgress.INIT);
-  expect(broadcastIndexProgressSpy.getCall(1).args[1]).toEqual(WorkerReservedProgress.COMPLETED);
-
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
 
   expect(createSpy.calledOnce).toBeTruthy();
@@ -91,13 +78,6 @@ test('Execute index job.', async () => {
 });
 
 test('Execute index job and then cancel.', async () => {
-  // Setup SocketService
-  const broadcastIndexProgressSpy = sinon.spy();
-  const socketService = {
-    broadcastIndexProgress: emptyAsyncFunc,
-  };
-  socketService.broadcastIndexProgress = broadcastIndexProgressSpy;
-
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
   const registerIndexJobTokenSpy = sinon.spy();
@@ -130,8 +110,7 @@ test('Execute index job and then cancel.', async () => {
     log,
     {} as EsClient,
     [(indexerFactory as any) as IndexerFactory],
-    (cancellationService as any) as CancellationSerivce,
-    (socketService as any) as SocketService
+    (cancellationService as any) as CancellationSerivce
   );
 
   await indexWorker.executeJob({
@@ -144,10 +123,6 @@ test('Execute index job and then cancel.', async () => {
 
   // Cancel the index job.
   cToken.cancel();
-
-  expect(broadcastIndexProgressSpy.calledTwice).toBeTruthy();
-  expect(broadcastIndexProgressSpy.getCall(0).args[1]).toEqual(WorkerReservedProgress.INIT);
-  expect(broadcastIndexProgressSpy.getCall(1).args[1]).toEqual(WorkerReservedProgress.COMPLETED);
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
 
@@ -170,8 +145,7 @@ test('On index job enqueued.', async () => {
     log,
     esClient as EsClient,
     [],
-    {} as CancellationSerivce,
-    {} as SocketService
+    {} as CancellationSerivce
   );
 
   await indexWorker.onJobEnqueued({
@@ -197,8 +171,7 @@ test('On index job completed.', async () => {
     log,
     esClient as EsClient,
     [],
-    {} as CancellationSerivce,
-    {} as SocketService
+    {} as CancellationSerivce
   );
 
   await indexWorker.onJobCompleted(

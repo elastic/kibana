@@ -10,6 +10,10 @@ export const loadStatus = createAction<string>('LOAD STATUS');
 export const loadStatusSuccess = createAction<any>('LOAD STATUS SUCCESS');
 export const loadStatusFailed = createAction<string>('LOAD STATUS FAILED');
 
+export const pollRepoCloneStatus = createAction<any>('POLL CLONE STATUS');
+export const pollRepoIndexStatus = createAction<any>('POLL INDEX STATUS');
+export const pollRepoDeleteStatus = createAction<any>('POLL DELETE STATUS');
+
 export const loadRepo = createAction<string>('LOAD REPO');
 export const loadRepoSuccess = createAction<any>('LOAD REPO SUCCESS');
 export const loadRepoFailed = createAction<any>('LOAD REPO FAILED');

@@ -13,11 +13,7 @@ import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { App } from './components/app';
-import { bindSocket } from './socket';
 import { store } from './stores';
-
-// Bind the web socket client.
-bindSocket(store);
 
 const app = uiModules.get('apps/code');
 

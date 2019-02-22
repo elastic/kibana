@@ -19,11 +19,11 @@ import { RootState } from '../reducers';
 
 const matchSelector = (state: RootState) => state.route.match;
 
-const pattern = (action: Action<any>) =>
+export const cloneCompletedPattern = (action: Action<any>) =>
   action.type === String(updateCloneProgress) &&
   action.payload.progress === WorkerReservedProgress.COMPLETED;
 
-const deletePattern = (action: Action<any>) =>
+const deleteCompletedPattern = (action: Action<any>) =>
   action.type === String(updateDeleteProgress) &&
   action.payload.progress === WorkerReservedProgress.COMPLETED;
 
@@ -35,7 +35,7 @@ function* handleRepoCloneSuccess() {
 }
 
 export function* watchRepoCloneSuccess() {
-  yield takeEvery(pattern, handleRepoCloneSuccess);
+  yield takeEvery(cloneCompletedPattern, handleRepoCloneSuccess);
 }
 
 function* handleRepoDeleteFinished(action: any) {
@@ -43,5 +43,5 @@ function* handleRepoDeleteFinished(action: any) {
 }
 
 export function* watchRepoDeleteFinished() {
-  yield takeEvery(deletePattern, handleRepoDeleteFinished);
+  yield takeEvery(deleteCompletedPattern, handleRepoDeleteFinished);
 }

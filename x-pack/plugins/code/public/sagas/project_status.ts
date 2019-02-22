@@ -5,11 +5,28 @@
  */
 
 import { Action } from 'redux-actions';
-import { all, call, put, takeEvery } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
+import { all, call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
-import { Repository } from '../../model';
-import { fetchReposSuccess } from '../actions';
-import { loadRepoSuccess, loadStatusFailed, loadStatusSuccess } from '../actions';
+
+import { RepositoryUtils } from '../../common/repository_utils';
+import { Repository, RepositoryUri, WorkerReservedProgress } from '../../model';
+import {
+  deleteRepo,
+  fetchReposSuccess,
+  importRepo,
+  indexRepo,
+  loadRepoSuccess,
+  loadStatusFailed,
+  loadStatusSuccess,
+  pollRepoCloneStatus,
+  pollRepoDeleteStatus,
+  pollRepoIndexStatus,
+  updateCloneProgress,
+  updateDeleteProgress,
+  updateIndexProgress,
+} from '../actions';
+import { cloneCompletedPattern } from './status';
 
 function fetchStatus(repoUri: string) {
   return kfetch({
@@ -17,10 +34,9 @@ function fetchStatus(repoUri: string) {
   });
 }
 
-function* loadRepoListStatus(action: Action<Repository[]>) {
+function* loadRepoListStatus(repos: Repository[]) {
   try {
-    const repositories = action.payload!;
-    const promises = repositories.map(repo => call(fetchStatus, repo.uri));
+    const promises = repos.map(repo => call(fetchStatus, repo.uri));
     const statuses = yield all(promises);
     yield put(
       loadStatusSuccess(
@@ -35,13 +51,12 @@ function* loadRepoListStatus(action: Action<Repository[]>) {
   }
 }
 
-function* loadRepoStatus(action: Action<any>) {
+function* loadRepoStatus(repo: Repository) {
   try {
-    const repository = action.payload!;
-    const repoStatus = yield call(fetchStatus, repository.uri);
+    const repoStatus = yield call(fetchStatus, repo.uri);
     yield put(
       loadStatusSuccess({
-        [repository.uri]: repoStatus,
+        [repo.uri]: repoStatus,
       })
     );
   } catch (err) {
@@ -49,10 +64,185 @@ function* loadRepoStatus(action: Action<any>) {
   }
 }
 
-export function* watchLoadRepoListStatus() {
-  yield takeEvery(String(fetchReposSuccess), loadRepoListStatus);
+function* handleRepoStatus(action: Action<any>) {
+  const repository: Repository = action.payload!;
+  yield call(loadRepoStatus, repository);
 }
 
+function* handleRepoListStatus(action: Action<Repository[]>) {
+  const repos: Repository[] = action.payload!;
+  yield call(loadRepoListStatus, repos);
+}
+
+function isInProgress(progress: number): boolean {
+  return progress < WorkerReservedProgress.COMPLETED && progress >= WorkerReservedProgress.INIT;
+}
+
+function* handleRepoListStatusLoaded(action: Action<any>) {
+  const statuses = action.payload;
+  for (const repoUri of Object.keys(statuses)) {
+    const status = statuses[repoUri];
+    if (status.deleteStatus) {
+      yield put(pollRepoDeleteStatus(repoUri));
+    } else if (status.indexStatus) {
+      if (isInProgress(status.indexStatus.progress)) {
+        yield put(pollRepoIndexStatus(repoUri));
+      }
+    } else if (status.gitStatus) {
+      if (isInProgress(status.gitStatus.progress)) {
+        yield put(pollRepoCloneStatus(repoUri));
+      }
+    }
+  }
+}
+
+// `fetchReposSuccess` is issued by the repository admin page.
+export function* watchLoadRepoListStatus() {
+  yield takeEvery(String(fetchReposSuccess), handleRepoListStatus);
+  // After all the status of all the repositoriesin the list has been loaded,
+  // start polling status only for those still in progress.
+  yield takeEvery(String(loadStatusSuccess), handleRepoListStatusLoaded);
+}
+
+// `loadRepoSuccess` is issued by the main source view page.
 export function* watchLoadRepoStatus() {
-  yield takeEvery(String(loadRepoSuccess), loadRepoStatus);
+  yield takeLatest(String(loadRepoSuccess), handleRepoStatus);
+}
+
+const REPO_STATUS_POLLING_FREQ_MS = 1000;
+
+function createRepoStatusPollingHandler(
+  parseRepoUri: (_: Action<any>) => RepositoryUri,
+  handleStatus: any,
+  pollingActionFunction: any
+) {
+  return function*(a: Action<any>) {
+    yield call(delay, REPO_STATUS_POLLING_FREQ_MS);
+
+    const repoUri = parseRepoUri(a);
+    let keepPolling = false;
+    try {
+      const repoStatus = yield call(fetchStatus, repoUri);
+      keepPolling = yield handleStatus(repoStatus, repoUri);
+    } catch (err) {
+      // Fetch repository status error. Ignore and keep trying.
+      keepPolling = true;
+    }
+
+    if (keepPolling) {
+      yield put(pollingActionFunction(repoUri));
+    }
+  };
+}
+
+const handleRepoCloneStatusPolling = createRepoStatusPollingHandler(
+  (action: Action<any>) => {
+    if (action.type === String(importRepo)) {
+      const repoUrl: string = action.payload;
+      return RepositoryUtils.buildRepository(repoUrl).uri;
+    } else if (action.type === String(pollRepoCloneStatus)) {
+      return action.payload;
+    }
+  },
+  function*(status: any, repoUri: RepositoryUri) {
+    if (status.gitStatus) {
+      const { progress, cloneProgress } = status.gitStatus;
+      yield put(
+        updateCloneProgress({
+          progress,
+          repoUri,
+          cloneProgress,
+        })
+      );
+      // Keep polling if the progress is not 100% yet.
+      return isInProgress(progress);
+    } else {
+      // Keep polling if the indexStatus has not been persisted yet.
+      return true;
+    }
+  },
+  pollRepoCloneStatus
+);
+
+export function* watchRepoCloneStatusPolling() {
+  // The repository clone status polling will be triggered by:
+  // * user click import repository
+  // * repeating pollRepoCloneStatus action by the poller itself.
+  yield takeEvery([String(importRepo), String(pollRepoCloneStatus)], handleRepoCloneStatusPolling);
+}
+
+const handleRepoIndexStatusPolling = createRepoStatusPollingHandler(
+  (action: Action<any>) => {
+    if (action.type === String(indexRepo) || action.type === String(pollRepoIndexStatus)) {
+      return action.payload;
+    } else if (action.type === String(updateCloneProgress)) {
+      return action.payload.repoUri;
+    }
+  },
+  function*(status: any, repoUri: RepositoryUri) {
+    if (status.indexStatus) {
+      yield put(
+        updateIndexProgress({
+          progress: status.indexStatus.progress,
+          repoUri,
+        })
+      );
+      // Keep polling if the progress is not 100% yet.
+      return isInProgress(status.indexStatus.progress);
+    } else {
+      // Keep polling if the indexStatus has not been persisted yet.
+      return true;
+    }
+  },
+  pollRepoIndexStatus
+);
+
+export function* watchRepoIndexStatusPolling() {
+  // The repository index status polling will be triggered by:
+  // * user click index repository
+  // * clone is done
+  // * repeating pollRepoIndexStatus action by the poller itself.
+  yield takeEvery(
+    [String(indexRepo), cloneCompletedPattern, String(pollRepoIndexStatus)],
+    handleRepoIndexStatusPolling
+  );
+}
+
+const handleRepoDeleteStatusPolling = createRepoStatusPollingHandler(
+  (action: Action<any>) => {
+    return action.payload;
+  },
+  function*(status: any, repoUri: RepositoryUri) {
+    if (!status.gitStatus && !status.indexStatus && !status.deleteStatus) {
+      // If all the statuses cannot be found, this indicates the the repository has been successfully
+      // removed.
+      yield put(
+        updateDeleteProgress({
+          progress: WorkerReservedProgress.COMPLETED,
+          repoUri,
+        })
+      );
+    }
+
+    if (status.deleteStatus) {
+      yield put(
+        updateDeleteProgress({
+          progress: status.deleteStatus.progress,
+          repoUri,
+        })
+      );
+      return isInProgress(status.deleteStatus.progress);
+    }
+  },
+  pollRepoDeleteStatus
+);
+
+export function* watchRepoDeleteStatusPolling() {
+  // The repository delete status polling will be triggered by:
+  // * user click delete repository
+  // * repeating pollRepoDeleteStatus action by the poller itself.
+  yield takeEvery(
+    [String(deleteRepo), String(pollRepoDeleteStatus)],
+    handleRepoDeleteStatusPolling
+  );
 }
