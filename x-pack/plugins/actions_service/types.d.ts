@@ -33,10 +33,10 @@ interface ActionSavedObjectInstance {
   instanceParams: any;
 }
 
-interface ActionInstance {
+interface ActionInstance<T> {
   name: string;
   actionType: string;
   connectorType: string;
   params: any;
-  connectorParams: any;
+  connectorParams: T;
 }
