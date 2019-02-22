@@ -10,5 +10,7 @@ export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) 
   describe('feature controls', () => {
     loadTestFile(require.resolve('./infrastructure_security'));
     loadTestFile(require.resolve('./infrastructure_spaces'));
+    loadTestFile(require.resolve('./logs_security'));
+    loadTestFile(require.resolve('./logs_spaces'));
   });
 }

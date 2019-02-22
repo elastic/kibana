@@ -93,7 +93,7 @@ export const HomePage = injectUICapabilities(
                                 href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                                 color="primary"
                                 fill
-                                data-test-subj="infraViewSetupInstructionsButton"
+                                data-test-subj="infrastructureViewSetupInstructionsButton"
                               >
                                 {intl.formatMessage({
                                   id:
@@ -109,7 +109,7 @@ export const HomePage = injectUICapabilities(
                                     <EuiButton
                                       color="primary"
                                       onClick={enable}
-                                      data-test-subj="infraChangeSourceConfigurationButton"
+                                      data-test-subj="infrastructureChangeSourceConfigurationButton"
                                     >
                                       {intl.formatMessage({
                                         id: 'xpack.infra.configureSourceActionLabel',

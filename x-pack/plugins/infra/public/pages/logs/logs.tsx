@@ -124,6 +124,7 @@ export const LogsPage = injectUICapabilities(
                                   href={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
                                   color="primary"
                                   fill
+                                  data-test-subj="logsViewSetupInstructionsButton"
                                 >
                                   {intl.formatMessage({
                                     id:
@@ -136,7 +137,11 @@ export const LogsPage = injectUICapabilities(
                                 <EuiFlexItem>
                                   <WithSourceConfigurationFlyoutState>
                                     {({ enable }) => (
-                                      <EuiButton color="primary" onClick={enable}>
+                                      <EuiButton
+                                        color="primary"
+                                        onClick={enable}
+                                        data-test-subj="logsChangeSourceConfigurationButton"
+                                      >
                                         {intl.formatMessage({
                                           id: 'xpack.infra.configureSourceActionLabel',
                                           defaultMessage: 'Change source configuration',

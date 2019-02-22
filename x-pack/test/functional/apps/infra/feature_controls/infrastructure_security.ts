@@ -11,7 +11,7 @@ import { DATE_WITH_DATA } from '../constants';
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'error']);
+  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -70,8 +70,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraViewSetupInstructionsButton');
-          await testSubjects.existOrFail('infraChangeSourceConfigurationButton');
+          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
+          await testSubjects.existOrFail('infrastructureChangeSourceConfigurationButton');
         });
       });
 
@@ -175,8 +175,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('infraChangeSourceConfigurationButton');
+          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
+          await testSubjects.missingOrFail('infrastructureChangeSourceConfigurationButton');
         });
       });
 
@@ -356,9 +356,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    // this is taking place of the usual "no privileges" test by ensuring that if the user
-    // has all logs privileges, it doesn't grant them access to the infrastructure app
-    describe('global logs all privileges', () => {
+    describe('global infrastructure no privileges', () => {
       before(async () => {
         await security.role.create('no_infrastructure_privileges_role', {
           elasticsearch: {
@@ -392,6 +390,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       after(async () => {
         await security.role.delete('no_infrastructure_privileges_role');
         await security.user.delete('no_infrastructure_privileges_user');
+      });
+
+      it(`doesn't show infrastructure navlink`, async () => {
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
+        expect(navLinks).to.not.contain(['Infrastructure']);
       });
 
       it(`infrastructure landing page renders not found page`, async () => {

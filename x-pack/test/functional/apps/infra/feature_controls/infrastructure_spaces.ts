@@ -39,7 +39,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await esArchiver.unload('empty_kibana');
       });
 
-      it('shows Infra navlink', async () => {
+      it('shows Infrastructure navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
