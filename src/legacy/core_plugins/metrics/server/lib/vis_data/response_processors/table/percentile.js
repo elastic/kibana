@@ -33,7 +33,7 @@ export default function percentile(resp, panel, series) {
         return [bucket.key, getAggValue(bucket, m)];
       });
       results.push({
-        id: `${split.id}:${percentile.id}`,
+        id: `${percentile.id}:${split.id}`,
         label,
         data,
       });
