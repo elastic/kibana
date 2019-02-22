@@ -25,7 +25,13 @@ export class FullscreenControl extends React.PureComponent {
 
     return (
       <span>
-        <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global isolate />
+        <Shortcuts
+          name="PRESENTATION"
+          handler={keyHandler}
+          targetNodeSelector="body"
+          global
+          isolate
+        />
         {children({ isFullscreen, toggleFullscreen: this.toggleFullscreen })}
       </span>
     );
