@@ -15,11 +15,9 @@ export default function({ getService }: TestInvoker) {
 
   describe('export', () => {
     const {
-      createExpectEmpty,
       createExpectRbacForbidden,
       expectTypeOrObjectsRequired,
       createExpectVisualizationResults,
-      expectNotSpaceAwareResults,
       exportTest,
     } = exportTestSuiteFactory(esArchiver, supertest);
 
@@ -30,16 +28,6 @@ export default function({ getService }: TestInvoker) {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'forbidden login and find globaltype message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden login and find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -57,16 +45,6 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(),
-        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -82,16 +60,6 @@ export default function({ getService }: TestInvoker) {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'forbidden login and find globaltype message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden login and find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -109,16 +77,6 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(),
-        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -134,16 +92,6 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -161,16 +109,6 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(),
-        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -186,16 +124,6 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -213,16 +141,6 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -238,16 +156,6 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -265,16 +173,6 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
           statusCode: 400,
@@ -290,16 +188,6 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',

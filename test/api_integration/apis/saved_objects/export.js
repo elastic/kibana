@@ -26,7 +26,7 @@ export default function ({ getService }) {
 
   describe('export', () => {
     describe('with kibana index', () => {
-      describe('object ordering', () => {
+      describe('basic amount of saved objects', () => {
         before(() => esArchiver.load('saved_objects/basic'));
         after(() => esArchiver.unload('saved_objects/basic'));
 
@@ -46,6 +46,47 @@ export default function ({ getService }) {
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+            });
+        });
+
+        it('should validate types', async () => {
+          await supertest
+            .get('/api/saved_objects/_export')
+            .query({
+              type: ['foo'],
+            })
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                // eslint-disable-next-line max-len
+                message: 'child "type" fails because [single value of "type" fails because ["type" must be one of [index-pattern, search, visualization, dashboard]]]',
+                validation: { source: 'query', keys: [ 'type' ] },
+              });
+            });
+        });
+
+        it('should validate types in objects', async () => {
+          await supertest
+            .get('/api/saved_objects/_export')
+            .query({
+              objects: JSON.stringify([
+                {
+                  type: 'foo',
+                  id: '1',
+                },
+              ]),
+            })
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                // eslint-disable-next-line max-len
+                message: 'child "objects" fails because ["objects" at position 0 fails because [child "type" fails because ["type" must be one of [index-pattern, search, visualization, dashboard]]]]',
+                validation: { source: 'query', keys: [ 'objects.0.type' ] },
+              });
             });
         });
       });

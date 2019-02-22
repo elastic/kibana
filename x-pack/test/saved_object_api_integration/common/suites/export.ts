@@ -17,8 +17,6 @@ interface ExportTest {
 
 interface ExportTests {
   spaceAwareType: ExportTest;
-  notSpaceAwareType: ExportTest;
-  unknownType: ExportTest;
   noTypeOrObjects: ExportTest;
 }
 
@@ -29,10 +27,6 @@ interface ExportTestDefinition {
 }
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectEmpty = () => (resp: { [key: string]: any }) => {
-    expect(resp.text).to.eql('');
-  };
-
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
     // The best that could be done here is to have an if statement to ensure at least one of the
@@ -49,18 +43,6 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       statusCode: 403,
       error: 'Forbidden',
       message: `Unable to find ${type}, missing action:saved_objects/${type}/find`,
-    });
-  };
-
-  const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
-    const response = JSON.parse(resp.text);
-    expect(response).to.eql({
-      type: 'globaltype',
-      id: '8121a00-8efd-21e7-1cb3-34ab966434445',
-      attributes: { name: 'My favorite global object' },
-      references: [],
-      updated_at: '2017-09-21T18:59:16.270Z',
-      version: response.version,
     });
   };
 
@@ -132,59 +114,6 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
-      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
-        tests.notSpaceAwareType.description
-      } when querying by type`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export?type=globaltype`)
-          .auth(user.username, user.password)
-          .expect(tests.notSpaceAwareType.statusCode)
-          .then(tests.notSpaceAwareType.response);
-      });
-
-      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
-        tests.notSpaceAwareType.description
-      } when querying by objects`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-          .query({
-            objects: JSON.stringify([
-              {
-                type: 'globaltype',
-                id: '8121a00-8efd-21e7-1cb3-34ab966434445',
-              },
-            ]),
-          })
-          .auth(user.username, user.password)
-          .expect(tests.notSpaceAwareType.statusCode)
-          .then(tests.notSpaceAwareType.response);
-      });
-
-      describe('unknown type', () => {
-        it(`should return ${tests.unknownType.statusCode} with ${
-          tests.unknownType.description
-        } when querying by type`, async () => {
-          await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export?type=wigwags`)
-            .auth(user.username, user.password)
-            .expect(tests.unknownType.statusCode)
-            .then(tests.unknownType.response);
-        });
-
-        it(`should return ${tests.unknownType.statusCode} with ${
-          tests.unknownType.description
-        } when querying by objects`, async () => {
-          await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-            .query({
-              objects: JSON.stringify([{ type: 'wigwags', id: '123' }]),
-            })
-            .auth(user.username, user.password)
-            .expect(tests.unknownType.statusCode)
-            .then(tests.unknownType.response);
-        });
-      });
-
       describe('no type or objects', () => {
         it(`should return ${tests.noTypeOrObjects.statusCode} with ${
           tests.noTypeOrObjects.description
@@ -204,11 +133,9 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   exportTest.only = makeExportTest(describe.only);
 
   return {
-    createExpectEmpty,
     createExpectRbacForbidden,
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
-    expectNotSpaceAwareResults,
     exportTest,
   };
 }

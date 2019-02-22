@@ -22,6 +22,7 @@ import stringify from 'json-stable-stringify';
 import { getSortedObjectsForExport } from '../lib/export';
 
 const EXPORT_SIZE_LIMIT = 10000;
+const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
 export const createExportRoute = (prereqs: any) => ({
   path: '/api/saved_objects/_export',
@@ -32,12 +33,14 @@ export const createExportRoute = (prereqs: any) => ({
       query: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string())
+            .items(Joi.string().valid(ALLOWED_TYPES))
             .single()
             .optional(),
           objects: Joi.array()
             .items({
-              type: Joi.string().required(),
+              type: Joi.string()
+                .valid(ALLOWED_TYPES)
+                .required(),
               id: Joi.string().required(),
             })
             .max(EXPORT_SIZE_LIMIT)

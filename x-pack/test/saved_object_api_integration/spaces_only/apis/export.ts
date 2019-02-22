@@ -14,10 +14,8 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
 
   const {
-    createExpectEmpty,
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
-    expectNotSpaceAwareResults,
     exportTest,
   } = exportTestSuiteFactory(esArchiver, supertest);
 
@@ -29,16 +27,6 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.SPACE_1.spaceId),
-        },
-        notSpaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -55,16 +43,6 @@ export default function({ getService }: TestInvoker) {
           description: 'only the visualization',
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.DEFAULT.spaceId),
-        },
-        notSpaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
