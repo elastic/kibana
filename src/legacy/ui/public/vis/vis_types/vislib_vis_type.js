@@ -91,6 +91,11 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         }
 
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
+
+        if (this.vis.params.addLegend) {
+          this.$scope.refreshLegend++;
+          this.$scope.$digest();
+        }
       });
     }
 

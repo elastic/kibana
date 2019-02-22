@@ -146,6 +146,8 @@ uiModules.get('kibana')
               $scope.labels = _.map(labels, label => {
                 return { label: label };
               });
+            } else {
+              $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading…' }) }];
             }
           } else {
             $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
