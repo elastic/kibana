@@ -274,7 +274,6 @@ export const RangeDatePicker = injectI18n(
           <EuiDatePickerRange
             className="euiDatePickerRange--inGroup"
             iconType={false}
-            disabled={disabled}
             fullWidth
             startDateControl={
               <EuiDatePicker
