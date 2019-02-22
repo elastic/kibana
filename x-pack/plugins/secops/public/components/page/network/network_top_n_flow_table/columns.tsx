@@ -123,12 +123,22 @@ export const getNetworkTopNFlowColumns = (
                   {domain}
                   {domains.length > 1 && (
                     <EuiToolTip
-                      content={domains.slice(1).map(domainName => (
-                        <span key={`${id}-${domainName}`}>
-                          {defaultToEmptyTag(domainName)}
-                          <br />
-                        </span>
-                      ))}
+                      content={
+                        <>
+                          {domains.slice(1, 6).map(domainName => (
+                            <span key={`${id}-${domainName}`}>
+                              {defaultToEmptyTag(domainName)}
+                              <br />
+                            </span>
+                          ))}
+                          {domains.slice(1).length > 5 && (
+                            <b>
+                              <br />
+                              more ...
+                            </b>
+                          )}
+                        </>
+                      }
                     >
                       <MoreDomains type="eye" />
                     </EuiToolTip>
