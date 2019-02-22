@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-var */
-require('jquery');
-require('angular');
-require('angular-sanitize');
-require('ui-select/dist/select');
-
-var uiModules = require('ui/modules').uiModules;
-uiModules.get('kibana', ['ui.select', 'ngSanitize']);
+export const mockedEsVersionPrecheckMethod = jest.fn().mockResolvedValue(true);
+export const EsVersionPrecheck = {
+  assign: 'esVersionCheck',
+  method: mockedEsVersionPrecheckMethod,
+};

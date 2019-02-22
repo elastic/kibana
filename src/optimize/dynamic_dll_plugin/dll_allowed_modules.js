@@ -17,8 +17,21 @@
  * under the License.
  */
 
-import { ElasticsearchError } from './elasticsearch_error';
+import path from 'path';
 
-export function isTermSizeZeroError(error) {
-  return ElasticsearchError.hasRootCause(error, 'size must be positive, got 0');
+export function notInNodeModules(checkPath) {
+  return !checkPath.includes(`${path.sep}node_modules${path.sep}`);
+}
+
+export function notInNodeModulesOrWebpackShims(checkPath) {
+  return notInNodeModules(checkPath)
+    && !checkPath.includes(`${path.sep}webpackShims${path.sep}`);
+}
+
+export function inPluginNodeModules(checkPath) {
+  return checkPath.match(/[\/\\]plugins.*[\/\\]node_modules/);
+}
+
+export function inDllPluginPublic(checkPath) {
+  return checkPath.includes(`${path.sep}dynamic_dll_plugin/public${path.sep}`);
 }
