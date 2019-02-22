@@ -46,6 +46,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
+
+  // adr documents have an incompatible naming scheme
+  'x-pack/plugins/infra/docs/adr/*',
 ];
 
 
