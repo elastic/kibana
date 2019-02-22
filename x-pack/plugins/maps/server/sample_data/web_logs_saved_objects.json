@@ -4,6 +4,7 @@
     "type":"map",
     "updated_at":"2019-01-15T20:30:25.436Z",
     "version":5,
+    "migrationVersion": {},
     "attributes":{
       "title":"[Logs] Total Requests and Bytes",
       "description":"",

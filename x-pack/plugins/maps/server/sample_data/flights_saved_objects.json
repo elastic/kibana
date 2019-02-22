@@ -4,6 +4,7 @@
     "type":"map",
     "updated_at":"2019-01-15T20:44:54.767Z",
     "version":2,
+    "migrationVersion": {},
     "attributes":{
       "title":"[Flights] Origin and Destination Flight Time",
       "description":"",
