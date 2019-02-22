@@ -26,7 +26,7 @@ export const getEmptyStringTag = () => <EmptyString>{getEmptyString()}</EmptyStr
 export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   if (item == null) {
     return getEmptyTagValue();
-  } else if (isString(item) && item != null && item === '') {
+  } else if (isString(item) && item === '') {
     return getEmptyStringTag();
   } else {
     return <>{item}</>;
@@ -37,7 +37,7 @@ export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
   const text = get(path, item);
   if (text == null) {
     return getEmptyTagValue();
-  } else if (text != null && text === '') {
+  } else if (text === '') {
     return getEmptyStringTag();
   } else {
     return <>{text}</>;

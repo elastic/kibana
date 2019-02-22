@@ -62,27 +62,13 @@ describe('EmptyValue', () => {
   });
 
   describe('#defaultToEmptyTag', () => {
-    test('should default to an empty value when a deep rooted value is null', () => {
-      const test = {
-        a: {
-          b: {
-            c: null,
-          },
-        },
-      };
-      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+    test('should default to an empty value when a value is null', () => {
+      const wrapper = mount(<p>{defaultToEmptyTag(null)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
-    test('should default to an empty value when a deep rooted value is undefined', () => {
-      const test = {
-        a: {
-          b: {
-            c: undefined,
-          },
-        },
-      };
-      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+    test('should default to an empty value when a value is undefined', () => {
+      const wrapper = mount(<p>{defaultToEmptyTag(undefined)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 

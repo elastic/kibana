@@ -16,7 +16,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
-import { EventsTable, formatSafely } from './index';
+import { EventsTable, formatIpSafely } from './index';
 import { mockData } from './mock';
 
 describe('Load More Events Table Component', () => {
@@ -53,17 +53,17 @@ describe('Load More Events Table Component', () => {
     });
   });
 
-  describe('formatSafely', () => {
-    test('formatSafely happy path', () => {
+  describe('formatIpSafely', () => {
+    test('formatIpSafely happy path', () => {
       const wrapperSourceIp = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatSafely('source.ip', mockData.Events.edges[0].node)}</p>
+          <p>{formatIpSafely('source.ip', mockData.Events.edges[0].node)}</p>
         </ThemeProvider>
       );
 
       const wrapperHostName = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatSafely('host.name', mockData.Events.edges[0].node)}</p>
+          <p>{formatIpSafely('host.name', mockData.Events.edges[0].node)}</p>
         </ThemeProvider>
       );
 
@@ -71,16 +71,16 @@ describe('Load More Events Table Component', () => {
       expect(wrapperHostName.text()).toBe('siem-general');
     });
 
-    test('formatSafely unhappy path', () => {
+    test('formatIpSafely unhappy path', () => {
       const wrapperSourceIp = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatSafely('.ip', mockData.Events.edges[0].node)}</p>
+          <p>{formatIpSafely('.ip', mockData.Events.edges[0].node)}</p>
         </ThemeProvider>
       );
 
       const wrapperHostName = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatSafely('.name', mockData.Events.edges[0].node)}</p>
+          <p>{formatIpSafely('.name', mockData.Events.edges[0].node)}</p>
         </ThemeProvider>
       );
 
@@ -88,16 +88,28 @@ describe('Load More Events Table Component', () => {
       expect(wrapperHostName.text()).toBe(getEmptyValue());
     });
 
-    test('formatSafely not happy with IP ranges that are of a particular size', () => {
+    test('formatIpSafely not happy with IP ranges that are of a particular size', () => {
       const ecs = cloneDeep(mockData.Events.edges[0].node);
       ecs.source!.ip = '255.255.255.255';
       const wrapperSourceIp = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <p>{formatSafely('source.ip', ecs)}</p>
+          <p>{formatIpSafely('source.ip', ecs)}</p>
         </ThemeProvider>
       );
 
       expect(wrapperSourceIp.text()).toBe('255.255.255.255');
+    });
+
+    test('formatIpSafely test of IPv6 max string length of 45', () => {
+      const ecs = cloneDeep(mockData.Events.edges[0].node);
+      ecs.source!.ip = '0000:0000:0000:0000:0000:ffff:192.168.100.228';
+      const wrapperSourceIp = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <p>{formatIpSafely('source.ip', ecs)}</p>
+        </ThemeProvider>
+      );
+
+      expect(wrapperSourceIp.text()).toBe('0000:0000:0000:0000:0000:ffff:192.168.100.228');
     });
   });
 });
