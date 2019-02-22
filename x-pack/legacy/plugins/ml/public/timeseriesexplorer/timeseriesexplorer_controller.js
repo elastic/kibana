@@ -654,7 +654,10 @@ module.controller('MlTimeSeriesExplorerController', function (
     });
   };
 
-  $scope.detectorIndexChanged = function () {
+  $scope.detectorIndexChanged = function (id) {
+    if (id !== undefined) {
+      $scope.detectorId = id;
+    }
     updateControlsForDetector();
     loadEntityValues();
   };

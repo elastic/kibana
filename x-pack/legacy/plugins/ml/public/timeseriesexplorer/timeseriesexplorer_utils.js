@@ -32,6 +32,15 @@ export function createTimeSeriesJobData(jobs) {
   });
 }
 
+export function mapScopeToProps(scope) {
+  return {
+    detectorId: scope.detectorId,
+    detectorIndexChanged: scope.detectorIndexChanged,
+    detectors: scope.detectors,
+    jobs: scope.jobs,
+  };
+}
+
 // Return dataset in format used by the single metric chart.
 // i.e. array of Objects with keys date (JavaScript date) and value,
 // plus lower and upper keys if model plot is enabled for the series.
