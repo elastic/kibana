@@ -54,6 +54,10 @@ export class AbstractLayer {
     return this._source.isJoinable();
   }
 
+  async supportsFitToBounds() {
+    return await this._source.supportsFitToBounds();
+  }
+
   async getDisplayName() {
     if (this._descriptor.label) {
       return this._descriptor.label;

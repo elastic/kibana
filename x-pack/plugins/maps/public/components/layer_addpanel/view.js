@@ -31,6 +31,12 @@ export class AddLayerPanel extends Component {
   }
 
   _previewLayer = (source) => {
+    if (!source) {
+      this.setState({ layer: null });
+      this.props.removeTransientLayer();
+      return;
+    }
+
     this.setState({
       layer: source.createDefaultLayer({}, this.props.mapColors)
     },
