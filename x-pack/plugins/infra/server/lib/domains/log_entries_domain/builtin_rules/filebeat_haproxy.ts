@@ -4,7 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const commonFrontendFields = [
+const ecsFrontendFields = [
+  {
+    field: 'source.address',
+  },
+  {
+    constant: ':',
+  },
+  {
+    field: 'source.port',
+  },
+  {
+    constant: ' ',
+  },
+  {
+    field: 'haproxy.frontend_name',
+  },
+];
+
+const preEcsFrontendFields = [
   {
     field: 'haproxy.client.ip',
   },
@@ -81,6 +99,120 @@ const commonQueueStatsFields = [
 
 export const filebeatHaproxyRules = [
   {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'haproxy.http.request.raw_request_line'],
+    },
+    format: [
+      {
+        constant: '[HAProxy][http] ',
+      },
+      ...ecsFrontendFields,
+      ...commonBackendFields,
+      {
+        constant: ' "',
+      },
+      {
+        field: 'haproxy.http.request.raw_request_line',
+      },
+      {
+        constant: '" ',
+      },
+      {
+        field: 'http.response.status_code',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'haproxy.http.request.time_wait_ms',
+      },
+      {
+        constant: '/',
+      },
+      {
+        field: 'event.duration',
+      },
+      {
+        constant: '/',
+      },
+      {
+        field: 'haproxy.connection_wait_time_ms',
+      },
+      {
+        constant: '/',
+      },
+      {
+        field: 'haproxy.http.request.time_wait_without_data_ms',
+      },
+      {
+        constant: '/',
+      },
+      {
+        field: 'event.duration',
+      },
+      {
+        constant: ' ',
+      },
+      ...commonConnectionStatsFields,
+      {
+        constant: ' ',
+      },
+      ...commonQueueStatsFields,
+    ],
+  },
+  {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'haproxy.connections.active'],
+    },
+    format: [
+      {
+        constant: '[HAProxy][tcp] ',
+      },
+      ...ecsFrontendFields,
+      ...commonBackendFields,
+      {
+        constant: ' ',
+      },
+      ...commonConnectionStatsFields,
+      {
+        constant: ' ',
+      },
+      ...commonQueueStatsFields,
+    ],
+  },
+  {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'haproxy.error_message'],
+    },
+    format: [
+      {
+        constant: '[HAProxy] ',
+      },
+      ...ecsFrontendFields,
+      {
+        constant: ' ',
+      },
+      {
+        field: 'haproxy.error_message',
+      },
+    ],
+  },
+  {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'haproxy.frontend_name'],
+    },
+    format: [
+      {
+        constant: '[HAProxy] ',
+      },
+      ...ecsFrontendFields,
+    ],
+  },
+  {
     // pre-ECS
     when: {
       exists: ['haproxy.http.request.raw_request_line'],
@@ -89,7 +221,7 @@ export const filebeatHaproxyRules = [
       {
         constant: '[HAProxy][http] ',
       },
-      ...commonFrontendFields,
+      ...preEcsFrontendFields,
       ...commonBackendFields,
       {
         constant: ' "',
@@ -152,7 +284,7 @@ export const filebeatHaproxyRules = [
       {
         constant: '[HAProxy][tcp] ',
       },
-      ...commonFrontendFields,
+      ...preEcsFrontendFields,
       ...commonBackendFields,
       {
         constant: ' ',
@@ -173,7 +305,7 @@ export const filebeatHaproxyRules = [
       {
         constant: '[HAProxy] ',
       },
-      ...commonFrontendFields,
+      ...preEcsFrontendFields,
       {
         constant: ' ',
       },
@@ -191,10 +323,7 @@ export const filebeatHaproxyRules = [
       {
         constant: '[HAProxy] ',
       },
-      ...commonFrontendFields,
-      {
-        constant: ' ',
-      },
+      ...preEcsFrontendFields,
     ],
   },
 ];

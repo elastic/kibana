@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { LayerTOC } from './view';
 import { updateLayerOrder } from '../../../../actions/store_actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
+import { getIsReadOnly } from '../../../../store/ui';
 
 const mapDispatchToProps = {
   updateLayerOrder: newOrder => updateLayerOrder(newOrder)
@@ -15,6 +16,7 @@ const mapDispatchToProps = {
 
 function mapStateToProps(state = {}) {
   return {
+    isReadOnly: getIsReadOnly(state),
     layerList: getLayerList(state)
   };
 }
