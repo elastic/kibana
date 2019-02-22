@@ -32,13 +32,13 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
         node: {
           source: {
             ip: '9.9.9.9',
-            domain: ['test.domain.net'],
+            domain: ['test.domain.net', 'test.old.domain.net'],
           },
           destination: null,
           network: {
             bytes: 325909849,
             packets: 221494,
-            direction: [NetworkDirectionEcs.inbound],
+            direction: [NetworkDirectionEcs.inbound, NetworkDirectionEcs.outbound],
           },
         },
         cursor: {

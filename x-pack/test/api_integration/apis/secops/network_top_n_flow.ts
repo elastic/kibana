@@ -8,98 +8,227 @@ import expect from 'expect.js';
 import { networkTopNFlowQuery } from '../../../../plugins/secops/public/containers/network_top_n_flow/index.gql_query';
 import {
   GetNetworkTopNFlowQuery,
+  NetworkTopNFlowDirection,
   NetworkTopNFlowType,
 } from '../../../../plugins/secops/public/graphql/types';
-
 import { KbnTestProvider } from './types';
+
+const EDGE_LENGTH = 10;
 
 const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
-
   describe('Network Top N Flow', () => {
-    before(() => esArchiver.load('filebeat/default'));
-    after(() => esArchiver.unload('filebeat/default'));
+    describe('With filebeat', () => {
+      before(() => esArchiver.load('filebeat/default'));
+      after(() => esArchiver.unload('filebeat/default'));
 
-    it('Make sure that we get Source NetworkTopNFlow data', () => {
-      return client
-        .query<GetNetworkTopNFlowQuery.Query>({
-          query: networkTopNFlowQuery,
-          variables: {
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: 1549936644870,
-              from: 1549677444870,
+      const FROM = new Date('2019-02-09T01:57:24.870Z').valueOf();
+      const TO = new Date('2019-02-12T01:57:24.870Z').valueOf();
+
+      it('Make sure that we get unidirectional Source NetworkTopNFlow data', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.source,
+              direction: NetworkTopNFlowDirection.uniDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
             },
-            type: NetworkTopNFlowType.source,
-            pagination: {
-              limit: 10,
-              cursor: null,
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
+            expect(networkTopNFlow.totalCount).to.be(121);
+            expect(networkTopNFlow.edges[0].node.destination).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
+
+      it('Make sure that we get bidirectional Source NetworkTopNFlow data', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.source,
+              direction: NetworkTopNFlowDirection.biDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
             },
-          },
-        })
-        .then(resp => {
-          const networkTopNFlow = resp.data.source.NetworkTopNFlow;
-          expect(networkTopNFlow.edges.length).to.be(10);
-          expect(networkTopNFlow.totalCount).to.be(121);
-          expect(networkTopNFlow.edges[0].node.destination).to.be(null);
-          expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
-        });
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
+            expect(networkTopNFlow.totalCount).to.be(10);
+            expect(networkTopNFlow.edges[0].node.destination).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
+
+      it('Make sure that we get unidirectional Destination NetworkTopNFlow data', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.destination,
+              direction: NetworkTopNFlowDirection.uniDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
+            },
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
+            expect(networkTopNFlow.totalCount).to.be(144);
+            expect(networkTopNFlow.edges[0].node.source).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
+
+      it('Make sure that we get bidirectional Destination NetworkTopNFlow data', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.destination,
+              direction: NetworkTopNFlowDirection.biDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
+            },
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
+            expect(networkTopNFlow.totalCount).to.be(89);
+            expect(networkTopNFlow.edges[0].node.source).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
+
+      it('Make sure that pagination is working in NetworkTopNFlow query', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.source,
+              direction: NetworkTopNFlowDirection.uniDirectional,
+              pagination: {
+                limit: 20,
+                cursor: 10,
+              },
+            },
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+
+            expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
+            expect(networkTopNFlow.totalCount).to.be(121);
+            expect(networkTopNFlow.edges[0].node.source!.ip).to.be('151.205.0.19');
+          });
+      });
     });
 
-    it('Make sure that we get Destination NetworkTopNFlow data', () => {
-      return client
-        .query<GetNetworkTopNFlowQuery.Query>({
-          query: networkTopNFlowQuery,
-          variables: {
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: 1549936644870,
-              from: 1549677444870,
-            },
-            type: NetworkTopNFlowType.destination,
-            pagination: {
-              limit: 10,
-              cursor: null,
-            },
-          },
-        })
-        .then(resp => {
-          const networkTopNFlow = resp.data.source.NetworkTopNFlow;
-          expect(networkTopNFlow.edges.length).to.be(10);
-          expect(networkTopNFlow.totalCount).to.be(144);
-          expect(networkTopNFlow.edges[0].node.source).to.be(null);
-          expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
-        });
-    });
+    describe('With packetbeat', () => {
+      before(() => esArchiver.load('packetbeat/default'));
+      after(() => esArchiver.unload('packetbeat/default'));
 
-    it('Make sure that pagination is working in NetworkTopNFlow query', () => {
-      return client
-        .query<GetNetworkTopNFlowQuery.Query>({
-          query: networkTopNFlowQuery,
-          variables: {
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: 1549936644870,
-              from: 1549677444870,
-            },
-            type: NetworkTopNFlowType.source,
-            pagination: {
-              limit: 20,
-              cursor: 10,
-            },
-          },
-        })
-        .then(resp => {
-          const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+      const FROM = new Date('2019-02-19T23:22:09.675Z').valueOf();
+      const TO = new Date('2019-02-19T23:26:50.001Z').valueOf();
 
-          expect(networkTopNFlow.edges.length).to.be(10);
-          expect(networkTopNFlow.totalCount).to.be(121);
-          expect(networkTopNFlow.edges[0].node.source!.ip).to.be('151.205.0.19');
-        });
+      it('Make sure that we get bidirectional Client NetworkTopNFlow data', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.client,
+              direction: NetworkTopNFlowDirection.biDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
+            },
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(1);
+            expect(networkTopNFlow.totalCount).to.be(1);
+            expect(networkTopNFlow.edges[0].node.server).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
+
+      it('Make sure that we get bidirectional Server NetworkTopNFlow data', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.server,
+              direction: NetworkTopNFlowDirection.biDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
+            },
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(1);
+            expect(networkTopNFlow.totalCount).to.be(1);
+            expect(networkTopNFlow.edges[0].node.client).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
     });
   });
 };

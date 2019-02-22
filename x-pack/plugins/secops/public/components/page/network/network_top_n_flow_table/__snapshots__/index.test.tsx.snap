@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default Authentication table 1`] = `
-<Connect(pure(Component))
+<Connect(NetworkTopNFlowTableComponent)
   data={
     Array [
       Object {
@@ -10,15 +10,18 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Authen
         },
         "node": Object {
           "destination": null,
-          "event": Object {
-            "duration": 84712891000000,
-          },
           "network": Object {
             "bytes": 3826633497,
+            "direction": Array [
+              "inbound",
+            ],
             "packets": 4185805,
           },
           "source": Object {
-            "domain": "test.domain.com",
+            "count": 1,
+            "domain": Array [
+              "test.domain.com",
+            ],
             "ip": "8.8.8.8",
           },
         },
@@ -29,15 +32,19 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Authen
         },
         "node": Object {
           "destination": null,
-          "event": Object {
-            "duration": 602171000000,
-          },
           "network": Object {
             "bytes": 325909849,
+            "direction": Array [
+              "inbound",
+              "outbound",
+            ],
             "packets": 221494,
           },
           "source": Object {
-            "domain": "test.domain.net",
+            "domain": Array [
+              "test.domain.net",
+              "test.old.domain.net",
+            ],
             "ip": "9.9.9.9",
           },
         },
@@ -47,7 +54,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Authen
   hasNextPage={true}
   loadMore={[MockFunction]}
   loading={false}
-  networkTopNFlowType="source"
   nextCursor="10"
   startDate={1546965070707}
   totalCount={524}

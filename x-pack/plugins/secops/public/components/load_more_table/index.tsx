@@ -64,7 +64,7 @@ export interface Columns<T> {
 
 export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
   public readonly state = {
-    isEmptyTable: true,
+    isEmptyTable: this.props.pageOfItems.length === 0,
     isPopoverOpen: false,
     paginationLoading: false,
   };
@@ -106,7 +106,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           height="auto"
           width="100%"
           text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
-          data-test-subj="LoadingPanelLoadMoreTable"
+          data-test-subj="InitialLoadingPanelLoadMoreTable"
         />
       );
     }
@@ -137,7 +137,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           {item.text}
         </EuiContextMenuItem>
       ));
-
     return (
       <BasicTableContainer>
         {!paginationLoading && loading && (

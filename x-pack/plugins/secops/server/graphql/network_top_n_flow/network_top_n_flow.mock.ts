@@ -7,7 +7,7 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
-import { NetworkTopNFlowData } from '../types';
+import { NetworkDirectionEcs, NetworkTopNFlowData } from '../types';
 
 export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } = {
   NetworkTopNFlow: {
@@ -22,6 +22,7 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
           network: {
             bytes: 1532853382,
             packets: 1025631,
+            direction: [NetworkDirectionEcs.inbound],
           },
           source: {
             domain: ['test.1.net'],
@@ -40,6 +41,7 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
           network: {
             bytes: 4208518310,
             packets: 2811441,
+            direction: [NetworkDirectionEcs.inbound],
           },
           source: {
             domain: ['test.2.net'],
@@ -148,6 +150,15 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                           kind: 'Field',
                           name: {
                             kind: 'Name',
+                            value: 'count',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
                             value: '__typename',
                           },
                           arguments: [],
@@ -189,30 +200,7 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                           kind: 'Field',
                           name: {
                             kind: 'Name',
-                            value: '__typename',
-                          },
-                          arguments: [],
-                          directives: [],
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    kind: 'Field',
-                    name: {
-                      kind: 'Name',
-                      value: 'event',
-                    },
-                    arguments: [],
-                    directives: [],
-                    selectionSet: {
-                      kind: 'SelectionSet',
-                      selections: [
-                        {
-                          kind: 'Field',
-                          name: {
-                            kind: 'Name',
-                            value: 'duration',
+                            value: 'count',
                           },
                           arguments: [],
                           directives: [],
@@ -254,6 +242,15 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                           name: {
                             kind: 'Name',
                             value: 'packets',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
+                            value: 'direction',
                           },
                           arguments: [],
                           directives: [],
