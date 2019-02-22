@@ -196,9 +196,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     // https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
     // instead of our previous approach using custom listeners, here we react to prop changes
     // and trigger corresponding updates to the component's state via updateExplorer()
-    previousSwimlaneLimit = null;
-    previousTableInterval = null;
-    previousTableSeverity = null;
+    previousSwimlaneLimit = limit$.getValue().val;
+    previousTableInterval = interval$.getValue().val;
+    previousTableSeverity = severity$.getValue().val;
     async componentDidUpdate() {
       if (this.props.explorer !== undefined && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
         explorer$.next({ action: EXPLORER_ACTION.IDLE });
