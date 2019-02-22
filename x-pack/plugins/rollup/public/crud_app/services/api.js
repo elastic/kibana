@@ -6,7 +6,6 @@
 
 import chrome from 'ui/chrome';
 import { getHttp } from './http_provider';
-import { trackUserAction } from './track_user_action';
 
 const apiPrefix = chrome.addBasePath('/api/rollup');
 
@@ -31,8 +30,6 @@ export async function deleteJobs(jobIds) {
 }
 
 export async function createJob(job) {
-  // Note that this will record an acion, even if the related request fails.
-  trackUserAction('create-rollup-job');
   const body = { job };
   return await getHttp().put(`${apiPrefix}/create`, body);
 }
