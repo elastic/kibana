@@ -72,13 +72,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
 
 ```ts
-import { PluginInitializerContext, PluginStart, PluginStop } from '../../../core/public';
+import { PluginInitializerContext, CoreStart, PluginStop } from '../../../core/public';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public start(core: PluginStart) {
+  public start(core: CoreStart) {
     // called when plugin is started up, aka when Kibana is loaded
   }
 
@@ -102,13 +102,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
 
 ```ts
-import { PluginInitializerContext, PluginStart, PluginStop } from '../../../core/server';
+import { PluginInitializerContext, CoreStart, PluginStop } from '../../../core/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public start(core: PluginStart) {
+  public start(core: CoreStart) {
     // called when plugin is started up during Kibana's startup sequence
   }
 
@@ -127,10 +127,10 @@ The various independent domains that make up `core` are represented by a series 
 For example, the core `UiSettings` service exposes a function `get` to all plugin `start` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
 
 ```ts
-import { PluginStart } from '../../../core/public';
+import { CoreStart } from '../../../core/public';
 
 export class Plugin {
-  public start(core: PluginStart) {
+  public start(core: CoreStart) {
     core.uiSettings.get('courier:maxShardsBeforeCryTime');
   }
 }
@@ -189,7 +189,7 @@ With that specified in the plugin manifest, the appropriate interfaces are then 
 **demo plugin.ts:**
 
 ```ts
-import { PluginStart, PluginStop } from '../../../core/server';
+import { CoreStart, PluginStop } from '../../../core/server';
 import { FoobarPluginStart, FoobarPluginStop } from '../../foobar/server';
 
 interface DemoStartDependencies {
@@ -201,7 +201,7 @@ interface DemoStopDependencies {
 }
 
 export class Plugin {
-  public start(core: PluginStart, dependencies: DemoStartDependencies) {
+  public start(core: CoreStart, dependencies: DemoStartDependencies) {
     const { foobar } = dependencies;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
@@ -289,7 +289,6 @@ export default (kibana) => {
     id: 'demo_plugin',
 
     init(server) {
-      // access functionality exposed by core
       server.route({
         path: '/api/demo_plugin/search',
         method: 'POST',
@@ -299,9 +298,7 @@ export default (kibana) => {
         }
       });
 
-      // creates an extension point that other plugins can call
       server.expose('getDemoBar', () => {
-        // accesses functionality exposed by another plugin
         return `Demo ${server.plugins.foo.getBar()}`;
       });
     }
@@ -312,7 +309,7 @@ export default (kibana) => {
 If we were to express this same set of capabilities in a shape that's more suitable to the new plugin system, it would look something like this:
 
 ```ts
-import { PluginStart } from '../../core/server';
+import { CoreStart } from '../../core/server';
 import { FooPluginStart } from '../foo/server';
 
 interface DemoStartDependencies {
@@ -322,8 +319,7 @@ interface DemoStartDependencies {
 export type DemoPluginStart = ReturnType<Plugin['start']>;
 
 export class Plugin {
-  public start(core: PluginStart, dependencies: DemoStartDependencies) {
-    // access functionality exposed by core
+  public start(core: CoreStart, dependencies: DemoStartDependencies) {
     core.http.route({
       path: '/api/demo_plugin/search',
       method: 'POST',
@@ -333,13 +329,124 @@ export class Plugin {
       }
     });
 
-    // creates an extension point that other plugins can call
     return {
       getDemoBar() {
-        // accesses functionality exposed by another plugin
         return `Demo ${dependencies.foo.getBar()}`;
       }
     };
   }
 }
 ```
+
+Let's break down the key differences in these examples.
+
+##### Defining the plugin
+
+The new plugin is defined as a class `Plugin`, whereas the legacy plugin exported a default factory function that instantiated a Kibana-supplied plugin class. Note that there is no id specified on the plugin class itself:
+
+```ts
+// before
+export default (kibana) => {
+  return new kibana.Plugin({
+    // ...
+  });
+}
+
+// after
+export class Plugin {
+  // ...
+}
+```
+
+##### Starting the plugin up
+
+The new plugin definition uses `start` instead of `init`, and rather than getting the hapi server object as its only argument, it gets two arguments: the core services and a dependency on another plugin.
+
+```ts
+// before
+init(server) {
+  // ...
+}
+
+//after
+public start(core: CoreStart, dependencies: DemoStartDependencies) {
+  // ...
+}
+```
+
+##### Accessing core services
+
+Rather than accessing "core" functions like HTTP routing directly on a hapi server object, the new plugin accesses core functionality through the top level services it exposes in the first argument to `start`. In the case of HTTP routing, it uses `core.http`.
+
+```ts
+// before
+server.route({
+  path: '/api/demo_plugin/search',
+  method: 'POST',
+  async handler(request) {
+    const { elasticsearch } = server.plugins;
+    return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
+  }
+});
+
+// after
+core.http.route({
+  path: '/api/demo_plugin/search',
+  method: 'POST',
+  async handler(request) {
+    const { elasticsearch } = core; // note, elasticsearch is moving to core
+    return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
+  }
+});
+```
+
+##### Exposing services for other plugins
+
+Legacy plugins on the server might expose functionality or services to other plugins by invoking the `expose` function on the hapi `server` object. This can happen at any time throughout the runtime of Kibana which makes it less than reliable.
+
+New plugins return the contract (if any) that they wish to make available to downstream plugins. This ensures the entirety of a plugin's start contract is available upon completion of its own `start` function. It also makes it much easier to provide type definitions for plugin contracts.
+
+```ts
+// before
+server.expose('getDemoBar', () => {
+  // ...
+});
+
+// after
+return {
+  getDemoBar() {
+    // ...
+  }
+};
+```
+
+##### Accessing plugin services
+
+In server-side code of legacy plugins, you once again use the hapi `server` object to access functionality that was exposed by other plugins. In new plugins, you access the exposed functionality in a similar way but on the second argument to `start` that is dedicated only to injecting plugin capabilities.
+
+```ts
+// before
+server.plugins.foo.getBar()
+
+// after
+dependencies.foo.getBar()
+```
+
+##### Static files
+
+One other thing worth noting in this example is how a new plugin will consume static files from core or other plugins, and also how it will expose static files for other plugins.
+
+This is done through standard modules and relative imports.
+
+```ts
+// import CoreStart type from core server
+import { CoreStart } from '../../core/server';
+
+// import FooPluginStart type from plugin foo
+import { FooPluginStart } from '../foo/server';
+
+// export DemoPluginStart type for downstream plugins, based on return value of start()
+export type DemoPluginStart = ReturnType<Plugin['start']>;
+```
+
+While these particular examples involve only types, the exact same pattern should be followed for those rare situations when a plugin exposes static functionality for plugins to consume.
