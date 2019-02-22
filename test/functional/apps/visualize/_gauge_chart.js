@@ -67,10 +67,10 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         expect(await PageObjects.visualize.getGaugeValue()).to.eql([
-          'win 8',
-          'win xp',
-          'win 7',
-          'ios'
+          '2,904\nwin 8',
+          '2,858\nwin xp',
+          '2,814\nwin 7',
+          '2,784\nios'
         ]);
       });
     });
