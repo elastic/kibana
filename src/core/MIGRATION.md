@@ -277,7 +277,7 @@ We recommend that _all_ plugins treat moving away from angular as a top-most pri
 
 The bulk of the migration work for most plugins will be changing the way the plugin is architected so dependencies from core and other plugins flow in via the same entry point. This effort is relatively straightforward on the server, but it can be a tremendous undertaking for client-side code in some plugins.
 
-#### Server-side
+#### Server-side architectural changes
 
 Legacy server-side plugins access functionality from core and other plugins at runtime via function arguments, which is similar to how they must be architected to use the new plugin system.
 
@@ -450,3 +450,67 @@ export type DemoPluginStart = ReturnType<Plugin['start']>;
 ```
 
 While these particular examples involve only types, the exact same pattern should be followed for those rare situations when a plugin exposes static functionality for plugins to consume.
+
+##### Rule of thumb for server-side changes
+
+Outside of the temporary shim, does your plugin code rely directly on hapi.js? If not, you're probably good to go.
+
+#### Client-side architectural changes
+
+Client-side legacy plugin code is where things get weird, but the approach is largely the same - in the public entry file of the plugin, we separate the legacy integrations with the new plugin definition using a temporary "shim".
+
+As before, let's start with an example legacy client-side plugin. This example integrates with core, consumes functionality from another plugin, and exposes functionality for other plugins to consume via `uiExports`. This would be the rough shape of the code that would originate in the entry file, which would be either `index.ts` or `<pluginname>.ts`:
+
+```js
+import chrome from 'ui/chrome';
+import routes from 'ui/routes';
+
+import 'uiExports/demoExtensions';
+import { DemoExtensionsProvider } from 'ui/registry/demo_extensions';
+
+import { getBar } from 'plugins/foo';
+
+import template from './demo.html';
+
+routes.enable();
+routes.when('/demo-foo', {
+  template,
+  controller($scope, config, indexPatterns, Private) {
+    const bar = getBar();
+    $scope.demoBarUrl = chrome.addBasePath(`/demo/${bar}`);
+    $scope.extensions =  Private(DemoExtensionsProvider);
+  },
+});
+```
+
+Expressed in the shape of a new plugin:
+
+```ts
+import { CoreStart } from '../../core/public';
+import { FooPluginStart } from '../foo/public';
+
+interface DemoStartDependencies {
+  foo: FooPluginStart
+}
+
+export type DemoPluginStart = ReturnType<Plugin['start']>;
+
+export class Plugin {
+  public start(core: CoreStart, dependencies: DemoStartDependencies) {
+    core.router.when('/demo-foo', async (request) => {
+
+    });
+
+    return {
+      registerExtension() {
+
+      }
+    };
+  }
+}
+```
+
+
+##### Rule of thumb for client-side changes
+
+Outside of the temporary shim, does your plugin code rely directly on code imported from webpack aliases (e.g. `import from 'plugins/...'` or `import from 'ui/...'`)? If not, you're probably good to go.
