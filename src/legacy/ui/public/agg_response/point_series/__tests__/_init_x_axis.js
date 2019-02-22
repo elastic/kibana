@@ -19,6 +19,7 @@
 
 import expect from 'expect.js';
 import { initXAxis } from '../_init_x_axis';
+import { makeFakeXAspect } from '../_fake_x_aspect';
 
 describe('initXAxis', function () {
   let chart;
@@ -28,11 +29,10 @@ describe('initXAxis', function () {
     chart = {
       aspects: {
         x: [{
+          ...makeFakeXAspect(),
           accessor: 0,
-          format: {},
           title: 'label',
-          params: {}
-        }]
+        }],
       }
     };
 
@@ -92,6 +92,16 @@ describe('initXAxis', function () {
       };
       initXAxis(chart, table);
       expect(chart.xAxisOrderedValues).to.eql(['hello', 'world', 'foo', 'bar', 'baz']);
+    });
+
+    it('returns the defaultValue if using fake x aspect', function () {
+      chart = {
+        aspects: {
+          x: [makeFakeXAspect()],
+        }
+      };
+      initXAxis(chart, table);
+      expect(chart.xAxisOrderedValues).to.eql(['_all']);
     });
   });
 
