@@ -16,7 +16,7 @@ export const SnapshotLoading = () => (
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.uptime.snapshot.endpointStatusTitle"
+            id="xpack.uptime.snapshot.endpointStatusLoadingTitle"
             defaultMessage="Endpoint status"
           />
         </h5>
