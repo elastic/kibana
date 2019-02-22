@@ -1,0 +1,38 @@
+[role="xpack"]
+[[uptime-overview]]
+
+== Monitor page
+
+The Monitor page will help you get further insight into the performance 
+of a specific network endpoint. You'll see detailed visualization of
+the monitor's request duration over time, as well as the `up`/`down`
+status over time.
+
+=== Status bar
+SCREENSHOT
+
+The Status bar displays a quick summary of the latest information
+regarding your monitor. You can view its latest status, click a link to
+visit the targeted URL, see its most recent request duration, and the amount
+of time that has elapsed since the last check.
+
+=== Monitor charts
+SCREENSHOT
+
+The Monitor charts visualize information over the time specified in the
+date range.
+
+The first chart displays request duration information for your monitor.
+The area surrounding the line is the range of request time for the corresponding
+bucket, the line is the average time.
+
+Next is a graphical representation of the check statuses over time. Hover over
+the charts to display crosshairs with more specific numeric data.
+SCREENSHOT
+
+=== Check history
+SCREENSHOT
+
+The Check history displays the total count of this monitor's checks for the selected
+date range. You can additionally filter the checks by `status` to help find recent problems
+on a per-check basis.
