@@ -40,9 +40,9 @@ import { logger } from '../logging/__mocks__';
 const env = new Env('.', getEnvOptions());
 const config$ = new BehaviorSubject({} as Config);
 
-const mockProcessExit = jest.spyOn(global.process, 'exit').mockImplementation(() => {
-  // noop
-});
+const mockProcessExit = jest
+  .spyOn(global.process, 'exit')
+  .mockImplementation(() => undefined as never);
 
 const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {
   // noop
