@@ -64,7 +64,7 @@ describe('kuery node types', function () {
         const result = wildcard.toQueryStringQuery(node);
         expect(result).to.be('\\+foo*bar');
 
-        const backslashNode = wildcard.buildNode('+foo\\bar');
+        const backslashNode = wildcard.buildNode('+foo\\\\bar');
         const backslashResult = wildcard.toQueryStringQuery(backslashNode);
         expect(backslashResult).to.be('\\+foo\\\\bar');
 
