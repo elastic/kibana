@@ -26,11 +26,11 @@ describe('license_pre_routing_factory', () => {
       };
     });
 
-    it('only instantiates one instance per server', () => {
-      const firstInstance = licensePreRoutingFactory(mockServer);
-      const secondInstance = licensePreRoutingFactory(mockServer);
+    it('instantiates a new instance per plugin', () => {
+      const firstInstance = licensePreRoutingFactory(mockServer, 'foo');
+      const secondInstance = licensePreRoutingFactory(mockServer, 'bar');
 
-      expect(firstInstance).to.be(secondInstance);
+      expect(firstInstance).to.not.be(secondInstance);
     });
 
     describe('isAvailable is false', () => {
