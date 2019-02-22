@@ -56,9 +56,9 @@ function createNewDashboardCtrl($scope, i18n) {
 uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true,
+    requireUICapability: 'dashboard.show'
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
-    requireUICapability: 'dashboard.show',
     template: dashboardListingTemplate,
     controller($injector, $location, $scope, Private, config, i18n) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
@@ -113,9 +113,9 @@ uiRoutes
     }
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
-    requireUICapability: 'dashboard.createNew',
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
+    requireUICapability: 'dashboard.createNew',
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
@@ -126,7 +126,6 @@ uiRoutes
     }
   })
   .when(createDashboardEditUrl(':id'), {
-    requireUICapability: 'dashboard.show',
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     resolve: {
