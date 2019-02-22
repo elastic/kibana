@@ -2,7 +2,7 @@
 == Working with remote clusters
 
 {kib} *Management* provides user interfaces for working with data from remote 
-clusters and managing the remote replication process. Replicating indices from a 
+clusters and managing the cross cluster replication process. Replicating indices from a 
 leader remote cluster to a follower index in a local cluster can be used to provide 
 remote backups for disaster recovery or for geo-proximite copies of data.
 
