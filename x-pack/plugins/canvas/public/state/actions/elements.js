@@ -263,11 +263,7 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
 
   // read updated element from state and fetch renderable
   const updatedElement = getNodeById(getState(), elementId, pageId);
-  {
-    if (doRender === true) {
-      dispatch(fetchRenderable(updatedElement));
-    }
-  }
+
   // reset element.filter if element is no longer a filter
   if (
     updatedElement.filter &&
@@ -276,6 +272,9 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
     )
   ) {
     dispatch(setFilter('', elementId, pageId, doRender));
+    // setFilter will trigger a re-render so we can skip the fetch here
+  } else if (doRender === true) {
+    dispatch(fetchRenderable(updatedElement));
   }
 }
 
