@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * React component for a checkbox element to toggle charts display.
  */
 import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiCheckbox
@@ -18,33 +17,14 @@ import {
 import makeId from '@elastic/eui/lib/components/form/form_row/make_id';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-// This service will be populated by the corresponding angularjs based one.
-export const mlCheckboxShowChartsService = {
-  intialized: false,
-  state: null
-};
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
-class CheckboxShowCharts extends Component {
-  constructor(props) {
-    super(props);
+export const showCharts$ = new BehaviorSubject(true);
 
-    // Restore the checked setting from the state.
-    this.mlCheckboxShowChartsService = mlCheckboxShowChartsService;
-    const showCharts = this.mlCheckboxShowChartsService.state.get('showCharts');
-
-    this.state = {
-      checked: showCharts
-    };
-  }
-
+class CheckboxShowChartsUnwrapped extends Component {
   onChange = (e) => {
     const showCharts = e.target.checked;
-    this.mlCheckboxShowChartsService.state.set('showCharts', showCharts);
-    this.mlCheckboxShowChartsService.state.changed();
-
-    this.setState({
-      checked: showCharts,
-    });
+    showCharts$.next(showCharts);
   };
 
   render() {
@@ -55,11 +35,15 @@ class CheckboxShowCharts extends Component {
           id="xpack.ml.controls.checkboxShowCharts.showChartsCheckboxLabel"
           defaultMessage="Show charts"
         />}
-        checked={this.state.checked}
+        checked={this.props.showCharts}
         onChange={this.onChange}
       />
     );
   }
 }
+
+const CheckboxShowCharts = injectObservablesAsProps({
+  showCharts: showCharts$
+}, CheckboxShowChartsUnwrapped);
 
 export { CheckboxShowCharts };
