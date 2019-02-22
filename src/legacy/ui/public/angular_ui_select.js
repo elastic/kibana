@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { ElasticsearchError } from './elasticsearch_error';
-export { isTermSizeZeroError } from './is_term_size_zero_error';
+import 'jquery';
+import 'angular';
+import 'angular-sanitize';
+import 'ui-select/dist/select';
+
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana', ['ui.select', 'ngSanitize']);
