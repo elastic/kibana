@@ -26,6 +26,8 @@ describe('Saved Objects Mixin', () => {
   const mockCallCluster = sinon.spy();
   const stubCallCluster = sinon.stub();
   const stubConfig = sinon.stub();
+  stubConfig.withArgs('savedObjects.maxImportExportSize').returns(10000);
+  stubConfig.withArgs('kibana.index').returns('kibana-index');
 
   beforeEach(() => {
     mockServer = {
@@ -97,9 +99,9 @@ describe('Saved Objects Mixin', () => {
   });
 
   describe('Routes', () => {
-    it('should create 7 routes', () => {
+    it('should create 8 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.callCount).toBe(7);
+      expect(mockServer.route.callCount).toBe(8);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -128,6 +130,10 @@ describe('Saved Objects Mixin', () => {
     it('should add PUT /api/saved_objects/{type}/{id}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
       expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/{type}/{id}', method: 'PUT' }))).toBeTruthy();
+    });
+    it('should add GET /api/saved_objects/_export', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/_export', method: 'GET' }))).toBeTruthy();
     });
   });
 
@@ -211,7 +217,6 @@ describe('Saved Objects Mixin', () => {
         stubCallCluster.withArgs('indices.get').returns({ status: 404 });
         stubCallCluster.withArgs('indices.getAlias').returns({ status: 404 });
         stubCallCluster.withArgs('cat.templates').returns([]);
-        stubConfig.withArgs('kibana.index').returns('kibana-index');
         const client = await service.getScopedSavedObjectsClient();
         await client.create('testtype');
         expect(stubCallCluster.calledWithMatch('create', sinon.match.object)).toBeTruthy();

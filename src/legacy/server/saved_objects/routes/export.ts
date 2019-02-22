@@ -17,14 +17,14 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
 import { getSortedObjectsForExport } from '../lib/export';
 
-const EXPORT_SIZE_LIMIT = 10000;
 const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
-export const createExportRoute = (prereqs: any) => ({
+export const createExportRoute = (prereqs: any, server: Hapi.Server) => ({
   path: '/api/saved_objects/_export',
   method: 'GET',
   config: {
@@ -43,7 +43,7 @@ export const createExportRoute = (prereqs: any) => ({
                 .required(),
               id: Joi.string().required(),
             })
-            .max(EXPORT_SIZE_LIMIT)
+            .max(server.config().get('savedObjects.maxImportExportSize'))
             .optional(),
         })
         .xor('type', 'objects')
@@ -55,7 +55,7 @@ export const createExportRoute = (prereqs: any) => ({
         savedObjectsClient,
         types: request.query.type,
         objects: request.query.objects,
-        exportSizeLimit: EXPORT_SIZE_LIMIT,
+        exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
       });
       return h
         .response(docsToExport.map(doc => stringify(doc)).join('\n'))
