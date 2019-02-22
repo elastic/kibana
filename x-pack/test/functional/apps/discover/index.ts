@@ -8,7 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 // tslint:disable:no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('discover', function() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
   });
