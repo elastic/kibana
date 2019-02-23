@@ -13,7 +13,6 @@ import {
   serializeJob,
   deserializeJob,
   getRouter,
-  trackUserAction,
 } from '../../services';
 
 import {
@@ -78,8 +77,6 @@ export const createJob = (jobConfig) => async (dispatch) => {
       defaultMessage: 'Error creating rollup job',
     }));
   }
-
-  trackUserAction('create-rollup-job');
 
   dispatch({
     type: CREATE_JOB_SUCCESS,
