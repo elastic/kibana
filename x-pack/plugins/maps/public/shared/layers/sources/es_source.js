@@ -40,6 +40,43 @@ export class AbstractESSource extends AbstractVectorSource {
     this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  _getValidMetrics() {
+    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
+      if (type === 'count') {
+        return true;
+      }
+
+      if (field) {
+        return true;
+      }
+      return false;
+    });
+    if (metrics.length === 0) {
+      metrics.push({ type: 'count' });
+    }
+    return metrics;
+  }
+
+  _formatMetricKey() {
+    throw new Error('should implement');
+  }
+
+  _formatMetricLabel() {
+    throw new Error('should implement');
+  }
+
+  getMetricFields() {
+    return this._getValidMetrics().map(metric => {
+      const metricKey = this._formatMetricKey(metric);
+      const metricLabel = this._formatMetricLabel(metric);
+      return {
+        ...metric,
+        propertyKey: metricKey,
+        propertyLabel: metricLabel
+      };
+    });
+  }
+
   async _runEsQuery(layerName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({

@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
