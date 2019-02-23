@@ -8,7 +8,7 @@ import produce from 'immer';
 import _ from 'lodash';
 import { Action, handleActions } from 'redux-actions';
 
-import { Location, SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
+import { SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
 import {
   closeSymbolPath,
   loadStructure,
@@ -22,7 +22,7 @@ const SPECIAL_SYMBOL_NAME = '{...}';
 const SPECIAL_CONTAINER_NAME = '';
 
 export interface SymbolWithMembers extends SymbolInformation {
-  members?: Set<SymbolWithMembers>;
+  members?: SymbolWithMembers[];
   path?: string;
 }
 
@@ -47,28 +47,26 @@ const initialState: SymbolState = {
 const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
   const structureTree: SymbolWithMembers[] = [];
 
-  function isOneLocationAfterAnotherLocation(oneLocation: Location, anotherLocation: Location) {
-    const {
-      line: oneLocationStartLine,
-      character: oneLocationStartCharacter,
-    } = oneLocation.range.start;
-    const {
-      line: anotherLocationStartLine,
-      character: anotherLocationStartCharacter,
-    } = anotherLocation.range.start;
-    return (
-      oneLocationStartLine > anotherLocationStartLine ||
-      (oneLocationStartLine === anotherLocationStartLine &&
-        oneLocationStartCharacter >= anotherLocationStartCharacter)
-    );
+  function findContainer(
+    tree: SymbolWithMembers[],
+    containerName: string
+  ): SymbolInformation | undefined {
+    const result = tree.find((s: SymbolInformation) => s.name === containerName);
+    if (result) {
+      return result;
+    } else {
+      const subTree = tree
+        .filter(s => s.members)
+        .map(s => s.members)
+        .flat();
+      if (subTree.length > 0) {
+        return findContainer(subTree, containerName);
+      } else {
+        return undefined;
+      }
+    }
   }
 
-  function findContainer(containerName: string, location: Location): SymbolInformation | undefined {
-    return symbols.find(
-      (s: SymbolInformation) =>
-        s.name === containerName && isOneLocationAfterAnotherLocation(location, s.location)
-    );
-  }
   symbols.forEach((s: SymbolInformation, index: number, arr: SymbolInformation[]) => {
     let container: Container;
     /**
@@ -81,16 +79,16 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
         (sy: SymbolInformation) => sy.name === SPECIAL_SYMBOL_NAME
       );
     } else {
-      container = findContainer(s.containerName || '', s.location);
+      container = findContainer(structureTree, s.containerName || '');
     }
     if (container) {
       if (!container.path) {
         container.path = container.name;
       }
       if (container.members) {
-        container.members.add({ ...s, path: `${container.path}/${s.name}` });
+        container.members.push({ ...s, path: `${container.path}/${s.name}` });
       } else {
-        container.members = new Set([{ ...s, path: `${container.path}/${s.name}` }]);
+        container.members = [{ ...s, path: `${container.path}/${s.name}` }];
       }
     } else {
       structureTree.push(s);

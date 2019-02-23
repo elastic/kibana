@@ -90,7 +90,7 @@ export class CodeSymbolTree extends React.PureComponent<Props> {
         onClick: () => void 0,
       };
       if (s.members) {
-        item.items = this.symbolsToSideNavItems(Array.from(s.members));
+        item.items = this.symbolsToSideNavItems(s.members);
         item.forceOpen = !this.props.closedPaths.includes(s.path!);
         item.renderItem = this.getStructureTreeItemRenderer(
           s.location,
