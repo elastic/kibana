@@ -76,7 +76,6 @@ export const PingList = ({
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
-        description: 'The "ms" in the default message is an abbreviation for milliseconds',
       }),
       dataType: 'number',
       render: (duration: number) => (
