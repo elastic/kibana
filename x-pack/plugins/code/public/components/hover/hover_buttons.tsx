@@ -27,6 +27,7 @@ export class HoverButtons extends React.PureComponent<HoverButtonProps> {
             size="s"
             isDisabled={this.props.state !== HoverState.READY}
             onClick={this.props.gotoDefinition}
+            data-test-subj="codeGoToDefinitionButton"
           >
             Goto Definition
           </EuiButton>
@@ -34,6 +35,7 @@ export class HoverButtons extends React.PureComponent<HoverButtonProps> {
             size="s"
             isDisabled={this.props.state !== HoverState.READY}
             onClick={this.props.findReferences}
+            data-test-subj="codeFindReferenceButton"
           >
             Find Reference
           </EuiButton>

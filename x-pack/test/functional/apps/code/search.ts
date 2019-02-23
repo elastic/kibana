@@ -8,10 +8,7 @@ import expect from 'expect.js';
 import { TestInvoker } from './lib/types';
 
 // tslint:disable:no-default-export
-export default function manageRepositoriesFunctonalTests({
-  getService,
-  getPageObjects,
-}: TestInvoker) {
+export default function searchFunctonalTests({ getService, getPageObjects }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
