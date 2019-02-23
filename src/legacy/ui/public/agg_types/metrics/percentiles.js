@@ -50,7 +50,7 @@ export const percentilesMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number'
+      filterFieldTypes: 'number,date'
     },
     {
       name: 'percents',
