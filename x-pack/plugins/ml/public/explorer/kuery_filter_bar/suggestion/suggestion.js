@@ -94,7 +94,7 @@ function getEuiIconType(type) {
   }
 }
 
-function Suggestion(props) {
+export const Suggestion = (props) => {
   return (
     <ListItem
       innerRef={props.innerRef}
@@ -111,7 +111,7 @@ function Suggestion(props) {
       />
     </ListItem>
   );
-}
+};
 
 Suggestion.propTypes = {
   onClick: PropTypes.func.isRequired,
@@ -121,4 +121,3 @@ Suggestion.propTypes = {
   innerRef: PropTypes.func.isRequired
 };
 
-export default Suggestion;

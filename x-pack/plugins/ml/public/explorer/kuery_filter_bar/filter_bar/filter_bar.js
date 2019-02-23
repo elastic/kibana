@@ -6,12 +6,12 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Suggestions from './suggestions';
-import ClickOutside from './click_outside';
+import { Suggestions } from '../suggestions';
+import { ClickOutside } from '../click_outside';
 import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const KEY_CODES = {
+export const KEY_CODES = {
   LEFT: 37,
   UP: 38,
   RIGHT: 39,
@@ -21,7 +21,7 @@ const KEY_CODES = {
   TAB: 9
 };
 
-export class FilterBar extends Component {
+class FilterBar extends Component {
   state = {
     isSuggestionsVisible: false,
     index: null,
@@ -234,3 +234,5 @@ FilterBar.defaultProps = {
   placeholder: 'tag : engineering OR tag : marketing',
   suggestions: []
 };
+
+export { FilterBar };

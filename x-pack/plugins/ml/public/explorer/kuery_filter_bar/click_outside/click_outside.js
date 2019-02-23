@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-export default class ClickOutside extends Component {
+class ClickOutside extends Component {
   componentDidMount() {
     document.addEventListener('mousedown', this.onClick);
   }
@@ -39,3 +39,5 @@ export default class ClickOutside extends Component {
 ClickOutside.propTypes = {
   onClickOutside: PropTypes.func.isRequired
 };
+
+export { ClickOutside };

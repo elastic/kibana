@@ -10,39 +10,13 @@ import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
 import { EuiCallOut } from '@elastic/eui';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query'; // luceneStringToDsl
-import { getAutocompleteProvider } from 'ui/autocomplete_providers';
+import { getSuggestions } from './utils';
+
 
 function convertKueryToEsQuery(kuery, indexPattern) {
   const ast = fromKueryExpression(kuery);
   return toElasticsearchQuery(ast, indexPattern);
 }
-
-async function getSuggestions(
-  query,
-  selectionStart,
-  indexPattern,
-  boolFilter
-) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
-  if (!autocompleteProvider) {
-    return [];
-  }
-  const config = {
-    get: () => true
-  };
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    config,
-    indexPatterns: [indexPattern],
-    boolFilter
-  });
-  return getAutocompleteSuggestions({
-    query,
-    selectionStart,
-    selectionEnd: selectionStart
-  });
-}
-
 export class KueryFilterBar extends Component {
   state = {
     error: null,
@@ -58,7 +32,6 @@ export class KueryFilterBar extends Component {
 
     const currentRequest = uniqueId();
     this.currentRequest = currentRequest;
-    // TODO: boolFilter for when we want to load existing filter from url
     const boolFilter = [];
 
     try {
@@ -75,7 +48,6 @@ export class KueryFilterBar extends Component {
 
       this.setState({ suggestions, isLoadingSuggestions: false });
     } catch (e) {
-      // TODO: callout or toast for error
       console.error('Error while fetching suggestions', e);
       this.setState({ isLoadingSuggestions: false, error: (e.message ? e.message : 'Error while fetching suggestions') });
     }
@@ -87,17 +59,16 @@ export class KueryFilterBar extends Component {
     const filteredFields = [];
 
     try {
-      const ast = fromKueryExpression(inputValue); // ast.function = 'and'
-      const isAndOperator = ast.function === 'and';
+      const ast = fromKueryExpression(inputValue);
+      const isAndOperator = (ast.function === 'and');
       const query = convertKueryToEsQuery(inputValue, indexPattern);
 
       if (!query) {
         return;
       }
-      // TODO: do some cleanup on what gets returned in this array (Remove bools, etc) - is there a better way to determine maskAll?
-      // Test that all relevant values get returned ( only if arg.type is literal? dig in more*)
-      // if ast.type == 'function' then layout is:
-      // ast.arguments = [ { arguments: [ { type: 'literal', value: 'AAL' } ] }, { arguments: [ { type: 'literal', value: 'AAL' } ] } ]
+
+      // if ast.type == 'function' then layout of ast.arguments:
+      // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
       if (ast && Array.isArray(ast.arguments)) {
 
         ast.arguments.forEach((arg) => {
@@ -127,7 +98,6 @@ export class KueryFilterBar extends Component {
   };
 
   render() {
-    // TODO: localization for error
     const { error } = this.state;
     const { initialValue, placeholder } = this.props;
 
