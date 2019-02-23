@@ -79,7 +79,15 @@ export const PingList = ({
         description: 'The "ms" in the default message is an abbreviation for milliseconds',
       }),
       dataType: 'number',
-      render: (duration: number) => <span>{duration / 1000} ms</span>,
+      render: (duration: number) => (
+        <span>
+          <FormattedMessage
+            id="xpack.uptime.pingList.durationMsColumnLabel"
+            defaultMessage="{duration} ms"
+            values={{ duration: duration / 1000 }}
+          />
+        </span>
+      ),
     },
     {
       field: 'error.type',
