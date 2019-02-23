@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EcsSchema } from './ecs_schema';
-
 /**
  * An instance of the unmodified schema exported from https://github.com/elastic/ecs
  * A map of `EcsNamespace.name` `->` `EcsNamespace`
@@ -14,7 +12,10 @@ import { EcsSchema } from './ecs_schema';
  * - NOTE: This instance does NOT include "mappings" from ECS fields, to `ECS`
  *   instances e.g. `@timestamp` to  `timestamp`
  */
-export const rawEcsSchema: EcsSchema = {
+
+import { EcsSchema } from '../type';
+
+export const ecsSchema: EcsSchema = {
   agent: {
     description:
       'The agent fields contain the data about the software entity, if any, that collects, detects, or observes events on a host, or takes measurements on a host. Examples include Beats. Agents may also run on observers. ECS agent.* fields shall be populated with details of the agent running on the host or observer where the event happened or the measurement was taken.\n',

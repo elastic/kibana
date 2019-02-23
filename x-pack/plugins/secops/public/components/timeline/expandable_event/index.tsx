@@ -9,7 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../graphql/types';
+import { DetailItem } from '../../../graphql/types';
 import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
@@ -23,18 +23,17 @@ const EventWithHoverActions = styled.div`
   width: 100%;
 `;
 
-const ExpandableDetails = styled.div<{ hideExpandButton: boolean }>`
-  width: 100%;
-
-  ${({ hideExpandButton }) =>
-    hideExpandButton
-      ? `
+const ExpandableDetails = styled.div<{ hideExpandButton: boolean; width: number }>`
+  width: ${({ width }) => (width ? `${width}px;` : '100%')}
+    ${({ hideExpandButton }) =>
+      hideExpandButton
+        ? `
   .euiAccordion__button svg {
     width: 0px;
     height: 0px;
   }
   `
-      : ''}
+        : ''};
 `;
 
 const HoverActionsRelativeContainer = styled.div`
@@ -54,21 +53,32 @@ const HoverActionsContainer = styled(EuiPanel)`
 `;
 
 interface Props {
-  event: Ecs;
+  id: string;
+  event: DetailItem[];
   forceExpand?: boolean;
   hideExpandButton?: boolean;
   stringifiedEvent: string;
   timelineId: string;
+  width: number;
 }
 
 export const ExpandableEvent = pure<Props>(
-  ({ event, forceExpand = false, hideExpandButton = false, stringifiedEvent, timelineId }) => (
+  ({
+    event,
+    forceExpand = false,
+    hideExpandButton = false,
+    id,
+    stringifiedEvent,
+    timelineId,
+    width,
+  }) => (
     <ExpandableDetails
       data-test-subj="timeline-expandable-details"
       hideExpandButton={hideExpandButton}
+      width={width}
     >
       <LazyAccordion
-        id={`timeline-${timelineId}-row-${event._id}`}
+        id={`timeline-${timelineId}-row-${id}`}
         buttonContent={
           <WithHoverActions
             render={showHoverContent => (
@@ -89,7 +99,7 @@ export const ExpandableEvent = pure<Props>(
         forceExpand={forceExpand}
         paddingSize="none"
       >
-        <StatefulEventDetails data={event} />
+        <StatefulEventDetails data={event} id={id} />
       </LazyAccordion>
     </ExpandableDetails>
   )

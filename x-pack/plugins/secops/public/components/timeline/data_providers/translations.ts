@@ -16,6 +16,13 @@ export const DELETE_DATA_PROVIDER = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+export const ADD = i18n.translate('xpack.secops.dataProviders.add', {
+  defaultMessage: 'Add',
+});
+
+export const DROP_HERE = i18n.translate('xpack.secops.dataProviders.dropHere', {
+  defaultMessage: 'Drop here',
+});
 
 export const DROP_ANYTHING = i18n.translate('xpack.secops.dataProviders.dropAnything', {
   defaultMessage: 'Drop anything',
@@ -34,6 +41,10 @@ export const HIGHLIGHTED = i18n.translate('xpack.secops.dataProviders.highlighte
 
 export const HERE_TO_BUILD_AN = i18n.translate('xpack.secops.dataProviders.hereToBuildAn', {
   defaultMessage: 'here to build an',
+});
+
+export const TO_BUILD_AN = i18n.translate('xpack.secops.dataProviders.toBuildAn', {
+  defaultMessage: 'to build an',
 });
 
 export const INCLUDE_DATA_PROVIDER = i18n.translate(

@@ -6,12 +6,13 @@
 
 import * as React from 'react';
 
-import { Ecs } from '../../graphql/types';
+import { DetailItem } from '../../graphql/types';
 
 import { EventDetails, View } from './event_details';
 
 interface Props {
-  data: Ecs;
+  data: DetailItem[];
+  id: string;
 }
 
 interface State {
@@ -30,8 +31,15 @@ export class StatefulEventDetails extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { data } = this.props;
+    const { data, id } = this.props;
 
-    return <EventDetails data={data} view={this.state.view} onViewSelected={this.onViewSelected} />;
+    return (
+      <EventDetails
+        data={data}
+        id={id}
+        view={this.state.view}
+        onViewSelected={this.onViewSelected}
+      />
+    );
   }
 }

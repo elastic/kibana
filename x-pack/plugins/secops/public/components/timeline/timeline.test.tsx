@@ -10,21 +10,18 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { eventsQuery } from '../../containers/events/index.gql_query';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
 import { mockEcsData } from '../../mock';
 import { mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { flyoutHeaderHeight } from '../flyout';
 
-import { ColumnHeaderType } from './body/column_headers/column_header';
-import { defaultHeaders } from './body/column_headers/default_headers';
-import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { Timeline } from './timeline';
 
 const testFlyoutHeight = 980;
-const mockGetNotesByIds = (eventId: string[]) => [];
 
 describe('Timeline', () => {
   const sort: Sort = {
@@ -49,39 +46,24 @@ describe('Timeline', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <Timeline
-          addNoteToEvent={jest.fn()}
+          browserFields={mockBrowserFields}
           id="foo"
-          columnHeaders={defaultHeaders}
-          columnRenderers={columnRenderers}
           dataProviders={mockDataProviders}
-          eventIdToNoteIds={{}}
           flyoutHeight={testFlyoutHeight}
           flyoutHeaderHeight={flyoutHeaderHeight}
-          getNotesByIds={mockGetNotesByIds}
           indexPattern={indexPattern}
           itemsPerPage={5}
           itemsPerPageOptions={[5, 10, 20]}
           kqlMode="search"
-          kqlQuery=""
+          kqlQueryExpression=""
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
           onChangeItemsPerPage={jest.fn()}
-          onColumnResized={jest.fn()}
-          onColumnRemoved={jest.fn()}
-          onColumnSorted={jest.fn()}
           onDataProviderRemoved={jest.fn()}
-          onFilterChange={jest.fn()}
-          onPinEvent={jest.fn()}
-          onRangeSelected={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
-          onUnPinEvent={jest.fn()}
-          pinnedEventIds={{}}
-          range={'1 Day'}
-          rowRenderers={rowRenderers}
           show={true}
           sort={sort}
-          updateNote={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -92,39 +74,24 @@ describe('Timeline', () => {
         <TestProviders>
           <MockedProvider mocks={mocks}>
             <Timeline
-              addNoteToEvent={jest.fn()}
+              browserFields={mockBrowserFields}
               id="foo"
-              columnHeaders={defaultHeaders}
-              columnRenderers={columnRenderers}
               dataProviders={mockDataProviders}
-              eventIdToNoteIds={{}}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
-              getNotesByIds={mockGetNotesByIds}
               indexPattern={indexPattern}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
-              kqlQuery=""
+              kqlQueryExpression=""
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
-              onColumnResized={jest.fn()}
-              onColumnRemoved={jest.fn()}
-              onColumnSorted={jest.fn()}
               onDataProviderRemoved={jest.fn()}
-              onFilterChange={jest.fn()}
-              onPinEvent={jest.fn()}
-              onRangeSelected={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
-              onUnPinEvent={jest.fn()}
-              pinnedEventIds={{}}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
               show={true}
               sort={sort}
-              updateNote={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -138,39 +105,24 @@ describe('Timeline', () => {
         <TestProviders>
           <MockedProvider mocks={mocks}>
             <Timeline
-              addNoteToEvent={jest.fn()}
+              browserFields={mockBrowserFields}
               id="foo"
-              columnHeaders={defaultHeaders}
-              columnRenderers={columnRenderers}
               dataProviders={mockDataProviders}
-              eventIdToNoteIds={{}}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
-              getNotesByIds={mockGetNotesByIds}
               indexPattern={indexPattern}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
-              kqlQuery=""
+              kqlQueryExpression=""
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
-              onColumnRemoved={jest.fn()}
-              onColumnResized={jest.fn()}
-              onColumnSorted={jest.fn()}
               onDataProviderRemoved={jest.fn()}
-              onFilterChange={jest.fn()}
-              onPinEvent={jest.fn()}
-              onRangeSelected={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
-              onUnPinEvent={jest.fn()}
-              pinnedEventIds={{}}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
               show={true}
               sort={sort}
-              updateNote={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -184,39 +136,24 @@ describe('Timeline', () => {
         <TestProviders>
           <MockedProvider mocks={mocks}>
             <Timeline
-              addNoteToEvent={jest.fn()}
+              browserFields={mockBrowserFields}
               id="foo"
-              columnHeaders={defaultHeaders}
-              columnRenderers={columnRenderers}
               dataProviders={mockDataProviders}
-              eventIdToNoteIds={{}}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
-              getNotesByIds={mockGetNotesByIds}
               indexPattern={indexPattern}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
-              kqlQuery=""
+              kqlQueryExpression=""
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
-              onColumnRemoved={jest.fn()}
-              onColumnResized={jest.fn()}
-              onColumnSorted={jest.fn()}
               onDataProviderRemoved={jest.fn()}
-              onFilterChange={jest.fn()}
-              onPinEvent={jest.fn()}
-              onRangeSelected={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
-              onUnPinEvent={jest.fn()}
-              pinnedEventIds={{}}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
               show={true}
               sort={sort}
-              updateNote={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -235,39 +172,24 @@ describe('Timeline', () => {
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={defaultHeaders}
-                columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -288,39 +210,24 @@ describe('Timeline', () => {
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={defaultHeaders}
-                columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -341,118 +248,32 @@ describe('Timeline', () => {
       });
     });
 
-    describe('onFilterChange', () => {
-      test('it invokes the onFilterChange callback when the input is updated', () => {
-        const newFilter = 'changed';
-        const mockOnFilterChange = jest.fn();
-
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
-        const wrapper = mount(
-          <TestProviders>
-            <MockedProvider mocks={mocks}>
-              <Timeline
-                addNoteToEvent={jest.fn()}
-                id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
-                dataProviders={mockDataProviders}
-                eventIdToNoteIds={{}}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
-                indexPattern={indexPattern}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQuery=""
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onFilterChange={mockOnFilterChange}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
-                show={true}
-                sort={sort}
-                updateNote={jest.fn()}
-              />
-            </MockedProvider>
-          </TestProviders>
-        );
-
-        wrapper
-          .find('[data-test-subj="textFilter"]')
-          .at(2)
-          .simulate('change', { target: { value: newFilter } });
-
-        expect(mockOnFilterChange).toBeCalledWith({
-          columnId: defaultHeaders[0].id,
-          filter: newFilter,
-        });
-      });
-    });
-
     describe('onToggleDataProviderEnabled', () => {
       test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
         const mockOnToggleDataProviderEnabled = jest.fn();
 
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -481,49 +302,28 @@ describe('Timeline', () => {
       test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
         const mockOnToggleDataProviderExcluded = jest.fn();
 
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -553,59 +353,42 @@ describe('Timeline', () => {
         const dataProviders = mockDataProviders.slice(0, 1);
         dataProviders[0].and = mockDataProviders.slice(1, 3);
 
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
                 dataProviders={dataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
         );
 
-        const andProviderBadge = wrapper
-          .find('[data-test-subj="andProviderButton"] span.euiBadge')
-          .first();
+        const andProviderBadges = wrapper.find(
+          '[data-test-subj="providerBadge"] .euiBadge__content span.field-value'
+        );
 
-        expect(andProviderBadge.text()).toEqual('2');
+        const andProviderBadgesText = andProviderBadges.map(node => node.text()).join(' ');
+        expect(andProviderBadges.length).toEqual(6);
+        expect(andProviderBadgesText).toEqual(
+          'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'
+        );
       });
 
       test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the accordeon menu', () => {
@@ -613,63 +396,42 @@ describe('Timeline', () => {
         dataProviders[0].and = mockDataProviders.slice(1, 3);
         const mockOnDataProviderRemoved = jest.fn();
 
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
                 dataProviders={dataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
         );
 
         wrapper
-          .find('[data-test-subj="andProviderButton"] span.euiBadge')
-          .first()
+          .find('[data-test-subj="providerBadge"]')
+          .at(3)
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="andProviderAccordion"] button.euiContextMenuItem')
+          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
           .at(2)
           .simulate('click');
 
@@ -681,63 +443,42 @@ describe('Timeline', () => {
         dataProviders[0].and = mockDataProviders.slice(1, 3);
         const mockOnToggleDataProviderEnabled = jest.fn();
 
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
                 dataProviders={dataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
         );
 
         wrapper
-          .find('[data-test-subj="andProviderButton"] span.euiBadge')
-          .first()
+          .find('[data-test-subj="providerBadge"]')
+          .at(3)
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="andProviderAccordion"] button.euiContextMenuItem')
+          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
           .at(1)
           .simulate('click');
 
@@ -753,63 +494,42 @@ describe('Timeline', () => {
         dataProviders[0].and = mockDataProviders.slice(1, 3);
         const mockOnToggleDataProviderExcluded = jest.fn();
 
-        // for this test, all columns have text filters
-        const allColumnsHaveTextFilters = defaultHeaders.map(header => ({
-          ...header,
-          columnHeaderType: 'text-filter' as ColumnHeaderType,
-        }));
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
               <Timeline
-                addNoteToEvent={jest.fn()}
+                browserFields={mockBrowserFields}
                 id="foo"
-                columnHeaders={allColumnsHaveTextFilters}
-                columnRenderers={columnRenderers}
                 dataProviders={dataProviders}
-                eventIdToNoteIds={{}}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
-                getNotesByIds={mockGetNotesByIds}
                 indexPattern={indexPattern}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
-                kqlQuery=""
+                kqlQueryExpression=""
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
-                onColumnRemoved={jest.fn()}
-                onColumnResized={jest.fn()}
-                onColumnSorted={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
-                onFilterChange={jest.fn()}
-                onPinEvent={jest.fn()}
-                onRangeSelected={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                onUnPinEvent={jest.fn()}
-                pinnedEventIds={{}}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
                 show={true}
                 sort={sort}
-                updateNote={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
         );
 
         wrapper
-          .find('[data-test-subj="andProviderButton"] span.euiBadge')
-          .first()
+          .find('[data-test-subj="providerBadge"]')
+          .at(3)
           .simulate('click');
 
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="andProviderAccordion"] button.euiContextMenuItem')
+          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
           .first()
           .simulate('click');
 

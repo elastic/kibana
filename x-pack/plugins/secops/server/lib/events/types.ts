@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsData } from '../../graphql/types';
+import { EventDetailsData, EventsData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { SearchHit } from '../types';
 
 export interface EventsAdapter {
   getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData>;
+  getEventDetails(req: FrameworkRequest, options: RequestDetailsOptions): Promise<EventDetailsData>;
+}
+
+export interface EventSource {
+  // tslint:disable-next-line:no-any
+  [field: string]: any;
 }
 
 export interface EventHit extends SearchHit {
   sort: string[];
-  _source: {
-    // tslint:disable-next-line:no-any
-    [field: string]: any;
-  };
+  _source: EventSource;
   aggregations: {
     // tslint:disable-next-line:no-any
     [agg: string]: any;
@@ -31,4 +34,9 @@ export interface TimerangeFilter {
       lte: number;
     };
   };
+}
+
+export interface RequestDetailsOptions {
+  indexName: string;
+  eventId: string;
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo } from 'lodash/fp';
+import { defaultTo, noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
@@ -43,12 +43,14 @@ const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerP
 const DragDropContextWrapperComponent = pure<Props>(({ dataProviders, dispatch, children }) => (
   <DragDropContext
     onDragEnd={result => {
+      enableScrolling();
       onDragEndHandler({
         result,
         dataProviders: dataProviders!,
         dispatch,
       });
     }}
+    onDragStart={disableScrolling}
   >
     {children}
   </DragDropContext>
@@ -63,3 +65,19 @@ const mapStateToProps = (state: State) => {
 };
 
 export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
+
+const disableScrolling = () => {
+  const x =
+    window.pageXOffset !== undefined
+      ? window.pageXOffset
+      : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+
+  const y =
+    window.pageYOffset !== undefined
+      ? window.pageYOffset
+      : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+
+  window.onscroll = () => window.scrollTo(x, y);
+};
+
+const enableScrolling = () => (window.onscroll = () => noop);

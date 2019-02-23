@@ -43,11 +43,11 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
     <P>
       <ToolTipTableMetadata data-test-subj="type">{i18n.TYPE}:</ToolTipTableMetadata>
       <ToolTipTableValue>
-        <IconType data-test-subj="type-icon" type={getIconFromType(header.type)} />
+        <IconType data-test-subj="type-icon" type={getIconFromType(header.type!)} />
         <span data-test-subj="type-value">{header.type}</span>
       </ToolTipTableValue>
     </P>
-    {header.description.length ? (
+    {header.description!.length ? (
       <P>
         <ToolTipTableMetadata data-test-subj="description">
           {i18n.DESCRIPTION}:

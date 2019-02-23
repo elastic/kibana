@@ -9,11 +9,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../graphql/types';
-import {
-  getAllFieldsInSchemaByMappedName,
-  getMappedFieldName,
-  virtualEcsSchema,
-} from '../../../../lib/ecs';
+import { getMappedEcsValue } from '../../../../lib/ecs';
 import { OnResize, Resizeable } from '../../../resize_handle';
 import { CELL_RESIZE_HANDLE_WIDTH, CellResizeHandle } from '../../../resize_handle/styled_handles';
 import { OnColumnResized } from '../../events';
@@ -51,8 +47,6 @@ const CellContainer = styled(EuiFlexGroup)<{ width: string }>`
   overflow: hidden;
   width: ${({ width }) => width};
 `;
-
-const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 export class DataDrivenColumns extends React.PureComponent<Props> {
   public render() {
@@ -99,8 +93,12 @@ export class DataDrivenColumns extends React.PureComponent<Props> {
         >
           {getColumnRenderer(header.id, columnRenderers, ecs).renderColumn({
             columnName: header.id,
-            data: ecs,
-            field: allFieldsInSchemaByName[getMappedFieldName(header.id)],
+            eventId: ecs._id,
+            value: getMappedEcsValue({
+              data: ecs,
+              fieldName: header.id,
+            }),
+            field: header,
             width: `${header.width - CELL_RESIZE_HANDLE_WIDTH}px`,
           })}
         </Cell>

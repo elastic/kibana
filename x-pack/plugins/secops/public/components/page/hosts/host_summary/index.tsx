@@ -19,8 +19,8 @@ import { get, getOr, isArray } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
 
+import { HostItem, HostsEdges } from '../../../../../server/graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';

@@ -2,6 +2,6 @@
 
 exports[`PreferenceFormattedDate rendering renders correctly against snapshot 1`] = `
 <Component
-  value="2019-02-25T22:27:05.000Z"
+  value={2019-02-25T22:27:05.000Z}
 />
 `;

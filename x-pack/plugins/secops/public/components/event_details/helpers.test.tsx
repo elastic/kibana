@@ -6,17 +6,17 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { getPopulatedMappedFields, virtualEcsSchema } from '../../../public/lib/ecs';
-import { mockEcsData, TestProviders } from '../../mock';
+import { TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 
 import { getExampleText, getIconFromType, getItems } from './helpers';
 
-const aField = virtualEcsSchema.event.fields['event.category'];
+const aField = mockDetailItemData[0];
 
 describe('helpers', () => {
   describe('getExampleText', () => {
     test('it returns the expected example text when the field contains an example', () => {
-      expect(getExampleText(aField)).toEqual('Example: user-management');
+      expect(getExampleText(aField)).toEqual('Example: Y-6TfmcB0WOhS6qyMv3s');
     });
 
     test(`it returns an empty string when the field's example is an empty string`, () => {
@@ -66,72 +66,54 @@ describe('helpers', () => {
   });
 
   describe('getItems', () => {
-    const data = mockEcsData[0];
-
     test('it returns the expected number of populated fields', () => {
-      expect(
-        getItems({
-          data,
-          populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-        }).length
-      ).toEqual(17);
+      expect(getItems(mockDetailItemData, mockDetailItemDataId).length).toEqual(20);
     });
 
-    test('it includes the "event.category" field', () => {
-      getItems({
-        data,
-        populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-      }).some(x => x.field === 'event.category');
+    test('it includes the "cloud.instance.id" field', () => {
+      getItems(mockDetailItemData, mockDetailItemDataId).some(x => x.field === 'cloud.instance.id');
     });
 
     test('it returns the expected description', () => {
       expect(
-        getItems({
-          data,
-          populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-        }).find(x => x.field === 'event.category')!.description
-      ).toEqual(
-        'Event category.\nThis contains high-level information about the contents of the event. It is more generic than `event.action`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution. Example: user-management'
-      );
+        getItems(mockDetailItemData, mockDetailItemDataId).find(
+          x => x.field === 'cloud.instance.id'
+        )!.description
+      ).toEqual('Instance ID of the host machine. Example: i-1234567890abcdef0');
     });
 
     test('it returns the expected type', () => {
       expect(
-        getItems({
-          data,
-          populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-        }).find(x => x.field === 'event.category')!.type
+        getItems(mockDetailItemData, mockDetailItemDataId).find(
+          x => x.field === 'cloud.instance.id'
+        )!.type
       ).toEqual('keyword');
     });
 
     test('it returns the expected valueAsString', () => {
       expect(
-        getItems({
-          data,
-          populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-        }).find(x => x.field === 'event.category')!.valueAsString
-      ).toEqual('Access');
+        getItems(mockDetailItemData, mockDetailItemDataId).find(
+          x => x.field === 'cloud.instance.id'
+        )!.valueAsString
+      ).toEqual('5412578377715150143');
     });
 
     test('it returns a draggable wrapper with the expected value.key', () => {
       expect(
-        getItems({
-          data,
-          populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-        }).find(x => x.field === 'event.category')!.value.key
-      ).toMatch(/^event-field-browser-value-for-event.category-\S+$/);
+        getItems(mockDetailItemData, mockDetailItemDataId).find(
+          x => x.field === 'cloud.instance.id'
+        )!.value.key
+      ).toMatch(/^event-field-browser-value-for-cloud.instance.id-\S+$/);
     });
 
     describe('formatting data for display', () => {
-      const justDateFields = getItems({
-        data,
-        populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-      }).filter(item => item.type === 'date');
+      const justDateFields = getItems(mockDetailItemData, mockDetailItemDataId).filter(
+        item => item.type === 'date'
+      );
 
-      const nonDateFields = getItems({
-        data,
-        populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
-      }).filter(item => item.type !== 'date');
+      const nonDateFields = getItems(mockDetailItemData, mockDetailItemDataId).filter(
+        item => item.type !== 'date'
+      );
 
       test('it should have at least one date field (a sanity check for inputs to other tests)', () => {
         expect(justDateFields.length > 0).toEqual(true); // to ensure the tests below run for at least one date field

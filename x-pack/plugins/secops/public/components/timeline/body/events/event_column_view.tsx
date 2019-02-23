@@ -27,6 +27,7 @@ interface Props {
   eventIdToNoteIds: { [eventId: string]: string[] };
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  loading: boolean;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
@@ -54,6 +55,7 @@ export class EventColumnView extends React.PureComponent<Props> {
       eventIdToNoteIds,
       expanded,
       getNotesByIds,
+      loading,
       onColumnResized,
       onEventToggled,
       onPinEvent,
@@ -79,6 +81,7 @@ export class EventColumnView extends React.PureComponent<Props> {
               pinnedEventIds,
             })}
             getNotesByIds={getNotesByIds}
+            loading={loading}
             noteIds={eventIdToNoteIds[event._id] || emptyNotes}
             onEventToggled={onEventToggled}
             onPinClicked={getPinOnClick({

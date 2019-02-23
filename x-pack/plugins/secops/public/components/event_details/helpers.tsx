@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import * as React from 'react';
 
-import { Ecs } from '../../graphql/types';
-import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../lib/ecs';
+import { DetailItem } from '../../graphql/types';
 import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { FormattedField } from '../timeline/body/renderers/formatted_field';
+import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 import { Provider } from '../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -50,8 +49,8 @@ interface Item {
 }
 
 /** Returns example text, or an empty string if the field does not have an example */
-export const getExampleText = (field: EcsField): string =>
-  field.example.length > 0 ? `Example: ${field.example}` : '';
+export const getExampleText = (field: DetailItem): string =>
+  !isEmpty(field.example) ? `Example: ${field.example}` : '';
 
 export const getIconFromType = (type: string) => {
   switch (type) {
@@ -72,36 +71,18 @@ export const getIconFromType = (type: string) => {
   }
 };
 
-interface GetItemsParams {
-  /** the runtime representation of an event */
-  data: Ecs;
-  /** all the fields that are populated in `data` */
-  populatedFields: EcsField[];
-}
-
 /**
- * Given `data`, the runtime representation of an event,
- * and `populatedFields`, an `EcsField[]` containing all the fields that are
- * populated in `data`, it returns an `Item[]`, so the data can be shown in
- * the table
+ * Return a draggable value for the details item view in the timeline
  */
-export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] =>
-  populatedFields.map(field => {
+export const getItems = (data: DetailItem[], id: string): Item[] =>
+  data.map(item => {
     const itemDataProvider = {
       enabled: true,
-      id: escapeDataProviderId(`id-event-field-browser-value-for-${field.name}-${data._id}`),
-      name: `${field.name}: ${getMappedEcsValue({
-        data,
-        fieldName: field.name,
-      })}`,
+      id: escapeDataProviderId(`id-event-field-browser-value-for-${item.field}-${id}`),
+      name: item.field,
       queryMatch: {
-        field: getOr(field.name, field.name, mappedEcsSchemaFieldNames),
-        value: escapeQueryValue(
-          getMappedEcsValue({
-            data,
-            fieldName: field.name,
-          })
-        ),
+        field: item.field,
+        value: escapeQueryValue(item.value),
       },
       excluded: false,
       kqlQuery: '',
@@ -109,16 +90,13 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] =>
     };
 
     return {
-      description: `${field.description} ${getExampleText(field)}`,
-      field: field.name,
-      type: field.type,
-      valueAsString: `${getMappedEcsValue({
-        data,
-        fieldName: field.name,
-      })}`,
+      description: `${item.description || ''} ${getExampleText(item)}`,
+      field: item.field,
+      type: item.type,
+      valueAsString: item.value.toString(),
       value: (
         <DraggableWrapper
-          key={`event-field-browser-value-for-${field.name}-${data._id}`}
+          key={`event-field-browser-value-for-${item.field}-${id}`}
           dataProvider={itemDataProvider}
           render={(dataProvider, _, snapshot) =>
             snapshot.isDragging ? (
@@ -126,7 +104,11 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] =>
                 <Provider dataProvider={dataProvider} />
               </DragEffects>
             ) : (
-              <FormattedField data={data} fieldName={field.name} fieldType={field.type} />
+              <FormattedFieldValue
+                value={item.value}
+                fieldName={item.field}
+                fieldType={item.type}
+              />
             )
           }
         />

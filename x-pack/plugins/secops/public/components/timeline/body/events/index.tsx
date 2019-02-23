@@ -9,6 +9,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
 
+import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -29,6 +30,7 @@ const EventsContainer = styled.div<{
 interface Props {
   actionsColumnWidth: number;
   addNoteToEvent: AddNoteToEvent;
+  browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: Ecs[];
@@ -54,6 +56,7 @@ export class Events extends React.PureComponent<Props> {
     const {
       actionsColumnWidth,
       addNoteToEvent,
+      browserFields,
       columnHeaders,
       columnRenderers,
       data,
@@ -78,6 +81,7 @@ export class Events extends React.PureComponent<Props> {
               <StatefulEvent
                 actionsColumnWidth={actionsColumnWidth}
                 addNoteToEvent={addNoteToEvent}
+                browserFields={browserFields}
                 columnHeaders={columnHeaders}
                 columnRenderers={columnRenderers}
                 event={event}

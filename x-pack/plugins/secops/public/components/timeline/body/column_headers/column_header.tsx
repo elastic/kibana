@@ -10,12 +10,12 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** The specification of a column header */
 export interface ColumnHeader {
-  category: string;
   columnHeaderType: ColumnHeaderType;
-  description: string;
-  example: string;
   id: ColumnId;
   placeholder?: string;
-  type: string;
   width: number;
+  category?: string;
+  description?: string;
+  example?: string;
+  type?: string;
 }

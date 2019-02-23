@@ -15,6 +15,8 @@
 
 export type Date = any;
 
+export type DetailItemValue = any;
+
 // ====================================================
 // Types
 // ====================================================
@@ -37,6 +39,8 @@ export interface Source {
   Authentications: AuthenticationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
+
+  EventDetails: EventDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -99,6 +103,12 @@ export interface SourceStatus {
 }
 /** A descriptor of a field in an index */
 export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: string | null;
+  /** whether the field's belong to an alias index */
+  indexes: (string | null)[];
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -107,6 +117,8 @@ export interface IndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
+  /** Description of the field */
+  description?: string | null;
 }
 
 export interface AuthenticationsData {
@@ -491,6 +503,24 @@ export interface UrlEcsFields {
   password?: string | null;
 }
 
+export interface EventDetailsData {
+  data?: DetailItem[] | null;
+}
+
+export interface DetailItem {
+  category: string;
+
+  description?: string | null;
+
+  example?: string | null;
+
+  field: string;
+
+  type: string;
+
+  value: DetailItemValue;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -667,6 +697,11 @@ export interface EventsSourceArgs {
   timerange?: TimerangeInput | null;
 
   filterQuery?: string | null;
+}
+export interface EventDetailsSourceArgs {
+  eventId: string;
+
+  indexName: string;
 }
 export interface HostsSourceArgs {
   id?: string | null;
@@ -1485,6 +1520,14 @@ export namespace SourceQuery {
   export type IndexFields = {
     __typename?: 'IndexField';
 
+    category: string;
+
+    description?: string | null;
+
+    example?: string | null;
+
+    indexes: (string | null)[];
+
     name: string;
 
     searchable: boolean;
@@ -1492,6 +1535,50 @@ export namespace SourceQuery {
     type: string;
 
     aggregatable: boolean;
+  };
+}
+
+export namespace GetEventDetailsQuery {
+  export type Variables = {
+    sourceId: string;
+    eventId: string;
+    indexName: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    EventDetails: EventDetails;
+  };
+
+  export type EventDetails = {
+    __typename?: 'EventDetailsData';
+
+    data?: Data[] | null;
+  };
+
+  export type Data = {
+    __typename?: 'DetailItem';
+
+    category: string;
+
+    description?: string | null;
+
+    example?: string | null;
+
+    field: string;
+
+    type: string;
+
+    value: DetailItemValue;
   };
 }
 

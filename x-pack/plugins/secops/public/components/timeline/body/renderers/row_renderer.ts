@@ -6,6 +6,7 @@
 
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 
 export const RowRendererContainer = styled.div<{ width: number }>`
@@ -15,6 +16,11 @@ export const RowRendererContainer = styled.div<{ width: number }>`
 export interface RowRenderer {
   isInstance: (data: Ecs) => boolean;
   renderRow: (
-    { data, width, children }: { data: Ecs; width: number; children: React.ReactNode }
+    {
+      browserFields,
+      data,
+      width,
+      children,
+    }: { browserFields: BrowserFields; data: Ecs; width: number; children: React.ReactNode }
   ) => React.ReactNode;
 }

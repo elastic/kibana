@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isString } from 'lodash/fp';
+import { get, isNil, isString } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -36,11 +36,15 @@ export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
 
 export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
   const text = get(path, item);
-  if (text == null) {
+  return getOrEmptyTagFromValue(text);
+};
+
+export const getOrEmptyTagFromValue = (value: string | number | null | undefined): JSX.Element => {
+  if (isNil(value)) {
     return getEmptyTagValue();
-  } else if (text === '') {
+  } else if (value === '') {
     return getEmptyStringTag();
   } else {
-    return <>{text}</>;
+    return <>{value}</>;
   }
 };

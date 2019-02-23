@@ -29,9 +29,13 @@ mockGetEvents.mockResolvedValue({
   Events: {
     ...mockEventsData.Events,
   },
+  EventDetails: {
+    data: [],
+  },
 });
 const mockEventsAdapter: EventsAdapter = {
   getEvents: mockGetEvents,
+  getEventDetails: mockGetEvents,
 };
 
 const mockEventsLibs: EventsResolversDeps = {
@@ -89,6 +93,13 @@ describe('Test Source Resolvers', () => {
       {} as GraphQLResolveInfo
     );
     expect(mockEventsAdapter.getEvents).toHaveBeenCalled();
-    expect(data).toEqual(mockEventsData);
+    expect(data).toEqual({
+      Events: {
+        ...mockEventsData.Events,
+      },
+      EventDetails: {
+        data: [],
+      },
+    });
   });
 });

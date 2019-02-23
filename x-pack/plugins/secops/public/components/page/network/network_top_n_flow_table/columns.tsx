@@ -180,7 +180,7 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     render: ({ node }) => {
       if (node.network && node.network.bytes) {
-        return numeral(node.network.packets).format('0.000b');
+        return numeral(node.network.bytes).format('0.000b');
       } else {
         return getEmptyTagValue();
       }

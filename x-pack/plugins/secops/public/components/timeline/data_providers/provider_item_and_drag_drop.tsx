@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { AndOrBadge } from '../../and_or_badge';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -17,33 +19,35 @@ import {
 } from '../events';
 
 import { DataProvider } from './data_provider';
-import { ProviderItemAndPopover } from './provider_item_and_popover';
+import { ProviderItemAnd } from './provider_item_and';
+
+import * as i18n from './translations';
+
+const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
+  margin: 0px 8px;
+`;
 
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
+  width: auto;
   border: 0.1rem dashed ${props => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
   text-align: center;
-  padding: 2px 3px;
+  padding: 3px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   ${props =>
     props.hasAndItem
-      ? `&:hover {
+      ? `&:hover {z
     transition: background-color 0.7s ease;
-    background-color: ${props.theme.eui.euiColorDarkestShade};
+    background-color: ${props.theme.eui.euiColorEmptyShade};
   }`
       : ''};
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};
-  .euiPopover {
-    display: inherit;
-    .euiPopover__anchor {
-      display: inherit;
-      .euiButtonEmpty {
-        width: 100%;
-        .euiButtonEmpty__content {
-          padding: 0px;
-        }
-      }
-    }
-  }
+`;
+
+const NumberProviderAndBadge = styled(EuiBadge)`
+  margin: 0px 5px;
 `;
 
 interface ProviderItemDropProps {
@@ -67,15 +71,32 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
   }) => {
     const onMouseEnter = () => onChangeDroppableAndProvider(dataProvider.id);
     const onMouseLeave = () => onChangeDroppableAndProvider('');
-
+    const hasAndItem = dataProvider.and.length > 0;
     return (
-      <DropAndTargetDataProviders
-        className="drop-and-provider-timeline"
-        hasAndItem={dataProvider.and.length > 0}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+        justifyContent="flexStart"
+        alignItems="center"
       >
-        <ProviderItemAndPopover
+        <DropAndTargetDataProvidersContainer className="drop-and-provider-timeline">
+          <DropAndTargetDataProviders
+            hasAndItem={hasAndItem}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+          >
+            {hasAndItem && (
+              <NumberProviderAndBadge color="primary">
+                {dataProvider.and.length}
+              </NumberProviderAndBadge>
+            )}
+            <EuiText color="subdued" size="xs">
+              {i18n.ADD}
+            </EuiText>
+            <AndOrBadge type="and" />
+          </DropAndTargetDataProviders>
+        </DropAndTargetDataProvidersContainer>
+        <ProviderItemAnd
           dataProvidersAnd={dataProvider.and}
           providerId={dataProvider.id}
           onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
@@ -83,7 +104,7 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
           onToggleDataProviderEnabled={onToggleDataProviderEnabled}
           onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         />
-      </DropAndTargetDataProviders>
+      </EuiFlexGroup>
     );
   }
 );

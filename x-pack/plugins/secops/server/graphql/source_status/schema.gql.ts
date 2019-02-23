@@ -9,6 +9,12 @@ import gql from 'graphql-tag';
 export const sourceStatusSchema = gql`
   "A descriptor of a field in an index"
   type IndexField {
+    "Where the field belong"
+    category: String!
+    "Example of field's value"
+    example: String
+    "whether the field's belong to an alias index"
+    indexes: [String]!
     "The name of the field"
     name: String!
     "The type of the field's values as recognized by Kibana"
@@ -17,6 +23,8 @@ export const sourceStatusSchema = gql`
     searchable: Boolean!
     "Whether the field's values can be aggregated"
     aggregatable: Boolean!
+    "Description of the field"
+    description: String
   }
 
   extend type SourceStatus {

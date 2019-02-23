@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
@@ -10,40 +11,29 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
-import { Note } from '../../lib/note';
 import { timelineModel } from '../../store';
 import { AutoSizer } from '../auto_sizer';
-import { AddNoteToEvent, UpdateNote } from '../notes/helpers';
 
-import { Body } from './body';
-import { ColumnHeader } from './body/column_headers/column_header';
-import { ColumnRenderer } from './body/renderers';
-import { RowRenderer } from './body/renderers';
 import { Sort } from './body/sort';
+import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
-  OnColumnRemoved,
-  OnColumnResized,
-  OnColumnSorted,
   OnDataProviderRemoved,
-  OnFilterChange,
-  OnPinEvent,
-  OnRangeSelected,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
-  OnUnPinEvent,
 } from './events';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 
 const WrappedByAutoSizer = styled.div`
-  width: auto;
+  width: 100%;
 `; // required by AutoSizer
 
 const TimelineContainer = styled(EuiFlexGroup)`
@@ -55,12 +45,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
 `;
 
 interface Props {
-  addNoteToEvent: AddNoteToEvent;
-  columnHeaders: ColumnHeader[];
-  columnRenderers: ColumnRenderer[];
+  browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  eventIdToNoteIds: { [eventId: string]: string[] };
-  getNotesByIds: (noteIds: string[]) => Note[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -68,37 +54,22 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: timelineModel.KqlMode;
-  kqlQuery: string;
+  kqlQueryExpression: string;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
-  onColumnResized: OnColumnResized;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
-  onFilterChange: OnFilterChange;
-  onPinEvent: OnPinEvent;
-  onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: { [eventId: string]: boolean };
-  range: string;
-  rowRenderers: RowRenderer[];
   show: boolean;
   sort: Sort;
-  updateNote: UpdateNote;
 }
 
 /** The parent Timeline component */
 export const Timeline = pure<Props>(
   ({
-    addNoteToEvent,
-    columnHeaders,
-    columnRenderers,
+    browserFields,
     dataProviders,
-    eventIdToNoteIds,
-    getNotesByIds,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -106,28 +77,22 @@ export const Timeline = pure<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
-    kqlQuery,
+    kqlQueryExpression,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
     onDataProviderRemoved,
-    onFilterChange,
-    onPinEvent,
-    onRangeSelected,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
-    onUnPinEvent,
-    pinnedEventIds,
-    range,
-    rowRenderers,
     show,
     sort,
-    updateNote,
   }) => {
-    const combinedQueries = combineQueries(dataProviders, indexPattern, kqlQuery, kqlMode);
+    const combinedQueries = combineQueries(
+      dataProviders,
+      indexPattern,
+      kqlQueryExpression,
+      kqlMode
+    );
     return (
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { height: timelineHeaderHeight = 0, width = 0 } }) => (
@@ -164,33 +129,18 @@ export const Timeline = pure<Props>(
               >
                 {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt }) => (
                   <>
-                    <Body
-                      addNoteToEvent={addNoteToEvent}
+                    <StatefulBody
+                      browserFields={browserFields}
+                      data={events}
                       id={id}
                       isLoading={loading}
-                      columnHeaders={columnHeaders}
-                      columnRenderers={columnRenderers}
-                      data={events}
-                      eventIdToNoteIds={eventIdToNoteIds}
-                      getNotesByIds={getNotesByIds}
                       height={calculateBodyHeight({
                         flyoutHeight,
                         flyoutHeaderHeight,
                         timelineHeaderHeight,
                         timelineFooterHeight: footerHeight,
                       })}
-                      onColumnResized={onColumnResized}
-                      onColumnRemoved={onColumnRemoved}
-                      onColumnSorted={onColumnSorted}
-                      onFilterChange={onFilterChange}
-                      onPinEvent={onPinEvent}
-                      onRangeSelected={onRangeSelected}
-                      onUnPinEvent={onUnPinEvent}
-                      pinnedEventIds={pinnedEventIds}
-                      range={range}
-                      rowRenderers={rowRenderers}
                       sort={sort}
-                      updateNote={updateNote}
                       width={width}
                     />
                     <Footer

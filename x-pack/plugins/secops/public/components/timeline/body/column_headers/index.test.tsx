@@ -7,9 +7,9 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
 import { Direction } from '../../../../graphql/types';
+import { TestProviders } from '../../../../mock/test_providers';
 import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { Sort } from '../sort';
 

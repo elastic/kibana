@@ -8,6 +8,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
 
+import { BrowserFields } from '../../../../containers/source';
+import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
 import { Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -23,6 +25,7 @@ import { EventColumnView } from './event_column_view';
 interface Props {
   actionsColumnWidth: number;
   addNoteToEvent: AddNoteToEvent;
+  browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   event: Ecs;
@@ -59,6 +62,7 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
     const {
       actionsColumnWidth,
       addNoteToEvent,
+      browserFields,
       columnHeaders,
       columnRenderers,
       event,
@@ -75,61 +79,74 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
     } = this.props;
 
     return (
-      <div data-test-subj="event">
-        {getRowRenderer(event, rowRenderers).renderRow({
-          data: event,
-          width,
-          children: (
-            <>
-              <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
-                <EuiFlexItem data-test-subj="event-column-data" grow={false}>
-                  <EventColumnView
-                    actionsColumnWidth={actionsColumnWidth}
-                    associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
-                    columnHeaders={columnHeaders}
-                    columnRenderers={columnRenderers}
-                    expanded={!!this.state.expanded[event._id]}
-                    event={event}
-                    eventIdToNoteIds={eventIdToNoteIds}
-                    getNotesByIds={getNotesByIds}
-                    onColumnResized={onColumnResized}
-                    onEventToggled={this.onToggleExpanded(event._id)}
-                    onPinEvent={onPinEvent}
-                    onUnPinEvent={onUnPinEvent}
-                    pinnedEventIds={pinnedEventIds}
-                    showNotes={!!this.state.showNotes[event._id]}
-                    toggleShowNotes={this.onToggleShowNotes(event._id)}
-                    updateNote={updateNote}
-                  />
-                </EuiFlexItem>
+      <TimelineDetailsComponentQuery
+        sourceId="default"
+        indexName={event._index!}
+        eventId={event._id}
+        executeQuery={!!this.state.expanded[event._id]}
+      >
+        {({ detailsData, loading }) => (
+          <div data-test-subj="event">
+            {getRowRenderer(event, rowRenderers).renderRow({
+              browserFields,
+              data: event,
+              width,
+              children: (
+                <>
+                  <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
+                    <EuiFlexItem data-test-subj="event-column-data" grow={false}>
+                      <EventColumnView
+                        actionsColumnWidth={actionsColumnWidth}
+                        associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
+                        columnHeaders={columnHeaders}
+                        columnRenderers={columnRenderers}
+                        expanded={!!this.state.expanded[event._id]}
+                        event={event}
+                        eventIdToNoteIds={eventIdToNoteIds}
+                        getNotesByIds={getNotesByIds}
+                        loading={loading}
+                        onColumnResized={onColumnResized}
+                        onEventToggled={this.onToggleExpanded(event._id)}
+                        onPinEvent={onPinEvent}
+                        onUnPinEvent={onUnPinEvent}
+                        pinnedEventIds={pinnedEventIds}
+                        showNotes={!!this.state.showNotes[event._id]}
+                        toggleShowNotes={this.onToggleShowNotes(event._id)}
+                        updateNote={updateNote}
+                      />
+                    </EuiFlexItem>
 
-                <EuiFlexItem data-test-subj="event-notes-flex-item" grow={false}>
-                  <NoteCards
-                    associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
-                    data-test-subj="note-cards"
-                    getNewNoteId={getNewNoteId}
-                    getNotesByIds={getNotesByIds}
-                    noteIds={eventIdToNoteIds[event._id] || emptyNotes}
-                    showAddNote={!!this.state.showNotes[event._id]}
-                    toggleShowAddNote={this.onToggleShowNotes(event._id)}
-                    updateNote={updateNote}
-                    width={`${width - 10}px`}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ),
-        })}
-        <EuiFlexItem data-test-subj="event-details" grow={true}>
-          <ExpandableEvent
-            event={event}
-            forceExpand={!!this.state.expanded[event._id]}
-            hideExpandButton={true}
-            stringifiedEvent={stringifyEvent(event)}
-            timelineId={timelineId}
-          />
-        </EuiFlexItem>
-      </div>
+                    <EuiFlexItem data-test-subj="event-notes-flex-item" grow={false}>
+                      <NoteCards
+                        associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
+                        data-test-subj="note-cards"
+                        getNewNoteId={getNewNoteId}
+                        getNotesByIds={getNotesByIds}
+                        noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+                        showAddNote={!!this.state.showNotes[event._id]}
+                        toggleShowAddNote={this.onToggleShowNotes(event._id)}
+                        updateNote={updateNote}
+                        width={`${width - 10}px`}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              ),
+            })}
+            <EuiFlexItem data-test-subj="event-details" grow={true}>
+              <ExpandableEvent
+                id={event._id}
+                event={detailsData || []}
+                forceExpand={!!this.state.expanded[event._id]}
+                hideExpandButton={true}
+                stringifiedEvent={stringifyEvent(event)}
+                timelineId={timelineId}
+                width={width}
+              />
+            </EuiFlexItem>
+          </div>
+        )}
+      </TimelineDetailsComponentQuery>
     );
   }
 

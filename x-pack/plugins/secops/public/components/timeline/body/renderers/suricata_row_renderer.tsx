@@ -24,12 +24,12 @@ export const suricataRowRenderer: RowRenderer = {
     const module: string | null = get('event.module', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: ({ data, width, children }) => {
+  renderRow: ({ browserFields, data, width, children }) => {
     return (
       <SuricataRow>
         {children}
         <RowRendererContainer width={width}>
-          <SuricataDetails data={data} />
+          <SuricataDetails data={data} browserFields={browserFields} />
         </RowRendererContainer>
       </SuricataRow>
     );
