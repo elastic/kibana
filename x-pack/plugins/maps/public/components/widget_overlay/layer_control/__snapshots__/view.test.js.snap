@@ -40,10 +40,10 @@ exports[`LayerControl is rendered 1`] = `
       >
         <EuiButtonEmpty
           color="primary"
+          data-test-subj="addLayerButton"
           flush="right"
           iconSide="left"
           onClick={[Function]}
-          data-test-subj="addLayerButton"
           size="xs"
           type="button"
         >
