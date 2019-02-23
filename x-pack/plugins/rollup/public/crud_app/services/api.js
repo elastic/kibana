@@ -5,6 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { UA_ROLLUP_JOB_CREATE } from '../../../common';
 import { getHttp } from './http_provider';
 import { trackUserRequest } from './track_user_action';
 
@@ -33,7 +34,7 @@ export async function deleteJobs(jobIds) {
 export async function createJob(job) {
   const body = { job };
   const action = getHttp().put(`${apiPrefix}/create`, body);
-  return await trackUserRequest(action, 'create-rollup-job');
+  return await trackUserRequest(action, UA_ROLLUP_JOB_CREATE);
 }
 
 export async function validateIndexPattern(indexPattern) {

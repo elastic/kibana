@@ -7,3 +7,9 @@
 export const PLUGIN = {
   ID: 'rollup'
 };
+
+export const UA_ROLLUP_JOB_CREATE = 'rollup_job_create';
+
+export const USER_ACTIONS = [
+  UA_ROLLUP_JOB_CREATE,
+];
