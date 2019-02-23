@@ -16,14 +16,14 @@ export interface UserActionRecord {
 export function fetchUserActions(
   server: Server,
   appName: string,
-  actionTypes: string
-): Promise<UserActionRecord> | undefined {
+  actionTypes: string[]
+): Promise<UserActionRecord | undefined> {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
   const savedObjectsClient = new SavedObjectsClient(internalRepository);
 
-  async function fetchUserAction(actionType) {
+  async function fetchUserAction(actionType: string): Promise<UserActionRecord | undefined> {
     try {
       const savedObjectId = `${appName}:${actionType}`;
       const savedObject = await savedObjectsClient.get('user-action', savedObjectId);
