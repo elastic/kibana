@@ -9,6 +9,7 @@ import React from 'react';
 import { pure } from 'recompose';
 
 import { NetworkTopNFlowDirection } from '../../../../graphql/types';
+import * as i18n from './translations';
 
 type MyEuiButtonGroupProps = Pick<
   EuiButtonGroupProps,
@@ -22,11 +23,11 @@ const MyEuiButtonGroup: React.SFC<MyEuiButtonGroupProps> = EuiButtonGroup;
 const toggleButtonDirection = [
   {
     id: NetworkTopNFlowDirection.uniDirectional,
-    label: 'Unidirectional',
+    label: i18n.UNIDIRECTIONAL,
   },
   {
     id: NetworkTopNFlowDirection.biDirectional,
-    label: 'Bidirectional',
+    label: i18n.BIDIRECTIONAL,
   },
 ];
 

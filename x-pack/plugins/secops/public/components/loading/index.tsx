@@ -17,17 +17,13 @@ injectGlobal`
   }
 `;
 
-type Position = 'relative' | 'absolute';
-
-type ZIndex = number | '-moz-initial' | 'inherit' | 'initial' | 'revert' | 'unset' | 'auto';
-
 interface LoadingProps {
   text: string;
   height: number | string;
   showBorder?: boolean;
   width: number | string;
-  zIndex?: ZIndex;
-  position?: Position;
+  zIndex?: number | string;
+  position?: string;
 }
 
 export const LoadingPanel = pure<LoadingProps>(
@@ -39,7 +35,13 @@ export const LoadingPanel = pure<LoadingProps>(
     position = 'relative',
     zIndex = 'inherit',
   }) => (
-    <LoadingStaticPanel className="app-loading" style={{ height, width, position, zIndex }}>
+    <LoadingStaticPanel
+      className="app-loading"
+      height={height}
+      width={width}
+      position={position}
+      zIndex={zIndex}
+    >
       <LoadingStaticContentPanel>
         <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
           <EuiLoadingChart size="m" />
@@ -52,12 +54,20 @@ export const LoadingPanel = pure<LoadingProps>(
   )
 );
 
-export const LoadingStaticPanel = styled.div`
-  position: relative;
+export const LoadingStaticPanel = styled.div<{
+  height: number | string;
+  position: string;
+  width: number | string;
+  zIndex: number | string;
+}>`
+  height: ${({ height }) => height};
+  position: ${({ position }) => position};
+  width: ${({ width }) => width};
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  z-index: ${({ zIndex }) => zIndex};
 `;
 
 export const LoadingStaticContentPanel = styled.div`

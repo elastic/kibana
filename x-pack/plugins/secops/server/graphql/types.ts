@@ -185,7 +185,7 @@ export interface SourceEcsFields {
 
   port?: number | null;
 
-  domain?: (string | null)[] | null;
+  domain?: string[] | null;
 }
 
 export interface HostEcsFields {
@@ -279,7 +279,7 @@ export interface DestinationEcsFields {
 
   port?: number | null;
 
-  domain?: (string | null)[] | null;
+  domain?: string[] | null;
 }
 
 export interface EventEcsFields {
@@ -1089,7 +1089,7 @@ export namespace SourceEcsFieldsResolvers {
 
     port?: PortResolver<number | null, TypeParent, Context>;
 
-    domain?: DomainResolver<(string | null)[] | null, TypeParent, Context>;
+    domain?: DomainResolver<string[] | null, TypeParent, Context>;
   }
 
   export type IpResolver<
@@ -1103,7 +1103,7 @@ export namespace SourceEcsFieldsResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
-    R = (string | null)[] | null,
+    R = string[] | null,
     Parent = SourceEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1400,7 +1400,7 @@ export namespace DestinationEcsFieldsResolvers {
 
     port?: PortResolver<number | null, TypeParent, Context>;
 
-    domain?: DomainResolver<(string | null)[] | null, TypeParent, Context>;
+    domain?: DomainResolver<string[] | null, TypeParent, Context>;
   }
 
   export type IpResolver<
@@ -1414,7 +1414,7 @@ export namespace DestinationEcsFieldsResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
-    R = (string | null)[] | null,
+    R = string[] | null,
     Parent = DestinationEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

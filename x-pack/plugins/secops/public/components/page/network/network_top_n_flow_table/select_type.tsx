@@ -9,26 +9,27 @@ import React from 'react';
 import { pure } from 'recompose';
 
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../../graphql/types';
+import * as i18n from './translations';
 
 const toggleTypeOptions = [
   {
     value: NetworkTopNFlowType.source,
-    inputDisplay: 'By Source IP',
+    inputDisplay: i18n.BY_SOURCE_IP,
     directions: [NetworkTopNFlowDirection.uniDirectional, NetworkTopNFlowDirection.biDirectional],
   },
   {
     value: NetworkTopNFlowType.destination,
-    inputDisplay: 'By Destination IP',
+    inputDisplay: i18n.BY_DESTINATION_IP,
     directions: [NetworkTopNFlowDirection.uniDirectional, NetworkTopNFlowDirection.biDirectional],
   },
   {
     value: NetworkTopNFlowType.client,
-    inputDisplay: 'By Client IP',
+    inputDisplay: i18n.BY_CLIENT_IP,
     directions: [NetworkTopNFlowDirection.biDirectional],
   },
   {
     value: NetworkTopNFlowType.server,
-    inputDisplay: 'By Server IP',
+    inputDisplay: i18n.BY_SERVER_IP,
     directions: [NetworkTopNFlowDirection.biDirectional],
   },
 ];

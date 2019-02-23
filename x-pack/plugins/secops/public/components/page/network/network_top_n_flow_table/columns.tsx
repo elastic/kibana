@@ -6,10 +6,9 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { get, has } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
 
 import {
   NetworkDirectionEcs,
@@ -21,7 +20,7 @@ import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from './add_to_kql';
@@ -41,7 +40,7 @@ export const getNetworkTopNFlowColumns = (
       const ipAttr = `${topNFlowType}.ip`;
       const ip: string | null = get(ipAttr, node);
       const id = escapeDataProviderId(
-        `networkTopNFlow-table-${uuid.v4()}-${topNFlowType}-${topNFlowDirection}-ip-${ip}`
+        `networkTopNFlow-table--${topNFlowType}-${topNFlowDirection}-ip-${ip}`
       );
       if (ip != null) {
         return (
@@ -134,7 +133,7 @@ export const getNetworkTopNFlowColumns = (
                           {domains.slice(1).length > 5 && (
                             <b>
                               <br />
-                              more ...
+                              {i18n.MORE}
                             </b>
                           )}
                         </>
@@ -158,47 +157,50 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
-      has('network.direction', node)
-        ? get('network.direction', node).length > 0
-          ? get('network.direction', node).map((direction: NetworkDirectionEcs) => (
-              <AddToKql
-                key={escapeDataProviderId(
-                  `networkTopNFlow-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
-                )}
-                content={i18n.FILTER_TO_KQL}
-                expression={`network.direction: ${escapeQueryValue(direction)}`}
-                type={type}
-              >
-                {defaultToEmptyTag(direction)}
-              </AddToKql>
-            ))
-          : getEmptyTagValue()
-        : getEmptyTagValue(),
+      isEmpty(get('network.direction', node))
+        ? getEmptyTagValue()
+        : get('network.direction', node).map((direction: NetworkDirectionEcs) => (
+            <AddToKql
+              key={escapeDataProviderId(
+                `networkTopNFlow-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
+              )}
+              content={i18n.FILTER_TO_KQL}
+              expression={`network.direction: ${escapeQueryValue(direction)}`}
+              type={type}
+            >
+              {defaultToEmptyTag(direction)}
+            </AddToKql>
+          )),
   },
   {
     name: i18n.BYTES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      has('network.bytes', node)
-        ? numeral(node.network!.bytes).format('0.000b')
-        : getEmptyTagValue(),
+    render: ({ node }) => {
+      if (node.network && node.network.bytes) {
+        return numeral(node.network.packets).format('0.000b');
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
   {
     name: i18n.PACKETS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      has('network.packets', node)
-        ? numeral(node.network!.packets).format('0,000')
-        : getEmptyTagValue(),
+    render: ({ node }) => {
+      if (node.network && node.network.packets) {
+        return numeral(node.network.packets).format('0,000');
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
   {
     name: getUniqueTitle(topNFlowType),
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      has(`${topNFlowType}.count`, node) ? get(`${topNFlowType}.count`, node) : getEmptyTagValue(),
+    render: ({ node }) => getOrEmptyTag(`${topNFlowType}.count`, node),
   },
 ];
 

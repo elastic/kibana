@@ -115,7 +115,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             },
           }));
           return children({
-            id: `${id}`,
+            id,
             refetch,
             loading,
             totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),

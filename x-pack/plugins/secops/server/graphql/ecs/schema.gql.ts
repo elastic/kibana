@@ -60,13 +60,13 @@ export const ecsSchema = gql`
   type SourceEcsFields {
     ip: String
     port: Float
-    domain: [String]
+    domain: [String!]
   }
 
   type DestinationEcsFields {
     ip: String
     port: Float
-    domain: [String]
+    domain: [String!]
   }
 
   type SuricataAlertData {

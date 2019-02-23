@@ -22,11 +22,6 @@ import styled from 'styled-components';
 import { LoadingPanel } from '../loading';
 import * as i18n from './translations';
 
-export interface HoryzontalBarChartData {
-  x: number;
-  y: string;
-}
-
 export interface ItemsPerRow {
   text: string;
   numberOfRow: number;

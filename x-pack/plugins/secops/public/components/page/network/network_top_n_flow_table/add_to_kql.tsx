@@ -65,6 +65,7 @@ const HoverActionsContainer = styled(EuiPanel)`
   position: absolute;
   top: -10px;
   width: 30px;
+  cursor: pointer;
 `;
 
 export const AddToKql = pure<AddToKqlProps>(({ children, content, expression, type }) => (

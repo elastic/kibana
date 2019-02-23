@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 
 import {
   NetworkTopNFlowData,
@@ -34,7 +34,7 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
     const hasNextPage = networkTopNFlowEdges.length > limit;
-    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
+    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
 
     return {
@@ -76,14 +76,14 @@ const formatTopNFlowEgdes = (
       _id: bucket.key,
       timestamp: bucket.timestamp.value_as_string,
       [networkTopNFlowType]: {
-        count: bucket.ip_count.value || null,
-        domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key) || null,
+        count: getOrNumber('ip_count.value', bucket),
+        domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
       },
       network: {
-        bytes: bucket.bytes.value || null,
-        packets: bucket.packets.value || null,
-        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key) || null,
+        bytes: getOrNumber('bytes.value', bucket),
+        packets: getOrNumber('packets.value', bucket),
+        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key),
       },
     },
     cursor: {
@@ -91,3 +91,11 @@ const formatTopNFlowEgdes = (
       tiebreaker: null,
     },
   }));
+
+const getOrNumber = (path: string, bucket: NetworkTopNFlowBuckets) => {
+  const numb = get(path, bucket);
+  if (numb == null) {
+    return null;
+  }
+  return numb;
+};

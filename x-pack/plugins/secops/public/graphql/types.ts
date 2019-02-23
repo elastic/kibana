@@ -156,7 +156,7 @@ export interface SourceEcsFields {
 
   port?: number | null;
 
-  domain?: (string | null)[] | null;
+  domain?: string[] | null;
 }
 
 export interface HostEcsFields {
@@ -250,7 +250,7 @@ export interface DestinationEcsFields {
 
   port?: number | null;
 
-  domain?: (string | null)[] | null;
+  domain?: string[] | null;
 }
 
 export interface EventEcsFields {
