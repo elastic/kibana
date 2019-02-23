@@ -9,7 +9,7 @@ import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';
 import mkdirp from 'mkdirp';
-import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
+import { Clone, Commit, Error as GitError, Repository, Reset } from 'nodegit';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
@@ -93,7 +93,7 @@ export class WorkspaceHandler {
       this.log.info(`checkout ${workspaceRepo.workdir()} to commit ${targetCommit.sha()}`);
       // @ts-ignore
       const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
-      if (result !== undefined && result !== Error.CODE.OK) {
+      if (result !== undefined && result !== GitError.CODE.OK) {
         throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
@@ -244,13 +244,16 @@ export class WorkspaceHandler {
     }
   }
 
-  // todo add an unit test
   private parseLocation(location: Location) {
     const uri = location.uri;
     if (uri && uri.startsWith('file://')) {
-      const workspaceUrl = new URL(`file://${this.workspacePath}`).toString();
-      if (uri.startsWith(workspaceUrl)) {
-        const relativePath = uri.substring(workspaceUrl.length + 1);
+      const locationPath = fs.realpathSync(decodeURIComponent(uri.substring('file://'.length)));
+      const workspacePath = fs.realpathSync(decodeURIComponent(this.workspacePath));
+      if (locationPath.startsWith(workspacePath)) {
+        const relativePath = path.relative(workspacePath, locationPath);
+        if (path.sep !== '/') {
+          relativePath.replace(path.sep, '/');
+        }
         const regex = /^(.*?\/.*?\/.*?)\/(__.*?\/)?([^_]+?)\/(.*)$/;
         const m = relativePath.match(regex);
         if (m) {
@@ -261,6 +264,8 @@ export class WorkspaceHandler {
           return { repoUri, revision: gitRevision, file };
         }
       }
+      // @ts-ignore
+      throw new Error("path in response doesn't not starts with workspace path");
     }
     return null;
   }
