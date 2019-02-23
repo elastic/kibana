@@ -13,6 +13,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const find = getService('find');
   const queryBar = getService('queryBar');
+  const comboBox = getService('comboBox');
 
   class GisPage {
 
@@ -209,6 +210,35 @@ export function GisPageProvider({ getService, getPageObjects }) {
     /*
      * Layer panel utility functions
      */
+    async isLayerAddPanelOpen() {
+      log.debug(`Is layer add panel open`);
+      return await testSubjects.exists('layerAddForm');
+    }
+
+    async cancelLayerAdd() {
+      log.debug(`Cancel layer add`);
+      const cancelExists = await testSubjects.exists('layerAddCancelButton');
+      if (cancelExists) {
+        await testSubjects.click('layerAddCancelButton');
+      }
+    }
+
+    async selectVectorSource() {
+      log.debug(`Select vector source`);
+      await testSubjects.click('vectorShapes');
+    }
+
+    // Returns first layer by default
+    async selectVectorLayer(vectorLayerName = '') {
+      log.debug(`Select vector layer ${vectorLayerName}`);
+      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
+      const selectedVectorLayer = vectorLayerName
+        ? vectorLayerName
+        : optionsStringList.trim().split('\n')[0];
+      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
+      return selectedVectorLayer;
+    }
+
     async removeLayer(layerName) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);

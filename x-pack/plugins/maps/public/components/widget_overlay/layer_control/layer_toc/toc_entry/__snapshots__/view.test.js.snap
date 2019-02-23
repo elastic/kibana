@@ -43,7 +43,7 @@ exports[`TOCEntry is rendered 1`] = `
     >
       <EuiLink
         color="text"
-        data-test-subj="mapOpenLayerButtonlayer 1"
+        data-test-subj="mapOpenLayerButtonlayer_1"
         onClick={[Function]}
         type="button"
       >
