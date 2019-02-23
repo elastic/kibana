@@ -18,15 +18,16 @@
  */
 
 import Boom from 'boom';
+import { Server } from 'hapi';
 
-export const registerUserActionRoute = (server) => {
+export const registerUserActionRoute = (server: Server) => {
   /*
    * Increment a count on an object representing a specific user action.
    */
   server.route({
     path: '/api/user_action/{appName}/{actionType}',
     method: 'POST',
-    handler: async (request) => {
+    handler: async (request: any) => {
       const { appName, actionType } = request.params;
 
       try {
@@ -36,14 +37,10 @@ export const registerUserActionRoute = (server) => {
         const savedObjectId = `${appName}:${actionType}`;
 
         // This object is created if it doesn't already exist.
-        await internalRepository.incrementCounter(
-          'user-action',
-          savedObjectId,
-          'count',
-        );
+        await internalRepository.incrementCounter('user-action', savedObjectId, 'count');
 
         return {};
-      } catch(error) {
+      } catch (error) {
         return new Boom('Something went wrong', { statusCode: error.status });
       }
     },

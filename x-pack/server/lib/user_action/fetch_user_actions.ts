@@ -1,12 +1,23 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Server } from 'hapi';
+
+export interface UserActionRecord {
+  actionType: string;
+  count: number;
+}
 
 // This is a helper method for retrieving user action telemetry data stored via the OSS
 // user_action API.
-export function fetchUserActions(server, appName, actionTypes) {
+export function fetchUserActions(
+  server: Server,
+  appName: string,
+  actionTypes: string
+): Promise<UserActionRecord> | undefined {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
