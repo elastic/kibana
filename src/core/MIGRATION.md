@@ -462,24 +462,118 @@ Client-side legacy plugin code is where things get weird, but the approach is la
 As before, let's start with an example legacy client-side plugin. This example integrates with core, consumes functionality from another plugin, and exposes functionality for other plugins to consume via `uiExports`. This would be the rough shape of the code that would originate in the entry file, which would be either `index.ts` or `<pluginname>.ts`:
 
 ```js
-import chrome from 'ui/chrome';
-import routes from 'ui/routes';
+// visualize/hacks/plugin.js
+// example init of updated plugin that preserves legacy API and introduces new one
+import { startContracts } from 'ui/legacy/plugins';
+import { Plugin } from '../plugin';
 
-import 'uiExports/demoExtensions';
-import { DemoExtensionsProvider } from 'ui/registry/demo_extensions';
+const core = {};
+const dependencies = {}
 
-import { getBar } from 'plugins/foo';
+const plugin = new Plugin();
+const start = plugin.start(core, dependencies);
+startContracts.set('visualize', start);
 
-import template from './demo.html';
+require('ui/registry/vis_types').__shimYourStuff__(plugin.visTypes$);
+require('uiExports/visTypes');
 
-routes.enable();
-routes.when('/demo-foo', {
-  template,
-  controller($scope, config, indexPatterns, Private) {
-    const bar = getBar();
-    $scope.demoBarUrl = chrome.addBasePath(`/demo/${bar}`);
-    $scope.extensions =  Private(DemoExtensionsProvider);
-  },
+
+// visualize/plugin.js
+// example of upgraded plugin definition
+export class Plugin {
+  constructor() {
+    this.visTypes$ = new ReplaySubject(1);
+  }
+
+  start(core, dependencies) {
+    return {
+      registerVisType(type) {
+        this.visTypes$.push(type);
+      }
+    };
+  }
+}
+
+
+// tag_cloud/hacks/plugin.js
+// example init of updated plugin that consumes new interface
+import { startContracts } from 'ui/legacy/plugins';
+import { Plugin } from '../plugin';
+
+const core = {};
+const dependencies = {
+  ...startContracts
+}
+
+const plugin = new Plugin();
+plugin.start(core, dependencies);
+
+
+
+
+
+
+
+
+
+
+
+// visualize/public/index.js
+import { coreStart } from 'ui/core';
+import { foo } from 'ui/plugins';
+
+import { visualize } from 'ui/legacy_plugins';
+
+import { getBar } from 'plugins/bar';
+
+const core = {
+  chrome: coreStart.chrome
+};
+
+const dependencies = {
+  bar: {
+    getBar
+  }
+};
+
+export class Plugin {
+  constructor() {
+    this.visTypes$ = new ReplaySubject(1);
+  }
+  start(core, dependencies) {
+    //require('ui/registry/vis_types').__shimYourStuff__(this.visTypes$);
+    require('uiExports/visTypes');
+
+    return {
+      visTypes$ = this.visTypes$.asObservable();
+      myVis() {
+
+      }
+    }
+  }
+}
+
+export startContract = new Plugin();
+
+//const start = new Plugin().start(core);
+
+export function myVis() {
+  return start.myVis();
+}
+
+
+
+
+// my_custom_visualization/index.js
+{
+  uiExports: {
+    vis_type: 'plugins/my_custom_visulaization/some_file'
+  }
+}
+// my_custom_visualization/public/some_file.js
+import { VisTypesProvider } from 'ui/registry/vis_types';
+VisTypesProvider.register(($http) => {
+  return { type: 'mycustomvis' };
 });
 ```
 
