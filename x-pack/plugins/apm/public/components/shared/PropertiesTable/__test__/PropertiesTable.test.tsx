@@ -132,7 +132,7 @@ describe('PropertiesTable', () => {
     it('should render null empty string when no docs are returned', () => {
       jest
         .spyOn(agentDocs, 'getAgentFeatureDocsUrl')
-        .mockImplementation(() => null);
+        .mockImplementation(() => undefined);
 
       expect(
         shallow(
