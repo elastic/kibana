@@ -591,7 +591,6 @@ require('ui/registry/foo').__temporaryShim__(start);
 
 
 // ui/public/registry/foo.ts
-import { ReplaySubject } from 'rxjs';
 import { FooPluginStart } from '../../../core_plugins/foo/public/plugin';
 
 // legacy plugin order is not guaranteed, so we store a buffer of registry
