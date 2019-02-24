@@ -7,11 +7,7 @@
 import gql from 'graphql-tag';
 
 export const kpiNetworkQuery = gql`
-  query GetKpiNetworkQuery(
-    $sourceId: ID!
-    $timerange: TimerangeInput!
-    $filterQuery: String
-  ) {
+  query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {
     source(id: $sourceId) {
       id
       KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {

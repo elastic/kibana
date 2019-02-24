@@ -48,7 +48,6 @@ export const buildQuery = ({
     packetbeatAlias,
   },
 }: RequestBasicOptions) => {
-
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     ...getKpiNetworkFilter(),
@@ -60,7 +59,7 @@ export const buildQuery = ({
         },
       },
     },
-  ]
+  ];
 
   const dslQuery = {
     allowNoIndices: true,
@@ -85,7 +84,7 @@ export const buildQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true
+      track_total_hits: true,
     },
   };
 

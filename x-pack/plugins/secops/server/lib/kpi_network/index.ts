@@ -6,9 +6,8 @@
 
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { KpiNetworkAdapter } from './types';
 import { KpiNetworkData } from '../../graphql/types';
-
+import { KpiNetworkAdapter } from './types';
 
 export class KpiNetwork {
   constructor(private readonly adapter: KpiNetworkAdapter) {}

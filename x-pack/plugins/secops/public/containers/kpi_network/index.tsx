@@ -8,7 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import { KpiNetworkData, GetKpiNetworkQuery } from '../../graphql/types';
+import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 import { kpiNetworkQuery } from './index.gql_query';
@@ -25,7 +25,6 @@ export interface KpiNetworkProps extends QueryTemplateProps {
 
 export class KpiNetworkQuery extends React.PureComponent<KpiNetworkProps> {
   public render() {
-
     const {
       id = 'kpiNetworkQuery',
       children,
@@ -55,7 +54,7 @@ export class KpiNetworkQuery extends React.PureComponent<KpiNetworkProps> {
           return children({
             id,
             loading,
-            kpiNetwork
+            kpiNetwork,
           });
         }}
       </Query>

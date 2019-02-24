@@ -12,10 +12,10 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { manageQuery } from '../../components/page/manage_query';
-import { NetworkTopNFlowTable, KpiNetworkComponent } from '../../components/page/network';
+import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { GlobalTime } from '../../containers/global_time';
-import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
+import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType, NetworkTopNFlowType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
@@ -51,13 +51,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       sourceId="default"
                       startDate={from}
                     >
-                      {({
-                        loading,
-                        kpiNetwork,
-                        id,
-                      }) => (
-                        <KpiNetworkComponent data={kpiNetwork} loading={loading} />
-                      )}
+                      {({ loading, kpiNetwork, id }) => <KpiNetworkComponent data={kpiNetwork} />}
                     </KpiNetworkQuery>
                     <NetworkTopNFlowQuery
                       endDate={to}

@@ -10,6 +10,6 @@ export const mockData: { KpiNetwork: KpiNetworkData } = {
   KpiNetwork: {
     networkEvents: 16,
     uniqueFlowId: 10277307,
-    activeAgents: 60015
-  }
+    activeAgents: 60015,
+  },
 };
