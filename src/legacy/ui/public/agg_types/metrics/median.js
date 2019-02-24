@@ -37,7 +37,7 @@ export const medianMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number,date'
+      filterFieldTypes: 'number'
     },
     {
       name: 'percents',
