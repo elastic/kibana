@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   CURRENT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
@@ -20,7 +19,7 @@ import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
-  let callCluster: jest.Mock<CallCluster>;
+  let callCluster: jest.Mock;
   let xpackInfo: { feature: jest.Mocked<any> };
   let service: ReindexService;
 
@@ -58,7 +57,7 @@ describe('reindexService', () => {
         },
       })),
     };
-    service = reindexServiceFactory(callCluster, xpackInfo as any, actions);
+    service = reindexServiceFactory(callCluster as any, xpackInfo as any, actions);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -298,7 +297,7 @@ describe('reindexService', () => {
       const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.inProgress },
-      });
+      } as any);
 
       await service.pauseReindexOperation('myIndex');
 
@@ -350,7 +349,7 @@ describe('reindexService', () => {
       const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
         id: '2',
         attributes: { indexName: 'myIndex', status: ReindexStatus.paused },
-      });
+      } as any);
 
       await service.resumeReindexOperation('myIndex');
 
@@ -407,7 +406,7 @@ describe('reindexService', () => {
           lastCompletedStep: ReindexStep.reindexStarted,
           reindexTaskId: '999333',
         },
-      });
+      } as any);
       callCluster.mockResolvedValueOnce(true);
 
       await service.cancelReindexing('myIndex');
