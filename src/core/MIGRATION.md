@@ -457,6 +457,24 @@ Outside of the temporary shim, does your plugin code rely directly on hapi.js? I
 
 #### Client-side architectural changes
 
+Client-side legacy plugin code is where things get weird, but the approach is similar - a new plugin definition wraps the business logic of the plugin while legacy functionality is "shimmed" temporarily. Ultimately, there are three high levels goals for client-side architectural changes:
+
+1. Move all webpack alias imports (`ui/`, `plugin/`, `uiExports/`) into the root shim(s)
+2. Adopt global new plugin definitions for all plugins
+3. Source of truth for all stateful actions and configuration should originate from new plugin definition
+
+How you accomplish these things varies wildly depending on the plugin's current implementation and functionality.
+
+Every plugin will add their global plugin definition via a `hack` uiExport, which will ensure that the plugin definition is always loaded for all applications. This is inline with how the plugin service works in the new platform.
+
+Plugins that "own" a uiExport will move
+
+
+
+* Plugin without app
+* Plugin with angular app
+* Plugin with react app
+
 Client-side legacy plugin code is where things get weird, but the approach is largely the same - in the public entry file of the plugin, we separate the legacy integrations with the new plugin definition using a temporary "shim".
 
 As before, let's start with an example legacy client-side plugin. This example integrates with core, consumes functionality from another plugin, and exposes functionality for other plugins to consume via `uiExports`. This would be the rough shape of the code that would originate in the entry file, which would be either `index.ts` or `<pluginname>.ts`:
@@ -486,6 +504,16 @@ export class Plugin {
   }
 
   start(core, dependencies) {
+    core.applications.registerApp('visualize', (dom) => {
+      this.legacyHackApp();
+
+      import('../application').then(({ bootstrapApp }) => {
+        const app = bootstrapApp(dom);
+      });
+
+      return app.start();
+    });
+
     return {
       registerVisType(type) {
         this.visTypes$.push(type);
@@ -493,6 +521,86 @@ export class Plugin {
     };
   }
 }
+
+// visualize/index.js
+// example of app entry file for upgraded angular plugin
+import chrome from 'ui/chrome';
+import routes from 'ui/routes';
+import { uiModules } from 'ui/modules';
+
+import 'uiExports/visTypes';
+
+import 'ui/autoload/all';
+import './visualize';
+import 'ui/vislib';
+import { showAppRedirectNotification } from 'ui/notify';
+
+routes.enable();
+
+routes
+  .otherwise({
+    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
+  });
+
+uiModules.get('kibana').run(showAppRedirectNotification);
+
+
+
+// example of plugin file for upgraded react plugin
+// plugin
+export class Plugin {
+  start(core, dependencies) {
+    const { I18nContext } = core.i18n;
+    core.applications.register('demo', async (dom) => {
+      const { mount } = await import('../application');
+      return mount({ dom, I18nContext });
+    });
+  }
+}
+
+// example of app entry file for upgraded react plugin
+// application
+import React from 'react';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+import ReactDOM from 'react-dom';
+
+import { configureStore } from './store';
+import { Main } from './components/Main';
+
+import './style/global_overrides.css';
+
+export function mount({ dom, I18nContext }) {
+  const store = configureStore();
+
+  ReactDOM.render(
+    <I18nContext>
+      <Provider store={store}>
+        <Router>
+          <Main />
+        </Router>
+      </Provider>
+    </I18nContext>,
+    dom
+  );
+
+  return function unmount() {
+    ReactDOM.unmountComponentAtNode(dom);
+  }
+}
+
+
+// entry
+import { core } from 'ui/core';
+import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
+import 'ui/autoload/styles';
+import 'ui/autoload/all';
+
+import template from './templates/index.html';
+chrome.setRootTemplate(template);
+const dom = document.getElementById('react-apm-root');
+
+core.applications.mountApp('demo', dom);
 
 
 // tag_cloud/hacks/plugin.js
