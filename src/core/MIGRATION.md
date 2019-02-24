@@ -547,7 +547,93 @@ new Plugin().start(core, dependencies);
 
 The `shim_plugin.js` file is take on the role of the plugin service in the new platform. It wires up the plugin definition with the dependencies that plugin has on core (i.e. `chrome`) and other plugins (i.e. `foo`). All of the webpack alias imports needed by this plugin have been moved into the shim, and the `plugin.js` code is pristine.
 
+##### Creating an extension
 
+Legacy plugins today extend applications by adding functionality through a registry in a uiExport. In the previous example, you saw how to shim this relationship from the extending side into the new plugin definition. Now, let's see how to shim the relavant uiExport registry from the side of the plugin that "owns" it.
+
+We need to update the registry to expose access to state as an observable. In most cases, this will only affect the implementation details of the owning plugin. This is how state should be shared between plugins in the new platform, but more importantly it is necessary now to move away from the uiExports extension while the order of legacy plugin execution is not determined by a dependency graph.
+
+In order to support dependent legacy plugins that have not yet been updated, we continue to initiate the uiExport in the app entry file. Once all downstream plugins have been updated to access the registry in a shimmed plugin definition, the `uiExports/` import statement from the app entry file can be removed.
+
+```ts
+// foo/public/plugin.ts
+import { ReplaySubject } from 'rxjs';
+
+export type FooPluginStart = ReturnType<Plugin['start']>;
+
+export class Plugin {
+  public constructor() {
+    this.fooRegistry = [];
+    this.foos$ = new ReplaySubject(1);
+  }
+
+  public start() {
+    return {
+      foos$: this.foos$.asObservable(),
+      registerFoo(fn) {
+        this.fooRegistry.push(fn);
+        this.fooSubject.next([ ...this.fooRegistry ]);
+      }
+    };
+  }
+}
+
+
+// foo/hacks/shim_plugin.ts
+import { startContracts } from 'ui/legacy/plugins';
+import { Plugin } from '../plugin';
+
+const plugin = new Plugin();
+const start = plugin.start();
+startContracts.set('foo', start);
+
+require('ui/registry/foo').__temporaryShim__(start);
+
+
+// ui/public/registry/foo.ts
+import { ReplaySubject } from 'rxjs';
+import { FooPluginStart } from '../../../core_plugins/foo/public/plugin';
+
+// legacy plugin order is not guaranteed, so we store a buffer of registry
+// calls and then empty them out when the owning plugin shims this module with
+// proper state
+let temporaryRegistry = [];
+let start;
+export function __temporaryShim__(fooStart: FooPluginStart) {
+  if (start) {
+    throw new Error('Foo registry already shimmed');
+  }
+  start = fooStart;
+  temporaryRegistry.forEach(fn => start.registerFoo(fn));
+  temporaryRegistry = undefined;
+}
+
+export const FooRegistryProvider = {
+  register(fn) {
+    if (start) {
+      start.registerFoo(fn);
+    } else {
+      temporaryRegistry.push(fn);
+    }
+  },
+  getAll() {
+    if (start) {
+      return start.foos$;
+    } else {
+      throw new Error('Foo registry not yet shimmed');
+    }
+  }
+};
+
+
+// foo/public/index.js
+import 'uiExports/foo'; // to continue support for non-updated plugins
+
+import { FooRegistryProvider } from 'ui/registry/foo';
+FooRegistryProvider.getAll().do(foos => {
+  // do something with array foos
+});
+```
 
 
 
