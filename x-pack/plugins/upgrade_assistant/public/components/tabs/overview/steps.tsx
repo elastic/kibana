@@ -75,7 +75,7 @@ const START_UPGRADE_STEP = {
               values={{
                 instructionButton: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/setup-upgrade.html"
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/setup-upgrade.html"
                     target="_blank"
                   >
                     <FormattedMessage

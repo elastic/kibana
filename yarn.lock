@@ -871,10 +871,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.10.2":
-  version "6.10.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.2.tgz#2eeaf71cb21f0b2b704c1c5e43757bf9a1a9157b"
-  integrity sha512-L5BpbggbK21pU4HRVSR284Y+qtuDNuTxPGcrIck32SC9Ex6nC8VPJgb8TmIMp+IamgSiZGoe3ebt6ey5hvfu5g==
+"@elastic/eui@6.10.3":
+  version "6.10.3"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.3.tgz#dc5387e43def26004cbf95398ea7e96187f60b29"
+  integrity sha512-UN/cm+RVZxaln+jazQFfbJG4K8Wlv1xZTRY3LwiXu4mS9aHNo3WxrXYrsMg5HWtuWL23QsRhj34BIjRWipi9NA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -5972,6 +5972,13 @@ content-disposition@0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.2.tgz#0cf68bb9ddf5f2be7961c3a85178cb85dba78cb4"
   integrity sha1-DPaLud318r55YcOoUXjLhdunjLQ=
+
+content-disposition@0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.3.tgz#e130caf7e7279087c5616c2007d0485698984fbd"
+  integrity sha512-ExO0774ikEObIAEV9kDo50o+79VCUdEB6n6lzKgGwupcVeRlhrj3qGAfwq8G6uBJjkqLrhT0qEYFcWng8z1z0g==
+  dependencies:
+    safe-buffer "5.1.2"
 
 content-type-parser@^1.0.1:
   version "1.0.2"

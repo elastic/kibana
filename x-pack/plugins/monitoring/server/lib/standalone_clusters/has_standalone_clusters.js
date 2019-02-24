@@ -38,6 +38,7 @@ export async function hasStandaloneClusters(req, indexPatterns) {
 
   const params = {
     index: indexPatternList,
+    rest_total_hits_as_int: true,
     body: {
       size: 0,
       terminate_after: 1,
@@ -52,7 +53,7 @@ export async function hasStandaloneClusters(req, indexPatterns) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
   if (response && response.hits) {
-    return get(response, 'hits.total.value', 0) > 0;
+    return get(response, 'hits.total', 0) > 0;
   }
   return false;
 }

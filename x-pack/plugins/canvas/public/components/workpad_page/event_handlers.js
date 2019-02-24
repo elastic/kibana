@@ -28,7 +28,7 @@ const resetHandler = () => {
   window.onmouseup = null;
 };
 
-const setupHandler = (commit, target) => {
+const setupHandler = (commit, target, initialCallback, initialClientX, initialClientY) => {
   // Ancestor has to be identified on setup, rather than 1st interaction, otherwise events may be triggered on
   // DOM elements that had been removed: kibana-canvas github issue #1093
   const canvasPage = ancestorElement(target);
@@ -63,6 +63,10 @@ const setupHandler = (commit, target) => {
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
     resetHandler();
   };
+  if (typeof initialCallback === 'function' && !isNaN(initialClientX) && !isNaN(initialClientY)) {
+    const { x, y } = localMousePosition(canvasOrigin, initialClientX, initialClientY);
+    initialCallback(x, y);
+  }
 };
 
 const handleMouseMove = (
@@ -72,9 +76,13 @@ const handleMouseMove = (
 ) => {
   // mouse move must be handled even before an initial click
   if (!window.onmousemove && isEditable) {
-    const { x, y } = localMousePosition(target, clientX, clientY);
-    setupHandler(commit, target);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+    setupHandler(
+      commit,
+      target,
+      (x, y) => commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey }),
+      clientX,
+      clientY
+    );
   }
 };
 
@@ -85,9 +93,13 @@ const handleWheel = (
 ) => {
   // new mouse position must be registered when page scrolls
   if (isEditable) {
-    const { x, y } = localMousePosition(target, clientX, clientY);
-    setupHandler(commit, target);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
+    setupHandler(
+      commit,
+      target,
+      (x, y) => commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey }),
+      clientX,
+      clientY
+    );
   }
 };
 
@@ -102,75 +114,20 @@ const handleMouseDown = (commit, e, isEditable) => {
   if (!ancestor) {
     return;
   }
-  const { x, y } = localMousePosition(ancestor, clientX, clientY);
-  setupHandler(commit, ancestor);
-  commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey });
-};
-
-const keyCode = key => (key === 'Meta' ? 'MetaLeft' : 'Key' + key.toUpperCase());
-
-const isTextInput = ({ tagName, type }) => {
-  // input types that aren't variations of text input
-  const nonTextInputs = [
-    'button',
-    'checkbox',
-    'color',
-    'file',
-    'image',
-    'radio',
-    'range',
-    'reset',
-    'submit',
-  ];
-
-  switch (tagName.toLowerCase()) {
-    case 'input':
-      return !nonTextInputs.includes(type);
-    case 'textarea':
-      return true;
-    default:
-      return false;
-  }
-};
-
-const modifierKey = key => ['KeyALT', 'KeyCONTROL'].indexOf(keyCode(key)) > -1;
-
-const handleKeyDown = (commit, e, isEditable) => {
-  const { key } = e;
-
-  if (isEditable && !modifierKey(key)) {
-    commit('keyboardEvent', {
-      event: 'keyDown',
-      code: keyCode(key), // convert to standard event code
-    });
-  }
-};
-
-const handleKeyPress = (commit, e, isEditable) => {
-  const { key, target } = e;
-  const upcaseKey = key && key.toUpperCase();
-  if (isEditable && !isTextInput(target) && 'GU'.indexOf(upcaseKey) !== -1) {
-    commit('actionEvent', {
-      event: upcaseKey === 'G' ? 'group' : 'ungroup',
-    });
-  }
-};
-
-const handleKeyUp = (commit, { key }, isEditable) => {
-  if (isEditable && !modifierKey(key)) {
-    commit('keyboardEvent', {
-      event: 'keyUp',
-      code: keyCode(key), // convert to standard event code
-    });
-  }
+  setupHandler(
+    commit,
+    ancestor,
+    (x, y) =>
+      commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey }),
+    clientX,
+    clientY
+  );
 };
 
 export const eventHandlers = {
   onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
-  onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable),
-  onKeyPress: props => e => handleKeyPress(props.commit, e, props.isEditable),
-  onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
+  onKeyDown: props => () => props.commit('keyboardEvent'), // dummy event
   onWheel: props => e => handleWheel(props.commit, e, props.isEditable),
   resetHandler: () => () => resetHandler(),
 };
