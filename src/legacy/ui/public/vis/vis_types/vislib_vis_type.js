@@ -92,6 +92,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
 
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
 
+        // refreshing the legend after the chart is rendered.
+        // this is necessary because some visualizations (heatmap and gauge)
+        // provide data necessary for the legend only after a render cycle.
         if (this.vis.params.addLegend) {
           this.$scope.refreshLegend++;
           this.$scope.$digest();
