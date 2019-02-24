@@ -93,16 +93,16 @@ export class CodeBlock extends React.PureComponent<Props> {
     }
   }
 
-  public componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
+  public componentDidUpdate(prevProps: Readonly<Props>) {
     if (
-      nextProps.code !== this.props.code ||
-      nextProps.highlightRanges !== this.props.highlightRanges
+      prevProps.code !== this.props.code ||
+      prevProps.highlightRanges !== this.props.highlightRanges
     ) {
       if (this.ed) {
-        this.ed.getModel().setValue(nextProps.code);
+        this.ed.getModel().setValue(this.props.code);
 
-        if (nextProps.highlightRanges) {
-          const decorations = nextProps.highlightRanges!.map((range: IRange) => {
+        if (this.props.highlightRanges) {
+          const decorations = this.props.highlightRanges!.map((range: IRange) => {
             return {
               range,
               options: {

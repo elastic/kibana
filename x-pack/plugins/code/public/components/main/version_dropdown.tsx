@@ -53,12 +53,12 @@ export class VersionDropDownComponent extends React.Component<Props, State> {
     this.props.fetchRepoCommits({ uri: this.props.repoUri, revision: this.props.head });
   }
 
-  public componentWillReceiveProps(nextProps: Readonly<Props>): void {
-    if (nextProps.repoUri !== this.props.repoUri) {
-      this.props.fetchRepoBranches({ uri: nextProps.repoUri });
-      this.props.fetchRepoCommits({ uri: nextProps.repoUri, revision: nextProps.head });
-    } else if (nextProps.head !== this.props.head) {
-      this.props.fetchRepoCommits({ uri: nextProps.repoUri, revision: nextProps.head });
+  public componentDidUpdate(prevProps: Readonly<Props>): void {
+    if (this.props.repoUri !== prevProps.repoUri) {
+      this.props.fetchRepoBranches({ uri: this.props.repoUri });
+      this.props.fetchRepoCommits({ uri: this.props.repoUri, revision: this.props.head });
+    } else if (prevProps.head !== this.props.head) {
+      this.props.fetchRepoCommits({ uri: this.props.repoUri, revision: this.props.head });
     }
   }
 

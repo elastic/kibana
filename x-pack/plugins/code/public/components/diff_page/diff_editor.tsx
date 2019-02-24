@@ -27,8 +27,10 @@ export class DiffEditor extends React.Component<Props> {
     this.diffEditor.init();
   };
 
-  public componentWillReceiveProps(nextProps: Props) {
-    this.updateLayout(nextProps.renderSideBySide);
+  public componentDidUpdate(prevProps: Props) {
+    if (prevProps.renderSideBySide !== this.props.renderSideBySide) {
+      this.updateLayout(this.props.renderSideBySide);
+    }
   }
 
   public updateLayout(renderSideBySide: boolean) {
