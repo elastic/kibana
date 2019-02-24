@@ -467,7 +467,87 @@ How you accomplish these things varies wildly depending on the plugin's current 
 
 Every plugin will add their global plugin definition via a `hack` uiExport, which will ensure that the plugin definition is always loaded for all applications. This is inline with how the plugin service works in the new platform.
 
-Plugins that "own" a uiExport will move
+##### Extending an application
+
+Let's take a look at a simple plugin that registers functionality to be used in an application. This is done by configuring a uiExport and accessing a registry through a `ui/registry` webpack alias:
+
+```js
+// demo/index.js
+{
+  uiExports: {
+    foo: 'plugins/demo/some_file'
+  }
+}
+
+// demo/public/some_file.js
+import chrome from 'ui/chrome';
+import { FooRegistryProvider } from 'ui/registry/foo';
+
+FooRegistryProvider.register(() => {
+  return {
+    url: chrome.getBasePath() + '/demo_foo'
+  };
+});
+```
+
+To update this plugin, we'll create a plugin definition in a hack uiExport, and we'll move the registration logic there where we'll create some shims into the legacy world.
+
+```ts
+// demo/index.js
+{
+  uiExports: {
+    hacks: [
+      'plugins/demo/hacks/shim_plugin'
+    ]
+  }
+}
+
+// demo/public/plugin.js
+import { CoreStart } from '../../core/public';
+import { FooPluginStart } from '../foo/public';
+
+interface DemoStartDependencies {
+  foo: FooPluginStart
+}
+
+export class Plugin {
+  public start(core: CoreStart, dependencies: DemoStartDependencies) {
+    const { chrome } = core;
+
+    dependencies.foo.registerFoo(() => {
+      return {
+        url: chrome.getBasePath() + '/demo_foo'
+      };
+    });
+  }
+}
+
+// demo/public/hacks/shim_plugin.js
+import chrome from 'ui/chrome';
+import { FooRegistryProvider } from 'ui/registry/foo';
+import { Plugin } from '../plugin';
+
+const core = {
+  chrome: {
+    getBasePath() {
+      return chrome.getBasePath();
+    }
+  }
+};
+const dependencies = {
+  foo: {
+    registerFoo(fn) {
+      FooRegistryProvider.register(fn);
+    }
+  }
+};
+
+new Plugin().start(core, dependencies);
+```
+
+The `shim_plugin.js` file is take on the role of the plugin service in the new platform. It wires up the plugin definition with the dependencies that plugin has on core (i.e. `chrome`) and other plugins (i.e. `foo`). All of the webpack alias imports needed by this plugin have been moved into the shim, and the `plugin.js` code is pristine.
+
+
 
 
 
