@@ -195,7 +195,11 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 
     return (
       <div className="code-sidebar" data-test-subj="codeRepositoryList">
-        {showCallOut && <EuiCallOut color={callOutType} title="">{callOutMessage}</EuiCallOut>}
+        {showCallOut && (
+          <EuiCallOut color={callOutType} title="">
+            {callOutMessage}
+          </EuiCallOut>
+        )}
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -238,8 +242,8 @@ const mapStateToProps = (state: RootState) => ({
   isAdmin: state.userProfile.isCodeAdmin,
   importLoading: state.repository.importLoading,
   callOutMessage: state.repository.callOutMessage,
-  callOutType: state.repository.callOutType;
-  showCallOut: state.repository.showCallOut;
+  callOutType: state.repository.callOutType,
+  showCallOut: state.repository.showCallOut,
 });
 
 const mapDispatchToProps = {
