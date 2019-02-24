@@ -7,6 +7,7 @@
 // @ts-ignore
 import {
   EuiButton,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,8 +19,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiSpacer,
   // @ts-ignore
+  EuiSpacer,
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -30,6 +31,7 @@ import styled from 'styled-components';
 import { Repository } from '../../../model';
 import { importRepo } from '../../actions';
 import { RootState } from '../../reducers';
+import { CallOutType } from '../../reducers/repository';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
 
@@ -69,6 +71,9 @@ interface Props {
   isAdmin: boolean;
   importRepo: (repoUrl: string) => void;
   importLoading: boolean;
+  callOutMessage?: string;
+  showCallOut: boolean;
+  callOutType: CallOutType;
 }
 interface State {
   showImportProjectModal: boolean;
@@ -95,7 +100,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   }
 
   public closeModal = () => {
-    this.setState({ showImportProjectModal: false });
+    this.setState({ showImportProjectModal: false, repoURL: '' });
   };
 
   public openModal = () => {
@@ -161,7 +166,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { projects, isAdmin, status } = this.props;
+    const { projects, isAdmin, status, callOutMessage, showCallOut, callOutType } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
 
@@ -190,6 +195,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 
     return (
       <div className="code-sidebar" data-test-subj="codeRepositoryList">
+        {showCallOut && <EuiCallOut color={callOutType} title="">{callOutMessage}</EuiCallOut>}
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -231,6 +237,9 @@ const mapStateToProps = (state: RootState) => ({
   status: state.status.status,
   isAdmin: state.userProfile.isCodeAdmin,
   importLoading: state.repository.importLoading,
+  callOutMessage: state.repository.callOutMessage,
+  callOutType: state.repository.callOutType;
+  showCallOut: state.repository.showCallOut;
 });
 
 const mapDispatchToProps = {
