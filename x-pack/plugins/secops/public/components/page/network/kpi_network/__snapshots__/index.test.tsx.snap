@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default Authentication table 1`] = `
+<pure(Component)
+  data={
+    Object {
+      "activeAgents": 60015,
+      "networkEvents": 16,
+      "uniqueFlowId": 10277307,
+    }
+  }
+/>
+`;

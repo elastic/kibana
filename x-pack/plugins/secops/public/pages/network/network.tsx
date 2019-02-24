@@ -51,7 +51,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       sourceId="default"
                       startDate={from}
                     >
-                      {({ loading, kpiNetwork, id }) => <KpiNetworkComponent data={kpiNetwork} />}
+                      {({ kpiNetwork }) => <KpiNetworkComponent data={kpiNetwork} />}
                     </KpiNetworkQuery>
                     <NetworkTopNFlowQuery
                       endDate={to}
