@@ -72,21 +72,13 @@ Object {
   "id": "123",
 }
 `);
-      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      "123",
-    ],
+      expect(savedObjectsClient.get.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
+    "123",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": Promise {},
-    },
-  ],
-}
+]
 `);
     });
   });
@@ -112,28 +104,20 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      Object {
-        "@created": "2019-02-12T21:01:22.479Z",
-        "@timestamp": "2019-02-12T21:01:22.479Z",
-        "foo": true,
-      },
-      Object {
-        "id": "workpad-123abc",
-      },
-    ],
-  ],
-  "results": Array [
+      expect(savedObjectsClient.create.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
     Object {
-      "isThrow": false,
-      "value": Promise {},
+      "@created": "2019-02-12T21:01:22.479Z",
+      "@timestamp": "2019-02-12T21:01:22.479Z",
+      "foo": true,
+    },
+    Object {
+      "id": "workpad-123abc",
     },
   ],
-}
+]
 `);
     });
 
@@ -158,28 +142,20 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      Object {
-        "@created": "2019-02-12T21:01:22.479Z",
-        "@timestamp": "2019-02-12T21:01:22.479Z",
-        "foo": true,
-      },
-      Object {
-        "id": "123",
-      },
-    ],
-  ],
-  "results": Array [
+      expect(savedObjectsClient.create.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
     Object {
-      "isThrow": false,
-      "value": Promise {},
+      "@created": "2019-02-12T21:01:22.479Z",
+      "@timestamp": "2019-02-12T21:01:22.479Z",
+      "foo": true,
+    },
+    Object {
+      "id": "123",
     },
   ],
-}
+]
 `);
     });
   });
@@ -211,45 +187,29 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      "123",
-    ],
+      expect(savedObjectsClient.get.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
+    "123",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": Promise {},
-    },
-  ],
-}
+]
 `);
-      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      Object {
-        "@created": "2019-02-12T21:01:22.479Z",
-        "@timestamp": "2019-02-12T21:01:22.479Z",
-        "foo": true,
-      },
-      Object {
-        "id": "123",
-        "overwrite": true,
-      },
-    ],
-  ],
-  "results": Array [
+      expect(savedObjectsClient.create.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
     Object {
-      "isThrow": false,
-      "value": Promise {},
+      "@created": "2019-02-12T21:01:22.479Z",
+      "@timestamp": "2019-02-12T21:01:22.479Z",
+      "foo": true,
+    },
+    Object {
+      "id": "123",
+      "overwrite": true,
     },
   ],
-}
+]
 `);
     });
   });
@@ -272,21 +232,13 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.delete).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      "123",
-    ],
+      expect(savedObjectsClient.delete.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
+    "123",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": Promise {},
-    },
-  ],
-}
+]
 `);
     });
   });
@@ -322,36 +274,28 @@ Object {
   ],
 }
 `);
-    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "fields": Array [
-          "id",
-          "name",
-          "@created",
-          "@timestamp",
-        ],
-        "page": "2",
-        "perPage": "10",
-        "search": "abc* | abc",
-        "searchFields": Array [
-          "name",
-        ],
-        "sortField": "@timestamp",
-        "sortOrder": "desc",
-        "type": "canvas-workpad",
-      },
-    ],
-  ],
-  "results": Array [
+    expect(savedObjectsClient.find.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
     Object {
-      "isThrow": false,
-      "value": Promise {},
+      "fields": Array [
+        "id",
+        "name",
+        "@created",
+        "@timestamp",
+      ],
+      "page": "2",
+      "perPage": "10",
+      "search": "abc* | abc",
+      "searchFields": Array [
+        "name",
+      ],
+      "sortField": "@timestamp",
+      "sortOrder": "desc",
+      "type": "canvas-workpad",
     },
   ],
-}
+]
 `);
   });
 });
