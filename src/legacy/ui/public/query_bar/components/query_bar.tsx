@@ -38,10 +38,16 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOutsideClickDetector,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 
 // @ts-ignore
-import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiSuperUpdateButton } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
@@ -85,7 +91,7 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (props: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 interface State {
