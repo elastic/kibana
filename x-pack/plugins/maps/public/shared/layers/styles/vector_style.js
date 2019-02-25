@@ -12,8 +12,9 @@ import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
+import { AbstractStyle } from './abstract_style';
 
-export class VectorStyle {
+export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
@@ -23,6 +24,7 @@ export class VectorStyle {
   }
 
   constructor(descriptor = {}) {
+    super();
     this._descriptor = VectorStyle.createDescriptor(descriptor.properties);
   }
 
@@ -63,6 +65,63 @@ export class VectorStyle {
         layer={layer}
       />
     );
+  }
+
+  /*
+   * Changes to source descriptor and join descriptor will impact style properties.
+   * For instance, a style property may be dynamically tied to the value of an ordinal field defined
+   * by a join or a metric aggregation. The metric aggregation or join may be edited or removed.
+   * When this happens, the style will be linked to a no-longer-existing ordinal field.
+   * This method provides a way for a style to clean itself and return a descriptor that unsets any dynamic
+   * properties that are tied to missing oridinal fields
+   *
+   * This method does not update its descriptor. It just returns a new descriptor that the caller
+   * can then use to update store state via dispatch.
+   */
+  getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
+    const originalProperties = this.getProperties();
+    const updatedProperties = {};
+    Object.keys(originalProperties).forEach(propertyName => {
+      if (!this._isPropertyDynamic(propertyName)) {
+        return;
+      }
+
+      const fieldName = _.get(originalProperties[propertyName], 'options.field.name');
+      if (!fieldName) {
+        return;
+      }
+
+      const matchingOrdinalField = nextOrdinalFields.find(oridinalField => {
+        return fieldName === oridinalField.name;
+      });
+
+      if (matchingOrdinalField) {
+        return;
+      }
+
+      updatedProperties[propertyName] = {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          ...originalProperties[propertyName].options
+        }
+      };
+      delete updatedProperties[propertyName].options.field;
+    });
+
+    if (Object.keys(updatedProperties).length === 0) {
+      return {
+        hasChanges: false,
+        nextStyleDescriptor: { ...this._descriptor },
+      };
+    }
+
+    return {
+      hasChanges: true,
+      nextStyleDescriptor: VectorStyle.createDescriptor({
+        ...originalProperties,
+        ...updatedProperties,
+      })
+    };
   }
 
   getSourceFieldNames() {
@@ -160,10 +219,21 @@ export class VectorStyle {
         max = Math.max(max, newValue);
       }
     }
-    //scale to [0,1]
+    const diff = max - min;
     const propName = VectorStyle.getComputedFieldName(fieldName);
+
+    //scale to [0,1] domain
     for (let i = 0; i < features.length; i++) {
-      features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
+      const unscaledValue = features[i].properties[fieldName];
+      let scaledValue;
+      if (typeof  unscaledValue !== 'number' || isNaN(unscaledValue)) {//cannot scale
+        scaledValue = -1;//put outside range
+      } else if (diff === 0) {//values are identical
+        scaledValue = 1;//snap to end of color range
+      } else {
+        scaledValue = (features[i].properties[fieldName] - min) / diff;
+      }
+      features[i].properties[propName] =  scaledValue;
     }
     featureCollection.computed.push(fieldName);
     return true;
@@ -246,7 +316,7 @@ export class VectorStyle {
       return _.get(styleDescriptor, 'options.color', null);
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field')
+    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.color');
     if (isDynamicConfigComplete) {
       return this._getMBDataDrivenColor({
@@ -263,7 +333,7 @@ export class VectorStyle {
       return styleDescriptor.options.size;
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field')
+    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.minSize')
       && _.has(styleDescriptor, 'options.maxSize');
     if (isDynamicConfigComplete) {

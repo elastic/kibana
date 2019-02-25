@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
-import { inspectorAdapters } from '../../../kibana_services';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 
@@ -53,7 +52,9 @@ export class MBMapContainer extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._checker.destroy();
+    if (this._checker) {
+      this._checker.destroy();
+    }
     if (this._mbMap) {
       this._mbMap.remove();
       this._mbMap = null;
@@ -64,6 +65,10 @@ export class MBMapContainer extends React.Component {
   async _initializeMap() {
 
     this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
+
+    if (!this._isMounted) {
+      return;
+    }
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -179,7 +184,9 @@ export class MBMapContainer extends React.Component {
         new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
         new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),
       );
-      this._mbMap.fitBounds(lnLatBounds);
+      //maxZoom ensure we're not zooming in too far on single points or small shapes
+      //the padding is to avoid too tight of a fit around edges
+      this._mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
     } else if (goto.center) {
       this._mbMap.setZoom(goto.center.zoom);
       this._mbMap.setCenter({
@@ -203,17 +210,13 @@ export class MBMapContainer extends React.Component {
 
     removeOrphanedSourcesAndLayers(this._mbMap, layerList);
     layerList.forEach(layer => {
-      if (!layer.hasErrors()) {
-        Promise.resolve(layer.syncLayerWithMB(this._mbMap))
-          .catch(({ message }) =>
-            this.props.setLayerErrorStatus(layer.getId(), message));
-      }
+      layer.syncLayerWithMB(this._mbMap);
     });
     syncLayerOrder(this._mbMap, layerList);
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady) {
+    if (!this.props.isMapReady || !this.props.inspectorAdapters.map) {
       return;
     }
 
@@ -222,7 +225,7 @@ export class MBMapContainer extends React.Component {
       zoom: this._mbMap.getZoom(),
 
     };
-    inspectorAdapters.map.setMapState({
+    this.props.inspectorAdapters.map.setMapState({
       stats,
       style: this._mbMap.getStyle(),
     });

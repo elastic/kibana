@@ -19,11 +19,12 @@ import 'ui/agg_types';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { DocTitleProvider } from 'ui/doc_title';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 
-import "mapbox-gl/dist/mapbox-gl.css";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 import 'ui/vis/map/service_settings';
 import './angular/services/gis_map_saved_object_loader';
@@ -82,11 +83,14 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route) {
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route,
+        Private) {
         const id = $route.current.params.id;
+        const docTitle = Private(DocTitleProvider);
         return gisMapSavedObjectLoader.get(id)
           .then((savedMap) => {
             recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
+            docTitle.change(savedMap.title);
             return savedMap;
           })
           .catch(redirectWhenMissing({

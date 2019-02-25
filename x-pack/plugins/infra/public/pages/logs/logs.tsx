@@ -11,12 +11,13 @@ import React from 'react';
 import { LogsPageContent } from './page_content';
 import { LogsToolbar } from './toolbar';
 
+import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
+
 import { Header } from '../../components/header';
 import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
 
-import { InfraHeaderFeedbackLink } from '../../components/header_feedback_link';
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
@@ -43,7 +44,6 @@ export const LogsPage = injectI18n(
       return (
         <ColumnarPage>
           <Header
-            appendSections={<InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/logs" />}
             breadcrumbs={[
               {
                 text: intl.formatMessage({
@@ -64,6 +64,12 @@ export const LogsPage = injectI18n(
               sourceId,
             }) => (
               <>
+                <DocumentTitle
+                  title={intl.formatMessage({
+                    id: 'xpack.infra.logsPage.documentTitle',
+                    defaultMessage: 'Logs',
+                  })}
+                />
                 <SourceConfigurationFlyout />
                 {isLoading ? (
                   <SourceLoadingPage />

@@ -229,6 +229,9 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
               },
             }}
             onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

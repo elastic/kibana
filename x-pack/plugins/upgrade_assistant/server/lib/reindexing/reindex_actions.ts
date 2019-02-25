@@ -10,24 +10,20 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   FindResponse,
   SavedObjectsClient,
-} from 'src/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
-  CURRENT_MAJOR_VERSION,
-  PREV_MAJOR_VERSION,
-} from 'x-pack/plugins/upgrade_assistant/common/version';
-import {
+  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
-
-export const ML_LOCK_DOC_ID = '___ML_REINDEX_LOCK___';
 
 /**
  * A collection of utility functions pulled out out of the ReindexService to make testing simpler.
@@ -88,31 +84,32 @@ export interface ReindexActions {
    */
   getFlatSettings(indexName: string): Promise<FlatSettings | null>;
 
-  // ----- Below are only for ML indices
+  // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
   /**
-   * Atomically increments the number of reindex operations running for ML jobs.
+   * Atomically increments the number of reindex operations running for an index group.
    */
-  incrementMlReindexes(): Promise<void>;
+  incrementIndexGroupReindexes(group: IndexGroup): Promise<void>;
 
   /**
-   * Atomically decrements the number of reindex operations running for ML jobs.
+   * Atomically decrements the number of reindex operations running for an index group.
    */
-  decrementMlReindexes(): Promise<void>;
+  decrementIndexGroupReindexes(group: IndexGroup): Promise<void>;
 
   /**
-   * Runs a callback function while locking the ML count.
-   * @param func A function to run with the locked ML lock document. Must return a promise that resolves
+   * Runs a callback function while locking an index group.
+   * @param func A function to run with the locked index group lock document. Must return a promise that resolves
    * to the updated ReindexSavedObject.
    */
-  runWhileMlLocked(
-    func: (mlLockDoc: ReindexSavedObject) => Promise<ReindexSavedObject>
+  runWhileIndexGroupLocked(
+    group: IndexGroup,
+    func: (lockDoc: ReindexSavedObject) => Promise<ReindexSavedObject>
   ): Promise<void>;
 
   /**
    * Exposed only for testing, DO NOT USE.
    */
-  _fetchAndLockMlDoc(): Promise<ReindexSavedObject>;
+  _fetchAndLockIndexGroupDoc(group: IndexGroup): Promise<ReindexSavedObject>;
 }
 
 export const reindexActionsFactory = (
@@ -120,22 +117,6 @@ export const reindexActionsFactory = (
   callCluster: CallCluster
 ): ReindexActions => {
   // ----- Internal functions
-  /**
-   * Generates a new index name for the new index. Iterates until it finds an index
-   * that doesn't already exist.
-   * @param indexName
-   */
-  const getNewIndexName = (indexName: string) => {
-    const prevVersionSuffix = `-reindexed-v${PREV_MAJOR_VERSION}`;
-    const currentVersionSuffix = `-reindexed-v${CURRENT_MAJOR_VERSION}`;
-
-    if (indexName.endsWith(prevVersionSuffix)) {
-      return indexName.replace(new RegExp(`${prevVersionSuffix}$`), currentVersionSuffix);
-    } else {
-      return `${indexName}${currentVersionSuffix}`;
-    }
-  };
-
   const isLocked = (reindexOp: ReindexSavedObject) => {
     if (reindexOp.attributes.locked) {
       const now = moment();
@@ -176,14 +157,14 @@ export const reindexActionsFactory = (
     async createReindexOp(indexName: string) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: getNewIndexName(indexName),
+        newIndexName: generateNewIndexName(indexName),
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
         reindexTaskId: null,
         reindexTaskPercComplete: null,
         errorMessage: null,
-        mlReindexCount: null,
+        runningReindexCount: null,
       });
     },
 
@@ -263,10 +244,11 @@ export const reindexActionsFactory = (
       return flatSettings[indexName];
     },
 
-    async _fetchAndLockMlDoc() {
+    async _fetchAndLockIndexGroupDoc(indexGroup) {
       const fetchDoc = async () => {
         try {
-          return await client.get<ReindexOperation>(REINDEX_OP_TYPE, ML_LOCK_DOC_ID);
+          // The IndexGroup enum value (a string) serves as the ID of the lock doc
+          return await client.get<ReindexOperation>(REINDEX_OP_TYPE, indexGroup);
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
             return await client.create<ReindexOperation>(
@@ -280,9 +262,9 @@ export const reindexActionsFactory = (
                 reindexTaskId: null,
                 reindexTaskPercComplete: null,
                 errorMessage: null,
-                mlReindexCount: 0,
+                runningReindexCount: 0,
               } as any,
-              { id: ML_LOCK_DOC_ID }
+              { id: indexGroup }
             );
           } else {
             throw e;
@@ -307,29 +289,29 @@ export const reindexActionsFactory = (
       return lockDoc();
     },
 
-    async incrementMlReindexes() {
-      this.runWhileMlLocked(mlDoc =>
-        this.updateReindexOp(mlDoc, {
-          mlReindexCount: mlDoc.attributes.mlReindexCount! + 1,
+    async incrementIndexGroupReindexes(indexGroup) {
+      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+        this.updateReindexOp(lockDoc, {
+          runningReindexCount: lockDoc.attributes.runningReindexCount! + 1,
         })
       );
     },
 
-    async decrementMlReindexes() {
-      this.runWhileMlLocked(mlDoc =>
-        this.updateReindexOp(mlDoc, {
-          mlReindexCount: mlDoc.attributes.mlReindexCount! - 1,
+    async decrementIndexGroupReindexes(indexGroup) {
+      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+        this.updateReindexOp(lockDoc, {
+          runningReindexCount: lockDoc.attributes.runningReindexCount! - 1,
         })
       );
     },
 
-    async runWhileMlLocked(func) {
-      let mlDoc = await this._fetchAndLockMlDoc();
+    async runWhileIndexGroupLocked(indexGroup, func) {
+      let lockDoc = await this._fetchAndLockIndexGroupDoc(indexGroup);
 
       try {
-        mlDoc = await func(mlDoc);
+        lockDoc = await func(lockDoc);
       } finally {
-        await releaseLock(mlDoc);
+        await releaseLock(lockDoc);
       }
     },
   };

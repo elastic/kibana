@@ -20,10 +20,10 @@
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
+import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
-import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
@@ -79,15 +79,13 @@ jest.mock('./notifications', () => ({
   NotificationsService: MockNotificationsService,
 }));
 
-const mockLoadingCountContract = {};
-const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
+const mockHttpContract = {};
+const MockHttpService = jest.fn<HttpService>(function _MockNotificationsService(this: any) {
+  this.start = jest.fn().mockReturnValue(mockHttpContract);
   this.stop = jest.fn();
 });
-jest.mock('./loading_count', () => ({
-  LoadingCountService: MockLoadingCountService,
+jest.mock('./http', () => ({
+  HttpService: MockHttpService,
 }));
 
 const mockBasePathStartContract = {};
@@ -123,7 +121,12 @@ jest.spyOn(CoreSystem.prototype, 'stop');
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
-  injectedMetadata: {} as any,
+  browserSupportsCsp: true,
+  injectedMetadata: {
+    csp: {
+      warnLegacyBrowsers: true,
+    },
+  } as any,
   requireLegacyFiles: jest.fn(),
 };
 
@@ -143,7 +146,7 @@ describe('constructor', () => {
     expect(MockI18nService).toHaveBeenCalledTimes(1);
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
-    expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
+    expect(MockHttpService).toHaveBeenCalledTimes(1);
     expect(MockBasePathService).toHaveBeenCalledTimes(1);
     expect(MockUiSettingsService).toHaveBeenCalledTimes(1);
     expect(MockChromeService).toHaveBeenCalledTimes(1);
@@ -195,6 +198,17 @@ describe('constructor', () => {
     });
   });
 
+  it('passes browserSupportsCsp to ChromeService', () => {
+    new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    expect(MockChromeService).toHaveBeenCalledTimes(1);
+    expect(MockChromeService).toHaveBeenCalledWith({
+      browserSupportsCsp: expect.any(Boolean),
+    });
+  });
+
   it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
     const rootDomElement = document.createElement('div');
     const injectedMetadata = { injectedMetadata: true } as any;
@@ -243,15 +257,15 @@ describe('#stop', () => {
     expect(notificationsService.stop).toHaveBeenCalled();
   });
 
-  it('calls loadingCount.stop()', () => {
+  it('calls http.stop()', () => {
     const coreSystem = new CoreSystem({
       ...defaultCoreSystemParams,
     });
 
-    const [loadingCountService] = MockLoadingCountService.mock.instances;
-    expect(loadingCountService.stop).not.toHaveBeenCalled();
+    const [httpService] = MockHttpService.mock.instances;
+    expect(httpService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(loadingCountService.stop).toHaveBeenCalled();
+    expect(httpService.stop).toHaveBeenCalled();
   });
 
   it('calls chrome.stop()', () => {
@@ -325,9 +339,9 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledWith();
   });
 
-  it('calls loadingCount#start()', () => {
+  it('calls http#start()', () => {
     startCore();
-    const [mockInstance] = MockLoadingCountService.mock.instances;
+    const [mockInstance] = MockHttpService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
       fatalErrors: mockFatalErrorsStartContract,
@@ -349,7 +363,7 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
       notifications: mockNotificationStartContract,
-      loadingCount: mockLoadingCountContract,
+      http: mockHttpContract,
       injectedMetadata: mockInjectedMetadataStartContract,
       basePath: mockBasePathStartContract,
     });
@@ -380,7 +394,10 @@ describe('#start()', () => {
     startCore();
     const [mockInstance] = MockChromeService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith();
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      notifications: mockNotificationStartContract,
+      injectedMetadata: mockInjectedMetadataStartContract,
+    });
   });
 
   it('returns start contract', () => {

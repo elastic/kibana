@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
 export interface PanelErrorProps {
@@ -26,8 +27,11 @@ export interface PanelErrorProps {
 export function PanelError({ error }: PanelErrorProps) {
   return (
     <div className="dshPanel__error panel-content">
-      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle" />
-      <span>{error}</span>
+      <EuiText color="subdued" size="xs">
+        <EuiIcon type="alert" color="danger" />
+        <EuiSpacer size="s" />
+        {error}
+      </EuiText>
     </div>
   );
 }

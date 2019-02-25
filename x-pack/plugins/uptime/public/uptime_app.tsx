@@ -6,7 +6,6 @@
 
 import {
   EuiHeader,
-  EuiHeaderBreadcrumbs,
   // @ts-ignore missing typings for EuiHeaderLink
   EuiHeaderLink,
   // @ts-ignore missing typings for EuiHeaderLinks
@@ -24,11 +23,10 @@ import {
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
@@ -62,7 +60,6 @@ export interface UptimeAppProps {
   initialDateRangeEnd: string;
   initialAutorefreshInterval: number;
   initialAutorefreshIsPaused: boolean;
-  isUsingK7Design: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
@@ -100,20 +97,11 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       initialAutorefreshInterval: autorefreshInterval,
       initialDateRangeStart: dateRangeStart,
       initialDateRangeEnd: dateRangeEnd,
-      isUsingK7Design,
       kibanaBreadcrumbs,
       updateBreadcrumbs,
     } = props;
 
-    let initialBreadcrumbs: UMBreadcrumb[];
-
-    if (isUsingK7Design) {
-      this.setBreadcrumbs = updateBreadcrumbs;
-      initialBreadcrumbs = kibanaBreadcrumbs;
-    } else {
-      this.setBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => this.setState({ breadcrumbs });
-      initialBreadcrumbs = [overviewBreadcrumb];
-    }
+    this.setBreadcrumbs = updateBreadcrumbs;
 
     let colors: UptimeAppColors;
     if (darkMode) {
@@ -133,7 +121,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.state = {
       autorefreshIsPaused,
       autorefreshInterval,
-      breadcrumbs: initialBreadcrumbs,
+      breadcrumbs: kibanaBreadcrumbs,
       colors,
       dateRangeStart,
       dateRangeEnd,
@@ -145,9 +133,9 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { isUsingK7Design, routerBasename, graphQLClient } = this.props;
+    const { routerBasename, graphQLClient } = this.props;
     return (
-      <I18nContext>
+      <I18nProvider>
         <Router basename={routerBasename}>
           <ApolloProvider client={graphQLClient}>
             <EuiPage className="app-wrapper-panel">
@@ -161,7 +149,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         defaultMessage: 'Go to Uptime home page',
                       })}
                       href="#/"
-                      iconType="heartbeatApp"
+                      iconType="uptimeApp"
                       iconTitle={i18n.translate('xpack.uptime.appHeader.uptimeLogoTitle', {
                         defaultMessage: 'Uptime',
                       })}
@@ -172,13 +160,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       />
                     </EuiHeaderLogo>
                   </EuiHeaderSectionItem>
-                  {!isUsingK7Design && (
-                    <EuiHeaderSectionItem>
-                      <div style={{ paddingTop: '20px', paddingRight: '8px' }}>
-                        <EuiHeaderBreadcrumbs breadcrumbs={this.state.breadcrumbs} />
-                      </div>
-                    </EuiHeaderSectionItem>
-                  )}
                 </EuiHeaderSection>
                 <EuiHeaderSection side="right">
                   <EuiHeaderSectionItem border="none">
@@ -227,7 +208,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           defaultMessage: 'Go to our discuss page',
                         })}
                         iconType="help"
-                        href="https://discuss.elastic.co/c/beats/heartbeat"
+                        href="https://discuss.elastic.co/c/uptime"
                         target="_blank"
                       >
                         <FormattedMessage
@@ -268,7 +249,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
             </EuiPage>
           </ApolloProvider>
         </Router>
-      </I18nContext>
+      </I18nProvider>
     );
   }
 

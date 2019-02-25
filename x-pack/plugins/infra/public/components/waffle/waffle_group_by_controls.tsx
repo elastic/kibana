@@ -47,16 +47,16 @@ const getOptions = (
       [InfraNodeType.pod]: ['kubernetes.namespace', 'kubernetes.node.name'].map(mapFieldToOption),
       [InfraNodeType.container]: [
         'host.name',
-        'meta.cloud.availability_zone',
-        'meta.cloud.machine_type',
-        'meta.cloud.project_id',
-        'meta.cloud.provider',
+        'cloud.availability_zone',
+        'cloud.machine.type',
+        'cloud.project.id',
+        'cloud.provider',
       ].map(mapFieldToOption),
       [InfraNodeType.host]: [
-        'meta.cloud.availability_zone',
-        'meta.cloud.machine_type',
-        'meta.cloud.project_id',
-        'meta.cloud.provider',
+        'cloud.availability_zone',
+        'cloud.machine.type',
+        'cloud.project.id',
+        'cloud.provider',
       ].map(mapFieldToOption),
     };
   }

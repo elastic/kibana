@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiFlyout, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -22,6 +23,7 @@ interface ReindexFlyoutProps {
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
+  cancelReindex: () => void;
 }
 
 interface ReindexFlyoutState {
@@ -46,7 +48,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
   }
 
   public render() {
-    const { closeFlyout, indexName, reindexState, startReindex } = this.props;
+    const { closeFlyout, indexName, reindexState, startReindex, cancelReindex } = this.props;
     const { currentFlyoutStep } = this.state;
 
     let flyoutContents: React.ReactNode;
@@ -66,6 +68,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
             closeFlyout={closeFlyout}
             reindexState={reindexState}
             startReindex={startReindex}
+            cancelReindex={cancelReindex}
           />
         );
         break;
@@ -78,7 +81,13 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
         <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m" maxWidth>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h2>Reindex {indexName}</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
+                  defaultMessage="Reindex {indexName}"
+                  values={{ indexName }}
+                />
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           {flyoutContents}

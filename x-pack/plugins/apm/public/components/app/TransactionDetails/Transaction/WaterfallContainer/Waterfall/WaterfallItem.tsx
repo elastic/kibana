@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
 import { px, unit, units } from '../../../../../../style/variables';
@@ -63,18 +63,8 @@ const ItemText = styled.span`
   /* add margin to all direct descendants */
   & > * {
     margin-right: ${px(units.half)};
+    white-space: nowrap;
   }
-`;
-
-const SpanNameLabel = styled.span`
-  color: ${theme.euiColorDarkShade};
-  font-weight: normal;
-  white-space: nowrap;
-`;
-
-const TransactionNameLabel = styled.span`
-  font-weight: 600;
-  white-space: nowrap;
 `;
 
 interface ITimelineMargins {
@@ -90,7 +80,7 @@ interface IWaterfallItemProps {
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
-  onClick: () => any;
+  onClick: () => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallItem }) {
@@ -139,10 +129,14 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
 }
 
 function NameLabel({ item }: { item: IWaterfallItem }) {
-  const StyledLabel =
-    item.docType === 'span' ? SpanNameLabel : TransactionNameLabel;
-
-  return <StyledLabel>{item.name}</StyledLabel>;
+  if (item.docType === 'span') {
+    return <EuiText size="s">{item.name}</EuiText>;
+  }
+  return (
+    <EuiTitle size="xxs">
+      <h5>{item.name}</h5>
+    </EuiTitle>
+  );
 }
 
 export function WaterfallItem({

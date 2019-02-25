@@ -11,11 +11,11 @@ import React from 'react';
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
+import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
-import { InfraHeaderFeedbackLink } from '../../components/header_feedback_link';
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
@@ -37,10 +37,22 @@ export const HomePage = injectI18n(
 
       return (
         <ColumnarPage>
+          <DocumentTitle
+            title={intl.formatMessage({
+              id: 'xpack.infra.homePage.documentTitle',
+              defaultMessage: 'Infrastructure',
+            })}
+          />
           <Header
-            appendSections={
-              <InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/infrastructure" />
-            }
+            breadcrumbs={[
+              {
+                href: '#/',
+                text: intl.formatMessage({
+                  id: 'xpack.infra.header.infrastructureTitle',
+                  defaultMessage: 'Infrastructure',
+                }),
+              },
+            ]}
           />
           <SourceConfigurationFlyout />
           <WithSource>

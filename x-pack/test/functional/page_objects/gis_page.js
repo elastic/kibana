@@ -12,8 +12,59 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
+  const queryBar = getService('queryBar');
+  const comboBox = getService('comboBox');
 
   class GisPage {
+
+    async setAbsoluteRange(start, end) {
+      await PageObjects.timePicker.setAbsoluteRange(start, end);
+      await this.waitForLayersToLoad();
+    }
+
+    async setAndSubmitQuery(query) {
+      await queryBar.setQuery(query);
+      await queryBar.submitQuery();
+      await this.waitForLayersToLoad();
+    }
+
+    async refreshQuery() {
+      await queryBar.submitQuery();
+      await this.waitForLayersToLoad();
+    }
+
+    async enterFullScreen() {
+      log.debug(`enterFullScreen`);
+      await testSubjects.click('mapsFullScreenMode');
+      await retry.try(async () => {
+        await testSubjects.exists('exitFullScreenModeLogo');
+      });
+      await this.waitForLayersToLoad();
+    }
+
+    // TODO combine with dashboard full screen into a service
+    async existFullScreen() {
+      log.debug(`existFullScreen`);
+      const isFullScreen = await testSubjects.exists('exitFullScreenModeLogo');
+      if (isFullScreen) {
+        await testSubjects.click('exitFullScreenModeLogo');
+      }
+    }
+
+    async waitForLayersToLoad() {
+      log.debug('Wait for layers to load');
+      const tableOfContents = await testSubjects.find('mapLayerTOC');
+      await retry.try(async () => {
+        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+      });
+    }
+
+    async waitForLayerDeleted(layerName) {
+      log.debug('Wait for layer deleted');
+      await retry.try(async () => {
+        await !this.doesLayerExist(layerName);
+      });
+    }
 
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
@@ -30,6 +81,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error(`Failed to open map ${name}`);
         }
       });
+
+      await this.waitForLayersToLoad();
     }
 
     async deleteSavedMaps(search) {
@@ -104,6 +157,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     /*
      * Layer TOC (table to contents) utility functions
      */
+    async clickAddLayer() {
+      log.debug('Click add layer');
+      await testSubjects.click('addLayerButton');
+    }
+
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
@@ -111,7 +169,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
 
     async getView() {
@@ -124,12 +182,34 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return { lat, lon, zoom };
     }
 
+    async toggleLayerVisibility(layerName) {
+      log.debug(`Toggle layer visibility, layer: ${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('layerVisibilityToggleButton');
+    }
+
+    async clickFitToBounds(layerName) {
+      log.debug(`Fit to bounds, layer: ${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('fitToBoundsButton');
+      await this.waitForLayersToLoad();
+    }
+
+    async openLayerTocActionsPanel(layerName) {
+      const cleanLayerName = layerName.split(' ').join('');
+      const isOpen = await testSubjects.exists(`layerTocActionsPanel${cleanLayerName}`);
+      if (!isOpen) {
+        await testSubjects.click(`layerTocActionsPanelToggleButton${cleanLayerName}`);
+      }
+    }
+
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await testSubjects.click(`mapOpenLayerButton${layerName}`);
     }
 
     async doesLayerExist(layerName) {
+      layerName = layerName.replace(' ', '_');
       log.debug(`Open layer panel, layer: ${layerName}`);
       return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
     }
@@ -137,6 +217,35 @@ export function GisPageProvider({ getService, getPageObjects }) {
     /*
      * Layer panel utility functions
      */
+    async isLayerAddPanelOpen() {
+      log.debug(`Is layer add panel open`);
+      return await testSubjects.exists('layerAddForm');
+    }
+
+    async cancelLayerAdd() {
+      log.debug(`Cancel layer add`);
+      const cancelExists = await testSubjects.exists('layerAddCancelButton');
+      if (cancelExists) {
+        await testSubjects.click('layerAddCancelButton');
+      }
+    }
+
+    async selectVectorSource() {
+      log.debug(`Select vector source`);
+      await testSubjects.click('vectorShapes');
+    }
+
+    // Returns first layer by default
+    async selectVectorLayer(vectorLayerName = '') {
+      log.debug(`Select vector layer ${vectorLayerName}`);
+      const optionsStringList = await comboBox.getOptionsList('emsVectorComboBox');
+      const selectedVectorLayer = vectorLayerName
+        ? vectorLayerName
+        : optionsStringList.trim().split('\n')[0];
+      await comboBox.set('emsVectorComboBox', selectedVectorLayer);
+      return selectedVectorLayer;
+    }
+
     async removeLayer(layerName) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
@@ -214,7 +323,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
       await PageObjects.timePicker.pauseAutoRefresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
   }
   return new GisPage();

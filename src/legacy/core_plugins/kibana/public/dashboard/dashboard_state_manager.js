@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import moment from 'moment';
 
 import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
@@ -144,13 +143,11 @@ export class DashboardStateManager {
    * or a relative time (now-15m), or a moment object
    * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
    * moment object
-   * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
     store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
-      mode: newTimeFilter.mode,
     }));
   }
 
@@ -241,9 +238,9 @@ export class DashboardStateManager {
 
     _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
       if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
-        const indexPattern = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
-        if (indexPattern) {
-          this.panelIndexPatternMapping[panelId] = indexPattern;
+        const embeddableMetadata = getEmbeddableMetadata(store.getState(), panelId);
+        if (embeddableMetadata.indexPatterns) {
+          this.panelIndexPatternMapping[panelId] = _.compact(embeddableMetadata.indexPatterns);
           this.dirty = true;
         }
       }
@@ -277,7 +274,8 @@ export class DashboardStateManager {
   }
 
   getPanelIndexPatterns() {
-    return _.uniq(Object.values(this.panelIndexPatternMapping));
+    const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
+    return _.uniq(indexPatterns);
   }
 
   /**
@@ -543,30 +541,17 @@ export class DashboardStateManager {
    * @param {Object} timeFilter
    * @param {func} timeFilter.setTime
    * @param {func} timeFilter.setRefreshInterval
-   * @param quickTimeRanges
    */
-  syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
+  syncTimefilterWithDashboard(timeFilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
       throw new Error(i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
         defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
       }));
     }
 
-    let mode;
-    const isMoment = moment(this.savedDashboard.timeTo).isValid();
-    if (isMoment) {
-      mode = 'absolute';
-    } else {
-      const quickTime = _.find(
-        quickTimeRanges,
-        (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
-
-      mode = quickTime ? 'quick' : 'relative';
-    }
     timeFilter.setTime({
       from: this.savedDashboard.timeFrom,
       to: this.savedDashboard.timeTo,
-      mode
     });
 
     if (this.savedDashboard.refreshInterval) {

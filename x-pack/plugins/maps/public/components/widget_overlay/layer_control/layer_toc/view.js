@@ -16,7 +16,9 @@ export class LayerTOC extends React.Component {
   }
 
   componentDidMount() {
-    this._attachSortHandler();
+    if (!this.props.isReadOnly) {
+      this._attachSortHandler();
+    }
   }
 
   _attachSortHandler() {
@@ -56,7 +58,7 @@ export class LayerTOC extends React.Component {
   render() {
     const layerEntries = this._renderLayers();
     return (
-      <div ref={node => this._domContainer = node}>
+      <div ref={node => this._domContainer = node} data-test-subj="mapLayerTOC">
         {layerEntries}
       </div>
     );

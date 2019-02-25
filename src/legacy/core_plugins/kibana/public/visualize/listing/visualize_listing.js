@@ -28,7 +28,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
-import { VisualizeConstants } from '../visualize_constants';
+import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
 
 import { i18n } from '@kbn/i18n';
 
@@ -51,6 +51,10 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
+  };
+
+  this.edit = ({ id }) => {
+    kbnUrl.change(createVisualizeEditUrl(id));
   };
 
   this.closeNewVisModal = () => {
@@ -78,7 +82,11 @@ export function VisualizeListingController($injector, createNewVis) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
+
+        return {
+          total: result.total,
+          hits: result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'))
+        };
       });
   };
 
@@ -92,5 +100,4 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
-  config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
 }
