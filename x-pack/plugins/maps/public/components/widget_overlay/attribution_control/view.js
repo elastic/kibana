@@ -63,7 +63,7 @@ export class AttributionControl  extends React.Component {
   };
 
   _renderAttribution({ url, label }) {
-    if (!url || url.length === 0) {
+    if (!url) {
       return label;
     }
 
