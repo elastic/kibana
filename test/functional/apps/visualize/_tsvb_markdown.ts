@@ -18,15 +18,15 @@
  */
 
 import expect from 'expect.js';
+import { TestWrapper } from 'typings';
 
-export default function ({ getService, getPageObjects }) {
+// tslint:disable-next-line:no-default-export
+export default function({ getService, getPageObjects }: TestWrapper) {
   const retry = getService('retry');
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
 
-  describe.skip('visual builder', function describeIndexTests() {
-
-    describe.skip('markdown', () => {
-
+  describe('visual builder', function describeIndexTests() {
+    describe('markdown', () => {
       before(async () => {
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
         await visualBuilder.clearMarkdown();
       });
 
-      it.skip('should render subtabs and table variables markdown components', async () => {
+      it('should render subtabs and table variables markdown components', async () => {
         const tabs = await visualBuilder.getSubTabs();
         expect(tabs.length).to.be(3);
 
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
         expect(variables).to.have.length(5);
       });
 
-      it.skip('should allow printing raw timestamp of data', async () => {
+      it('should allow printing raw timestamp of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
         retry.try(async () => {
           const text = await visualBuilder.getMarkdownText();
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it.skip('should render html as plain text', async () => {
+      it('should render html as plain text', async () => {
         const html = '<h1>hello world</h1>';
         await visualBuilder.enterMarkdown(html);
         retry.try(async () => {
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it.skip('should render mustache list', async () => {
+      it('should render mustache list', async () => {
         const list = '{{#each _all}}\n{{ data.formatted.[0] }} {{ data.raw.[0] }}\n{{/each}}';
 
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
