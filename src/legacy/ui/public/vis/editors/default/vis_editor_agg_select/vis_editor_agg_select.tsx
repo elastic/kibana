@@ -21,23 +21,31 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
+import { AggType } from 'ui/agg_types';
+import { AggConfig } from 'ui/vis/agg_config';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
 
 interface VisEditorAggSelectProps {
-  agg: any;
+  agg: AggConfig;
   label: string;
-  aggTypeOptions: any;
-  onChangeAggType: (agg: any, aggType: any) => void;
+  aggTypeOptions: AggType[];
+  isSelectValid: () => boolean;
+  onChangeAggType: (agg: AggConfig, aggType: AggType) => void;
 }
+
+type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
+  label: string;
+  options?: EuiComboBoxOptionProps[];
+};
 
 function VisEditorAggSelect({
   agg,
   label,
   aggTypeOptions,
   onChangeAggType,
+  isSelectValid,
 }: VisEditorAggSelectProps) {
-  const [isInvalid, setIsInvalid] = useState(false);
   const selectedOptions = agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
   let aggHelpLink = null;
 
@@ -66,15 +74,14 @@ function VisEditorAggSelect({
     </div>
   );
 
-  const onChange = (options: EuiComboBoxOptionProps[]) => {
+  const onChange = (options: ComboBoxGroupedOption[]) => {
     onChangeAggType(agg, _.get(options, '0.value'));
-    setIsInvalid(options.length ? false : true);
   };
 
-  const getGroupedOptions = () => {
-    const groupedOptions =
+  const getGroupedOptions = (): ComboBoxGroupedOption[] => {
+    const groupedOptions: ComboBoxGroupedOption[] =
       aggTypeOptions && aggTypeOptions.length
-        ? aggTypeOptions.reduce((array: any[], type: any) => {
+        ? aggTypeOptions.reduce((array: AggType[], type: AggType) => {
             const group = array.find(element => element.label === type.subtype);
             const option = {
               label: type.title,
@@ -93,8 +100,10 @@ function VisEditorAggSelect({
 
     groupedOptions.sort(sortByLabel);
 
-    groupedOptions.forEach((group: any) => {
-      group.options.sort(sortByLabel);
+    groupedOptions.forEach((group: ComboBoxGroupedOption) => {
+      if (Array.isArray(group.options)) {
+        group.options.sort(sortByLabel);
+      }
     });
 
     return groupedOptions;
@@ -113,7 +122,7 @@ function VisEditorAggSelect({
         onChange={onChange}
         data-test-subj="visEditorAggSelect"
         isClearable={false}
-        isInvalid={isInvalid}
+        isInvalid={isSelectValid && !isSelectValid()}
       />
     </EuiFormRow>
   );

@@ -27,6 +27,7 @@ uiModules
   .directive('visEditorAggSelect', reactDirective => reactDirective(wrapInI18nContext(VisEditorAggSelect), [
     'label',
     'onChangeAggType',
+    'isSelectValid',
     ['agg', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }]
   ]));

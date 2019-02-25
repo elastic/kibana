@@ -33,6 +33,15 @@
   </p>
 </div>
 
-<vis-editor-agg-select agg="agg" label="label" on-change-agg-type="onChangeAggType" agg-type-options="aggTypeOptions" ng-model="agg.type"/>
+<vis-editor-agg-select
+  agg="agg"
+  label="label"
+  on-change-agg-type="onChangeAggType"
+  agg-type-options="aggTypeOptions"
+  is-select-valid="isSelectValid"
+  ng-model="agg.type"
+  name="aggType"
+  required
+/>
 
 <!-- schema editors get added down here: aggSelect.html, agg_types/controls/*.html -->
