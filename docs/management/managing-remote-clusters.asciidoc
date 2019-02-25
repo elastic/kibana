@@ -23,7 +23,11 @@ clusters and check their connectivity.
 Before you use this feature, you should be familiar with the concept of 
 {ref}/modules-remote-clusters.html[remote clusters].  
  
-To set up a remote cluster, go to *Management > Elasticsearch > Remote Clusters*. 
+To get started, go to *Management > Elasticsearch > Remote Clusters*. You can manage
+your remote clusters from this list. 
+
+To set up a new remote, click *Add a remote cluster*. Give the cluster a unique name 
+and define the seed nodes for cluster discovery.
 
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
@@ -36,11 +40,11 @@ indices on the remote cluster based on an auto-follow index pattern.
 [[managing-cross-cluster-replication]]
 == Managing cross cluster replication
  
-*Cross Cluster Replication* includes tools to help you create and manage the cross cluster 
+*Cross Cluster Replication* helps you create and manage the cross cluster 
 replication process. If you want to replicate data from existing indices, or set up 
-local followers on a case-by-case basis, you can create and manage followers individually 
-from *Follower indices*. If you want to automatically detect and follow new indices 
-when they are created on a remote cluster, you can do so from *Auto-follow patterns*. 
+local followers on a case-by-case basis, go to *Follower indices*. 
+If you want to automatically detect and follow new indices when they are created 
+on a remote cluster, you can do so from *Auto-follow patterns*. 
 
 Creating an auto-follow pattern is useful when you have time-series data, like a logs index, on the 
 remote cluster that is created or rolled over on a daily basis. Once you have configured an 
