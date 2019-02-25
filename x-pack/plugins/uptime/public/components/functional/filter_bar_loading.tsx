@@ -15,4 +15,4 @@ const searchBox = {
   }),
 };
 
-export const FilterBarLoading = () => <EuiSearchBar box={searchBox} />;
+export const FilterBarLoading = () => <EuiSearchBar box={searchBox} onChange={()=>{ /* */}}/>;
