@@ -23,7 +23,6 @@ import expect from 'expect.js';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
-import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 
@@ -91,9 +90,6 @@ describe('plugins/elasticsearch', () => {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
           }
-        },
-        getKibanaIndexMappingsDsl() {
-          return mappings;
         },
         ext: sinon.stub()
       };

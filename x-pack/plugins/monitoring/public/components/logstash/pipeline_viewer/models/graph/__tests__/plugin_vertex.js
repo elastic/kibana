@@ -83,7 +83,7 @@ describe('PluginVertex', () => {
     expect(pluginVertex.latestEventsPerSecond).to.be(20);
   });
 
-  describe("isTimeConsuming", () => {
+  describe('isTimeConsuming', () => {
     let percentExecution;
 
     beforeEach(() => {
@@ -96,7 +96,7 @@ describe('PluginVertex', () => {
       expect(pluginVertex.isTimeConsuming()).to.be(false);
     });
 
-    it("should have a true isTimeConsuming result when the plugin consumes a large amount of execution time", () => {
+    it('should have a true isTimeConsuming result when the plugin consumes a large amount of execution time', () => {
       vertexJson.stats.percent_of_total_processor_duration.data[1][1] = 0.1 +
         (percentExecution * (TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT));
       const pluginVertex = new PluginVertex(graph, vertexJson);
@@ -104,7 +104,7 @@ describe('PluginVertex', () => {
     });
   });
 
-  describe("isSlow", () => {
+  describe('isSlow', () => {
     beforeEach(() => {
       graph.processorVertices[0].millis_per_event = 1;
       graph.processorVertices[1].millis_per_event = 999999999999999999;

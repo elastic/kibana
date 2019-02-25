@@ -14,14 +14,10 @@ import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../v
 import { EuiSpacer } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      ordinalFields: [],
-      defaultDynamicProperties: getDefaultDynamicProperties(),
-      defaultStaticProperties: getDefaultStaticProperties()
-    };
+  state = {
+    ordinalFields: [],
+    defaultDynamicProperties: getDefaultDynamicProperties(),
+    defaultStaticProperties: getDefaultStaticProperties()
   }
 
   componentWillUnmount() {

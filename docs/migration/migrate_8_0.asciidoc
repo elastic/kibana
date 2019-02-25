@@ -1,0 +1,25 @@
+[[breaking-changes-8.0]]
+== Breaking changes in 8.0
+++++
+<titleabbrev>8.0</titleabbrev>
+++++
+
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 8.0.
+
+coming[8.0.0]
+
+See also <<release-highlights>> and <<release-notes>>.
+
+[float]
+=== kibana.yml setting `elasticsearch.url` sets port based on protocol
+*Details:* In prior versions of Kibana, if no port was specified in `elasticsearch.url` a default of 9200 was chosen.
+The port is now protocol dependent: https ports will use 443, and http ports will use 80.
+
+*Impact:* If your `elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.
+
+[float]
+=== `optimize` directory is now in the `data` folder
+*Details:* Generated bundles have moved to the configured `path.data` folder.
+
+*Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.

@@ -19,17 +19,17 @@ import _ from 'lodash';
 export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   const features = [];
   hits.forEach(hit => {
-    const value = _.get(hit, `_source[${geoFieldName}]`);
+    const properties = flattenHit(hit);
+
     let geometries;
     if (geoFieldType === 'geo_point') {
-      geometries = geoPointToGeometry(value);
+      geometries = geoPointToGeometry(properties[geoFieldName]);
     } else if (geoFieldType === 'geo_shape') {
-      geometries = geoShapeToGeometry(value);
+      geometries = geoShapeToGeometry(properties[geoFieldName]);
     } else {
       throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
     }
 
-    const properties = flattenHit(hit);
     // don't include geometry field value in properties
     delete properties[geoFieldName];
 
@@ -115,7 +115,7 @@ export function geoShapeToGeometry(value) {
   }
 
   // TODO handle case where value is WKT and convert to geojson
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     throw new Error(`Unable to convert WKT to geojson, not supported`);
   }
 
@@ -196,8 +196,8 @@ function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   const bottomRight = [right, bottom];
   const topRight = [right, top];
   return {
-    "type": "polygon",
-    "coordinates": [
+    'type': 'polygon',
+    'coordinates': [
       [ topLeft, bottomLeft, bottomRight, topRight, topLeft ]
     ]
   };

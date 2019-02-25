@@ -8,8 +8,9 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsClient } from 'src/server/saved_objects';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ReindexStatus } from '../../common/types';
+import { EsVersionPrecheck } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 import { CredentialStore } from '../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
@@ -40,8 +41,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
     callWithRequest,
     callWithInternalUser,
     xpackInfo,
-    log,
-    server.plugins.apm_oss.indexPatterns
+    log
   );
 
   // Wait for ES connection before starting the polling loop.
@@ -60,24 +60,21 @@ export function registerReindexIndicesRoutes(
 ) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const xpackInfo = server.plugins.xpack_main.info;
-  const apmIndexPatterns = server.plugins.apm_oss.indexPatterns;
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
   server.route({
     path: `${BASE_PATH}/{indexName}`,
     method: 'POST',
+    options: {
+      pre: [EsVersionPrecheck],
+    },
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(
-        callCluster,
-        xpackInfo,
-        reindexActions,
-        apmIndexPatterns
-      );
+      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
 
       try {
         if (!(await reindexService.hasRequiredPrivileges(indexName))) {
@@ -113,17 +110,15 @@ export function registerReindexIndicesRoutes(
   server.route({
     path: `${BASE_PATH}/{indexName}`,
     method: 'GET',
+    options: {
+      pre: [EsVersionPrecheck],
+    },
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(
-        callCluster,
-        xpackInfo,
-        reindexActions,
-        apmIndexPatterns
-      );
+      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
 
       try {
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
@@ -154,6 +149,9 @@ export function registerReindexIndicesRoutes(
   server.route({
     path: `${BASE_PATH}/{indexName}/cancel`,
     method: 'POST',
+    options: {
+      pre: [EsVersionPrecheck],
+    },
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
