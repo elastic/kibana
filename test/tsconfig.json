@@ -4,7 +4,7 @@
     "module": "commonjs",
     "allowJs": true,
     "outDir": "target",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
       "ui/*": [
         "../src/legacy/ui/public/*"
@@ -16,6 +16,7 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
   ]
 }
