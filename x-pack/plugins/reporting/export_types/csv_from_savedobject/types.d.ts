@@ -67,6 +67,10 @@ export interface VisState {
   type: string; // e.g 'metrics' for TSVB
 }
 
+export interface SearchSource {
+  piranhas: number;
+}
+
 export interface TimelionPanel {
   expression: string;
   interval: string;

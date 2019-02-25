@@ -10,13 +10,13 @@ import { get } from 'lodash';
 // @ts-ignore
 import { cryptoFactory, oncePerServer } from '../../../server/lib';
 import { JobDocPayload, JobParams, KbnServer } from '../../../types';
-import { SavedObject, SavedObjectServiceError, TimelionPanel, TsvbPanel, VisState } from '../types';
+import { SavedObject, SavedObjectServiceError, SearchSource, TsvbPanel, VisState } from '../types';
 import { generateCsv } from './lib/generate_csv';
 
 interface VisData {
   title: string;
   visType: string;
-  panel: TsvbPanel | TimelionPanel;
+  panel: TsvbPanel | SearchSource;
 }
 
 function createJobFn(server: KbnServer) {
@@ -35,12 +35,25 @@ function createJobFn(server: KbnServer) {
       .then(() => client.get(savedObjectType, savedObjectId))
       .then((savedObject: SavedObject) => {
         const { attributes } = savedObject;
-        const { visState: visStateJSON } = attributes;
-        const { params: vpanel, title: vtitle, type: vtype }: VisState = JSON.parse(visStateJSON); // no var name shadowing
-        if (!vpanel) {
-          throw new Error('The saved object contained no panel data!');
+        const { visState: visStateJSON, kibanaSavedObjectMeta } = attributes;
+
+        if (!visStateJSON && !kibanaSavedObjectMeta) {
+          throw new Error('Could not parse saved object data!');
         }
-        return { panel: vpanel, title: vtitle, visType: vtype };
+
+        if (visStateJSON) {
+          // visualization type
+          const { params: vpanel, title: vtitle, type: vtype }: VisState = JSON.parse(visStateJSON); // no var name shadowing
+          if (!vpanel) {
+            throw new Error('The saved object contained no panel data!');
+          }
+          return { panel: vpanel, title: vtitle, visType: vtype };
+        }
+
+        // kibanaSavedObjectMeta
+        const { searchSourceJSON } = kibanaSavedObjectMeta;
+        const searchSource: SearchSource = JSON.parse(searchSourceJSON);
+        return { panel: searchSource, title: attributes.title, visType: 'search' };
       })
       .catch((err: Error) => {
         const errPayload: SavedObjectServiceError = get(err, 'output.payload', { statusCode: 0 });

@@ -7,7 +7,8 @@
 import { badRequest, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { KbnServer } from '../../../../types';
-import { TimelionPanel, TsvbPanel } from '../../types';
+import { SearchSource, TsvbPanel } from '../../types';
+import { generateCsvSearch } from './generate_csv_search';
 import { generateCsvTsvb } from './generate_csv_tsvb';
 
 interface CsvResult {
@@ -19,13 +20,17 @@ export async function generateCsv(
   req: Request,
   server: KbnServer,
   visType: string,
-  panel: TsvbPanel | TimelionPanel
+  panel: TsvbPanel | SearchSource
 ): Promise<CsvResult> {
   switch (visType) {
     case 'metrics':
       // @ts-ignore
       const tsvbPanel: TsvbPanel = panel;
       return await generateCsvTsvb(req, server, tsvbPanel);
+    case 'search':
+      // @ts-ignore
+      const searchPanel: SearchSource = panel;
+      return await generateCsvSearch(req, server, searchPanel);
     case 'timelion':
       throw notImplemented('Timelion is not yet supported by this API');
     default:
