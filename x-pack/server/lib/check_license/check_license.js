@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RANKED_LICENSE_TYPES, LICENSE_STATUS } from '../constants';
+import { i18n } from '@kbn/i18n';
+import { RANKED_LICENSE_TYPES } from '../constants';
+import { LICENSE_STATUS } from '../../../common/constants';
 
 export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo) {
   if(!RANKED_LICENSE_TYPES.includes(minimumLicenseRequired)) {
@@ -15,9 +17,14 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   // from Elasticsearch, assume worst case and disable
   if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
     return {
-      isAvailable: false,
       status: LICENSE_STATUS.UNAVAILABLE,
-      message: `You cannot use ${pluginName} because license information is not available at this time.`
+      message: i18n.translate(
+        'xpack.server.checkLicense.errorUnavailableMessage',
+        {
+          defaultMessage: 'You cannot use {pluginName} because license information is not available at this time.',
+          values: { pluginName },
+        },
+      ),
     };
   }
 
@@ -29,24 +36,33 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   // License is not valid
   if (!isLicenseModeValid) {
     return {
-      isAvailable: false,
       status: LICENSE_STATUS.INVALID,
-      message: `Your ${licenseType} license does not support ${pluginName}. Please upgrade your license.`
+      message: i18n.translate(
+        'xpack.server.checkLicense.errorUnsupportedMessage',
+        {
+          defaultMessage: 'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
+          values: { licenseType, pluginName },
+        },
+      ),
     };
   }
 
   // License is valid but not active
   if (!isLicenseActive) {
     return {
-      isAvailable: false,
-      status: LICENSE_STATUS.INACTIVE,
-      message: `You cannot use ${pluginName} because your ${licenseType} license has expired.`
+      status: LICENSE_STATUS.EXPIRED,
+      message: i18n.translate(
+        'xpack.server.checkLicense.errorExpiredMessage',
+        {
+          defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired',
+          values: { licenseType, pluginName },
+        },
+      ),
     };
   }
 
   // License is valid and active
   return {
-    isAvailable: true,
     status: LICENSE_STATUS.VALID,
   };
 }

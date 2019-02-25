@@ -13,9 +13,3 @@ export const RANKED_LICENSE_TYPES = [
   'platinum',
   'trial',
 ];
-export const LICENSE_STATUS = {
-  UNAVAILABLE: 'UNAVAILABLE',
-  INVALID: 'INVALID',
-  INACTIVE: 'INACTIVE',
-  VALID: 'VALID',
-};
