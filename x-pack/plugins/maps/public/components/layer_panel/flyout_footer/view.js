@@ -13,6 +13,10 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+
+
 export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
   hasStateChanged }) => {
   const removeBtn = (
@@ -23,7 +27,10 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
         flush="right"
         data-test-subj="mapRemoveLayerButton"
       >
-        Remove layer
+        <FormattedMessage
+          id="xpack.maps.layerPanel.footer.removeLayer"
+          defaultMessage="Remove layer"
+        />
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
