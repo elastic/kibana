@@ -104,6 +104,7 @@ export class TOCEntry extends React.Component {
         fitToBounds={() => {
           fitToBounds(layer.getId());
         }}
+        
         zoom={zoom}
         toggleVisible={() => {
           toggleVisible(layer.getId());
@@ -159,7 +160,9 @@ export class TOCEntry extends React.Component {
           <EuiFlexItem>
             <button
               onClick={openLayerPanelWithCheck}
-              data-test-subj={`mapOpenLayerButton${this.state.displayName}`}
+              data-test-subj={`mapOpenLayerButton${this.state.displayName
+                ? this.state.displayName.replace(' ', '_')
+                : ''}`}
             >
               <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
                 {this.state.displayName}
