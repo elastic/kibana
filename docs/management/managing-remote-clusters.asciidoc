@@ -36,7 +36,7 @@ indices on the remote cluster based on an auto-follow index pattern.
 [[managing-cross-cluster-replication]]
 == Managing cross cluster replication
  
-*Cross Cluster Replication* includes tools to help you create and manage the remote 
+*Cross Cluster Replication* includes tools to help you create and manage the cross cluster 
 replication process. If you want to replicate data from existing indices, or set up 
 local followers on a case-by-case basis, you can create and manage followers individually 
 from *Follower indices*. If you want to automatically detect and follow new indices 
