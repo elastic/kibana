@@ -27,11 +27,6 @@ function ReactEditorControllerProvider(Private, config) {
       this.el = el;
       this.savedObj = savedObj;
       this.vis = savedObj.vis;
-      this.vis.fields = {};
-    }
-
-    updateVisFields = (fields) => {
-      this.vis.fields = { ...this.vis.fields, ...fields };
     }
 
     async render(params) {
@@ -43,7 +38,7 @@ function ReactEditorControllerProvider(Private, config) {
             vis={this.vis}
             savedObj={this.savedObj}
             timeRange={params.timeRange}
-            renderComplete={this.updateVisFields}
+            renderComplete={() => {}}
             isEditorMode={true}
             appState={params.appState}
           />
