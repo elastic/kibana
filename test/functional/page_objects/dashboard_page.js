@@ -355,8 +355,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      */
     async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
       await testSubjects.click('dashboardSaveMenuItem');
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const modalDialog = await testSubjects.find('savedObjectSaveModal');
 
       log.debug('entering new title');
       await testSubjects.setValue('savedObjectTitle', dashboardTitle);
@@ -370,6 +369,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       await this.clickSave();
+      await testSubjects.waitForDeleted(modalDialog);
     }
 
     async selectDashboard(dashName) {
