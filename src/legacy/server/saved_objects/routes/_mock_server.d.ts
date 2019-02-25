@@ -19,4 +19,4 @@
 
 import Hapi from 'hapi';
 
-export function MockServer(): Hapi.Server;
+export function MockServer(config: { [key: string]: any }): Hapi.Server;
