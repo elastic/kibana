@@ -31,9 +31,11 @@
   </div>
 
   <visualize-listing-table
-    fetch-items="listingController.fetchItems"
-    delete-selected-items="listingController.deleteSelectedItems"
-    on-create-vis="listingController.createNewVis"
+    find-items="listingController.fetchItems"
+    delete-items="listingController.deleteSelectedItems"
+    create-item="listingController.createNewVis"
+    get-view-url="listingController.getViewUrl"
+    edit-item="listingController.editItem"
   ></visualize-listing-table>
 
   <new-vis-modal
