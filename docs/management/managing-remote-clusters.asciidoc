@@ -2,9 +2,9 @@
 == Working with remote clusters
 
 {kib} *Management* provides user interfaces for working with data from remote 
-clusters and managing the cross cluster replication process. Replicating indices from a 
-leader remote cluster to a follower index in a local cluster can be used to provide 
-remote backups for disaster recovery or for geo-proximite copies of data.
+clusters and managing the cross cluster replication process. You can replicate indices from a 
+leader remote cluster to a follower index in a local cluster. The local follower indices
+can be used to provide remote backups for disaster recovery or for geo-proximite copies of data.
 
 Before using these features, you should be familiar with the following concepts:
 
@@ -16,14 +16,14 @@ Before using these features, you should be familiar with the following concepts:
 [[managing-remote-clusters]]
 == Managing remote clusters 
 
-*Remote Clusters* helps you manage remote clusters for use with 
+*Remote clusters* helps you manage remote clusters for use with 
 cross cluster search and cross cluster replication. You can add and remove remote 
 clusters and check their connectivity. 
 
 Before you use this feature, you should be familiar with the concept of 
 {ref}/modules-remote-clusters.html[remote clusters].  
  
-Go to *Management > Elasticsearch > Remote Clusters* to get started. 
+To set up a remote cluster, go to *Management > Elasticsearch > Remote Clusters*. 
 
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
@@ -42,20 +42,20 @@ local followers on a case-by-case basis, you can create and manage followers ind
 from *Follower indices*. If you want to automatically detect and follow new indices 
 when they are created on a remote cluster, you can do so from *Auto-follow patterns*. 
 
-Creating an auto-follow pattern can be useful when you have time-series data, like a logs index, on the 
-remote cluster that gets created or rolled over on a daily basis. Once you have configured an 
+Creating an auto-follow pattern is useful when you have time-series data, like a logs index, on the 
+remote cluster that is created or rolled over on a daily basis. Once you have configured an 
 auto-follow pattern, any time a new index with a name that matches the pattern is 
 created in the remote cluster, a follower index is automatically configured in the local cluster.
 
 From the same view, you can also see a list of your saved auto-follow patterns for 
-a given remote cluster, and monitor to see if the replication is active.
+a given remote cluster, and monitor whether the replication is active.
 
 Before you use these features, you should be familiar with the following concepts:
 
 * {xpack-ref}/ccr-requirements.html[Requirements for leader indices] 
 * {xpack-ref}/ccr-auto-follow.html[Automatically following indices]
 
-Go to *Management > Elasticsearch > Cross Cluster Replication* to get started. 
+To get started, go to *Management > Elasticsearch > Cross Cluster Replication*. 
 
 [role="screenshot"]
 image::images/auto_follow_pattern.png[][UI for adding an auto-follow pattern]
