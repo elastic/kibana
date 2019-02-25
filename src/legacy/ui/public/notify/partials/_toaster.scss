@@ -25,9 +25,6 @@
     display: flex;
     align-items: center;
     padding: $euiSizeXS $euiSize;
-    margin: 0;
-    border-radius: 0;
-    border: none;
 
     > * {
       flex: 0 0 auto;
@@ -64,23 +61,16 @@
   }
 }
 
-.kbnToast--info {
-  border-color: $euiColorPrimary;
-  background-color: euiCallOutColor('primary', 'background');
-  color: euiCallOutColor('primary', 'foreground');
-}
-.kbnToast--warning {
-  border-color: $euiColorWarning;
-  background-color: euiCallOutColor('warning', 'background');
-  color: euiCallOutColor('warning', 'foreground');
-}
-.kbnToast--danger {
-  border-color: $euiColorDanger;
-  background-color: euiCallOutColor('danger', 'background');
-  color: euiCallOutColor('danger', 'foreground');
-}
-.kbnToast-success {
-  border-color: $euiColorSuccess;
-  background-color: euiCallOutColor('success', 'background');
-  color: euiCallOutColor('success', 'foreground');
+$kbnToastTypes: (
+  info: 'primary',
+  warning: 'warning',
+  danger: 'danger',
+  success: 'success',
+);
+
+@each $name, $color in $kbnToastTypes {
+  .kbnToast--#{$name} {
+    background-color: euiCallOutColor($color, 'background');
+    color: euiCallOutColor($color, 'foreground');
+  }
 }
