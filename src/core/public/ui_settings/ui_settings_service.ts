@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { BasePathStartContract } from '../base_path';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { LoadingCountStartContract } from '../loading_count';
-import { NotificationsStartContract } from '../notifications';
+import { BasePathStart } from '../base_path';
+import { InjectedMetadataStart } from '../injected_metadata';
+import { LoadingCountStart } from '../loading_count';
+import { NotificationsStart } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
@@ -28,10 +28,10 @@ import { UiSettingsClient } from './ui_settings_client';
 import { i18n } from '@kbn/i18n';
 
 interface Deps {
-  notifications: NotificationsStartContract;
-  loadingCount: LoadingCountStartContract;
-  injectedMetadata: InjectedMetadataStartContract;
-  basePath: BasePathStartContract;
+  notifications: NotificationsStart;
+  loadingCount: LoadingCountStart;
+  injectedMetadata: InjectedMetadataStart;
+  basePath: BasePathStart;
 }
 
 export class UiSettingsService {
@@ -73,4 +73,4 @@ export class UiSettingsService {
   }
 }
 
-export type UiSettingsStartContract = UiSettingsClient;
+export type UiSettingsStart = UiSettingsClient;

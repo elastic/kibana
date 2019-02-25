@@ -18,24 +18,24 @@
  */
 
 import angular from 'angular';
-import { BasePathStartContract } from '../base_path';
-import { ChromeStartContract } from '../chrome';
-import { FatalErrorsStartContract } from '../fatal_errors';
-import { I18nStartContract } from '../i18n';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { LoadingCountStartContract } from '../loading_count';
-import { NotificationsStartContract } from '../notifications';
+import { BasePathStart } from '../base_path';
+import { ChromeStart } from '../chrome';
+import { FatalErrorsStart } from '../fatal_errors';
+import { I18nStart } from '../i18n';
+import { InjectedMetadataStart } from '../injected_metadata';
+import { LoadingCountStart } from '../loading_count';
+import { NotificationsStart } from '../notifications';
 import { UiSettingsClient } from '../ui_settings';
 
 interface Deps {
-  i18n: I18nStartContract;
-  injectedMetadata: InjectedMetadataStartContract;
-  fatalErrors: FatalErrorsStartContract;
-  notifications: NotificationsStartContract;
-  loadingCount: LoadingCountStartContract;
-  basePath: BasePathStartContract;
+  i18n: I18nStart;
+  injectedMetadata: InjectedMetadataStart;
+  fatalErrors: FatalErrorsStart;
+  notifications: NotificationsStart;
+  loadingCount: LoadingCountStart;
+  basePath: BasePathStart;
   uiSettings: UiSettingsClient;
-  chrome: ChromeStartContract;
+  chrome: ChromeStart;
 }
 
 export interface LegacyPlatformParams {

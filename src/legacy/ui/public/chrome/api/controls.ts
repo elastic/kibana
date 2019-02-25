@@ -18,11 +18,11 @@
  */
 
 import * as Rx from 'rxjs';
-import { ChromeStartContract } from '../../../../../core/public/chrome';
+import { ChromeStart } from '../../../../../core/public/chrome';
 
-let newPlatformChrome: ChromeStartContract;
+let newPlatformChrome: ChromeStart;
 
-export function __newPlatformInit__(instance: ChromeStartContract) {
+export function __newPlatformInit__(instance: ChromeStart) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/controls is already initialized');
   }

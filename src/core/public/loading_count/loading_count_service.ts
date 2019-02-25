@@ -28,10 +28,10 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { FatalErrorsStartContract } from '../fatal_errors';
+import { FatalErrorsStart } from '../fatal_errors';
 
 interface Deps {
-  fatalErrors: FatalErrorsStartContract;
+  fatalErrors: FatalErrorsStart;
 }
 
 export class LoadingCountService {
@@ -83,4 +83,4 @@ export class LoadingCountService {
   }
 }
 
-export type LoadingCountStartContract = ReturnType<LoadingCountService['start']>;
+export type LoadingCountStart = ReturnType<LoadingCountService['start']>;
