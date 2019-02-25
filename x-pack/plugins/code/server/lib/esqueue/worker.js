@@ -20,7 +20,7 @@ function formatJobObject(job) {
     type: job._type,
     id: job._id,
     // Expose the payload of the job even when the job failed/timeout
-    payload: job._source.payload.payload,
+    ...job._source.payload,
   };
 }
 

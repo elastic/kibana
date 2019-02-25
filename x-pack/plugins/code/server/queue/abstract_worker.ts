@@ -25,10 +25,12 @@ export abstract class AbstractWorker implements Worker {
 
   // Assemble jobs, for now most of the job object construction should be the same.
   public createJob(payload: any, options: any): Job {
+    const timestamp = moment().valueOf();
     if (options.timeout !== undefined || options.timeout !== null) {
       return {
         payload,
         options,
+        timestamp,
       };
     } else {
       return {
@@ -37,6 +39,7 @@ export abstract class AbstractWorker implements Worker {
           ...options,
           timeout: this.getTimeoutMs(payload),
         },
+        timestamp,
       };
     }
   }
@@ -101,17 +104,29 @@ export abstract class AbstractWorker implements Worker {
   }
 
   public async onJobCompleted(job: Job, res: WorkerResult) {
-    this.log.info(`${this.id} job completed with result ${JSON.stringify(res)}`);
+    this.log.info(
+      `${this.id} job completed with result ${JSON.stringify(
+        res
+      )} in ${this.workerTaskDurationSeconds(job)} seconds.`
+    );
     return await this.updateProgress(res.uri, WorkerReservedProgress.COMPLETED);
   }
 
   public async onJobExecutionError(res: any) {
-    this.log.error(`${this.id} job execution error ${JSON.stringify(res)}.`);
+    this.log.error(
+      `${this.id} job execution error ${JSON.stringify(res)} in ${this.workerTaskDurationSeconds(
+        res.job
+      )} seconds.`
+    );
     return await this.updateProgress(res.job.payload.uri, WorkerReservedProgress.ERROR);
   }
 
   public async onJobTimeOut(res: any) {
-    this.log.error(`${this.id} job timed out ${JSON.stringify(res)}`);
+    this.log.error(
+      `${this.id} job timed out ${JSON.stringify(res)} in ${this.workerTaskDurationSeconds(
+        res.job
+      )} seconds.`
+    );
     return await this.updateProgress(res.job.payload.uri, WorkerReservedProgress.TIMEOUT);
   }
 
@@ -125,5 +140,10 @@ export abstract class AbstractWorker implements Worker {
   protected getTimeoutMs(payload: any) {
     // Set to 1 hour by default. Override this function for sub classes if necessary.
     return moment.duration(1, 'hour').asMilliseconds();
+  }
+
+  private workerTaskDurationSeconds(job: Job) {
+    const diff = moment().diff(moment(job.timestamp));
+    return moment.duration(diff).asSeconds();
   }
 }

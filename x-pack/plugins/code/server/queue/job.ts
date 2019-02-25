@@ -9,5 +9,6 @@ import { CancellationToken } from '../lib/esqueue';
 export interface Job {
   payload: any;
   options: any;
+  timestamp: number;
   cancellationToken?: CancellationToken;
 }

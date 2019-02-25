@@ -68,6 +68,7 @@ test('Execute index job.', async () => {
     },
     options: {},
     cancellationToken: cToken,
+    timestamp: 0,
   });
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
@@ -119,6 +120,7 @@ test('Execute index job and then cancel.', async () => {
     },
     options: {},
     cancellationToken: cToken,
+    timestamp: 0,
   });
 
   // Cancel the index job.
@@ -153,6 +155,7 @@ test('On index job enqueued.', async () => {
       uri: 'github.com/elastic/kibana',
     },
     options: {},
+    timestamp: 0,
   });
 
   expect(indexSpy.calledOnce).toBeTruthy();
@@ -180,6 +183,7 @@ test('On index job completed.', async () => {
         uri: 'github.com/elastic/kibana',
       },
       options: {},
+      timestamp: 0,
     },
     {
       uri: 'github.com/elastic/kibana',
