@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './register_management_section';
-import './testbed_route';
+export default function ({ loadTestFile }) {
+  describe('Maps endpoints', () => {
+    loadTestFile(require.resolve('./migrations'));
+  });
+}

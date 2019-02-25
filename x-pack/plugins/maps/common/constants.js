@@ -7,6 +7,8 @@
 export const GIS_API_PATH = 'api/maps';
 
 export const EMS_FILE = 'EMS_FILE';
+export const ES_GEO_GRID = 'ES_GEO_GRID';
+export const ES_SEARCH = 'ES_SEARCH';
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 
