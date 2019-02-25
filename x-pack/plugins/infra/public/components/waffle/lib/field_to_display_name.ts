@@ -24,19 +24,19 @@ export const fieldToName = (field: string, intl: InjectedIntl) => {
       id: 'xpack.infra.groupByDisplayNames.hostName',
       defaultMessage: 'Host',
     }),
-    'cloud.availability_zone': intl.formatMessage({
+    'meta.cloud.availability_zone': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.availabilityZone',
       defaultMessage: 'Availability Zone',
     }),
-    'cloud.machine.type': intl.formatMessage({
+    'meta.cloud.machine_type': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.machineType',
       defaultMessage: 'Machine Type',
     }),
-    'cloud.project.id': intl.formatMessage({
+    'meta.cloud.project_id': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.projectID',
       defaultMessage: 'Project ID',
     }),
-    'cloud.provider': intl.formatMessage({
+    'meta.cloud.provider': intl.formatMessage({
       id: 'xpack.infra.groupByDisplayNames.provider',
       defaultMessage: 'Cloud Provider',
     }),
