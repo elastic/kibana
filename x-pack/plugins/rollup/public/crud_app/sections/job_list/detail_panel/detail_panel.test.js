@@ -116,48 +116,48 @@ describe('<DetailPanel />', () => {
       const panelType = JOB_DETAILS_TAB_SUMMARY;
       const { findTestSubject } = initTestBed({ panelType });
 
-      const tabContentSections = ['Logistics', 'DateHistogram', 'Stats']
-        .map((section) => findTestSubject(`rollupJobDetailSummary${section}Section`))
-        .filter(s => !!s.length)
-        .map(reactWrapper => ({
-          title: reactWrapper.find('EuiTitle').text(),
-          reactWrapper,
-        }));
-
       it('should have a "Logistics", "Date histogram" and "Stats" section', () => {
-        const expectedTitles = ['Logistics', 'Date histogram', 'Stats'];
-        expect(tabContentSections.map(section => section.title)).toEqual(expectedTitles);
+        const expectedSections = ['Logistics', 'DateHistogram', 'Stats'];
+        const sectionsFound = expectedSections.reduce((sectionsFound, section) => {
+          if (findTestSubject(`rollupJobDetailSummary${section}Section`).length) {
+            sectionsFound.push(section);
+          }
+          return sectionsFound;
+        }, []);
+
+        expect(sectionsFound).toEqual(expectedSections);
       });
 
       describe('Logistics section', () => {
-        const LOGISTICS_SUBSECTIONS = ['Index pattern', 'Rollup index', 'Cron ', 'Delay'];
-
-        const logisticsSubSections = findTestSubject('rollupJobDetailSummaryLogisticItem')
-          .map(item => ({
-            title: item.childAt(0).text(),
-            description: item.childAt(1).text(),
-          }));
+        const LOGISTICS_SUBSECTIONS = ['IndexPattern', 'RollupIndex', 'Cron', 'Delay'];
 
         it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
-          const logisticsSubsectionsTitles = logisticsSubSections.map(subSection => subSection.title);
+          const logisticsSubsectionsTitles = LOGISTICS_SUBSECTIONS.reduce((subSections, subSection) => {
+            if (findTestSubject(`rollupJobDetailLogistics${subSection}Title`)) {
+              subSections.push(subSection);
+            }
+            return subSections;
+          }, []);
           expect(logisticsSubsectionsTitles).toEqual(LOGISTICS_SUBSECTIONS);
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          LOGISTICS_SUBSECTIONS.forEach((section) => {
-            const { description } = logisticsSubSections.find(({ title }) => title === section);
+          LOGISTICS_SUBSECTIONS.forEach((subSection) => {
+            const wrapper = findTestSubject(`rollupJobDetailLogistics${subSection}Description`);
+            expect(wrapper.length).toBe(1);
+            const description = wrapper.text();
 
-            switch(section) {
-              case 'Index pattern':
+            switch(subSection) {
+              case 'IndexPattern':
                 expect(description).toEqual(defaultJob.indexPattern);
                 break;
-              case 'Cron ':
+              case 'Cron':
                 expect(description).toEqual(defaultJob.rollupCron);
                 break;
               case 'Delay':
                 expect(description).toEqual(defaultJob.rollupDelay);
                 break;
-              case 'Rollup index':
+              case 'RollupIndex':
                 expect(description).toEqual(defaultJob.rollupIndex);
                 break;
               default:
@@ -169,27 +169,29 @@ describe('<DetailPanel />', () => {
       });
 
       describe('Date histogram section', () => {
-        const DATE_HISTOGRAMS_SUBSECTIONS = ['Time field', 'Timezone', 'Interval '];
-
-        const dateHistogramSubSections = findTestSubject('rollupJobDetailSummaryDateHistogramItem')
-          .map(item => ({
-            title: item.childAt(0).text(),
-            description: item.childAt(1).text(),
-          }));
+        const DATE_HISTOGRAMS_SUBSECTIONS = ['TimeField', 'Timezone', 'Interval'];
 
         it('should have "Time field", "Timezone", "Interval" subsections', () => {
-          expect(dateHistogramSubSections.map(i => i.title)).toEqual(DATE_HISTOGRAMS_SUBSECTIONS);
+          const dateHistogramSubsections = DATE_HISTOGRAMS_SUBSECTIONS.reduce((subSections, subSection) => {
+            if (findTestSubject(`rollupJobDetailDateHistogram${subSection}Title`)) {
+              subSections.push(subSection);
+            }
+            return subSections;
+          }, []);
+          expect(dateHistogramSubsections).toEqual(DATE_HISTOGRAMS_SUBSECTIONS);
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          DATE_HISTOGRAMS_SUBSECTIONS.forEach((section) => {
-            const { description } = dateHistogramSubSections.find(({ title }) => title === section);
+          DATE_HISTOGRAMS_SUBSECTIONS.forEach((subSection) => {
+            const wrapper = findTestSubject(`rollupJobDetailDateHistogram${subSection}Description`);
+            expect(wrapper.length).toBe(1);
+            const description = wrapper.text();
 
-            switch(section) {
-              case 'Time field':
+            switch(subSection) {
+              case 'TimeField':
                 expect(description).toEqual(defaultJob.dateHistogramField);
                 break;
-              case 'Interval ':
+              case 'Interval':
                 expect(description).toEqual(defaultJob.dateHistogramInterval);
                 break;
               case 'Timezone':
@@ -204,33 +206,35 @@ describe('<DetailPanel />', () => {
       });
 
       describe('Stats section', () => {
-        const STATS_SUBSECTIONS = ['Documents processed', 'Pages processed', 'Rollups indexed', 'Trigger count'];
-
-        const statsSubSections = findTestSubject('rollupJobDetailSummaryStatsItem')
-          .map(item => ({
-            title: item.childAt(0).text(),
-            description: item.childAt(1).text(),
-          }));
+        const STATS_SUBSECTIONS = ['DocumentsProcessed', 'PagesProcessed', 'RollupsIndexed', 'TriggerCount'];
 
         it('should have "Documents processed", "Pages processed", "Rollups indexed" and "Trigger count" subsections', () => {
-          expect(statsSubSections.map(i => i.title)).toEqual(STATS_SUBSECTIONS);
+          const statsSubSections = STATS_SUBSECTIONS.reduce((subSections, subSection) => {
+            if (findTestSubject(`rollupJobDetailStats${subSection}Title`)) {
+              subSections.push(subSection);
+            }
+            return subSections;
+          }, []);
+          expect(statsSubSections).toEqual(STATS_SUBSECTIONS);
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          STATS_SUBSECTIONS.forEach((section) => {
-            const { description } = statsSubSections.find(({ title }) => title === section);
+          STATS_SUBSECTIONS.forEach((subSection) => {
+            const wrapper = findTestSubject(`rollupJobDetailStats${subSection}Description`);
+            expect(wrapper.length).toBe(1);
+            const description = wrapper.text();
 
-            switch(section) {
-              case 'Documents processed':
+            switch(subSection) {
+              case 'DocumentsProcessed':
                 expect(description).toEqual(defaultJob.documentsProcessed.toString());
                 break;
-              case 'Pages processed':
+              case 'PagesProcessed':
                 expect(description).toEqual(defaultJob.pagesProcessed.toString());
                 break;
-              case 'Rollups indexed':
+              case 'RollupsIndexed':
                 expect(description).toEqual(defaultJob.rollupsIndexed.toString());
                 break;
-              case 'Trigger count':
+              case 'TriggerCount':
                 expect(description).toEqual(defaultJob.triggerCount.toString());
                 break;
               default:
@@ -241,8 +245,10 @@ describe('<DetailPanel />', () => {
         });
 
         it('should display the job status', () => {
-          const statsSection = tabContentSections.find(section => section.title === 'Stats');
-          expect(statsSection.reactWrapper.find('EuiHealth').text()).toEqual('Stopped');
+          const statsSection = findTestSubject('rollupJobDetailSummaryStatsSection');
+          expect(statsSection.length).toBe(1);
+          expect(defaultJob.status).toEqual('stopped'); // make sure status is Stopped
+          expect(statsSection.find('EuiHealth').text()).toEqual('Stopped');
         });
       });
     });
