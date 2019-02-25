@@ -69,13 +69,13 @@ export class CodeQueryBar extends Component<Props, State> {
       return null;
     }
 
+    const nextState: any = {
+      currentProps: nextProps,
+    };
     if (nextProps.query !== prevState.query) {
-      return {
-        query: nextProps.query,
-        currentProps: nextProps,
-      };
+      nextState.query = nextProps.query;
     }
-    return null;
+    return nextState;
   }
 
   /*
