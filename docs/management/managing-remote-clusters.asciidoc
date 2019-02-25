@@ -23,11 +23,11 @@ clusters and check their connectivity.
 Before you use this feature, you should be familiar with the concept of 
 {ref}/modules-remote-clusters.html[remote clusters].  
  
-To get started, go to *Management > Elasticsearch > Remote Clusters*. You can manage
-your remote clusters from this list. 
+Go to *Management > Elasticsearch > Remote clusters* to create or manage your remotes.
 
 To set up a new remote, click *Add a remote cluster*. Give the cluster a unique name 
-and define the seed nodes for cluster discovery.
+and define the seed nodes for cluster discovery. You can edit or remove your remote clusters 
+from the *Remote clusters* list view.
 
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
