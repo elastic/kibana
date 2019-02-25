@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { builtinRules } from '.';
 import { compileFormattingRules } from '../message';
+import { filebeatNginxRules } from './filebeat_nginx';
 
 const { format } = compileFormattingRules(filebeatNginxRules);
 describe('Filebeat Rules', () => {

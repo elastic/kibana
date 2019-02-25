@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { builtinRules } from '.';
 import { compileFormattingRules } from '../message';
+import { filebeatApache2Rules } from './filebeat_apache2';
 
 const { format } = compileFormattingRules(filebeatApache2Rules);
 describe('Filebeat Rules', () => {
