@@ -10,9 +10,8 @@ import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
-
 import {
-  EuiButtonIcon,
+  EuiIcon,
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
@@ -132,13 +131,7 @@ export class LayerPanel extends React.Component {
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label="Fit to bounds"
-                iconType={selectedLayer.getLayerTypeIconName()}
-                onClick={this.props.fitToBounds}
-              >
-                Fit
-              </EuiButtonIcon>
+              <EuiIcon type={selectedLayer.getLayerTypeIconName()} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
