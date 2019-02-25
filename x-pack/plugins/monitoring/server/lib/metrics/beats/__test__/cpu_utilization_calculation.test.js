@@ -49,7 +49,7 @@ describe('Beats CPU Utilization Metric', () => {
     expect(myUtilizationMetric.calculation(bucket)).toBe(null);
   });
 
-  it('should return 0 for 0 deriv normalized_value', () => {
+  it('should return 0 for 0 deriv value', () => {
     const myUtilizationMetric = new BeatsCpuUtilizationMetric({
       field: 'beats_cpu_utilization',
       label: 'stats.cpu.value',
@@ -59,12 +59,12 @@ describe('Beats CPU Utilization Metric', () => {
     });
 
     const bucket = {
-      metric_deriv: { normalized_value: -33 }
+      metric_deriv: { value: -33 }
     };
     expect(myUtilizationMetric.calculation(bucket)).toBe(null);
   });
 
-  it('should return gt 0 for gt 0 deriv normalized_value', () => {
+  it('should return gt 0 for gt 0 deriv value', () => {
     const myUtilizationMetric = new BeatsCpuUtilizationMetric({
       field: 'beats_cpu_utilization',
       label: 'stats.cpu.value',
@@ -74,7 +74,7 @@ describe('Beats CPU Utilization Metric', () => {
     });
 
     const bucket = {
-      metric_deriv: { normalized_value: 33 }
+      metric_deriv: { value: 33 }
     };
     expect(myUtilizationMetric.calculation(bucket, null, null, 30)).toBe(0.11);
   });

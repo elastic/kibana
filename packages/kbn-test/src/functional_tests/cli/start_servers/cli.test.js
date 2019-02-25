@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import { Writable } from 'stream';
+
 import { startServersCli } from './cli';
+import { checkMockConsoleLogSnapshot } from '../../test_helpers';
 
 // Note: Stub the startServers function to keep testing only around the cli
 // method and arguments.
@@ -35,7 +38,7 @@ describe('start servers CLI', () => {
     const processMock = {
       exit: exitMock,
       argv: argvMock,
-      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn() },
+      stdout: new Writable(),
       cwd: jest.fn(),
     };
 
@@ -62,7 +65,7 @@ describe('start servers CLI', () => {
       await startServersCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('rejects empty config value if no default passed', async () => {
@@ -71,7 +74,7 @@ describe('start servers CLI', () => {
       await startServersCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts empty config value if default passed', async () => {
@@ -88,7 +91,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts string value for kibana-install-dir', async () => {
@@ -105,7 +108,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts boolean value for updateBaselines', async () => {
@@ -114,7 +117,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts source value for esFrom', async () => {
@@ -123,15 +126,6 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
-    });
-
-    it('rejects non-enum value for esFrom', async () => {
-      global.process.argv.push('--esFrom', 'butter');
-
-      await startServersCli('foo');
-
-      expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
     });
 
     it('accepts debug option', async () => {
@@ -188,7 +182,7 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
   });
 });

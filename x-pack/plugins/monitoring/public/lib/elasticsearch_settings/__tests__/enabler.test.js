@@ -11,6 +11,7 @@ import { forbidden } from 'boom';
 const updateModel = properties => properties;
 const updateModelSpy = sinon.spy(updateModel);
 
+
 describe('Settings Enabler Class for calling API to update Elasticsearch Settings', () => {
   test('should return status from successfully calling API', async () => {
     const get$http = () => ({
@@ -54,7 +55,7 @@ describe('Settings Enabler Class for calling API to update Elasticsearch Setting
     expect(updateModelSpy.lastCall.args[0]).toEqual({
       errors: {
         error: 'Forbidden',
-        message: 'Error: this is not available',
+        message: 'this is not available',
         statusCode: 403
       },
       isCollectionIntervalUpdated: false,

@@ -18,8 +18,10 @@
  */
 
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
-const PKG_VERSION = require('../../package.json').version;
+const { version } = require('../../package.json');
+const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -37,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -55,11 +56,13 @@ module.exports = function (grunt) {
   }
 
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
   ];
 
+  const esFrom = process.env.TEST_ES_FROM || 'source';
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
@@ -68,6 +71,13 @@ module.exports = function (grunt) {
       args: [
         require.resolve('../../scripts/eslint'),
         '--no-cache'
+      ]
+    },
+
+    sasslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/sasslint')
       ]
     },
 
@@ -90,6 +100,25 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs the tslint script to check for Typescript linting errors
+    typeCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/type_check')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    runs the i18n_check script to check i18n engine usage
+    i18nCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/i18n_check'),
+        '--ignore-missing',
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
@@ -104,6 +133,13 @@ module.exports = function (grunt) {
     browserTestServer: createKbnServerTask({
       flags: [
         ...browserTestServerFlags,
+      ]
+    }),
+    browserSCSS: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
+        '--optimize',
+        '--optimize.enabled=false'
       ]
     }),
 
@@ -147,20 +183,34 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
       ],
     },
 
-    panelActionTests: {
+    serverIntegrationTests: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/panel_actions/config.js',
-        '--esFrom', 'source',
+        '--config', 'test/server_integration/http/ssl/config.js',
+        '--config', 'test/server_integration/http/ssl_redirect/config.js',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    },
+
+    pluginFunctionalTestsRelease: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/plugin_functional/config.js',
+        '--esFrom', esFrom,
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -169,26 +219,15 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576',
       ],
     },
 
-    functionalTestsRelease: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
+    ...getFunctionalTestGroupRunConfigs({
+      esFrom,
+      kibanaInstallDir: KIBANA_INSTALL_DIR
+    })
   };
 };

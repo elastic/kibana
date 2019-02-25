@@ -15,7 +15,7 @@ module.exports = (function () {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
-      url: 'http://localhost:9200/' + indexName + '/_xpack/graph/_explore',
+      url: 'http://localhost:9200/' + indexName + '/_graph/explore',
       dataType: 'json',
       contentType: 'application/json;charset=utf-8',
       async: true,
@@ -29,7 +29,7 @@ module.exports = (function () {
     const dataForServer = JSON.stringify(request);
     $.ajax({
       type: 'POST',
-      url: 'http://localhost:9200/' + indexName + '/_search',
+      url: 'http://localhost:9200/' + indexName + '/_search?rest_total_hits_as_int=true',
       dataType: 'json',
       contentType: 'application/json;charset=utf-8', //Not sure why this was necessary - worked without elsewhere
       async: true,
@@ -1236,19 +1236,19 @@ module.exports = (function () {
         filterMap[nodeNum] = nodeQuery;
       });
       const searchReq = {
-        "size": 0,
-        "query": {
-          "bool": {
+        'size': 0,
+        'query': {
+          'bool': {
             // Only match docs that share 2 nodes so can help describe their relationship
             'minimum_should_match': 2,
             'should': shoulds
           }
         },
-        "aggs": {
-          "matrix": {
-            "adjacency_matrix": {
-              "separator": "|",
-              "filters": filterMap
+        'aggs': {
+          'matrix': {
+            'adjacency_matrix': {
+              'separator': '|',
+              'filters': filterMap
             }
           }
         }
@@ -1261,10 +1261,10 @@ module.exports = (function () {
         const buckets = data.aggregations.matrix.buckets;
         const vertices = nodesForLinking.map(function (existingNode) {
           return {
-            "field": existingNode.data.field,
-            "term": existingNode.data.term,
-            "weight": 1,
-            "depth": 0
+            'field': existingNode.data.field,
+            'term': existingNode.data.term,
+            'weight': 1,
+            'depth': 0
           };
         });
 
@@ -1279,7 +1279,7 @@ module.exports = (function () {
         buckets.forEach(function (bucket) {
           // We calibrate line thickness based on % of max weight of
           // all edges (including the edges we may already have in the workspace)
-          const ids = bucket.key.split("|");
+          const ids = bucket.key.split('|');
           if(ids.length === 2) {
             // bucket represents an edge
             if (self.options.exploreControls.useSignificance) {
@@ -1301,7 +1301,7 @@ module.exports = (function () {
           if(bucket.doc_count < parseInt(self.options.exploreControls.minDocCount)) {
             return;
           }
-          const ids = bucket.key.split("|");
+          const ids = bucket.key.split('|');
           if(ids.length == 2) {
             // Bucket represents an edge
             const srcNode = nodesForLinking[ids[0]];
@@ -1314,11 +1314,11 @@ module.exports = (function () {
             } else  {
               connections.push({
                 // source and target values are indexes into the vertices array
-                "source": parseInt(ids[0]),
-                "target": parseInt(ids[1]),
-                "weight": bucket.weight,
-                "width": Math.max(backFilledMinLineSize, ((bucket.weight / maxEdgeWeight) * backFilledMaxLineSize)),
-                "doc_count": bucket.doc_count
+                'source': parseInt(ids[0]),
+                'target': parseInt(ids[1]),
+                'weight': bucket.weight,
+                'width': Math.max(backFilledMinLineSize, ((bucket.weight / maxEdgeWeight) * backFilledMaxLineSize)),
+                'doc_count': bucket.doc_count
               });
             }
           }

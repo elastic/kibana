@@ -12,13 +12,13 @@ import {
 import chrome from 'ui/chrome';
 import rison from 'rison-node';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
-import { getPartitioningFieldNames } from 'plugins/ml/../common/util/job_utils';
-import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
-import { replaceTokensInUrlValue } from 'plugins/ml/util/custom_url_utils';
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
+import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
+import { parseInterval } from '../../../../common/util/parse_interval';
+import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
+import { ml } from '../../../services/ml_api_service';
+import { mlJobService } from '../../../services/job_service';
+import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
@@ -96,11 +96,6 @@ export function getQueryEntityFieldNames(job) {
   return entityFieldNames;
 }
 
-export function isValidCustomUrlLabel(label) {
-  // TODO - check label is unique for the job.
-  return (label !== undefined) && (label.trim().length > 0);
-}
-
 export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
   if (timeRangeSettings.type === TIME_RANGE_TYPE.INTERVAL) {
     const interval = parseInterval(timeRangeSettings.interval);
@@ -110,21 +105,21 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
   return true;
 }
 
-export function isValidCustomUrlSettings(settings) {
-  let isValid = isValidCustomUrlLabel(settings.label);
+export function isValidCustomUrlSettings(settings, savedCustomUrls) {
+  let isValid = isValidLabel(settings.label, savedCustomUrls);
   if (isValid === true) {
     isValid = isValidCustomUrlSettingsTimeRange(settings.timeRange);
   }
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings, job) {
+export function buildCustomUrlFromSettings(settings) {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
     return buildDashboardUrlFromSettings(settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
-    return Promise.resolve(buildDiscoverUrlFromSettings(settings, job));
+    return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
     const urlToAdd = {
       url_name: settings.label,
@@ -224,7 +219,7 @@ function buildDashboardUrlFromSettings(settings) {
 
 }
 
-function buildDiscoverUrlFromSettings(settings, job) {
+function buildDiscoverUrlFromSettings(settings) {
   const { discoverIndexPatternId, queryFieldNames } = settings.kibanaSettings;
 
   // Add time settings to the global state URL parameter with $earliest$ and
@@ -243,10 +238,10 @@ function buildDiscoverUrlFromSettings(settings, job) {
     index: discoverIndexPatternId
   };
 
-  // Use the query from the datafeed only if no job entities are selected.
-  let query = job.datafeed_config.query;
+  // If partitioning field entities have been configured add tokens
+  // to the URL to use in the Discover page search.
 
-  // To put entities in filters section would involve creating parameters of the form
+  // Ideally we would put entities in the filters section, but currently this involves creating parameters of the form
   // filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:b30fd340-efb4-11e7-a600-0f58b1422b87,
   // key:airline,negate:!f,params:(query:AAL,type:phrase),type:phrase,value:AAL),query:(match:(airline:(query:AAL,type:phrase)))))
   // which includes the ID of the index holding the field used in the filter.
@@ -262,14 +257,10 @@ function buildDiscoverUrlFromSettings(settings, job) {
       queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
     });
 
-    query = {
+    appState.query = {
       language: 'lucene',
       query: queryString
     };
-  }
-
-  if (query !== undefined) {
-    appState.query = query;
   }
 
   const _a = rison.encode(appState);
@@ -278,7 +269,8 @@ function buildDiscoverUrlFromSettings(settings, job) {
 
   const urlToAdd = {
     url_name: settings.label,
-    url_value: urlValue
+    url_value: urlValue,
+    time_range: TIME_RANGE_TYPE.AUTO,
   };
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
@@ -323,6 +315,7 @@ export function getTestUrl(job, customUrl) {
   return new Promise((resolve, reject) => {
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       body
     })
       .then((resp) => {

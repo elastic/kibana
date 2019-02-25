@@ -1,0 +1,37 @@
+{
+  "name": "@kbn/interpreter",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "scripts": {
+    "canvas:peg": "pegjs common/lib/grammar.peg",
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --dev",
+    "kbn:watch": "node scripts/build --dev --watch"
+  },
+  "dependencies": {
+    "@kbn/i18n": "1.0.0",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash.clone": "^4.5.0",
+    "uuid": "3.0.1"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "1.0.0",
+    "@kbn/dev-utils": "1.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "6.26.3",
+    "babel-loader": "7.1.5",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "6.20.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "css-loader": "1.0.0",
+    "del": "^3.0.0",
+    "getopts": "^2.2.3",
+    "pegjs": "0.9.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "0.23.1",
+    "supports-color": "^5.5.0",
+    "url-loader": "1.1.2",
+    "webpack": "4.23.1",
+    "webpack-cli": "^3.1.2"
+  }
+}

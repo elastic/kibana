@@ -1,0 +1,89 @@
+[[data-rollups]]
+== Working with rollup indices
+
+The {ref}/xpack-rollup.html[rollup feature in {es}]
+enables you to summarize historical data and store it compactly for future analysis, 
+so you can query, aggregate, and visualize the data using a fraction of the storage. 
+This is a good way to keep costs down when you need to store months or years of 
+historical data for use in visualizations and reports.  
+
+{kib} supports rolled up data in two ways:
+
+* You can create and manage a rollup job in Management
+* You can create a visualization using rolled up data in 
+Visualize and view it in a dashboard
+
+
+
+[[create-and-manage-rollup-job]]
+=== Create and manage rollup jobs
+
+In Management, you'll find a UI for viewing, creating, starting, stopping, and 
+deleting rollup jobs. A rollup job is a periodic task that summarizes data from 
+indices specified by an index pattern and rolls it into a new index. To navigate 
+to the UI, go to *Management*, and under *Elasticsearch*, click *Rollup Jobs*. 
+
+[role="screenshot"]
+image::images/management_rollup_list.png[][List of currently active rollup jobs]
+
+[float]
+[[create-rollup-job]]
+==== Creating a rollup job
+
+{kib} makes it easy for you to create a rollup job by walking you through the 
+process step by step. The first step is to define the job logistics. These include 
+the name of the rollup job, the index or indices to summarize, and the output rollup index.  
+
+The index pattern cannot match the name of the output rollup index. For example,
+if your index pattern is `metricbeat-*`, you cannot name your rollup index
+`metricbeat-rollup`.  Otherwise, the job will attempt to capture the data in the 
+rollup index.
+
+[role="screenshot"]
+image::images/management_create_rollup_job.png[][Wizard that walks you through creation of a rollup job]
+
+You must set a schedule for the rollup job: how often to collect the data, 
+the number of documents to roll up at a time, and the duration of its latency. 
+The latency buffer field is provided to protect against the late arrival of data 
+from Beats or other sources. By delaying the rollup for the specified amount of 
+time from when the job starts, you allow for the inclusion of late-arriving data 
+in the rollup.
+
+In the subsequent phases, you define the Date Histogram aggregation for the job 
+and optionally the Terms and Histogram aggregations.
+
+* The Date Histogram aggregation defines the time intervals for summarizing the data. 
+This value is important because you cannot search the data with a smaller value 
+than this interval. However, you can aggregate buckets in a larger time interval. 
+
+* The Terms histogram enables you to split the time buckets into sub buckets for 
+term field values. 
+
+* The Histogram aggregation enables you to split the time buckets into sub buckets 
+for numeric field values. 
+
+The final step is to specify the fields for calculating metrics. For each selected 
+field, you can collect any or all of the following: value count, average, sum, min, and max.
+
+Before you save the rollup job, {kib} displays a summary of the rollup job for 
+validation.
+
+[float]
+[[manage-rollup-job]]
+==== Managing rollup jobs
+
+Selecting a job on the *Rollup jobs* page shows its details. The Manage menu in 
+the lower right enables you to start, stop, and delete the rollup job.
+You must first stop a rollup job before deleting it.
+
+[role="screenshot"]
+image::images/management_rollup_job_details.png[][Rollup job details]
+
+You can start, stop, and delete an existing rollup job, but edits are not supported. 
+If you want to make any changes, delete the existing job and create a new one with 
+the updated specifications. Be sure to use a different name for the new rollup job; 
+reusing the same name could lead to problems with mismatched job configurations. 
+More about logistical details for the {ref}/rollup-job-config.html[rollup job configuration] 
+can be found in the {es} documentation.
+
+

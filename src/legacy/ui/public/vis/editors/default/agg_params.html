@@ -1,0 +1,36 @@
+<div ng-if="aggIsTooLow" class="form-group">
+  <p class="visEditorAggParam__error"
+    i18n-id="common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage"
+    i18n-default-message="&quot;{schema}&quot; aggs must run before all other buckets!"
+    i18n-values="{ schema: agg.schema.title }"
+  >
+  </p>
+  <input
+    type="number"
+    name="order"
+    ng-model="$index"
+    max="{{aggIsTooLow ? $index - 1 : $index}}"
+    style="display: none;">
+</div>
+
+<div ng-if="agg.error" class="form-group">
+  <p class="visEditorAggParam__error ng-binding">
+    {{agg.error}}
+  </p>
+</div>
+
+<div ng-if="agg.schema.deprecate" class="form-group">
+  <p ng-show="agg.schema.deprecateMessage" class="visEditorAggParam__error">
+    {{ agg.schema.deprecateMessage }}
+  </p>
+  <p
+    ng-show="!agg.schema.deprecateMessage"
+    class="visEditorAggParam__error"
+    i18n-id="common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage"
+    i18n-default-message="&quot;{schema}&quot; has been deprecated."
+    i18n-values="{ schema: agg.schema.title }"
+  >
+  </p>
+</div>
+
+<!-- schema editors get added down here: aggSelect.html, agg_types/controls/*.html -->

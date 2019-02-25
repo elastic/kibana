@@ -24,6 +24,7 @@ async function executeUpgrade(callWithRequest) {
 
   return callWithRequest('indices.putMapping', {
     index: INDEX_NAMES.PIPELINES,
+    include_type_name: true,
     type: TYPE_NAMES.PIPELINES,
     body: {
       properties: {
@@ -42,13 +43,13 @@ export function registerExecuteRoute(server) {
   server.route({
     path: '/api/logstash/upgrade',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         await executeUpgrade(callWithRequest);
-        reply({ is_upgraded: true });
+        return { is_upgraded: true };
       } catch(err) {
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

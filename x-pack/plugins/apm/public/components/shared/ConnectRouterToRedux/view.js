@@ -23,8 +23,10 @@ class ConnectRouterToRedux extends Component {
     this.props.updateLocation(this.props.location);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.props.updateLocation(nextProps.location);
+  componentDidUpdate() {
+    // this component is wrapped in a react-router Route to get access
+    // to the location prop, so no need to check for prop change here
+    this.props.updateLocation(this.props.location);
   }
 
   render() {

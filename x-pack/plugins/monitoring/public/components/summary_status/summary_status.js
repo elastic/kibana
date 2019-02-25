@@ -7,26 +7,45 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { StatusIcon } from '../status_icon';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { StatusIcon } from '../status_icon/index.js';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-const wrapChild = ({ label, value, dataTestSubj }, index) => (
+const wrapChild = ({ label, value, ...props }, index) => (
   <EuiFlexItem
     key={`summary-status-item-${index}`}
     grow={false}
-    className="monitoring-summary-status__eui-content"
-    data-test-subj={dataTestSubj}
+    {...props}
   >
-    {label ? label + ': ' : null}
-    <strong>{value}</strong>
+    <EuiStat
+      title={value}
+      titleSize="s"
+      textAlign="left"
+      description={label ? `${label}` : ''}
+    />
   </EuiFlexItem>
 );
 
 const DefaultIconComponent = ({ status }) => (
   <Fragment>
-    Status: {(
-      <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
-    )}
+    <FormattedMessage
+      id="xpack.monitoring.summaryStatus.statusIconTitle"
+      defaultMessage="Status: {statusIcon}"
+      values={{
+        statusIcon: (
+          <StatusIcon
+            type={status.toUpperCase()}
+            label={i18n.translate('xpack.monitoring.summaryStatus.statusIconLabel', {
+              defaultMessage: 'Status: {status}',
+              values: {
+                status
+              }
+            })}
+          />
+        )
+      }}
+    />
   </Fragment>
 );
 
@@ -36,28 +55,35 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   }
 
   return (
-    <div className="monitoring-summary-status__status-indicator">
-      <IconComponent status={status} isOnline={isOnline} />{' '}
-      {capitalize(status)}
-    </div>
+    <EuiFlexItem
+      key={`summary-status-item-status`}
+      grow={false}
+    >
+      <EuiStat
+        title={(
+          <Fragment>
+            <IconComponent status={status} isOnline={isOnline} />
+              &nbsp;
+            {capitalize(status)}
+          </Fragment>
+        )}
+        titleSize="s"
+        textAlign="left"
+        description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
+          defaultMessage: 'Status',
+        })}
+      />
+    </EuiFlexItem>
   );
 };
 
 export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, ...props }) {
   return (
-    <div className="monitoring-summary-status" role="status">
-      <div className="monitoring-summary-status__content" {...props}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          {metrics.map(wrapChild)}
-
-          <EuiFlexItem
-            grow={true}
-            className="monitoring-summary-status__eui-content"
-          >
-            <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+    <div {...props}>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
+        {metrics.map(wrapChild)}
+      </EuiFlexGroup>
     </div>
   );
 }

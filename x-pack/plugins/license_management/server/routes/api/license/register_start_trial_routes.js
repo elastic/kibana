@@ -5,24 +5,12 @@
  */
 
 import { canStartTrial, startTrial } from '../../../lib/start_trial';
-import { wrapEsError } from '../../../lib/wrap_es_error';
 
-export function registerStartTrialRoutes(server) {
-  const xpackInfo = server.plugins.xpack_main.info;
-  server.route({
-    path: '/api/license/start_trial',
-    method: 'GET',
-    handler: (request, reply) => {
-      return canStartTrial(request)
-        .then(reply, e => reply(wrapEsError(e)));
-    }
+export function registerStartTrialRoutes(router, xpackInfo) {
+  router.get('/start_trial', (request) => {
+    return canStartTrial(request);
   });
-  server.route({
-    path: '/api/license/start_trial',
-    method: 'POST',
-    handler: (request, reply) => {
-      return startTrial(request, xpackInfo)
-        .then(reply, e => reply(wrapEsError(e)));
-    }
+  router.post('/start_trial', (request) => {
+    return startTrial(request, xpackInfo);
   });
 }

@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './save_status_modal_controller';

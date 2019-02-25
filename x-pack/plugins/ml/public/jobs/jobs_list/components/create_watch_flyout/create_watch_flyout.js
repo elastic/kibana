@@ -26,11 +26,16 @@ import { toastNotifications } from 'ui/notify';
 import { loadFullJob } from '../utils';
 import { mlCreateWatchService } from '../../../../jobs/new_job/simple/components/watcher/create_watch_service';
 import { CreateWatch } from '../../../../jobs/new_job/simple/components/watcher/create_watch_view';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 
-function getSuccessToast(id, url) {
+function getSuccessToast(id, url, intl) {
   return {
-    title: `Watch ${id} created successfully`,
+    title: intl.formatMessage({
+      id: 'xpack.ml.jobsList.createWatchFlyout.watchCreatedSuccessfullyNotificationMessage',
+      defaultMessage: 'Watch {id} created successfully' },
+    { id }
+    ),
     text: (
       <React.Fragment>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -41,7 +46,10 @@ function getSuccessToast(id, url) {
               target="_blank"
               iconType="link"
             >
-              Edit watch
+              {intl.formatMessage({
+                id: 'xpack.ml.jobsList.createWatchFlyout.editWatchButtonLabel',
+                defaultMessage: 'Edit watch' }
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -50,7 +58,7 @@ function getSuccessToast(id, url) {
   };
 }
 
-export class CreateWatchFlyout extends Component {
+class CreateWatchFlyoutUI extends Component {
   constructor(props) {
     super(props);
 
@@ -95,13 +103,17 @@ export class CreateWatchFlyout extends Component {
   }
 
   save = () => {
+    const { intl } = this.props;
     mlCreateWatchService.createNewWatch(this.state.jobId)
     	.then((resp) => {
-        toastNotifications.addSuccess(getSuccessToast(resp.id, resp.url));
+        toastNotifications.addSuccess(getSuccessToast(resp.id, resp.url, intl));
         this.closeFlyout();
       })
       .catch((error) => {
-        toastNotifications.addDanger(`Could not save watch`);
+        toastNotifications.addDanger(intl.formatMessage({
+          id: 'xpack.ml.jobsList.createWatchFlyout.watchNotSavedErrorNotificationMessage',
+          defaultMessage: 'Could not save watch'
+        }));
         console.error(error);
       });
   }
@@ -125,7 +137,11 @@ export class CreateWatchFlyout extends Component {
           <EuiFlyoutHeader>
             <EuiTitle>
               <h2>
-                Create watch for {jobId}
+                <FormattedMessage
+                  id="xpack.ml.jobsList.createWatchFlyout.pageTitle"
+                  defaultMessage="Create watch for {jobId}"
+                  values={{ jobId }}
+                />
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -145,7 +161,10 @@ export class CreateWatchFlyout extends Component {
                   onClick={this.closeFlyout}
                   flush="left"
                 >
-                  Close
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.createWatchFlyout.closeButtonLabel"
+                    defaultMessage="Close"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -153,7 +172,10 @@ export class CreateWatchFlyout extends Component {
                   onClick={this.save}
                   fill
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.createWatchFlyout.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -169,8 +191,9 @@ export class CreateWatchFlyout extends Component {
 
   }
 }
-CreateWatchFlyout.propTypes = {
+CreateWatchFlyoutUI.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
 };
 
+export const CreateWatchFlyout = injectI18n(CreateWatchFlyoutUI);

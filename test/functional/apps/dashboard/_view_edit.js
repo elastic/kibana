@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
 
@@ -62,23 +62,21 @@ export default function ({ getService, getPageObjects }) {
         it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.setTimepickerInDataRange();
 
-          const originalFromTime = await PageObjects.header.getFromTime();
-          const originalToTime = await PageObjects.header.getToTime();
+          const originalTime = await PageObjects.timePicker.getTimeConfig();
 
           await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
 
-          await PageObjects.dashboard.clickEdit();
-          await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+          await PageObjects.dashboard.switchToEditMode();
+          await PageObjects.timePicker.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const newFromTime = await PageObjects.header.getFromTime();
-          const newToTime = await PageObjects.header.getToTime();
+          const newTime = await PageObjects.timePicker.getTimeConfig();
 
-          expect(newFromTime).to.equal(originalFromTime);
-          expect(newToTime).to.equal(originalToTime);
+          expect(newTime.start).to.equal(originalTime.start);
+          expect(newTime.end).to.equal(originalTime.end);
         });
 
         it('when the query is edited and applied', async function () {
@@ -99,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
           // This may seem like a pointless line but there was a bug that only arose when the dashboard
           // was loaded initially
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
 
           let hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(true);
@@ -125,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardAddPanel.clickAddNewEmbeddableLink();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await PageObjects.visualize.saveVisualization('new viz panel');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -153,12 +151,10 @@ export default function ({ getService, getPageObjects }) {
       describe('and preserves edits on cancel', function () {
         it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-          const newFromTime = '2015-09-19 06:31:44.000';
-          const newToTime = '2015-09-19 06:31:44.000';
-          await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
           await PageObjects.dashboard.saveDashboard(dashboardName, true);
-          await PageObjects.dashboard.clickEdit();
-          await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
+          await PageObjects.dashboard.switchToEditMode();
+          await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-19 06:31:44.000');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           await PageObjects.common.clickCancelOnModal();
@@ -166,11 +162,10 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-          const fromTime = await PageObjects.header.getFromTime();
-          const toTime = await PageObjects.header.getToTime();
+          const time = await PageObjects.timePicker.getTimeConfig();
 
-          expect(fromTime).to.equal(newFromTime);
-          expect(toTime).to.equal(newToTime);
+          expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
+          expect(time.end).to.equal('Sep 19, 2015 @ 06:31:44.000');
         });
       });
     });
@@ -180,11 +175,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.setTimepickerInDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
-        await PageObjects.dashboard.clickEdit();
-        await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
-
-        const newFromTime = await PageObjects.header.getFromTime();
-        const newToTime = await PageObjects.header.getToTime();
+        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.timePicker.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+        const newTime = await PageObjects.timePicker.getTimeConfig();
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -193,11 +186,10 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-        const fromTime = await PageObjects.header.getFromTime();
-        const toTime = await PageObjects.header.getToTime();
+        const time = await PageObjects.timePicker.getTimeConfig();
 
-        expect(fromTime).to.equal(newFromTime);
-        expect(toTime).to.equal(newToTime);
+        expect(time.start).to.equal(newTime.start);
+        expect(time.end).to.equal(newTime.end);
       });
     });
 
@@ -205,8 +197,8 @@ export default function ({ getService, getPageObjects }) {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        await PageObjects.dashboard.clickEdit();
-        await PageObjects.header.setAbsoluteRange('2014-10-19 06:31:44.000', '2014-12-19 06:31:44.000');
+        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.timePicker.setAbsoluteRange('2014-10-19 06:31:44.000', '2014-12-19 06:31:44.000');
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         await PageObjects.common.expectConfirmModalOpenState(false);

@@ -8,6 +8,7 @@ import React from 'react';
 import { find } from 'lodash';
 import { MonitoringViewBaseController } from '../../';
 import { ElasticsearchOverview } from 'plugins/monitoring/components';
+import { I18nContext } from 'ui/i18n';
 
 export class ElasticsearchOverviewController extends MonitoringViewBaseController {
   constructor($injector, $scope) {
@@ -31,6 +32,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
       $injector
     });
 
+    this.isCcrEnabled = $scope.cluster.isCcrEnabled;
     this.showShardActivityHistory = false;
     this.toggleShardActivityHistory = () => {
       this.showShardActivityHistory = !this.showShardActivityHistory;
@@ -70,14 +72,16 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
     const { clusterStatus, metrics, shardActivity } = data;
     const shardActivityData = shardActivity && this.filterShardActivityData(shardActivity); // no filter on data = null
     const component = (
-      <ElasticsearchOverview
-        clusterStatus={clusterStatus}
-        metrics={metrics}
-        shardActivity={shardActivityData}
-        onBrush={this.onBrush}
-        showShardActivityHistory={this.showShardActivityHistory}
-        toggleShardActivityHistory={this.toggleShardActivityHistory}
-      />
+      <I18nContext>
+        <ElasticsearchOverview
+          clusterStatus={clusterStatus}
+          metrics={metrics}
+          shardActivity={shardActivityData}
+          onBrush={this.onBrush}
+          showShardActivityHistory={this.showShardActivityHistory}
+          toggleShardActivityHistory={this.toggleShardActivityHistory}
+        />
+      </I18nContext>
     );
 
     super.renderReact(component);

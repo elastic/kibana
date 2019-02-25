@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
 import testSubjSelector from '@kbn/test-subj-selector';
 import {
   filter as filterAsync,
@@ -27,29 +26,39 @@ import {
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
+
+  const FIND_TIME = config.get('timeouts.find');
+  const TRY_TIME = config.get('timeouts.try');
+  const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   class TestSubjects {
-    async exists(selector, timeout = 1000) {
+    async exists(selector, options = {}) {
+      const {
+        timeout = WAIT_FOR_EXISTS_TIME,
+        allowHidden = false,
+      } = options;
+
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      return await (
+        allowHidden
+          ? find.existsByCssSelector(testSubjSelector(selector), timeout)
+          : find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout)
+      );
     }
 
-    async existOrFail(selector, timeout = 1000) {
-      log.debug(`TestSubjects.existOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element exists, or else fail the test consuming this.
-      expect(doesExist).to.be(true);
+    async existOrFail(selector, existsOptions) {
+      if (!await this.exists(selector, { timeout: TRY_TIME, ...existsOptions })) {
+        throw new Error(`expected testSubject(${selector}) to exist`);
+      }
     }
 
-    async missingOrFail(selector, timeout = 1000) {
-      log.debug(`TestSubjects.missingOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element is missing, or else fail the test consuming this.
-      expect(doesExist).to.be(false);
+    async missingOrFail(selector, existsOptions) {
+      if (await this.exists(selector, existsOptions)) {
+        throw new Error(`expected testSubject(${selector}) to not exist`);
+      }
     }
 
 
@@ -61,24 +70,24 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async click(selector, timeout = defaultFindTimeout) {
+    async clickWhenNotDisabled(selector, { timeout = FIND_TIME } = {}) {
       log.debug(`TestSubjects.click(${selector})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
-      });
+      await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
     }
 
-    async doubleClick(selector, timeout = defaultFindTimeout) {
+    async click(selector, timeout = FIND_TIME) {
+      log.debug(`TestSubjects.click(${selector})`);
+      await find.clickByCssSelector(testSubjSelector(selector), timeout);
+    }
+
+    async doubleClick(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await remote.doubleClick();
+        await browser.moveMouseTo(element);
+        await browser.doubleClick();
       });
     }
-
 
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
@@ -92,7 +101,7 @@ export function TestSubjectsProvider({ getService }) {
       return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
-    async find(selector, timeout = 1000) {
+    async find(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.find(${selector})`);
       return await find.byCssSelector(testSubjSelector(selector), timeout);
     }
@@ -135,7 +144,7 @@ export function TestSubjectsProvider({ getService }) {
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
-        const input = await remote.getActiveElement();
+        const input = await find.activeElement();
         await input.clearValue();
         await input.type(text);
       });
@@ -145,6 +154,13 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.isEnabled();
+      });
+    }
+
+    async isDisplayed(selector) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.isDisplayed();
       });
     }
 
@@ -180,7 +196,7 @@ export function TestSubjectsProvider({ getService }) {
       // moveMouseTo function.
       await retry.try(async () => {
         const element = await this.find(selector);
-        await remote.moveMouseTo(element);
+        await browser.moveMouseTo(element);
       });
     }
 
@@ -189,6 +205,18 @@ export function TestSubjectsProvider({ getService }) {
         const elements = await this.findAll(selectorAll);
         return await mapAsync(elements, mapFn);
       });
+    }
+
+    async waitForDeleted(selector) {
+      await find.waitForDeletedByCssSelector(testSubjSelector(selector));
+    }
+
+    async waitForAttributeToChange(selector, attribute, value) {
+      await find.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
+    }
+
+    getCssSelector(selector) {
+      return testSubjSelector(selector);
     }
   }
 

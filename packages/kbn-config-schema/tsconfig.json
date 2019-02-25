@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./target/types",
+    "outDir": "./target/out",
+    "stripInternal": true,
+    "declarationMap": true,
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "./types/joi.d.ts",
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "target"
+  ]
+}

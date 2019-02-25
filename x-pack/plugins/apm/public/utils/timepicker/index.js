@@ -15,7 +15,7 @@ let currentInterval;
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
   const checkInterval = setInterval(() => {
-    const hasElm = !!document.querySelector('#react-apm-breadcrumbs');
+    const hasElm = !!document.querySelector('#kibana-angular-template');
     if (hasElm) {
       clearInterval(checkInterval);
       resolve();
@@ -38,16 +38,6 @@ export function initTimepicker(history, dispatch) {
     uiModules
       .get('app/apm', [])
       .controller('TimePickerController', ($scope, globalState, $rootScope) => {
-        // Add APM feedback menu
-        // TODO: move this somewhere else
-        $scope.topNavMenu = [];
-        $scope.topNavMenu.push({
-          key: 'APM feedback',
-          description: 'APM feedback',
-          tooltip: 'Provide feedback on APM',
-          template: require('../../templates/feedback_menu.html')
-        });
-
         history.listen(() => {
           updateRefreshRate(dispatch);
           globalState.fetch(); // ensure global state is updated when url changes

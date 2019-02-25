@@ -2,37 +2,26 @@
 
 exports[`Summary Status Component should allow label to be optional 1`] = `
 <div
-  class="monitoring-summary-status"
-  role="status"
+  intl="[object Object]"
 >
   <div
-    class="monitoring-summary-status__content"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero monitoring-summary-status__eui-content"
-        data-test-subj="transportAddress"
-      >
-        <strong>
-          127.0.0.1:9300
-        </strong>
-      </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrowZero monitoring-summary-status__eui-content"
-        data-test-subj="documentCount"
-      >
-        Documents: 
-        <strong>
-          24.8k
-        </strong>
-      </div>
-      <div
-        class="euiFlexItem monitoring-summary-status__eui-content"
+        class="euiStat euiStat--leftAligned"
       >
         <div
-          class="monitoring-summary-status__status-indicator"
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Status
+          </p>
+        </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
         >
           Status: 
           <span
@@ -44,8 +33,48 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
               src="../plugins/monitoring/icons/health-yellow.svg"
             />
           </span>
-           Yellow
+           Yellow
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="transportAddress"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p />
         </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
+        >
+          127.0.0.1:9300
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="documentCount"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Documents
+          </p>
+        </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
+        >
+          24.8k
+        </p>
       </div>
     </div>
   </div>
@@ -54,36 +83,52 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
 
 exports[`Summary Status Component should allow status to be optional 1`] = `
 <div
-  class="monitoring-summary-status"
-  role="status"
+  intl="[object Object]"
 >
   <div
-    class="monitoring-summary-status__content"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="freeDiskSpace"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero monitoring-summary-status__eui-content"
-        data-test-subj="freeDiskSpace"
+        class="euiStat euiStat--leftAligned"
       >
-        Free Disk Space: 
-        <strong>
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Free Disk Space
+          </p>
+        </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
+        >
           173.9 GB
-        </strong>
+        </p>
       </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="documentCount"
+    >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero monitoring-summary-status__eui-content"
-        data-test-subj="documentCount"
+        class="euiStat euiStat--leftAligned"
       >
-        Documents: 
-        <strong>
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Documents
+          </p>
+        </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
+        >
           24.8k
-        </strong>
+        </p>
       </div>
-      <div
-        class="euiFlexItem monitoring-summary-status__eui-content"
-      />
     </div>
   </div>
 </div>
@@ -91,38 +136,26 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
 
 exports[`Summary Status Component should render metrics in a summary bar 1`] = `
 <div
-  class="monitoring-summary-status"
-  role="status"
+  intl="[object Object]"
 >
   <div
-    class="monitoring-summary-status__content"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero monitoring-summary-status__eui-content"
-        data-test-subj="freeDiskSpace"
-      >
-        Free Disk Space: 
-        <strong>
-          173.9 GB
-        </strong>
-      </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrowZero monitoring-summary-status__eui-content"
-        data-test-subj="documentCount"
-      >
-        Documents: 
-        <strong>
-          24.8k
-        </strong>
-      </div>
-      <div
-        class="euiFlexItem monitoring-summary-status__eui-content"
+        class="euiStat euiStat--leftAligned"
       >
         <div
-          class="monitoring-summary-status__status-indicator"
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Status
+          </p>
+        </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
         >
           Status: 
           <span
@@ -134,8 +167,50 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
               src="../plugins/monitoring/icons/health-green.svg"
             />
           </span>
-           Green
+           Green
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="freeDiskSpace"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Free Disk Space
+          </p>
         </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
+        >
+          173.9 GB
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="documentCount"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p>
+            Documents
+          </p>
+        </div>
+        <p
+          class="euiTitle euiTitle--small euiStat__title"
+        >
+          24.8k
+        </p>
       </div>
     </div>
   </div>

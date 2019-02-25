@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'plugins/monitoring/components/alerts/formatted_message';
+import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { formatDateTimeLocal } from '../../../../common/formatting';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
@@ -17,12 +18,11 @@ import {
   EuiTitle,
   EuiButton,
   EuiText,
-  EuiTextColor,
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
 
-export function AlertsPanel({ alerts, changeUrl }) {
+function AlertsPanelUi({ alerts, changeUrl, intl }) {
   const goToAlerts = () => changeUrl('/alerts');
 
   if (!alerts || !alerts.length) {
@@ -35,10 +35,13 @@ export function AlertsPanel({ alerts, changeUrl }) {
     const severityIcon = mapSeverity(item.metadata.severity);
 
     if (item.resolved_timestamp) {
-      severityIcon.title =
-        `${severityIcon.title} (resolved ${formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE)} ago)`;
-      severityIcon.color = "success";
-      severityIcon.iconType = "check";
+      severityIcon.title = intl.formatMessage({
+        id: 'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
+        defaultMessage: '{severityIconTitle} (resolved {time} ago)' },
+      { severityIconTitle: severityIcon.title, time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE)
+      });
+      severityIcon.color = 'success';
+      severityIcon.iconType = 'check';
     }
 
     return (
@@ -50,7 +53,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
         color={severityIcon.color}
         title={severityIcon.title}
       >
-        <FormattedMessage
+        <FormattedAlert
           prefix={item.prefix}
           suffix={item.suffix}
           message={item.message}
@@ -58,14 +61,15 @@ export function AlertsPanel({ alerts, changeUrl }) {
           changeUrl={changeUrl}
         />
         <EuiText size="xs">
-          <p data-test-subj="alertMeta">
-            <EuiTextColor color="subdued">
-              Last checked {
-                formatDateTimeLocal(item.update_timestamp)
-              } (triggered {
-                formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE)
-              } ago)
-            </EuiTextColor>
+          <p data-test-subj="alertMeta" className="monCallout--meta">
+            <FormattedMessage
+              id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
+              defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
+              values={{
+                updateDateTime: formatDateTimeLocal(item.update_timestamp),
+                duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE)
+              }}
+            />
           </p>
         </EuiText>
       </EuiCallOut>
@@ -78,15 +82,21 @@ export function AlertsPanel({ alerts, changeUrl }) {
     <div data-test-subj="clusterAlertsContainer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              Top cluster alerts
-            </h2>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                id="xpack.monitoring.cluster.overview.alertsPanel.topClusterTitle"
+                defaultMessage="Top cluster alerts"
+              />
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" onClick={goToAlerts} data-test-subj="viewAllAlerts">
-            View all alerts
+            <FormattedMessage
+              id="xpack.monitoring.cluster.overview.alertsPanel.viewAllButtonLabel"
+              defaultMessage="View all alerts"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -96,3 +106,5 @@ export function AlertsPanel({ alerts, changeUrl }) {
     </div>
   );
 }
+
+export const AlertsPanel = injectI18n(AlertsPanelUi);

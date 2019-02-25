@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ALL_RESOURCE = '*';
+export const GLOBAL_RESOURCE = '*';
+export const IGNORED_TYPES = ['space'];
+export const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];

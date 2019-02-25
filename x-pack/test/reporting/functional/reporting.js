@@ -9,7 +9,7 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import fs from 'fs';
 import { promisify } from 'bluebird';
-import { checkIfPdfsMatch } from './lib';
+import { checkIfPdfsMatch, checkIfPngsMatch } from './lib';
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(mkdirp);
 
@@ -29,19 +29,18 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.reporting.initTests();
     });
 
-    const expectUnsavedChangesWarning = async () => {
-      await PageObjects.reporting.openReportingPanel();
-      const warningExists = await PageObjects.reporting.getUnsavedChangesWarningExists();
-      expect(warningExists).to.be(true);
-      const buttonExists = await PageObjects.reporting.getGenerateReportButtonExists();
-      expect(buttonExists).to.be(false);
+    const expectDisabledGenerateReportButton = async () => {
+      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
+      await retry.try(async () => {
+        const isDisabled = await generateReportButton.getProperty('disabled');
+        expect(isDisabled).to.be(true);
+      });
     };
 
     const expectEnabledGenerateReportButton = async () => {
-      await PageObjects.reporting.openReportingPanel();
-      const printPdfButton = await PageObjects.reporting.getGenerateReportButton();
+      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
-        const isDisabled = await printPdfButton.getProperty('disabled');
+        const isDisabled = await generateReportButton.getProperty('disabled');
         expect(isDisabled).to.be(false);
       });
     };
@@ -52,41 +51,44 @@ export default function ({ getService, getPageObjects }) {
       expect(success).to.be(true);
     };
 
-    const writeSessionReport = async (name, rawPdf) => {
+    const writeSessionReport = async (name, rawPdf, reportExt = 'pdf') => {
       const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
       await mkdirAsync(sessionDirectory);
-      const sessionReportPath = path.resolve(sessionDirectory, `${name}.pdf`);
+      const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
       await writeFileAsync(sessionReportPath, rawPdf);
       return sessionReportPath;
     };
 
-    const getBaselineReportPath = (fileName) => {
+    const getBaselineReportPath = (fileName, reportExt = 'pdf') => {
       const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-      return path.resolve(baselineFolder, `${fileName}.pdf`);
+      return path.resolve(baselineFolder, `${fileName}.${reportExt}`);
     };
 
     describe('Dashboard', () => {
+      beforeEach(() => PageObjects.reporting.clearToastNotifications());
+
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
-          await expectUnsavedChangesWarning();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.dashboard.saveDashboard('mydash');
+          await PageObjects.dashboard.saveDashboard('mypdfdash');
+          await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
         });
       });
 
-      describe('Print Layout', () => {
+      describe.skip('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();
 
@@ -99,37 +101,40 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.dashboard.saveDashboard('report test');
 
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
           const reportFileName = 'dashboard_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
             log
           );
           // After expected OS differences, the diff count came to be around 128k
-          expect(diffCount).to.be.lessThan(128000);
+          expect(percentSimilar).to.be.lessThan(0.05);
         });
 
         it('matches same baseline report with margins turned on', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.dashboard.useMargins(true);
           await PageObjects.dashboard.saveDashboard('report test');
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -137,74 +142,143 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.closeTab(1);
           const reportFileName = 'dashboard_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
             log
           );
           // After expected OS differences, the diff count came to be around 128k
-          expect(diffCount).to.be.lessThan(128000);
+          expect(percentSimilar).to.be.lessThan(0.05);
+
         });
       });
 
-      describe('Preserve Layout', () => {
+      // TODO Re-enable the tests after removing Phantom:
+      // https://github.com/elastic/kibana/issues/21485
+      describe.skip('Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
-          // report than phantom.
+          // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
 
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-          await PageObjects.reporting.clickPreserveLayoutOption();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
+
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
 
           const reportFileName = 'dashboard_preserve_layout';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
             log
           );
-          // After expected OS differences, the diff count came to be around 350k. Due to
-          // https://github.com/elastic/kibana/issues/21485 this jumped up to something like 368 when
-          // comparing the same baseline for chromium and phantom.
-          expect(diffCount).to.be.lessThan(400000);
+          expect(percentSimilar).to.be.lessThan(0.05);
 
         });
       });
+
+      describe('Print PNG button', () => {
+        it('is not available if new', async () => {
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.clickNewDashboard();
+          await PageObjects.reporting.openPngReportingPanel();
+          await expectDisabledGenerateReportButton();
+        });
+
+        it('becomes available when saved', async () => {
+          await PageObjects.dashboard.saveDashboard('mypngdash');
+          await PageObjects.reporting.openPngReportingPanel();
+          await expectEnabledGenerateReportButton();
+        });
+      });
+
+      // TODO Re-enable the tests after removing Phantom:
+      // https://github.com/elastic/kibana/issues/21485
+      describe.skip('Preserve Layout', () => {
+        it('matches baseline report', async function () {
+
+          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+          // function is taking about 15 seconds per comparison in jenkins.
+          this.timeout(360000);
+
+          await PageObjects.dashboard.switchToEditMode();
+          await PageObjects.reporting.setTimepickerInDataRange();
+          const visualizations = PageObjects.dashboard.getTestVisualizationNames();
+
+          // There is a current issue causing reports with tilemaps to timeout:
+          // https://github.com/elastic/kibana/issues/14136. Once that is resolved, add the tilemap visualization
+          // back in!
+          const tileMapIndex = visualizations.indexOf('Visualization TileMap');
+          visualizations.splice(tileMapIndex, 1);
+          await PageObjects.dashboard.addVisualizations(visualizations);
+
+          await PageObjects.dashboard.saveDashboard('PNG report test');
+
+          await PageObjects.reporting.openPngReportingPanel();
+          await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+          await PageObjects.reporting.clickGenerateReportButton();
+          await PageObjects.reporting.removeForceSharedItemsContainerSize();
+
+          await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
+
+          const url = await PageObjects.reporting.getUrlOfTab(1);
+          await PageObjects.reporting.closeTab(1);
+          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+
+          const reportFileName = 'dashboard_preserve_layout';
+          const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
+          const percentSimilar = await checkIfPngsMatch(
+            sessionReportPath,
+            getBaselineReportPath(reportFileName, 'png'),
+            config.get('screenshots.directory'),
+            log
+          );
+          expect(percentSimilar).to.be.lessThan(0.05);
+
+        });
+      });
+
     });
 
     describe('Discover', () => {
       describe('Generate CSV button', () => {
+        beforeEach(() => PageObjects.common.navigateToApp('discover'));
+
         it('is not available if new', async () => {
-          await PageObjects.common.navigateToApp('discover');
-          await expectUnsavedChangesWarning();
+          await PageObjects.reporting.openCsvReportingPanel();
+          await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
-          await PageObjects.discover.saveSearch('my search');
+          await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectEnabledGenerateReportButton();
         });
 
         it('generates a report with data', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
-          await PageObjects.reporting.clickTopNavReportingLink();
+          await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
 
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
-          await PageObjects.reporting.clickTopNavReportingLink();
+          await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
       });
@@ -216,7 +290,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.navigateToUrl('visualize', 'new');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await expectUnsavedChangesWarning();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
@@ -224,18 +299,22 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickBucket('X-Axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
-          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('my viz');
+          await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
         });
 
-        it('matches baseline report', async function () {
+        // TODO Re-enable the tests after removing Phantom:
+        // https://github.com/elastic/kibana/issues/21485
+        it.skip('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
 
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -243,18 +322,13 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.closeTab(1);
           const reportFileName = 'visualize_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
             log
           );
-          // After expected OS and browser differences, the diff count came up to max 800564 that I saw.
-          // This is pretty bad. https://github.com/elastic/kibana/issues/21486 is filed to lower this
-          // which will be much easier when we only support one browser type (chromium instead of phantom).
-          // The reason this is so high currently is because of a phantom bug:
-          // https://github.com/elastic/kibana/issues/21485
-          expect(diffCount).to.be.lessThan(810000);
+          expect(percentSimilar).to.be.lessThan(0.05);
         });
       });
     });

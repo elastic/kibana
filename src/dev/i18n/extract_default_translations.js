@@ -17,36 +17,62 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
-import JSON5 from 'json5';
+import path from 'path';
 
-import { extractHtmlMessages } from './extract_html_messages';
-import { extractCodeMessages } from './extract_code_messages';
-import { extractPugMessages } from './extract_pug_messages';
-import { extractHandlebarsMessages } from './extract_handlebars_messages';
-import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
+import {
+  extractHtmlMessages,
+  extractCodeMessages,
+  extractPugMessages,
+  extractHandlebarsMessages,
+} from './extractors';
+import { globAsync, readFileAsync, normalizePath } from './utils';
 
-function addMessageToMap(targetMap, key, value) {
+import { createFailError, isFailError } from '../run';
+
+function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
+
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw new Error(
-      `There is more than one default message for the same id "${key}": \
-"${existingValue.message}" and "${value.message}"`
+    reporter.report(
+      createFailError(`There is more than one default message for the same id "${key}":
+"${existingValue.message}" and "${value.message}"`)
     );
+  } else {
+    targetMap.set(key, value);
   }
-  targetMap.set(key, value);
 }
 
-export async function extractDefaultTranslations(inputPath) {
+function filterEntries(entries, exclude) {
+  return entries.filter(entry =>
+    exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
+  );
+}
+
+export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
+  const normalizedPath = normalizePath(filePath);
+
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
+    normalizedPath.startsWith(`${pluginPath}/`)
+  );
+
+  if (!id.startsWith(`${expectedNamespace}.`)) {
+    reporter.report(
+      createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See .i18nrc.json for the list of supported namespaces.`)
+    );
+  }
+}
+
+export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
+    ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'],
   });
 
   const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
-      const resolvedPath = resolve(inputPath, entry);
+      const resolvedPath = path.resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
@@ -63,8 +89,6 @@ export async function extractDefaultTranslations(inputPath) {
     { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
   );
 
-  const defaultMessagesMap = new Map();
-
   await Promise.all(
     [
       [htmlEntries, extractHtmlMessages],
@@ -73,7 +97,7 @@ export async function extractDefaultTranslations(inputPath) {
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        entries.map(async entry => {
+        filterEntries(entries, config.exclude).map(async entry => {
           return {
             name: entry,
             content: await readFileAsync(entry),
@@ -82,42 +106,21 @@ export async function extractDefaultTranslations(inputPath) {
       );
 
       for (const { name, content } of files) {
+        const reporterWithContext = reporter.withContext({ name });
+
         try {
-          for (const [id, value] of extractFunction(content)) {
-            addMessageToMap(defaultMessagesMap, id, value);
+          for (const [id, value] of extractFunction(content, reporterWithContext)) {
+            validateMessageNamespace(id, name, config.paths, reporterWithContext);
+            addMessageToMap(targetMap, id, value, reporterWithContext);
           }
         } catch (error) {
-          throw new Error(`Error in ${name}\n${error.message || error}`);
+          if (!isFailError(error)) {
+            throw error;
+          }
+
+          reporterWithContext.report(error);
         }
       }
     })
   );
-
-  // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
-
-  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
-    return key1 < key2 ? -1 : 1;
-  });
-
-  for (const [mapKey, mapValue] of defaultMessages) {
-    jsonBuffer = Buffer.concat([
-      jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${mapValue.message}',`),
-      Buffer.from(mapValue.context ? ` // ${mapValue.context}\n` : '\n'),
-    ]);
-  }
-
-  // append previously removed closing curly brace
-  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-  try {
-    await accessAsync(resolve(inputPath, 'translations'));
-  } catch (_) {
-    await makeDirAsync(resolve(inputPath, 'translations'));
-  }
-
-  await writeFileAsync(resolve(inputPath, 'translations', 'en.json'), jsonBuffer);
 }

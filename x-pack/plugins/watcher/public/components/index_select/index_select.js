@@ -10,8 +10,6 @@ import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import template from './index_select.html';
 
-import './index_select.less';
-
 function mapIndex(indexName, isFromIndexPattern = false, isUserEntered = false) {
   return { indexName, isFromIndexPattern, isUserEntered };
 }

@@ -60,6 +60,13 @@ export const schema = Joi.object().keys({
     otherwise: Joi.default([]),
   }),
 
+  excludeTestFiles: Joi.array().items(Joi.string()).default([]),
+
+  suiteTags: Joi.object().keys({
+    include: Joi.array().items(Joi.string()).default([]),
+    exclude: Joi.array().items(Joi.string()).default([]),
+  }).default(),
+
   services: Joi.object().pattern(
     ID_PATTERN,
     Joi.func().required()
@@ -72,10 +79,26 @@ export const schema = Joi.object().keys({
 
   timeouts: Joi.object().keys({
     find: Joi.number().default(10000),
-    try: Joi.number().default(40000),
+    try: Joi.number().default(120000),
+    waitFor: Joi.number().default(20000),
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
     navigateStatusPageCheck: Joi.number().default(250),
+
+    // Many of our tests use the `exists` functions to determine where the user is. For
+    // example, you'll see a lot of code like:
+    // if (!testSubjects.exists('someElementOnPageA')) {
+    //   navigateToPageA();
+    // }
+    // If the element doesn't exist, selenium would wait up to defaultFindTimeout for it to
+    // appear. Because there are many times when we expect it to not be there, we don't want
+    // to wait the full amount of time, or it would greatly slow our tests down. We used to have
+    // this value at 1 second, but this caused flakiness because sometimes the element was deemed missing
+    // only because the page hadn't finished loading.
+    // The best path forward it to prefer functions like `testSubjects.existOrFail` or
+    // `testSubjects.missingOrFail` instead of just the `exists` checks, and be deterministic about
+    // where your user is and what they should click next.
+    waitForExists: Joi.number().default(2500),
   }).default(),
 
   mochaOpts: Joi.object().keys({
@@ -83,8 +106,9 @@ export const schema = Joi.object().keys({
     grep: Joi.string(),
     invert: Joi.boolean().default(false),
     slow: Joi.number().default(30000),
-    timeout: Joi.number().default(INSPECTING ? Infinity : 180000),
+    timeout: Joi.number().default(INSPECTING ? Infinity : 360000),
     ui: Joi.string().default('bdd'),
+    require: Joi.string().default('')
   }).default(),
 
   updateBaselines: Joi.boolean().default(false),
@@ -93,6 +117,10 @@ export const schema = Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),
     rootDirectory: Joi.string(),
+  }).default(),
+
+  mochaReporter: Joi.object().keys({
+    captureLogOutput: Joi.boolean().default(!!process.env.CI),
   }).default(),
 
   users: Joi.object().pattern(
@@ -112,6 +140,7 @@ export const schema = Joi.object().keys({
     license: Joi.string().default('oss'),
     from: Joi.string().default('snapshot'),
     serverArgs: Joi.array(),
+    dataArchive: Joi.string(),
   }).default(),
 
   kbnTestServer: Joi.object().keys({
@@ -119,9 +148,6 @@ export const schema = Joi.object().keys({
     sourceArgs: Joi.array(),
     serverArgs: Joi.array(),
   }).default(),
-
-  // env allows generic data, but should be removed
-  env: Joi.object().default(),
 
   chromedriver: Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
@@ -140,7 +166,12 @@ export const schema = Joi.object().keys({
 
   // settings for the esArchiver module
   esArchiver: Joi.object().keys({
-    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver'))
+    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+  }).default(),
+
+  // settings for the kibanaServer.uiSettings module
+  uiSettings: Joi.object().keys({
+    defaults: Joi.object().unknown(true)
   }).default(),
 
   // settings for the screenshots module
@@ -151,5 +182,10 @@ export const schema = Joi.object().keys({
   // settings for the failureDebugging module
   failureDebugging: Joi.object().keys({
     htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
+  }).default(),
+
+  // settings for the find service
+  layout: Joi.object().keys({
+    fixedHeaderHeight: Joi.number().default(50),
   }).default(),
 }).default();

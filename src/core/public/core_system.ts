@@ -18,12 +18,20 @@
  */
 
 import './core.css';
+
+import { BasePathService } from './base_path';
+import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
+import { HttpService } from './http';
+import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
+import { NotificationsService } from './notifications';
+import { UiSettingsService } from './ui_settings';
 
 interface Params {
   rootDomElement: HTMLElement;
+  browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
@@ -39,14 +47,29 @@ export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly legacyPlatform: LegacyPlatformService;
+  private readonly notifications: NotificationsService;
+  private readonly http: HttpService;
+  private readonly uiSettings: UiSettingsService;
+  private readonly basePath: BasePathService;
+  private readonly chrome: ChromeService;
+  private readonly i18n: I18nService;
 
   private readonly rootDomElement: HTMLElement;
+  private readonly notificationsTargetDomElement: HTMLDivElement;
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
-    const { rootDomElement, injectedMetadata, requireLegacyFiles, useLegacyTestHarness } = params;
+    const {
+      rootDomElement,
+      browserSupportsCsp,
+      injectedMetadata,
+      requireLegacyFiles,
+      useLegacyTestHarness,
+    } = params;
 
     this.rootDomElement = rootDomElement;
+
+    this.i18n = new I18nService();
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -59,6 +82,15 @@ export class CoreSystem {
         this.stop();
       },
     });
+
+    this.notificationsTargetDomElement = document.createElement('div');
+    this.notifications = new NotificationsService({
+      targetDomElement: this.notificationsTargetDomElement,
+    });
+    this.http = new HttpService();
+    this.basePath = new BasePathService();
+    this.uiSettings = new UiSettingsService();
+    this.chrome = new ChromeService({ browserSupportsCsp });
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -73,11 +105,38 @@ export class CoreSystem {
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(this.notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
 
+      const i18n = this.i18n.start();
+      const notifications = this.notifications.start({ i18n });
       const injectedMetadata = this.injectedMetadata.start();
-      const fatalErrors = this.fatalErrors.start();
-      this.legacyPlatform.start({ injectedMetadata, fatalErrors });
+      const fatalErrors = this.fatalErrors.start({ i18n });
+      const http = this.http.start({ fatalErrors });
+      const basePath = this.basePath.start({ injectedMetadata });
+      const uiSettings = this.uiSettings.start({
+        notifications,
+        http,
+        injectedMetadata,
+        basePath,
+      });
+      const chrome = this.chrome.start({
+        injectedMetadata,
+        notifications,
+      });
+
+      this.legacyPlatform.start({
+        i18n,
+        injectedMetadata,
+        fatalErrors,
+        notifications,
+        http,
+        basePath,
+        uiSettings,
+        chrome,
+      });
+
+      return { fatalErrors };
     } catch (error) {
       this.fatalErrors.add(error);
     }
@@ -85,6 +144,11 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
+    this.notifications.stop();
+    this.http.stop();
+    this.uiSettings.stop();
+    this.chrome.stop();
+    this.i18n.stop();
     this.rootDomElement.textContent = '';
   }
 }

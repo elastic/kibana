@@ -7,4 +7,3 @@
 
 
 import './form_label_directive';
-import './styles/main.less';

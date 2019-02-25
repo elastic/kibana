@@ -24,6 +24,11 @@ import { inspect } from 'util';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
+import { getSnapshotOfRunnableLogs } from './log_cache';
+import { escapeCdata } from '../xml';
+
+const dateNow = Date.now.bind(Date);
+
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
@@ -44,11 +49,11 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   );
 
   const setStartTime = (node) => {
-    node.startTime = Date.now();
+    node.startTime = dateNow();
   };
 
   const setEndTime = node => {
-    node.endTime = Date.now();
+    node.endTime = dateNow();
   };
 
   const getFullTitle = node => {
@@ -82,6 +87,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('end', () => {
     // crawl the test graph to collect all defined tests
     const allTests = findAllTests(runner.suite);
+    if (!allTests.length) {
+      return;
+    }
 
     // filter out just the failures
     const failures = results.filter(result => result.failed);
@@ -120,9 +128,12 @@ export function setupJUnitReportGeneration(runner, options = {}) {
 
     [...results, ...skippedResults].forEach(result => {
       const el = addTestcaseEl(result.node);
+      el.ele('system-out').dat(
+        escapeCdata(getSnapshotOfRunnableLogs(result.node) || '')
+      );
 
       if (result.failed) {
-        el.ele('failure').dat(inspect(result.error));
+        el.ele('failure').dat(escapeCdata(inspect(result.error)));
         return;
       }
 

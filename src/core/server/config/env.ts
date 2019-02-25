@@ -20,27 +20,39 @@
 import { resolve } from 'path';
 import process from 'process';
 
-import { LegacyKbnServer } from '../legacy_compat';
+import { pkg } from '../../../legacy/utils/package_json';
 
-interface PackageInfo {
+export interface PackageInfo {
   version: string;
   branch: string;
   buildNum: number;
   buildSha: string;
 }
 
-interface EnvironmentMode {
+export interface EnvironmentMode {
   name: 'development' | 'production';
   dev: boolean;
   prod: boolean;
 }
 
+/** @internal */
 export interface EnvOptions {
-  config?: string;
-  kbnServer?: any;
-  packageInfo: PackageInfo;
-  mode: EnvironmentMode;
-  [key: string]: any;
+  configs: string[];
+  cliArgs: CliArgs;
+  isDevClusterMaster: boolean;
+}
+
+/** @internal */
+export interface CliArgs {
+  dev: boolean;
+  envName?: string;
+  quiet: boolean;
+  silent: boolean;
+  watch: boolean;
+  repl: boolean;
+  basePath: boolean;
+  optimize: boolean;
+  open: boolean;
 }
 
 export class Env {
@@ -51,50 +63,77 @@ export class Env {
     return new Env(process.cwd(), options);
   }
 
+  /** @internal */
   public readonly configDir: string;
-  public readonly corePluginsDir: string;
+  /** @internal */
   public readonly binDir: string;
+  /** @internal */
   public readonly logDir: string;
+  /** @internal */
   public readonly staticFilesDir: string;
+  /** @internal */
+  public readonly pluginSearchPaths: ReadonlyArray<string>;
+
+  /**
+   * Information about Kibana package (version, build number etc.).
+   */
+  public readonly packageInfo: Readonly<PackageInfo>;
+
+  /**
+   * Mode Kibana currently run in (development or production).
+   */
+  public readonly mode: Readonly<EnvironmentMode>;
+
+  /**
+   * Arguments provided through command line.
+   * @internal
+   */
+  public readonly cliArgs: Readonly<CliArgs>;
+
+  /**
+   * Paths to the configuration files.
+   * @internal
+   */
+  public readonly configs: ReadonlyArray<string>;
+
+  /**
+   * Indicates that this Kibana instance is run as development Node Cluster master.
+   * @internal
+   */
+  public readonly isDevClusterMaster: boolean;
 
   /**
    * @internal
    */
-  constructor(readonly homeDir: string, private readonly options: EnvOptions) {
+  constructor(readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
-    this.corePluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
-  }
 
-  public getConfigFile() {
-    const defaultConfigFile = this.getDefaultConfigFile();
-    return this.options.config === undefined ? defaultConfigFile : this.options.config;
-  }
+    this.pluginSearchPaths = [
+      resolve(this.homeDir, 'src', 'plugins'),
+      resolve(this.homeDir, 'plugins'),
+      resolve(this.homeDir, '..', 'kibana-extra'),
+    ];
 
-  /**
-   * @internal
-   */
-  public getLegacyKbnServer(): LegacyKbnServer | undefined {
-    return this.options.kbnServer;
-  }
+    this.cliArgs = Object.freeze(options.cliArgs);
+    this.configs = Object.freeze(options.configs);
+    this.isDevClusterMaster = options.isDevClusterMaster;
 
-  /**
-   * Gets information about Kibana package (version, build number etc.).
-   */
-  public getPackageInfo() {
-    return this.options.packageInfo;
-  }
+    const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
+    this.mode = Object.freeze<EnvironmentMode>({
+      dev: isDevMode,
+      name: isDevMode ? 'development' : 'production',
+      prod: !isDevMode,
+    });
 
-  /**
-   * Gets mode Kibana currently run in (development or production).
-   */
-  public getMode() {
-    return this.options.mode;
-  }
-
-  private getDefaultConfigFile() {
-    return resolve(this.configDir, 'kibana.yml');
+    const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
+    this.packageInfo = Object.freeze({
+      branch: pkg.branch,
+      buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      version: pkg.version,
+    });
   }
 }

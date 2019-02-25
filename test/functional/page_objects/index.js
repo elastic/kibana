@@ -31,3 +31,5 @@ export { MonitoringPageProvider } from './monitoring_page';
 export { PointSeriesPageProvider } from './point_series_page';
 export { VisualBuilderPageProvider } from './visual_builder_page';
 export { TimelionPageProvider } from './timelion_page';
+export { SharePageProvider } from './share_page';
+export { TimePickerPageProvider } from './time_picker';

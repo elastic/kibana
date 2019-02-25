@@ -23,12 +23,12 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
-  describe('test large number of fields @skipcloud', function () {
+  describe('test large number of fields', function () {
+    this.tags(['skipCloud']);
+
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 

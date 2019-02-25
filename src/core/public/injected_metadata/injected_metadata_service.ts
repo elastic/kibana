@@ -17,14 +17,37 @@
  * under the License.
  */
 
+import { get } from 'lodash';
+import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
 export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    basePath: string;
+    csp: {
+      warnLegacyBrowsers: boolean;
+    };
+    vars: {
+      [key: string]: unknown;
+    };
     legacyMetadata: {
-      [key: string]: any;
+      app: unknown;
+      translations: unknown;
+      bundleId: string;
+      nav: unknown;
+      version: string;
+      branch: string;
+      buildNum: number;
+      buildSha: string;
+      basePath: string;
+      serverName: string;
+      devMode: boolean;
+      uiSettings: {
+        defaults: UiSettingsState;
+        user?: UiSettingsState;
+      };
     };
   };
 }
@@ -42,8 +65,28 @@ export class InjectedMetadataService {
 
   public start() {
     return {
+      getBasePath: () => {
+        return this.state.basePath;
+      },
+
+      getKibanaVersion: () => {
+        return this.getKibanaVersion();
+      },
+
+      getCspConfig: () => {
+        return this.state.csp;
+      },
+
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
+      },
+
+      getInjectedVar: (name: string, defaultValue?: any): unknown => {
+        return get(this.state.vars, name, defaultValue);
+      },
+
+      getInjectedVars: () => {
+        return this.state.vars;
       },
     };
   }

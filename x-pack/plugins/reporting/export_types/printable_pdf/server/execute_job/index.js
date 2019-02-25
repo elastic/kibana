@@ -4,97 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { omit } from 'lodash';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
+import { decryptJobHeaders, omitBlacklistedHeaders, getConditionalHeaders,
+  addForceNowQuerystring, getCustomLogo } from '../../../common/execute_job/';
 
-const KBN_SCREENSHOT_HEADER_BLACKLIST = [
-  'accept-encoding',
-  'content-length',
-  'content-type',
-  'host',
-  'referer',
-  // `Transfer-Encoding` is hop-by-hop header that is meaningful
-  // only for a single transport-level connection, and shouldn't
-  // be stored by caches or forwarded by proxies.
-  'transfer-encoding',
-];
 
 function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
-  const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
 
-  const decryptJobHeaders = async (job) => {
-    const decryptedHeaders = await crypto.decrypt(job.headers);
-    return { job, decryptedHeaders };
-  };
-
-  const omitBlacklistedHeaders = ({ job, decryptedHeaders }) => {
-    const filteredHeaders = omit(decryptedHeaders, KBN_SCREENSHOT_HEADER_BLACKLIST);
-    return { job, filteredHeaders };
-  };
-
-  const getCustomLogo = async ({ job, filteredHeaders }) => {
-    const fakeRequest = {
-      headers: filteredHeaders,
-    };
-
-    const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-    const uiSettings = server.uiSettingsServiceFactory({
-      savedObjectsClient
-    });
-
-    const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
-
-    return { job, filteredHeaders, logo };
-  };
-
-  const addForceNowQuerystring = async ({ job, filteredHeaders, logo }) => {
-    const urls = job.urls.map(jobUrl => {
-      if (!job.forceNow) {
-        return jobUrl;
-      }
-
-      const parsed = url.parse(jobUrl, true);
-      const hash = url.parse(parsed.hash.replace(/^#/, ''), true);
-
-      const transformedHash = url.format({
-        pathname: hash.pathname,
-        query: {
-          ...hash.query,
-          forceNow: job.forceNow
-        }
-      });
-
-      return url.format({
-        ...parsed,
-        hash: transformedHash
-      });
-    });
-    return { job, filteredHeaders, logo, urls };
-  };
-
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
-    const process$ = Rx.of(jobToExecute).pipe(
+    const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
+      catchError(() => Rx.throwError(
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage', {
+          defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
+        }))),
       map(omitBlacklistedHeaders),
+      map(getConditionalHeaders),
       mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, filteredHeaders, logo, urls }) => {
-        return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
+      mergeMap(({ job, conditionalHeaders, logo, urls }) => {
+        return generatePdfObservable(job.title, urls, job.browserTimezone, conditionalHeaders, job.layout, logo);
       }),
       map(buffer => ({
         content_type: 'application/pdf',
-        content: buffer.toString('base64')
+        content: buffer.toString('base64'),
+        size: buffer.byteLength,
       }))
     );
 

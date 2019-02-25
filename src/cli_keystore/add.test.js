@@ -17,30 +17,37 @@
  * under the License.
  */
 
+const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
+  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
+  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+
+jest.mock('fs', () => ({
+  readFileSync: jest.fn().mockImplementation((path) => {
+    if (!path.includes('nonexistent')) {
+      return JSON.stringify(mockKeystoreData);
+    }
+
+    throw { code: 'ENOENT' };
+  }),
+  existsSync: jest.fn().mockImplementation((path) => {
+    return !path.includes('nonexistent');
+  }),
+  writeFileSync: jest.fn()
+}));
+
 import sinon from 'sinon';
-import mockFs from 'mock-fs';
 import { PassThrough } from 'stream';
 
-import { Keystore } from '../server/keystore';
+import { Keystore } from '../legacy/server/keystore';
 import { add } from './add';
 import Logger from '../cli_plugin/lib/logger';
-import * as prompt from '../server/utils/prompt';
+import * as prompt from '../legacy/server/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {
     const sandbox = sinon.createSandbox();
 
-    const keystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-      + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-      + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
-
     beforeEach(() => {
-      mockFs({
-        '/data': {
-          'test.keystore': JSON.stringify(keystoreData),
-        }
-      });
-
       sandbox.stub(prompt, 'confirm');
       sandbox.stub(prompt, 'question');
 
@@ -49,7 +56,6 @@ describe('Kibana keystore', () => {
     });
 
     afterEach(() => {
-      mockFs.restore();
       sandbox.restore();
     });
 
@@ -148,5 +154,9 @@ describe('Kibana keystore', () => {
 
       expect(keystore.data.foo).toEqual('kibana');
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 });

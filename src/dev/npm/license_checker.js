@@ -19,19 +19,11 @@
 
 import licenseChecker from 'license-checker';
 
-export function callLicenseChecker(options = {}) {
-  const {
-    directory,
-    dev = false
-  } = options;
-
-  if (!directory) {
-    throw new Error('You must specify the directory where license checker should start');
-  }
-
+async function runLicenseChecker(directory, dev) {
   return new Promise((resolve, reject) => {
     licenseChecker.init({
       start: directory,
+      development: dev,
       production: !dev,
       json: true,
       customFormat: {
@@ -41,7 +33,49 @@ export function callLicenseChecker(options = {}) {
       }
     }, (err, licenseInfo) => {
       if (err) reject(err);
-      else resolve(licenseInfo);
+      else {
+        resolve(
+          // Extend original licenseInfo object with a new attribute
+          // stating whether a license was found in a package used
+          // only as a dev dependency or not
+          Object.keys(licenseInfo).reduce(function (result, key) {
+            result[key] = Object.assign(licenseInfo[key], { isDevOnly: dev });
+            return result;
+          }, {})
+        );
+      }
     });
+  });
+}
+
+export async function callLicenseChecker(options = {}) {
+  const {
+    directory,
+    dev = false
+  } = options;
+
+  if (!directory) {
+    throw new Error('You must specify the directory where license checker should start');
+  }
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Run license checker for prod only packages
+      const prodOnlyLicenses = await runLicenseChecker(directory, false);
+
+      if (!dev) {
+        resolve(prodOnlyLicenses);
+        return;
+      }
+
+      // In case we have the dev option
+      // also run the license checker for the
+      // dev only packages and build a final object
+      // merging the previous results too
+      const devOnlyLicenses = await runLicenseChecker(directory, true);
+      resolve(Object.assign(prodOnlyLicenses, devOnlyLicenses));
+    } catch (e) {
+      reject(e);
+    }
   });
 }

@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function NodeAvailableWarning() {
   const isCloud = false; // placeholder for future specific cloud functionality
@@ -23,18 +24,40 @@ export function NodeAvailableWarning() {
     return (
       <React.Fragment>
         <EuiCallOut
-          title="No ML nodes available"
+          title={(<FormattedMessage
+            id="xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableTitle"
+            defaultMessage="No ML nodes available"
+          />)}
           color="warning"
           iconType="alert"
         >
           <p>
-            There are no ML nodes available.<br />
-            You will not be able to create or run jobs.
-            {isCloud &&
-              <span ng-if="isCloud">
-                &nbsp;This can be configured in Cloud <EuiLink href="#">here</EuiLink>.
-              </span>
-            }
+            <FormattedMessage
+              id="xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableDescription"
+              defaultMessage="There are no ML nodes available."
+            /><br />
+            <FormattedMessage
+              id="xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription"
+              defaultMessage="You will not be able to create or run jobs. {cloudConfigLink}"
+              values={{
+                cloudConfigLink: isCloud
+                  ? <FormattedMessage
+                    id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
+                    defaultMessage="This can be configured in Cloud {hereCloudLink}."
+                    values={{
+                      hereCloudLink: (
+                        <EuiLink href="#">
+                          <FormattedMessage
+                            id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
+                            defaultMessage="here"
+                          />
+                        </EuiLink>
+                      )
+                    }}
+                  />
+                  : '',
+              }}
+            />
           </p>
         </EuiCallOut>
         <EuiSpacer size="m" />

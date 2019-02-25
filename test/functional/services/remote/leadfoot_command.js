@@ -30,7 +30,16 @@ let attemptCounter = 0;
 async function attemptToCreateCommand(log, server, driverApi) {
   const attemptId = ++attemptCounter;
   log.debug('[leadfoot:command] Creating session');
-  const session = await server.createSession({}, driverApi.getRequiredCapabilities());
+
+  let browserOptions = {};
+  if (process.env.TEST_DISABLE_GPU) {
+    browserOptions = { chromeOptions: { args: ['disable-gpu'] } };
+  }
+  if (process.env.TEST_BROWSER_HEADLESS) {
+    browserOptions = { chromeOptions: { args: ['headless', 'disable-gpu'] } };
+  }
+  const session = await server.createSession(browserOptions, driverApi.getRequiredCapabilities());
+
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Registering session for teardown');
@@ -50,8 +59,8 @@ async function attemptToCreateCommand(log, server, driverApi) {
 export async function initLeadfootCommand({ log, browserDriverApi }) {
   return await Promise.race([
     (async () => {
-      await delay(2 * MINUTE);
-      throw new Error('remote failed to start within 2 minutes');
+      await delay(6 * MINUTE);
+      throw new Error('remote failed to start within 6 minutes');
     })(),
 
     (async () => {
@@ -76,7 +85,7 @@ export async function initLeadfootCommand({ log, browserDriverApi }) {
 
       while (true) {
         const command = await Promise.race([
-          delay(30 * SECOND),
+          delay(6 * MINUTE),
           attemptToCreateCommand(log, server, browserDriverApi)
         ]);
 

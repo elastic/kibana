@@ -10,10 +10,15 @@ exports[`Queue component renders default elements 1`] = `
     size="s"
   />
   <EuiText
-    className="pipelineViewer__queueMessage"
+    className="monPipelineViewer__queueMessage"
     grow={true}
+    size="m"
   >
-    Queue metrics not available
+    <FormattedMessage
+      defaultMessage="Queue metrics not available"
+      id="xpack.monitoring.logstash.pipeline.queue.noMetricsDescription"
+      values={Object {}}
+    />
   </EuiText>
 </div>
 `;

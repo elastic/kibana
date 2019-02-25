@@ -20,20 +20,24 @@
 import path from 'path';
 import { readKeystore }  from './read_keystore';
 
-jest.mock('../../server/keystore');
-import { Keystore } from '../../server/keystore';
+jest.mock('../../legacy/server/keystore');
+import { Keystore } from '../../legacy/server/keystore';
 
 describe('cli/serve/read_keystore', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  it('returns keystore data', () => {
-    const keystoreData = { 'foo': 'bar' };
+  it('returns structured keystore data', () => {
+    const keystoreData = { 'elasticsearch.password': 'changeme' };
     Keystore.prototype.data = keystoreData;
 
     const data = readKeystore();
-    expect(data).toEqual(keystoreData);
+    expect(data).toEqual({
+      elasticsearch: {
+        password: 'changeme'
+      }
+    });
   });
 
   it('uses data path provided', () => {

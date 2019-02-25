@@ -21,7 +21,8 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const inspector = getService('inspector');
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
@@ -34,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickHeatmapChart');
       await PageObjects.visualize.clickHeatmapChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');
@@ -44,33 +44,17 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
-    });
-
-    it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct data', async function () {
@@ -99,10 +83,65 @@ export default function ({ getService, getPageObjects }) {
       ];
 
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
+      await inspector.close();
+    });
+
+    it('should show 4 color ranges as default colorNumbers param', async function () {
+      const legends = await PageObjects.visualize.getLegendEntries();
+      const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
+      expect(legends).to.eql(expectedLegends);
+    });
+
+    it('should show 6 color ranges if changed on options', async function () {
+      await PageObjects.visualize.clickOptionsTab();
+      await PageObjects.visualize.changeHeatmapColorNumbers(6);
+      await PageObjects.visualize.clickGo();
+      const legends = await PageObjects.visualize.getLegendEntries();
+      const expectedLegends = [
+        '0 - 267',
+        '267 - 534',
+        '534 - 800',
+        '800 - 1,067',
+        '1,067 - 1,334',
+        '1,334 - 1,600',
+      ];
+      expect(legends).to.eql(expectedLegends);
+    });
+    it('should show 6 custom color ranges', async function () {
+      await PageObjects.visualize.clickOptionsTab();
+      await PageObjects.visualize.clickEnableCustomRanges();
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.isCustomRangeTableShown();
+      await PageObjects.visualize.addCustomRange(0, 100);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(100, 200);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(200, 300);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(300, 400);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(400, 500);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(500, 600);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(600, 700);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(700, 800);
+      await PageObjects.visualize.clickGo();
+      const legends = await PageObjects.visualize.getLegendEntries();
+      const expectedLegends = [
+        '0 - 100',
+        '100 - 200',
+        '200 - 300',
+        '300 - 400',
+        '400 - 500',
+        '500 - 600',
+        '600 - 700',
+        '700 - 800',
+      ];
+      expect(legends).to.eql(expectedLegends);
     });
   });
 }

@@ -1,0 +1,60 @@
+<div ng-show="add.form">
+  <label
+    i18n-id="common.ui.vis.editors.aggAdd.selectGroupTypeLabel"
+    i18n-default-message="Select {groupNameLabel} type"
+    i18n-values="{ groupNameLabel }"
+  >
+  </label>
+  <ul class="form-group list-group list-group-menu">
+    <li
+      tabindex="0"
+      id="aggSchemaListItem-{{$index}}"
+      ng-hide="schema.deprecate"
+      ng-repeat="schema in availableSchema"
+      ng-click="add.submit(schema)"
+      class="list-group-item list-group-menu-item"
+      data-test-subj="{{schema.title}}">
+      <i ng-show="schema.icon" ng-class="schema.icon"></i>
+      {{schema.title}}
+    </li>
+  </ul>
+</div>
+
+<div class="euiSpacer euiSpacer--s"></div>
+
+<div
+  ng-if="stats.max > stats.count"
+  ng-init="add.form = stats.count < 1 ? !add.form : add.form"
+  ng-click="add.form = !add.form"
+  class="eui-textCenter">
+
+  <div ng-if="!add.form">
+    <button
+      data-test-subj="visualizeEditorAddAggregationButton"
+      class="kuiButton kuiButton--secondary kuiButton--small"
+      ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate"
+      i18n-id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
+      i18n-default-message="Add {groupNameLabel}"
+      i18n-values="{ groupNameLabel }"
+    >
+    </button>
+
+    <button
+      data-test-subj="visualizeEditorAddAggregationButton"
+      class="kuiButton kuiButton--secondary kuiButton--small"
+      ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate"
+      i18n-id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
+      i18n-default-message="Add sub-{groupNameLabel}"
+      i18n-values="{ groupNameLabel }"
+    >
+    </button>
+  </div>
+
+  <button
+    class="kuiButton kuiButton--danger kuiButton--small"
+    ng-if="add.form"
+    i18n-id="common.ui.vis.editors.aggAdd.cancelButtonLabel"
+    i18n-default-message="Cancel"
+  >
+  </button>
+</div>

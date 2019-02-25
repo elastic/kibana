@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import moment from 'moment';
-import { noop, random, get, find } from 'lodash';
+import { noop, random, get, find, identity } from 'lodash';
 import { ClientMock } from './fixtures/elasticsearch';
 import { QueueMock } from './fixtures/queue';
 import { Worker } from '../worker';
@@ -253,7 +253,7 @@ describe('Worker class', function () {
     it('should use error multiplier when processPendingJobs rejects the Promise', async function () {
       worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 
-      const processPendingJobsStub = sinon.stub(worker, "_processPendingJobs").returns(Promise.reject(new Error('test error')));
+      const processPendingJobsStub = sinon.stub(worker, '_processPendingJobs').returns(Promise.reject(new Error('test error')));
 
       await allowPoll(defaultWorkerOptions.interval);
       expect(processPendingJobsStub.callCount).to.be(1);
@@ -266,7 +266,7 @@ describe('Worker class', function () {
     it('should not use error multiplier when processPendingJobs resolved the Promise', async function () {
       worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 
-      const processPendingJobsStub = sinon.stub(worker, "_processPendingJobs").callsFake(() => Promise.resolve());
+      const processPendingJobsStub = sinon.stub(worker, '_processPendingJobs').callsFake(() => Promise.resolve());
 
       await allowPoll(defaultWorkerOptions.interval);
       expect(processPendingJobsStub.callCount).to.be(1);
@@ -336,11 +336,6 @@ describe('Worker class', function () {
         searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.resolve({ hits: { hits: [] } }));
       });
 
-      it('should query with version', function () {
-        const params = getSearchParams();
-        expect(params).to.have.property('version', true);
-      });
-
       it('should query by default doctype', function () {
         const params = getSearchParams();
         expect(params).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
@@ -354,7 +349,7 @@ describe('Worker class', function () {
     });
 
     describe('query body', function () {
-      const conditionPath = 'query.constant_score.filter.bool';
+      const conditionPath = 'query.bool.filter.bool';
       const jobtype = 'test_jobtype';
 
       beforeEach(() => {
@@ -367,6 +362,11 @@ describe('Worker class', function () {
         clock.restore();
       });
 
+      it('should query with seq_no_primary_term', function () {
+        const { body } = getSearchParams(jobtype);
+        expect(body).to.have.property('seq_no_primary_term', true);
+      });
+
       it('should filter unwanted source data', function () {
         const excludedFields = [ 'output.content' ];
         const { body } = getSearchParams(jobtype);
@@ -377,7 +377,7 @@ describe('Worker class', function () {
       it('should search by job type', function () {
         const { body } = getSearchParams(jobtype);
         const conditions = get(body, conditionPath);
-        expect(conditions.filter).to.eql({ term: { jobtype: jobtype } });
+        expect(conditions.must).to.eql({ term: { jobtype: jobtype } });
       });
 
       it('should search for pending or expired jobs', function () {
@@ -388,7 +388,7 @@ describe('Worker class', function () {
         // this works because we are stopping the clock, so all times match
         const nowTime = moment().toISOString();
         const pending = { term: { status: 'pending' } };
-        const expired = { bool: { filter: [
+        const expired = { bool: { must: [
           { term: { status: 'processing' } },
           { range: { process_expiration: { lte: nowTime } } }
         ] } };
@@ -398,6 +398,12 @@ describe('Worker class', function () {
 
         const expiredMatch = find(conditions.should, expired);
         expect(expiredMatch).to.not.be(undefined);
+      });
+
+      it('specify that there should be at least one match', function () {
+        const { body } = getSearchParams(jobtype);
+        const conditions = get(body, conditionPath);
+        expect(conditions).to.have.property('minimum_should_match', 1);
       });
 
       it('should use default size', function () {
@@ -426,7 +432,6 @@ describe('Worker class', function () {
         index: 'myIndex',
         type: 'test',
         id: 12345,
-        version: 3
       };
       return mockQueue.client.get(params)
         .then((jobDoc) => {
@@ -440,13 +445,14 @@ describe('Worker class', function () {
       clock.restore();
     });
 
-    it('should use version on update', function () {
+    it('should use seqNo and primaryTerm on update', function () {
       worker._claimJob(job);
       const query = updateSpy.firstCall.args[0];
       expect(query).to.have.property('index', job._index);
       expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
-      expect(query).to.have.property('version', job._version);
+      expect(query).to.have.property('if_seq_no', job._seq_no);
+      expect(query).to.have.property('if_primary_term', job._primary_term);
     });
 
     it('should increment the job attempts', function () {
@@ -494,25 +500,58 @@ describe('Worker class', function () {
       expect(msg).to.equal(false);
     });
 
-    it('should return true on version errors', function () {
+    it('should reject the promise on conflict errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
       return worker._claimJob(job)
-        .then((res) => expect(res).to.equal(true));
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 409 });
+        });
     });
 
-    it('should return false on other errors', function () {
+    it('should reject the promise on other errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
       return worker._claimJob(job)
-        .then((res) => expect(res).to.equal(false));
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 401 });
+        });
+    });
+  });
+
+  describe('find a pending job to claim', function () {
+    const getMockJobs = (status = 'pending') => ([{
+      _index: 'myIndex',
+      _type: 'test',
+      _id: 12345,
+      _seq_no: 3,
+      _primary_term: 3,
+      found: true,
+      _source: {
+        jobtype: 'jobtype',
+        created_by: false,
+        payload: { id: 'sample-job-1', now: 'Mon Apr 25 2016 14:13:04 GMT-0700 (MST)' },
+        priority: 10,
+        timeout: 10000,
+        created_at: '2016-04-25T21:13:04.738Z',
+        attempts: 0,
+        max_attempts: 3,
+        status
+      },
+    }]);
+
+    beforeEach(function () {
+      worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
     });
 
-    it('should emit on other errors', function (done) {
+    afterEach(() => {
       mockQueue.client.update.restore();
+    });
+
+    it('should emit for errors from claiming job', function (done) {
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
 
-      worker.on(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
+      worker.once(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
         try {
           expect(err).to.have.property('error');
           expect(err).to.have.property('job');
@@ -523,7 +562,30 @@ describe('Worker class', function () {
           done(e);
         }
       });
-      worker._claimJob(job);
+
+      worker._claimPendingJobs(getMockJobs());
+    });
+
+    it('should reject the promise if an error claiming the job', function () {
+      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
+      return worker._claimPendingJobs(getMockJobs())
+        .catch(err => {
+          expect(err).to.eql({ statusCode: 409 });
+        });
+    });
+
+    it('should get the pending job', function () {
+      sinon.stub(mockQueue.client, 'update').returns(Promise.resolve({ test: 'cool' }));
+      sinon.stub(worker, '_performJob').callsFake(identity);
+      return worker._claimPendingJobs(getMockJobs())
+        .then(claimedJob => {
+          expect(claimedJob._index).to.be('myIndex');
+          expect(claimedJob._type).to.be('test');
+          expect(claimedJob._source.jobtype).to.be('jobtype');
+          expect(claimedJob._source.status).to.be('processing');
+          expect(claimedJob.test).to.be('cool');
+          worker._performJob.restore();
+        });
     });
   });
 
@@ -547,13 +609,14 @@ describe('Worker class', function () {
       clock.restore();
     });
 
-    it('should use version on update', function () {
+    it('should use _seq_no and _primary_term on update', function () {
       worker._failJob(job);
       const query = updateSpy.firstCall.args[0];
       expect(query).to.have.property('index', job._index);
       expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
-      expect(query).to.have.property('version', job._version);
+      expect(query).to.have.property('if_seq_no', job._seq_no);
+      expect(query).to.have.property('if_primary_term', job._primary_term);
     });
 
     it('should set status to failed', function () {
@@ -570,7 +633,7 @@ describe('Worker class', function () {
       expect(doc.output).to.have.property('content', msg);
     });
 
-    it('should return true on version mismatch errors', function () {
+    it('should return true on conflict errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
       return worker._failJob(job)
@@ -674,7 +737,8 @@ describe('Worker class', function () {
             expect(query).to.have.property('index', job._index);
             expect(query).to.have.property('type', job._type);
             expect(query).to.have.property('id', job._id);
-            expect(query).to.have.property('version', job._version);
+            expect(query).to.have.property('if_seq_no', job._seq_no);
+            expect(query).to.have.property('if_primary_term', job._primary_term);
             expect(query.body.doc).to.have.property('output');
             expect(query.body.doc.output).to.have.property('content_type', false);
             expect(query.body.doc.output).to.have.property('content', payload);
@@ -805,6 +869,33 @@ describe('Worker class', function () {
     function getFailStub(workerWithFailure) {
       return sinon.stub(workerWithFailure, '_failJob').returns(Promise.resolve());
     }
+
+    describe('saving output failure', () => {
+      it('should mark the job as failed if saving to ES fails', async () => {
+        const job = {
+          _id: 'shouldSucced',
+          _source: {
+            timeout: 1000,
+            payload: 'test'
+          }
+        };
+
+        sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 413 }));
+
+        const workerFn = function (jobPayload) {
+          return new Promise(function (resolve) {
+            setTimeout(() => resolve(jobPayload), 10);
+          });
+        };
+        const worker = new Worker(mockQueue, 'test', workerFn, defaultWorkerOptions);
+        const failStub = getFailStub(worker);
+
+        await worker._performJob(job);
+        worker.destroy();
+
+        sinon.assert.called(failStub);
+      });
+    });
 
     describe('search failure', function () {
       it('causes _processPendingJobs to reject the Promise', function () {

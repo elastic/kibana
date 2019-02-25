@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/beats', {
-        from: '2017-12-19 17:14:09',
-        to: '2017-12-19 18:15:09',
+        from: '2017-12-19 17:14:09.000',
+        to: '2017-12-19 18:15:09.000',
       });
 
       // go to beats listing
@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
         duckbeat: 1,
         sheepbeat: 1,
         winlogbeat: 1,
-        totalEvents: '699.9k',
-        bytesSent: '427.9 MB',
+        totalEvents: 'Total Events\n699.9k',
+        bytesSent: 'Bytes Sent\n427.9 MB',
       });
     });
 

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { fromRoot, pkg } from '../../utils';
+import { fromRoot, pkg } from '../../legacy/utils';
 import install from './install';
 import Logger from '../lib/logger';
-import { getConfig } from '../../server/path';
+import { getConfig } from '../../legacy/server/path';
 import { parse, parseMilliseconds } from './settings';
 import logWarnings from '../lib/log_warnings';
 import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
@@ -32,7 +32,7 @@ function processCommand(command, options) {
   } catch (ex) {
     //The logger has not yet been initialized.
     console.error(ex.message);
-    process.exit(64); // eslint-disable-line no-process-exit
+    process.exit(64);
   }
 
   const logger = new Logger(settings);

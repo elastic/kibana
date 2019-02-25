@@ -26,8 +26,9 @@ import {
   isStoppable,
   isClosable,
 } from '../utils';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class MultiJobActionsMenu extends Component {
+class MultiJobActionsMenuUI extends Component {
   constructor(props) {
     super(props);
 
@@ -58,13 +59,15 @@ export class MultiJobActionsMenu extends Component {
         size="s"
         onClick={this.onButtonClick}
         iconType="gear"
-        aria-label="Management actions"
+        aria-label={this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
+          defaultMessage: 'Management actions'
+        })}
         color="text"
         disabled={(this.canDeleteJob === false && this.canStartStopDatafeed === false)}
       />
     );
 
-    const s = (this.props.jobs.length > 1) ? 's' : '';
     const items = [
       (
         <EuiContextMenuItem
@@ -73,7 +76,11 @@ export class MultiJobActionsMenu extends Component {
           disabled={(this.canDeleteJob === false)}
           onClick={() => { this.props.showDeleteJobModal(this.props.jobs); this.closePopover(); }}
         >
-          Delete job{s}
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.deleteJobsLabel"
+            defaultMessage="Delete {jobsCount, plural, one {job} other {jobs}}"
+            values={{ jobsCount: this.props.jobs.length }}
+          />
         </EuiContextMenuItem>
       )
     ];
@@ -86,7 +93,11 @@ export class MultiJobActionsMenu extends Component {
           disabled={(this.canCloseJob === false)}
           onClick={() => { closeJobs(this.props.jobs); this.closePopover(); }}
         >
-          Close job{s}
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.closeJobsLabel"
+            defaultMessage="Close {jobsCount, plural, one {job} other {jobs}}"
+            values={{ jobsCount: this.props.jobs.length }}
+          />
         </EuiContextMenuItem>
       );
     }
@@ -99,7 +110,11 @@ export class MultiJobActionsMenu extends Component {
           disabled={(this.canStartStopDatafeed === false)}
           onClick={() => { stopDatafeeds(this.props.jobs, this.props.refreshJobs); this.closePopover(); }}
         >
-          Stop datafeed{s}
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel"
+            defaultMessage="Stop {jobsCount, plural, one {datafeed} other {datafeeds}}"
+            values={{ jobsCount: this.props.jobs.length }}
+          />
         </EuiContextMenuItem>
       );
     }
@@ -112,7 +127,11 @@ export class MultiJobActionsMenu extends Component {
           disabled={(this.canStartStopDatafeed === false)}
           onClick={() => { this.props.showStartDatafeedModal(this.props.jobs); this.closePopover(); }}
         >
-          Start datafeed{s}
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel"
+            defaultMessage="Start {jobsCount, plural, one {datafeed} other {datafeeds}}"
+            values={{ jobsCount: this.props.jobs.length }}
+          />
         </EuiContextMenuItem>
       );
     }
@@ -132,9 +151,11 @@ export class MultiJobActionsMenu extends Component {
     );
   }
 }
-MultiJobActionsMenu.propTypes = {
+MultiJobActionsMenuUI.propTypes = {
   jobs: PropTypes.array.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
 };
+
+export const MultiJobActionsMenu = injectI18n(MultiJobActionsMenuUI);

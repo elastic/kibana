@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import { Writable } from 'stream';
+
 import { runTestsCli } from './cli';
+import { checkMockConsoleLogSnapshot } from '../../test_helpers';
 
 // Note: Stub the runTests function to keep testing only around the cli
 // method and arguments.
@@ -35,7 +38,7 @@ describe('run tests CLI', () => {
     const processMock = {
       exit: exitMock,
       argv: argvMock,
-      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn() },
+      stdout: new Writable(),
       cwd: jest.fn(),
     };
 
@@ -62,7 +65,7 @@ describe('run tests CLI', () => {
       await runTestsCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('rejects empty config value if no default passed', async () => {
@@ -71,7 +74,7 @@ describe('run tests CLI', () => {
       await runTestsCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts empty config value if default passed', async () => {
@@ -88,7 +91,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts string value for kibana-install-dir', async () => {
@@ -105,7 +108,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts boolean value for updateBaselines', async () => {
@@ -130,7 +133,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts value for grep', async () => {
@@ -187,7 +190,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).not.toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('rejects invalid options even if valid options exist', async () => {
@@ -196,7 +199,7 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).toHaveBeenCalledWith(1);
-      expect(logMock.mock.calls).toMatchSnapshot();
+      checkMockConsoleLogSnapshot(logMock);
     });
   });
 });

@@ -1,0 +1,97 @@
+<div class="vgaEditor" ng-controller="VegaEditorController">
+  <div
+    kbn-ui-ace-keyboard-mode
+    ui-ace="{
+      onLoad: aceLoaded,
+      useWrapMode: true,
+      advanced: {
+        highlightActiveLine: false
+      },
+      rendererOptions: {
+        showPrintMargin: false
+      },
+      mode: 'hjson'
+    }"
+    id="vegaAceEditor"
+    ng-model="editorState.params.spec"
+    data-test-subj="vega-editor"
+    class="vgaEditor__aceEditor"
+  ></div>
+
+  <div class="vgaEditor__aceEditorActions">
+    <span dropdown>
+      <button
+        id="vegaHelp"
+        class="editor_action"
+        dropdown-toggle
+        aria-label="{{::'vega.editor.vegaHelpButtonAriaLabel' | i18n: {defaultMessage: 'Vega help'} }}"
+      >
+        <span class="kuiIcon fa-question-circle"></span>
+      </button>
+      <ul
+        class="dropdown-menu"
+        role="menu"
+        aria-labelledby="vegaHelp"
+      >
+        <li role="menuitem">
+          <a
+            target="_blank"
+            rel="noopener"
+            href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
+            i18n-id="vega.editor.vegaHelpLinkText"
+            i18n-default-message="Kibana Vega Help"
+          ></a>
+        </li>
+        <li role="menuitem">
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://vega.github.io/vega-lite/docs/"
+            i18n-id="vega.editor.vegaLiteDocumentationLinkText"
+            i18n-default-message="Vega-Lite Documentation"
+          ></a>
+        </li>
+        <li role="menuitem">
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://vega.github.io/vega/docs/"
+            i18n-id="vega.editor.vegaDocumentationLinkText"
+            i18n-default-message="Vega Documentation"
+          ></a>
+        </li>
+      </ul>
+    </span>
+    <span dropdown>
+      <button
+        id="vegaOptions"
+        class="editor_action"
+        dropdown-toggle
+        aria-label="{{::'vega.editor.vegaEditorOptionsButtonAriaLabel' | i18n: {defaultMessage: 'Vega editor options'} }}"
+      >
+        <span class="kuiIcon fa-wrench"></span>
+      </button>
+      <ul
+        class="dropdown-menu"
+        role="menu"
+        aria-labelledby="vegaOptions"
+      >
+        <li role="menuitem">
+          <button
+            ng-click="formatHJson($event)"
+            i18n-id="vega.editor.reformatAsHJSONButtonLabel"
+            i18n-default-message="Reformat as HJSON"
+          ></button>
+        </li>
+        <li role="menuitem">
+          <button
+            ng-click="formatJson($event)"
+            i18n-id="vega.editor.reformatAsJSONButtonLabel"
+            i18n-default-message="Reformat as JSON, delete comments"
+          ></button>
+        </li>
+      </ul>
+    </span>
+  </div>
+
+</div>

@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { omit } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
   const pipelineList = getService('pipelineList');
@@ -19,39 +19,43 @@ export default function ({ getService, getPageObjects }) {
     let originalWindowSize;
 
     before(async () => {
-      originalWindowSize = await remote.getWindowSize();
-      await remote.setWindowSize(1600, 1000);
+      originalWindowSize = await browser.getWindowSize();
+      await browser.setWindowSize(1600, 1000);
       await esArchiver.load('logstash/example_pipelines');
       await PageObjects.logstash.gotoPipelineList();
     });
 
     after(async () => {
       await esArchiver.unload('logstash/example_pipelines');
-      await remote.setWindowSize(originalWindowSize.width, originalWindowSize.height);
+      await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 
     it('shows example pipelines', async () => {
-      const rows = await pipelineList.getRowsFromTable();
+      const rows = await pipelineList.readRows();
       const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
 
       for (const time of rows.map(row => row.lastModified)) {
         // last modified is a relative time string. Check for 'ago' suffix
-        expect(time).to.be.a('string').match(/ ago$/);
+        expect(time)
+          .to.be.a('string')
+          .match(/ ago$/);
       }
 
-      const expectedRows = [{
-        selected: false,
-        id: 'tweets_and_beats',
-        description: 'ingest tweets and beats',
-        username: 'elastic'
-      }];
+      const expectedRows = [
+        {
+          selected: false,
+          id: 'tweets_and_beats',
+          description: 'ingest tweets and beats',
+          username: 'elastic',
+        },
+      ];
 
       for (let emptyPipelineId = 1; emptyPipelineId <= 19; ++emptyPipelineId) {
         expectedRows.push({
           selected: false,
           id: `empty_pipeline_${emptyPipelineId}`,
           description: 'an empty pipeline',
-          username: 'elastic'
+          username: 'elastic',
         });
       }
 
@@ -63,14 +67,14 @@ export default function ({ getService, getPageObjects }) {
         // select all
         await pipelineList.clickSelectAll();
 
-        for (const row of await pipelineList.getRowsFromTable()) {
+        for (const row of await pipelineList.readRows()) {
           expect(row).to.have.property('selected', true);
         }
 
         // unselect all
         await pipelineList.clickSelectAll();
 
-        for (const row of await pipelineList.getRowsFromTable()) {
+        for (const row of await pipelineList.readRows()) {
           expect(row).to.have.property('selected', false);
         }
       });
@@ -89,13 +93,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('delete button', () => {
-      it('is disabled when no rows are selected', async () => {
+      it('is missing when no rows are selected', async () => {
         await pipelineList.deselectAllRows();
-        await pipelineList.assertDeleteButton({ enabled: false });
+        await pipelineList.assertDeleteButtonMissing();
       });
 
       it('is enabled when all rows are selected', async () => {
-        await pipelineList.selectAllRows();
+        await pipelineList.clickSelectAll();
         await pipelineList.assertDeleteButton({ enabled: true });
       });
 
@@ -109,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
     describe('filter', () => {
       it('filters the pipeline list', async () => {
         await pipelineList.setFilter('tweets');
-        const rows = await pipelineList.getRowsFromTable();
+        const rows = await pipelineList.readRows();
 
         expect(rows).to.have.length(1);
         expect(rows[0]).to.have.property('id', 'tweets_and_beats');
@@ -136,12 +140,14 @@ export default function ({ getService, getPageObjects }) {
 
       it('takes user to the second page', async () => {
         await pipelineList.clickNextPage();
-        const rows = await pipelineList.getRowsFromTable();
+        const rows = await pipelineList.readRows();
         const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
 
         for (const time of rows.map(row => row.lastModified)) {
           // last modified is a relative time string. Check for 'ago' suffix
-          expect(time).to.be.a('string').match(/ ago$/);
+          expect(time)
+            .to.be.a('string')
+            .match(/ ago$/);
         }
 
         expect(rowsWithoutTime).to.eql([
@@ -149,21 +155,20 @@ export default function ({ getService, getPageObjects }) {
             selected: false,
             id: 'empty_pipeline_20',
             description: 'an empty pipeline',
-            username: 'elastic'
+            username: 'elastic',
           },
           {
             selected: false,
             id: 'empty_pipeline_21',
             description: 'an empty pipeline',
-            username: 'elastic'
-          }
+            username: 'elastic',
+          },
         ]);
       });
     });
 
     describe('clone button', () => {
       it('links to the pipeline editor with cloned pipeline details', async () => {
-
         // First, create a random pipeline
         await PageObjects.logstash.gotoNewPipelineEditor();
 
@@ -188,9 +193,15 @@ export default function ({ getService, getPageObjects }) {
         await pipelineEditor.setQueueCheckpointWrites(queueCheckpointWrites);
 
         await pipelineEditor.assertInputs({
-          id, description, pipeline,
-          workers, batchSize,
-          queueType, queueMaxBytesNumber, queueMaxBytesUnits, queueCheckpointWrites
+          id,
+          description,
+          pipeline,
+          workers,
+          batchSize,
+          queueType,
+          queueMaxBytesNumber,
+          queueMaxBytesUnits,
+          queueCheckpointWrites,
         });
 
         await pipelineEditor.clickSave();
@@ -203,11 +214,16 @@ export default function ({ getService, getPageObjects }) {
 
         // Check that pipeline edit view is shown with cloned pipeline details
         await pipelineEditor.assertInputs({
-          id: '', description, pipeline,
-          workers, batchSize,
-          queueType, queueMaxBytesNumber, queueMaxBytesUnits, queueCheckpointWrites
+          id: '',
+          description,
+          pipeline,
+          workers,
+          batchSize,
+          queueType,
+          queueMaxBytesNumber,
+          queueMaxBytesUnits,
+          queueCheckpointWrites,
         });
-
       });
 
       after(async () => {

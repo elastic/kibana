@@ -22,18 +22,18 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await remote.setWindowSize(1000, 500);
+      await browser.setWindowSize(1000, 500);
     });
 
     after(async function () {
-      await remote.setWindowSize(1300, 900);
+      await browser.setWindowSize(1300, 900);
       const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
       await PageObjects.dashboard.deleteDashboard('area', id);
     });
@@ -50,14 +50,15 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(percentSimilar).to.be.lessThan(0.05);
+      expect(percentDifference).to.be.lessThan(0.05);
     });
 
     it('compare area chart snapshot', async () => {
@@ -70,15 +71,16 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
       // Testing some OS/browser differences were shown to cause .009 percent difference.
-      expect(percentSimilar).to.be.lessThan(0.05);
+      expect(percentDifference).to.be.lessThan(0.05);
     });
   });
 }

@@ -32,6 +32,8 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
+  SharePageProvider,
+  TimePickerPageProvider,
 } from './page_objects';
 
 import {
@@ -52,6 +54,12 @@ import {
   ComboBoxProvider,
   EmbeddingProvider,
   RenderableProvider,
+  TableProvider,
+  BrowserProvider,
+  InspectorProvider,
+  PieChartProvider,
+  AppsMenuProvider,
+  GlobalNavProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -85,14 +93,16 @@ export default async function ({ readConfigFile }) {
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
       visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
+      timelion: TimelionPageProvider,
+      share: SharePageProvider,
+      timePicker: TimePickerPageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
       retry: commonConfig.get('services.retry'),
-      remote: RemoteProvider,
+      __leadfoot__: RemoteProvider,
       filterBar: FilterBarProvider,
       queryBar: QueryBarProvider,
       find: FindProvider,
@@ -109,10 +119,14 @@ export default async function ({ readConfigFile }) {
       comboBox: ComboBoxProvider,
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
+      table: TableProvider,
+      browser: BrowserProvider,
+      pieChart: PieChartProvider,
+      inspector: InspectorProvider,
+      appsMenu: AppsMenuProvider,
+      globalNav: GlobalNavProvider,
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
@@ -122,6 +136,14 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false
+      },
     },
 
     apps: {
@@ -154,6 +176,10 @@ export default async function ({ readConfigFile }) {
       console: {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
+      },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
       },
       home: {
         pathname: '/app/kibana',

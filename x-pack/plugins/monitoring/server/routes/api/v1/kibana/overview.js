@@ -10,6 +10,7 @@ import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
+import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 
 export function kibanaOverviewRoute(server) {
   /**
@@ -32,11 +33,11 @@ export function kibanaOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const kbnIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.kibana.index_pattern', ccs);
+      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
         const [ clusterStatus, metrics ] = await Promise.all([
@@ -44,12 +45,12 @@ export function kibanaOverviewRoute(server) {
           getMetrics(req, kbnIndexPattern, metricSet),
         ]);
 
-        reply({
+        return {
           clusterStatus,
           metrics,
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });
