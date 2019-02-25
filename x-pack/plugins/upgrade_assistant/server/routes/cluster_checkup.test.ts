@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { Server } from 'hapi';
+
+jest.mock('../lib/es_version_precheck');
+import { EsVersionPrecheck } from '../lib/es_version_precheck';
 import { registerClusterCheckupRoutes } from './cluster_checkup';
 
 // Need to require to get mock on named export to work.
@@ -124,6 +128,19 @@ describe('cluster checkup API', () => {
       });
 
       expect(resp.statusCode).toEqual(500);
+    });
+
+    it('returns a 426 if EsVersionCheck throws', async () => {
+      (EsVersionPrecheck.method as jest.Mock).mockRejectedValue(
+        new Boom(`blah`, { statusCode: 426 })
+      );
+
+      const resp = await server.inject({
+        method: 'GET',
+        url: '/api/upgrade_assistant/status',
+      });
+
+      expect(resp.statusCode).toEqual(426);
     });
   });
 });
