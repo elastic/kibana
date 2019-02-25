@@ -7,7 +7,7 @@
 import { compose, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { canUserWrite } from '../../state/selectors/app';
-import { getWorkpadName, getSelectedPage, isWriteable } from '../../state/selectors/workpad';
+import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { setWriteable } from '../../state/actions/workpad';
 import { addElement } from '../../state/actions/elements';
 import { WorkpadHeader as Component } from './workpad_header';
@@ -15,7 +15,6 @@ import { WorkpadHeader as Component } from './workpad_header';
 const mapStateToProps = state => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
   canUserWrite: canUserWrite(state),
-  workpadName: getWorkpadName(state),
   selectedPage: getSelectedPage(state),
 });
 
