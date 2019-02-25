@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import chrome from 'ui/chrome';
 
@@ -14,10 +15,27 @@ export function InvalidLicenseNotification() {
     <EuiEmptyPrompt
       iconType="alert"
       iconColor="warning"
-      title={<h1>Invalid license</h1>}
-      body={<p>Your current license does not support the Kibana APM UI.</p>}
+      title={
+        <h1>
+          {i18n.translate('xpack.apm.invalidLicense.title', {
+            defaultMessage: 'Invalid License'
+          })}
+        </h1>
+      }
+      body={
+        <p>
+          {i18n.translate('xpack.apm.invalidLicense.message', {
+            defaultMessage:
+              'Your current license does not support the Kibana APM UI.'
+          })}
+        </p>
+      }
       actions={[
-        <EuiButton href={MANAGE_LICENSE_URL}>Manage your license</EuiButton>
+        <EuiButton href={MANAGE_LICENSE_URL}>
+          {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
+            defaultMessage: 'Manage your license'
+          })}
+        </EuiButton>
       ]}
     />
   );
