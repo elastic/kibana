@@ -16,7 +16,6 @@ import {
   EuiIconTip
 } from '@elastic/eui';
 
-
 function flattenPanelTree(tree, array = []) {
   array.push(tree);
 
@@ -32,12 +31,35 @@ function flattenPanelTree(tree, array = []) {
   return array;
 }
 
+function cleanDisplayName(displayName) {
+  if (!displayName) {
+    return displayName;
+  }
+  return displayName.split(' ').join('');
+}
+
 export class LayerTocActions extends Component {
 
-
   state = {
-    isPopoverOpen: false
+    isPopoverOpen: false,
+    supportsFitToBounds: false,
   };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadSupportsFitToBounds();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async _loadSupportsFitToBounds() {
+    const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
+    if (this._isMounted) {
+      this.setState({ supportsFitToBounds });
+    }
+  }
 
   _onClick = () => {
     this.setState(prevState => ({
@@ -59,6 +81,7 @@ export class LayerTocActions extends Component {
         flush="left"
         color="text"
         onClick={this._onClick}
+        data-test-subj={`layerTocActionsPanelToggleButton${cleanDisplayName(this.props.displayName)}`}
       >
         {icon}
       </EuiButtonEmpty>);
@@ -122,6 +145,9 @@ export class LayerTocActions extends Component {
               size="m"
             />
           ),
+          'data-test-subj': 'fitToBoundsButton',
+          toolTipContent: this.state.supportsFitToBounds ? null : 'Layer does not support fit to data',
+          disabled: !this.state.supportsFitToBounds,
           onClick: () => {
             this._closePopover();
             this.props.fitToBounds();
@@ -130,6 +156,7 @@ export class LayerTocActions extends Component {
         {
           name: this.props.layer.isVisible() ? 'Hide layer' : 'Show layer',
           icon: visibilityToggle,
+          'data-test-subj': 'layerVisibilityToggleButton',
           onClick: () => {
             this._closePopover();
             this.props.toggleVisible();
@@ -155,6 +182,7 @@ export class LayerTocActions extends Component {
         <EuiContextMenu
           initialPanelId={0}
           panels={this._getPanels()}
+          data-test-subj={`layerTocActionsPanel${cleanDisplayName(this.props.displayName)}`}
         />
       </EuiPopover>);
   }

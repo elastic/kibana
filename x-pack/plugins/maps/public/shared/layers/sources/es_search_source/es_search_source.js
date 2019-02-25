@@ -9,9 +9,6 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { AbstractESSource } from '../es_source';
-import {
-  indexPatternService,
-} from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -21,21 +18,26 @@ const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends AbstractESSource {
 
   static type = 'ES_SEARCH';
-  static title = 'Elasticsearch documents';
+  static title = 'Documents';
   static description = 'Geospatial data from a Kibana index pattern';
 
-  static renderEditor({ onPreviewSource }) {
-    const onSelect = (layerConfig) => {
-      const layerSource = new ESSearchSource({
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
+    const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const source = new ESSearchSource({
         id: uuid(),
-        ...layerConfig
-      });
-      onPreviewSource(layerSource);
+        ...sourceConfig
+      }, inspectorAdapters);
+      onPreviewSource(source);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
 
-  constructor(descriptor) {
+  constructor(descriptor, inspectorAdapters) {
     super({
       id: descriptor.id,
       type: ESSearchSource.type,
@@ -44,7 +46,7 @@ export class ESSearchSource extends AbstractESSource {
       limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
-    });
+    }, inspectorAdapters);
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -59,10 +61,18 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getNumberFields() {
-    const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    return indexPattern.fields.byType.number.map(field => {
-      return { name: field.name, label: field.name };
-    });
+    try {
+      const indexPattern = await this._getIndexPattern();
+      return indexPattern.fields.byType.number.map(field => {
+        return { name: field.name, label: field.name };
+      });
+    } catch (error) {
+      return [];
+    }
+  }
+
+  getMetricFields() {
+    return [];
   }
 
   getFieldNames() {

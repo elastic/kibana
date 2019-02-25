@@ -15,16 +15,13 @@ import {
 
 export class AttributionControl  extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      uniqueAttributions: []
-    };
+  state = {
+    uniqueAttributions: []
   }
 
   componentDidMount() {
     this._isMounted = true;
-    this._syncMbMapWithAttribution();
+    this._loadAttributions();
   }
 
   componentWillUnmount() {
@@ -32,13 +29,16 @@ export class AttributionControl  extends React.Component {
   }
 
   componentDidUpdate() {
-    this._syncMbMapWithAttribution();
+    this._loadAttributions();
   }
 
-  _syncMbMapWithAttribution = async () => {
-
-    const attributionPromises = this.props.layerList.map(layer => {
-      return layer.getAttributions();
+  _loadAttributions = async () => {
+    const attributionPromises = this.props.layerList.map(async (layer) => {
+      try {
+        return await layer.getAttributions();
+      } catch (error) {
+        return [];
+      }
     });
     const attributions = await Promise.all(attributionPromises);
     if (!this._isMounted) {
@@ -62,11 +62,21 @@ export class AttributionControl  extends React.Component {
     }
   };
 
+  _renderAttribution({ url, label }) {
+    if (!url) {
+      return label;
+    }
+
+    return (
+      <EuiLink color="subdued" href={url} target="_blank">{label}</EuiLink>
+    );
+  }
+
   _renderAttributions() {
     return this.state.uniqueAttributions.map((attribution, index) => {
       return (
         <Fragment key={index}>
-          <EuiLink color="subdued" href={attribution.url} target="_blank">{attribution.label}</EuiLink>
+          {this._renderAttribution(attribution)}
           {index < (this.state.uniqueAttributions.length - 1) && ', '}
         </Fragment>
       );

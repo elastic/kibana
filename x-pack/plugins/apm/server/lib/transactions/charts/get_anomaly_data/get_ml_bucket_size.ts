@@ -5,6 +5,7 @@
  */
 
 import { idx } from 'x-pack/plugins/apm/common/idx';
+import { getMlIndex } from 'x-pack/plugins/apm/common/ml_job_constants';
 import { Setup } from '../../../helpers/setup_request';
 
 interface IOptions {
@@ -24,18 +25,14 @@ export async function getMlBucketSize({
 }: IOptions): Promise<number> {
   const { client, start, end } = setup;
   const params = {
-    index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`.toLowerCase(),
+    index: getMlIndex(serviceName, transactionType),
     body: {
       _source: 'bucket_span',
       size: 1,
       query: {
         bool: {
-          must: {
-            exists: {
-              field: 'bucket_span'
-            }
-          },
           filter: [
+            { exists: { field: 'bucket_span' } },
             {
               range: {
                 timestamp: {

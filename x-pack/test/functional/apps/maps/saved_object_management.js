@@ -32,8 +32,8 @@ export default function ({ getPageObjects, getService }) {
 
       it('should update global Kibana refresh config to value stored with map', async () => {
         const kibanaRefreshConfig = await PageObjects.timePicker.getRefreshConfig();
-        expect(kibanaRefreshConfig.interval).to.equal('0.02');
-        expect(kibanaRefreshConfig.units).to.equal('minutes');
+        expect(kibanaRefreshConfig.interval).to.equal('1');
+        expect(kibanaRefreshConfig.units).to.equal('seconds');
         expect(kibanaRefreshConfig.isPaused).to.equal(true);
       });
 
@@ -80,6 +80,7 @@ export default function ({ getPageObjects, getService }) {
           const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
+          await PageObjects.maps.waitForLayersToLoad();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');

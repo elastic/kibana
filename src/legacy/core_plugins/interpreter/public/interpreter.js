@@ -17,38 +17,23 @@
  * under the License.
  */
 
-
-import { initializeInterpreter, loadBrowserRegistries, createSocket } from '@kbn/interpreter/public';
-import chrome from 'ui/chrome';
+import { register } from '@kbn/interpreter/common';
+import { initializeInterpreter, registries } from '@kbn/interpreter/public';
+import { kfetch } from 'ui/kfetch';
 import { functions } from './functions';
-import { functionsRegistry } from './functions_registry';
-import { typesRegistry } from './types_registry';
-import { renderFunctionsRegistry } from './render_functions_registry';
 import { visualization } from './renderers/visualization';
 
-const basePath = chrome.getInjected('serverBasePath');
-
-const types = {
-  browserFunctions: functionsRegistry,
-  renderers: renderFunctionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-renderFunctionsRegistry.register(visualization);
+register(registries, {
+  browserFunctions: functions,
+  renderers: [visualization],
+});
 
 let _resolve;
 let _interpreterPromise;
 
 const initialize = async () => {
-  await loadBrowserRegistries(types, basePath);
-  const socket = await createSocket(basePath, functionsRegistry);
-  initializeInterpreter(socket, typesRegistry, functionsRegistry).then(interpreter => {
-    _resolve({ interpreter, socket });
+  initializeInterpreter(kfetch, registries.types, registries.browserFunctions).then(interpreter => {
+    _resolve({ interpreter });
   });
 };
 
@@ -63,9 +48,4 @@ export const getInterpreter = async () => {
 export const interpretAst = async (...params) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(...params);
-};
-
-export const updateInterpreterFunctions = async () => {
-  const { socket } =  await getInterpreter();
-  socket.emit('updateFunctionList');
 };

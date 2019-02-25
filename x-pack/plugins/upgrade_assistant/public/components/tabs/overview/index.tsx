@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { NEXT_MAJOR_VERSION } from '../../../../common/version';
+import { LoadingErrorBanner } from '../../error_banner';
 import { LoadingState, UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
@@ -31,8 +32,8 @@ export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props =
       <p>
         <FormattedMessage
           id="xpack.upgradeAssistant.overviewTab.tabDetail"
-          defaultMessage="This assistant checks your cluster and indices and identifies the changes
-             you need to make before upgrading to Elasticsearch {nextEsVersion}."
+          defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
+           {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
           values={{
             nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
           }}
@@ -52,14 +53,18 @@ export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props =
 
     <EuiPageContent>
       <EuiPageContentBody>
-        {props.loadingState === LoadingState.Success ? (
-          <Steps {...props} />
-        ) : (
+        {props.loadingState === LoadingState.Success && <Steps {...props} />}
+
+        {props.loadingState === LoadingState.Loading && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner />
             </EuiFlexItem>
           </EuiFlexGroup>
+        )}
+
+        {props.loadingState === LoadingState.Error && (
+          <LoadingErrorBanner loadingError={props.loadingError} />
         )}
       </EuiPageContentBody>
     </EuiPageContent>

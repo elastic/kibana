@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "include": [
+    "typings/**/*",
     "common/**/*",
     "server/**/*",
     "plugins/**/*",
@@ -12,7 +13,7 @@
   "compilerOptions": {
     "paths": {
       "ui/*": [
-        "src/ui/public/*"
+        "src/legacy/ui/public/*"
       ],
       "plugins/xpack_main/*": [
         "x-pack/plugins/xpack_main/public/*"

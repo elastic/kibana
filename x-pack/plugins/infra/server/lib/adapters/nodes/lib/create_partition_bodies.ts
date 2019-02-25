@@ -27,8 +27,8 @@ export function createPartitionBodies(
   const numberOfPartitions: number = Math.ceil(totalNodes / NODE_REQUEST_PARTITION_SIZE);
   const indices =
     nodeOptions.metric.type === InfraMetricType.logRate
-      ? [sourceConfiguration.logAlias]
-      : [sourceConfiguration.metricAlias];
+      ? sourceConfiguration.logAlias
+      : sourceConfiguration.metricAlias;
   times(
     numberOfPartitions,
     (partitionId: number): void => {

@@ -7,18 +7,18 @@
 
 import React from 'react';
 import {
-  EuiSelect,
+  EuiComboBox,
   EuiFormRow,
 } from '@elastic/eui';
 
 import { getEmsVectorFilesMeta } from '../../../../meta';
-
+import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 
 export class EMSFileCreateSourceEditor extends React.Component {
 
-
   state = {
-    emsFileOptionsRaw: null
+    emsFileOptionsRaw: null,
+    selectedOption: null,
   };
 
   _loadFileOptions = async () => {
@@ -39,24 +39,42 @@ export class EMSFileCreateSourceEditor extends React.Component {
     this._loadFileOptions();
   }
 
+  _onChange = (selectedOptions) => {
+    if (selectedOptions.length === 0) {
+      return;
+    }
+
+    this.setState({ selectedOption: selectedOptions[0] });
+
+    const emsFileId = selectedOptions[0].value;
+    this.props.onChange(emsFileId);
+  }
+
   render() {
 
     if (!this.state.emsFileOptionsRaw) {
+      // TODO display loading message
       return null;
     }
 
-    const emsVectorOptions = this.state.emsFileOptionsRaw ? this.state.emsFileOptionsRaw.map((file) => ({
-      value: file.id,
-      text: file.name
-    })) : [];
-
+    const options = this.state.emsFileOptionsRaw.map(({ id, name }) => {
+      return { label: name, value: id };
+    });
 
     return (
-      <EuiFormRow label="Layer">
-        <EuiSelect
-          hasNoInitialSelection
-          options={emsVectorOptions}
-          onChange={this.props.onChange}
+      <EuiFormRow
+        label="Layer"
+        helpText={this.state.emsFileOptionsRaw.length === 0 ? getEmsUnavailableMessage() : null}
+      >
+        <EuiComboBox
+          placeholder="Select EMS vector shapes"
+          options={options}
+          selectedOptions={this.state.selectedOption ? [this.state.selectedOption] : []}
+          onChange={this._onChange}
+          isClearable={false}
+          singleSelection={true}
+          isDisabled={this.state.emsFileOptionsRaw.length === 0}
+          data-test-subj="emsVectorComboBox"
         />
       </EuiFormRow>
     );

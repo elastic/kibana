@@ -32,17 +32,3 @@
     max-width: 700px;
   }
 }
-
-
-
-@keyframes loginWelcome_FadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(200px), scale(.75);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0), scale(1);
-  }
-}

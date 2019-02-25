@@ -14,7 +14,7 @@ import { EMSTMSCreateSourceEditor } from './create_source_editor';
 export class EMSTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_TMS';
-  static title = 'Elastic Maps Service tiles';
+  static title = 'Tiles';
   static description = 'Map tiles from Elastic Maps Service';
   static icon = 'emsApp';
 
@@ -25,20 +25,16 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
       const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
-      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsTMSSource);
     };
 
     return <EMSTMSCreateSourceEditor onChange={onChange}/>;
-  }
-
-  constructor(descriptor) {
-    super(descriptor);
   }
 
   async getImmutableProperties() {
@@ -48,15 +44,15 @@ export class EMSTMSSource extends AbstractTMSSource {
     ];
   }
 
-  async _getTMSOptions() {
+  async _getEmsTmsMeta() {
     const emsTileServices = await getEmsTMSServices();
-    if(!emsTileServices) {
-      return;
-    }
-
-    return emsTileServices.find(service => {
+    const meta = emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
+    if (!meta) {
+      throw new Error(`Unable to find EMS tile configuration for id: ${this._descriptor.id}`);
+    }
+    return meta;
   }
 
   _createDefaultLayerDescriptor(options) {
@@ -78,12 +74,12 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getAttributions() {
-    const service = await this._getTMSOptions();
-    if (!service || !service.attributionMarkdown) {
+    const emsTmsMeta = await this._getEmsTmsMeta();
+    if (!emsTmsMeta.attributionMarkdown) {
       return [];
     }
 
-    return service.attributionMarkdown.split('|').map((attribution) => {
+    return emsTmsMeta.attributionMarkdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;
@@ -96,10 +92,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getUrlTemplate() {
-    const service = await this._getTMSOptions();
-    if (!service || !service.url) {
-      throw new Error('Cannot generate EMS TMS url template');
-    }
-    return service.url;
+    const emsTmsMeta = await this._getEmsTmsMeta();
+    return emsTmsMeta.url;
   }
 }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
@@ -12,7 +11,6 @@ import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { makeGeohashGridPolygon } from '../../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
@@ -21,10 +19,11 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { getGeohashPrecisionForZoom } from './zoom_to_precision';
+import { filterPropertiesForTooltip } from '../../util';
 
-const COUNT_PROP_LABEL = 'Count';
+const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
+const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
   {
@@ -41,8 +40,8 @@ const aggSchemas = new Schemas([
   {
     group: 'buckets',
     name: 'segment',
-    title: 'Geo Coordinates',
-    aggFilter: 'geohash_grid',
+    title: 'Geo Grid',
+    aggFilter: 'geotile_grid',
     min: 1,
     max: 1
   }
@@ -51,7 +50,7 @@ const aggSchemas = new Schemas([
 export class ESGeoGridSource extends AbstractESSource {
 
   static type = 'ES_GEO_GRID';
-  static title = 'Elasticsearch grid aggregation';
+  static title = 'Grid aggregation';
   static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
@@ -65,10 +64,15 @@ export class ESGeoGridSource extends AbstractESSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
       const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor);
+      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 
@@ -114,25 +118,30 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
+  isJoinable() {
+    return false;
+  }
+
   getGridResolution() {
     return this._descriptor.resolution;
   }
 
   getGeoGridPrecision(zoom) {
-    return getGeohashPrecisionForZoom(zoom) + this._getGeoGridPrecisionResolutionDelta();
+    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
+    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
   _getGeoGridPrecisionResolutionDelta() {
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-      return 0;
+      return 2;
     }
 
     if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
-      return 1;
+      return 3;
     }
 
     if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
-      return 2;
+      return 4;
     }
 
     throw new Error(`Grid resolution param not recognized: ${this._descriptor.resolution}`);
@@ -146,13 +155,6 @@ export class ESGeoGridSource extends AbstractESSource {
       timeFilters: searchFilters.timeFilters,
       query: searchFilters.query,
     });
-
-    if (this._descriptor.requestType === RENDER_AS.GRID) {
-      featureCollection.features.forEach((feature) => {
-        //replace geometries with the polygon
-        feature.geometry = makeGeohashGridPolygon(feature);
-      });
-    }
 
     return {
       data: featureCollection,
@@ -168,7 +170,6 @@ export class ESGeoGridSource extends AbstractESSource {
     });
   }
 
-
   async getGeoJsonPoints({ layerName }, { geogridPrecision, buffer, timeFilters, query }) {
 
     const indexPattern = await this._getIndexPattern();
@@ -178,7 +179,10 @@ export class ESGeoGridSource extends AbstractESSource {
     const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
-    const { featureCollection } = convertToGeoJson(tabifiedResp);
+    const { featureCollection } = convertToGeoJson({
+      table: tabifiedResp,
+      renderAs: this._descriptor.requestType,
+    });
 
     return featureCollection;
   }
@@ -187,31 +191,13 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
 
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
   }
 
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      return {
-        ...metric,
-        propertyKey: metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME,
-        propertyLabel: metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL,
-      };
-    });
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   _makeAggConfigs(precision) {
@@ -234,16 +220,14 @@ export class ESGeoGridSource extends AbstractESSource {
       {
         id: 'grid',
         enabled: true,
-        type: 'geohash_grid',
+        type: 'geotile_grid',
         schema: 'segment',
         params: {
           field: this._descriptor.geoField,
-          isFilteredByCollar: false, // map extent filter is in query so no need to filter in aggregation
-          useGeocentroid: true, // TODO make configurable
-          autoPrecision: false, // false so we can define our own precision levels based on styling
+          useGeocentroid: true,
           precision: precision,
         }
-      }
+      },
     ];
   }
 
@@ -309,13 +293,8 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatProperties(properties) {
-    properties = await super.filterAndFormatProperties(properties);
-    const allProps = {};
-    for  (const key in properties) {
-      if (key !== 'geohash_meta') {
-        allProps[key] = properties[key];
-      }
-    }
-    return allProps;
+    const metricFields = this.getMetricFields();
+    return filterPropertiesForTooltip(metricFields, properties);
+
   }
 }

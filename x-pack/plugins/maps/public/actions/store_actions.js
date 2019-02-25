@@ -6,26 +6,25 @@
 
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
-
-import { GIS_API_PATH } from '../../common/constants';
 import {
   getLayerList,
   getLayerListRaw,
   getDataFilters,
-  getSelectedLayer,
+  getSelectedLayerId,
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
+  getTransientLayerId,
 } from '../selectors/map_selectors';
+import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
+export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
 export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
-export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
-export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const MAP_READY = 'MAP_READY';
@@ -37,9 +36,7 @@ export const SET_JOINS = 'SET_JOINS';
 export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
-export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
-export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
-export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
+export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
@@ -47,8 +44,9 @@ export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
 export const CLEAR_MOUSE_COORDINATES = 'CLEAR_MOUSE_COORDINATES';
 export const SET_GOTO = 'SET_GOTO';
 export const CLEAR_GOTO = 'CLEAR_GOTO';
-
-const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
+export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
+export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
+export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -74,6 +72,34 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   await Promise.all(syncs);
 }
 
+export function trackCurrentLayerState(layerId) {
+  return {
+    type: TRACK_CURRENT_LAYER_STATE,
+    layerId: layerId
+  };
+}
+
+export function rollbackToTrackedLayerStateForSelectedLayer() {
+  return async (dispatch, getState) => {
+    const layerId = getSelectedLayerId(getState());
+    await dispatch({
+      type: ROLLBACK_TO_TRACKED_LAYER_STATE,
+      layerId: layerId
+    });
+    dispatch(syncDataForLayer(layerId));
+  };
+}
+
+export function removeTrackedLayerStateForSelectedLayer() {
+  return (dispatch, getState) => {
+    const layerId = getSelectedLayerId(getState());
+    dispatch({
+      type: REMOVE_TRACKED_LAYER_STATE,
+      layerId: layerId
+    });
+  };
+}
+
 export function replaceLayerList(newLayerList) {
   return (dispatch, getState) => {
     getLayerListRaw(getState()).forEach(({ id }) => {
@@ -88,8 +114,6 @@ export function replaceLayerList(newLayerList) {
 
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
-    dispatch(clearTemporaryLayers());
-
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
       dispatch({
@@ -107,27 +131,76 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setLayerErrorStatus(id, errorMessage) {
+export function setLayerErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
-      layerId: id,
+      layerId,
       errorMessage,
     });
   };
 }
 
 export function toggleLayerVisible(layerId) {
-  return {
-    type: TOGGLE_LAYER_VISIBLE,
-    layerId
+  return async (dispatch, getState) => {
+    //if the current-state is invisible, we also want to sync data
+    //e.g. if a layer was invisible at start-up, it won't have any data loaded
+    const layer = getLayerList(getState()).find(layer => {
+      return layerId === layer.getId();
+    });
+    if (!layer) {
+      return;
+    }
+    const makeVisible = !layer.isVisible();
+    await dispatch({
+      type: TOGGLE_LAYER_VISIBLE,
+      layerId
+    });
+    if (makeVisible) {
+      dispatch(syncDataForLayer(layerId));
+    }
   };
+
 }
 
 export function setSelectedLayer(layerId) {
-  return {
-    type: SET_SELECTED_LAYER,
-    selectedLayerId: layerId
+  return async (dispatch, getState) => {
+    const oldSelectedLayer = getSelectedLayerId(getState());
+    if (oldSelectedLayer) {
+      await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
+    }
+    if (layerId) {
+      dispatch(trackCurrentLayerState(layerId));
+    }
+    dispatch({
+      type: SET_SELECTED_LAYER,
+      selectedLayerId: layerId
+    });
+  };
+}
+
+export function removeTransientLayer() {
+  return async (dispatch, getState) => {
+    const transientLayerId = getTransientLayerId(getState());
+    if (transientLayerId) {
+      await dispatch(removeLayer(transientLayerId));
+      await dispatch(setTransientLayer(null));
+    }
+  };
+}
+
+export function setTransientLayer(layerId) {
+  return  {
+    type: SET_TRANSIENT_LAYER,
+    transientLayerId: layerId,
+  };
+}
+
+export function clearTransientLayerStateAndCloseFlyout() {
+  return async dispatch => {
+    await dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    await dispatch(setSelectedLayer(null));
+    await dispatch(removeTransientLayer());
   };
 }
 
@@ -135,34 +208,6 @@ export function updateLayerOrder(newLayerOrder) {
   return {
     type: UPDATE_LAYER_ORDER,
     newLayerOrder
-  };
-}
-
-export function promoteTemporaryStyles() {
-  return {
-    type: PROMOTE_TEMPORARY_STYLES
-  };
-}
-
-export function promoteTemporaryLayers() {
-  return {
-    type: PROMOTE_TEMPORARY_LAYERS
-  };
-}
-
-export function clearTemporaryStyles() {
-  return {
-    type: CLEAR_TEMPORARY_STYLES
-  };
-}
-
-export function clearTemporaryLayers() {
-  return (dispatch, getState) => {
-    getLayerListRaw(getState()).forEach(({ temporary, id }) => {
-      if (temporary) {
-        dispatch(removeLayer(id));
-      }
-    });
   };
 }
 
@@ -318,23 +363,27 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return ({
-    type: LAYER_DATA_LOAD_ERROR,
-    layerId,
-    dataId,
-    requestToken,
-    errorMessage
-  });
+  return async (dispatch) => {
+    dispatch({
+      type: LAYER_DATA_LOAD_ERROR,
+      layerId,
+      dataId,
+      requestToken,
+    });
+
+    dispatch(setLayerErrorStatus(layerId, errorMessage));
+  };
 }
 
 export function updateSourceProp(layerId, propName, value) {
-  return (dispatch) => {
+  return async (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName,
       value,
     });
+    await dispatch(clearMissingStyleProperties(layerId));
     dispatch(syncDataForLayer(layerId));
   };
 }
@@ -394,8 +443,9 @@ export function updateLayerAlpha(id, alpha) {
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();
-    const layer = getSelectedLayer(state);
-    dispatch(removeLayer(layer.getId()));
+    const layerId = getSelectedLayerId(state);
+    dispatch(removeLayer(layerId));
+    dispatch(setSelectedLayer(null));
   };
 }
 
@@ -412,13 +462,6 @@ export function removeLayer(id) {
       type: REMOVE_LAYER,
       id
     });
-  };
-}
-
-export function setMeta(metaJson) {
-  return {
-    type: SET_META,
-    meta: metaJson
   };
 }
 
@@ -458,31 +501,61 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function updateLayerStyleForSelectedLayer(style, temporary = true) {
-  return {
-    type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
-    style: {
-      ...style,
-      temporary
-    },
+export function clearMissingStyleProperties(layerId) {
+  return async (dispatch, getState) => {
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
+    if (!targetLayer) {
+      return;
+    }
+
+    const style = targetLayer.getCurrentStyle();
+    if (!style) {
+      return;
+    }
+    const ordinalFields = await targetLayer.getOrdinalFields();
+    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
+    if (hasChanges) {
+      dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
+    }
+  };
+}
+
+export function updateLayerStyle(layerId, styleDescriptor) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_STYLE,
+      layerId,
+      style: {
+        ...styleDescriptor
+      },
+    });
+
+    // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
+    dispatch(syncDataForLayer(layerId));
+  };
+}
+
+export function updateLayerStyleForSelectedLayer(styleDescriptor) {
+  return (dispatch, getState) => {
+    const selectedLayerId = getSelectedLayerId(getState());
+    if (!selectedLayerId) {
+      return;
+    }
+    dispatch(updateLayerStyle(selectedLayerId, styleDescriptor));
   };
 }
 
 export function setJoinsForLayer(layer, joins) {
   return async (dispatch) => {
-    console.warn('Not Implemented: must remove any styles that are driven by join-fields that are no longer present');
     await dispatch({
       type: SET_JOINS,
       layer: layer,
       joins: joins
     });
 
+    await dispatch(clearMissingStyleProperties(layer.getId()));
     dispatch(syncDataForLayer(layer.getId()));
   };
-}
-
-export async function loadMetaResources(dispatch) {
-  const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
-  const metaJson = await meta.json();
-  await dispatch(setMeta(metaJson));
 }

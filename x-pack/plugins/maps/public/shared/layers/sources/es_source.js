@@ -8,7 +8,7 @@ import { AbstractVectorSource } from './vector_source';
 import {
   fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
-  inspectorAdapters, SearchSource
+  SearchSource
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
@@ -19,10 +19,6 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 export class AbstractESSource extends AbstractVectorSource {
 
   static icon = 'logoElasticsearch';
-
-  constructor(descriptor) {
-    super(descriptor);
-  }
 
   isFieldAware() {
     return true;
@@ -41,12 +37,50 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
+    this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
+  }
+
+  _getValidMetrics() {
+    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
+      if (type === 'count') {
+        return true;
+      }
+
+      if (field) {
+        return true;
+      }
+      return false;
+    });
+    if (metrics.length === 0) {
+      metrics.push({ type: 'count' });
+    }
+    return metrics;
+  }
+
+  _formatMetricKey() {
+    throw new Error('should implement');
+  }
+
+  _formatMetricLabel() {
+    throw new Error('should implement');
+  }
+
+  getMetricFields() {
+    return this._getValidMetrics().map(metric => {
+      const metricKey = this._formatMetricKey(metric);
+      const metricLabel = this._formatMetricLabel(metric);
+      return {
+        ...metric,
+        propertyKey: metricKey,
+        propertyLabel: metricLabel
+      };
+    });
   }
 
   async _runEsQuery(layerName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: layerName,
         requestId: this._descriptor.id,
@@ -78,7 +112,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return searchSource;
   }
 
-  async getBoundsForFilters({ query, timeFilters }, layerName) {
+  async getBoundsForFilters({ query, timeFilters }) {
 
     const searchSource = await this._makeSearchSource({ query, timeFilters }, 0);
     const geoField = await this._getGeoField();
@@ -96,33 +130,65 @@ export class AbstractESSource extends AbstractVectorSource {
     const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
-    const esResp = await this._runEsQuery(layerName, searchSource, 'bounds request');
-    const esBounds = _.get(esResp, 'aggregations.1.bounds');
-    return (esBounds) ?
-      {
-        min_lon: esBounds.top_left.lon,
-        max_lon: esBounds.bottom_right.lon,
-        min_lat: esBounds.bottom_right.lat,
-        max_lat: esBounds.top_left.lat
-      }  : null;
+    let esBounds;
+    try {
+      const esResp = await searchSource.fetch();
+      esBounds = _.get(esResp, 'aggregations.1.bounds');
+    } catch(error) {
+      esBounds = {
+        top_left: {
+          lat: 90,
+          lon: -180
+        },
+        bottom_right: {
+          lat: -90,
+          lon: 180
+        }
+      };
+    }
+
+    return {
+      min_lon: esBounds.top_left.lon,
+      max_lon: esBounds.bottom_right.lon,
+      min_lat: esBounds.bottom_right.lat,
+      max_lat: esBounds.top_left.lat
+    };
   }
 
   async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
+    try {
+      const indexPattern = await this._getIndexPattern();
+      const timeField = indexPattern.timeFieldName;
+      return !!timeField;
+    } catch (error) {
+      return false;
+    }
   }
-
 
   async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
+    if (this.indexPattern) {
+      return this.indexPattern;
     }
-    return indexPattern;
+
+    try {
+      this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+      return this.indexPattern;
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern for id: ${this._descriptor.indexPatternId}`);
+    }
   }
+
+  async supportsFitToBounds() {
+    try {
+      const geoField = await this._getGeoField();
+      // geo_bounds aggregation only supports geo_point
+      // there is currently no backend support for getting bounding box of geo_shape field
+      return geoField.type !== 'geo_shape';
+    } catch (error) {
+      return false;
+    }
+  }
+
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();
@@ -134,8 +200,13 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    const indexPattern = await this._getIndexPattern();
-    return indexPattern.title;
+    try {
+      const indexPattern = await this._getIndexPattern();
+      return indexPattern.title;
+    } catch (error) {
+      // Unable to load index pattern, just return id as display name
+      return this._descriptor.indexPatternId;
+    }
   }
 
   isBoundsAware() {

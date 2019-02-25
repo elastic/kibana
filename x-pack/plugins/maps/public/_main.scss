@@ -8,6 +8,10 @@
   overflow: hidden;
 }
 
+.mapFullScreen {
+  height: 100vh !important;
+}
+
 #react-maps-root {
   flex-grow: 1;
   display: flex;

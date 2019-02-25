@@ -23,17 +23,26 @@ import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
+import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 
 import { history } from './components/shared/Links/url_helpers';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
+
+// render APM feedback link in global help menu
+chrome.helpExtension.set(domElement => {
+  ReactDOM.render(<GlobalHelpExtension />, domElement);
+  return () => {
+    ReactDOM.unmountComponentAtNode(domElement);
+  };
+});
 
 chrome.setRootTemplate(template);
 const store = configureStore();
 
 initTimepicker(history, store.dispatch).then(() => {
   ReactDOM.render(
-    <I18nProvider>
+    <I18nContext>
       <Provider store={store}>
         <Fragment>
           <GlobalProgress />
@@ -43,7 +52,7 @@ initTimepicker(history, store.dispatch).then(() => {
           </Router>
         </Fragment>
       </Provider>
-    </I18nProvider>,
+    </I18nContext>,
     document.getElementById('react-apm-root')
   );
 });

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
 
 const uiModule = uiModules.get('monitoring/directives', []);
@@ -23,7 +23,7 @@ uiModule.directive('monitoringBeatsListing', (kbnUrl) => {
     link(scope, $el) {
       function renderReact(data) {
         render((
-          <I18nProvider>
+          <I18nContext>
             <Listing
               stats={data.stats}
               data={data.listing}
@@ -35,7 +35,7 @@ uiModule.directive('monitoringBeatsListing', (kbnUrl) => {
                 scope,
               }}
             />
-          </I18nProvider>
+          </I18nContext>
         ), $el[0]);
       }
       scope.$watch('data', (data = {}) => {

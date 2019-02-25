@@ -29,9 +29,6 @@ import brushHandler from '../lib/create_brush_handler';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import { fetchFields } from '../lib/fetch_fields';
 import chrome from 'ui/chrome';
-import { I18nProvider } from '@kbn/i18n/react';
-
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 class VisEditor extends Component {
   constructor(props) {
@@ -106,8 +103,8 @@ class VisEditor extends Component {
     this.setState({ autoApply: event.target.checked });
   }
 
-  onDataChange = (data) => {
-    this.visDataSubject.next(data);
+  onDataChange = ({ visData }) => {
+    this.visDataSubject.next(visData);
   }
 
   render() {
@@ -116,19 +113,16 @@ class VisEditor extends Component {
         return null;
       }
       return (
-        <I18nProvider>
-          <Visualization
-            dateFormat={this.props.config.get('dateFormat')}
-            reversed={IS_DARK_THEME}
-            onBrush={this.onBrush}
-            onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
-            fields={this.state.visFields}
-            model={this.props.vis.params}
-            visData={this.props.visData}
-            getConfig={this.getConfig}
-          />
-        </I18nProvider>
+        <Visualization
+          dateFormat={this.props.config.get('dateFormat')}
+          onBrush={this.onBrush}
+          onUiState={this.handleUiState}
+          uiState={this.props.vis.getUiState()}
+          fields={this.state.visFields}
+          model={this.props.vis.params}
+          visData={this.props.visData}
+          getConfig={this.getConfig}
+        />
       );
     }
 

@@ -6,15 +6,15 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import { GIS_API_PATH } from '../../../../../common/constants';
+import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
 import { emsServiceSettings } from '../../../../kibana_services';
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 
 export class EMSFileSource extends AbstractVectorSource {
 
-  static type = 'EMS_FILE';
-  static title = 'Elastic Maps Service vector shapes';
+  static type = EMS_FILE;
+  static title = 'Vector shapes';
   static description = 'Vector shapes of administrative boundaries from Elastic Maps Service';
   static icon = 'emsApp';
 
@@ -25,25 +25,31 @@ export class EMSFileSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
-    const onChange = ({ target }) => {
-      const selectedId = target.options[target.selectedIndex].value;
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
+    const onChange = (selectedId) => {
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
+      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsFileSource);
     };
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
   }
 
-  constructor(descriptor) {
-    super(descriptor);
+  async _getEmsVectorFileMeta() {
+    const emsFiles = await getEmsVectorFilesMeta();
+    const meta = emsFiles.find((source => source.id === this._descriptor.id));
+    if (!meta) {
+      throw new Error(`Unable to find EMS vector shapes for id: ${this._descriptor.id}`);
+    }
+    return meta;
   }
 
   async getGeoJsonWithMeta() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
-    const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fetchUrl);
+    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+    const featureCollection = await AbstractVectorSource.getGeoJson({
+      format: emsVectorFileMeta.format,
+      featureCollectionPath: 'data',
+      fetchUrl: `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`
+    });
     return {
       data: featureCollection,
       meta: {}
@@ -59,22 +65,23 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    return fileSource.name;
+    try {
+      const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+      return emsVectorFileMeta.name;
+    } catch (error) {
+      return this._descriptor.id;
+    }
   }
 
   async getAttributions() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    return fileSource.attributions;
+    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+    return emsVectorFileMeta.attributions;
   }
 
 
   async getStringFields() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    return fileSource.fields.map(f => {
+    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+    return emsVectorFileMeta.fields.map(f => {
       return { name: f.name, label: f.description };
     });
   }

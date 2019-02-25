@@ -6,11 +6,12 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
+import { I18nContext } from 'ui/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { getStore } from '../store/store';
+import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
 import {
   setSelectedLayer,
@@ -18,11 +19,19 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
+  clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
-import { updateFlyout, FLYOUT_STATE } from '../store/ui';
-import {  getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import {
+  enableFullScreen,
+  getIsFullScreen,
+  updateFlyout,
+  FLYOUT_STATE
+} from '../store/ui';
+import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
-import { inspectorAdapters, indexPatternService } from '../kibana_services';
+import { DocTitleProvider } from 'ui/doc_title';
+import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
@@ -36,12 +45,12 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get('app/maps', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState, Private) => {
 
   const savedMap = $scope.map = $route.current.locals.map;
   let unsubscribe;
 
-  inspectorAdapters.requests.reset();
+  const store = createMapStore();
 
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
     if (diff.includes('time')) {
@@ -91,35 +100,21 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
     $scope.query = query;
     $scope.time = dateRange;
-    getStore().then(store => {
-      // ignore outdated query
-      if ($scope.query !== query && $scope.time !== dateRange) {
-        return;
-      }
+    syncAppAndGlobalState();
 
-      store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
-
-      syncAppAndGlobalState();
-    });
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
       isPaused,
       interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
     };
-    getStore().then(store => {
-      // ignore outdated
-      if ($scope.refreshConfig.isPaused !== isPaused && $scope.refreshConfig.interval !== refreshInterval) {
-        return;
-      }
+    syncAppAndGlobalState();
 
-      store.dispatch(setRefreshConfig($scope.refreshConfig));
-
-      syncAppAndGlobalState();
-    });
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
-  getStore().then(store => {
+  function renderMap() {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -148,10 +143,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <GisMap/>
+        <I18nContext>
+          <GisMap/>
+        </I18nContext>
       </Provider>,
-      root);
-  });
+      root
+    );
+  }
+  renderMap();
 
   let prevIndexPatternIds;
   async function updateIndexPatterns(nextIndexPatternIds) {
@@ -173,7 +172,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.indexPatterns = indexPatterns;
   }
 
+  $scope.isFullScreen = false;
   function handleStoreChanges(store) {
+    const nextIsFullScreen = getIsFullScreen(store.getState());
+    if (nextIsFullScreen !== $scope.isFullScreen) {
+      // Must trigger digest cycle for angular top nav to redraw itself when isFullScreen changes
+      $scope.$evalAsync(() => {
+        $scope.isFullScreen = nextIsFullScreen;
+      });
+    }
+
     const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
@@ -191,24 +199,21 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
-  $scope.getMapTitle = function () {
-    return $scope.map.title;
-  };
-  // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
     { text: 'Maps', href: '#' },
-    { text: $scope.getMapTitle() }
+    { text: $scope.map.title }
   ]);
-  config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
-    const store = await  getStore();
+    await store.dispatch(clearTransientLayerStateAndCloseFlyout());
     savedMap.syncWithStore(store.getState());
-
+    const docTitle = Private(DocTitleProvider);
     let id;
+
     try {
       id = await savedMap.save(saveOptions);
+      docTitle.change(savedMap.title);
     } catch(err) {
       toastNotifications.addDanger({
         title: `Error on saving '${savedMap.title}'`,
@@ -238,10 +243,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
+    key: 'full screen',
+    description: 'full screen',
+    testId: 'mapsFullScreenMode',
+    run() {
+      store.dispatch(enableFullScreen());
+    }
+  }, {
     key: 'inspect',
     description: 'Open Inspector',
     testId: 'openInspectorButton',
     run() {
+      const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
   }, {

@@ -1,10 +1,5 @@
 .mlSettingsPage {
 
-  .mlSettingsPage__body {
-    background: $euiColorLightestShade;
-    min-height: 100vh;
-  }
-
   .mlSettingsPage__content {
     width: map-get($euiBreakpoints, 'xl');
     margin-top: $euiSize;

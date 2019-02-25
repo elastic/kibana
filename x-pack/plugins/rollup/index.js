@@ -19,6 +19,7 @@ import { registerRollupUsageCollector } from './server/usage';
 export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.rollup',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
@@ -37,15 +38,6 @@ export function rollup(kibana) {
       search: [
         'plugins/rollup/search',
       ],
-      migrations: {
-        'index-pattern': {
-          '6.5.0': (doc) => {
-            doc.attributes.type = doc.attributes.type || undefined;
-            doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
-            return doc;
-          }
-        },
-      }
     },
     init: function (server) {
       registerLicenseChecker(server);

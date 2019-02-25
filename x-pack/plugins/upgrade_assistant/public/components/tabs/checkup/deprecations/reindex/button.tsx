@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from 'lodash';
 import React, { Fragment, ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import { ReindexStatus } from '../../../../../../common/types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { kfetch } from 'ui/kfetch';
+import { ReindexStatus, UIReindexOption } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
@@ -61,11 +64,21 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     const { flyoutVisible, reindexState } = this.state;
 
     const buttonProps: any = { size: 's', onClick: this.showFlyout };
-    let buttonContent: ReactNode = 'Reindex';
+    let buttonContent: ReactNode = (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.reindexLabel"
+        defaultMessage="Reindex"
+      />
+    );
 
     if (reindexState.loadingState === LoadingState.Loading) {
       buttonProps.disabled = true;
-      buttonContent = 'Loading…';
+      buttonContent = (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.loadingLabel"
+          defaultMessage="Loading…"
+        />
+      );
     } else {
       switch (reindexState.status) {
         case ReindexStatus.inProgress:
@@ -79,19 +92,45 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
           buttonProps.color = 'secondary';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'check';
-          buttonContent = 'Done';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.doneLabel"
+              defaultMessage="Done"
+            />
+          );
           break;
         case ReindexStatus.failed:
           buttonProps.color = 'danger';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'cross';
-          buttonContent = 'Failed';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.failedLabel"
+              defaultMessage="Failed"
+            />
+          );
           break;
         case ReindexStatus.paused:
           buttonProps.color = 'warning';
           buttonProps.iconSide = 'left';
           buttonProps.iconType = 'pause';
-          buttonContent = 'Paused';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.pausedLabel"
+              defaultMessage="Paused"
+            />
+          );
+        case ReindexStatus.cancelled:
+          buttonProps.color = 'danger';
+          buttonProps.iconSide = 'left';
+          buttonProps.iconType = 'cross';
+          buttonContent = (
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.cancelledLabel"
+              defaultMessage="Cancelled"
+            />
+          );
+          break;
       }
     }
 
@@ -104,7 +143,8 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
             indexName={indexName}
             closeFlyout={this.closeFlyout}
             reindexState={reindexState}
-            startReindex={this.service.startReindex}
+            startReindex={this.startReindex}
+            cancelReindex={this.cancelReindex}
           />
         )}
       </Fragment>
@@ -133,11 +173,35 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     }
   }
 
+  private startReindex = async () => {
+    if (!this.state.reindexState.status) {
+      // if status didn't exist we are starting a reindex action
+      this.sendUIReindexTelemetryInfo('start');
+    }
+
+    await this.service.startReindex();
+  };
+
+  private cancelReindex = async () => {
+    this.sendUIReindexTelemetryInfo('stop');
+    await this.service.cancelReindex();
+  };
+
   private showFlyout = () => {
+    this.sendUIReindexTelemetryInfo('open');
     this.setState({ flyoutVisible: true });
   };
 
   private closeFlyout = () => {
+    this.sendUIReindexTelemetryInfo('close');
     this.setState({ flyoutVisible: false });
   };
+
+  private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
+    await kfetch({
+      pathname: '/api/upgrade_assistant/telemetry/ui_reindex',
+      method: 'PUT',
+      body: JSON.stringify(set({}, uiReindexAction, true)),
+    });
+  }
 }

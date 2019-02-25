@@ -176,6 +176,9 @@ class PipelineListingUI extends Component {
                 },
               }}
               onTableChange={onTableChange}
+              executeQueryOptions={{
+                defaultFields: ['id']
+              }}
             />
           </EuiPageContent>
         </EuiPageBody>

@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
 
   const expectAllDataRenders = async () => {
     await pieChart.expectPieSliceCount(16);
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
 
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
@@ -113,18 +113,16 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.panelCount(27);
       await PageObjects.dashboard.waitForRenderComplete();
-      const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(27);
     });
 
     it('adding saved searches', async () => {
       await dashboardAddPanel.addEverySavedSearch('"Rendering Test"');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.panelCount(28);
       await PageObjects.dashboard.waitForRenderComplete();
-      const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.be(28);
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
@@ -139,7 +137,7 @@ export default function ({ getService, getPageObjects }) {
       // Change the time to make sure that it's updated when re-opened from the listing page.
       const fromTime = '2018-05-10 00:00:00.000';
       const toTime = '2018-05-11 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
@@ -156,8 +154,7 @@ export default function ({ getService, getPageObjects }) {
     it('panels are updated when time changes outside of data', async () => {
       const fromTime = '2018-05-11 00:00:00.000';
       const toTime = '2018-05-12 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.waitForRenderComplete();
       await expectNoDataRenders();
     });
@@ -165,8 +162,7 @@ export default function ({ getService, getPageObjects }) {
     it('panels are updated when time changes inside of data', async () => {
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
