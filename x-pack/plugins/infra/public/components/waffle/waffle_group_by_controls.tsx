@@ -164,6 +164,7 @@ export const WaffleGroupByControls = injectI18n(
               // EuiFilterButton onClick handler doesn't cancel out the keyUp handler that eventually
               // invokes "iconOnClick", and B) the context menu doesn't open / close just because an item is removed.
               // Detailed writeup: https://github.com/elastic/kibana/issues/28159
+              // (Next line is disabled due to <span> having event handlers and no ARIA role)
               // tslint:disable-next-line
               <span
                 onKeyDown={this.handleGroupItemKeyEvent}
