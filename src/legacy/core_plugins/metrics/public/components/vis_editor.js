@@ -178,11 +178,11 @@ class VisEditor extends Component {
   async componentDidMount() {
     await this.setDefaultIndexPattern();
     await this.fetchIndexPatternFields();
-    this.props.renderComplete(this.state.visFields);
+    this.props.renderComplete();
   }
 
   componentDidUpdate() {
-    this.props.renderComplete(this.state.visFields);
+    this.props.renderComplete();
   }
 }
 
