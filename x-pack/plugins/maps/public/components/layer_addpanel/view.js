@@ -20,6 +20,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
 } from '@elastic/eui';
+import _ from 'lodash';
 
 export class AddLayerPanel extends Component {
 
@@ -31,6 +32,12 @@ export class AddLayerPanel extends Component {
   }
 
   _previewLayer = (source) => {
+    if (!source) {
+      this.setState({ layer: null });
+      this.props.removeTransientLayer();
+      return;
+    }
+
     this.setState({
       layer: source.createDefaultLayer({}, this.props.mapColors)
     },
@@ -39,10 +46,7 @@ export class AddLayerPanel extends Component {
 
   _clearSource = () => {
     this.setState({ sourceType: null });
-
-    if (this.state.layer) {
-      this.props.removeTransientLayer();
-    }
+    this.props.removeTransientLayer();
   }
 
   _onSourceTypeChange = (sourceType) => {
@@ -87,6 +91,7 @@ export class AddLayerPanel extends Component {
             onClick={() => this._onSourceTypeChange(Source.type)}
             description={Source.description}
             layout="horizontal"
+            data-test-subj={_.camelCase(Source.title)}
           />
         </Fragment>
       );
@@ -155,7 +160,10 @@ export class AddLayerPanel extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="mapLayerPanel__body">
+        <EuiFlyoutBody
+          className="mapLayerPanel__body"
+          data-test-subj="layerAddForm"
+        >
           {this._renderAddLayerForm()}
         </EuiFlyoutBody>
 
@@ -163,12 +171,9 @@ export class AddLayerPanel extends Component {
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => {
-                  if (this.state.layer) {
-                    this.props.closeFlyout();
-                  }
-                }}
+                onClick={this.props.closeFlyout}
                 flush="left"
+                data-test-subj="layerAddCancelButton"
               >
                 Cancel
               </EuiButtonEmpty>

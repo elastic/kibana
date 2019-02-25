@@ -19,6 +19,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { ES_GEO_GRID } from '../../../../../common/constants';
 import { filterPropertiesForTooltip } from '../../util';
 
 const COUNT_PROP_LABEL = 'count';
@@ -49,7 +50,7 @@ const aggSchemas = new Schemas([
 
 export class ESGeoGridSource extends AbstractESSource {
 
-  static type = 'ES_GEO_GRID';
+  static type = ES_GEO_GRID;
   static title = 'Grid aggregation';
   static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
@@ -66,6 +67,11 @@ export class ESGeoGridSource extends AbstractESSource {
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
       const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
       const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);

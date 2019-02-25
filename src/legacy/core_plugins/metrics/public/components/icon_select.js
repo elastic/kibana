@@ -46,7 +46,7 @@ function IconSelect(props) {
       options={props.icons}
       selectedOptions={selectedIcon ? [selectedIcon] : []}
       onChange={props.onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
       renderOption={renderOption}
     />
   );

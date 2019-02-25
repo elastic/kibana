@@ -180,7 +180,7 @@ class TableSeriesConfig extends Component {
                 options={functionOptions}
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
-                singleSelection={true}
+                singleSelection={{ asPlainText: true }}
                 fullWidth
               />
             </EuiFormRow>
