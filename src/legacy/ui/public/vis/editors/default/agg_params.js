@@ -19,7 +19,6 @@
 
 import $ from 'jquery';
 import { has, get } from 'lodash';
-import aggSelectHtml from './agg_select.html';
 import advancedToggleHtml from './advanced_toggle.html';
 import '../../../filters/match_any';
 import './agg_param';
@@ -33,7 +32,7 @@ import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAggParams', function ($compile) {
+  .directive('visEditorAggParams', function ($compile, i18n) {
 
     return {
       restrict: 'E',
@@ -85,9 +84,6 @@ uiModules
         // controls for the agg, which is why they are first
         addSchemaEditor();
 
-        // allow selection of an aggregation
-        addAggSelector();
-
         function addSchemaEditor() {
           const $schemaEditor = $('<div>').addClass('schemaEditors form-group').appendTo($el);
 
@@ -95,11 +91,6 @@ uiModules
             $schemaEditor.append($scope.agg.schema.editor);
             $compile($schemaEditor)($scope.$new());
           }
-        }
-
-        function addAggSelector() {
-          const $aggSelect = $(aggSelectHtml).appendTo($el);
-          $compile($aggSelect)($scope);
         }
 
         // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
@@ -201,6 +192,29 @@ uiModules
             .attr(attrs)
             .append(param.editor)
             .get(0);
+        }
+
+        $scope.label = getAggSelectLabel();
+        $scope.onChangeAggType = (agg, aggType) => {
+          agg.type = aggType;
+          $scope.aggForm.$invalid = aggType ? false : true;
+        };
+
+        function getAggSelectLabel() {
+          let aggSelectLabel = '';
+
+          if ($scope.$index < 1 || $scope.groupName !== 'buckets') {
+            aggSelectLabel = i18n('common.ui.vis.editors.aggSelect.aggregationLabel', {
+              defaultMessage: 'Aggregation',
+            });
+          }
+          if ($scope.$index >= 1 && $scope.groupName === 'buckets') {
+            aggSelectLabel = i18n('common.ui.vis.editors.aggSelect.subAggregationLabel', {
+              defaultMessage: 'Sub Aggregation',
+            });
+          }
+
+          return aggSelectLabel;
         }
       }
     };
