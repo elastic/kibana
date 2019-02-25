@@ -1,20 +1,5 @@
 {
   "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "module": "commonjs",
-    "allowJs": true,
-    "outDir": "target",
-    "baseUrl": "./",
-    "paths": {
-      "ui/*": [
-        "../src/legacy/ui/public/*/*"
-      ],
-    },
-    "types": [
-      "node",
-      "mocha"
-    ]
-  },
   "include": [
     "**/*.ts"
   ]
