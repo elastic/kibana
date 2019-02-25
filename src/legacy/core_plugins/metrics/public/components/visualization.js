@@ -91,7 +91,8 @@ Visualization.propTypes = {
   uiState: PropTypes.object,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
+  fields: PropTypes.object
 };
 
 Visualization.defaultProps = {
