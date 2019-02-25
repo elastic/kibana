@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface EsArchiverOptions {
-  skipExisting?: boolean;
-}
-
-export interface EsArchiver {
-  load(archiveName: string, options?: EsArchiverOptions): Promise<void>;
-  unload(archiveName: string): Promise<void>;
-}
+import { EsArchiver } from '../../../src/es_archiver';
 
 export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: 'esArchiver'): EsArchiver;

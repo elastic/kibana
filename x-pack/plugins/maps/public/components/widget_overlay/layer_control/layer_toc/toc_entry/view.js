@@ -131,7 +131,11 @@ export class TOCEntry extends React.Component {
       <EuiLink
         color="text"
         onClick={this._openLayerPanelWithCheck}
-        data-test-subj={`mapOpenLayerButton${this.state.displayName}`}
+        data-test-subj={
+          `mapOpenLayerButton${this.state.displayName
+            ? this.state.displayName.replace(' ', '_')
+            : ''}`
+        }
       >
         {displayName}
       </EuiLink>

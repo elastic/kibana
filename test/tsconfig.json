@@ -1,19 +1,10 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "allowJs": true,
-    "outDir": "target",
-    "baseUrl": ".",
-    "paths": {
-      "ui/*": [
-        "../src/legacy/ui/public/*"
-      ],
-    },
     "types": [
       "node",
-      "mocha"
+      "mocha",
+      "@kbn/test/types/expect.js"
     ]
   },
   "include": [

@@ -17,12 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
 import expect from 'expect.js';
-import { TestWrapper } from 'typings';
+import { FtrProviderContext } from '../../../types';
 
 // tslint:disable-next-line:no-default-export
-export default function({ getService, getPageObjects }: TestWrapper) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
