@@ -6,9 +6,9 @@
 
 import { useMemo, useState } from 'react';
 
-import { LogSummary as LogSummaryQuery } from '../../graphql/types';
-import { useApolloClient } from '../../utils/apollo_context';
-import { useCancellableEffect } from '../../utils/cancellable_effect';
+import { LogSummary as LogSummaryQuery } from '../../../graphql/types';
+import { useApolloClient } from '../../../utils/apollo_context';
+import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { logSummaryQuery } from './log_summary.gql_query';
 
 const LOAD_BUCKETS_PER_PAGE = 100;

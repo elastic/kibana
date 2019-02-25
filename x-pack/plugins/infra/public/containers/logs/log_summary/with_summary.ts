@@ -7,10 +7,10 @@
 import { useContext } from 'react';
 import { connect } from 'react-redux';
 
-import { logFilterSelectors, logPositionSelectors, State } from '../../store';
-import { RendererFunction } from '../../utils/typed_react';
+import { logFilterSelectors, logPositionSelectors, State } from '../../../store';
+import { RendererFunction } from '../../../utils/typed_react';
+import { LogViewConfiguration } from '../log_view_configuration';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
-import { LogViewConfiguration } from './log_view_configuration';
 
 export const WithSummary = connect((state: State) => ({
   visibleMidpointTime: logPositionSelectors.selectVisibleMidpointOrTargetTime(state),
