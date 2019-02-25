@@ -22,8 +22,8 @@ import { getIndexPatternObject } from '../helpers/get_index_pattern';
 import getEsShardTimeout from '../helpers/get_es_shard_timeout';
 
 export default async (req, panel, series, esQueryConfig) => {
-  const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject);
   const esShardTimeout = await getEsShardTimeout(req);
 
