@@ -1119,6 +1119,7 @@ export namespace GetKpiNetworkQuery {
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
+    direction: NetworkTopNFlowDirection;
     type: NetworkTopNFlowType;
     timerange: TimerangeInput;
     pagination: PaginationInput;
@@ -1164,37 +1165,59 @@ export namespace GetNetworkTopNFlowQuery {
 
     destination?: Destination | null;
 
-    event?: Event | null;
+    client?: Client | null;
+
+    server?: Server | null;
 
     network?: Network | null;
   };
 
   export type _Source = {
-    __typename?: 'NetworkTopNFlowSource';
+    __typename?: 'TopNFlowItem';
+
+    count?: number | null;
 
     ip?: string | null;
 
-    domain?: string | null;
+    domain?: string[] | null;
   };
 
   export type Destination = {
-    __typename?: 'NetworkTopNFlowDestination';
+    __typename?: 'TopNFlowItem';
+
+    count?: number | null;
 
     ip?: string | null;
 
-    domain?: string | null;
+    domain?: string[] | null;
   };
 
-  export type Event = {
-    __typename?: 'NetworkTopNFlowEvent';
+  export type Client = {
+    __typename?: 'TopNFlowItem';
 
-    duration?: number | null;
+    count?: number | null;
+
+    ip?: string | null;
+
+    domain?: string[] | null;
+  };
+
+  export type Server = {
+    __typename?: 'TopNFlowItem';
+
+    count?: number | null;
+
+    ip?: string | null;
+
+    domain?: string[] | null;
   };
 
   export type Network = {
-    __typename?: 'NetworkTopNFlowNetwork';
+    __typename?: 'NetworkEcsField';
 
     bytes?: number | null;
+
+    direction?: NetworkDirectionEcs[] | null;
 
     packets?: number | null;
   };

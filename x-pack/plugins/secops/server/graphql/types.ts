@@ -464,12 +464,6 @@ export interface KpiNetworkData {
   activeAgents?: number | null;
 }
 
-export interface NetworkEcsField {
-  bytes?: number | null;
-
-  packets?: number | null;
-}
-
 // ====================================================
 // InputTypes
 // ====================================================

@@ -34,7 +34,7 @@ export const createOptions = (
   return {
     sourceConfiguration: source.configuration,
     timerange: args.timerange!,
-    pagination: args.pagination,
+    pagination: args.pagination!,
     sortField: args.sortField!,
     filterQuery: parseFilterQuery(args.filterQuery || ''),
     fields: fields.map(field => field.replace('edges.node.', '')),
