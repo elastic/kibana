@@ -7,7 +7,9 @@
 import { badRequest, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { KbnServer } from '../../../../types';
-import { SearchSource, TsvbPanel } from '../../types';
+// @ts-ignore
+import { createTaggedLogger } from '../../../../server/lib/create_tagged_logger';
+import { SearchPanel, TsvbPanel } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 import { generateCsvTsvb } from './generate_csv_tsvb';
 
@@ -20,17 +22,23 @@ export async function generateCsv(
   req: Request,
   server: KbnServer,
   visType: string,
-  panel: TsvbPanel | SearchSource
+  panel: TsvbPanel | SearchPanel
 ): Promise<CsvResult> {
+  const logger = {
+    debug: createTaggedLogger(server, ['reporting', 'csv', 'debug']),
+    warning: createTaggedLogger(server, ['reporting', 'csv', 'warning']),
+    error: createTaggedLogger(server, ['reporting', 'csv', 'error']),
+  };
+
   switch (visType) {
     case 'metrics':
       // @ts-ignore
       const tsvbPanel: TsvbPanel = panel;
-      return await generateCsvTsvb(req, server, tsvbPanel);
+      return await generateCsvTsvb(req, server, logger, tsvbPanel);
     case 'search':
       // @ts-ignore
-      const searchPanel: SearchSource = panel;
-      return await generateCsvSearch(req, server, searchPanel);
+      const searchPanel: SearchPanel = panel;
+      return await generateCsvSearch(req, server, logger, searchPanel);
     case 'timelion':
       throw notImplemented('Timelion is not yet supported by this API');
     default:

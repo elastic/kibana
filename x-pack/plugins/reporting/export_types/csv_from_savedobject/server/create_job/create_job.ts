@@ -35,7 +35,7 @@ function createJobFn(server: KbnServer) {
 
     const { panel, title, visType }: VisData = await Promise.resolve()
       .then(() => client.get(savedObjectType, savedObjectId))
-      .then((savedObject: SavedObject) => {
+      .then(async (savedObject: SavedObject) => {
         const { attributes } = savedObject;
         const { visState: visStateJSON, kibanaSavedObjectMeta } = attributes;
 
@@ -45,11 +45,11 @@ function createJobFn(server: KbnServer) {
 
         if (visStateJSON) {
           // visualization type
-          return createJobVis(visStateJSON);
+          return await createJobVis(visStateJSON);
         }
 
         // saved search type
-        return createJobSearch(savedObject, kibanaSavedObjectMeta, attributes);
+        return await createJobSearch(client, savedObject, kibanaSavedObjectMeta);
       })
       .catch((err: Error) => {
         const errPayload: SavedObjectServiceError = get(err, 'output.payload', { statusCode: 0 });

@@ -25,7 +25,7 @@ export interface SavedObjectAttributes {
   kibanaSavedObjectMeta: SavedObjectMeta;
 }
 
-export interface SavedObjectReferences {
+export interface SavedObjectReference {
   name: string; // should be kibanaSavedObjectMeta.searchSourceJSON.index
   type: string; // should be index-pattern
   id: string;
@@ -33,7 +33,7 @@ export interface SavedObjectReferences {
 
 export interface SavedObject {
   attributes: SavedObjectAttributes;
-  references?: SavedObjectReferences[];
+  references?: SavedObjectReference[];
 }
 
 export interface TsvbPanel {
@@ -80,7 +80,8 @@ export interface VisState {
   type: string; // e.g 'metrics' for TSVB
 }
 
-export interface SearchSource {
+export interface SearchPanel {
+  indexPatternSavedObject: any;
   attributes: SavedObjectAttributes;
-  references: SavedObjectReferences[];
+  references: SavedObjectReference[];
 }

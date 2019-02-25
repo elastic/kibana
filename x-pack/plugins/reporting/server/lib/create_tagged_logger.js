@@ -23,3 +23,5 @@ export function createTaggedLogger(server, tags) {
     server.log([...tags, ...additionalTags], msg);
   };
 }
+
+

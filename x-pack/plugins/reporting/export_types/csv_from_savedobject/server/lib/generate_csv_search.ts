@@ -5,8 +5,10 @@
  */
 
 import { Request } from 'hapi';
-import { KbnServer } from '../../../../types';
-import { SearchSource } from '../../types';
+import { KbnServer, Logger } from '../../../../types';
+import { SearchPanel } from '../../types';
+// @ts-ignore
+import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 
 interface CsvResult {
   type: string;
@@ -16,10 +18,15 @@ interface CsvResult {
 export async function generateCsvSearch(
   req: Request,
   server: KbnServer,
-  searchPanel: SearchSource
+  logger: Logger,
+  searchPanel: SearchPanel
 ): Promise<CsvResult> {
+  // get job params to main csv export module
+
+  const generateCsv = createGenerateCsv(logger);
+
   return {
     type: 'CSV from Saved Search',
-    rows: ['one,two,three', 'a,b,c'],
+    rows: generateCsv(),
   };
 }

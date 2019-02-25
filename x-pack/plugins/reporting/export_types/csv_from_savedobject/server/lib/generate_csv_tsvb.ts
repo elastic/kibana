@@ -6,12 +6,12 @@
 
 import { badRequest } from 'boom';
 import { Request } from 'hapi';
-import { KbnServer } from '../../../../types';
+import { KbnServer, Logger } from '../../../../types';
 import { TsvbAggregationCell, TsvbAggregationRow, TsvbPanel, TsvbTableData } from '../../types';
 
 const JOB_DATA_TYPE = 'CSV from TSVB table visualization';
 
-export async function generateCsvTsvb(req: Request, server: KbnServer, tsvbPanel: TsvbPanel) {
+export async function generateCsvTsvb(req: Request, server: KbnServer, logger: Logger, tsvbPanel: TsvbPanel) {
   const { getTableData: getTableDataTSVB } = server.plugins.metrics; // FIXME: don't crash if config has tsvb disabled
   const tableDataTSVB: TsvbTableData = await getTableDataTSVB(req, tsvbPanel);
 
