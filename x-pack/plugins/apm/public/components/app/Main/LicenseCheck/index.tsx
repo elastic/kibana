@@ -6,18 +6,19 @@
 import React from 'react';
 import { STATUS } from '../../../../constants/index';
 import { LicenceRequest } from '../../../../store/reactReduxRequest/license';
+import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
-function LicenseChecker() {
+export const LicenseCheck: React.SFC = ({ children }) => {
   return (
     <LicenceRequest
-      render={({ data, status }) => {
-        if (status === STATUS.SUCCESS && !data.license.is_active) {
-          window.location = '#/invalid-license';
+      render={({ data: licenseData, status: licenseStatus }) => {
+        const hasValidLicense = licenseData.license.is_active;
+        if (licenseStatus === STATUS.SUCCESS && !hasValidLicense) {
+          return <InvalidLicenseNotification />;
         }
-        return null;
+
+        return children;
       }}
     />
   );
-}
-
-export default LicenseChecker;
+};
