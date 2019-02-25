@@ -18,21 +18,26 @@ const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends AbstractESSource {
 
   static type = 'ES_SEARCH';
-  static title = 'Elasticsearch documents';
+  static title = 'Documents';
   static description = 'Geospatial data from a Kibana index pattern';
 
-  static renderEditor({ onPreviewSource }) {
-    const onSelect = (layerConfig) => {
-      const layerSource = new ESSearchSource({
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
+    const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const source = new ESSearchSource({
         id: uuid(),
-        ...layerConfig
-      });
-      onPreviewSource(layerSource);
+        ...sourceConfig
+      }, inspectorAdapters);
+      onPreviewSource(source);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
 
-  constructor(descriptor) {
+  constructor(descriptor, inspectorAdapters) {
     super({
       id: descriptor.id,
       type: ESSearchSource.type,
@@ -41,7 +46,7 @@ export class ESSearchSource extends AbstractESSource {
       limit: _.get(descriptor, 'limit', DEFAULT_LIMIT),
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', true),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
-    });
+    }, inspectorAdapters);
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -64,6 +69,10 @@ export class ESSearchSource extends AbstractESSource {
     } catch (error) {
       return [];
     }
+  }
+
+  getMetricFields() {
+    return [];
   }
 
   getFieldNames() {

@@ -231,7 +231,7 @@ function getTemplate(layout, logo, title) {
                 }),
                 fontSize: 10,
                 style: {
-                  color: "#aaa"
+                  color: '#aaa'
                 },
                 margin: [0, 2, 0, 0]
               } : '',

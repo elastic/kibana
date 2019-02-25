@@ -22,6 +22,7 @@ import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
+import { I18nContext } from 'ui/i18n';
 
 let activeSession: FlyoutSession | null = null;
 
@@ -104,9 +105,11 @@ export function openFlyout(
   };
 
   ReactDOM.render(
-    <EuiFlyout {...flyoutProps} onClose={onClose}>
-      {flyoutChildren}
-    </EuiFlyout>,
+    <I18nContext>
+      <EuiFlyout {...flyoutProps} onClose={onClose}>
+        {flyoutChildren}
+      </EuiFlyout>
+    </I18nContext>,
     container
   );
 

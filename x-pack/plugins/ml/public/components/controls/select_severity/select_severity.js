@@ -10,10 +10,10 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiHealth,
@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });
 const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' });
@@ -71,50 +72,12 @@ function optionValueToThreshold(value) {
   return threshold;
 }
 
-// This service will be populated by the corresponding angularjs based one.
-export const mlSelectSeverityService = {
-  intialized: false,
-  state: null
-};
+export const severity$ = new BehaviorSubject(SEVERITY_OPTIONS[0]);
 
-class SelectSeverity extends Component {
-  constructor(props) {
-    super(props);
-
-    // Restore the threshold from the state, or default to warning.
-    if (mlSelectSeverityService.intialized) {
-      this.mlSelectSeverityService = mlSelectSeverityService;
-    }
-
-    this.state = {
-      valueDisplay: SEVERITY_OPTIONS[0].display,
-    };
-  }
-
-  componentDidMount() {
-    // set initial state from service if available
-    if (this.mlSelectSeverityService !== undefined) {
-      const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-      const thresholdValue = get(thresholdState, 'val', 0);
-      const threshold = optionValueToThreshold(thresholdValue);
-      // set initial selected option equal to threshold value
-      const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));
-      this.mlSelectSeverityService.state.set('threshold', threshold);
-      this.setState({ valueDisplay: selectedOption.display, });
-    }
-  }
-
+class SelectSeverityUnwrapped extends Component {
   onChange = (valueDisplay) => {
-    this.setState({
-      valueDisplay: valueDisplay,
-    });
     const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
-
-    if (this.mlSelectSeverityService !== undefined) {
-      this.mlSelectSeverityService.state.set('threshold', threshold).changed();
-    } else {
-      this.props.onChangeHandler(threshold);
-    }
+    severity$.next(threshold);
   }
 
   getOptions = () =>
@@ -147,7 +110,7 @@ class SelectSeverity extends Component {
     }));
 
   render() {
-    const { valueDisplay } = this.state;
+    const { severity } = this.props;
     const options = this.getOptions();
 
     return (
@@ -155,23 +118,24 @@ class SelectSeverity extends Component {
         className={this.props.classNames}
         hasDividers
         options={options}
-        valueOfSelected={valueDisplay}
+        valueOfSelected={severity.display}
         onChange={this.onChange}
       />
     );
   }
 }
 
-SelectSeverity.propTypes = {
-  mlSelectSeverityService: PropTypes.object,
-  onChangeHandler: PropTypes.func,
+SelectSeverityUnwrapped.propTypes = {
   classNames: PropTypes.string
 };
 
-SelectSeverity.defaultProps = {
-  mlSelectSeverityService: undefined,
-  onChangeHandler: () => {},
+SelectSeverityUnwrapped.defaultProps = {
   classNames: ''
 };
+
+const SelectSeverity = injectObservablesAsProps(
+  { severity: severity$ },
+  SelectSeverityUnwrapped
+);
 
 export { SelectSeverity };
