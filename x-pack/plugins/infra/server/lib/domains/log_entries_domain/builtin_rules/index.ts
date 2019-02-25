@@ -39,14 +39,14 @@ export const builtinRules = [
   ...genericRules,
   {
     when: {
-      exists: ['log.path'],
+      exists: ['source'],
     },
     format: [
       {
         constant: 'failed to format message from ',
       },
       {
-        field: 'log.path',
+        field: 'source',
       },
     ],
   },

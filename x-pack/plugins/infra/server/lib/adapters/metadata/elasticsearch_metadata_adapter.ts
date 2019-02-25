@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { first, get } from 'lodash';
 import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
@@ -37,18 +37,21 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
             },
           },
         },
-        size: 0,
+        size: 1,
+        _source: [NAME_FIELDS[nodeType]],
         aggs: {
-          nodeName: {
-            terms: {
-              field: NAME_FIELDS[nodeType],
-              size: 1,
-            },
-          },
           metrics: {
             terms: {
-              field: 'event.dataset',
+              field: 'metricset.module',
               size: 1000,
+            },
+            aggs: {
+              names: {
+                terms: {
+                  field: 'metricset.name',
+                  size: 1000,
+                },
+              },
             },
           },
         },
@@ -57,7 +60,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
 
     const response = await this.framework.callWithRequest<
       any,
-      { metrics?: InfraMetadataAggregationResponse; nodeName?: InfraMetadataAggregationResponse }
+      { metrics?: InfraMetadataAggregationResponse }
     >(req, 'search', metricQuery);
 
     const buckets =
@@ -65,9 +68,11 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         ? response.aggregations.metrics.buckets
         : [];
 
+    const sampleDoc = first(response.hits.hits);
+
     return {
       id: nodeId,
-      name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
+      name: get(sampleDoc, `_source.${NAME_FIELDS[nodeType]}`),
       buckets,
     };
   }
@@ -89,18 +94,21 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
             },
           },
         },
-        size: 0,
+        size: 1,
+        _source: [NAME_FIELDS[nodeType]],
         aggs: {
-          nodeName: {
-            terms: {
-              field: NAME_FIELDS[nodeType],
-              size: 1,
-            },
-          },
           metrics: {
             terms: {
-              field: 'event.dataset',
+              field: 'fileset.module',
               size: 1000,
+            },
+            aggs: {
+              names: {
+                terms: {
+                  field: 'fileset.name',
+                  size: 1000,
+                },
+              },
             },
           },
         },
@@ -109,7 +117,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
 
     const response = await this.framework.callWithRequest<
       any,
-      { metrics?: InfraMetadataAggregationResponse; nodeName?: InfraMetadataAggregationResponse }
+      { metrics?: InfraMetadataAggregationResponse }
     >(req, 'search', logQuery);
 
     const buckets =
@@ -117,9 +125,11 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         ? response.aggregations.metrics.buckets
         : [];
 
+    const sampleDoc = first(response.hits.hits);
+
     return {
       id: nodeId,
-      name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
+      name: get(sampleDoc, `_source.${NAME_FIELDS[nodeType]}`),
       buckets,
     };
   }

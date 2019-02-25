@@ -6,7 +6,6 @@
 
 export const filebeatApache2Rules = [
   {
-    // pre-ECS
     when: {
       exists: ['apache2.access'],
     },
@@ -56,29 +55,6 @@ export const filebeatApache2Rules = [
     ],
   },
   {
-    // ECS
-    when: {
-      values: {
-        'event.dataset': 'apache.error',
-      },
-    },
-    format: [
-      {
-        constant: '[apache][',
-      },
-      {
-        field: 'log.level',
-      },
-      {
-        constant: '] ',
-      },
-      {
-        field: 'message',
-      },
-    ],
-  },
-  {
-    // pre-ECS
     when: {
       exists: ['apache2.error.message'],
     },

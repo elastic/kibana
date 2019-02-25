@@ -9,6 +9,7 @@ import moment from 'moment';
 
 import { InfraMetricType, InfraNode, InfraNodeMetric } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
+import { NAME_FIELDS } from '../constants';
 import { getBucketSizeInSeconds } from './get_bucket_size_in_seconds';
 
 // TODO: Break these function into seperate files and expand beyond just documnet count
@@ -71,9 +72,9 @@ export function createNodeItem(
   node: InfraBucket,
   bucket: InfraBucket
 ): InfraNode {
-  const nodeDetails = get(node, ['nodeDetails', 'buckets', 0]);
+  const nodeDoc = get(node, ['nodeDetails', 'hits', 'hits', 0]);
   return {
     metric: createNodeMetrics(options, node, bucket),
-    path: [{ value: node.key, label: get(nodeDetails, 'key', node.key) }],
+    path: [{ value: node.key, label: get(nodeDoc, `_source.${NAME_FIELDS[options.nodeType]}`) }],
   } as InfraNode;
 }
