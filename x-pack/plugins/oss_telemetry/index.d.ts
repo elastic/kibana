@@ -63,4 +63,5 @@ export interface HapiServer {
   config: () => {
     get: (prop: string) => any;
   };
+  log: (context: string[], message: string) => void;
 }

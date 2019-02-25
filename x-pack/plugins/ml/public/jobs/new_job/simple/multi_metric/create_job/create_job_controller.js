@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -705,7 +705,7 @@ module
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
       mlMultiMetricJobService.stopDatafeed($scope.formConfig)
-        .catch()
+        .catch(() => {})
         .then(() => {
           $scope.$applyAsync();
         });

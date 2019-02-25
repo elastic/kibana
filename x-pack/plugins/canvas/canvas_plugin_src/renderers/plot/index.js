@@ -11,7 +11,6 @@ import '../../lib/flot-charts';
 import { debounce, includes } from 'lodash';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
-import './plot.scss';
 
 const render = (domNode, config, handlers) => {
   // TODO: OH NOES

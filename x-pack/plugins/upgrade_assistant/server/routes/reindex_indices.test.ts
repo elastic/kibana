@@ -18,6 +18,7 @@ const mockReindexService = {
   cancelReindexing: jest.fn(),
 };
 
+jest.mock('../lib/es_version_precheck');
 jest.mock('../lib/reindexing', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
@@ -41,9 +42,6 @@ describe('reindex API', () => {
     } as any,
     xpack_main: {
       info: {},
-    },
-    apm_oss: {
-      indexPatterns: ['apm-*'],
     },
   } as any;
   server.config = () => ({ get: () => '' } as any);

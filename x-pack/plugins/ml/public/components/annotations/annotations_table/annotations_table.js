@@ -126,7 +126,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) && this.props.jobs.length > 0
     ) {
       this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => this.getAnnotations());
-      annotationsRefresh$.next();
+      annotationsRefresh$.next(true);
     }
   }
 
@@ -137,7 +137,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
-      annotationsRefresh$.next();
+      annotationsRefresh$.next(true);
     }
   }
 
@@ -209,14 +209,14 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
-        mlTableService.rowMouseleave.changed(this.mouseOverRecord, 'annotation');
+        mlTableService.rowMouseleave$.next({ record: this.mouseOverRecord, type: 'annotation' });
 
         // fire mouseenter on the new record.
-        mlTableService.rowMouseenter.changed(record, 'annotation');
+        mlTableService.rowMouseenter$.next({ record, type: 'annotation' });
       }
     } else {
       // Mouse is now over a row, fire mouseenter on the record.
-      mlTableService.rowMouseenter.changed(record, 'annotation');
+      mlTableService.rowMouseenter$.next({ record, type: 'annotation' });
     }
 
     this.mouseOverRecord = record;
@@ -224,7 +224,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
-      mlTableService.rowMouseleave.changed(this.mouseOverRecord, 'annotation');
+      mlTableService.rowMouseleave$.next({ record: this.mouseOverRecord, type: 'annotation' });
       this.mouseOverRecord = undefined;
     }
   };

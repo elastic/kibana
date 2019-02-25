@@ -7,7 +7,7 @@
 import { map } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './action_type_select.html';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import { Action } from 'plugins/watcher/models/action';
 import 'plugins/watcher/services/settings';
 
@@ -30,7 +30,11 @@ app.directive('actionTypeSelect', function ($injector) {
 
         this.loadActionTypes()
           .then(actionTypes => {
-            this.actionTypes = actionTypes;
+            this.actionTypes = actionTypes.filter((actionType) => {
+              // 'Action' is the default action type. If an action has the default then it's
+              // not fully implemented and shouldn't be presented to the user.
+              return actionType.typeName !== 'Action';
+            });
           });
       }
 
