@@ -11,7 +11,7 @@ export const filebeatApache2Rules = [
     },
     format: [
       {
-        constant: '[apache][access] ',
+        constant: '[Apache][access] ',
       },
       {
         field: 'apache2.access.remote_ip',
@@ -60,7 +60,7 @@ export const filebeatApache2Rules = [
     },
     format: [
       {
-        constant: '[apache][',
+        constant: '[Apache][',
       },
       {
         field: 'apache2.error.level',

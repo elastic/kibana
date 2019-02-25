@@ -11,7 +11,7 @@ export const filebeatNginxRules = [
     },
     format: [
       {
-        constant: '[nginx][access] ',
+        constant: '[Nginx][access] ',
       },
       {
         field: 'nginx.access.remote_ip',
@@ -60,7 +60,7 @@ export const filebeatNginxRules = [
     },
     format: [
       {
-        constant: '[nginx]',
+        constant: '[Nginx]',
       },
       {
         constant: '[',
