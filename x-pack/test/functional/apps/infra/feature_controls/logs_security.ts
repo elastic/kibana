@@ -9,12 +9,16 @@ import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/provider
 
 // tslint:disable no-default-export
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
   describe('logs security', () => {
+    before(async () => {
+      esArchiver.load('empty_kibana');
+    });
     describe('global logs all privileges', () => {
       before(async () => {
         await security.role.create('global_logs_all_role', {

@@ -47,13 +47,14 @@ export const NodeContextMenu = injectUICapabilities(
         [InfraNodeType.pod]: 'kubernetes.pod.uid',
       };
 
-      const nodeLogsUrl = node.id
-        ? getNodeLogsUrl({
-            nodeType,
-            nodeId: node.id,
-            time: timeRange.to,
-          })
-        : undefined;
+      const nodeLogsUrl =
+        node.id && uiCapabilities.logs.show
+          ? getNodeLogsUrl({
+              nodeType,
+              nodeId: node.id,
+              time: timeRange.to,
+            })
+          : undefined;
       const nodeDetailUrl = node.id
         ? getNodeDetailUrl({
             nodeType,

@@ -18,7 +18,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('infrastructure spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('infra/metrics_and_logs');
+      await esArchiver.load('infra/metrics_and_logs');
+    });
+
+    after(async () => {
+      await esArchiver.unload('infra/metrics_and_logs');
     });
 
     describe('space with no features disabled', () => {
