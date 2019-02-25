@@ -8,6 +8,9 @@
 /**
  *  global
  */
+ html {
+  background: white !important;
+}
 
 /* elements can hide themselves when shared */
 .hide-for-sharing {
@@ -121,8 +124,11 @@ visualize-app .visEditor__canvas {
  * to handle this fine, but firefox moves the visualizations around.
  */
  dashboard-app .react-grid-item {
-  height: 0 !important; /* 1. */
-  width: 0 !important; /* 1. */
   transform: none !important; /* 2. */
   -webkit-transform: none !important; /* 2. */
+}
+
+dashboard-app .react-grid-item .dshPanel {
+  border: none !important;
+  box-shadow: none !important;
 }
