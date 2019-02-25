@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { TRACE_ID } from 'x-pack/plugins/apm/common/constants';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   getWaterfall,
   IWaterfall
@@ -23,13 +20,12 @@ export const ID = 'waterfall';
 
 interface Props {
   urlParams: IUrlParams;
-  transaction: Transaction;
+  traceId?: string;
   render: RRRRender<IWaterfall>;
 }
 
-export function WaterfallRequest({ urlParams, transaction, render }: Props) {
+export function WaterfallRequest({ urlParams, render, traceId }: Props) {
   const { start, end } = urlParams;
-  const traceId: string = get(transaction, TRACE_ID);
 
   if (!(traceId && start && end)) {
     return null;
@@ -40,8 +36,16 @@ export function WaterfallRequest({ urlParams, transaction, render }: Props) {
       id={ID}
       fn={loadTrace}
       args={[{ traceId, start, end }]}
-      render={({ args, data = [], status }) => {
-        const waterfall = getWaterfall(data, transaction);
+      render={({
+        args,
+        data = { trace: [], errorsPerTransaction: {} },
+        status
+      }) => {
+        const waterfall = getWaterfall(
+          data.trace,
+          data.errorsPerTransaction,
+          urlParams.transactionId
+        );
         return render({ args, data: waterfall, status });
       }}
     />

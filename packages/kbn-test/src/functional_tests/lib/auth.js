@@ -94,7 +94,7 @@ async function insertUser(port, auth, username, password, roles = [], retries = 
           auth,
           hostname: 'localhost',
           port,
-          pathname: `/_xpack/security/user/${username}`,
+          pathname: `/_security/user/${username}`,
         }),
         json: true,
         body: { password, roles },

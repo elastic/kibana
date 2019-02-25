@@ -36,7 +36,8 @@ import {
   MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_SHRINK_ENABLED,
-  PHASE_FREEZE_ENABLED
+  PHASE_FREEZE_ENABLED,
+  PHASE_INDEX_PRIORITY
 } from '../constants';
 import { filterItems, sortTable } from '../../services';
 
@@ -122,6 +123,9 @@ export const splitSizeAndUnits = field => {
 };
 
 export const isNumber = value => typeof value === 'number';
+export const isEmptyObject = (obj) => {
+  return Object.entries(obj).length === 0 && obj.constructor === Object;
+};
 
 export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   const policy = { ...defaultPolicy };
@@ -198,6 +202,9 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     if (actions.freeze) {
       policy[PHASE_FREEZE_ENABLED] = true;
     }
+    if (actions.set_priority) {
+      policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
+    }
   }
   return policy;
 };
@@ -255,14 +262,28 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.allocate.require = {
       [name]: value
     };
+  } else {
+    if (esPhase.actions.allocate) {
+      delete esPhase.actions.allocate.require;
+    }
   }
   if (isNumber(phase[PHASE_REPLICA_COUNT])) {
     esPhase.actions.allocate = esPhase.actions.allocate || {};
     esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
   } else {
     if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
+      delete esPhase.actions.allocate.number_of_replicas;
     }
+  }
+  if (esPhase.actions.allocate
+      && !esPhase.actions.allocate.require
+      && !esPhase.actions.allocate.number_of_replicas
+      && isEmptyObject(esPhase.actions.allocate.include)
+      && isEmptyObject(esPhase.actions.allocate.exclude)
+  ) {
+    // remove allocate action if it does not define require or number of nodes
+    // and both include and exclude are empty objects (ES will fail to parse if we don't)
+    delete esPhase.actions.allocate;
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
@@ -285,6 +306,11 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.freeze = {};
   } else {
     delete esPhase.actions.freeze;
+  }
+  if (isNumber(phase[PHASE_INDEX_PRIORITY])) {
+    esPhase.actions.set_priority = {
+      priority: phase[PHASE_INDEX_PRIORITY]
+    };
   }
   return esPhase;
 };

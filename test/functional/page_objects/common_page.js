@@ -90,9 +90,17 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
 
-    navigateToApp(appName) {
+    /**
+     * @param {string} appName - name of the app
+     * @param {object} [opts] - optional options object
+     * @param {object} [opts.appConfig] - overrides for appConfig, e.g. { pathname, hash }
+     */
+    navigateToApp(appName, opts = { appConfig: {} }) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        ...config.get(['apps', appName]),
+        ...opts.appConfig,
+      });
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
@@ -108,9 +116,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
-                    'dateFormat:tz': 'UTC',
                     'defaultIndex': 'logstash-*',
-                    'telemetry:optIn': false
                   });
                 }
               }

@@ -22,7 +22,8 @@ import {
   PHASE_FORCE_MERGE_ENABLED,
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_REPLICA_COUNT,
-  WARM_PHASE_ON_ROLLOVER
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_INDEX_PRIORITY
 } from '../constants';
 import {
   getPhase,
@@ -74,8 +75,12 @@ export const validatePhase = (type, phase, errors) => {
       if (numberedAttribute === PHASE_FORCE_MERGE_SEGMENTS && !phase[PHASE_FORCE_MERGE_ENABLED]) {
         continue;
       }
-      // PHASE_REPLICA_COUNT is optional
+      // PHASE_REPLICA_COUNT is optional and can be zero
       if (numberedAttribute === PHASE_REPLICA_COUNT && !phase[numberedAttribute]) {
+        continue;
+      }
+      // PHASE_INDEX_PRIORITY is optional and can be zero
+      if (numberedAttribute === PHASE_INDEX_PRIORITY && !phase[numberedAttribute]) {
         continue;
       }
       if (!isNumber(phase[numberedAttribute])) {

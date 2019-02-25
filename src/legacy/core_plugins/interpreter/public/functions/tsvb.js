@@ -64,10 +64,17 @@ export const tsvb = () => ({
       uiState: uiState,
     });
 
+    response.visType = 'metrics';
+
     return {
       type: 'render',
       as: 'visualization',
-      value: response,
+      value: {
+        visType: 'metrics',
+        visConfig: params,
+        uiState: uiState,
+        visData: response,
+      },
     };
   },
 });

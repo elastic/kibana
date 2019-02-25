@@ -9,15 +9,12 @@
  */
 
 import { chain, each, get, union, uniq } from 'lodash';
-import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 
 import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
-import { mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
-import { mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -165,10 +162,9 @@ export function getFieldsByJob() {
   }, { '*': [] });
 }
 
-export function getSelectionTimeRange(selectedCells, interval) {
+export function getSelectionTimeRange(selectedCells, interval, bounds) {
   // Returns the time range of the cell(s) currently selected in the swimlane.
   // If no cell(s) are currently selected, returns the dashboard time range.
-  const bounds = timefilter.getActiveBounds();
   let earliestMs = bounds.min.valueOf();
   let latestMs = bounds.max.valueOf();
 
@@ -383,10 +379,10 @@ export function processViewByResults(
   return dataset;
 }
 
-export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval) {
+export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
-  const timeRange = getSelectionTimeRange(selectedCells, interval);
+  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
   if (mlAnnotationsEnabled === false) {
     return Promise.resolve([]);
@@ -419,19 +415,21 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
   );
 }
 
-export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, fieldName) {
+export async function loadAnomaliesTableData(
+  selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName, tableInterval, tableSeverity
+) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
-  const timeRange = getSelectionTimeRange(selectedCells, interval);
+  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
   return new Promise((resolve, reject) => {
     ml.results.getAnomaliesTableData(
       jobIds,
       [],
       influencers,
-      mlSelectIntervalService.state.get('interval').val,
-      mlSelectSeverityService.state.get('threshold').val,
+      tableInterval,
+      tableSeverity,
       timeRange.earliestMs,
       timeRange.latestMs,
       dateFormatTz,

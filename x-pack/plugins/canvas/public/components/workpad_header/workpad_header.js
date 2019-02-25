@@ -27,7 +27,6 @@ export const WorkpadHeader = ({
   isWriteable,
   canUserWrite,
   toggleWriteable,
-  hasAssets,
   addElement,
   setShowElementModal,
   showElementModal,
@@ -81,7 +80,7 @@ export const WorkpadHeader = ({
             <EuiFlexItem grow={false}>
               <FullscreenControl>
                 {({ toggleFullscreen }) => (
-                  <EuiToolTip position="bottom" content="Toggle fullscreen mode">
+                  <EuiToolTip position="bottom" content="Enter fullscreen mode">
                     <EuiButtonIcon
                       iconType="fullScreen"
                       aria-label="View fullscreen"
@@ -115,11 +114,9 @@ export const WorkpadHeader = ({
         {isWriteable ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              {hasAssets && (
-                <EuiFlexItem grow={false}>
-                  <AssetManager />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <AssetManager />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
@@ -141,7 +138,6 @@ export const WorkpadHeader = ({
 WorkpadHeader.propTypes = {
   isWriteable: PropTypes.bool,
   toggleWriteable: PropTypes.func,
-  hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,
   showElementModal: PropTypes.bool,
   setShowElementModal: PropTypes.func,

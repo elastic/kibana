@@ -20,8 +20,6 @@
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  min-height: 29px; /* 1 */
-  line-height: 29px; /* 1 */
 }
 
 .kuiLocalNavRow__section {
@@ -40,12 +38,3 @@
   padding: 0 $localNavSideSpacing; /* 1 */
   align-items: flex-start; /* 1 */
 }
-
-.kuiLocalNav__popover {
-  height: 100%;
-
-  .kuiLocalNav__popoverAnchor {
-    height: 100%;
-  }
-}
-

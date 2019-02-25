@@ -19,13 +19,12 @@ import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const template = `
+  <div class="euiSpacer euiSpacer--s" />
   <ml-nav-menu name="settings" />
-  <div class="mlCalendarManagement">
-    <ml-calendars-list />
-  </div>
+  <ml-calendars-list />
 `;
 
 uiRoutes
@@ -54,9 +53,9 @@ module.directive('mlCalendarsList', function () {
       };
 
       ReactDOM.render(
-        <I18nProvider>
+        <I18nContext>
           {React.createElement(CalendarsList, props)}
-        </I18nProvider>,
+        </I18nContext>,
         element[0]
       );
     }

@@ -21,20 +21,21 @@ export function AppsMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
-  const flyout = getService('flyout');
+  const globalNav = getService('globalNav');
 
   return new class AppsMenu {
     async readLinks() {
       await this._ensureMenuOpen();
-      const buttons = await testSubjects.findAll('appsMenu appLink');
-      try {
-        return Promise.all(buttons.map(async (element) => ({
-          text: await element.getVisibleText(),
-          href: await element.getProperty('href'),
-        })));
-      } finally {
-        await this._ensureMenuClosed();
-      }
+      const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
+      const $ = await appMenu.parseDomContent();
+      const links = $.findTestSubjects('appLink').toArray().map(link => {
+        return {
+          text: $(link).text(),
+          href: $(link).attr('href')
+        };
+      });
+      await this._ensureMenuClosed();
+      return links;
     }
 
     async linkExists(name) {
@@ -42,38 +43,31 @@ export function AppsMenuProvider({ getService }) {
     }
 
     async clickLink(appTitle) {
-      log.debug(`click "${appTitle}" tab`);
-      await this._ensureMenuOpen();
-      const container = await testSubjects.find('appsMenu');
-      const link = await container.findByPartialLinkText(appTitle);
-      await link.click();
+      try {
+        log.debug(`click "${appTitle}" tab`);
+        await this._ensureMenuOpen();
+        const container = await testSubjects.find('navDrawer&expanded appsMenu');
+        const link = await container.findByPartialLinkText(appTitle);
+        await link.click();
+      } finally {
+        await this._ensureMenuClosed();
+      }
     }
 
     async _ensureMenuOpen() {
-      // some apps render flyouts that cover the global nav menu, so we make sure all flyouts are
-      // closed before trying to use the appsMenu
-      await flyout.ensureAllClosed();
-
-      if (!await testSubjects.exists('appsMenu')) {
-        await testSubjects.click('appsMenuButton');
-        await retry.waitFor('apps menu displayed', async () => (
-          await testSubjects.exists('appsMenu')
+      if (!await testSubjects.exists('navDrawer&expanded')) {
+        await testSubjects.moveMouseTo('navDrawer');
+        await retry.waitFor('apps drawer open', async () => (
+          await testSubjects.exists('navDrawer&expanded')
         ));
       }
     }
 
     async _ensureMenuClosed() {
-      const [appsMenuButtonExists, appsMenuExists] = await Promise.all([
-        testSubjects.exists('appsMenuButton'),
-        testSubjects.exists('appsMenu')
-      ]);
-
-      if (appsMenuButtonExists && appsMenuExists) {
-        await testSubjects.click('appsMenuButton');
-        await retry.waitFor('user menu closed', async () => (
-          !await testSubjects.exists('appsMenu')
-        ));
-      }
+      await globalNav.moveMouseToLogo();
+      await retry.waitFor('apps drawer closed', async () => (
+        await testSubjects.exists('navDrawer&collapsed')
+      ));
     }
   };
 }

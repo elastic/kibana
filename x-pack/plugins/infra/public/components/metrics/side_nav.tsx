@@ -77,7 +77,6 @@ const SideNavContainer = styled.div`
   position: fixed;
   z-index: 1;
   height: 88vh;
-  background-color: #f5f5f5;
   padding-left: 16px;
   margin-left: -16px;
   overflow-y: auto;

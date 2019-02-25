@@ -103,9 +103,10 @@ class EditPolicyUi extends Component {
           defaultMessage: 'Please fix the  errors on this page.',
         })
       );
-      const element = document.getElementById(`${firstError}-row`);
+      const errorRowId = `${firstError.replace('.', '-')}-row`;
+      const element = document.getElementById(errorRowId);
       if (element) {
-        element.scrollIntoView();
+        element.scrollIntoView({ block: 'center', inline: 'nearest' });
       }
     } else {
       const success = await saveLifecyclePolicy(lifecycle, saveAsNewPolicy);

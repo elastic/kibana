@@ -30,6 +30,26 @@ export function getUiSettingDefaults() {
     return numeralLanguage.id;
   })];
 
+  const luceneQueryLanguageLabel = i18n.translate('kbn.advancedSettings.searchQueryLanguageLucene', {
+    defaultMessage: 'Lucene',
+  });
+
+  const queryLanguageSettingName = i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
+    defaultMessage: 'Query language',
+  });
+
+  const requestPreferenceOptionLabels = {
+    sessionId: i18n.translate('kbn.advancedSettings.courier.requestPreferenceSessionId', {
+      defaultMessage: 'Session ID',
+    }),
+    custom: i18n.translate('kbn.advancedSettings.courier.requestPreferenceCustom', {
+      defaultMessage: 'Custom',
+    }),
+    none: i18n.translate('kbn.advancedSettings.courier.requestPreferenceNone', {
+      defaultMessage: 'None',
+    }),
+  };
+
   // wrapped in provider so that a new instance is given to each app/test
   return {
     'buildNum': {
@@ -42,16 +62,19 @@ export function getUiSettingDefaults() {
       value: '{ "analyze_wildcard": true }',
       description:
         i18n.translate('kbn.advancedSettings.query.queryStringOptionsText', {
-          defaultMessage: '{optionsLink} for the lucene query string parser',
+          defaultMessage: '{optionsLink} for the lucene query string parser. Is only used when "{queryLanguage}" is set ' +
+            'to {luceneLanguage}.',
           description: 'Part of composite text: kbn.advancedSettings.query.queryStringOptions.optionsLinkText + ' +
                        'kbn.advancedSettings.query.queryStringOptionsText',
           values: {
             optionsLink:
-              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">' +
+              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
               i18n.translate('kbn.advancedSettings.query.queryStringOptions.optionsLinkText', {
                 defaultMessage: 'Options',
               }) +
               '</a>',
+            luceneLanguage: luceneQueryLanguageLabel,
+            queryLanguage: queryLanguageSettingName,
           },
         }),
       type: 'json'
@@ -65,33 +88,27 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
           'Currently only applies when experimental query features are enabled in the query bar. ' +
-          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}',
+          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: 'query:queryString:options',
         },
       }),
     },
-    'k7design': {
-      name: i18n.translate('kbn.advancedSettings.k7designTitle', {
-        defaultMessage: 'Use the new K7 UI design',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.k7designText', {
-        defaultMessage:
-          'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
-      }),
-    },
     'search:queryLanguage': {
-      name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
-        defaultMessage: 'Query language',
-      }),
-      value: 'lucene',
+      name: queryLanguageSettingName,
+      value: 'kuery',
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
+          'Query language used by the query bar. KQL is a new language built specifically for Kibana.',
       }),
       type: 'select',
-      options: ['lucene', 'kuery']
+      options: ['lucene', 'kuery'],
+      optionLabels: {
+        lucene: luceneQueryLanguageLabel,
+        kuery: i18n.translate('kbn.advancedSettings.searchQueryLanguageKql', {
+          defaultMessage: 'KQL',
+        }),
+      },
     },
     'sort:options': {
       name: i18n.translate('kbn.advancedSettings.sortOptionsTitle', {
@@ -104,7 +121,7 @@ export function getUiSettingDefaults() {
                      'kbn.advancedSettings.sortOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.sortOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -117,7 +134,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.dateFormatTitle', {
         defaultMessage: 'Date format',
       }),
-      value: 'MMMM Do YYYY, HH:mm:ss.SSS',
+      value: 'MMM D, YYYY @ HH:mm:ss.SSS',
       description: i18n.translate('kbn.advancedSettings.dateFormatText', {
         defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
         description: 'Part of composite text: kbn.advancedSettings.dateFormatText + ' +
@@ -248,6 +265,14 @@ export function getUiSettingDefaults() {
       }),
       value: 'desc',
       options: ['desc', 'asc'],
+      optionLabels: {
+        desc: i18n.translate('kbn.advancedSettings.discover.sortOrderDesc', {
+          defaultMessage: 'Descending',
+        }),
+        asc: i18n.translate('kbn.advancedSettings.discover.sortOrderAsc', {
+          defaultMessage: 'Ascending',
+        }),
+      },
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
         defaultMessage:
@@ -310,19 +335,25 @@ export function getUiSettingDefaults() {
       }),
       value: 'sessionId',
       options: ['sessionId', 'custom', 'none'],
+      optionLabels: requestPreferenceOptionLabels,
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.courier.requestPreferenceText', {
         defaultMessage:
           `Allows you to set which shards handle your search requests.
           <ul>
-            <li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards.
+            <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
-            <li><strong>custom:</strong> allows you to define a your own preference.
+            <li><strong>{custom}:</strong> allows you to define a your own preference.
               Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
-            <li><strong>none:</strong> means do not set a preference.
+            <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
           </ul>`,
+        values: {
+          sessionId: requestPreferenceOptionLabels.sessionId,
+          custom: requestPreferenceOptionLabels.custom,
+          none: requestPreferenceOptionLabels.none,
+        },
       }),
       category: ['search'],
     },
@@ -342,7 +373,7 @@ export function getUiSettingDefaults() {
           setRequestReferenceSetting: '<strong>courier:setRequestPreference</strong>',
           customSettingValue: '"custom"',
           requestPreferenceLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText', {
               defaultMessage: 'Request Preference',
             }) +
@@ -364,7 +395,7 @@ export function getUiSettingDefaults() {
         values: {
           maxRequestsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
-            target="_blank" rel="noopener noreferrer" >max_concurrent_shard_requests</a>`
+            target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
       }),
       category: ['search'],
@@ -372,7 +403,7 @@ export function getUiSettingDefaults() {
     'search:includeFrozen': {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
-        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
       category: ['search'],
@@ -432,7 +463,7 @@ export function getUiSettingDefaults() {
         values: {
           cellDimensionsLink:
             `<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText', {
               defaultMessage: 'Explanation of cell dimensions',
             }) +
@@ -750,8 +781,7 @@ export function getUiSettingDefaults() {
       value:
 `{
   "from": "now-15m",
-  "to": "now",
-  "mode": "quick"
+  "to": "now"
 }`,
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
@@ -777,31 +807,46 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Time picker quick ranges',
       }),
       value: JSON.stringify([
-        { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
-        { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
-        { from: 'now/M',    to: 'now/M',    display: 'This month',            section: 0 },
-        { from: 'now/y',    to: 'now/y',    display: 'This year',             section: 0 },
-        { from: 'now/d',    to: 'now',      display: 'Today so far',          section: 0 },
-        { from: 'now/w',    to: 'now',      display: 'Week to date',          section: 0 },
-        { from: 'now/M',    to: 'now',      display: 'Month to date',         section: 0 },
-        { from: 'now/y',    to: 'now',      display: 'Year to date',          section: 0 },
-
-        { from: 'now-15m',  to: 'now',      display: 'Last 15 minutes',       section: 1 },
-        { from: 'now-30m',  to: 'now',      display: 'Last 30 minutes',       section: 1 },
-        { from: 'now-1h',   to: 'now',      display: 'Last 1 hour',           section: 1 },
-        { from: 'now-4h',   to: 'now',      display: 'Last 4 hours',          section: 1 },
-        { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 1 },
-        { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 1 },
-        { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 1 },
-
-        { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 2 },
-        { from: 'now-60d',  to: 'now',      display: 'Last 60 days',          section: 2 },
-        { from: 'now-90d',  to: 'now',      display: 'Last 90 days',          section: 2 },
-        { from: 'now-6M',   to: 'now',      display: 'Last 6 months',         section: 2 },
-        { from: 'now-1y',   to: 'now',      display: 'Last 1 year',           section: 2 },
-        { from: 'now-2y',   to: 'now',      display: 'Last 2 years',          section: 2 },
-        { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 2 },
-
+        {
+          from: 'now/d',
+          to: 'now/d',
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' })
+        },
+        {
+          from: 'now/w',
+          to: 'now/w',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' })
+        },
+        {
+          from: 'now/M',
+          to: 'now/M',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' })
+        },
+        {
+          from: 'now/y',
+          to: 'now/y',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' })
+        },
+        {
+          from: 'now/d',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' })
+        },
+        {
+          from: 'now/w',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' })
+        },
+        {
+          from: 'now/M',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' })
+        },
+        {
+          from: 'now/y',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' })
+        },
       ], null, 2),
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
@@ -815,12 +860,21 @@ export function getUiSettingDefaults() {
         values: {
           acceptedFormatsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
               defaultMessage: 'accepted formats',
             }) +
             '</a>',
         },
+      }),
+    },
+    'theme:darkMode': {
+      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
+        defaultMessage: 'Dark mode',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.darkModeText', {
+        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
     },
     'filters:pinnedByDefault': {
@@ -856,7 +910,7 @@ export function getUiSettingDefaults() {
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +

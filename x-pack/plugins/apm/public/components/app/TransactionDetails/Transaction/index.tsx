@@ -18,8 +18,8 @@ import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
+import { TransactionLink } from '../../../shared/Links/TransactionLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
-import { TransactionLink } from '../../../shared/TransactionLink';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -140,6 +140,9 @@ export const Transaction: React.SFC<Props> = ({
       <EuiSpacer />
 
       <StickyTransactionProperties
+        errorCount={
+          waterfall.errorCountByTransactionId[transaction.transaction.id]
+        }
         transaction={transaction}
         totalDuration={waterfall.traceRootDuration}
       />

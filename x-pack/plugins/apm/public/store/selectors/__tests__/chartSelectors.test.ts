@@ -37,24 +37,24 @@ describe('chartSelectors', () => {
       overallAvgDuration: 200
     } as ApmTimeSeriesResponse;
 
-    it('should match snapshot', () => {
+    it('should produce correct series', () => {
       expect(getResponseTimeSeries(apmTimeseries)).toEqual([
         {
-          color: '#3185fc',
+          color: 'rgb(49, 133, 252)',
           data: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
           legendValue: '0 ms',
           title: 'Avg.',
           type: 'linemark'
         },
         {
-          color: '#ecae23',
+          color: 'rgb(230, 194, 32)',
           data: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
           title: '95th percentile',
           titleShort: '95th',
           type: 'linemark'
         },
         {
-          color: '#f98510',
+          color: 'rgb(249, 133, 16)',
           data: [{ x: 0, y: 300 }, { x: 1000, y: 400 }],
           title: '99th percentile',
           titleShort: '99th',
@@ -77,24 +77,24 @@ describe('chartSelectors', () => {
       ]
     } as any) as ApmTimeSeriesResponse;
     const transactionType = 'MyTransactionType';
-    it('should match snapshot', () => {
+    it('should produce correct series', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
         {
-          color: '#00b3a4',
+          color: 'rgb(0, 179, 164)',
           data: [{ x: 0, y: 5 }, { x: 0, y: 2 }],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
           type: 'linemark'
         },
         {
-          color: '#f98510',
+          color: 'rgb(249, 133, 16)',
           data: [{ x: 0, y: 1 }],
           legendValue: '1.0 tpm',
           title: 'HTTP 4xx',
           type: 'linemark'
         },
         {
-          color: '#db1374',
+          color: 'rgb(219, 19, 116)',
           data: [{ x: 0, y: 0 }],
           legendValue: '0.0 tpm',
           title: 'HTTP 5xx',

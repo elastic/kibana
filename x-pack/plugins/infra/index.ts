@@ -8,7 +8,13 @@ import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
+import {
+  getConfigSchema,
+  // getDeprecations,
+  initServerWithKibana,
+  KbnServer,
+} from './server/kibana.index';
+import { savedObjectMappings } from './server/saved_objects';
 
 const APP_ID = 'infra';
 
@@ -31,6 +37,7 @@ export function infra(kibana: any) {
         listed: false,
         url: `/app/${APP_ID}#/home`,
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/infra/register_feature'],
       links: [
         {
@@ -60,10 +67,14 @@ export function infra(kibana: any) {
           url: `/app/${APP_ID}#/logs`,
         },
       ],
+      mappings: savedObjectMappings,
     },
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
+    // deprecations(helpers: any) {
+    //   return getDeprecations(helpers);
+    // },
     init(server: KbnServer) {
       initServerWithKibana(server);
     },

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { injectI18nProvider } from '@kbn/i18n/react';
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -43,7 +43,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardListing', function (reactDirective) {
-  return reactDirective(injectI18nProvider(DashboardListing));
+  return reactDirective(wrapInI18nContext(DashboardListing));
 });
 
 function createNewDashboardCtrl($scope, i18n) {
@@ -60,11 +60,18 @@ uiRoutes
     template: dashboardListingTemplate,
     controller($injector, $location, $scope, Private, config, i18n) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
+      const kbnUrl = $injector.get('kbnUrl');
       const dashboardConfig = $injector.get('dashboardConfig');
 
       $scope.listingLimit = config.get('savedObjects:listingLimit');
+      $scope.create = () => {
+        kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+      };
       $scope.find = (search) => {
         return services.dashboards.find(search, $scope.listingLimit);
+      };
+      $scope.edit = ({ id }) => {
+        kbnUrl.redirect(createDashboardEditUrl(id));
       };
       $scope.delete = (ids) => {
         return services.dashboards.delete(ids);

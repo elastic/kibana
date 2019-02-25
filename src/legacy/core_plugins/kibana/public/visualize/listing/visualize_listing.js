@@ -24,17 +24,17 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
+import { wrapInI18nContext } from 'ui/i18n';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
-import { VisualizeConstants } from '../visualize_constants';
+import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
 
 import { i18n } from '@kbn/i18n';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', reactDirective => reactDirective(injectI18nProvider(VisualizeListingTable)));
-app.directive('newVisModal', reactDirective => reactDirective(injectI18nProvider(NewVisModal)));
+app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
   const Notifier = $injector.get('Notifier');
@@ -51,6 +51,10 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
+  };
+
+  this.edit = ({ id }) => {
+    kbnUrl.change(createVisualizeEditUrl(id));
   };
 
   this.closeNewVisModal = () => {
@@ -78,7 +82,11 @@ export function VisualizeListingController($injector, createNewVis) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
+
+        return {
+          total: result.total,
+          hits: result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'))
+        };
       });
   };
 
@@ -92,5 +100,4 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
-  config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
 }

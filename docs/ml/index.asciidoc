@@ -54,6 +54,10 @@ occurring in your operational environment at that time:
 [role="screenshot"]
 image::ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
 
+In some circumstances, annotations are also added automatically. For example, if
+the {ml} analytics detect that there is missing data, it annotates the affected
+time period. For more information, see 
+{stack-ov}/ml-delayed-data-detection.html[Handling delayed data].
 The *Job Management* pane shows the full list of annotations for each job.
 
 NOTE: The {kib} {ml-features} use pop-ups. You must configure your

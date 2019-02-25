@@ -5,24 +5,34 @@
  */
 
 import axios from 'axios';
-import { findIndex } from 'lodash';
+import { findIndex, get, set } from 'lodash';
 import React from 'react';
 
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import {
+  EuiEmptyPrompt,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
+import { kfetch } from 'ui/kfetch';
 
 import { UpgradeAssistantStatus } from '../../server/lib/es_migration_apis';
 import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
-import { LoadingState, UpgradeAssistantTabProps } from './types';
+import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
 
 interface TabsState {
   loadingState: LoadingState;
+  loadingError?: Error;
   checkupData?: UpgradeAssistantStatus;
   selectedTabIndex: number;
+  telemetryState: TelemetryState;
+  upgradeableCluster: boolean;
 }
 
 export class UpgradeAssistantTabsUI extends React.Component<
@@ -34,20 +44,57 @@ export class UpgradeAssistantTabsUI extends React.Component<
 
     this.state = {
       loadingState: LoadingState.Loading,
+      upgradeableCluster: true,
       selectedTabIndex: 0,
+      telemetryState: TelemetryState.Complete,
     };
   }
 
-  public componentDidMount() {
-    this.loadData();
+  public async componentDidMount() {
+    await this.loadData();
+
+    // Send telemetry info about the default selected tab
+    this.sendTelemetryInfo(this.tabs[this.state.selectedTabIndex].id);
   }
 
   public render() {
-    const { selectedTabIndex } = this.state;
+    const { selectedTabIndex, telemetryState, upgradeableCluster } = this.state;
     const tabs = this.tabs;
+
+    if (!upgradeableCluster) {
+      return (
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <EuiEmptyPrompt
+              iconType="logoElasticsearch"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle"
+                    defaultMessage="Your cluster is upgrading"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
+                    defaultMessage="One or more Elasticsearch nodes have a newer version of
+                      Elasticsearch than Kibana. Once all your nodes are upgraded, install the latest version of Kibana."
+                  />
+                </p>
+              }
+            />
+          </EuiPageContentBody>
+        </EuiPageContent>
+      );
+    }
 
     return (
       <EuiTabbedContent
+        data-test-subj={
+          telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
+        }
         tabs={tabs}
         onTabClick={this.onTabClick}
         selectedTab={tabs[selectedTabIndex]}
@@ -59,6 +106,13 @@ export class UpgradeAssistantTabsUI extends React.Component<
     const selectedTabIndex = findIndex(this.tabs, { id: selectedTab.id });
     if (selectedTabIndex === -1) {
       throw new Error(`Clicked tab did not exist in tabs array`);
+    }
+
+    // Send telemetry info about the current selected tab
+    // only in case the clicked tab id it's different from the
+    // current selected tab id
+    if (this.tabs[this.state.selectedTabIndex].id !== selectedTab.id) {
+      this.sendTelemetryInfo(selectedTab.id);
     }
 
     this.setSelectedTabIndex(selectedTabIndex);
@@ -77,14 +131,22 @@ export class UpgradeAssistantTabsUI extends React.Component<
         checkupData: resp.data,
       });
     } catch (e) {
-      this.setState({ loadingState: LoadingState.Error });
+      if (get(e, 'response.status') === 426) {
+        this.setState({
+          loadingState: LoadingState.Success,
+          upgradeableCluster: false,
+        });
+      } else {
+        this.setState({ loadingState: LoadingState.Error, loadingError: e });
+      }
     }
   };
 
   private get tabs() {
     const { intl } = this.props;
-    const { loadingState, checkupData } = this.state;
+    const { loadingError, loadingState, checkupData } = this.state;
     const commonProps: UpgradeAssistantTabProps = {
+      loadingError,
       loadingState,
       refreshCheckupData: this.loadData,
       setSelectedTabIndex: this.setSelectedTabIndex,
@@ -139,6 +201,24 @@ export class UpgradeAssistantTabsUI extends React.Component<
         ),
       },
     ];
+  }
+
+  private async sendTelemetryInfo(tabName: string) {
+    // In case we don't have any data yet, we wanna to ignore the
+    // telemetry info update
+    if (this.state.loadingState !== LoadingState.Success) {
+      return;
+    }
+
+    this.setState({ telemetryState: TelemetryState.Running });
+
+    await kfetch({
+      pathname: '/api/upgrade_assistant/telemetry/ui_open',
+      method: 'PUT',
+      body: JSON.stringify(set({}, tabName, true)),
+    });
+
+    this.setState({ telemetryState: TelemetryState.Complete });
   }
 }
 

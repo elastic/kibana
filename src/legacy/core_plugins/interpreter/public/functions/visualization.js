@@ -134,10 +134,8 @@ export const visualization = () => ({
       as: 'visualization',
       value: {
         visData: context,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams
-        },
+        visType: args.type,
+        visConfig: visConfigParams
       }
     };
   }

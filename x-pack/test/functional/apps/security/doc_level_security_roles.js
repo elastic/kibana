@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
-          "indices": [{
-            "names": ["dlstest"],
-            "privileges": ["read", "view_index_metadata"],
-            "query": "{\"match\": {\"region\": \"EAST\"}}"
+          'indices': [{
+            'names': ['dlstest'],
+            'privileges': ['read', 'view_index_metadata'],
+            'query': '{"match": {"region": "EAST"}}'
           }]
         },
         kibana: {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:dls _index:dlstest _score:1');
+      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:_doc _index:dlstest _score:0');
     });
     after('logout', async () => {
       await PageObjects.security.logout();

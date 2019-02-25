@@ -9,13 +9,15 @@ import {
   EuiSpacer,
   // @ts-ignore No typings for EuiSuperSelect
   EuiSuperSelect,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
-import { MonitorCharts } from '../components/queries/monitor_charts';
-import { MonitorStatusBar } from '../components/queries/monitor_status_bar';
-import { Pings } from '../components/queries/ping_list';
+import {
+  MonitorChartsQuery,
+  MonitorPageTitleQuery,
+  MonitorStatusBarQuery,
+  PingListQuery,
+} from '../components/queries';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
@@ -43,15 +45,13 @@ export class MonitorPage extends React.Component<Props> {
     const id = this.props.location.pathname.replace(/^(\/monitor\/)/, '');
     return (
       <Fragment>
-        <EuiTitle>
-          <h2>{id}</h2>
-        </EuiTitle>
+        <MonitorPageTitleQuery monitorId={id} {...this.props} />
         <EuiSpacer />
-        <MonitorStatusBar monitorId={id} {...this.props} />
+        <MonitorStatusBarQuery monitorId={id} {...this.props} />
         <EuiSpacer />
-        <MonitorCharts monitorId={id} {...this.props} />
+        <MonitorChartsQuery monitorId={id} {...this.props} />
         <EuiSpacer />
-        <Pings monitorId={id} {...this.props} />
+        <PingListQuery monitorId={id} {...this.props} />
       </Fragment>
     );
   }

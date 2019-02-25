@@ -14,23 +14,27 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
 import styled, { withTheme } from 'styled-components';
 
+import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
+import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
+import { InvalidNodeError } from '../../components/metrics/invalid_node';
 import { MetricsSideNav } from '../../components/metrics/side_nav';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
+import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
   WithMetricsTime,
   WithMetricsTimeUrlState,
 } from '../../containers/metrics/with_metrics_time';
-import { WithOptions } from '../../containers/with_options';
+import { WithSource } from '../../containers/with_source';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
@@ -84,7 +88,7 @@ export const MetricDetail = withTheme(
         const layouts = layoutCreator(this.props.theme);
 
         return (
-          <WithOptions>
+          <WithSource>
             {({ sourceId }) => (
               <WithMetricsTime resetOnUnmount>
                 {({
@@ -101,14 +105,32 @@ export const MetricDetail = withTheme(
                     nodeId={nodeId}
                   >
                     {({ name, filteredLayouts, loading: metadataLoading }) => {
-                      const breadcrumbs = [{ text: name }];
+                      const breadcrumbs = [
+                        {
+                          href: '#/',
+                          text: intl.formatMessage({
+                            id: 'xpack.infra.header.infrastructureTitle',
+                            defaultMessage: 'Infrastructure',
+                          }),
+                        },
+                        { text: name },
+                      ];
                       return (
                         <ColumnarPage>
-                          <Header
-                            appendSections={<InfrastructureBetaBadgeHeaderSection />}
-                            breadcrumbs={breadcrumbs}
-                          />
+                          <Header breadcrumbs={breadcrumbs} />
+                          <SourceConfigurationFlyout />
                           <WithMetricsTimeUrlState />
+                          <DocumentTitle
+                            title={intl.formatMessage(
+                              {
+                                id: 'xpack.infra.metricDetailPage.documentTitle',
+                                defaultMessage: 'Infrastructure | Metrics | {name}',
+                              },
+                              {
+                                name,
+                              }
+                            )}
+                          />
                           <DetailPageContent>
                             <WithMetrics
                               layouts={filteredLayouts}
@@ -117,9 +139,35 @@ export const MetricDetail = withTheme(
                               nodeType={nodeType}
                               nodeId={nodeId}
                             >
-                              {({ metrics, error, loading }) => {
+                              {({ metrics, error, loading, refetch }) => {
                                 if (error) {
-                                  return <ErrorPageBody message={error} />;
+                                  const invalidNodeError = error.graphQLErrors.some(
+                                    (err: GraphQLFormattedError) =>
+                                      err.code === InfraMetricsErrorCodes.invalid_node
+                                  );
+
+                                  return (
+                                    <>
+                                      <DocumentTitle
+                                        title={(previousTitle: string) =>
+                                          intl.formatMessage(
+                                            {
+                                              id: 'xpack.infra.metricDetailPage.documentTitleError',
+                                              defaultMessage: '{previousTitle} | Uh oh',
+                                            },
+                                            {
+                                              previousTitle,
+                                            }
+                                          )
+                                        }
+                                      />
+                                      {invalidNodeError ? (
+                                        <InvalidNodeError nodeName={name} />
+                                      ) : (
+                                        <ErrorPageBody message={error.message} />
+                                      )}
+                                    </>
+                                  );
                                 }
                                 return (
                                   <EuiPage style={{ flex: '1 0 auto' }}>
@@ -164,7 +212,10 @@ export const MetricDetail = withTheme(
                                                       ? false
                                                       : loading
                                                   }
+                                                  refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
+                                                  isLiveStreaming={isAutoReloading}
+                                                  stopLiveStreaming={stopMetricsAutoReload}
                                                 />
                                               </EuiPageContentWithRelative>
                                             </EuiPageBody>
@@ -184,7 +235,7 @@ export const MetricDetail = withTheme(
                 )}
               </WithMetricsTime>
             )}
-          </WithOptions>
+          </WithSource>
         );
       }
 

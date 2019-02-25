@@ -15,7 +15,7 @@ let currentInterval;
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
   const checkInterval = setInterval(() => {
-    const hasElm = !!document.querySelector('#react-apm-breadcrumbs');
+    const hasElm = !!document.querySelector('#kibana-angular-template');
     if (hasElm) {
       clearInterval(checkInterval);
       resolve();
@@ -37,48 +37,28 @@ export function initTimepicker(history, dispatch) {
 
     uiModules
       .get('app/apm', [])
-      .controller(
-        'TimePickerController',
-        ($scope, globalState, $rootScope, i18n) => {
-          // Add APM feedback menu
-          // TODO: move this somewhere else
-          $scope.topNavMenu = [];
-          $scope.topNavMenu.push({
-            key: 'APM feedback',
-            label: i18n('xpack.apm.topNav.apmFeedbackLabel', {
-              defaultMessage: 'APM feedback'
-            }),
-            description: i18n('xpack.apm.topNav.apmFeedbackDescription', {
-              defaultMessage: 'APM feedback'
-            }),
-            tooltip: i18n('xpack.apm.topNav.apmFeedbackTooltip', {
-              defaultMessage: 'Provide feedback on APM'
-            }),
-            template: require('../../templates/feedback_menu.html')
-          });
-
-          history.listen(() => {
-            updateRefreshRate(dispatch);
-            globalState.fetch(); // ensure global state is updated when url changes
-          });
-
-          // ensure that redux is notified after timefilter has updated
-          $scope.$listen(timefilter, 'timeUpdate', () =>
-            dispatch(updateTimePickerAction())
-          );
-
-          // ensure that timepicker updates when global state changes
-          registerTimefilterWithGlobalState(globalState, $rootScope);
-
-          timefilter.enableTimeRangeSelector();
-          timefilter.enableAutoRefreshSelector();
-
-          dispatch(updateTimePickerAction());
+      .controller('TimePickerController', ($scope, globalState, $rootScope) => {
+        history.listen(() => {
           updateRefreshRate(dispatch);
+          globalState.fetch(); // ensure global state is updated when url changes
+        });
 
-          Promise.all([waitForAngularReady]).then(resolve);
-        }
-      );
+        // ensure that redux is notified after timefilter has updated
+        $scope.$listen(timefilter, 'timeUpdate', () =>
+          dispatch(updateTimePickerAction())
+        );
+
+        // ensure that timepicker updates when global state changes
+        registerTimefilterWithGlobalState(globalState, $rootScope);
+
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
+
+        dispatch(updateTimePickerAction());
+        updateRefreshRate(dispatch);
+
+        Promise.all([waitForAngularReady]).then(resolve);
+      });
   });
 }
 

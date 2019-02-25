@@ -46,6 +46,14 @@ jest.mock('ui/test_harness', () => {
   };
 });
 
+const mockI18nContextInit = jest.fn();
+jest.mock('ui/i18n', () => {
+  mockLoadOrder.push('ui/i18n');
+  return {
+    __newPlatformInit__: mockI18nContextInit,
+  };
+});
+
 const mockFatalErrorInit = jest.fn();
 jest.mock('ui/notify/fatal_error', () => {
   mockLoadOrder.push('ui/notify/fatal_error');
@@ -62,11 +70,11 @@ jest.mock('ui/notify/toasts', () => {
   };
 });
 
-const mockLoadingCountInit = jest.fn();
+const mockHttpInit = jest.fn();
 jest.mock('ui/chrome/api/loading_count', () => {
   mockLoadOrder.push('ui/chrome/api/loading_count');
   return {
-    __newPlatformInit__: mockLoadingCountInit,
+    __newPlatformInit__: mockHttpInit,
   };
 });
 
@@ -99,6 +107,14 @@ jest.mock('ui/chrome/api/controls', () => {
   mockLoadOrder.push('ui/chrome/api/controls');
   return {
     __newPlatformInit__: mockChromeControlsInit,
+  };
+});
+
+const mockChromeHelpExtensionInit = jest.fn();
+jest.mock('ui/chrome/api/help_extension', () => {
+  mockLoadOrder.push('ui/chrome/api/help_extension');
+  return {
+    __newPlatformInit__: mockChromeHelpExtensionInit,
   };
 });
 
@@ -138,9 +154,11 @@ const injectedMetadataStartContract: any = {
   getLegacyMetadata: jest.fn(),
 };
 
-const loadingCountStartContract = {
-  add: jest.fn(),
-  getCount$: jest.fn().mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
+const httpStartContract = {
+  addLoadingCount: jest.fn(),
+  getLoadingCount$: jest
+    .fn()
+    .mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
 };
 
 const basePathStartContract = {
@@ -151,6 +169,7 @@ const basePathStartContract = {
 
 const uiSettingsStartContract: any = {};
 const chromeStartContract: any = {};
+const i18nStartContract: any = { Context: () => '' };
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -160,10 +179,11 @@ const defaultParams = {
 };
 
 const defaultStartDeps = {
+  i18n: i18nStartContract,
   fatalErrors: fatalErrorsStartContract,
   injectedMetadata: injectedMetadataStartContract,
   notifications: notificationsStartContract,
-  loadingCount: loadingCountStartContract,
+  http: httpStartContract,
   basePath: basePathStartContract,
   uiSettings: uiSettingsStartContract,
   chrome: chromeStartContract,
@@ -192,6 +212,17 @@ describe('#start()', () => {
       expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
     });
 
+    it('passes i18n.Context to ui/i18n', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockI18nContextInit).toHaveBeenCalledTimes(1);
+      expect(mockI18nContextInit).toHaveBeenCalledWith(i18nStartContract.Context);
+    });
+
     it('passes fatalErrors service to ui/notify/fatal_errors', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
@@ -214,15 +245,15 @@ describe('#start()', () => {
       expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStartContract.toasts);
     });
 
-    it('passes loadingCount service to ui/chrome/api/loading_count', () => {
+    it('passes http service to ui/chrome/api/loading_count', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });
 
       legacyPlatform.start(defaultStartDeps);
 
-      expect(mockLoadingCountInit).toHaveBeenCalledTimes(1);
-      expect(mockLoadingCountInit).toHaveBeenCalledWith(loadingCountStartContract);
+      expect(mockHttpInit).toHaveBeenCalledTimes(1);
+      expect(mockHttpInit).toHaveBeenCalledWith(httpStartContract);
     });
 
     it('passes basePath service to ui/chrome/api/base_path', () => {
@@ -267,6 +298,17 @@ describe('#start()', () => {
 
       expect(mockChromeControlsInit).toHaveBeenCalledTimes(1);
       expect(mockChromeControlsInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
+    it('passes chrome service to ui/chrome/api/help_extension', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockChromeHelpExtensionInit).toHaveBeenCalledTimes(1);
+      expect(mockChromeHelpExtensionInit).toHaveBeenCalledWith(chromeStartContract);
     });
 
     it('passes chrome service to ui/chrome/api/theme', () => {

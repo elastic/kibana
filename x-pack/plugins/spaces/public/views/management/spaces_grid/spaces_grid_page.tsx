@@ -93,7 +93,7 @@ class SpacesGridPageUI extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size="s">
               <p>{getSpacesFeatureDescription()}</p>
             </EuiText>
           </EuiFlexItem>
