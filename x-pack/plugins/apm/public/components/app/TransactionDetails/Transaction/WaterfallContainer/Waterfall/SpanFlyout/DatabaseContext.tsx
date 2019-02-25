@@ -27,6 +27,7 @@ import {
   unit,
   units
 } from '../../../../../../../style/variables';
+import { TruncateHeightSection } from './TruncateHeightSection';
 
 registerLanguage('sql', sql);
 
@@ -38,6 +39,8 @@ const DatabaseStatement = styled.div`
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;
+
+const dbSyntaxLineHeight = unit * 1.5;
 
 interface Props {
   dbContext?: NonNullable<Span['span']>['db'];
@@ -66,20 +69,22 @@ export function DatabaseContext({ dbContext }: Props) {
       </EuiTitle>
       <EuiSpacer size="m" />
       <DatabaseStatement>
-        <SyntaxHighlighter
-          language={'sql'}
-          style={xcode}
-          customStyle={{
-            color: null,
-            background: null,
-            padding: null,
-            lineHeight: px(unit * 1.5),
-            whiteSpace: 'pre-wrap',
-            overflowX: 'scroll'
-          }}
-        >
-          {dbContext.statement}
-        </SyntaxHighlighter>
+        <TruncateHeightSection previewHeight={px(10 * dbSyntaxLineHeight)}>
+          <SyntaxHighlighter
+            language={'sql'}
+            style={xcode}
+            customStyle={{
+              color: null,
+              background: null,
+              padding: null,
+              lineHeight: px(dbSyntaxLineHeight),
+              whiteSpace: 'pre-wrap',
+              overflowX: 'scroll'
+            }}
+          >
+            {dbContext.statement}
+          </SyntaxHighlighter>
+        </TruncateHeightSection>
       </DatabaseStatement>
       <EuiSpacer size="l" />
     </Fragment>
