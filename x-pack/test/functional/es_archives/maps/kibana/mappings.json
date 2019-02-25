@@ -215,6 +215,20 @@
         "namespace": {
           "type": "keyword"
         },
+        "references": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
         "search": {
           "properties": {
             "columns": {
