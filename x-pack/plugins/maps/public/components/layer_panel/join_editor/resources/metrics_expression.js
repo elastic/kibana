@@ -6,14 +6,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
   EuiPopoverTitle,
   EuiExpression,
   EuiFormErrorText,
 } from '@elastic/eui';
-
 import { MetricsEditor } from '../../../../shared/components/metrics_editor';
 
 export class MetricsExpression extends Component {
@@ -82,7 +81,11 @@ export class MetricsExpression extends Component {
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description={metricExpressions.length > 1 ? 'and use metrics' : 'and use metric'}
+            description={metricExpressions.length > 1 ? i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetrics', {
+              defaultMessage: 'and use metrics'
+            }) : i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetric', {
+              defaultMessage: 'and use metric'
+            })}
             uppercase={false}
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
           />
