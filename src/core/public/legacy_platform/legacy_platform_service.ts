@@ -21,9 +21,9 @@ import angular from 'angular';
 import { BasePathStartContract } from '../base_path';
 import { ChromeStartContract } from '../chrome';
 import { FatalErrorsStartContract } from '../fatal_errors';
+import { HttpStartContract } from '../http';
 import { I18nStartContract } from '../i18n';
 import { InjectedMetadataStartContract } from '../injected_metadata';
-import { LoadingCountStartContract } from '../loading_count';
 import { NotificationsStartContract } from '../notifications';
 import { UiSettingsClient } from '../ui_settings';
 
@@ -32,7 +32,7 @@ interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
   fatalErrors: FatalErrorsStartContract;
   notifications: NotificationsStartContract;
-  loadingCount: LoadingCountStartContract;
+  http: HttpStartContract;
   basePath: BasePathStartContract;
   uiSettings: UiSettingsClient;
   chrome: ChromeStartContract;
@@ -59,7 +59,7 @@ export class LegacyPlatformService {
     injectedMetadata,
     fatalErrors,
     notifications,
-    loadingCount,
+    http,
     basePath,
     uiSettings,
     chrome,
@@ -70,7 +70,7 @@ export class LegacyPlatformService {
     require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
-    require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
+    require('ui/chrome/api/loading_count').__newPlatformInit__(http);
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
     require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
