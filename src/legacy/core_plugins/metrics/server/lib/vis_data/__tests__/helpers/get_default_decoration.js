@@ -38,7 +38,21 @@ describe('getDefaultDecoration', () => {
 
     it('should set a stack option to true', () => {
       const series = {
-        stacked: true,
+        stacked: 'stacked',
+        id: 'test_id'
+      };
+
+      expect(getDefaultDecoration(series))
+        .to.have.property('stack', true);
+
+      series.stacked = 'percent';
+      expect(getDefaultDecoration(series))
+        .to.have.property('stack', true);
+    });
+
+    it('should set a stack option to be series id', () => {
+      const series = {
+        stacked: 'stacked_within_series',
         id: 'test_id'
       };
 
