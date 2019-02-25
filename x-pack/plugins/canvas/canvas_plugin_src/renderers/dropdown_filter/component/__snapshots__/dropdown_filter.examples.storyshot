@@ -112,12 +112,6 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
       -- ANY --
     </option>
     <option
-      aria-selected={true}
-      value="selectedValue"
-    >
-      selectedValue
-    </option>
-    <option
       aria-selected={false}
       value="Item One"
     >
@@ -232,12 +226,6 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
       value="%%CANVAS_MATCH_ALL%%"
     >
       -- ANY --
-    </option>
-    <option
-      aria-selected={true}
-      value="selectedValue"
-    >
-      selectedValue
     </option>
   </select>
   <svg
