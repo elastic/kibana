@@ -39,29 +39,29 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover', 'timePicker']);
 
   describe('scripted fields', () => {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern();
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
@@ -79,6 +79,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -97,9 +98,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
@@ -109,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
         });
       });
 
@@ -145,6 +144,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -160,9 +160,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -172,7 +170,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ngood');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
 
         });
       });
@@ -207,6 +205,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -222,9 +221,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -234,7 +231,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\ntrue');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
 
         });
       });
@@ -269,6 +266,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -285,9 +283,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 19:22:00.000';
         const toTime = '2015-09-18 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -297,7 +293,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 06:52:55.953\n2015-09-18 07:00');
+          expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
         });
       });
 

@@ -16,6 +16,7 @@ import {
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
+  reindex?: boolean;
 }
 
 export interface UpgradeAssistantStatus {
@@ -52,7 +53,12 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
     (indexDeprecations, indexName) => {
       return indexDeprecations.concat(
         deprecations.index_settings[indexName].map(
-          d => ({ ...d, index: indexName } as EnrichedDeprecationInfo)
+          d =>
+            ({
+              ...d,
+              index: indexName,
+              reindex: /Index created before/.test(d.message),
+            } as EnrichedDeprecationInfo)
         )
       );
     },

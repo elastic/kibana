@@ -123,6 +123,9 @@ export const splitSizeAndUnits = field => {
 };
 
 export const isNumber = value => typeof value === 'number';
+export const isEmptyObject = (obj) => {
+  return Object.entries(obj).length === 0 && obj.constructor === Object;
+};
 
 export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   const policy = { ...defaultPolicy };
@@ -259,14 +262,28 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.allocate.require = {
       [name]: value
     };
+  } else {
+    if (esPhase.actions.allocate) {
+      delete esPhase.actions.allocate.require;
+    }
   }
   if (isNumber(phase[PHASE_REPLICA_COUNT])) {
     esPhase.actions.allocate = esPhase.actions.allocate || {};
     esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
   } else {
     if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
+      delete esPhase.actions.allocate.number_of_replicas;
     }
+  }
+  if (esPhase.actions.allocate
+      && !esPhase.actions.allocate.require
+      && !esPhase.actions.allocate.number_of_replicas
+      && isEmptyObject(esPhase.actions.allocate.include)
+      && isEmptyObject(esPhase.actions.allocate.exclude)
+  ) {
+    // remove allocate action if it does not define require or number of nodes
+    // and both include and exclude are empty objects (ES will fail to parse if we don't)
+    delete esPhase.actions.allocate;
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {

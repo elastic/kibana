@@ -15,8 +15,6 @@ import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
-import { mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
-import { mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -417,7 +415,9 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
   );
 }
 
-export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName) {
+export async function loadAnomaliesTableData(
+  selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName, tableInterval, tableSeverity
+) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
@@ -428,8 +428,8 @@ export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFo
       jobIds,
       [],
       influencers,
-      mlSelectIntervalService.state.get('interval').val,
-      mlSelectSeverityService.state.get('threshold').val,
+      tableInterval,
+      tableSeverity,
       timeRange.earliestMs,
       timeRange.latestMs,
       dateFormatTz,

@@ -6,13 +6,22 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
+import {
   IndexGroup,
   ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { ReindexService, reindexServiceFactory } from './reindex_service';
+import {
+  isMlIndex,
+  isWatcherIndex,
+  ReindexService,
+  reindexServiceFactory,
+} from './reindex_service';
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
@@ -84,7 +93,7 @@ describe('reindexService', () => {
           cluster: ['manage'],
           index: [
             {
-              names: [`anIndex*`],
+              names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
               privileges: ['all'],
             },
             {
@@ -107,7 +116,37 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_ml'],
           index: [
             {
-              names: [`.ml-anomalies*`],
+              names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('includes checking for permissions on the baseName which could be an alias', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      const hasRequired = await service.hasRequiredPrivileges(
+        `reindexed-v${PREV_MAJOR_VERSION}-anIndex`
+      );
+      expect(hasRequired).toBe(true);
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names: [
+                `reindexed-v${PREV_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
+                'anIndex',
+              ],
               privileges: ['all'],
             },
             {
@@ -130,7 +169,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_watcher'],
           index: [
             {
-              names: [`.watches*`],
+              names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
               privileges: ['all'],
             },
             {
@@ -145,14 +184,17 @@ describe('reindexService', () => {
 
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
+      const indexName = 'myIndex';
       actions.getFlatSettings.mockResolvedValueOnce({
-        settings: {},
+        settings: {
+          'index.provided_name': indexName,
+        },
         mappings: {
           properties: { https: { type: 'boolean' } },
         },
       });
 
-      const reindexWarnings = await service.detectReindexWarnings('myIndex');
+      const reindexWarnings = await service.detectReindexWarnings(indexName);
       expect(reindexWarnings).toEqual([]);
     });
 
@@ -414,6 +456,40 @@ describe('reindexService', () => {
     });
   });
 
+  describe('isMlIndex', () => {
+    it('is false for non-ml indices', () => {
+      expect(isMlIndex('.literally-anything')).toBe(false);
+    });
+
+    it('is true for ML indices', () => {
+      expect(isMlIndex('.ml-state')).toBe(true);
+      expect(isMlIndex('.ml-anomalies')).toBe(true);
+      expect(isMlIndex('.ml-config')).toBe(true);
+    });
+
+    it('is true for ML re-indexed indices', () => {
+      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-state`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-anomalies`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-config`)).toBe(true);
+    });
+  });
+
+  describe('isWatcherIndex', () => {
+    it('is false for non-watcher indices', () => {
+      expect(isWatcherIndex('.literally-anything')).toBe(false);
+    });
+
+    it('is true for watcher indices', () => {
+      expect(isWatcherIndex('.watches')).toBe(true);
+      expect(isWatcherIndex('.triggered-watches')).toBe(true);
+    });
+
+    it('is true for watcher re-indexed indices', () => {
+      expect(isWatcherIndex(`.reindexed-v${PREV_MAJOR_VERSION}-watches`)).toBe(true);
+      expect(isWatcherIndex(`.reindexed-v${PREV_MAJOR_VERSION}-triggered-watches`)).toBe(true);
+    });
+  });
+
   describe('state machine, lastCompletedStep ===', () => {
     const defaultAttributes = {
       indexName: 'myIndex',
@@ -445,6 +521,34 @@ describe('reindexService', () => {
           expect(actions.incrementIndexGroupReindexes).not.toHaveBeenCalled();
           expect(actions.runWhileIndexGroupLocked).not.toHaveBeenCalled();
           expect(callCluster).not.toHaveBeenCalled();
+        });
+
+        it('supports an already migrated ML index', async () => {
+          actions.incrementIndexGroupReindexes.mockResolvedValueOnce();
+          actions.runWhileIndexGroupLocked.mockImplementationOnce(async (group: string, f: any) =>
+            f()
+          );
+          callCluster
+            // Mock call to /_nodes for version check
+            .mockResolvedValueOnce({ nodes: { nodeX: { version: '6.7.0-alpha' } } })
+            // Mock call to /_ml/set_upgrade_mode?enabled=true
+            .mockResolvedValueOnce({ acknowledged: true });
+
+          const mlReindexedOp = {
+            id: '2',
+            attributes: { ...reindexOp.attributes, indexName: '.reindexed-v7-ml-anomalies' },
+          } as ReindexSavedObject;
+          const updatedOp = await service.processNextStep(mlReindexedOp);
+
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(
+            ReindexStep.indexGroupServicesStopped
+          );
+          expect(actions.incrementIndexGroupReindexes).toHaveBeenCalled();
+          expect(actions.runWhileIndexGroupLocked).toHaveBeenCalled();
+          expect(callCluster).toHaveBeenCalledWith('transport.request', {
+            path: '/_ml/set_upgrade_mode?enabled=true',
+            method: 'POST',
+          });
         });
 
         it('increments ML reindexes and calls ML stop endpoint', async () => {
@@ -726,6 +830,13 @@ describe('reindexService', () => {
         id: '1',
         attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.newIndexCreated },
       } as ReindexSavedObject;
+
+      beforeEach(() => {
+        actions.getFlatSettings.mockResolvedValueOnce({
+          settings: {},
+          mappings: {},
+        });
+      });
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
         callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex

@@ -21,6 +21,7 @@ A high level overview of our contributing guidelines.
     - [Customizing `config/kibana.dev.yml`](#customizing-configkibanadevyml)
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
+  - [Internationalization](#internationalization)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
   - [Debugging Unit Tests](#debugging-unit-tests)
@@ -172,15 +173,39 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch from a nightly snapshot.
+### Running Elasticsearch
+
+There are a few options when it comes to running Elasticsearch:
+
+First, you'll need to have a `java` binary in `PATH` and `JAVA_HOME` set. The version of Java required is specified in [.ci/java-version.properties](https://github.com/elastic/elasticsearch/blob/master/.ci/java-versions.properties) on the ES branch.
+
+**Nightly snapshot**
+
+These snapshots are built on a nightly basis which expire after a couple weeks. If running from an old, untracted branch this snapshot might not exist. In which case you might need to run from source or an archive.
 
 ```bash
 yarn es snapshot
 ```
 
-This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+**Source**
 
-> You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
+By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
+
+```bash
+yarn es source
+```
+
+**Archive**
+
+Use this if you already have a distributable. For released versions, one can be obtained on the [Elasticsearch downloads](https://www.elastic.co/downloads/elasticsearch) page.
+
+```bash
+yarn es archive <full_path_to_archive>
+```
+
+
+Each of these will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+
 
 If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
 
@@ -253,6 +278,22 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 `vi`       | [scrooloose/syntastic](https://github.com/scrooloose/syntastic)
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
+
+### Internationalization
+
+All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
+
+In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+```jsx
+import { I18nContext } from 'ui/i18n';
+
+ReactDOM.render(
+  <I18nContext>
+      {myComponentTree}
+  </I18nContext>,
+  container
+);
+```
 
 ### Testing and Building
 

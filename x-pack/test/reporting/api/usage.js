@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import * as GenerationUrls from "./generation_urls";
+import * as GenerationUrls from './generation_urls';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
