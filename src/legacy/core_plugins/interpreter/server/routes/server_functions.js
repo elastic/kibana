@@ -43,6 +43,10 @@ function runServerFunctions(server) {
     method: 'POST',
     path: `${API_ROUTE}/fns`,
     options: {
+      payload: {
+        allow: 'application/json',
+        maxBytes: 26214400, // 25MB payload limit
+      },
       validate: {
         payload: Joi.object({
           functions: Joi.array().items(
