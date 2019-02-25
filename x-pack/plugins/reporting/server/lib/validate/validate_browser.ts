@@ -29,7 +29,7 @@ export const validateBrowser = async (server: KbnServer, browserFactory: any, lo
           const page = await browser.newPage();
           const url = getAbsoluteUrl({ path: API_STATS_ENDPOINT });
           logger.debug(`Opening page ${url}`);
-          await page.goto(url, { waitUntil: 'networkidle0' }); // Look for JSON response
+          await page.goto(url, { waitUntil: 'networkidle0' }); // see if this fails
         } else {
           throw new Error('Could not get handle to browser client!');
         }
