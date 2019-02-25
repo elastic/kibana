@@ -34,13 +34,13 @@ interface Deps {
   fatalErrors: FatalErrorsStart;
 }
 
-export class LoadingCountService {
-  private readonly total$ = new Rx.BehaviorSubject(0);
+export class HttpService {
+  private readonly loadingCount$ = new Rx.BehaviorSubject(0);
   private readonly stop$ = new Rx.Subject();
 
   public start({ fatalErrors }: Deps) {
     return {
-      add: (count$: Rx.Observable<number>) => {
+      addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
           .pipe(
             distinctUntilChanged(),
@@ -63,7 +63,7 @@ export class LoadingCountService {
           )
           .subscribe({
             next: delta => {
-              this.total$.next(this.total$.getValue() + delta);
+              this.loadingCount$.next(this.loadingCount$.getValue() + delta);
             },
             error: error => {
               fatalErrors.add(error);
@@ -71,16 +71,16 @@ export class LoadingCountService {
           });
       },
 
-      getCount$: () => {
-        return this.total$.pipe(distinctUntilChanged());
+      getLoadingCount$: () => {
+        return this.loadingCount$.pipe(distinctUntilChanged());
       },
     };
   }
 
   public stop() {
     this.stop$.next();
-    this.total$.complete();
+    this.loadingCount$.complete();
   }
 }
 
-export type LoadingCountStart = ReturnType<LoadingCountService['start']>;
+export type HttpStart = ReturnType<HttpService['start']>;

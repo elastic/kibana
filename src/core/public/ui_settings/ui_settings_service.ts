@@ -18,8 +18,8 @@
  */
 
 import { BasePathStart } from '../base_path';
+import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
-import { LoadingCountStart } from '../loading_count';
 import { NotificationsStart } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 
 interface Deps {
   notifications: NotificationsStart;
-  loadingCount: LoadingCountStart;
+  http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   basePath: BasePathStart;
 }
@@ -38,9 +38,9 @@ export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public start({ notifications, loadingCount, injectedMetadata, basePath }: Deps) {
+  public start({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsStart {
     this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
-    loadingCount.add(this.uiSettingsApi.getLoadingCount$());
+    http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
     const legacyMetadata = injectedMetadata.getLegacyMetadata();
