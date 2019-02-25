@@ -7,8 +7,7 @@
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
+import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
@@ -25,45 +24,33 @@ interface Props {
   uiCapabilities: UICapabilities;
 }
 
-export const NodeContextMenu = injectUICapabilities(
-  injectI18n(
-    ({
-      options,
-      timeRange,
-      children,
-      node,
-      isPopoverOpen,
-      closePopover,
-      nodeType,
-      intl,
-      uiCapabilities,
-    }: Props) => {
-      // Due to the changing nature of the fields between APM and this UI,
-      // We need to have some exceptions until 7.0 & ECS is finalized. Reference
-      // #26620 for the details for these fields.
-      // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-      const APM_FIELDS = {
-        [InfraNodeType.host]: 'context.system.hostname',
-        [InfraNodeType.container]: 'container.id',
-        [InfraNodeType.pod]: 'kubernetes.pod.uid',
-      };
+export const NodeContextMenu = injectUICapabilities(injectI18n(
+  ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl, uiCapabilities }: Props) => {
+    // Due to the changing nature of the fields between APM and this UI,
+    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
+    // #26620 for the details for these fields.
+    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
+    const APM_FIELDS = {
+      [InfraNodeType.host]: 'host.hostname',
+      [InfraNodeType.container]: 'container.id',
+      [InfraNodeType.pod]: 'kubernetes.pod.uid',
+    };
 
-      const nodeLogsUrl =
-        node.id && uiCapabilities.logs.show
-          ? getNodeLogsUrl({
-              nodeType,
-              nodeId: node.id,
-              time: timeRange.to,
-            })
-          : undefined;
-      const nodeDetailUrl = node.id
-        ? getNodeDetailUrl({
-            nodeType,
-            nodeId: node.id,
-            from: timeRange.from,
-            to: timeRange.to,
-          })
-        : undefined;
+    const nodeLogsUrl = node.id
+      ? getNodeLogsUrl({
+          nodeType,
+          nodeId: node.id,
+          time: timeRange.to,
+        })
+      : undefined;
+    const nodeDetailUrl = node.id
+      ? getNodeDetailUrl({
+          nodeType,
+          nodeId: node.id,
+          from: timeRange.from,
+          to: timeRange.to,
+        })
+      : undefined;
 
       const apmTracesUrl = uiCapabilities.apm.show
         ? {
@@ -125,4 +112,5 @@ export const NodeContextMenu = injectUICapabilities(
       );
     }
   )
+)
 );

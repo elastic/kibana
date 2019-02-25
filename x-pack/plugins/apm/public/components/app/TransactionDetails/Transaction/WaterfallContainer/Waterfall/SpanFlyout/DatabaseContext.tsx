@@ -22,6 +22,7 @@ import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import {
   borderRadius,
   fontFamilyCode,
+  fontSize,
   px,
   unit,
   units
@@ -35,10 +36,11 @@ const DatabaseStatement = styled.div`
   border-radius: ${borderRadius};
   border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 
 interface Props {
-  dbContext?: NonNullable<Span['context']>['db'];
+  dbContext?: NonNullable<Span['span']>['db'];
 }
 
 export function DatabaseContext({ dbContext }: Props) {

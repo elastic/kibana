@@ -23,8 +23,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('feature controls security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('visualize/default');
+      await esArchiver.load('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
+    });
+
+    after(async () => {
+      await esArchiver.unload('visualize/default');
     });
 
     describe('global visualize all privileges', () => {
@@ -73,17 +77,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
-      it(`allows a visualization to be created`, async () => {
-        const fromTime = '2015-09-19 06:31:44.000';
-        const toTime = '2015-09-23 18:31:44.000';
-        const vizName1 = 'Visualization VerticalBarChart';
+      it(`landing page shows "Create new Visualization" button`, async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await testSubjects.existOrFail('visualizeLandingPage', 10000);
+        await testSubjects.existOrFail('newItemButton');
+      });
 
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVerticalBarChart();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
+      it(`can view existing Visualization`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', '/visualize/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('visualizationLoader', 10000);
+      });
+
+      it('can save existing Visualization', async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', '/visualize/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('visualizeSaveButton', 10000);
       });
     });
 
@@ -131,11 +144,27 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
-      it(`does not allow a visualization to be created`, async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVerticalBarChart();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.visualize.expectNoSaveOption();
+      it(`landing page doesn't show "Create new Visualization" button`, async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await testSubjects.existOrFail('visualizeLandingPage', 10000);
+        await testSubjects.missingOrFail('newItemButton');
+      });
+
+      it(`can view existing Visualization`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('visualizationLoader', 10000);
+      });
+
+      it(`can't save existing Visualization`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('shareTopNavButton', 10000);
+        await testSubjects.missingOrFail('visualizeSaveButton', 10000);
       });
     });
 
@@ -177,8 +206,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_visualize_privileges_user');
       });
 
-      it(`redirects to home page`, async () => {
+      it(`landing page redirects to home page`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
+      });
+
+      it(`edit page redirects to home page`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

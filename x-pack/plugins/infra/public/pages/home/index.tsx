@@ -12,6 +12,7 @@ import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
+import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
@@ -39,6 +40,12 @@ export const HomePage = injectUICapabilities(
 
         return (
           <ColumnarPage>
+            <DocumentTitle
+              title={intl.formatMessage({
+                id: 'xpack.infra.homePage.documentTitle',
+                defaultMessage: 'Infrastructure',
+              })}
+            />
             <Header
               breadcrumbs={[
                 {
@@ -93,7 +100,6 @@ export const HomePage = injectUICapabilities(
                                 href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                                 color="primary"
                                 fill
-                                data-test-subj="infrastructureViewSetupInstructionsButton"
                               >
                                 {intl.formatMessage({
                                   id:
@@ -106,11 +112,7 @@ export const HomePage = injectUICapabilities(
                               <EuiFlexItem>
                                 <WithSourceConfigurationFlyoutState>
                                   {({ enable }) => (
-                                    <EuiButton
-                                      color="primary"
-                                      onClick={enable}
-                                      data-test-subj="infrastructureChangeSourceConfigurationButton"
-                                    >
+                                    <EuiButton color="primary" onClick={enable}>
                                       {intl.formatMessage({
                                         id: 'xpack.infra.configureSourceActionLabel',
                                         defaultMessage: 'Change source configuration',

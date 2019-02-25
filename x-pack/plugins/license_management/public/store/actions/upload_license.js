@@ -8,7 +8,7 @@ import { createAction } from 'redux-actions';
 import { addLicense } from '../actions/add_license';
 import { BASE_PATH } from '../../../common/constants/base_path';
 import { putLicense } from '../../lib/es';
-import { addUploadErrorMessage } from "./add_error_message";
+import { addUploadErrorMessage } from './add_error_message';
 import { i18n } from '@kbn/i18n';
 
 export const uploadLicenseStatus = createAction('LICENSE_MANAGEMENT_UPLOAD_LICENSE_STATUS');

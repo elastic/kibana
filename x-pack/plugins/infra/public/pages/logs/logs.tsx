@@ -12,7 +12,9 @@ import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
 import { LogsPageContent } from './page_content';
 import { LogsToolbar } from './toolbar';
 
+import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
+
 import { Header } from '../../components/header';
 import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
@@ -43,7 +45,7 @@ export const LogsPage = injectUICapabilities(
         const { intl, uiCapabilities } = this.props;
 
         return (
-          <ColumnarPage data-test-subj="infraLogsPage">
+          <ColumnarPage>
             <Header
               breadcrumbs={[
                 {
@@ -65,6 +67,12 @@ export const LogsPage = injectUICapabilities(
                 sourceId,
               }) => (
                 <>
+                  <DocumentTitle
+                    title={intl.formatMessage({
+                      id: 'xpack.infra.logsPage.documentTitle',
+                      defaultMessage: 'Logs',
+                    })}
+                  />
                   <SourceConfigurationFlyout
                     shouldAllowEdit={uiCapabilities.logs.configureSource as boolean}
                   />
@@ -124,7 +132,6 @@ export const LogsPage = injectUICapabilities(
                                   href={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
                                   color="primary"
                                   fill
-                                  data-test-subj="logsViewSetupInstructionsButton"
                                 >
                                   {intl.formatMessage({
                                     id:
@@ -137,11 +144,7 @@ export const LogsPage = injectUICapabilities(
                                 <EuiFlexItem>
                                   <WithSourceConfigurationFlyoutState>
                                     {({ enable }) => (
-                                      <EuiButton
-                                        color="primary"
-                                        onClick={enable}
-                                        data-test-subj="logsChangeSourceConfigurationButton"
-                                      >
+                                      <EuiButton color="primary" onClick={enable}>
                                         {intl.formatMessage({
                                           id: 'xpack.infra.configureSourceActionLabel',
                                           defaultMessage: 'Change source configuration',
