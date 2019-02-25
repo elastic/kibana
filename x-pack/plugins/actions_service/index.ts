@@ -14,7 +14,7 @@ import mappings from './mappings.json';
 export const actionsService = (kibana: any) => {
   return new kibana.Plugin({
     id: 'actions_service',
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'SecretService'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.actions_service',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
