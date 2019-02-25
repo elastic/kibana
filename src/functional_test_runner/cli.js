@@ -75,7 +75,7 @@ const functionalTestRunner = createFunctionalTestRunner({
       bail: cmd.bail,
       grep: cmd.grep,
       invert: cmd.invert,
-      require: `ts-node/register --project tests/tsconfig.json -r tsconfig-paths/register -T "test/**/*.{ts,js}" --moduleResolution Node`
+      require: `ts-node/register --project tests/tsconfig.json -r tsconfig-paths/register -T "test/**/*.{ts,js}"`
     },
     suiteTags: {
       include: cmd.includeTag,
