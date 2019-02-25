@@ -21,16 +21,14 @@ export function pick<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Pick<T, K> {
-  const newObj = keys.reduce(
+  return keys.reduce(
     (acc, key) => {
-      if (key in obj) {
+      if (obj.hasOwnProperty(key)) {
         acc[key] = obj[key];
       }
 
       return acc;
     },
-    {} as Record<string, unknown>
+    {} as Pick<T, K>
   );
-
-  return newObj as Pick<T, K>;
 }

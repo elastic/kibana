@@ -3,16 +3,16 @@ import elasticsearch from 'elasticsearch';
 import { constants } from '../../constants';
 
 export function ClientMock() {
-  this.callWithInternalUser = (ep, params = {}, ...rest) => {
-    if (ep === 'indices.create') {
+  this.callWithInternalUser = (endpoint, params = {}, ...rest) => {
+    if (endpoint === 'indices.create') {
       return Promise.resolve({ acknowledged: true });
     }
 
-    if (ep === 'indices.exists') {
+    if (endpoint === 'indices.exists') {
       return Promise.resolve(false);
     }
 
-    if (ep === 'index') {
+    if (endpoint === 'index') {
       const shardCount = 2;
       return Promise.resolve({
         _index: params.index || 'index',
@@ -25,7 +25,7 @@ export function ClientMock() {
       });
     }
 
-    if (ep === 'get') {
+    if (endpoint === 'get') {
       if (params === elasticsearch.errors.NotFound) return elasticsearch.errors.NotFound;
 
       const _source = {
@@ -57,7 +57,7 @@ export function ClientMock() {
       });
     }
 
-    if (ep === 'search') {
+    if (endpoint === 'search') {
       const [count = 5, source = {}] = rest;
       const hits = times(count, () => {
         return {
@@ -90,7 +90,7 @@ export function ClientMock() {
       });
     }
 
-    if (ep === 'update') {
+    if (endpoint === 'update') {
       const shardCount = 2;
       return Promise.resolve({
         _index: params.index || 'index',

@@ -29,7 +29,7 @@ const readFileAsync = promisify(fs.readFile, fs);
 
 const getDefaultElasticsearchConfig = () => {
   return {
-    hosts: ['http://localhost:9200'],
+    hosts: ['http://localhost:9200', 'http://192.168.1.1:1234'],
     requestTimeout: moment.duration(30000),
     ssl: { certificateAuthorities: [], verificationMode: 'full' },
   };
@@ -55,10 +55,7 @@ describe('plugins/console', function () {
     });
 
     it(`uses http.Agent when url's protocol is http`, function () {
-      const { agent } = getElasticsearchProxyConfig({
-        ...getDefaultElasticsearchConfig(),
-        hosts: ['http://localhost:9200'],
-      });
+      const { agent } = getElasticsearchProxyConfig(getDefaultElasticsearchConfig());
       expect(agent).to.be.a(http.Agent);
     });
 

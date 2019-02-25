@@ -72,7 +72,7 @@ export default function (kibana) {
         // map implicitly allows to create custom `data` and `admin` clients. This is
         // allowed intentionally to support custom `admin` cluster client created by the
         // x-pack/monitoring bulk uploader. We should forbid that as soon as monitoring
-        // bulk uploader is refactored.
+        // bulk uploader is refactored, see https://github.com/elastic/kibana/issues/31934.
         if (clusters.has(name)) {
           throw new Error(`cluster '${name}' already exists`);
         }

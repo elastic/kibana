@@ -27,6 +27,7 @@ import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { logger } from '../logging/__mocks__';
+import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 
 let elasticsearchService: ElasticsearchService;
@@ -56,34 +57,9 @@ describe('#start', () => {
   test('returns legacy Elasticsearch config as a part of the contract', async () => {
     const startContract = await elasticsearchService.start();
 
-    await expect(startContract.legacy.config$.pipe(first()).toPromise()).resolves
-      .toMatchInlineSnapshot(`
-ElasticsearchConfig {
-  "apiVersion": "master",
-  "customHeaders": Object {},
-  "healthCheckDelay": "PT2.5S",
-  "hosts": Array [
-    "http://1.2.3.4",
-  ],
-  "logQueries": false,
-  "password": undefined,
-  "pingTimeout": "PT30S",
-  "requestHeadersWhitelist": Array [
-    "authorization",
-  ],
-  "requestTimeout": "PT30S",
-  "shardTimeout": "PT30S",
-  "sniffInterval": false,
-  "sniffOnConnectionFault": false,
-  "sniffOnStart": false,
-  "ssl": Object {
-    "alwaysPresentCertificate": true,
-    "certificateAuthorities": undefined,
-    "verificationMode": "full",
-  },
-  "username": "jest",
-}
-`);
+    await expect(startContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
+      ElasticsearchConfig
+    );
   });
 
   test('returns data and admin client observables as a part of the contract', async () => {
