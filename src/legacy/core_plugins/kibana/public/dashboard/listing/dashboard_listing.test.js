@@ -64,7 +64,7 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
     deleteItems={() => {}}
     createItem={() => {}}
     editItem={() => {}}
-    getEditUrl={() => {}}
+    getViewUrl={() => {}}
     listingLimit={1000}
     hideWriteControls={false}
   />);
@@ -78,7 +78,7 @@ describe('after fetch', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
-      getEditUrl={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
       initialFilter="my dashboard"
@@ -98,7 +98,7 @@ describe('after fetch', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
-      getEditUrl={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
     />);
@@ -117,7 +117,7 @@ describe('after fetch', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
-      getEditUrl={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);
@@ -136,7 +136,7 @@ describe('after fetch', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
-      getEditUrl={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={true}
     />);
@@ -155,7 +155,7 @@ describe('after fetch', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
-      getEditUrl={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);

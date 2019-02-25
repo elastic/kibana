@@ -71,9 +71,9 @@ uiRoutes
         return services.dashboards.find(search, $scope.listingLimit);
       };
       $scope.editItem = ({ id }) => {
-        kbnUrl.redirect(createDashboardEditUrl(id));
+        kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
       };
-      $scope.getEditUrl = ({ id }) => {
+      $scope.getViewUrl = ({ id }) => {
         return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
       $scope.delete = (ids) => {

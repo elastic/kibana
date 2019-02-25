@@ -54,10 +54,11 @@ export function VisualizeListingController($injector, createNewVis) {
   };
 
   this.editItem = ({ id }) => {
+    // for visualizations the edit and view URLs are the same
     kbnUrl.change(createVisualizeEditUrl(id));
   };
 
-  this.getEditUrl = ({ id }) => {
+  this.getViewUrl = ({ id }) => {
     return chrome.addBasePath(`#${createVisualizeEditUrl(id)}`);
   };
 
