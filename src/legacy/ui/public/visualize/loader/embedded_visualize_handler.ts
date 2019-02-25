@@ -461,7 +461,9 @@ export class EmbeddedVisualizeHandler {
    */
   private handleDataLoaderError = (error: any): void => {
     // TODO: come up with a general way to cancel execution of pipeline expressions.
-    this.dataLoaderParams.searchSource.cancelQueued();
+    if (this.dataLoaderParams.searchSource && this.dataLoaderParams.searchSource.cancelQueued) {
+      this.dataLoaderParams.searchSource.cancelQueued();
+    }
 
     this.vis.requestError = error;
     this.vis.showRequestError =
