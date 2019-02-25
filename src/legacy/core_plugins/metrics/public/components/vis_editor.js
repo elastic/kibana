@@ -42,18 +42,24 @@ class VisEditor extends Component {
       visFields: {},
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
-    this.handleUiState = this.handleUiState.bind(this, props.vis);
-    this.getConfig = this.getConfig.bind(this);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
-  getConfig(...args) {
+  get uiState() {
+    return this.props.vis.getUiState();
+  }
+
+  get visFields() {
+    return this.uiState.get('visFields') || {};
+  }
+
+  getConfig = (...args) => {
     return this.props.config.get(...args);
   }
 
-  handleUiState(vis, ...args) {
-    vis.uiStateVal(...args);
+  handleUiState = (field, value) =>  {
+    this.props.vis.uiStateVal(field, value);
   }
 
   fetchIndexPatternFields = async () => {
@@ -62,12 +68,12 @@ class VisEditor extends Component {
     const indexPatterns = extractIndexPatterns(params, visFields);
     const fields = await fetchFields(indexPatterns);
     this.setState((previousState) => {
-      return {
-        visFields: {
-          ...previousState.visFields,
-          ...fields,
-        }
+      const visFields = {
+        ...previousState.visFields,
+        ...fields,
       };
+      this.handleUiState('visFields', visFields);
+      return { visFields };
     });
   }
 
@@ -117,8 +123,8 @@ class VisEditor extends Component {
           dateFormat={this.props.config.get('dateFormat')}
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
-          uiState={this.props.vis.getUiState()}
-          fields={this.props.vis.fields}
+          uiState={this.uiState}
+          fields={this.visFields}
           model={this.props.vis.params}
           visData={this.props.visData}
           getConfig={this.getConfig}
@@ -142,7 +148,7 @@ class VisEditor extends Component {
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
             onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
+            uiState={this.uiState}
             onBrush={this.onBrush}
             onCommit={this.handleCommit}
             onToggleAutoApply={this.handleAutoApplyToggle}
