@@ -24,33 +24,44 @@ interface Props {
   uiCapabilities: UICapabilities;
 }
 
-export const NodeContextMenu = injectUICapabilities(injectI18n(
-  ({ options, timeRange, children, node, isPopoverOpen, closePopover, nodeType, intl, uiCapabilities }: Props) => {
-    // Due to the changing nature of the fields between APM and this UI,
-    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
-    // #26620 for the details for these fields.
-    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-    const APM_FIELDS = {
-      [InfraNodeType.host]: 'host.hostname',
-      [InfraNodeType.container]: 'container.id',
-      [InfraNodeType.pod]: 'kubernetes.pod.uid',
-    };
+export const NodeContextMenu = injectUICapabilities(
+  injectI18n(
+    ({
+      options,
+      timeRange,
+      children,
+      node,
+      isPopoverOpen,
+      closePopover,
+      nodeType,
+      intl,
+      uiCapabilities,
+    }: Props) => {
+      // Due to the changing nature of the fields between APM and this UI,
+      // We need to have some exceptions until 7.0 & ECS is finalized. Reference
+      // #26620 for the details for these fields.
+      // TODO: This is tech debt, remove it after 7.0 & ECS migration.
+      const APM_FIELDS = {
+        [InfraNodeType.host]: 'host.hostname',
+        [InfraNodeType.container]: 'container.id',
+        [InfraNodeType.pod]: 'kubernetes.pod.uid',
+      };
 
-    const nodeLogsUrl = node.id
-      ? getNodeLogsUrl({
-          nodeType,
-          nodeId: node.id,
-          time: timeRange.to,
-        })
-      : undefined;
-    const nodeDetailUrl = node.id
-      ? getNodeDetailUrl({
-          nodeType,
-          nodeId: node.id,
-          from: timeRange.from,
-          to: timeRange.to,
-        })
-      : undefined;
+      const nodeLogsUrl = node.id
+        ? getNodeLogsUrl({
+            nodeType,
+            nodeId: node.id,
+            time: timeRange.to,
+          })
+        : undefined;
+      const nodeDetailUrl = node.id
+        ? getNodeDetailUrl({
+            nodeType,
+            nodeId: node.id,
+            from: timeRange.from,
+            to: timeRange.to,
+          })
+        : undefined;
 
       const apmTracesUrl = uiCapabilities.apm.show
         ? {
@@ -112,5 +123,4 @@ export const NodeContextMenu = injectUICapabilities(injectI18n(
       );
     }
   )
-)
 );
