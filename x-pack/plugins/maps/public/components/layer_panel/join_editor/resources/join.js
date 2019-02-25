@@ -6,13 +6,12 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 
@@ -204,12 +203,19 @@ export class Join extends Component {
             className="mapJoinItem__delete"
             iconType="trash"
             color="danger"
-            aria-label="Delete join"
-            title="Delete join"
+            aria-label={getDeleteJoin()}
+            title={getDeleteJoin()}
             onClick={onRemove}
           />
         </EuiFlexGroup>
       </div>
     );
   }
+}
+
+
+function getDeleteJoin() {
+  return i18n.translate('xpack.maps.layerPanel.join.deleteJoin', {
+    defaultMessage: 'Delete join'
+  });
 }

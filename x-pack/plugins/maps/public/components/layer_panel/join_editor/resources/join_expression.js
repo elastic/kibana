@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -15,9 +14,10 @@ import {
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../../../shared/components/single_field_select';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   indexPatternService,
@@ -87,10 +87,14 @@ export class JoinExpression extends Component {
 
     return (
       <EuiFormRow
-        label="Left field"
+        label={
+          i18n.translate('xpack.maps.layerPanel.joinExpression.leftField', {
+            defaultMessage: 'Left field'
+          })
+        }
       >
         <EuiComboBox
-          placeholder="Select field"
+          placeholder={getSelectField()}
           singleSelection={true}
           isClearable={false}
           options={options}
@@ -108,10 +112,18 @@ export class JoinExpression extends Component {
 
     return (
       <EuiFormRow
-        label="Right source"
+        label={
+          i18n.translate('xpack.maps.layerPanel.joinExpression.rightSource', {
+            defaultMessage: 'Right source'
+          })
+        }
       >
         <IndexPatternSelect
-          placeholder="Select index pattern"
+          placeholder={
+            i18n.translate('xpack.maps.layerPanel.joinExpression.selectIndexPattern', {
+              defaultMessage: 'Select index pattern'
+            })
+          }
           indexPatternId={this.props.rightSourceIndexPatternId}
           onChange={this._onRightSourceChange}
           isClearable={false}
@@ -119,6 +131,7 @@ export class JoinExpression extends Component {
       </EuiFormRow>
     );
   }
+
 
   _renderRightFieldSelect() {
     if (!this.props.rightFields || !this.props.leftValue) {
@@ -131,10 +144,14 @@ export class JoinExpression extends Component {
 
     return (
       <EuiFormRow
-        label="Right field"
+        label={
+          i18n.translate('xpack.maps.layerPanel.joinExpression.rightField', {
+            defaultMessage: 'Right field'
+          })
+        }
       >
         <SingleFieldSelect
-          placeholder="Select field"
+          placeholder={getSelectField()}
           value={this.props.rightValue}
           onChange={this.props.onRightFieldChange}
           filterField={filterStringOrNumberFields}
@@ -156,7 +173,9 @@ export class JoinExpression extends Component {
       return `${leftSourceName}:${leftValue} with ${rightSourceName}:${rightValue}`;
     }
 
-    return '-- select --';
+    return i18n.translate('xpack.maps.layerPanel.joinExpression.selectPlaceholder', {
+      defaultMessage: '-- select --'
+    });
   }
 
   render() {
@@ -180,7 +199,12 @@ export class JoinExpression extends Component {
         }
       >
         <div style={{ width: 300 }}>
-          <EuiPopoverTitle>Join</EuiPopoverTitle>
+          <EuiPopoverTitle>
+            <FormattedMessage
+              id="xpack.maps.layerPanel.joinExpression.join"
+              defaultMessage="Join"
+            />
+          </EuiPopoverTitle>
           <EuiFormRow
             label="Left source"
           >
@@ -222,3 +246,10 @@ JoinExpression.propTypes = {
   rightFields: PropTypes.object, // indexPattern.fields IndexedArray object
   onRightFieldChange: PropTypes.func.isRequired,
 };
+
+
+function getSelectField() {
+  i18n.translate('xpack.maps.layerPanel.joinExpression.selectField', {
+    defaultMessage: 'selectField'
+  });
+}
