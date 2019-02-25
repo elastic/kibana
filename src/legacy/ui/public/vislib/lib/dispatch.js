@@ -75,10 +75,13 @@ export function VislibLibDispatchProvider(Private, config) {
      * @param d {Object} Data point
      * @returns event with list of data points related to the click
      */
-    clickEventResponse(d) {
-      const _data = d3.event.target.nearestViewportElement ?
-        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const isSlices = !!(_data && _data.slices);
+    clickEventResponse(d, props = {}) {
+      let isSlices = props.isSlices;
+      if (isSlices === undefined) {
+        const _data = d3.event.target.nearestViewportElement ?
+          d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
+        isSlices = !!(_data && _data.slices);
+      }
 
       const data = d.input || d;
 
