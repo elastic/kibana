@@ -44,7 +44,6 @@ export class TabSummary extends Component {
 
     return (
       <section
-        role="contentinfo"
         aria-labelledby="rollupJobDetailStatsTitle"
         data-test-subj="rollupJobDetailSummaryStatsSection"
       >
@@ -150,7 +149,6 @@ export class TabSummary extends Component {
     return (
       <Fragment>
         <section
-          role="contentinfo"
           aria-labelledby="rollupJobDetailLogisticsTitle"
           data-test-subj="rollupJobDetailSummaryLogisticsSection"
         >
@@ -254,7 +252,6 @@ export class TabSummary extends Component {
         </section>
 
         <section
-          role="contentinfo"
           aria-labelledby="rollupJobDetailDateHistogramTitle"
           data-test-subj="rollupJobDetailSummaryDateHistogramSection"
         >
