@@ -47,7 +47,6 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
-    "skipLibCheck": true,
     // adding global typings
     "types": [
       "node",
