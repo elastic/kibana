@@ -10,6 +10,11 @@ export interface SavedObjectServiceError {
   message?: string;
 }
 
+export interface SavedObjectMeta {
+  searchSourceJSON?: string;
+  searchSource?: any;
+}
+
 export interface SavedObjectAttributes {
   title: string;
   visState: string;
@@ -17,10 +22,7 @@ export interface SavedObjectAttributes {
   description: string;
   columns?: string[];
   version: number;
-  kibanaSavedObjectMeta: {
-    searchSourceJSON?: string;
-    searchSource?: any;
-  };
+  kibanaSavedObjectMeta: SavedObjectMeta;
 }
 
 export interface SavedObjectReferences {

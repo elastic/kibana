@@ -8,17 +8,12 @@ import { notFound } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
-import { cryptoFactory, oncePerServer } from '../../../server/lib';
-import { JobDocPayload, JobParams, KbnServer } from '../../../types';
-import {
-  SavedObject,
-  SavedObjectReferences,
-  SavedObjectServiceError,
-  SearchSource,
-  TsvbPanel,
-  VisState,
-} from '../types';
-import { generateCsv } from './lib/generate_csv';
+import { cryptoFactory, oncePerServer } from '../../../../server/lib';
+import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
+import { SavedObject, SavedObjectServiceError, SearchSource, TsvbPanel } from '../../types';
+import { generateCsv } from '../lib/generate_csv';
+import { createJobSearch } from './create_job_search';
+import { createJobVis } from './create_job_vis';
 
 interface VisData {
   title: string;
@@ -50,29 +45,11 @@ function createJobFn(server: KbnServer) {
 
         if (visStateJSON) {
           // visualization type
-          const { params: vPanel, title: vtitle, type: vtype }: VisState = JSON.parse(visStateJSON); // no var name shadowing
-          if (!vPanel) {
-            throw new Error('The saved object contained no panel data!');
-          }
-          return { panel: vPanel, title: vtitle, visType: vtype };
+          return createJobVis(visStateJSON);
         }
 
         // saved search type
-        const { searchSourceJSON } = kibanaSavedObjectMeta;
-        const references: SavedObjectReferences[] = savedObject.references!;
-        if (!searchSourceJSON || !references) {
-          throw new Error('The saved search object is missing configuration fields!');
-        }
-        const searchSource = JSON.parse(searchSourceJSON);
-
-        const sPanel = {
-          attributes: {
-            ...savedObject.attributes,
-            kibanaSavedObjectMeta: { searchSource },
-          },
-          references,
-        };
-        return { panel: sPanel, title: attributes.title, visType: 'search' };
+        return createJobSearch(savedObject, kibanaSavedObjectMeta, attributes);
       })
       .catch((err: Error) => {
         const errPayload: SavedObjectServiceError = get(err, 'output.payload', { statusCode: 0 });
