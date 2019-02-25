@@ -107,7 +107,7 @@ describe('Load More Table Component', () => {
         <LoadMoreTable
           columns={getHostsColumns()}
           loadingTitle="Hosts"
-          loading={true}
+          loading={false}
           pageOfItems={mockData.Hosts.edges}
           loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
           limit={1}
@@ -118,6 +118,7 @@ describe('Load More Table Component', () => {
         />
       );
       wrapper.setState({ paginationLoading: true, isEmptyTable: false });
+      wrapper.setProps({ loading: true });
       expect(
         wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
       ).toBeFalsy();
