@@ -167,6 +167,7 @@ export const WaffleGroupByControls = injectI18n(
               // (Next line is disabled due to <span> having event handlers and no ARIA role)
               // tslint:disable-next-line
               <span
+                key={(o && o.field) + 'event-wrapper'}
                 onKeyDown={this.handleGroupItemKeyEvent}
                 onClick={this.handleGroupItemClickEvent}
               >
