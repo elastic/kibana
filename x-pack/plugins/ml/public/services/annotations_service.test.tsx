@@ -34,7 +34,7 @@ describe('annotations_service', () => {
 
     expect(subscriber.mock.calls).toHaveLength(0);
 
-    annotationsRefresh$.next();
+    annotationsRefresh$.next(true);
 
     expect(subscriber.mock.calls).toHaveLength(1);
   });

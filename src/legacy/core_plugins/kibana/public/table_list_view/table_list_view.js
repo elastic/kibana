@@ -354,7 +354,7 @@ class TableListViewUi extends React.Component {
     };
 
     const columns = this.props.tableColumns.slice();
-    if (!this.state.hideWriteControls) {
+    if (!this.props.hideWriteControls) {
       columns.push({
         name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
           defaultMessage: 'Actions'
