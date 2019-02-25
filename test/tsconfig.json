@@ -12,7 +12,8 @@
     },
     "types": [
       "node",
-      "mocha"
+      "mocha",
+      "@kbn/test/types/expect.js"
     ]
   },
   "include": [

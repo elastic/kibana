@@ -47,7 +47,14 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // adding global typings
+    "types": [
+      "node",
+      "jest",
+      "react",
+      "@kbn/test/types/expect.js"
+    ]
   },
   "include": [
     "kibana.d.ts",
