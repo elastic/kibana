@@ -19,6 +19,7 @@ import {
 } from '../../selectors/map_selectors';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 import { copyPersistentState } from '../../store/util';
+import { extractReferences, injectReferences } from '../../../common/migrations/references';
 
 const module = uiModules.get('app/maps');
 
@@ -30,6 +31,15 @@ module.factory('SavedGisMap', function (Private) {
       type: SavedGisMap.type,
       mapping: SavedGisMap.mapping,
       searchSource: SavedGisMap.searchsource,
+      extractReferences,
+      injectReferences: (savedObject, references) => {
+        const { attributes } = injectReferences({
+          attributes: { layerListJSON: savedObject.layerListJSON },
+          references
+        });
+
+        savedObject.layerListJSON = attributes.layerListJSON;
+      },
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
       id: id,
