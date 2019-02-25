@@ -410,7 +410,7 @@
             "name": "millisFromNow",
             "description": "Milliseconds from the timestamp to the current time",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1806,22 +1806,6 @@
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "scheme",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
               }
             },
             "isDeprecated": false,

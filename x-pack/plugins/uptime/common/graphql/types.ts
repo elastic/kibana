@@ -43,7 +43,7 @@ export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: number | null;
+  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -354,8 +354,6 @@ export interface FilterBar {
   id?: string[] | null;
 
   port?: number[] | null;
-
-  scheme?: string[] | null;
 
   status?: string[] | null;
 

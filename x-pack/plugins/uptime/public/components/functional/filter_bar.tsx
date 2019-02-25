@@ -20,10 +20,7 @@ interface FilterBarProps {
 const MAX_SELECTION_LENGTH = 20;
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({
-  filterBar: { id, port, scheme, type },
-  updateQuery,
-}: FilterBarProps) => {
+export const FilterBar = ({ filterBar: { id, port, type }, updateQuery }: FilterBarProps) => {
   const showFilterDisclaimer =
     (id && id.length && id.length > MAX_SELECTION_LENGTH) ||
     (port && port.length && port.length > MAX_SELECTION_LENGTH);
@@ -73,17 +70,6 @@ export const FilterBar = ({
         value: portValue,
         view: portValue,
       })),
-      searchThreshold: SEARCH_THRESHOLD,
-    },
-    {
-      type: 'field_value_selection',
-      field: 'monitor.scheme',
-      name: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
-        defaultMessage: 'Scheme',
-      }),
-      multiSelect: false,
-      options:
-        scheme && scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
       searchThreshold: SEARCH_THRESHOLD,
     },
     {

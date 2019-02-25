@@ -329,16 +329,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const MONITOR_SOURCE_ID_KEY = 'monitor.id';
     const MONITOR_SOURCE_TCP_KEY = 'tcp.port';
     const MONITOR_SOURCE_TYPE_KEY = 'monitor.type';
-    const MONITOR_SOURCE_SCHEME_KEY = 'monitor.scheme';
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        _source: [
-          MONITOR_SOURCE_ID_KEY,
-          MONITOR_SOURCE_TCP_KEY,
-          MONITOR_SOURCE_TYPE_KEY,
-          MONITOR_SOURCE_SCHEME_KEY,
-        ],
+        _source: [MONITOR_SOURCE_ID_KEY, MONITOR_SOURCE_TCP_KEY, MONITOR_SOURCE_TYPE_KEY],
         size: 1000,
         query: {
           range: {
@@ -360,7 +354,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const ids: string[] = [];
     const ports = new Set<number>();
     const types = new Set<string>();
-    const schemes = new Set<string>();
 
     const hits = get(result, 'hits.hits', []);
     hits.forEach((hit: any) => {
@@ -375,11 +368,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         `_source.${MONITOR_SOURCE_TYPE_KEY}`,
         undefined
       );
-      const schemeValue: string | undefined = get(
-        hit,
-        `_source.${MONITOR_SOURCE_SCHEME_KEY}`,
-        undefined
-      );
 
       if (key) {
         ids.push(key);
@@ -390,13 +378,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       if (typeValue) {
         types.add(typeValue);
       }
-      if (schemeValue) {
-        schemes.add(schemeValue);
-      }
     });
 
     return {
-      scheme: Array.from(schemes).sort(),
       type: Array.from(types).sort(),
       port: Array.from(ports).sort((a: number, b: number) => a - b),
       id: ids.sort(),

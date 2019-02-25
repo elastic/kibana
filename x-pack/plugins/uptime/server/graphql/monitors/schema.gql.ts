@@ -10,7 +10,6 @@ export const monitorsSchema = gql`
   type FilterBar {
     id: [String!]
     port: [Int!]
-    scheme: [String!]
     status: [String!]
     type: [String!]
   }
