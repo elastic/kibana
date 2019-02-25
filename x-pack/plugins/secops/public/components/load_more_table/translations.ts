@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING = i18n.translate('xpack.secops.loadingMoreTable.loading', {
+export const LOADING = i18n.translate('xpack.secops.loadingMoreTable.loadingDescription', {
   defaultMessage: 'Loading',
 });
 
-export const LOAD_MORE = i18n.translate('xpack.secops.loadingMoreTable.loadMore', {
+export const LOAD_MORE = i18n.translate('xpack.secops.loadingMoreTable.loadMoreDescription', {
   defaultMessage: 'Load More',
 });

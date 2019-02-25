@@ -6,13 +6,16 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyNetworkFilterQuery,
   setNetworkFilterQueryDraft,
-  updateTopDestinationLimit,
-  updateTopSourceLimit,
+  updateTopNFlowDirection,
+  updateTopNFlowLimit,
+  updateTopNFlowType,
 } from './actions';
+import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel } from './model';
 
 export type NetworkState = NetworkModel;
@@ -20,11 +23,10 @@ export type NetworkState = NetworkModel;
 export const initialNetworkState: NetworkState = {
   page: {
     queries: {
-      topSource: {
+      topNFlow: {
         limit: DEFAULT_TABLE_LIMIT,
-      },
-      topDestination: {
-        limit: DEFAULT_TABLE_LIMIT,
+        topNFlowType: NetworkTopNFlowType.source,
+        topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
       },
     },
     filterQuery: null,
@@ -38,26 +40,44 @@ export const initialNetworkState: NetworkState = {
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
-  .case(updateTopSourceLimit, (state, { limit, networkType }) => ({
+  .case(updateTopNFlowLimit, (state, { limit, networkType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        topSource: {
+        topNFlow: {
+          ...state[networkType].queries!.topNFlow,
           limit,
         },
       },
     },
   }))
-  .case(updateTopDestinationLimit, (state, { limit, networkType }) => ({
+  .case(updateTopNFlowDirection, (state, { topNFlowDirection, networkType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        topDestination: {
-          limit,
+        topNFlow: {
+          ...state[networkType].queries!.topNFlow,
+          ...helperUpdateTopNFlowDirection(
+            state[networkType].queries!.topNFlow.topNFlowType,
+            topNFlowDirection
+          ),
+        },
+      },
+    },
+  }))
+  .case(updateTopNFlowType, (state, { topNFlowType, networkType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        topNFlow: {
+          ...state[networkType].queries!.topNFlow,
+          topNFlowType,
         },
       },
     },

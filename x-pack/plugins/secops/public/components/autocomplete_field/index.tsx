@@ -132,6 +132,7 @@ export class AutocompleteField extends React.Component<
         break;
       case 'Escape':
         evt.preventDefault();
+        evt.stopPropagation();
         this.setState(withSuggestionsHidden);
         break;
     }

@@ -201,4 +201,17 @@ declare module '@elastic/eui' {
     idSelected?: any;
   };
   export const EuiButtonGroup: React.SFC<EuiButtonGroupProps>;
+
+  type EuiSuperSelectProps = CommonProps & {
+    options?: any;
+    valueOfSelected?: any;
+    onChange?: (value: any) => void;
+    disabled?: boolean;
+    isLoading?: boolean;
+    itemClassName?: any;
+    hasDividers?: boolean;
+    itemLayoutAlign?: any;
+  };
+
+  export const EuiSuperSelect: React.SFC<EuiSuperSelectProps>;
 }

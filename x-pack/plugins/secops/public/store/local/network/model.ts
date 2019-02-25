@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
@@ -15,9 +16,13 @@ export interface BasicQuery {
   limit: number;
 }
 
+export interface TopNFlowQuery extends BasicQuery {
+  topNFlowType: NetworkTopNFlowType;
+  topNFlowDirection: NetworkTopNFlowDirection;
+}
+
 interface NetworkQueries {
-  topSource: BasicQuery;
-  topDestination: BasicQuery;
+  topNFlow: TopNFlowQuery;
 }
 
 export interface GenericNetworkModel {

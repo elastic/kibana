@@ -16,7 +16,7 @@ export const PageHeader = styled(EuiPageHeader)`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   position: fixed;
   width: calc(100% - 32px);
-  z-index: 1;
+  z-index: 10;
   padding: 6px 0px 0px 0px;
   margin-bottom: 0px;
   margin-top: 50px;

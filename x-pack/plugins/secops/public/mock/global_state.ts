@@ -5,7 +5,7 @@
  */
 
 import { defaultWidth } from '../components/timeline/body';
-import { Direction } from '../graphql/types';
+import { Direction, NetworkTopNFlowDirection, NetworkTopNFlowType } from '../graphql/types';
 import { State } from '../store';
 
 export const mockGlobalState: State = {
@@ -58,11 +58,10 @@ export const mockGlobalState: State = {
     network: {
       page: {
         queries: {
-          topSource: {
+          topNFlow: {
             limit: 10,
-          },
-          topDestination: {
-            limit: 10,
+            topNFlowType: NetworkTopNFlowType.source,
+            topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
           },
         },
         filterQuery: null,

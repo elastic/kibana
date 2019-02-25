@@ -10,7 +10,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { ElasticsearchNetworkTopNFlowAdapter } from './elasticsearch_adapter';
 import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
 
-describe('Network Top N flow elasticsearch_adapter', () => {
+describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=source and NetworkTopNFlowDirection=uniDirectional', () => {
   describe('Happy Path - get Data', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponse);
@@ -37,8 +37,8 @@ describe('Network Top N flow elasticsearch_adapter', () => {
 
   describe('Unhappy Path - No data', () => {
     const mockNoDataResponse = cloneDeep(mockResponse);
-    mockNoDataResponse.aggregations.network_top_n_flow_count.value = 0;
-    mockNoDataResponse.aggregations.network_top_n_flow.buckets = [];
+    mockNoDataResponse.aggregations.top_n_flow_count.value = 0;
+    mockNoDataResponse.aggregations.top_uni_flow.buckets = [];
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
     const mockFramework: FrameworkAdapter = {
@@ -68,8 +68,8 @@ describe('Network Top N flow elasticsearch_adapter', () => {
 
   describe('No pagination', () => {
     const mockNoPaginationResponse = cloneDeep(mockResponse);
-    mockNoPaginationResponse.aggregations.network_top_n_flow_count.value = 10;
-    mockNoPaginationResponse.aggregations.network_top_n_flow.buckets = mockNoPaginationResponse.aggregations.network_top_n_flow.buckets.slice(
+    mockNoPaginationResponse.aggregations.top_n_flow_count.value = 10;
+    mockNoPaginationResponse.aggregations.top_uni_flow.buckets = mockNoPaginationResponse.aggregations.top_uni_flow.buckets.slice(
       0,
       -1
     );

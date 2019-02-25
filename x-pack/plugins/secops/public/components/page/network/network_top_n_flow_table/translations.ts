@@ -6,42 +6,124 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SOURCE = i18n.translate('xpack.secops.networkTopNFlowTable.source.title', {
-  defaultMessage: 'Top Uni-Directional Flow Sources',
+export const TOP_TALKERS = i18n.translate('xpack.secops.networkTopNFlowTable.title', {
+  defaultMessage: 'Top Talkers',
 });
 
-export const DESTINATION = i18n.translate('xpack.secops.networkTopNFlowTable.destination.title', {
-  defaultMessage: 'Top Uni-Directional Flow Destinations',
+export const SOURCE_IP = i18n.translate('xpack.secops.networkTopNFlowTable.column.sourceIpTitle', {
+  defaultMessage: 'Source IP',
 });
-
-export const SOURCE_IP = i18n.translate(
-  'xpack.secops.networkTopNFlowTable.source.ip.column.title',
-  {
-    defaultMessage: 'Source Ip',
-  }
-);
 
 export const DESTINATION_IP = i18n.translate(
-  'xpack.secops.networkTopNFlowTable.destination.ip.column.title',
+  'xpack.secops.networkTopNFlowTable.column.destinationIpTitle',
   {
-    defaultMessage: 'Destination Ip',
+    defaultMessage: 'Destination IP',
   }
 );
 
-export const DOMAIN = i18n.translate('xpack.secops.networkTopNFlowTable.domain.column.title', {
-  defaultMessage: 'Domain',
+export const CLIENT_IP = i18n.translate('xpack.secops.networkTopNFlowTable.column.clientIpTitle', {
+  defaultMessage: 'Client IP',
 });
 
-export const BYTES = i18n.translate('xpack.secops.networkTopNFlowTable.bytes.column.title', {
+export const SERVER_IP = i18n.translate('xpack.secops.networkTopNFlowTable.column.serverIpTitle', {
+  defaultMessage: 'Server IP',
+});
+
+export const DOMAIN = i18n.translate('xpack.secops.networkTopNFlowTable.column.lastDomainTitle', {
+  defaultMessage: 'Last Domain',
+});
+
+export const BYTES = i18n.translate('xpack.secops.networkTopNFlowTable.column.bytesTitle', {
   defaultMessage: 'Bytes',
 });
 
-export const PACKETS = i18n.translate('xpack.secops.networkTopNFlowTable.packets.column.title', {
+export const PACKETS = i18n.translate('xpack.secops.networkTopNFlowTable.column.packetsTitle', {
   defaultMessage: 'Packets',
 });
 
-export const DURATION = i18n.translate('xpack.secops.networkTopNFlowTable.duration.column.title', {
-  defaultMessage: 'Duration',
+export const DIRECTION = i18n.translate('xpack.secops.networkTopNFlowTable.column.directionTitle', {
+  defaultMessage: 'Direction',
+});
+
+export const UNIQUE_SOURCE_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.column.uniqueSourceIpsTitle',
+  {
+    defaultMessage: 'Unique Source IPs',
+  }
+);
+
+export const UNIQUE_DESTINATION_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.column.uniqueDestinationIpsTitle',
+  {
+    defaultMessage: 'Unique Destination IPs',
+  }
+);
+
+export const UNIQUE_CLIENT_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.column.uniqueClientIpsTitle',
+  {
+    defaultMessage: 'Unique Client IPs',
+  }
+);
+
+export const UNIQUE_SERVER_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.column.uniqueServerIpsTitle',
+  {
+    defaultMessage: 'Unique Server IPs',
+  }
+);
+
+export const BY_SOURCE_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.select.bySourceIpTitle',
+  {
+    defaultMessage: 'By Source IP',
+  }
+);
+
+export const BY_DESTINATION_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.select.byDestinationIpTitle',
+  {
+    defaultMessage: 'By Destination IP',
+  }
+);
+
+export const BY_CLIENT_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.select.byClientIpSelector',
+  {
+    defaultMessage: 'By Client IP',
+  }
+);
+
+export const BY_SERVER_IP = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.select.byServerIpSelector',
+  {
+    defaultMessage: 'By Server IP',
+  }
+);
+
+export const FILTER_TO_KQL = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.description.filterToKQLDescription',
+  {
+    defaultMessage: 'Add to KQL',
+  }
+);
+
+export const UNIDIRECTIONAL = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.unidirectionalDescription',
+  {
+    defaultMessage: 'Unidirectional',
+  }
+);
+
+export const BIDIRECTIONAL = i18n.translate(
+  'xpack.secops.networkTopNFlowTable.bidirectionalDescription',
+  {
+    defaultMessage: 'Bidirectional',
+  }
+);
+
+export const MORE = i18n.translate('xpack.secops.networkTopNFlowTable.moreDescription', {
+  defaultMessage: 'More ...',
 });
 
 export const ROWS_5 = i18n.translate('xpack.secops.networkTopNFlowTable.rows', {

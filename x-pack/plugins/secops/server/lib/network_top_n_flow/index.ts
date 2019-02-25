@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowData, NetworkTopNFlowType } from '../../graphql/types';
+import {
+  NetworkTopNFlowData,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowType,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import { NetworkTopNFlowAdapter } from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptions {
   networkTopNFlowType: NetworkTopNFlowType;
+  networkTopNFlowDirection: NetworkTopNFlowDirection;
 }
 
 export class NetworkTopNFlow {
