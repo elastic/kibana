@@ -21,7 +21,8 @@ import Hapi from 'hapi';
 import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 
 const defaultConfig = {
-  'kibana.index': '.kibana'
+  'kibana.index': '.kibana',
+  'savedObjects.maxImportExportSize': 10000,
 };
 
 export function MockServer(config = defaultConfig) {

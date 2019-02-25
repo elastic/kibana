@@ -29,9 +29,7 @@ describe('GET /api/saved_objects/_export', () => {
   };
 
   beforeEach(() => {
-    server = MockServer({
-      'savedObjects.maxImportExportSize': 10000,
-    });
+    server = MockServer();
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
