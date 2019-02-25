@@ -25,7 +25,12 @@ export async function findRelationships(type, id, options = {}) {
   } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
-  const bulkGetOpts = references.map(ref => ({ id: ref.id, type: ref.type }));
+
+  // we filter the objects which we execute bulk requests for based on the saved
+  // object types as well, these are the only types we should be concerned with
+  const bulkGetOpts = references
+    .filter(({ type }) => savedObjectTypes.includes(type))
+    .map(ref => ({ id: ref.id, type: ref.type }));
 
   const [referencedObjects, referencedResponse] = await Promise.all([
     bulkGetOpts.length > 0
