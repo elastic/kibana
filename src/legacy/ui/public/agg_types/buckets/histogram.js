@@ -79,7 +79,7 @@ export const histogramBucketAgg = new BucketAggType({
       modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
-          ? { script: { inline: field.script, lang: field.lang } }
+          ? { script: { source: field.script, lang: field.lang } }
           : { field: field.name };
 
         return searchSource
