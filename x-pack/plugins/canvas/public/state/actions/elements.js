@@ -265,6 +265,7 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
   const updatedElement = getNodeById(getState(), elementId, pageId);
 
   // reset element.filter if element is no longer a filter
+  // TODO: find a way to extract a list of filter renderers from the functions registry
   if (
     updatedElement.filter &&
     !['dropdownControl', 'timefilterControl', 'exactly'].some(filter =>
