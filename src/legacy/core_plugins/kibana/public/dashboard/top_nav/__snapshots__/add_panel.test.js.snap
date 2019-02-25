@@ -8,7 +8,7 @@ exports[`render 1`] = `
   maxWidth={false}
   onClose={[Function]}
   ownFocus={true}
-  size="s"
+  size="m"
 >
   <EuiFlyoutBody>
     <EuiTitle
@@ -49,7 +49,7 @@ exports[`render 1`] = `
     <EuiSpacer
       size="s"
     />
-    <InjectIntl(SavedObjectFinderUI)
+    <SavedObjectFinder
       callToActionButton={
         <EuiButton
           color="primary"

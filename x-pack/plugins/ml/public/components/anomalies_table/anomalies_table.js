@@ -118,14 +118,14 @@ class AnomaliesTable extends Component {
     if (this.mouseOverRecord !== undefined) {
       if (this.mouseOverRecord.rowId !== record.rowId) {
         // Mouse is over a different row, fire mouseleave on the previous record.
-        mlTableService.rowMouseleave.changed(this.mouseOverRecord);
+        mlTableService.rowMouseleave$.next({ record: this.mouseOverRecord });
 
         // fire mouseenter on the new record.
-        mlTableService.rowMouseenter.changed(record);
+        mlTableService.rowMouseenter$.next({ record });
       }
     } else {
       // Mouse is now over a row, fire mouseenter on the record.
-      mlTableService.rowMouseenter.changed(record);
+      mlTableService.rowMouseenter$.next({ record });
     }
 
     this.mouseOverRecord = record;
@@ -133,7 +133,7 @@ class AnomaliesTable extends Component {
 
   onMouseLeaveRow = () => {
     if (this.mouseOverRecord !== undefined) {
-      mlTableService.rowMouseleave.changed(this.mouseOverRecord);
+      mlTableService.rowMouseleave$.next({ record: this.mouseOverRecord });
       this.mouseOverRecord = undefined;
     }
   };

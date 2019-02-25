@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -570,7 +570,7 @@ module
       // any jitters in the chart caused by previously loading the model mid job.
         $scope.chartData.model = [];
         reloadModelChart()
-          .catch()
+          .catch(() => {})
           .then(() => {
             $scope.chartData.percentComplete = 100;
             $scope.$broadcast('render-results');

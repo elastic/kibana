@@ -15,12 +15,17 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { apmReindexScript, isLegacyApmIndex } from '../apm';
-import apmMappings from '../apm/mapping.json';
-import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
+import {
+  generateNewIndexName,
+  getReindexWarnings,
+  sourceNameForIndex,
+  transformFlatSettings,
+} from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
+const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
+const WATCHER_INDICES = ['.watches', '.triggered-watches'];
 
 export interface ReindexService {
   /**
@@ -93,8 +98,7 @@ export interface ReindexService {
 export const reindexServiceFactory = (
   callCluster: CallCluster,
   xpackInfo: XPackInfo,
-  actions: ReindexActions,
-  apmIndexPatterns: string[] = []
+  actions: ReindexActions
 ): ReindexService => {
   // ------ Utility functions
 
@@ -282,13 +286,12 @@ export const reindexServiceFactory = (
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
-    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
 
     const createIndex = await callCluster('indices.create', {
       index: newIndexName,
       body: {
         settings,
-        mappings: legacyApmIndex ? apmMappings : mappings,
+        mappings,
       },
     });
 
@@ -308,28 +311,13 @@ export const reindexServiceFactory = (
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
 
-    const reindexBody = {
-      source: { index: indexName },
-      dest: { index: reindexOp.attributes.newIndexName },
-    } as any;
-
-    const flatSettings = await actions.getFlatSettings(indexName);
-    if (!flatSettings) {
-      throw Boom.notFound(`Index ${indexName} does not exist.`);
-    }
-
-    const legacyApmIndex = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
-    if (legacyApmIndex) {
-      reindexBody.script = {
-        lang: 'painless',
-        source: apmReindexScript,
-      };
-    }
-
     const startReindex = (await callCluster('reindex', {
       refresh: true,
       waitForCompletion: false,
-      body: reindexBody,
+      body: {
+        source: { index: indexName },
+        dest: { index: reindexOp.attributes.newIndexName },
+      },
     })) as any;
 
     return actions.updateReindexOp(reindexOp, {
@@ -461,13 +449,13 @@ export const reindexServiceFactory = (
         return true;
       }
 
-      const index = parseIndexName(indexName);
-      const names = [indexName, index.newIndexName];
+      const names = [indexName, generateNewIndexName(indexName)];
+      const sourceName = sourceNameForIndex(indexName);
 
       // if we have re-indexed this in the past, there will be an
       // underlying alias we will also need to update.
-      if (index.cleanIndexName !== indexName) {
-        names.push(index.cleanIndexName);
+      if (sourceName !== indexName) {
+        names.push(sourceName);
       }
 
       // Otherwise, query for required privileges for this index.
@@ -507,7 +495,7 @@ export const reindexServiceFactory = (
       if (!flatSettings) {
         return null;
       } else {
-        return getReindexWarnings(flatSettings, apmIndexPatterns);
+        return getReindexWarnings(flatSettings);
       }
     },
 
@@ -666,8 +654,12 @@ export const reindexServiceFactory = (
   };
 };
 
-const isMlIndex = (indexName: string) =>
-  indexName.startsWith('.ml-state') || indexName.startsWith('.ml-anomalies');
+export const isMlIndex = (indexName: string) => {
+  const sourceName = sourceNameForIndex(indexName);
+  return ML_INDICES.indexOf(sourceName) >= 0;
+};
 
-const isWatcherIndex = (indexName: string) =>
-  indexName.startsWith('.watches') || indexName.startsWith('.triggered-watches');
+export const isWatcherIndex = (indexName: string) => {
+  const sourceName = sourceNameForIndex(indexName);
+  return WATCHER_INDICES.indexOf(sourceName) >= 0;
+};

@@ -22,14 +22,13 @@ import { getVisualizeLoader } from 'ui/visualize/loader';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
-import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
+import {
+  EmbeddableInstanceConfiguration,
+  OnEmbeddableStateChanged,
+} from 'ui/embeddable/embeddable_factory';
 import { getIndexPattern } from 'ui/embeddable/get_index_pattern';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-
-export interface VisualizeEmbeddableInstanceConfiguration {
-  id: string;
-}
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   private savedVisualizations: SavedVisualizations;
@@ -54,7 +53,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
    * @return {Promise.<{ metadata, onContainerStateChanged, render, destroy }>}
    */
   public async create(
-    panelMetadata: VisualizeEmbeddableInstanceConfiguration,
+    panelMetadata: EmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const visId = panelMetadata.id;
@@ -69,12 +68,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     }
 
     const indexPattern = await getIndexPattern(savedObject);
+    const indexPatterns = indexPattern ? [indexPattern] : [];
     return new VisualizeEmbeddable({
       onEmbeddableStateChanged,
       savedVisualization: savedObject,
       editUrl,
       loader,
-      indexPattern,
+      indexPatterns,
     });
   }
 }
