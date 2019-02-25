@@ -266,11 +266,6 @@ export function screenshotsObservableFactory(server) {
             browser => openUrl(browser, url, conditionalHeaders),
             browser => browser
           ),
-          tap(() => logger.debug('injecting custom css')),
-          mergeMap(
-            browser => injectCustomCss(browser, layout),
-            browser => browser
-          ),
           tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
           mergeMap(
             browser => Rx.race(
@@ -293,6 +288,11 @@ export function screenshotsObservableFactory(server) {
           mergeMap(
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
+          ),
+          tap(() => logger.debug('injecting custom css')),
+          mergeMap(
+            ({ browser }) => injectCustomCss(browser, layout),
+            ({ browser }) => ({ browser })
           ),
           tap(() => logger.debug('positioning elements')),
           mergeMap(
