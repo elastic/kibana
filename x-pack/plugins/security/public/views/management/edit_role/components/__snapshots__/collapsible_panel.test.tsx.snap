@@ -51,9 +51,7 @@ exports[`it renders without blowing up 1`] = `
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <p>
     child
   </p>

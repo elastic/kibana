@@ -15,7 +15,6 @@ exports[`StatementListHeading component renders title and icon type 1`] = `
     grow={false}
   >
     <EuiIcon
-      size="m"
       type="logstashInput"
     />
   </EuiFlexItem>

@@ -22,7 +22,6 @@ exports[`BytesFormatEditor should render normally 1`] = `
           />
            
           <EuiIcon
-            size="m"
             type="link"
           />
         </EuiLink>

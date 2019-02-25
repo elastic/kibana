@@ -30,9 +30,7 @@ exports[`renders DashboardCloneModal 1`] = `
           />
         </p>
       </EuiText>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiFieldText
         autoFocus={true}
         compressed={false}

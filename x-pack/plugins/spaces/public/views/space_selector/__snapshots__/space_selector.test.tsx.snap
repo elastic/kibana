@@ -72,9 +72,7 @@ exports[`it renders without crashing 1`] = `
         onSpaceSelect={[Function]}
         spaces={Array []}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiText
         color="subdued"
         grow={true}

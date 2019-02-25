@@ -553,7 +553,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               >
                 <EuiIcon
                   className="euiStepNumber__icon"
-                  size="m"
                   title="complete"
                   type="check"
                 >

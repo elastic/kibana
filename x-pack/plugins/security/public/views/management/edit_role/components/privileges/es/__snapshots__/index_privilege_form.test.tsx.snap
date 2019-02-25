@@ -2,10 +2,7 @@
 
 exports[`it renders without crashing 1`] = `
 <Fragment>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGroup
     alignItems="stretch"
     className="index-privilege-form"
@@ -187,9 +184,7 @@ exports[`it renders without crashing 1`] = `
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiFlexGroup
         alignItems="stretch"
         component="div"

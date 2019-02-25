@@ -28,9 +28,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
         iconType="logstashInput"
         onShowVertexDetails={[Function]}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <Queue
         queue={
           Object {
@@ -41,9 +39,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
           }
         }
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <StatementSection
         detailVertex={null}
         elements={
@@ -59,9 +55,7 @@ exports[`PipelineViewer component passes expected props 1`] = `
         iconType="logstashFilter"
         onShowVertexDetails={[Function]}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <StatementSection
         detailVertex={null}
         elements={
@@ -114,9 +108,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
         iconType="logstashInput"
         onShowVertexDetails={[Function]}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <Queue
         queue={
           Object {
@@ -127,9 +119,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
           }
         }
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <StatementSection
         detailVertex={
           Object {
@@ -149,9 +139,7 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
         iconType="logstashFilter"
         onShowVertexDetails={[Function]}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <StatementSection
         detailVertex={
           Object {

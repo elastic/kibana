@@ -51,9 +51,7 @@ exports[`HistoryTabs should render correctly 1`] = `
       Three
     </EuiTab>
   </EuiTabs>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <Route
     key="/one"
     path="/one"

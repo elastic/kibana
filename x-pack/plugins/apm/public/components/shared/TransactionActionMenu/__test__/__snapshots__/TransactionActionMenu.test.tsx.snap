@@ -50,7 +50,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>
@@ -87,7 +86,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>
@@ -124,7 +122,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>
@@ -161,7 +158,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>
@@ -198,7 +194,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>
@@ -235,7 +230,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>
@@ -272,7 +266,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               grow={false}
             >
               <EuiIcon
-                size="m"
                 type="popout"
               />
             </EuiFlexItem>

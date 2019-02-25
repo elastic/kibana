@@ -65,9 +65,7 @@ exports[`it renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiDescribedFormGroup
     description={
       <p>
@@ -122,9 +120,7 @@ exports[`it renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -193,10 +189,7 @@ exports[`it renders without crashing 1`] = `
       }
     }
   />
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiButton
     color="primary"
     fill={false}

@@ -42,9 +42,7 @@ exports[`props exportedFieldsUrl 1`] = `
       text="this is a great tutorial about..."
     />
     <div>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiButton
         color="primary"
         fill={false}
