@@ -49,7 +49,7 @@ export default function ({ getPageObjects }) {
         // Select layer
         const vectorLayer = await PageObjects.maps.selectVectorLayer();
         // Confirm layer added
-        await PageObjects.common.sleep(1000);
+        await PageObjects.maps.waitForLayersToLoad();
         let vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
         expect(vectorLayerExists).to.be(true);
         // Click cancel
@@ -58,7 +58,7 @@ export default function ({ getPageObjects }) {
         panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
         expect(panelOpen).to.be(false);
         // Verify layer has been removed
-        await PageObjects.common.sleep(500);
+        await PageObjects.maps.waitForLayerDeleted(vectorLayer);
         vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
         expect(vectorLayerExists).to.be(false);
       });
@@ -72,7 +72,7 @@ export default function ({ getPageObjects }) {
       // Select layer
       const vectorLayer = await PageObjects.maps.selectVectorLayer();
       // Confirm layer added
-      await PageObjects.common.sleep(1000);
+      await PageObjects.maps.waitForLayersToLoad();
       let vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
       expect(vectorLayerExists).to.be(true);
       // Click save
@@ -81,7 +81,7 @@ export default function ({ getPageObjects }) {
       panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(false);
       // Verify layer has been removed
-      await PageObjects.common.sleep(500);
+      await PageObjects.maps.waitForLayerDeleted(vectorLayer);
       vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
       expect(vectorLayerExists).to.be(false);
     });

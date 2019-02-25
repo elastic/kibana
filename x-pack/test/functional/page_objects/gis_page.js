@@ -59,6 +59,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async waitForLayerDeleted(layerName) {
+      log.debug('Wait for layer deleted');
+      await retry.try(async () => {
+        await !this.doesLayerExist(layerName);
+      });
+    }
+
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
     async loadSavedMap(name) {
