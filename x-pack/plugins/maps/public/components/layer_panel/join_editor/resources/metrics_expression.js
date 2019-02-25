@@ -14,7 +14,7 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { MetricsEditor } from '../../../../shared/components/metrics_editor';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 export class MetricsExpression extends Component {
 
   state = {
@@ -36,7 +36,12 @@ export class MetricsExpression extends Component {
   _renderMetricsEditor = () => {
     if (!this.props.rightFields) {
       return (
-        <EuiFormErrorText>JOIN must be set</EuiFormErrorText>
+        <EuiFormErrorText>
+          <FormattedMessage
+            id="xpack.maps.layerPanel.metricsExpression.joinMustBeSet"
+            defaultMessage="JOIN must be set"
+          />
+        </EuiFormErrorText>
       );
     }
 
@@ -92,7 +97,12 @@ export class MetricsExpression extends Component {
         }
       >
         <div style={{ width: 400 }}>
-          <EuiPopoverTitle>Metrics</EuiPopoverTitle>
+          <EuiPopoverTitle>
+            <FormattedMessage
+              id="xpack.maps.layerPanel.metricsExpression.metrics"
+              defaultMessage="Metrics"
+            />
+          </EuiPopoverTitle>
           {this._renderMetricsEditor()}
         </div>
       </EuiPopover>
