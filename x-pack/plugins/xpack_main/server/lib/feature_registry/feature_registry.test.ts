@@ -119,7 +119,7 @@ describe('FeatureRegistry', () => {
           api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
-      } as any,
+      },
     };
 
     const featureRegistry = new FeatureRegistry();
