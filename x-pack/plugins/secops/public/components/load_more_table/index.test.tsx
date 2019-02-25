@@ -57,8 +57,7 @@ describe('Load More Table Component', () => {
       ).toBeTruthy();
     });
 
-    // tslint:disable-next-line:ban
-    test.only('it renders the over loading panel after data has been in the table ', () => {
+    test('it renders the over loading panel after data has been in the table ', () => {
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <LoadMoreTable
