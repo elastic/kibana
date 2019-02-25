@@ -14,7 +14,10 @@ export interface Props {
    * @default []
    */
   choices?: string[];
-  /** Optional value for the component */
+  /**
+   * Optional value for the component. If the value is not present in the
+   * choices collection, it will be discarded.
+   */
   value?: string;
   /** Function to invoke when the dropdown value is changed */
   onChange: (value: string) => void;
@@ -24,11 +27,6 @@ export interface Props {
 
 export const DropdownFilter: SFC<Props> = ({ value, onChange, commit, choices = [] }) => {
   choices = choices || [];
-
-  // Prepend the choices with the value provided if it isn't in the choices array.
-  if (value && !choices.includes(value)) {
-    choices = [value].concat(choices);
-  }
 
   let options = [{ value: '%%CANVAS_MATCH_ALL%%', text: '-- ANY --' }];
   options = options.concat(choices.map(choice => ({ value: choice, text: choice })));
