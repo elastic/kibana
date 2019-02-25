@@ -33,12 +33,15 @@ export default (gulp, { buildTarget }) => {
     // to be the same as the intermediateBuildDirectory defined on the package.json
     // As result of it, we need to move the transpiled js files for the correct folder
     // and in the end deleting the generated outDir from the intermediateBuildDirectory.
+    //
+    //# TODO: This might be able to go away with the upgrade to babel 7
     await moveFiles(
       gulp,
       resolve(buildRoot, 'x-pack/plugins/**/*'),
       resolve(buildRoot, 'plugins')
     );
     await del(resolve(buildRoot, 'x-pack'));
+    //#
 
     const log = new ToolingLog({
       level: 'info',
