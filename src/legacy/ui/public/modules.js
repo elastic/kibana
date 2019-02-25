@@ -108,7 +108,10 @@ export function get(moduleName, requires) {
 
     // ensure that it is required by linked modules
     _.each(links, function (app) {
-      if (!~app.requires.indexOf(moduleName)) app.requires.push(moduleName);
+      // tslint:disable-next-line:no-bitwise
+      if (!~app.requires.indexOf(moduleName)) {
+        app.requires.push(moduleName);
+      }
     });
   }
 
@@ -124,11 +127,15 @@ export function close(moduleName) {
   const module = existingModules[moduleName];
 
   // already closed
-  if (!module) return;
+  if (!module) {
+    return;
+  }
 
   // if the module is currently linked, unlink it
   const i = links.indexOf(module);
-  if (i > -1) links.splice(i, 1);
+  if (i > -1) {
+    links.splice(i, 1);
+  }
 
   // remove from linked modules list of required modules
   _.each(links, function (app) {
