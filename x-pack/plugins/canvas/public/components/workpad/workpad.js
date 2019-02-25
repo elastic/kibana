@@ -10,7 +10,6 @@ import { Shortcuts } from 'react-shortcuts';
 import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
-import { setDocTitle } from '../../lib/doc_title';
 
 export class Workpad extends React.PureComponent {
   static propTypes = {
@@ -22,7 +21,9 @@ export class Workpad extends React.PureComponent {
     pages: PropTypes.array.isRequired,
     totalElementCount: PropTypes.number.isRequired,
     isFullscreen: PropTypes.bool.isRequired,
-    workpad: PropTypes.object.isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    workpadCss: PropTypes.string,
     undoHistory: PropTypes.func.isRequired,
     redoHistory: PropTypes.func.isRequired,
     nextPage: PropTypes.func.isRequired,
@@ -69,20 +70,20 @@ export class Workpad extends React.PureComponent {
   };
 
   render() {
+    console.log('Workpad render');
     const {
       selectedPageNumber,
       getAnimation,
       onTransitionEnd,
       pages,
       totalElementCount,
-      workpad,
+      width,
+      height,
+      workpadCss,
       grid,
       isFullscreen,
     } = this.props;
 
-    setDocTitle(workpad.name);
-
-    const { height, width } = workpad;
     const bufferStyle = {
       height: isFullscreen ? height : height + 32,
       width: isFullscreen ? width : width + 32,
@@ -112,7 +113,7 @@ export class Workpad extends React.PureComponent {
 
               // NOTE: the data-shared-* attributes here are used for reporting
               return Style.it(
-                workpad.css,
+                workpadCss,
                 <div
                   className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
                   style={fsStyle}
