@@ -32,6 +32,16 @@ export class WorkpadHeader extends React.PureComponent {
     setShowElementModal: PropTypes.func,
   };
 
+  fullscreenButton = ({ toggleFullscreen }) => (
+    <EuiToolTip position="bottom" content="Enter fullscreen mode">
+      <EuiButtonIcon
+        iconType="fullScreen"
+        aria-label="View fullscreen"
+        onClick={toggleFullscreen}
+      />
+    </EuiToolTip>
+  );
+
   keyHandler = action => {
     if (action === 'EDITING') {
       this.props.toggleWriteable();
@@ -92,17 +102,7 @@ export class WorkpadHeader extends React.PureComponent {
                 <RefreshControl />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <FullscreenControl>
-                  {({ toggleFullscreen }) => (
-                    <EuiToolTip position="bottom" content="Enter fullscreen mode">
-                      <EuiButtonIcon
-                        iconType="fullScreen"
-                        aria-label="View fullscreen"
-                        onClick={toggleFullscreen}
-                      />
-                    </EuiToolTip>
-                  )}
-                </FullscreenControl>
+                <FullscreenControl>{this.fullscreenButton}</FullscreenControl>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <WorkpadExport />
