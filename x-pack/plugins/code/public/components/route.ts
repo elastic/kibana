@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { Route as ReactRoute, RouteProps } from 'react-router';
+import { Route as ReactRoute, RouteProps } from 'react-router-dom';
 import { Match, routeChange } from '../actions';
 
 interface Props extends RouteProps {

@@ -78,6 +78,13 @@ interface State {
 }
 
 class CodeProjectTab extends React.PureComponent<Props, State> {
+  public static getDerivedStateFromProps(props: Props, state: State) {
+    if (state.showImportProjectModal && !props.importLoading) {
+      return { showImportProjectModal: false };
+    }
+    return null;
+  }
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -86,12 +93,6 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       repoURL: '',
       sortOption: SortOptionsValue.alphabetical_asc,
     };
-  }
-
-  public componentWillReceiveProps(nextProps: Props) {
-    if (this.props.importLoading && !nextProps.importLoading) {
-      this.closeModal();
-    }
   }
 
   public closeModal = () => {
