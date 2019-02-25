@@ -33,10 +33,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
 });
 
 export const WorkpadHeader = compose(
-  withState('showElementModal', 'setShowElementModal', false),
   connect(
     mapStateToProps,
     mapDispatchToProps,
     mergeProps
-  )
+  ),
+  withState('showElementModal', 'setShowElementModal', false)
 )(Component);
