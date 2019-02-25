@@ -71,7 +71,7 @@ export class Events extends React.PureComponent<Props, State> {
     return (
       <EuiFlexGroup data-test-subj="events" direction="column" gutterSize="none">
         {data.map(event => (
-          <EuiFlexItem data-test-subj="event" grow={true} key={event._id!}>
+          <EuiFlexItem data-test-subj="event" grow={true} key={event._id}>
             {getRowRenderer(event, rowRenderers).renderRow(
               event,
               <>
@@ -84,26 +84,26 @@ export class Events extends React.PureComponent<Props, State> {
                     >
                       <EuiFlexItem grow={false}>
                         <Actions
-                          associateNote={this.associateNote(event._id!, addNoteToEvent, onPinEvent)}
-                          expanded={!!this.state.expanded[event._id!]}
+                          associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
+                          expanded={!!this.state.expanded[event._id]}
                           data-test-subj="actions"
-                          eventId={event._id!}
+                          eventId={event._id}
                           eventIsPinned={eventIsPinned({
-                            eventId: event._id!,
+                            eventId: event._id,
                             pinnedEventIds,
                           })}
                           getNotesByIds={getNotesByIds}
-                          noteIds={eventIdToNoteIds[event._id!] || emptyNotes}
-                          onEventToggled={this.onToggleExpanded(event._id!)}
+                          noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+                          onEventToggled={this.onToggleExpanded(event._id)}
                           onPinClicked={getPinOnClick({
-                            allowUnpinning: !eventHasNotes(eventIdToNoteIds[event._id!]),
-                            eventId: event._id!,
+                            allowUnpinning: !eventHasNotes(eventIdToNoteIds[event._id]),
+                            eventId: event._id,
                             onPinEvent,
                             onUnPinEvent,
                             pinnedEventIds,
                           })}
-                          showNotes={!!this.state.showNotes[event._id!]}
-                          toggleShowNotes={this.onToggleShowNotes(event._id!)}
+                          showNotes={!!this.state.showNotes[event._id]}
+                          toggleShowNotes={this.onToggleShowNotes(event._id)}
                           updateNote={updateNote}
                         />
                       </EuiFlexItem>
@@ -116,13 +116,13 @@ export class Events extends React.PureComponent<Props, State> {
                           ecs={event}
                         />
                         <NoteCards
-                          associateNote={this.associateNote(event._id!, addNoteToEvent, onPinEvent)}
+                          associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
                           data-test-subj="note-cards"
                           getNewNoteId={getNewNoteId}
                           getNotesByIds={getNotesByIds}
-                          noteIds={eventIdToNoteIds[event._id!] || emptyNotes}
-                          showAddNote={!!this.state.showNotes[event._id!]}
-                          toggleShowAddNote={this.onToggleShowNotes(event._id!)}
+                          noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+                          showAddNote={!!this.state.showNotes[event._id]}
+                          toggleShowAddNote={this.onToggleShowNotes(event._id)}
                           updateNote={updateNote}
                           width="90%"
                         />
@@ -133,7 +133,7 @@ export class Events extends React.PureComponent<Props, State> {
                   <EuiFlexItem data-test-subj="event-details" grow={true}>
                     <ExpandableEvent
                       event={event}
-                      forceExpand={!!this.state.expanded[event._id!]}
+                      forceExpand={!!this.state.expanded[event._id]}
                       hideExpandButton={true}
                       stringifiedEvent={stringifyEvent(event)}
                       timelineId={id}

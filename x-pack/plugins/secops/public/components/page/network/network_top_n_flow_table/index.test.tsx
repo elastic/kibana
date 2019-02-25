@@ -12,7 +12,6 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { NetworkTopNFlowTable } from '.';
-import { NetworkTopNFlowType } from '../../../../graphql/types';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 import { mockData } from './mock';
@@ -40,7 +39,6 @@ describe('NetworkTopNFlow Table Component', () => {
             loadMore={loadMore}
             startDate={1546965070707}
             type={networkModel.NetworkType.page}
-            networkTopNFlowType={NetworkTopNFlowType.source}
           />
         </ReduxStoreProvider>
       );

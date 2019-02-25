@@ -72,34 +72,35 @@ export const formatAuthenticationData = (
   fields: ReadonlyArray<string>,
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
-): AuthenticationsEdges => {
-  const init: AuthenticationsEdges = {
-    node: {
-      failures: 0,
-      successes: 0,
-      _id: '',
-      user: {
-        name: '',
+): AuthenticationsEdges =>
+  fields.reduce<AuthenticationsEdges>(
+    (flattenedFields, fieldName) => {
+      if (hit.cursor) {
+        flattenedFields.cursor.value = hit.cursor;
+      }
+      flattenedFields.node = {
+        ...flattenedFields.node,
+        ...{
+          _id: hit._id,
+          user: { name: hit.user },
+          failures: hit.failures,
+          successes: hit.successes,
+        },
+      };
+      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
+    },
+    {
+      node: {
+        failures: 0,
+        successes: 0,
+        _id: '',
+        user: {
+          name: '',
+        },
       },
-    },
-    cursor: {
-      value: '',
-      tiebreaker: null,
-    },
-  };
-  return fields.reduce((flattenedFields, fieldName) => {
-    if (hit.cursor) {
-      flattenedFields.cursor.value = hit.cursor;
+      cursor: {
+        value: '',
+        tiebreaker: null,
+      },
     }
-    flattenedFields.node = {
-      ...flattenedFields.node,
-      ...{
-        _id: hit._id,
-        user: { name: hit.user },
-        failures: hit.failures,
-        successes: hit.successes,
-      },
-    };
-    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-  }, init);
-};
+  );

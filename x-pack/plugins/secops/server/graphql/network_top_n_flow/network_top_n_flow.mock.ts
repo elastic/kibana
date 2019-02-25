@@ -7,7 +7,7 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
-import { NetworkTopNFlowData } from '../types';
+import { NetworkDirectionEcs, NetworkTopNFlowData } from '../types';
 
 export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } = {
   NetworkTopNFlow: {
@@ -19,18 +19,17 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
         },
         node: {
           _id: '1.1.1.1',
-          event: {
-            duration: 10546999000000,
-          },
           network: {
             bytes: 1532853382,
             packets: 1025631,
+            direction: [NetworkDirectionEcs.inbound],
           },
           source: {
-            domain: 'test.1.net',
+            domain: ['test.1.net'],
             ip: '1.1.1.1',
+            count: 1,
           },
-          destination: { domain: 'Hello World', ip: 'Hello World' },
+          destination: { domain: ['Hello World'], ip: 'Hello World' },
         },
       },
       {
@@ -39,18 +38,17 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
         },
         node: {
           _id: '2.2.2.2',
-          event: {
-            duration: 6905047000000,
-          },
           network: {
             bytes: 4208518310,
             packets: 2811441,
+            direction: [NetworkDirectionEcs.inbound],
           },
           source: {
-            domain: 'test.2.net',
+            domain: ['test.2.net'],
             ip: '2.2.2.2',
+            count: 1,
           },
-          destination: { domain: 'Hello World', ip: 'Hello World' },
+          destination: { domain: ['Hello World'], ip: 'Hello World' },
         },
       },
     ],
@@ -152,6 +150,15 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                           kind: 'Field',
                           name: {
                             kind: 'Name',
+                            value: 'count',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
                             value: '__typename',
                           },
                           arguments: [],
@@ -193,30 +200,7 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                           kind: 'Field',
                           name: {
                             kind: 'Name',
-                            value: '__typename',
-                          },
-                          arguments: [],
-                          directives: [],
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    kind: 'Field',
-                    name: {
-                      kind: 'Name',
-                      value: 'event',
-                    },
-                    arguments: [],
-                    directives: [],
-                    selectionSet: {
-                      kind: 'SelectionSet',
-                      selections: [
-                        {
-                          kind: 'Field',
-                          name: {
-                            kind: 'Name',
-                            value: 'duration',
+                            value: 'count',
                           },
                           arguments: [],
                           directives: [],
@@ -258,6 +242,15 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                           name: {
                             kind: 'Name',
                             value: 'packets',
+                          },
+                          arguments: [],
+                          directives: [],
+                        },
+                        {
+                          kind: 'Field',
+                          name: {
+                            kind: 'Name',
+                            value: 'direction',
                           },
                           arguments: [],
                           directives: [],

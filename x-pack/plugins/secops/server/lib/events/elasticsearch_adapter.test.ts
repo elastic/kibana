@@ -53,8 +53,10 @@ describe('events elasticsearch_adapter', () => {
           },
         },
         event: {
+          action: 'event-action-1',
           module: 'event-module-1',
           type: 'event-type-1',
+          category: 'event-category-1',
         },
       },
       sort: ['123567890', '1234'],
@@ -110,7 +112,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            category: 'suricata-category-1',
+            category: 'event-category-1',
           },
         },
       };
@@ -156,8 +158,8 @@ describe('events elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats an event with a event type correctly', () => {
-      const fields: ReadonlyArray<string> = ['event.type'];
+    test('it formats an event with a event action correctly', () => {
+      const fields: ReadonlyArray<string> = ['event.action'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
       const expected: EcsEdges = {
         cursor: {
@@ -168,7 +170,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            type: 'event-type-1',
+            action: 'event-action-1',
           },
         },
       };
@@ -449,7 +451,7 @@ describe('events elasticsearch_adapter', () => {
     test('it formats a event data if fields are empty', () => {
       const fields: ReadonlyArray<string> = [];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: {} };
+      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: { _id: '' } };
 
       expect(data).toEqual(expected);
     });

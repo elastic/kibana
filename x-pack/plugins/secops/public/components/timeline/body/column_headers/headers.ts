@@ -35,9 +35,9 @@ export const defaultHeaders: ColumnHeader[] = [
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'event.type',
+    id: 'event.action',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: i18n.TYPE,
+    text: i18n.ACTION,
   },
   {
     columnHeaderType: 'not-filtered',

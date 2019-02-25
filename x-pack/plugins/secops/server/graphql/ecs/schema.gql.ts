@@ -13,6 +13,7 @@ export const ecsSchema = gql`
     id: Float
     module: String
     severity: Float
+    action: String
     type: String
   }
 
@@ -59,13 +60,13 @@ export const ecsSchema = gql`
   type SourceEcsFields {
     ip: String
     port: Float
-    domain: String
+    domain: [String!]
   }
 
   type DestinationEcsFields {
     ip: String
     port: Float
-    domain: String
+    domain: [String!]
   }
 
   type SuricataAlertData {
@@ -92,13 +93,22 @@ export const ecsSchema = gql`
     group: String
   }
 
+  enum NetworkDirectionEcs {
+    inbound
+    outbound
+    internal
+    external
+    unknown
+  }
+
   type NetworkEcsField {
     bytes: Float
     packets: Float
+    direction: [NetworkDirectionEcs!]
   }
 
   type ECS {
-    _id: String
+    _id: String!
     _index: String
     destination: DestinationEcsFields
     event: EventEcsFields

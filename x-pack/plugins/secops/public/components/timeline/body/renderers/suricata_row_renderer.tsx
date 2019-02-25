@@ -89,7 +89,7 @@ export const fieldExists = ({ data, fieldName }: { data: Ecs; fieldName: string 
 const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fieldName }) => {
   const itemDataProvider = {
     enabled: true,
-    id: escapeDataProviderId(`id-suricata-row-render-value-for-${fieldName}-${data._id!}`),
+    id: escapeDataProviderId(`id-suricata-row-render-value-for-${fieldName}-${data._id}`),
     name: `${fieldName}: ${getMappedEcsValue({
       data,
       fieldName,
@@ -113,7 +113,7 @@ const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fieldName
 
   return fieldExists({ data, fieldName }) ? (
     <DraggableWrapper
-      key={`suricata-row-render-value-for-${fieldName}-${data._id!}`}
+      key={`suricata-row-render-value-for-${fieldName}-${data._id}`}
       dataProvider={itemDataProvider}
       render={(dataProvider, _, snapshot) =>
         snapshot.isDragging ? (
@@ -147,7 +147,7 @@ export const suricataRowRenderer: RowRenderer = {
         {signature != null ? (
           <SuricataSignature>
             <EuiButton
-              key={data._id!}
+              key={data._id}
               fill
               size="s"
               href={createLinkWithSignature(signature)}

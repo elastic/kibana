@@ -125,7 +125,7 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
               and: [],
               enabled: true,
               excluded: false,
-              id: escapeDataProviderId(`hosts-table-${node._id!}-hostName-${hostName}`),
+              id: escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostName}`),
               name: hostName,
               kqlQuery: '',
               queryMatch: {

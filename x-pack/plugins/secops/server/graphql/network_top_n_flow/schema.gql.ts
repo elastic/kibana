@@ -7,31 +7,20 @@
 import gql from 'graphql-tag';
 
 export const networkTopNFlowSchema = gql`
-  type NetworkTopNFlowSource {
+  type TopNFlowItem {
+    count: Float
+    domain: [String!]
     ip: String
-    domain: String
-  }
-
-  type NetworkTopNFlowDestination {
-    ip: String
-    domain: String
-  }
-
-  type NetworkTopNFlowEvent {
-    duration: Float
-  }
-
-  type NetworkTopNFlowNetwork {
-    bytes: Float
-    packets: Float
   }
 
   type NetworkTopNFlowItem {
     _id: String
-    source: NetworkTopNFlowSource
-    destination: NetworkTopNFlowDestination
-    event: NetworkTopNFlowEvent
-    network: NetworkTopNFlowNetwork
+    timestamp: String
+    source: TopNFlowItem
+    destination: TopNFlowItem
+    client: TopNFlowItem
+    server: TopNFlowItem
+    network: NetworkEcsField
   }
 
   type NetworkTopNFlowEdges {
@@ -46,14 +35,22 @@ export const networkTopNFlowSchema = gql`
   }
 
   enum NetworkTopNFlowType {
-    source
+    client
     destination
+    server
+    source
+  }
+
+  enum NetworkTopNFlowDirection {
+    uniDirectional
+    biDirectional
   }
 
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     NetworkTopNFlow(
       id: String
+      direction: NetworkTopNFlowDirection!
       type: NetworkTopNFlowType!
       timerange: TimerangeInput!
       pagination: PaginationInput!

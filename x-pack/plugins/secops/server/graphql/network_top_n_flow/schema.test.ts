@@ -14,14 +14,15 @@ import { ecsSchema } from '../ecs';
 import { dateSchema } from '../scalar_date';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
-import { NetworkTopNFlowType } from '../types';
+import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../types';
 import { getNetworkTopNFlowQueryMock, mockNetworkTopNFlowData } from './network_top_n_flow.mock';
 import { networkTopNFlowSchema } from './schema.gql';
 
 const testCaseSource = {
-  id: 'Test case to query Authentications',
+  id: 'Test case to query Network Top N Flow',
   query: `
     query GetNetworkTopNFlowQuery(
+      $direction: NetworkTopNFlowDirection!
       $type: NetworkTopNFlowType!
       $timerange: TimerangeInput!
       $pagination: PaginationInput!
@@ -29,6 +30,7 @@ const testCaseSource = {
     ) {
       source(id: "default") {
         NetworkTopNFlow(
+          direction: $direction
           type: $type
           timerange: $timerange
           pagination: $pagination
@@ -41,17 +43,16 @@ const testCaseSource = {
               source {
                 ip
                 domain
+                count
               }
               destination {
                 ip
                 domain
               }
-              event {
-                duration
-              }
               network {
                 bytes
                 packets
+                direction
               }
             }
             cursor {
@@ -75,6 +76,7 @@ const testCaseSource = {
       from: 1546318799999,
     },
     type: NetworkTopNFlowType.source,
+    direction: NetworkTopNFlowDirection.uniDirectional,
     pagination: {
       limit: 2,
       cursor: null,

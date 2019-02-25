@@ -6,13 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOSTS = i18n.translate('xpack.secops.uncommonProcessTable.hosts', {
+export const HOSTS = i18n.translate('xpack.secops.uncommonProcessTable.hostsTitle', {
   defaultMessage: 'Hosts',
 });
 
-export const NUMBER_OF_HOSTS = i18n.translate('xpack.secops.uncommonProcessTable.numberOfHosts', {
-  defaultMessage: 'Number of Hosts',
-});
+export const NUMBER_OF_HOSTS = i18n.translate(
+  'xpack.secops.uncommonProcessTable.numberOfHostsTitle',
+  {
+    defaultMessage: 'Number of Hosts',
+  }
+);
 
 export const NUMBER_OF_INSTANCES = i18n.translate(
   'xpack.secops.uncommonProcessTable.numberOfInstances',
@@ -21,15 +24,15 @@ export const NUMBER_OF_INSTANCES = i18n.translate(
   }
 );
 
-export const LAST_COMMAND = i18n.translate('xpack.secops.uncommonProcessTable.lastCommand', {
+export const LAST_COMMAND = i18n.translate('xpack.secops.uncommonProcessTable.lastCommandTitle', {
   defaultMessage: 'Last Command',
 });
 
-export const LAST_USER = i18n.translate('xpack.secops.uncommonProcessTable.lastUser', {
+export const LAST_USER = i18n.translate('xpack.secops.uncommonProcessTable.lastUserTitle', {
   defaultMessage: 'Last User',
 });
 
-export const NAME = i18n.translate('xpack.secops.uncommonProcessTable.name', {
+export const NAME = i18n.translate('xpack.secops.uncommonProcessTable.nameTitle', {
   defaultMessage: 'Name',
 });
 

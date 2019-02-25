@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import { cloneDeep, omit, set } from 'lodash/fp';
+import { cloneDeep, set } from 'lodash/fp';
 import React from 'react';
 
 import { suricataColumnRenderer } from '.';
@@ -23,13 +23,13 @@ describe('suricata_column_renderer', () => {
   });
 
   test('should return isInstance of false if event is empty', () => {
-    const missingSource = omit('event', mockDatum);
-    expect(suricataColumnRenderer.isInstance('event.id', missingSource)).toBe(false);
+    delete mockDatum.event;
+    expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(false);
   });
 
   test('should return isInstance of false if event module is empty', () => {
-    const missingSource = omit('event.module', mockDatum);
-    expect(suricataColumnRenderer.isInstance('event.id', missingSource)).toBe(false);
+    delete mockDatum.event!.module;
+    expect(suricataColumnRenderer.isInstance('event.id', mockDatum)).toBe(false);
   });
 
   test('should return isInstance of false if event module does not equal suricata', () => {
@@ -72,11 +72,11 @@ describe('suricata_column_renderer', () => {
   });
 
   test('should return a value of the empty if no CVE is in the event and the event does not have an id', () => {
-    const missingSignature = omit('suricata.eve.alert.signature', mockDatum);
-    const missingEventIdAndSignature = omit('event.id', missingSignature);
+    delete mockDatum.suricata!.eve!.alert!.signature;
+    delete mockDatum.event!.id;
     const column = suricataColumnRenderer.renderColumn(
       'event.id',
-      missingEventIdAndSignature,
+      mockDatum,
       allFieldsInSchemaByName['event.id']
     );
     const wrapper = mount(<span>{column}</span>);

@@ -23,7 +23,7 @@ const Container = styled.div`
   right: -3px;
   min-width: 50px;
   max-width: 80px;
-  z-index: 2;
+  z-index: 9;
   height: 240px;
   max-height: 240px;
 `;
@@ -36,7 +36,7 @@ const BadgeButtonContainer = styled.div`
 
 export const Button = styled(EuiPanel)`
   display: flex;
-  z-index: 2;
+  z-index: 9;
   justify-content: center;
   text-align: center;
   border-top: 1px solid ${props => props.theme.eui.euiColorLightShade};
@@ -53,7 +53,7 @@ export const Button = styled(EuiPanel)`
 
 export const Text = styled(EuiText)`
   width: 12px;
-  z-index: 3;
+  z-index: 10;
   user-select: none;
 `;
 
@@ -62,7 +62,7 @@ export const Badge = styled(EuiBadge)`
   min-width: 25px;
   padding: 0px;
   transform: translateY(10px);
-  z-index: 3;
+  z-index: 10;
 `;
 interface FlyoutButtonProps {
   dataProviders: DataProvider[];
