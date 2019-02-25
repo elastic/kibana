@@ -31,13 +31,19 @@ import {
 } from '../../../utils/streams';
 import { SavedObject, SavedObjectsClient } from '../service';
 
+interface SavedObjectTypeAndId {
+  type: string;
+  id: string;
+}
+
 interface ImportRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
   payload: {
     file: Readable;
-    overwrite: boolean;
+    overwrite: boolean | SavedObjectTypeAndId[];
+    skip: SavedObjectTypeAndId[];
   };
 }
 
@@ -53,7 +59,23 @@ export const createImportRoute = (prereqs: any) => ({
     },
     validate: {
       payload: Joi.object({
-        overwrite: Joi.boolean().default(false),
+        overwrite: Joi.alternatives([
+          Joi.boolean(),
+          Joi.array().items(
+            Joi.object({
+              type: Joi.string().required(),
+              id: Joi.string().required(),
+            })
+          ),
+        ]).default(false),
+        skip: Joi.array()
+          .items(
+            Joi.object({
+              type: Joi.string().required(),
+              id: Joi.string().required(),
+            })
+          )
+          .default([]),
         file: Joi.object().required(),
       }),
     },
@@ -73,19 +95,50 @@ export const createImportRoute = (prereqs: any) => ({
       createLimitStream(request.server.config().get('savedObjects.maxImportExportSize')),
       createConcatStream([]),
     ])) as SavedObject[];
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
-      overwrite: request.payload.overwrite,
-    });
-    const failedObjects = bulkCreateResult.saved_objects.filter((obj: SavedObject) => !!obj.error);
-    if (failedObjects.length) {
-      const firstFailedObject = failedObjects[0];
-      const err = Boom.boomify(new Error(), firstFailedObject.error);
-      // Boom's method to add data to the error
-      err.output.payload.attributes = {
-        objects: failedObjects.map(obj => ({ id: obj.id, type: obj.type })),
-      };
-      throw err;
+
+    // Split objects between ones we'll overwrite and ones we won't
+    const [objectsToOverwrite, objectsToNotOverwrite] = objectsToImport.reduce(
+      ([overwrite, dontOverwrite], obj) => {
+        if (
+          request.payload.skip.some(skipObj => skipObj.type === obj.type && skipObj.id === obj.id)
+        ) {
+          return [overwrite, dontOverwrite];
+        }
+        if (
+          request.payload.overwrite === true ||
+          (Array.isArray(request.payload.overwrite) &&
+            request.payload.overwrite.some(
+              overwriteObj => overwriteObj.type === obj.type && overwriteObj.id === obj.id
+            ))
+        ) {
+          overwrite.push(obj);
+        } else {
+          dontOverwrite.push(obj);
+        }
+        return [overwrite, dontOverwrite];
+      },
+      [[] as SavedObject[], [] as SavedObject[]]
+    );
+
+    // Overwrite objects
+    if (objectsToOverwrite.length) {
+      await savedObjectsClient.bulkCreate(objectsToOverwrite, { overwrite: true });
     }
+
+    // Create other objects, detect collisions
+    if (objectsToNotOverwrite.length) {
+      const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
+      const failedObjects = bulkCreateResult.saved_objects.filter(obj => !!obj.error);
+      if (failedObjects.length) {
+        const err = Boom.conflict();
+        // Boom's method to add data to the error
+        err.output.payload.attributes = {
+          objects: failedObjects.map(obj => ({ id: obj.id, type: obj.type })),
+        };
+        throw err;
+      }
+    }
+
     return { success: true };
   },
 });
