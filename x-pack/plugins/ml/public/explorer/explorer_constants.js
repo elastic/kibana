@@ -17,6 +17,7 @@ export const DRAG_SELECT_ACTION = {
 };
 
 export const EXPLORER_ACTION = {
+  IDLE: 'idle',
   INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   LOAD_JOBS: 'loadJobs',
@@ -29,8 +30,6 @@ export const APP_STATE_ACTION = {
   SAVE_SELECTION: 'saveSelection',
   SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'saveSwimlaneViewByFieldName',
 };
-
-export const SWIMLANE_DEFAULT_LIMIT = 10;
 
 export const SWIMLANE_TYPE = {
   OVERALL: 'overall',

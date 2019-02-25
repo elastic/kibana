@@ -41,19 +41,15 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
       {groups.map((group, i) => {
         // library frame
         if (group.isLibraryFrame) {
-          const hasMultipleStackframes = group.stackframes.length > 1;
-          const hasLeadingSpacer = hasMultipleStackframes && i !== 0;
-          const hasTrailingSpacer =
-            hasMultipleStackframes && i !== groups.length - 1;
           return (
             <Fragment key={i}>
-              {hasLeadingSpacer && <EuiSpacer size="m" />}
+              <EuiSpacer size="m" />
               <LibraryStackFrames
-                initialVisiblity={!hasMultipleStackframes}
+                initialVisiblity={false}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
               />
-              {hasTrailingSpacer && <EuiSpacer size="m" />}
+              <EuiSpacer size="m" />
             </Fragment>
           );
         }
