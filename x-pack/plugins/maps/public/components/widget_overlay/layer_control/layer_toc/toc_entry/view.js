@@ -104,7 +104,6 @@ export class TOCEntry extends React.Component {
         fitToBounds={() => {
           fitToBounds(layer.getId());
         }}
-        
         zoom={zoom}
         toggleVisible={() => {
           toggleVisible(layer.getId());
