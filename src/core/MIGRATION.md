@@ -561,6 +561,8 @@ import { ReplaySubject } from 'rxjs';
 
 export type FooPluginStart = ReturnType<Plugin['start']>;
 
+export type FooFn = () => void;
+
 export class Plugin {
   public constructor() {
     this.fooRegistry = [];
@@ -576,22 +578,24 @@ export class Plugin {
       }
     };
   }
+
+  public stop() {
+    this.foos$.complete();
+  }
 }
 
 
 // foo/hacks/shim_plugin.ts
-import { startContracts } from 'ui/legacy/plugins';
 import { Plugin } from '../plugin';
 
 const plugin = new Plugin();
 const start = plugin.start();
-startContracts.set('foo', start);
 
 require('ui/registry/foo').__temporaryShim__(start);
 
 
 // ui/public/registry/foo.ts
-import { FooPluginStart } from '../../../core_plugins/foo/public/plugin';
+import { FooPluginStart, FooFn } from '../../../core_plugins/foo/public/plugin';
 
 // legacy plugin order is not guaranteed, so we store a buffer of registry
 // calls and then empty them out when the owning plugin shims this module with
@@ -608,7 +612,7 @@ export function __temporaryShim__(fooStart: FooPluginStart) {
 }
 
 export const FooRegistryProvider = {
-  register(fn) {
+  register(fn: FooFn) {
     if (start) {
       start.registerFoo(fn);
     } else {
@@ -629,7 +633,7 @@ export const FooRegistryProvider = {
 import 'uiExports/foo'; // to continue support for non-updated plugins
 
 import { FooRegistryProvider } from 'ui/registry/foo';
-FooRegistryProvider.getAll().do(foos => {
+FooRegistryProvider.getAll().subscribe(foos => {
   // do something with array foos
 });
 ```
