@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the create dashboard button', async () => {
-        const createNewButtonExists = await testSubjects.exists('newDashboardLink');
+        const createNewButtonExists = await testSubjects.exists('newItemButton');
         expect(createNewButtonExists).to.be(false);
       });
 
