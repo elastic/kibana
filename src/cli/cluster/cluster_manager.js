@@ -163,6 +163,7 @@ export default class ClusterManager {
     const { fromRoot } = require('../../legacy/utils');
 
     const watchPaths = [
+      fromRoot('src/core'),
       fromRoot('src/legacy/core_plugins'),
       fromRoot('src/legacy/server'),
       fromRoot('src/legacy/ui'),
@@ -170,7 +171,6 @@ export default class ClusterManager {
       fromRoot('x-pack/common'),
       fromRoot('x-pack/plugins'),
       fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));

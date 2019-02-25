@@ -32,6 +32,26 @@ export const filebeatLogstashRules = [
     ],
   },
   {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'logstash.slowlog'],
+    },
+    format: [
+      {
+        constant: '[Logstash][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'logstash.slowlog',
+      },
+    ],
+  },
+  {
     // pre-ECS
     when: {
       exists: ['logstash.slowlog.message'],
