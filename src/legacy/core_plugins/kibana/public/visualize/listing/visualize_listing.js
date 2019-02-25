@@ -58,7 +58,7 @@ export function VisualizeListingController($injector, createNewVis) {
   };
 
   this.getEditUrl = ({ id }) => {
-    return `#${createVisualizeEditUrl(id)}`;
+    return chrome.addBasePath(`#${createVisualizeEditUrl(id)}`);
   };
 
   this.closeNewVisModal = () => {

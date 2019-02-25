@@ -62,8 +62,8 @@ class TableListViewUi extends React.Component {
       showLimitError: false,
       filter: this.props.initialFilter,
       selectedIds: [],
-      sortField: '',
-      sortDirection: '',
+      sortField: 'title',
+      sortDirection: 'asc',
       page: 0,
       perPage: 20,
     };
