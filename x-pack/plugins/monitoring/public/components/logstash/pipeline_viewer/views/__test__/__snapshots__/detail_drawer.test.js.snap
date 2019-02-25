@@ -27,7 +27,6 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -63,9 +62,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
   ...
 }
         </EuiCodeBlock>
-        <EuiSpacer
-          size="l"
-        />
+        <EuiSpacer />
       </div>
       <p>
         <FormattedMessage
@@ -106,7 +103,6 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -147,9 +143,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   id =&gt; "mySpecialId"
 }
         </EuiCodeBlock>
-        <EuiSpacer
-          size="l"
-        />
+        <EuiSpacer />
       </div>
       <EuiTable
         responsive={true}
@@ -421,7 +415,6 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -731,7 +724,6 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem
@@ -800,7 +792,6 @@ exports[`DetailDrawer component shows vertex title 1`] = `
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
       <EuiFlexItem

@@ -23,9 +23,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
         />
       </p>
     </EuiCallOut>
-    <EuiSpacer
-      size="l"
-    />
+    <EuiSpacer />
     <WarningCheckbox
       checkedIds={
         Object {
