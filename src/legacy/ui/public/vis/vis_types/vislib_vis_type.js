@@ -23,7 +23,7 @@ import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import './vislib_vis_legend';
+import { CUSTOM_LEGEND_VIS_TYPES } from './vislib_vis_legend';
 import { BaseVisTypeProvider } from './base_vis_type';
 import VislibProvider from '../../vislib';
 import { VisFiltersProvider } from '../vis_filters';
@@ -93,11 +93,13 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
 
         // refreshing the legend after the chart is rendered.
-        // this is necessary because some visualizations (heatmap and gauge)
+        // this is necessary because some visualizations
         // provide data necessary for the legend only after a render cycle.
-        if (this.vis.params.addLegend) {
+        if (this.vis.params.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)) {
           this.$scope.refreshLegend++;
           this.$scope.$digest();
+
+          this.vis.vislibVis.render(esResponse, this.vis.getUiState());
         }
       });
     }

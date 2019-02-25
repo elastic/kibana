@@ -25,6 +25,8 @@ import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 
+export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
+
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
@@ -92,7 +94,7 @@ uiModules.get('kibana')
         };
 
         $scope.canFilter = function (legendData) {
-          if (['heatmap', 'gauge'].includes($scope.vis.vislibVis.visConfigArgs.type)) {
+          if (CUSTOM_LEGEND_VIS_TYPES.includes($scope.vis.vislibVis.visConfigArgs.type)) {
             return false;
           }
           const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
@@ -140,14 +142,12 @@ uiModules.get('kibana')
             $scope.open = $scope.vis.params.addLegend;
           }
 
-          if (['heatmap', 'gauge'].includes(vislibVis.visConfigArgs.type)) {
+          if (CUSTOM_LEGEND_VIS_TYPES.includes(vislibVis.visConfigArgs.type)) {
             const labels = vislibVis.getLegendLabels();
             if (labels) {
               $scope.labels = _.map(labels, label => {
                 return { label: label };
               });
-            } else {
-              $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading…' }) }];
             }
           } else {
             $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
