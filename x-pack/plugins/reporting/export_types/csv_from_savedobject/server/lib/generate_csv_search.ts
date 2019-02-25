@@ -13,7 +13,11 @@ interface CsvResult {
   rows: string[] | null;
 }
 
-export async function generateCsvSearch(req: Request, server: KbnServer, searchPanel: SearchSource): Promise<CsvResult> {
+export async function generateCsvSearch(
+  req: Request,
+  server: KbnServer,
+  searchPanel: SearchSource
+): Promise<CsvResult> {
   return {
     type: 'CSV from Saved Search',
     rows: ['one,two,three', 'a,b,c'],

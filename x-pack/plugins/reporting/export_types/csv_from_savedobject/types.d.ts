@@ -10,17 +10,28 @@ export interface SavedObjectServiceError {
   message?: string;
 }
 
-export interface SavedObject {
-  attributes: {
-    title: string;
-    visState: string;
-    uiStateJSON: string;
-    description: string;
-    version: 1;
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: string;
-    };
+export interface SavedObjectAttributes {
+  title: string;
+  visState: string;
+  uiStateJSON: string;
+  description: string;
+  columns?: string[];
+  version: number;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON?: string;
+    searchSource?: any;
   };
+}
+
+export interface SavedObjectReferences {
+  name: string; // should be kibanaSavedObjectMeta.searchSourceJSON.index
+  type: string; // should be index-pattern
+  id: string;
+}
+
+export interface SavedObject {
+  attributes: SavedObjectAttributes;
+  references?: SavedObjectReferences[];
 }
 
 export interface TsvbPanel {
@@ -62,16 +73,12 @@ export interface TsvbTableData {
 
 export interface VisState {
   aggs: any[]; // unused?
-  params?: TsvbPanel | TimelionPanel;
+  params?: TsvbPanel;
   title: string;
   type: string; // e.g 'metrics' for TSVB
 }
 
 export interface SearchSource {
-  piranhas: number;
-}
-
-export interface TimelionPanel {
-  expression: string;
-  interval: string;
+  attributes: SavedObjectAttributes;
+  references: SavedObjectReferences[];
 }
