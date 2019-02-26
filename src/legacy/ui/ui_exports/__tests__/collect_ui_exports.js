@@ -129,7 +129,8 @@ describe('plugin discovery', () => {
         () => collectUiExports(invalidSpecs),
       ).to.throwError((err) => {
         expect(err).to.be.a(Error);
-        expect(err).to.have.property('message', `test2 defined migrations for types it doesn't own the mappings: test-type`);
+        expect(err).to.have.property('message', 'Migrations and mappings must be defined together in the uiExports of a single plugin. ' +
+          'test2 defines migrations for types test-type but does not define their mappings.');
       });
     });
   });

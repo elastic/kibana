@@ -39,12 +39,13 @@ const pluginId = (pluginSpec) => pluginSpec.id ? pluginSpec.id() : pluginSpec.ge
 export const migrations = wrap(
   alias('savedObjectMigrations'),
   (next) => (acc, spec, type, pluginSpec) => {
-    const mappings = pluginSpec._uiExports.mappings || {};
+    const mappings = pluginSpec.getExportSpecs().mappings || {};
     const invalidMigrationTypes = Object.keys(spec)
       .filter(type => !mappings[type]);
     if (invalidMigrationTypes.length) {
       throw new Error(
-        `${pluginId(pluginSpec)} defined migrations for types it doesn't own the mappings: ${invalidMigrationTypes.join(', ')}`
+        'Migrations and mappings must be defined together in the uiExports of a single plugin. ' +
+        `${pluginId(pluginSpec)} defines migrations for types ${invalidMigrationTypes.join(', ')} but does not define their mappings.`
       );
     }
     return next(acc, spec, type, pluginSpec);
