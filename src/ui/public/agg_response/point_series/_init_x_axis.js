@@ -25,7 +25,7 @@ export function initXAxis(chart, table) {
   chart.xAxisLabel = x.title;
   chart.xAxisOrderedValues = x.i === -1
     ? [x.params.defaultValue]
-    : uniq(table.rows.map(r => r[x.i]));
+    : uniq(table.rows.map(r => r[x.i].value));
 
   if (!x.aggConfig || !x.aggConfig.type.ordered) return;
 

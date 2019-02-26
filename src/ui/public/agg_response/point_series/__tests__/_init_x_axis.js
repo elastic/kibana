@@ -53,11 +53,11 @@ describe('initXAxis', function () {
     table = {
       columns: [{ id: '0' }],
       rows: [
-        { '0': 'hello' },
-        { '0': 'world' },
-        { '0': 'foo' },
-        { '0': 'bar' },
-        { '0': 'baz' },
+        [{ value: 'hello' }],
+        [{ value: 'world' }],
+        [{ value: 'foo' }],
+        [{ value: 'bar' }],
+        [{ value: 'baz' }],
       ],
     };
   });
@@ -104,14 +104,14 @@ describe('initXAxis', function () {
       table = {
         columns: [{ id: '0' }],
         rows: [
-          { '0': 'hello' },
-          { '0': 'world' },
-          { '0': 'hello' },
-          { '0': 'world' },
-          { '0': 'foo' },
-          { '0': 'bar' },
-          { '0': 'baz' },
-          { '0': 'hello' },
+          [{ value: 'hello' }],
+          [{ value: 'world' }],
+          [{ value: 'hello' }],
+          [{ value: 'world' }],
+          [{ value: 'foo' }],
+          [{ value: 'bar' }],
+          [{ value: 'baz' }],
+          [{ value: 'hello' }],
         ],
       };
       initXAxis(chart, table);
