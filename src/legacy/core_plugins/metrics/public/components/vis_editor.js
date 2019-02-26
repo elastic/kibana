@@ -72,7 +72,7 @@ class VisEditor extends Component {
   }
 
   setDefaultIndexPattern = async () => {
-    if (this.props.vis.params.index_pattern === '') {
+    if (!this.props.vis.params.index_pattern) {
       // set the default index pattern if none is defined.
       const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
