@@ -79,8 +79,10 @@ export class CodeFileTree extends React.Component<Props> {
   };
 
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
-    const className =
-      this.props.match.params.path === node.path ? 'code-active-file-node' : 'code-file-node';
+    const className = classes(
+      'eui-displayInlineBlock',
+      this.props.match.params.path === node.path ? 'code-active-file-node' : 'code-file-node'
+    );
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
       this.toggleTree(path, node.type === FileTreeItemType.Directory);
