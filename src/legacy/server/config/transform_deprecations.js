@@ -57,7 +57,7 @@ const loggingTimezone = (settings, log) => {
 
 const configPath = (settings, log) => {
   if (_.has(process, 'env.CONFIG_PATH')) {
-    log(`Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF`);
+    log(`Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`);
   }
 };
 
