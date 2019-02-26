@@ -20,35 +20,24 @@ export function SearchItemsProvider(Private, $route, config) {
   function createSearchItems() {
     let indexPattern = $route.current.locals.indexPattern;
 
-    let query = {
-      query: '*',
-      language: 'lucene'
-    };
-
     let combinedQuery = {
       bool: {
         must: [{
-          query_string: {
-            analyze_wildcard: true,
-            query: '*'
-          }
+          match_all: {}
         }]
       }
     };
-
-    let filters = [];
 
     const savedSearch = $route.current.locals.savedSearch;
     if (indexPattern.id === undefined && savedSearch.id !== undefined) {
       const searchSource = savedSearch.searchSource;
       indexPattern = searchSource.getField('index');
 
-      query = searchSource.getField('query');
+      const query = searchSource.getField('query');
       const fs = searchSource.getField('filter');
 
-      if (fs.length) {
-        filters = fs;
-      }
+      const filters = (fs.length) ? fs : [];
+
       const esQueryConfigs = getEsQueryConfig(config);
       combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
@@ -56,8 +45,6 @@ export function SearchItemsProvider(Private, $route, config) {
     return {
       indexPattern,
       savedSearch,
-      filters,
-      query,
       combinedQuery
     };
   }
