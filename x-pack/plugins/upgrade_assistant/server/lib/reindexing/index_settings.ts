@@ -22,6 +22,7 @@ export interface ParsedIndexName {
 
 // the security indices must be whitelisted and follow the pattern set forth in v5
 const SECURITY_MATCHER = new RegExp(`^.security(-[67])?$`);
+const SECURITY_SOURCE = '.security';
 
 // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
 // avoid conflicts with index patterns/templates/etc
@@ -55,7 +56,7 @@ export const sourceNameForIndex = (indexName: string): string => {
 
   // special handling for security index
   if (indexName.match(SECURITY_MATCHER)) {
-    return '.security';
+    return SECURITY_SOURCE;
   }
 
   const cleanBaseName = baseName.replace(REINDEXED_MATCHER, '');
@@ -73,8 +74,8 @@ export const generateNewIndexName = (indexName: string): string => {
   const sourceName = sourceNameForIndex(indexName);
   const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
 
-  if (sourceName === '.security') {
-    return `.security-${NEXT_MAJOR_VERSION}`;
+  if (sourceName === SECURITY_SOURCE) {
+    return `${SECURITY_SOURCE}-${NEXT_MAJOR_VERSION}`;
   }
 
   return indexName.startsWith('.')
