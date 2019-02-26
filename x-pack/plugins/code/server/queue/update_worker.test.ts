@@ -53,6 +53,7 @@ test('Execute update job', async () => {
       uri: 'mockrepo',
     },
     options: {},
+    timestamp: 0,
   });
 
   expect(newInstanceSpy.calledOnce).toBeTruthy();

@@ -80,6 +80,7 @@ test('Execute delete job.', async () => {
       uri: 'github.com/elastic/kibana',
     },
     options: {},
+    timestamp: 0,
   });
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
@@ -115,6 +116,7 @@ test('On delete job enqueued.', async () => {
       uri: 'github.com/elastic/kibana',
     },
     options: {},
+    timestamp: 0,
   });
 
   expect(indexSpy.calledOnce).toBeTruthy();
@@ -144,6 +146,7 @@ test('On delete job completed.', async () => {
         uri: 'github.com/elastic/kibana',
       },
       options: {},
+      timestamp: 0,
     },
     {
       uri: 'github.com/elastic/kibana',

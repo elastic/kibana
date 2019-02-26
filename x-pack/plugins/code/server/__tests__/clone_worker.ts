@@ -124,6 +124,7 @@ describe('clone_worker_tests', () => {
         url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
       },
       options: {},
+      timestamp: 0,
     });
 
     assert.ok(newInstanceSpy.calledOnce);
@@ -160,6 +161,7 @@ describe('clone_worker_tests', () => {
           url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
         },
         options: {},
+        timestamp: 0,
       },
       {
         uri: 'github.com/Microsoft/TypeScript-Node-Starter',
@@ -197,6 +199,7 @@ describe('clone_worker_tests', () => {
         url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
       },
       options: {},
+      timestamp: 0,
     });
 
     // Expect EsClient index to be called to update the progress to 0.
