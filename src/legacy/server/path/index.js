@@ -23,7 +23,7 @@ import { find } from 'lodash';
 import { fromRoot } from '../../utils';
 
 const CONFIG_PATHS = [
-  join(process.env.KIBANA_PATH_CONF, 'kibana.yml'),
+  process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'),
   process.env.CONFIG_PATH, //deprecated
   fromRoot('config/kibana.yml'),
   '/etc/kibana/kibana.yml'
