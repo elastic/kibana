@@ -75,8 +75,8 @@ export class DeletePhase extends PureComponent {
                 }
                 id={`${PHASE_DELETE}-${PHASE_ENABLED}`}
                 checked={phaseData[PHASE_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_ENABLED, e.target.checked);
+                onChange={e => {
+                  setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="deletePhaseContent"
               />

@@ -135,8 +135,8 @@ class HotPhaseUi extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_SIZE_STORED,
                           e.target.value
                         );
@@ -159,8 +159,8 @@ class HotPhaseUi extends PureComponent {
                         defaultMessage: 'Maximum index size units'
                       })}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
                           e.target.value
                         );
@@ -195,8 +195,8 @@ class HotPhaseUi extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_DOCUMENTS]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_DOCUMENTS,
                           e.target.value
                         );
@@ -222,8 +222,8 @@ class HotPhaseUi extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
-                      onChange={async e => {
-                        await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
+                      onChange={e => {
+                        setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
                       }}
                       min={1}
                     />
@@ -243,8 +243,8 @@ class HotPhaseUi extends PureComponent {
                         defaultMessage: 'Maximum age units'
                       })}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_AGE_UNITS,
                           e.target.value
                         );
