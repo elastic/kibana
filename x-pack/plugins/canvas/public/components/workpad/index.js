@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { compose, withState, withProps, getContext, withHandlers } from 'recompose';
+import { pure, compose, withState, withProps, getContext, withHandlers } from 'recompose';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
@@ -40,6 +40,7 @@ const mapDispatchToProps = {
 };
 
 export const Workpad = compose(
+  pure,
   getContext({
     router: PropTypes.object,
   }),
