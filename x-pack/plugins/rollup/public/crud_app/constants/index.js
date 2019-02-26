@@ -7,4 +7,4 @@
 export {
   CRUD_APP_BASE_PATH,
 } from './paths';
-export { ILLEGAL_CHARACTERS } from './validation';
+export { ILLEGAL_CHARACTERS_ROLLUP_INDEX } from './validation';
