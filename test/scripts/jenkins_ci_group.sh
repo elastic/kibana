@@ -25,5 +25,9 @@ export TEST_ES_FROM=${TEST_ES_FROM:-source}
 "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
 
 if [ "$CI_GROUP" == "1" ]; then
+  # build kbn_tp_sample_panel_action
+  cd test/plugin_functional/plugins/kbn_tp_sample_panel_action;
+  yarn build;
+  cd -;
   "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease --from=source;
 fi
