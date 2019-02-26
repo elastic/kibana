@@ -19,9 +19,5 @@ export const getColumnRenderer = (
   const renderer = columnRenderers.find(columnRenderer =>
     columnRenderer.isInstance(columnName, ecs)
   );
-  if (renderer == null) {
-    return unhandledColumnRenderer();
-  } else {
-    return renderer;
-  }
+  return renderer != null ? renderer : unhandledColumnRenderer();
 };

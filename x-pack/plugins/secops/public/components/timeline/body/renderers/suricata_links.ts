@@ -22,7 +22,7 @@ export const getBeginningTokens = (signature: string): string[] => {
   const signatureSplit = signature.split(' ');
   return signatureSplit.reduce<string[]>((accum, curr, index) => {
     if (
-      (accum.length === index && curr === curr.toUpperCase()) ||
+      (accum.length === index && curr === curr.toUpperCase() && curr !== '') ||
       specialTokenRules.includes(curr)
     ) {
       accum = accum.concat(curr);

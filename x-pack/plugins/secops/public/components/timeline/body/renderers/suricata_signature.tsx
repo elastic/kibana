@@ -28,7 +28,7 @@ const TokensFlexItem = styled(EuiFlexItem)`
 
 export const GoogleLink = pure(({ link, value }: { link: string; value: string }) => (
   <TokensFlexItem grow={false}>
-    <EuiLink href={`https://www.google.com/search?q=${link}`} target="_blank">
+    <EuiLink href={`https://www.google.com/search?q=${encodeURI(link)}`} target="_blank">
       {value}
     </EuiLink>
   </TokensFlexItem>
@@ -48,35 +48,33 @@ export const Tokens = pure(({ tokens }: { tokens: string[] }) => (
 
 export const DraggableSignatureId = pure(
   ({ id, signatureId }: { id: string; signatureId: string }) => (
-    <>
-      <SignatureFlexItem grow={false}>
-        <DraggableWrapper
-          dataProvider={{
-            and: [],
-            enabled: true,
-            id: escapeDataProviderId(`suricata-${id}-sig-${signatureId}`),
-            name: signatureId,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: 'suricata.eve.alert.signature_id',
-              value: signatureId,
-            },
-          }}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              <Badge iconType="number" color="hollow">
-                {signatureId}
-              </Badge>
-            )
-          }
-        />
-      </SignatureFlexItem>
-    </>
+    <SignatureFlexItem grow={false}>
+      <DraggableWrapper
+        dataProvider={{
+          and: [],
+          enabled: true,
+          id: escapeDataProviderId(`suricata-${id}-sig-${signatureId}`),
+          name: signatureId,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: 'suricata.eve.alert.signature_id',
+            value: signatureId,
+          },
+        }}
+        render={(dataProvider, _, snapshot) =>
+          snapshot.isDragging ? (
+            <DragEffects>
+              <Provider dataProvider={dataProvider} />
+            </DragEffects>
+          ) : (
+            <Badge iconType="number" color="hollow">
+              {signatureId}
+            </Badge>
+          )
+        }
+      />
+    </SignatureFlexItem>
   )
 );
 
