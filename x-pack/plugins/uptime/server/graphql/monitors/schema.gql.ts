@@ -79,6 +79,7 @@ export const monitorsSchema = gql`
     latestMessage: String
     monitorId: String
     type: String!
+    monitorType: String
     count: Int
     statusCode: String
     timestamp: String

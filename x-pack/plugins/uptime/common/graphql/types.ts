@@ -367,6 +367,8 @@ export interface ErrorListItem {
 
   type: string;
 
+  monitorType?: string | null;
+
   count?: number | null;
 
   statusCode?: string | null;

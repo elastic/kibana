@@ -145,6 +145,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       rest_total_hits_as_int: true,
       body: {
         query,
+        size: 0,
         aggs: {
           timeseries: {
             auto_date_histogram: {
@@ -172,6 +173,35 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
                   precision_threshold: 20000,
                 },
               },
+              icmp: {
+                filter: {
+                  term: {
+                    'monitor.type': 'icmp',
+                  },
+                },
+                aggs: {
+                  down: {
+                    filter: {
+                      term: {
+                        'monitor.status': 'down',
+                      },
+                    },
+                    aggs: {
+                      icmp_down_count: {
+                        cardinality: {
+                          field: 'monitor.ip',
+                        },
+                      },
+                    },
+                  },
+                  bucket_icmp_total: {
+                    cardinality: {
+                      field: 'monitor.ip',
+                      precision_threshold: 20000,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -184,10 +214,12 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       const key: number = get(bucket, 'key');
       const total: number = get(bucket, 'bucket_total.value');
       const downCount: number = get(bucket, 'down.bucket_count.value');
+      const icmpTotal: number = get(bucket, 'icmp.bucket_icmp_total.value', 0);
+      const icmpDownCount: number = get(bucket, 'icmp.down.icmp_down_count.value', 0);
       return {
         key,
-        downCount,
-        upCount: total - downCount,
+        downCount: downCount + icmpDownCount,
+        upCount: total + icmpTotal - downCount - icmpDownCount,
         y: 1,
       };
     });

@@ -190,6 +190,43 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
+    const icmpParams = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query,
+        size: 0,
+        aggs: {
+          icmp: {
+            filter: {
+              term: {
+                'monitor.type': 'icmp',
+              },
+            },
+            aggs: {
+              ids: {
+                terms: {
+                  field: 'monitor.ip',
+                  size: 10000,
+                },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      sort: [
+                        {
+                          '@timestamp': { order: 'desc' },
+                        },
+                      ],
+                      size: 1,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
     let up: number = 0;
     let down: number = 0;
     let searchAfter: any = null;
@@ -217,6 +254,30 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       searchAfter = get(queryResult, 'aggregations.ids.after_key');
     } while (searchAfter);
 
+    let icmpSearchAfter: any = null;
+    do {
+      if (icmpSearchAfter) {
+        set(params, 'body.aggs.ids.composite.after', icmpSearchAfter);
+      }
+
+      const queryResult = await this.database.search(request, icmpParams);
+      const idBuckets = get(queryResult, 'aggregations.icmp.ids.buckets', []);
+
+      idBuckets.forEach(bucket => {
+        // We only get the latest doc
+        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
+        if (!statusFilter || (statusFilter && statusFilter === status)) {
+          if (status === 'up') {
+            up++;
+          } else {
+            down++;
+          }
+        }
+      });
+
+      icmpSearchAfter = get(queryResult, 'aggregations.ids.after_key');
+    } while (icmpSearchAfter);
+
     return { up, down, total: up + down };
   }
 
@@ -234,6 +295,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
+        size: 0,
         query,
         aggs: {
           hosts: {
@@ -270,7 +332,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               histogram: {
                 auto_date_histogram: {
                   field: '@timestamp',
-                  buckets: 50,
+                  buckets: 25,
                 },
                 aggs: {
                   status: {
@@ -286,11 +348,74 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    const res = await this.database.search(request, params);
-    const aggBuckets: any[] = get(res, 'aggregations.hosts.buckets', []);
-    const result = aggBuckets
-      .map(({ key, histogram: { buckets }, latest: { hits: { hits } } }) => {
-        if (statusFilter && hits[0]._source.monitor.status !== statusFilter) {
+
+    const icmpParams = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 0,
+        query,
+        aggs: {
+          icmp: {
+            filter: {
+              term: {
+                'monitor.type': 'icmp',
+              },
+            },
+            aggs: {
+              hosts: {
+                terms: {
+                  field: 'monitor.ip',
+                  size: 100,
+                },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      sort: [
+                        {
+                          '@timestamp': {
+                            order: 'desc',
+                          },
+                        },
+                      ],
+                      size: 1,
+                    },
+                  },
+                  histogram: {
+                    auto_date_histogram: {
+                      field: '@timestamp',
+                      buckets: 25,
+                    },
+                    aggs: {
+                      status: {
+                        terms: {
+                          field: 'monitor.status',
+                          size: 10,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const [httpTcpResult, icmpResult] = await Promise.all([
+      this.database.search(request, params),
+      this.database.search(request, icmpParams),
+    ]);
+    const res: any = httpTcpResult.aggregations.hosts.buckets.concat(
+      icmpResult.aggregations.icmp.hosts.buckets
+    );
+    const result = res
+      .map((resultBucket: any) => {
+        const key = get(resultBucket, 'key');
+        const buckets: any[] = get(resultBucket, 'histogram.buckets', []);
+        const hits: any[] = get(resultBucket, 'latest.hits.hits', []);
+        const latestStatus: string | undefined = get(hits, '[0]._source.monitor.status', undefined);
+        if (statusFilter && latestStatus !== statusFilter) {
           return undefined;
         }
         const upSeries: any[] = [];
@@ -317,7 +442,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           downSeries,
         };
       })
-      .filter(f => f !== undefined);
+      .filter((f: any) => f !== undefined);
     return result;
   }
 
@@ -436,11 +561,51 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    const {
-      aggregations: {
-        error_type: { buckets },
+    const icmpParams = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query,
+        size: 0,
+        aggs: {
+          icmp: {
+            filter: {
+              term: {
+                'monitor.type': 'icmp',
+              },
+            },
+          },
+          error_type: {
+            terms: {
+              field: 'error.type',
+            },
+            aggs: {
+              by_id: {
+                terms: {
+                  field: 'monitor.ip',
+                },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      sort: [{ '@timestamp': { order: 'desc' } }],
+                      size: 1,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-    } = await this.database.search(request, params);
+    };
+
+    const [httpTcpResult, icmpResult] = await Promise.all([
+      this.database.search(request, params),
+      this.database.search(request, icmpParams),
+    ]);
+
+    const httpTcpBuckets: any[] = get(httpTcpResult, 'aggregations.error_type.buckets', []);
+    const icmpBuckets: any[] = get(icmpResult, 'aggregations.error_type.buckets', []);
+    const buckets = httpTcpBuckets.concat(icmpBuckets);
 
     const errorsList: ErrorListItem[] = [];
     buckets.forEach(
@@ -458,10 +623,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
           const timestamp = get(source, '@timestamp', null);
+          const monitorType = get(source, 'monitor.type', null);
           errorsList.push({
             latestMessage: errorMessage,
             monitorId,
             type: errorType,
+            monitorType,
             count,
             statusCode,
             timestamp,
