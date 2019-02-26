@@ -1102,7 +1102,7 @@ export namespace GetKpiNetworkQuery {
 
     id: string;
 
-    KpiNetwork?: KpiNetwork | null;
+    KpiNetwork: KpiNetwork;
   };
 
   export type KpiNetwork = {
