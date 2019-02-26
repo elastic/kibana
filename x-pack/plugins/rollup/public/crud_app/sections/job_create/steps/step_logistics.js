@@ -25,12 +25,12 @@ import {
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl, cronUrl } from '../../../services';
 import { CronEditor, StepError } from './components';
+import { ILLEGAL_CHARACTERS } from '../../../constants';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexIllegalCharacters = ILLEGAL_CHARACTERS.ROLLUP_INDEX.join(' ');
 
 export class StepLogisticsUi extends Component {
   static propTypes = {

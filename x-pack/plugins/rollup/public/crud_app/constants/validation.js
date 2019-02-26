@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  CRUD_APP_BASE_PATH,
-} from './paths';
-export { ILLEGAL_CHARACTERS } from './validation';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
+
+export const ILLEGAL_CHARACTERS = {
+  ROLLUP_INDEX: [ ...INDEX_ILLEGAL_CHARACTERS_VISIBLE, '*' ]
+};
