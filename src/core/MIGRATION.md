@@ -269,7 +269,7 @@ If your plugin is registering some sort of global behavior that technically cros
 
 If your plugin is using angular only in the context of its own application, then removing angular is likely not a definitive requirement for moving to the new platform. In this case, you will need to refactor your plugin to initialize an entirely standalone angular module that serves your application. You will need to create custom wrappers for any of the angular services you previously relied on (including those through `Private()`) inside your own plugin.
 
-At this poing, keeping angular around is not the recommended approach. If you feel you must do it, then talk to the platform team directly and we can help you craft a plan.
+At this point, keeping angular around is not the recommended approach. If you feel you must do it, then talk to the platform team directly and we can help you craft a plan.
 
 We recommend that _all_ plugins treat moving away from angular as a top-most priority if they haven't done so already.
 
