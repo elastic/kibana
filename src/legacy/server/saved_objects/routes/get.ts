@@ -20,14 +20,16 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClient } from '../';
-import { Prerequisites, TypeAndIdPair } from './types';
+import { Prerequisites } from './types';
 
-// @ts-ignore
 interface GetRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
-  params: TypeAndIdPair;
+  params: {
+    type: string;
+    id: string;
+  };
 }
 
 export const createGetRoute = (prereqs: Prerequisites) => ({

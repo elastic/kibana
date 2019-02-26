@@ -26,11 +26,6 @@ export interface SavedObjectReference {
   id: string;
 }
 
-export interface TypeAndIdPair {
-  type: string;
-  id: string;
-}
-
 export interface Prerequisites {
   getSavedObjectsClient: {
     assign: string;

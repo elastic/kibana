@@ -20,14 +20,16 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClient } from '../';
-import { Prerequisites, TypeAndIdPair } from './types';
+import { Prerequisites } from './types';
 
-// @ts-ignore
 interface BulkGetRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
-  payload: TypeAndIdPair[];
+  payload: Array<{
+    type: string;
+    id: string;
+  }>;
 }
 
 export const createBulkGetRoute = (prereqs: Prerequisites) => ({

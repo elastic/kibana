@@ -31,8 +31,6 @@ interface SavedObject {
   references: SavedObjectReference[];
 }
 
-export type BulkCreateRequestPayload = SavedObject[];
-
 // @ts-ignore
 interface BulkCreateRequest extends Hapi.Request {
   pre: {
@@ -41,7 +39,7 @@ interface BulkCreateRequest extends Hapi.Request {
   query: {
     overwrite: boolean;
   };
-  payload: BulkCreateRequestPayload;
+  payload: SavedObject[];
 }
 
 export const createBulkCreateRoute = (prereqs: Prerequisites) => ({

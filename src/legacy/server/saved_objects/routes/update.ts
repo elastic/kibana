@@ -20,14 +20,16 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClient } from '../';
-import { Prerequisites, SavedObjectReference, TypeAndIdPair } from './types';
+import { Prerequisites, SavedObjectReference } from './types';
 
-// @ts-ignore
 interface UpdateRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
-  params: TypeAndIdPair;
+  params: {
+    type: string;
+    id: string;
+  };
   payload: {
     attributes: { [key: string]: any };
     version?: string;

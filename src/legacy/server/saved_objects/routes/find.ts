@@ -21,7 +21,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClient } from '../';
 import { keysToCamelCaseShallow } from '../../../utils/case_conversion';
-import { Prerequisites, TypeAndIdPair } from './types';
+import { Prerequisites } from './types';
 
 // @ts-ignore
 interface FindRequest extends Hapi.Request {
@@ -36,7 +36,10 @@ interface FindRequest extends Hapi.Request {
     default_search_operator: string;
     search_fields?: string[];
     sort_field?: string[];
-    has_reference?: TypeAndIdPair[];
+    has_reference?: Array<{
+      type: string;
+      id: string;
+    }>;
     fields?: string[];
   };
 }
