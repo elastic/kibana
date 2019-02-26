@@ -69,7 +69,9 @@ export class RepositoryService {
           fetchOpts: {
             callbacks: {
               transferProgress: {
-                throttle: 50, // Make the progress update less frequent.
+                // Make the progress update less frequent to avoid too many
+                // concurrently update of git status in elasticsearch.
+                throttle: 1000,
                 callback: (stats: any) => {
                   const progress =
                     (100 * (stats.receivedObjects() + stats.indexedObjects())) /
