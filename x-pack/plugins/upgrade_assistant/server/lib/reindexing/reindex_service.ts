@@ -511,7 +511,7 @@ export const reindexServiceFactory = (
     },
 
     async detectReindexWarnings(indexName: string) {
-      const flatSettings = await actions.getFlatSettings(indexName);
+      const flatSettings = await actions.getFlatSettingsWithTypeName(indexName);
       if (!flatSettings) {
         return null;
       } else {
