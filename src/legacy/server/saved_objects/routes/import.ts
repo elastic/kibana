@@ -22,7 +22,6 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { Readable } from 'stream';
 import { Transform } from 'stream';
-
 import {
   createConcatStream,
   createMapStream,
@@ -30,8 +29,9 @@ import {
   createSplitStream,
 } from '../../../utils/streams';
 import { SavedObject, SavedObjectsClient } from '../service';
+import { Prerequisites } from './types';
 
-interface SavedObjectTypeAndId {
+interface TypeAndIdPair {
   type: string;
   id: string;
 }
@@ -42,18 +42,17 @@ interface ImportRequest extends Hapi.Request {
   };
   payload: {
     file: Readable;
-    overwrite: boolean | SavedObjectTypeAndId[];
-    skip: SavedObjectTypeAndId[];
+    overwrite: boolean | TypeAndIdPair[];
+    skip: TypeAndIdPair[];
   };
 }
 
-export const createImportRoute = (prereqs: any) => ({
+export const createImportRoute = (prereqs: Prerequisites) => ({
   path: '/api/saved_objects/_import',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     payload: {
-      // TODO: set maxBytes?
       output: 'stream',
       allow: 'multipart/form-data',
     },
