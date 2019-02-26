@@ -289,6 +289,8 @@ export function screenshotsObservableFactory(server) {
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
+          // Waiting till _after_ elements have rendered before injecting our CSS
+          // allows for them to be displayed properly in many cases
           tap(() => logger.debug('injecting custom css')),
           mergeMap(
             ({ browser }) => injectCustomCss(browser, layout),
