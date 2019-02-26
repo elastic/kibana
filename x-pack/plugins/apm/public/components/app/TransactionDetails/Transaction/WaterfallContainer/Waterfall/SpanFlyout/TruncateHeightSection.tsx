@@ -8,7 +8,6 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { idx } from 'x-pack/plugins/apm/common/idx';
 import { px, units } from '../../../../../../../style/variables';
 // @ts-ignore
 import { Ellipsis } from '../../../../../../shared/Icons';
@@ -18,42 +17,56 @@ const ToggleButtonContainer = styled.div`
   user-select: none;
 `;
 
-const ContentContainer = styled.div`
-  overflow: hidden;
-`;
-
 interface Props {
   previewHeight: string;
 }
 
-export const TruncateHeightSection: React.SFC<Props> = props => {
+export const TruncateHeightSection: React.SFC<Props> = ({
+  children,
+  previewHeight
+}) => {
   const [isTruncated, setIsTruncated] = useState(true);
-  const [showToggle, setShowToggle] = useState(false);
+  const [isContentClipping, setIsContentClipping] = useState(true);
+  const [forcedStaticHeight, setForcedStaticHeight] = useState(true);
   const contentContainerEl = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const scrollHeight =
-      idx(contentContainerEl, _ => _.current.scrollHeight) || 0;
-    const clientHeight =
-      idx(contentContainerEl, _ => _.current.clientHeight) || 0;
-    if (scrollHeight > clientHeight) {
-      setShowToggle(true);
-    } else {
-      setIsTruncated(false);
-    }
-  });
+  useEffect(
+    () => {
+      setForcedStaticHeight(true);
+    },
+    [children, previewHeight]
+  );
+
+  useEffect(
+    () => {
+      if (forcedStaticHeight) {
+        if (contentContainerEl.current) {
+          setIsContentClipping(
+            contentContainerEl.current.scrollHeight >
+              contentContainerEl.current.clientHeight
+          );
+        }
+        setForcedStaticHeight(false);
+      }
+    },
+    [forcedStaticHeight]
+  );
 
   return (
     <Fragment>
-      <ContentContainer
-        innerRef={contentContainerEl}
+      <div
+        ref={contentContainerEl}
         style={{
-          height: isTruncated ? props.previewHeight : 'auto'
+          overflow: 'hidden',
+          height:
+            forcedStaticHeight || (isContentClipping && isTruncated)
+              ? previewHeight
+              : 'auto'
         }}
       >
-        {props.children}
-      </ContentContainer>
-      {showToggle ? (
+        {children}
+      </div>
+      {isContentClipping ? (
         <ToggleButtonContainer>
           <EuiLink
             onClick={() => {
