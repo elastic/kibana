@@ -145,6 +145,16 @@ const handleRepoCloneStatusPolling = createRepoStatusPollingHandler(
     }
   },
   function*(status: any, repoUri: RepositoryUri) {
+    if (
+      // Repository has been deleted during the clone
+      (!status.gitStatus && !status.indexStatus && !status.deleteStatus) ||
+      // Repository is in delete during the clone
+      status.deleteStatus
+    ) {
+      // Stop polling git progress
+      return false;
+    }
+
     if (status.gitStatus) {
       const { progress, cloneProgress } = status.gitStatus;
       yield put(
@@ -180,6 +190,16 @@ const handleRepoIndexStatusPolling = createRepoStatusPollingHandler(
     }
   },
   function*(status: any, repoUri: RepositoryUri) {
+    if (
+      // Repository has been deleted during the index
+      (!status.gitStatus && !status.indexStatus && !status.deleteStatus) ||
+      // Repository is in delete during the index
+      status.deleteStatus
+    ) {
+      // Stop polling index progress
+      return false;
+    }
+
     if (status.indexStatus) {
       yield put(
         updateIndexProgress({
@@ -222,6 +242,7 @@ const handleRepoDeleteStatusPolling = createRepoStatusPollingHandler(
           repoUri,
         })
       );
+      return false;
     }
 
     if (status.deleteStatus) {
