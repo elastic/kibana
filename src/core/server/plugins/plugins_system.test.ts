@@ -27,7 +27,7 @@ jest.mock('./plugin_context', () => ({
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { ElasticsearchServiceStartContract } from '../elasticsearch';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { logger } from '../logging/__mocks__';
 import { Plugin, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
@@ -60,7 +60,7 @@ let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-let startDeps: { elasticsearch: ElasticsearchServiceStartContract };
+let startDeps: { elasticsearch: ElasticsearchServiceStart };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
   startDeps = { elasticsearch: { legacy: {} } as any };
@@ -81,10 +81,10 @@ afterEach(() => {
 });
 
 test('can be started even without plugins', async () => {
-  const pluginsContracts = await pluginsSystem.startPlugins(startDeps);
+  const pluginsStart = await pluginsSystem.startPlugins(startDeps);
 
-  expect(pluginsContracts).toBeInstanceOf(Map);
-  expect(pluginsContracts.size).toBe(0);
+  expect(pluginsStart).toBeInstanceOf(Map);
+  expect(pluginsStart.size).toBe(0);
 });
 
 test('`startPlugins` throws plugin has missing required dependency', async () => {

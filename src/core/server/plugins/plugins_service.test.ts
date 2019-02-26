@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ElasticsearchServiceStartContract } from '../elasticsearch';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
@@ -44,7 +44,7 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-let startDeps: { elasticsearch: ElasticsearchServiceStartContract };
+let startDeps: { elasticsearch: ElasticsearchServiceStart };
 beforeEach(() => {
   mockPackage.raw = {
     branch: 'feature-v1',
@@ -288,12 +288,12 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     plugin$: from([firstPlugin, secondPlugin]),
   });
 
-  const pluginContracts = new Map();
-  mockPluginSystem.startPlugins.mockResolvedValue(pluginContracts);
+  const pluginsStart = new Map();
+  mockPluginSystem.startPlugins.mockResolvedValue(pluginsStart);
 
-  const startContract = await pluginsService.start(startDeps);
+  const start = await pluginsService.start(startDeps);
 
-  expect(startContract).toBe(pluginContracts);
+  expect(start).toBe(pluginsStart);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);

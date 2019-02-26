@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { ElasticsearchServiceStartContract } from '../elasticsearch';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { logger } from '../logging/__mocks__';
 import { Plugin, PluginManifest } from './plugin';
 import { createPluginInitializerContext, createPluginStartContext } from './plugin_context';
@@ -57,7 +57,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-let startDeps: { elasticsearch: ElasticsearchServiceStartContract };
+let startDeps: { elasticsearch: ElasticsearchServiceStart };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
   startDeps = { elasticsearch: { adminClient$: {}, dataClient$: {} } as any };

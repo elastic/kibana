@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
-import { ElasticsearchServiceStartContract } from '../elasticsearch';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { Plugin, PluginName } from './plugin';
@@ -28,15 +28,15 @@ import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export type PluginsServiceStartContract = Map<PluginName, unknown>;
+export type PluginsServiceStart = Map<PluginName, unknown>;
 
 /** @internal */
 export interface PluginsServiceStartDeps {
-  elasticsearch: ElasticsearchServiceStartContract;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceStartContract> {
+export class PluginsService implements CoreService<PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 

@@ -31,7 +31,7 @@ interface CoreClusterClients {
   dataClient: ClusterClient;
 }
 
-export interface ElasticsearchServiceStartContract {
+export interface ElasticsearchServiceStart {
   // Required for the BWC with the legacy Kibana only.
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
@@ -43,7 +43,7 @@ export interface ElasticsearchServiceStartContract {
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<ElasticsearchServiceStartContract> {
+export class ElasticsearchService implements CoreService<ElasticsearchServiceStart> {
   private readonly log: Logger;
   private subscription?: Subscription;
 
@@ -51,7 +51,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
     this.log = coreContext.logger.get('elasticsearch-service');
   }
 
-  public async start(): Promise<ElasticsearchServiceStartContract> {
+  public async start(): Promise<ElasticsearchServiceStart> {
     this.log.debug('Starting elasticsearch service');
 
     const clients$ = this.coreContext.configService

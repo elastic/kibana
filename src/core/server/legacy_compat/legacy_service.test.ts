@@ -30,9 +30,9 @@ import MockClusterManager from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { ElasticsearchServiceStartContract } from '../elasticsearch';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { logger } from '../logging/__mocks__';
-import { PluginsServiceStartContract } from '../plugins/plugins_service';
+import { PluginsServiceStart } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -43,9 +43,9 @@ let configService: jest.Mocked<ConfigService>;
 let env: Env;
 let config$: BehaviorSubject<Config>;
 let startDeps: {
-  elasticsearch: ElasticsearchServiceStartContract;
+  elasticsearch: ElasticsearchServiceStart;
   http: any;
-  plugins: PluginsServiceStartContract;
+  plugins: PluginsServiceStart;
 };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());

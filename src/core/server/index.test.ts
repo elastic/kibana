@@ -64,14 +64,14 @@ afterEach(() => {
 });
 
 test('starts services on "start"', async () => {
-  const mockHttpServiceStartContract = { something: true };
-  mockHttpService.start.mockResolvedValue(mockHttpServiceStartContract);
+  const mockHttpServiceStart = { something: true };
+  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
 
-  const mockElasticsearchServiceStartContract = { adminClient$: {} };
-  mockElasticsearchService.start.mockResolvedValue(mockElasticsearchServiceStartContract);
+  const mockElasticsearchServiceStart = { adminClient$: {} };
+  mockElasticsearchService.start.mockResolvedValue(mockElasticsearchServiceStart);
 
-  const mockPluginsServiceStartContract = new Map([['some-plugin', 'some-value']]);
-  mockPluginsService.start.mockResolvedValue(mockPluginsServiceStartContract);
+  const mockPluginsServiceStart = new Map([['some-plugin', 'some-value']]);
+  mockPluginsService.start.mockReturnValue(Promise.resolve(mockPluginsServiceStart));
 
   const server = new Server(mockConfigService as any, logger, env);
 
@@ -87,14 +87,14 @@ test('starts services on "start"', async () => {
 
   expect(mockPluginsService.start).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.start).toHaveBeenCalledWith({
-    elasticsearch: mockElasticsearchServiceStartContract,
+    elasticsearch: mockElasticsearchServiceStart,
   });
 
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledWith({
-    elasticsearch: mockElasticsearchServiceStartContract,
-    http: mockHttpServiceStartContract,
-    plugins: mockPluginsServiceStartContract,
+    elasticsearch: mockElasticsearchServiceStart,
+    http: mockHttpServiceStart,
+    plugins: mockPluginsServiceStart,
   });
 });
 
@@ -137,8 +137,8 @@ test('does not start http service if process is dev cluster master', async () =>
 });
 
 test('stops services on "stop"', async () => {
-  const mockHttpServiceStartContract = { something: true };
-  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStartContract));
+  const mockHttpServiceStart = { something: true };
+  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
 
   const server = new Server(mockConfigService as any, logger, env);
 
