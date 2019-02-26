@@ -76,8 +76,7 @@ export class EditorComponent extends React.Component<IProps> {
       this.revealPosition(this.props.revealPosition);
     }
     const { file } = this.props;
-    const currentFileContent = this.props.file.content;
-    if (file.content && file.content !== currentFileContent) {
+    if (file.content && prevProps.file.content !== file.content) {
       const { uri, path, revision } = file.payload;
       this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
         if (this.props.revealPosition) {
@@ -85,16 +84,18 @@ export class EditorComponent extends React.Component<IProps> {
         }
       });
     }
-    if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
-      this.loadBlame(this.props.blames);
-      this.monaco!.editor!.updateOptions({ lineHeight: 38 });
-    } else if (!this.props.showBlame) {
-      this.destroyBlameWidgets();
-      this.monaco!.editor!.updateOptions({ lineHeight: 24 });
-    }
-    if (prevProps.blames !== this.props.blames && this.props.showBlame) {
-      this.loadBlame(this.props.blames);
-      this.monaco!.editor!.updateOptions({ lineHeight: 38 });
+    if (this.monaco && this.monaco.editor) {
+      if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {
+        this.loadBlame(this.props.blames);
+        this.monaco.editor.updateOptions({ lineHeight: 38 });
+      } else if (!this.props.showBlame) {
+        this.destroyBlameWidgets();
+        this.monaco.editor.updateOptions({ lineHeight: 24 });
+      }
+      if (prevProps.blames !== this.props.blames && this.props.showBlame) {
+        this.loadBlame(this.props.blames);
+        this.monaco.editor.updateOptions({ lineHeight: 38 });
+      }
     }
   }
 
