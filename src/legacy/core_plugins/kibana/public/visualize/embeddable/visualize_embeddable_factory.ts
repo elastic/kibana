@@ -26,9 +26,9 @@ import {
   EmbeddableInstanceConfiguration,
   OnEmbeddableStateChanged,
 } from 'ui/embeddable/embeddable_factory';
-import { getIndexPattern } from 'ui/embeddable/get_index_pattern';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+import { getIndexPattern } from './get_index_pattern';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   private savedVisualizations: SavedVisualizations;
