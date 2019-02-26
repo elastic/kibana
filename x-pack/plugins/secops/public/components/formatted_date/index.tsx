@@ -15,7 +15,7 @@ export const KibanaConfigContext = React.createContext<Partial<AppFrameworkAdapt
 export const PreferenceFormattedDate = pure<{ value: Date | string }>(({ value }) => (
   <KibanaConfigContext.Consumer>
     {(config: Partial<AppFrameworkAdapter>) =>
-      config && config.dateFormatTz && config.dateFormatTz
+      config && config.dateFormat && config.dateFormatTz
         ? moment.tz(value, config.dateFormatTz).format(config.dateFormat)
         : moment.utc(value).toISOString()
     }
