@@ -127,6 +127,13 @@ export function FilterBarProvider({ getService, getPageObjects }) {
         await testSubjects.click('cancelSaveFilter');
       }
     }
+
+    async getIndexPatterns() {
+      await testSubjects.click('addFilter');
+      const indexPatterns = await comboBox.getOptionsList('filterIndexPatternsSelect');
+      await this.ensureFieldEditorModalIsClosed();
+      return indexPatterns.trim().split('\n').join(',');
+    }
   }
 
   return new FilterBar();

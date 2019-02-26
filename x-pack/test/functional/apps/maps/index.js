@@ -40,6 +40,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./joins'));
       loadTestFile(require.resolve('./add_layer_panel'));
       loadTestFile(require.resolve('./layer_errors'));
+      loadTestFile(require.resolve('./embeddable/dashboard'));
     });
   });
 }
