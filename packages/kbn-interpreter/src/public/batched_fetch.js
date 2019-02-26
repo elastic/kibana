@@ -18,12 +18,13 @@
  */
 
 import { FUNCTIONS_URL } from './consts';
+import { once } from 'lodash';
 
 /**
  * Create a function which executes an Expression function on the
  * server as part of a larger batch of executions.
  */
-export function batchedFetch({ kfetch, serialize, ms = 10 }) {
+export function batchedFetch({ ajaxStream, serialize, ms = 10 }) {
   // Uniquely identifies each function call in a batch operation
   // so that the appropriate promise can be resolved / rejected later.
   let id = 0;
@@ -42,7 +43,7 @@ export function batchedFetch({ kfetch, serialize, ms = 10 }) {
   };
 
   const runBatch = () => {
-    processBatch(kfetch, batch);
+    processBatch(ajaxStream, batch);
     reset();
   };
 
@@ -72,8 +73,8 @@ function createFuture() {
   let reject;
 
   return {
-    resolve(val) { return resolve(val); },
-    reject(val) { return reject(val); },
+    resolve: once((val) => resolve(val)),
+    reject: once((val) => reject(val)),
     promise: new Promise((res, rej) => {
       resolve = res;
       reject = rej;
@@ -85,22 +86,21 @@ function createFuture() {
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(kfetch, batch) {
+async function processBatch(ajaxStream, batch) {
   try {
-    const { results } = await kfetch({
-      pathname: FUNCTIONS_URL,
-      method: 'POST',
+    await ajaxStream({
+      url: FUNCTIONS_URL,
       body: JSON.stringify({
         functions: Object.values(batch).map(({ request }) => request),
       }),
-    });
+      onResponse({ id, statusCode, result }) {
+        const { future } = batch[id];
 
-    results.forEach(({ id, result }) => {
-      const { future } = batch[id];
-      if (result.statusCode && result.err) {
-        future.reject(result);
-      } else {
-        future.resolve(result);
+        if (statusCode >= 400) {
+          future.reject(result);
+        } else {
+          future.resolve(result);
+        }
       }
     });
   } catch (err) {

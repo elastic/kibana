@@ -20,6 +20,7 @@
 import { register } from '@kbn/interpreter/common';
 import { initializeInterpreter, registries } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
+import { ajaxStream } from 'ui/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
 
@@ -32,7 +33,12 @@ let _resolve;
 let _interpreterPromise;
 
 const initialize = async () => {
-  initializeInterpreter(kfetch, registries.types, registries.browserFunctions).then(interpreter => {
+  initializeInterpreter({
+    kfetch,
+    ajaxStream,
+    typesRegistry: registries.types,
+    functionsRegistry: registries.browserFunctions,
+  }).then(interpreter => {
     _resolve({ interpreter });
   });
 };
