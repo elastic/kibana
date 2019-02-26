@@ -6,6 +6,7 @@
 
 import expect from 'expect.js';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
+import { LICENSE_STATUS } from '../../../../../common/constants';
 
 describe('license_pre_routing_factory', () => {
   describe('#reportingFeaturePreRoutingFactory', () => {
@@ -33,10 +34,10 @@ describe('license_pre_routing_factory', () => {
       expect(firstInstance).to.not.be(secondInstance);
     });
 
-    describe('isAvailable is false', () => {
+    describe('status is invalid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: false
+          status: LICENSE_STATUS.INVALID
         };
       });
 
@@ -51,10 +52,10 @@ describe('license_pre_routing_factory', () => {
       });
     });
 
-    describe('isAvailable is true', () => {
+    describe('status is valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: true
+          status: LICENSE_STATUS.VALID
         };
       });
 
