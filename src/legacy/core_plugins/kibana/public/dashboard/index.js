@@ -60,11 +60,21 @@ uiRoutes
     template: dashboardListingTemplate,
     controller($injector, $location, $scope, Private, config, i18n) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
+      const kbnUrl = $injector.get('kbnUrl');
       const dashboardConfig = $injector.get('dashboardConfig');
 
       $scope.listingLimit = config.get('savedObjects:listingLimit');
+      $scope.create = () => {
+        kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+      };
       $scope.find = (search) => {
         return services.dashboards.find(search, $scope.listingLimit);
+      };
+      $scope.editItem = ({ id }) => {
+        kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
+      };
+      $scope.getViewUrl = ({ id }) => {
+        return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
       $scope.delete = (ids) => {
         return services.dashboards.delete(ids);
