@@ -40,23 +40,18 @@ import { logger } from '../logging/__mocks__';
 const env = new Env('.', getEnvOptions());
 const config$ = new BehaviorSubject({} as Config);
 
-const mockProcessExit = jest
-  .spyOn(global.process, 'exit')
-  .mockImplementation(() => undefined as never);
-
-const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {
-  // noop
-});
+let mockConsoleError: jest.SpyInstance;
 
 beforeEach(() => {
+  jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
+  mockConsoleError = jest.spyOn(console, 'error').mockReturnValue(undefined);
   mockLoggingService.asLoggerFactory.mockReturnValue(logger);
   mockConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });
 
 afterEach(() => {
-  mockProcessExit.mockReset();
-  mockConsoleError.mockReset();
+  jest.restoreAllMocks();
 
   mockLoggingService.upgrade.mockReset();
   mockLoggingService.stop.mockReset();
