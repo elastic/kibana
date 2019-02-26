@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { HttpService, HttpStartContract } from './http_service';
+export { HttpService, HttpStart } from './http_service';
