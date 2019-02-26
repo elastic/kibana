@@ -16,12 +16,13 @@ import moment from 'moment-timezone';
 import { plainColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
-import { mockEcsData, mockFramework } from '../../../../mock';
+import { mockEcsData, mockFrameworks } from '../../../../mock';
 import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 import { KibanaConfigContext } from '../../../formatted_date';
 
 const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
+const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {
   let mockDatum: Ecs;

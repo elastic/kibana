@@ -6,7 +6,17 @@
 
 import { AppFrameworkAdapter } from '../lib/lib';
 
-export const mockFramework: Partial<AppFrameworkAdapter> = {
-  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-  dateFormatTz: 'UTC',
+export const mockFrameworks: { [name: string]: Partial<AppFrameworkAdapter> } = {
+  default_ET: {
+    dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    dateFormatTz: 'America/New_York',
+  },
+  default_MT: {
+    dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    dateFormatTz: 'America/Denver',
+  },
+  default_UTC: {
+    dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    dateFormatTz: 'UTC',
+  },
 };

@@ -9,7 +9,7 @@ import { GraphQLScalarType, Kind } from 'graphql';
 export const dateScalar = new GraphQLScalarType({
   name: 'Date',
   description:
-    'Represents a date for either an ES formatted date date or epoch string ISO8601 formatted',
+    'Represents a Date for either an ES formatted date string or epoch string ISO8601 formatted',
   serialize(value): string {
     return Number.isNaN(Date.parse(value)) ? new Date(value).toISOString() : value;
   },
@@ -19,7 +19,7 @@ export const dateScalar = new GraphQLScalarType({
   parseLiteral(ast) {
     switch (ast.kind) {
       case Kind.INT:
-        return new Date(ast.value);
+        return parseInt(ast.value, 10);
       case Kind.STRING:
         return ast.value;
     }

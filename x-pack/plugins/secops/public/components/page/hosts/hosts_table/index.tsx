@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 import { get, isNil } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -166,7 +166,9 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
     hideForMobile: false,
     render: ({ node }) =>
       node.firstSeen && node.firstSeen !== '' ? (
-        <FormattedRelative value={node.firstSeen} />
+        <EuiToolTip position="bottom" content={node.firstSeen}>
+          <FormattedRelative value={node.firstSeen} />
+        </EuiToolTip>
       ) : (
         defaultToEmptyTag(node.firstSeen)
       ),

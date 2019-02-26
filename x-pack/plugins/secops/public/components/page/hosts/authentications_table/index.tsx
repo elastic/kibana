@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { get, has, isNil } from 'lodash/fp';
 import React from 'react';
@@ -166,7 +166,9 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     hideForMobile: false,
     render: ({ node }) =>
       has('lastFailure.timestamp', node) ? (
-        <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
+        <EuiToolTip position="bottom" content={node.lastFailure!.timestamp!}>
+          <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
+        </EuiToolTip>
       ) : (
         getEmptyTagValue()
       ),
@@ -273,7 +275,9 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     hideForMobile: false,
     render: ({ node }) =>
       has('lastSuccess.timestamp', node) ? (
-        <FormattedRelative value={new Date(node.lastSuccess!.timestamp!)} />
+        <EuiToolTip position="bottom" content={node.lastSuccess!.timestamp!}>
+          <FormattedRelative value={new Date(node.lastSuccess!.timestamp!)} />
+        </EuiToolTip>
       ) : (
         getEmptyTagValue()
       ),
