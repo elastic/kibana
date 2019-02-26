@@ -33,8 +33,8 @@ export async function deleteJobs(jobIds) {
 
 export async function createJob(job) {
   const body = { job };
-  const action = getHttp().put(`${apiPrefix}/create`, body);
-  return await trackUserRequest(action, UA_ROLLUP_JOB_CREATE);
+  const request = getHttp().put(`${apiPrefix}/create`, body);
+  return await trackUserRequest(request, UA_ROLLUP_JOB_CREATE);
 }
 
 export async function validateIndexPattern(indexPattern) {

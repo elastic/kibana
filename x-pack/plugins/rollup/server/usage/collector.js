@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { fetchUserActions } from '../../../../server/lib/user_action';
-import { USER_ACTIONS } from '../../common';
+import { UA_APP_NAME, USER_ACTIONS } from '../../common';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
@@ -182,7 +182,7 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
 
-      const userActions = await fetchUserActions(server, 'rollup-job-wizard', USER_ACTIONS);
+      const userActions = await fetchUserActions(server, UA_APP_NAME, USER_ACTIONS);
 
       const userActionsByActionType = userActions.reduce((byActionType, userAction) => {
         // User action is undefined if nobody has performed this action on the client yet.

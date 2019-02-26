@@ -5,14 +5,15 @@
  */
 
 import chrome from 'ui/chrome';
+import { UA_APP_NAME } from '../../../common';
 import { getHttp } from './http_provider';
 
 export function trackUserAction(actionType) {
-  getHttp().post(chrome.addBasePath(`/api/user_action/rollup-job-wizard/${actionType}`));
+  getHttp().post(chrome.addBasePath(`/api/user_action/${UA_APP_NAME}/${actionType}`));
 }
 
-export function trackUserRequest(action, actionType) {
+export function trackUserRequest(request, actionType) {
   // Only track successful actions.
-  action.then(() => trackUserAction(actionType));
-  return action;
+  request.then(() => trackUserAction(actionType));
+  return request;
 }
