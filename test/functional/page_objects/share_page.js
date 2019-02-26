@@ -46,7 +46,7 @@ export function SharePageProvider({ getService, getPageObjects }) {
       }
       const menuPanel = await find.byCssSelector('div.euiContextMenuPanel');
       testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
-      await find.waitForElementStale(menuPanel);
+      await testSubjects.waitForDeleted(menuPanel);
     }
 
     async getSharedUrl() {
