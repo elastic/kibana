@@ -38,7 +38,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
       : getCreateUserBreadcrumbs
   ),
   controllerAs: 'editUser',
-  controller($scope, $route, kbnUrl, Notifier, confirmModal, $http) {
+  controller($scope, $route, kbnUrl, $http) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('editUserReactRoot');
       if (elem) {

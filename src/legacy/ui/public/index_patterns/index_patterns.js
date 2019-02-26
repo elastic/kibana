@@ -27,7 +27,7 @@ import { fieldFormats } from '../registry/field_formats';
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana/index_patterns');
 
-export function IndexPatternsProvider(Notifier, Private, config) {
+export function IndexPatternsProvider(Private, config) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternProvider);

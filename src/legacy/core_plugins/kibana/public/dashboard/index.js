@@ -129,7 +129,7 @@ uiRoutes
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState, i18n) {
+      dash: function (savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState, i18n) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)
