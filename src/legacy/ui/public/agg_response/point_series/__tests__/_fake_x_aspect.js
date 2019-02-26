@@ -31,5 +31,6 @@ describe('makeFakeXAspect', function () {
       .and.have.property('format')
       .and.have.property('params');
 
+    expect(aspect.params).to.have.property('defaultValue', '_all');
   });
 });

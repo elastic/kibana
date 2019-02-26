@@ -126,7 +126,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) && this.props.jobs.length > 0
     ) {
       this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => this.getAnnotations());
-      annotationsRefresh$.next();
+      annotationsRefresh$.next(true);
     }
   }
 
@@ -137,7 +137,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
-      annotationsRefresh$.next();
+      annotationsRefresh$.next(true);
     }
   }
 

@@ -20,10 +20,10 @@
 import { BasePathService } from './base_path';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
+import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
-import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
@@ -37,41 +37,41 @@ jest.mock('./legacy_platform', () => ({
   LegacyPlatformService: MockLegacyPlatformService,
 }));
 
-const mockInjectedMetadataStartContract = {};
+const mockInjectedMetadataStart = {};
 const MockInjectedMetadataService = jest.fn<InjectedMetadataService>(
   function _MockInjectedMetadataService(this: any) {
-    this.start = jest.fn().mockReturnValue(mockInjectedMetadataStartContract);
+    this.start = jest.fn().mockReturnValue(mockInjectedMetadataStart);
   }
 );
 jest.mock('./injected_metadata', () => ({
   InjectedMetadataService: MockInjectedMetadataService,
 }));
 
-const mockFatalErrorsStartContract = {};
+const mockFatalErrorsStart = {};
 const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalErrorsService(
   this: any
 ) {
-  this.start = jest.fn().mockReturnValue(mockFatalErrorsStartContract);
+  this.start = jest.fn().mockReturnValue(mockFatalErrorsStart);
   this.add = jest.fn();
 });
 jest.mock('./fatal_errors', () => ({
   FatalErrorsService: MockFatalErrorsService,
 }));
 
-const mockI18nStartContract = {};
+const mockI18nStart = {};
 const MockI18nService = jest.fn<I18nService>(function _MockI18nService(this: any) {
-  this.start = jest.fn().mockReturnValue(mockI18nStartContract);
+  this.start = jest.fn().mockReturnValue(mockI18nStart);
   this.stop = jest.fn();
 });
 jest.mock('./i18n', () => ({
   I18nService: MockI18nService,
 }));
 
-const mockNotificationStartContract = {};
+const mockNotificationStart = {};
 const MockNotificationsService = jest.fn<NotificationsService>(function _MockNotificationsService(
   this: any
 ) {
-  this.start = jest.fn().mockReturnValue(mockNotificationStartContract);
+  this.start = jest.fn().mockReturnValue(mockNotificationStart);
   this.add = jest.fn();
   this.stop = jest.fn();
 });
@@ -79,39 +79,37 @@ jest.mock('./notifications', () => ({
   NotificationsService: MockNotificationsService,
 }));
 
-const mockLoadingCountContract = {};
-const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
+const mockHttp = {};
+const MockHttpService = jest.fn<HttpService>(function _MockNotificationsService(this: any) {
+  this.start = jest.fn().mockReturnValue(mockHttp);
   this.stop = jest.fn();
 });
-jest.mock('./loading_count', () => ({
-  LoadingCountService: MockLoadingCountService,
+jest.mock('./http', () => ({
+  HttpService: MockHttpService,
 }));
 
-const mockBasePathStartContract = {};
+const mockBasePathStart = {};
 const MockBasePathService = jest.fn<BasePathService>(function _MockNotificationsService(this: any) {
-  this.start = jest.fn().mockReturnValue(mockBasePathStartContract);
+  this.start = jest.fn().mockReturnValue(mockBasePathStart);
 });
 jest.mock('./base_path', () => ({
   BasePathService: MockBasePathService,
 }));
 
-const mockUiSettingsContract = {};
+const mockUiSettings = {};
 const MockUiSettingsService = jest.fn<UiSettingsService>(function _MockNotificationsService(
   this: any
 ) {
-  this.start = jest.fn().mockReturnValue(mockUiSettingsContract);
+  this.start = jest.fn().mockReturnValue(mockUiSettings);
   this.stop = jest.fn();
 });
 jest.mock('./ui_settings', () => ({
   UiSettingsService: MockUiSettingsService,
 }));
 
-const mockChromeStartContract = {};
+const mockChromeStart = {};
 const MockChromeService = jest.fn<ChromeService>(function _MockNotificationsService(this: any) {
-  this.start = jest.fn().mockReturnValue(mockChromeStartContract);
+  this.start = jest.fn().mockReturnValue(mockChromeStart);
   this.stop = jest.fn();
 });
 jest.mock('./chrome', () => ({
@@ -148,7 +146,7 @@ describe('constructor', () => {
     expect(MockI18nService).toHaveBeenCalledTimes(1);
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
-    expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
+    expect(MockHttpService).toHaveBeenCalledTimes(1);
     expect(MockBasePathService).toHaveBeenCalledTimes(1);
     expect(MockUiSettingsService).toHaveBeenCalledTimes(1);
     expect(MockChromeService).toHaveBeenCalledTimes(1);
@@ -259,15 +257,15 @@ describe('#stop', () => {
     expect(notificationsService.stop).toHaveBeenCalled();
   });
 
-  it('calls loadingCount.stop()', () => {
+  it('calls http.stop()', () => {
     const coreSystem = new CoreSystem({
       ...defaultCoreSystemParams,
     });
 
-    const [loadingCountService] = MockLoadingCountService.mock.instances;
-    expect(loadingCountService.stop).not.toHaveBeenCalled();
+    const [httpService] = MockHttpService.mock.instances;
+    expect(httpService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(loadingCountService.stop).toHaveBeenCalled();
+    expect(httpService.stop).toHaveBeenCalled();
   });
 
   it('calls chrome.stop()', () => {
@@ -341,12 +339,12 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledWith();
   });
 
-  it('calls loadingCount#start()', () => {
+  it('calls http#start()', () => {
     startCore();
-    const [mockInstance] = MockLoadingCountService.mock.instances;
+    const [mockInstance] = MockHttpService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
-      fatalErrors: mockFatalErrorsStartContract,
+      fatalErrors: mockFatalErrorsStart,
     });
   });
 
@@ -355,7 +353,7 @@ describe('#start()', () => {
     const [mockInstance] = MockBasePathService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
-      injectedMetadata: mockInjectedMetadataStartContract,
+      injectedMetadata: mockInjectedMetadataStart,
     });
   });
 
@@ -364,10 +362,10 @@ describe('#start()', () => {
     const [mockInstance] = MockUiSettingsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
-      notifications: mockNotificationStartContract,
-      loadingCount: mockLoadingCountContract,
-      injectedMetadata: mockInjectedMetadataStartContract,
-      basePath: mockBasePathStartContract,
+      notifications: mockNotificationStart,
+      http: mockHttp,
+      injectedMetadata: mockInjectedMetadataStart,
+      basePath: mockBasePathStart,
     });
   });
 
@@ -382,14 +380,14 @@ describe('#start()', () => {
     startCore();
     const [mockInstance] = MockFatalErrorsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith({ i18n: mockI18nStartContract });
+    expect(mockInstance.start).toHaveBeenCalledWith({ i18n: mockI18nStart });
   });
 
   it('calls notifications#start()', () => {
     startCore();
     const [mockInstance] = MockNotificationsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
-    expect(mockInstance.start).toHaveBeenCalledWith({ i18n: mockI18nStartContract });
+    expect(mockInstance.start).toHaveBeenCalledWith({ i18n: mockI18nStart });
   });
 
   it('calls chrome#start()', () => {
@@ -397,13 +395,13 @@ describe('#start()', () => {
     const [mockInstance] = MockChromeService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
-      notifications: mockNotificationStartContract,
-      injectedMetadata: mockInjectedMetadataStartContract,
+      notifications: mockNotificationStart,
+      injectedMetadata: mockInjectedMetadataStart,
     });
   });
 
   it('returns start contract', () => {
-    expect(startCore()).toEqual({ fatalErrors: mockFatalErrorsStartContract });
+    expect(startCore()).toEqual({ fatalErrors: mockFatalErrorsStart });
   });
 });
 

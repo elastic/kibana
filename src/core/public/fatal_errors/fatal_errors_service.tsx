@@ -22,7 +22,7 @@ import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
-import { I18nStartContract } from '../i18n';
+import { I18nStart } from '../i18n';
 import { InjectedMetadataService } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { ErrorInfo, getErrorInfo } from './get_error_info';
@@ -34,12 +34,12 @@ export interface FatalErrorsParams {
 }
 
 interface Deps {
-  i18n: I18nStartContract;
+  i18n: I18nStart;
 }
 
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
-  private i18n?: I18nStartContract;
+  private i18n?: I18nStart;
 
   constructor(private params: FatalErrorsParams) {
     this.errorInfo$
@@ -109,4 +109,4 @@ export class FatalErrorsService {
   }
 }
 
-export type FatalErrorsStartContract = ReturnType<FatalErrorsService['start']>;
+export type FatalErrorsStart = ReturnType<FatalErrorsService['start']>;
