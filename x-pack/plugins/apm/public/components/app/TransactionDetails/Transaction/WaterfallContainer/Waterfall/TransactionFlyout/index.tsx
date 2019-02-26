@@ -46,15 +46,15 @@ const ResponsiveFlyout = styled(EuiFlyout)`
   }
 
   @media (min-width: 1000px) {
-    width: 70%;
+    width: 80%;
   }
 
   @media (min-width: 1400px) {
-    width: 50%;
+    width: 70%;
   }
 
   @media (min-width: 2000px) {
-    width: 35%;
+    width: 60%;
   }
 `;
 
