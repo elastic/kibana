@@ -20,7 +20,7 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy_compat';
+import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
 
 interface KibanaFeatures {
