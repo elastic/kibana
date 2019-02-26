@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import sinon from 'sinon';
+import { createMockServer } from './_mock_server';
 import { createUpdateRoute } from './update';
-import { MockServer } from './_mock_server';
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
-  const savedObjectsClient = { update: sinon.stub().returns('') };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: sinon.stub().returns(''),
+    bulkGet: sinon.stub().returns(''),
+    create: sinon.stub().returns(''),
+    delete: sinon.stub().returns(''),
+    find: sinon.stub().returns(''),
+    get: sinon.stub().returns(''),
+    update: sinon.stub().returns(''),
+  };
 
   beforeEach(() => {
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -50,10 +60,10 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
         attributes: {
-          title: 'Testing'
+          title: 'Testing',
         },
         references: [],
-      }
+      },
     };
 
     savedObjectsClient.update.returns(Promise.resolve(true));
@@ -73,8 +83,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
         attributes,
-        version: options.version
-      }
+        version: options.version,
+      },
     };
 
     await server.inject(request);

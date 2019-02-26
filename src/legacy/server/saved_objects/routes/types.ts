@@ -18,28 +18,22 @@
  */
 
 import Hapi from 'hapi';
-import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
+import { SavedObjectsClient } from '../';
 
-const defaultConfig = {
-  'kibana.index': '.kibana'
-};
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
 
-export function MockServer(config = defaultConfig) {
-  const server = new Hapi.Server({
-    port: 0,
-    routes: {
-      validate: {
-        failAction: defaultValidationErrorHandler
-      }
-    }
-  });
-  server.config = function () {
-    return {
-      get: (key) => {
-        return config[key];
-      }
-    };
+export interface TypeAndIdPair {
+  type: string;
+  id: string;
+}
+
+export interface Prerequisites {
+  getSavedObjectsClient: {
+    assign: string;
+    method: (req: Hapi.Request) => SavedObjectsClient;
   };
-
-  return server;
 }

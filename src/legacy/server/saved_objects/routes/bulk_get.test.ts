@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import sinon from 'sinon';
+import { createMockServer } from './_mock_server';
 import { createBulkGetRoute } from './bulk_get';
-import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/_bulk_get', () => {
-  const savedObjectsClient = { bulkGet: sinon.stub().returns('') };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: sinon.stub().returns(''),
+    bulkGet: sinon.stub().returns(''),
+    create: sinon.stub().returns(''),
+    delete: sinon.stub().returns(''),
+    find: sinon.stub().returns(''),
+    get: sinon.stub().returns(''),
+    update: sinon.stub().returns(''),
+  };
 
   beforeEach(() => {
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -48,20 +58,24 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     const request = {
       method: 'POST',
       url: '/api/saved_objects/_bulk_get',
-      payload: [{
-        id: 'abc123',
-        type: 'index-pattern'
-      }]
+      payload: [
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+        },
+      ],
     };
 
     const clientResponse = {
-      saved_objects: [{
-        id: 'abc123',
-        type: 'index-pattern',
-        title: 'logstash-*',
-        version: 'foo',
-        references: [],
-      }]
+      saved_objects: [
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+          title: 'logstash-*',
+          version: 'foo',
+          references: [],
+        },
+      ],
     };
 
     savedObjectsClient.bulkGet.returns(Promise.resolve(clientResponse));
@@ -74,15 +88,17 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   it('calls upon savedObjectClient.bulkGet', async () => {
-    const docs = [{
-      id: 'abc123',
-      type: 'index-pattern'
-    }];
+    const docs = [
+      {
+        id: 'abc123',
+        type: 'index-pattern',
+      },
+    ];
 
     const request = {
       method: 'POST',
       url: '/api/saved_objects/_bulk_get',
-      payload: docs
+      payload: docs,
     };
 
     await server.inject(request);

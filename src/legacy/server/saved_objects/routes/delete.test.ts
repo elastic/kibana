@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import sinon from 'sinon';
+import { createMockServer } from './_mock_server';
 import { createDeleteRoute } from './delete';
-import { MockServer } from './_mock_server';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
-  const savedObjectsClient = { delete: sinon.stub() };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: sinon.stub().returns(''),
+    bulkGet: sinon.stub().returns(''),
+    create: sinon.stub().returns(''),
+    delete: sinon.stub().returns(''),
+    find: sinon.stub().returns(''),
+    get: sinon.stub().returns(''),
+    update: sinon.stub().returns(''),
+  };
 
   beforeEach(() => {
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -47,7 +57,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'DELETE',
-      url: '/api/saved_objects/index-pattern/logstash-*'
+      url: '/api/saved_objects/index-pattern/logstash-*',
     };
     const clientResponse = true;
 
@@ -63,7 +73,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   it('calls upon savedObjectClient.delete', async () => {
     const request = {
       method: 'DELETE',
-      url: '/api/saved_objects/index-pattern/logstash-*'
+      url: '/api/saved_objects/index-pattern/logstash-*',
     };
 
     await server.inject(request);

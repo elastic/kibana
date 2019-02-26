@@ -17,24 +17,37 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import Joi from 'joi';
+import { SavedObjectsClient } from '../';
+import { Prerequisites, TypeAndIdPair } from './types';
 
-export const createDeleteRoute = (prereqs) => ({
+// @ts-ignore
+interface GetRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClient;
+  };
+  params: TypeAndIdPair;
+}
+
+export const createGetRoute = (prereqs: Prerequisites) => ({
   path: '/api/saved_objects/{type}/{id}',
-  method: 'DELETE',
+  method: 'GET',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      params: Joi.object().keys({
-        type: Joi.string().required(),
-        id: Joi.string().required(),
-      }).required()
+      params: Joi.object()
+        .keys({
+          type: Joi.string().required(),
+          id: Joi.string().required(),
+        })
+        .required(),
     },
-    handler(request) {
+    handler(request: GetRequest) {
       const { savedObjectsClient } = request.pre;
       const { type, id } = request.params;
 
-      return savedObjectsClient.delete(type, id);
-    }
-  }
+      return savedObjectsClient.get(type, id);
+    },
+  },
 });

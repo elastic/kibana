@@ -17,9 +17,31 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import Joi from 'joi';
+import { SavedObjectsClient } from '../';
+import { Prerequisites, SavedObjectReference } from './types';
 
-export const createCreateRoute = prereqs => {
+// @ts-ignore
+interface CreateRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClient;
+  };
+  query: {
+    overwrite: boolean;
+  };
+  params: {
+    type: string;
+    id?: string;
+  };
+  payload: {
+    attributes: { [key: string]: any };
+    migrationVersion?: { [key: string]: string };
+    references: SavedObjectReference[];
+  };
+}
+
+export const createCreateRoute = (prereqs: Prerequisites) => {
   return {
     path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
@@ -40,17 +62,18 @@ export const createCreateRoute = prereqs => {
         payload: Joi.object({
           attributes: Joi.object().required(),
           migrationVersion: Joi.object().optional(),
-          references: Joi.array().items(
-            Joi.object()
-              .keys({
+          references: Joi.array()
+            .items(
+              Joi.object().keys({
                 name: Joi.string().required(),
                 type: Joi.string().required(),
                 id: Joi.string().required(),
-              }),
-          ).default([]),
+              })
+            )
+            .default([]),
         }).required(),
       },
-      handler(request) {
+      handler(request: CreateRequest) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { overwrite } = request.query;

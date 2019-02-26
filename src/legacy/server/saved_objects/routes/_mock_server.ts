@@ -17,24 +17,29 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Hapi from 'hapi';
+import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 
-export const createGetRoute = (prereqs) => ({
-  path: '/api/saved_objects/{type}/{id}',
-  method: 'GET',
-  config: {
-    pre: [prereqs.getSavedObjectsClient],
-    validate: {
-      params: Joi.object().keys({
-        type: Joi.string().required(),
-        id: Joi.string().required(),
-      }).required()
+const defaultConfig = {
+  'kibana.index': '.kibana',
+};
+
+export function createMockServer(config: { [key: string]: any } = defaultConfig) {
+  const server = new Hapi.Server({
+    port: 0,
+    routes: {
+      validate: {
+        failAction: defaultValidationErrorHandler,
+      },
     },
-    handler(request) {
-      const { savedObjectsClient } = request.pre;
-      const { type, id } = request.params;
+  });
+  server.config = () => {
+    return {
+      get(key: string) {
+        return config[key];
+      },
+    };
+  };
 
-      return savedObjectsClient.get(type, id);
-    }
-  }
-});
+  return server;
+}

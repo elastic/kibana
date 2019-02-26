@@ -17,23 +17,37 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import Joi from 'joi';
+import { SavedObjectsClient } from '../';
+import { Prerequisites, TypeAndIdPair } from './types';
 
-export const createBulkGetRoute = (prereqs) => ({
-  path: '/api/saved_objects/_bulk_get',
-  method: 'POST',
+// @ts-ignore
+interface DeleteRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClient;
+  };
+  params: TypeAndIdPair;
+}
+
+export const createDeleteRoute = (prereqs: Prerequisites) => ({
+  path: '/api/saved_objects/{type}/{id}',
+  method: 'DELETE',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      payload: Joi.array().items(Joi.object({
-        type: Joi.string().required(),
-        id: Joi.string().required(),
-      }).required())
+      params: Joi.object()
+        .keys({
+          type: Joi.string().required(),
+          id: Joi.string().required(),
+        })
+        .required(),
     },
-    handler(request) {
+    handler(request: DeleteRequest) {
       const { savedObjectsClient } = request.pre;
+      const { type, id } = request.params;
 
-      return savedObjectsClient.bulkGet(request.payload);
-    }
-  }
+      return savedObjectsClient.delete(type, id);
+    },
+  },
 });

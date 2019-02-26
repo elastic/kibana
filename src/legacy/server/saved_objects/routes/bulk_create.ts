@@ -17,9 +17,34 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import Joi from 'joi';
+import { SavedObjectsClient } from '../';
+import { Prerequisites, SavedObjectReference } from './types';
 
-export const createBulkCreateRoute = prereqs => ({
+interface SavedObject {
+  type: string;
+  id?: string;
+  attributes: { [key: string]: any };
+  version?: string;
+  migrationVersion?: { [key: string]: string };
+  references: SavedObjectReference[];
+}
+
+export type BulkCreateRequestPayload = SavedObject[];
+
+// @ts-ignore
+interface BulkCreateRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClient;
+  };
+  query: {
+    overwrite: boolean;
+  };
+  payload: BulkCreateRequestPayload;
+}
+
+export const createBulkCreateRoute = (prereqs: Prerequisites) => ({
   path: '/api/saved_objects/_bulk_create',
   method: 'POST',
   config: {
@@ -37,18 +62,19 @@ export const createBulkCreateRoute = prereqs => ({
           attributes: Joi.object().required(),
           version: Joi.string(),
           migrationVersion: Joi.object().optional(),
-          references: Joi.array().items(
-            Joi.object()
-              .keys({
+          references: Joi.array()
+            .items(
+              Joi.object().keys({
                 name: Joi.string().required(),
                 type: Joi.string().required(),
                 id: Joi.string().required(),
-              }),
-          ).default([]),
+              })
+            )
+            .default([]),
         }).required()
       ),
     },
-    handler(request) {
+    handler(request: BulkCreateRequest) {
       const { overwrite } = request.query;
       const { savedObjectsClient } = request.pre;
 

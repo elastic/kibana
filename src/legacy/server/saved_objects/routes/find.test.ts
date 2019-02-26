@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import sinon from 'sinon';
+import { createMockServer } from './_mock_server';
 import { createFindRoute } from './find';
-import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/_find', () => {
-  const savedObjectsClient = { find: sinon.stub().returns('') };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: sinon.stub().returns(''),
+    bulkGet: sinon.stub().returns(''),
+    create: sinon.stub().returns(''),
+    delete: sinon.stub().returns(''),
+    find: sinon.stub().returns(''),
+    get: sinon.stub().returns(''),
+    update: sinon.stub().returns(''),
+  };
 
   beforeEach(() => {
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -47,7 +57,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('returns with status 400 when type is missing', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find'
+      url: '/api/saved_objects/_find',
     };
 
     const { payload, statusCode } = await server.inject(request);
@@ -63,7 +73,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern'
+      url: '/api/saved_objects/_find?type=index-pattern',
     };
 
     const clientResponse = {
@@ -76,15 +86,16 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           references: [],
-        }, {
+        },
+        {
           type: 'index-pattern',
           id: 'stocks-*',
           title: 'stocks-*',
           timeFieldName: '@timestamp',
           notExpandable: true,
           references: [],
-        }
-      ]
+        },
+      ],
     };
 
     savedObjectsClient.find.returns(Promise.resolve(clientResponse));
@@ -99,7 +110,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('calls upon savedObjectClient.find with defaults', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&type=bar'
+      url: '/api/saved_objects/_find?type=foo&type=bar',
     };
 
     await server.inject(request);
@@ -107,13 +118,18 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: ['foo', 'bar'], defaultSearchOperator: 'OR' });
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      type: ['foo', 'bar'],
+      defaultSearchOperator: 'OR',
+    });
   });
 
   it('accepts the query parameter page/per_page', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&per_page=10&page=50'
+      url: '/api/saved_objects/_find?type=foo&per_page=10&page=50',
     };
 
     await server.inject(request);
@@ -127,35 +143,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter search_fields', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&search_fields=title'
-    };
-
-    await server.inject(request);
-
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
-
-    const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'], type: ['foo'], defaultSearchOperator: 'OR' });
-  });
-
-  it('accepts the query parameter fields as a string', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&fields=title'
-    };
-
-    await server.inject(request);
-
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
-
-    const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'], type: ['foo'], defaultSearchOperator: 'OR' });
-  });
-
-  it('accepts the query parameter fields as an array', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&fields=title&fields=description'
+      url: '/api/saved_objects/_find?type=foo&search_fields=title',
     };
 
     await server.inject(request);
@@ -164,14 +152,58 @@ describe('GET /api/saved_objects/_find', () => {
 
     const options = savedObjectsClient.find.getCall(0).args[0];
     expect(options).toEqual({
-      perPage: 20, page: 1, fields: ['title', 'description'], type: ['foo'], defaultSearchOperator: 'OR'
+      perPage: 20,
+      page: 1,
+      searchFields: ['title'],
+      type: ['foo'],
+      defaultSearchOperator: 'OR',
+    });
+  });
+
+  it('accepts the query parameter fields as a string', async () => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/_find?type=foo&fields=title',
+    };
+
+    await server.inject(request);
+
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
+
+    const options = savedObjectsClient.find.getCall(0).args[0];
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      fields: ['title'],
+      type: ['foo'],
+      defaultSearchOperator: 'OR',
+    });
+  });
+
+  it('accepts the query parameter fields as an array', async () => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/_find?type=foo&fields=title&fields=description',
+    };
+
+    await server.inject(request);
+
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
+
+    const options = savedObjectsClient.find.getCall(0).args[0];
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      fields: ['title', 'description'],
+      type: ['foo'],
+      defaultSearchOperator: 'OR',
     });
   });
 
   it('accepts the query parameter type as a string', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern'
+      url: '/api/saved_objects/_find?type=index-pattern',
     };
 
     await server.inject(request);
@@ -179,13 +211,18 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern'], defaultSearchOperator: 'OR' });
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      type: ['index-pattern'],
+      defaultSearchOperator: 'OR',
+    });
   });
 
   it('accepts the query parameter type as an array', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern&type=visualization'
+      url: '/api/saved_objects/_find?type=index-pattern&type=visualization',
     };
 
     await server.inject(request);
@@ -193,6 +230,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern', 'visualization'], defaultSearchOperator: 'OR' });
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      type: ['index-pattern', 'visualization'],
+      defaultSearchOperator: 'OR',
+    });
   });
 });

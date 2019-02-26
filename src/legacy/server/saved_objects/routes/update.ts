@@ -17,40 +17,59 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import Joi from 'joi';
+import { SavedObjectsClient } from '../';
+import { Prerequisites, SavedObjectReference, TypeAndIdPair } from './types';
 
-export const createUpdateRoute = (prereqs) => {
+// @ts-ignore
+interface UpdateRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClient;
+  };
+  params: TypeAndIdPair;
+  payload: {
+    attributes: { [key: string]: any };
+    version?: string;
+    references: SavedObjectReference[];
+  };
+}
+
+export const createUpdateRoute = (prereqs: Prerequisites) => {
   return {
     path: '/api/saved_objects/{type}/{id}',
     method: 'PUT',
     config: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
-        params: Joi.object().keys({
-          type: Joi.string().required(),
-          id: Joi.string().required(),
-        }).required(),
+        params: Joi.object()
+          .keys({
+            type: Joi.string().required(),
+            id: Joi.string().required(),
+          })
+          .required(),
         payload: Joi.object({
           attributes: Joi.object().required(),
           version: Joi.string(),
-          references: Joi.array().items(
-            Joi.object()
-              .keys({
+          references: Joi.array()
+            .items(
+              Joi.object().keys({
                 name: Joi.string().required(),
                 type: Joi.string().required(),
                 id: Joi.string().required(),
-              }),
-          ).default([]),
-        }).required()
+              })
+            )
+            .default([]),
+        }).required(),
       },
-      handler(request) {
+      handler(request: UpdateRequest) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { attributes, version, references } = request.payload;
         const options = { version, references };
 
         return savedObjectsClient.update(type, id, attributes, options);
-      }
-    }
+      },
+    },
   };
 };

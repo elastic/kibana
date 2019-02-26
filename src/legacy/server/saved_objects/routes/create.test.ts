@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
 import sinon from 'sinon';
+import { createMockServer } from './_mock_server';
 import { createCreateRoute } from './create';
-import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/{type}', () => {
-  const savedObjectsClient = { create: sinon.stub().returns('') };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: sinon.stub().returns(''),
+    bulkGet: sinon.stub().returns(''),
+    create: sinon.stub().returns(''),
+    delete: sinon.stub().returns(''),
+    find: sinon.stub().returns(''),
+    get: sinon.stub().returns(''),
+    update: sinon.stub().returns(''),
+  };
 
   beforeEach(() => {
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -50,9 +60,9 @@ describe('POST /api/saved_objects/{type}', () => {
       url: '/api/saved_objects/index-pattern',
       payload: {
         attributes: {
-          title: 'Testing'
-        }
-      }
+          title: 'Testing',
+        },
+      },
     };
     const clientResponse = {
       type: 'index-pattern',
@@ -74,7 +84,7 @@ describe('POST /api/saved_objects/{type}', () => {
     const request = {
       method: 'POST',
       url: '/api/saved_objects/index-pattern',
-      payload: {}
+      payload: {},
     };
 
     const { statusCode, payload } = await server.inject(request);
@@ -92,16 +102,21 @@ describe('POST /api/saved_objects/{type}', () => {
       url: '/api/saved_objects/index-pattern',
       payload: {
         attributes: {
-          title: 'Testing'
-        }
-      }
+          title: 'Testing',
+        },
+      },
     };
 
     await server.inject(request);
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false, id: undefined, migrationVersion: undefined, references: [] };
+    const options = {
+      overwrite: false,
+      id: undefined,
+      migrationVersion: undefined,
+      references: [],
+    };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);
@@ -113,9 +128,9 @@ describe('POST /api/saved_objects/{type}', () => {
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
         attributes: {
-          title: 'Testing'
-        }
-      }
+          title: 'Testing',
+        },
+      },
     };
 
     await server.inject(request);
