@@ -26,7 +26,7 @@ export function InvalidLicenseNotification() {
         <p>
           {i18n.translate('xpack.apm.invalidLicense.message', {
             defaultMessage:
-              'Your current license does not support the Kibana APM UI.'
+              'The APM UI is not available because your current license has expired or is no longer valid.'
           })}
         </p>
       }
