@@ -11,7 +11,7 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockFramework, mockGlobalState } from '../../../../mock';
+import { mockFrameworks, mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { KibanaConfigContext } from '../../../formatted_date';
 import { HostsTable } from './index';
@@ -31,7 +31,7 @@ describe('Load More Table Component', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KibanaConfigContext.Provider value={mockFramework}>
+          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
             <HostsTable
               loading={false}
               data={mockData.Hosts.edges}

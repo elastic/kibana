@@ -15,20 +15,11 @@ import { mockFrameworks } from '../../mock';
 describe('PreferenceFormattedDate', () => {
   describe('rendering', () => {
     const isoDateString = '2019-02-25T22:27:05.000Z';
-    const utcDateString = 'Tue, 26 Feb 2019 20:02:05 GMT';
     const configFormattedDateString = (
       dateString: string,
       config: Partial<AppFrameworkAdapter>
     ): string => moment.tz(dateString, config.dateFormatTz!).format(config.dateFormat);
 
-    test('it renders the UTC date string supplied when no configuration exists', () => {
-      const wrapper = mount(
-        <KibanaConfigContext.Provider value={{}}>
-          <PreferenceFormattedDate value={utcDateString} />
-        </KibanaConfigContext.Provider>
-      );
-      expect(wrapper.text()).toEqual(utcDateString);
-    });
     test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {
       const wrapper = mount(
         <KibanaConfigContext.Provider value={{}}>

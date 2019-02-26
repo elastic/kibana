@@ -1,7 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Load More Table Component rendering it renders the default Hosts table 1`] = `
-<ContextProvider>
+<ContextProvider
+  value={
+    Object {
+      "dateFormat": "MMM D, YYYY @ HH:mm:ss.SSS",
+      "dateFormatTz": "UTC",
+    }
+  }
+>
   <Connect(pure(Component))
     data={
       Array [
