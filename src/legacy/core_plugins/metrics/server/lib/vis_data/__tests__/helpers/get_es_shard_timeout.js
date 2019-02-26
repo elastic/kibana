@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { expect } from 'chai';
-import getEsShardTimeout from '../../helpers/get_es_shard_timeout';
+import { getEsShardTimeout } from '../../helpers/get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
   it('should return the elasticsearch.shardTimeout', () => {

@@ -147,18 +147,18 @@ test('throws if registering route handler after http server is started', () => {
 });
 
 test('returns http server contract on start', async () => {
-  const httpServerContract = {
+  const httpServer = {
     server: {},
     options: { someOption: true },
   };
 
   mockHttpServer.mockImplementation(() => ({
     isListening: () => false,
-    start: jest.fn().mockReturnValue(httpServerContract),
+    start: jest.fn().mockReturnValue(httpServer),
     stop: noop,
   }));
 
   const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
 
-  expect(await service.start()).toBe(httpServerContract);
+  expect(await service.start()).toBe(httpServer);
 });

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { ToastsStartContract } from '../../../../../core/public/notifications';
+import { ToastsStart } from '../../../../../core/public/notifications';
 
 import { ToastNotifications } from './toast_notifications';
 
@@ -26,7 +26,7 @@ describe('ToastNotifications', () => {
   describe('interface', () => {
     function setup() {
       return {
-        toastNotifications: new ToastNotifications(new ToastsStartContract()),
+        toastNotifications: new ToastNotifications(new ToastsStart()),
       };
     }
 
