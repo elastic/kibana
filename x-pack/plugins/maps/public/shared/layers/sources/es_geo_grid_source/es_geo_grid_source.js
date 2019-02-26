@@ -19,6 +19,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../../common/constants';
 import { filterPropertiesForTooltip } from '../../util';
 
 const COUNT_PROP_LABEL = 'count';
@@ -49,7 +50,7 @@ const aggSchemas = new Schemas([
 
 export class ESGeoGridSource extends AbstractESSource {
 
-  static type = 'ES_GEO_GRID';
+  static type = ES_GEO_GRID;
   static title = 'Grid aggregation';
   static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
@@ -250,7 +251,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: 'source'
+            origin: SOURCE_DATA_ID_ORIGIN
           },
           color: 'Blues'
         }
@@ -261,7 +262,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: 'source'
+            origin: SOURCE_DATA_ID_ORIGIN
           },
           minSize: 4,
           maxSize: 32,
