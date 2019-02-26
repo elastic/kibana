@@ -5,7 +5,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
   "calls": Array [
     Array [
       Object {
-        "basePathStartContract": true,
+        "basePathStart": true,
       },
       "kibanaVersion",
     ],

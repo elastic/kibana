@@ -23,9 +23,9 @@ import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
 import { Config } from '../config';
 import { DevConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpServiceStartContract } from '../http';
+import { BasePathProxyServer, HttpConfig, HttpServiceStart } from '../http';
 import { Logger } from '../logging';
-import { PluginsServiceStartContract } from '../plugins/plugins_service';
+import { PluginsServiceStart } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -36,8 +36,8 @@ interface LegacyKbnServer {
 }
 
 interface Deps {
-  http?: HttpServiceStartContract;
-  plugins: PluginsServiceStartContract;
+  http?: HttpServiceStart;
+  plugins: PluginsServiceStart;
 }
 
 /** @internal */
