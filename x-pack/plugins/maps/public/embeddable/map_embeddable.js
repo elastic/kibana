@@ -20,6 +20,7 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
+  setRefreshConfig,
 } from '../actions/store_actions';
 import { setReadOnly } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
@@ -44,6 +45,10 @@ export class MapEmbeddable extends Embeddable {
         !_.isEqual(containerState.filters, this.prevFilters)) {
       this.dispatchSetQuery(containerState);
     }
+
+    if (!_.isEqual(containerState.refreshConfig, this.prevRefreshConfig)) {
+      this.dispatchSetRefreshConfig(containerState);
+    }
   }
 
   dispatchSetQuery({ query, timeRange, filters }) {
@@ -55,6 +60,11 @@ export class MapEmbeddable extends Embeddable {
       query,
       timeFilters: timeRange,
     }));
+  }
+
+  dispatchSetRefreshConfig({ refreshConfig }) {
+    this.prevRefreshConfig = refreshConfig;
+    this.store.dispatch(setRefreshConfig(refreshConfig));
   }
 
   /**
@@ -76,6 +86,7 @@ export class MapEmbeddable extends Embeddable {
     const layerList = getInitialLayers(this.savedMap.layerListJSON);
     this.store.dispatch(replaceLayerList(layerList));
     this.dispatchSetQuery(containerState);
+    this.dispatchSetRefreshConfig(containerState);
 
     render(
       <Provider store={this.store}>
