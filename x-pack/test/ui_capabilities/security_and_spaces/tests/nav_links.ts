@@ -6,12 +6,13 @@
 
 import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { navLinksBuilder } from '../../common/nav_links_builder';
+import { Features } from '../../common/features';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
+const features = new Features();
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -34,9 +35,9 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'global_read at everything_space':
           case 'everything_space_all at everything_space':
           case 'everything_space_read at everything_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            for (const [, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
+              expect(enabled).to.be(true);
+            }
             break;
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
@@ -47,7 +48,14 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            // only management should be enabled in this situation
+            for (const [navLinkId, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
+              if (navLinkId === features.management.navLinkId) {
+                expect(enabled).to.be(true);
+              } else {
+                expect(enabled).to.be(false);
+              }
+            }
             break;
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':

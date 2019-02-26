@@ -13,12 +13,10 @@ import {
 import { UserAtSpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function advancedSettingsTests({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('advancedSettings', () => {
+  describe('foo', () => {
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
@@ -28,26 +26,31 @@ export default function advancedSettingsTests({
           space.id
         );
         switch (scenario.id) {
-          // these users have a read/write view of Advanced Settings
+          // these users have a read/write view
           case 'superuser at everything_space':
           case 'global_all at everything_space':
-
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: true,
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: true,
+              edit: true,
+              delete: true,
+              show: true,
             });
             break;
-          // these users have a read only view of Advanced Settings
+          // these users have a read only view
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: false,
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
+              show: true,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -60,9 +63,12 @@ export default function advancedSettingsTests({
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: false,
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
+              show: false,
             });
             break;
           // if we don't have access at the space itself, we're
