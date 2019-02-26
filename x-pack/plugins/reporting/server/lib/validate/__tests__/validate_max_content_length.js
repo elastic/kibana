@@ -11,10 +11,12 @@ const FIVE_HUNDRED_MEGABYTES = 524288000;
 const ONE_HUNDRED_MEGABYTES = 104857600;
 
 describe('Reporting: Validate Max Content Length', () => {
-  const log = sinon.spy();
+  const logger = {
+    warning: sinon.spy(),
+  };
 
   beforeEach(() => {
-    log.resetHistory();
+    logger.warning.resetHistory();
   });
 
   it('should log warning messages when reporting has a higher max-size than elasticsearch', async () => {
@@ -37,12 +39,12 @@ describe('Reporting: Validate Max Content Length', () => {
       },
     };
 
-    await validateMaxContentLength(server, log);
+    await validateMaxContentLength(server, logger);
 
-    sinon.assert.calledWithMatch(log, `xpack.reporting.csv.maxSizeBytes (524288000) is higher`);
-    sinon.assert.calledWithMatch(log, `than ElasticSearch's http.max_content_length (104857600)`);
-    sinon.assert.calledWithMatch(log, 'Please set http.max_content_length in ElasticSearch to match');
-    sinon.assert.calledWithMatch(log, 'or lower your xpack.reporting.csv.maxSizeBytes in Kibana');
+    sinon.assert.calledWithMatch(logger.warning, `xpack.reporting.csv.maxSizeBytes (524288000) is higher`);
+    sinon.assert.calledWithMatch(logger.warning, `than ElasticSearch's http.max_content_length (104857600)`);
+    sinon.assert.calledWithMatch(logger.warning, 'Please set http.max_content_length in ElasticSearch to match');
+    sinon.assert.calledWithMatch(logger.warning, 'or lower your xpack.reporting.csv.maxSizeBytes in Kibana');
   });
 
   it('should do nothing when reporting has the same max-size as elasticsearch', async () => {
@@ -65,7 +67,7 @@ describe('Reporting: Validate Max Content Length', () => {
       },
     };
 
-    expect(async () => validateMaxContentLength(server, log)).not.to.throwError();
-    sinon.assert.notCalled(log);
+    expect(async () => validateMaxContentLength(server, logger.warning)).not.to.throwError();
+    sinon.assert.notCalled(logger.warning);
   });
 });
