@@ -224,8 +224,12 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async waitForDeleted(selector) {
-      await find.waitForDeletedByCssSelector(testSubjSelector(selector));
+    async waitForDeleted(selectorOrElement) {
+      if (typeof (selectorOrElement) === 'string') {
+        await find.waitForDeletedByCssSelector(testSubjSelector(selectorOrElement));
+      } else {
+        await find.waitForElementStale(selectorOrElement);
+      }
     }
 
     async waitForAttributeToChange(selector, attribute, value) {
