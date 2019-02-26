@@ -28,7 +28,7 @@ import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
 /** @internal */
-export type HttpServiceStartContract = HttpServerInfo;
+export type HttpServiceStart = HttpServerInfo;
 
 /** @internal */
 export class HttpService implements CoreService<HttpServerInfo> {
