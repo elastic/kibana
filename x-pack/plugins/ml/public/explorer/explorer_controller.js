@@ -171,8 +171,8 @@ module.controller('MlExplorerController', function (
             }
 
             jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
-              fullJobs: resp.jobs,
               filterData,
+              fullJobs: resp.jobs,
               selectedCells,
               selectedJobIds,
               swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,

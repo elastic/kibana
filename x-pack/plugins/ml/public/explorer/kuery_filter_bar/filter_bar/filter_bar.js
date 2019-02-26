@@ -8,18 +8,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Suggestions } from '../suggestions';
 import { ClickOutside } from '../click_outside';
-import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
+import { EuiFieldSearch, EuiProgress, keyCodes } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-export const KEY_CODES = {
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  ENTER: 13,
-  ESC: 27,
-  TAB: 9
-};
 
 class FilterBar extends Component {
   state = {
@@ -59,11 +49,11 @@ class FilterBar extends Component {
     const { selectionStart } = event.target;
     const { value } = this.state;
     switch (event.keyCode) {
-      case KEY_CODES.LEFT:
+      case keyCodes.LEFT:
         this.setState({ isSuggestionsVisible: true });
         this.props.onChange(value, selectionStart);
         break;
-      case KEY_CODES.RIGHT:
+      case keyCodes.RIGHT:
         this.setState({ isSuggestionsVisible: true });
         this.props.onChange(value, selectionStart);
         break;
@@ -73,7 +63,7 @@ class FilterBar extends Component {
   onKeyDown = event => {
     const { isSuggestionsVisible, index, value } = this.state;
     switch (event.keyCode) {
-      case KEY_CODES.DOWN:
+      case keyCodes.DOWN:
         event.preventDefault();
         if (isSuggestionsVisible) {
           this.incrementIndex(index);
@@ -81,13 +71,13 @@ class FilterBar extends Component {
           this.setState({ isSuggestionsVisible: true, index: 0 });
         }
         break;
-      case KEY_CODES.UP:
+      case keyCodes.UP:
         event.preventDefault();
         if (isSuggestionsVisible) {
           this.decrementIndex(index);
         }
         break;
-      case KEY_CODES.ENTER:
+      case keyCodes.ENTER:
         event.preventDefault();
         if (isSuggestionsVisible && this.props.suggestions[index]) {
           this.selectSuggestion(this.props.suggestions[index]);
@@ -96,11 +86,11 @@ class FilterBar extends Component {
           this.props.onSubmit(value);
         }
         break;
-      case KEY_CODES.ESC:
+      case keyCodes.ESC:
         event.preventDefault();
         this.setState({ isSuggestionsVisible: false });
         break;
-      case KEY_CODES.TAB:
+      case keyCodes.TAB:
         this.setState({ isSuggestionsVisible: false });
         break;
     }

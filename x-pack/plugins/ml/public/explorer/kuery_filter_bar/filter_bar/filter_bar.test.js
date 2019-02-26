@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { FilterBar, KEY_CODES } from './filter_bar';
+import { keyCodes } from '@elastic/eui';
+import { FilterBar } from './filter_bar';
 
 
 const defaultProps = {
@@ -63,7 +64,7 @@ describe('FilterBar', () => {
     expect(wrapper.state('isSuggestionsVisible')).toBe(false);
 
     const searchBar = wrapper.find('EuiFieldSearch');
-    searchBar.simulate('keydown', { preventDefault: () => {}, keyCode: KEY_CODES.DOWN });
+    searchBar.simulate('keydown', { preventDefault: () => {}, keyCode: keyCodes.DOWN });
     wrapper.update();
     // updated values
     expect(wrapper.state('index')).toEqual(0);
@@ -74,7 +75,7 @@ describe('FilterBar', () => {
     const wrapper = shallow(<FilterBar {...defaultProps} />);
     wrapper.setState({ isSuggestionsVisible: true, value: 'f', index: 0 });
     const searchBar = wrapper.find('EuiFieldSearch');
-    searchBar.simulate('keydown', { preventDefault: () => { }, keyCode: KEY_CODES.DOWN });
+    searchBar.simulate('keydown', { preventDefault: () => { }, keyCode: keyCodes.DOWN });
     wrapper.update();
 
     expect(wrapper.state('index')).toEqual(1);

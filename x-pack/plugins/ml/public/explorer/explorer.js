@@ -304,9 +304,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
     // Field objects required fields: name, type, aggregatable, searchable
-
-    // TODO: Figure out if we need type other than string since types returned from mapping may be more
-    // varied than what is accepted by the kuery bar.
     async getIndexPattern(selectedJobs, noInfluencersConfigured) {
       const selectedJobIds = selectedJobs.map((job) => job.id);
       const influencers = await loadInfluencerFields(selectedJobIds, noInfluencersConfigured);
@@ -544,7 +541,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     topFieldsPreviousArgs = null;
     topFieldsPreviousData = null;
-    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) { // influencersFilterQuery
+    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
       const { swimlaneLimit } = this.props;
 
@@ -567,8 +564,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobIds,
             earliestMs,
             latestMs,
-            swimlaneLimit,
-            //influencersFilterQuery
+            swimlaneLimit
           ).then((resp) => {
             if (resp.influencers[swimlaneViewByFieldName] === undefined) {
               this.topFieldsPreviousData = [];
@@ -714,7 +710,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
       } else {
-        // TODO: ensure this is the right place to put this - check for side effects
         let tempInfluencersFilterQuery = influencersFilterQuery;
 
         if (maskAll === true) {
