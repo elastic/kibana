@@ -20,10 +20,6 @@ import {
 import {
   PHASE_COLD,
   PHASE_ENABLED,
-  PHASE_ROLLOVER_ALIAS,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-  PHASE_NODE_ATTRS,
   PHASE_REPLICA_COUNT,
   PHASE_FREEZE_ENABLED
 } from '../../../../store/constants';
@@ -40,15 +36,6 @@ class ColdPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
-      [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
-      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-    }).isRequired,
   };
   render() {
     const {

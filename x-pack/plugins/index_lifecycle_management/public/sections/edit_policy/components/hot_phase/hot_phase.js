@@ -21,7 +21,6 @@ import {
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../components';
 import {
   PHASE_HOT,
-  PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MAX_AGE,
   PHASE_ROLLOVER_MAX_AGE_UNITS,
   PHASE_ROLLOVER_MAX_DOCUMENTS,
@@ -39,19 +38,6 @@ class HotPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MAX_AGE]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired,
-      [PHASE_ROLLOVER_MAX_AGE_UNITS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MAX_SIZE_STORED]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired,
-      [PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]: PropTypes.string.isRequired
-    }).isRequired
   };
 
   render() {

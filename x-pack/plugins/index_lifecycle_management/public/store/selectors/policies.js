@@ -9,12 +9,6 @@
 import { createSelector } from 'reselect';
 import { Pager } from '@elastic/eui';
 import {
-  defaultColdPhase,
-  defaultDeletePhase,
-  defaultHotPhase,
-  defaultWarmPhase,
-} from '../defaults';
-import {
   PHASE_HOT,
   PHASE_WARM,
   PHASE_COLD,
@@ -127,10 +121,13 @@ export const isEmptyObject = (obj) => {
   return Object.entries(obj).length === 0 && obj.constructor === Object;
 };
 
-export const phaseFromES = (phase, phaseName, defaultPolicy) => {
-  const policy = { ...defaultPolicy };
+export const phaseFromES = (phase, phaseName) => {
+  const policy = { };
 
   if (!phase) {
+    policy[PHASE_ENABLED] = false;
+    policy[PHASE_ROLLOVER_ENABLED] = false;
+    policy[PHASE_INDEX_PRIORITY] = '';
     return policy;
   }
 
@@ -217,10 +214,10 @@ export const policyFromES = (policy) => {
   return {
     name,
     phases: {
-      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultHotPhase),
-      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhase),
-      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultColdPhase),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultDeletePhase)
+      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT),
+      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM),
+      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD),
+      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE)
     },
     isNew: false,
     saveAsNew: false

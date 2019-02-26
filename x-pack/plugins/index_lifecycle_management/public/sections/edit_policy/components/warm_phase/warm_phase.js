@@ -21,14 +21,10 @@ import {
   PHASE_WARM,
   PHASE_ENABLED,
   WARM_PHASE_ON_ROLLOVER,
-  PHASE_ROLLOVER_ALIAS,
   PHASE_FORCE_MERGE_ENABLED,
   PHASE_FORCE_MERGE_SEGMENTS,
-  PHASE_NODE_ATTRS,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_SHRINK_ENABLED,
 } from '../../../../store/constants';
 import { SetPriorityInput } from '../set_priority_input';
@@ -43,21 +39,6 @@ class WarmPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [WARM_PHASE_ON_ROLLOVER]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_FORCE_MERGE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_FORCE_MERGE_SEGMENTS]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
-      [PHASE_PRIMARY_SHARD_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-        .isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
-    }).isRequired,
   };
   render() {
     const {
