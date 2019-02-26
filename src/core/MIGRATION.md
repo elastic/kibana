@@ -732,9 +732,7 @@ new Plugin().start(core);
 
 // demo/public/index.js
 import { core } from 'ui/core';
-import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
 import 'ui/autoload/styles';
-import 'ui/autoload/all';
 
 import template from './templates/index.html';
 chrome.setRootTemplate(template);
