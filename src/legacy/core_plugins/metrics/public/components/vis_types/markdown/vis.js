@@ -74,7 +74,9 @@ function MarkdownVisualization(props) {
         {markdownError && <ErrorComponent error={markdownError} />}
         <style type="text/css">{markdownCss}</style>
         <div className={contentClasses}>
-          <div id={markdownElementId}>{!markdownError && <Markdown markdown={markdownSource} />}</div>
+          <div id={markdownElementId}>
+            { !markdownError && <Markdown markdown={markdownSource} openLinksInNewTab={model.markdown_openLinksInNewTab} /> }
+          </div>
         </div>
       </div>
     );
