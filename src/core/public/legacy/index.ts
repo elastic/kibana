@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { LegacyPlatformService, LegacyPlatformParams } from './legacy_platform_service';
+export { LegacyPlatformService, LegacyPlatformParams } from './legacy_service';

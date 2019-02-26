@@ -142,7 +142,7 @@ jest.mock('ui/chrome/services/global_nav_state', () => {
   };
 });
 
-import { LegacyPlatformService } from './legacy_platform_service';
+import { LegacyPlatformService } from './legacy_service';
 
 const fatalErrorsStart = {} as any;
 const notificationsStart = {
