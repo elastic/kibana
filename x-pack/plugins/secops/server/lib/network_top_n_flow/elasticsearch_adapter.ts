@@ -30,7 +30,6 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
       'search',
       buildQuery(options)
     );
-
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);

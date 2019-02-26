@@ -27,7 +27,7 @@ export const mockOptions: RequestBasicOptions = {
 export const mockRequest = {
   params: {},
   payload: {
-    operationName: 'GetNetworkTopNFlowQuery',
+    operationName: 'GetKpiNetworkQuery',
     variables: {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
