@@ -7,6 +7,7 @@
 import { SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FeaturesService } from '../../common/services';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
@@ -17,13 +18,20 @@ export default function uiCapabilitesTests({
 }: KibanaFunctionalTestDefaultProviders) {
   const securityService: SecurityService = getService('security');
   const spacesService: SpacesService = getService('spaces');
+  const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function() {
     this.tags('ciGroup5');
 
     before(async () => {
+      const features = await featuresService.get();
       for (const space of Spaces) {
-        await spacesService.create(space);
+        const disabledFeatures =
+          space.disabledFeatures === '*' ? Object.keys(features) : space.disabledFeatures;
+        await spacesService.create({
+          ...space,
+          disabledFeatures,
+        });
       }
 
       for (const user of Users) {

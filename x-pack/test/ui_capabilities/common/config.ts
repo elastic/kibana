@@ -7,7 +7,7 @@
 import path from 'path';
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
-import { UICapabilitiesProvider } from './services';
+import { FeaturesProvider, UICapabilitiesProvider } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -30,6 +30,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         security: SecurityServiceProvider,
         spaces: SpacesServiceProvider,
         uiCapabilities: UICapabilitiesProvider,
+        features: FeaturesProvider,
       },
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',

@@ -6,19 +6,26 @@
 
 import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { Features } from '../../common/features';
+import { NavLinksBuilder } from '../../common/nav_links_builder';
+import { FeaturesService } from '../../common/services';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
 } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
-const features = new Features();
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
+  const featuresService: FeaturesService = getService('features');
 
   describe('navLinks', () => {
+    let navLinksBuilder: NavLinksBuilder;
+    before(async () => {
+      const features = await featuresService.get();
+      navLinksBuilder = new NavLinksBuilder(features);
+    });
+
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
@@ -32,25 +39,15 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            for (const [, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
-              expect(enabled).to.be(true);
-            }
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'foo_all':
           case 'foo_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            // only management should be enabled in this situation
-            for (const [navLinkId, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
-              if (
-                navLinkId === features.management.navLinkId ||
-                navLinkId === features.foo.navLinkId
-              ) {
-                expect(enabled).to.be(true);
-              } else {
-                expect(enabled).to.be(false);
-              }
-            }
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.only('management', 'foo')
+            );
             break;
           case 'no_kibana_privileges':
           case 'legacy_all':

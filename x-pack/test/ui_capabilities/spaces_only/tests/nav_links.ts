@@ -6,16 +6,23 @@
 
 import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { Features } from '../../common/features';
+import { NavLinksBuilder } from '../../common/nav_links_builder';
+import { FeaturesService } from '../../common/services';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
-const features = new Features();
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
+  const featuresService: FeaturesService = getService('features');
 
   describe('navLinks', () => {
+    let navLinksBuilder: NavLinksBuilder;
+    before(async () => {
+      const features = await featuresService.get();
+      navLinksBuilder = new NavLinksBuilder(features);
+    });
+
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
@@ -23,33 +30,17 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            for (const [, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
-              expect(enabled).to.be(true);
-            }
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            // only management should be enabled in this situation
-            for (const [navLinkId, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
-              if (navLinkId === features.management.navLinkId) {
-                expect(enabled).to.be(true);
-              } else {
-                expect(enabled).to.be(false);
-              }
-            }
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
           case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            // only management should be enabled in this situation
-            for (const [navLinkId, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
-              if (navLinkId === features.foo.navLinkId) {
-                expect(enabled).to.be(false);
-              } else {
-                expect(enabled).to.be(true);
-              }
-            }
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('foo'));
             break;
           default:
             throw new UnreachableError(scenario);
