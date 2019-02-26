@@ -20,6 +20,15 @@ export function SearchItemsProvider(Private, $route, config) {
   function createSearchItems() {
     let indexPattern = $route.current.locals.indexPattern;
 
+    // query is only used by the data visualizer as it needs
+    // a lucene string_string.
+    // Using a blank query will cause match_all:{} to be used
+    // when passed through luceneStringToDsl
+    let query = {
+      query: '',
+      language: 'lucene'
+    };
+
     let combinedQuery = {
       bool: {
         must: [{
@@ -33,7 +42,7 @@ export function SearchItemsProvider(Private, $route, config) {
       const searchSource = savedSearch.searchSource;
       indexPattern = searchSource.getField('index');
 
-      const query = searchSource.getField('query');
+      query = searchSource.getField('query');
       const fs = searchSource.getField('filter');
 
       const filters = (fs.length) ? fs : [];
@@ -45,7 +54,8 @@ export function SearchItemsProvider(Private, $route, config) {
     return {
       indexPattern,
       savedSearch,
-      combinedQuery
+      query,
+      combinedQuery,
     };
   }
 
