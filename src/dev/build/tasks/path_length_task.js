@@ -17,27 +17,32 @@
  * under the License.
  */
 
+import { relative } from 'path';
 
-import vfs from 'vinyl-fs';
-import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
+import { tap, filter, map, toArray } from 'rxjs/operators';
+
+import { scan$ } from '../lib/scan';
 
 export const PathLengthTask = {
   description: 'Checking Windows for paths > 200 characters',
 
   async run(config, log, build) {
-
-    await createPromiseFromStreams([
-      vfs.src('**/*', {
-        buffer: false,
-        dot: true,
-        cwd: build.resolvePath(),
-      }),
-      createMapStream((file) => {
-        const length = file.path.replace(build.resolvePath(), '').length;
-        if (length > 200) {
-          throw new Error(`Windows has a path limit of 260 characters. ${file.path} has from root length of ${length}`);
+    const buildRoot = build.resolvePath();
+    await scan$(buildRoot).pipe(
+      map(path => relative(buildRoot, path)),
+      filter(relativePath => relativePath.length > 200),
+      toArray(),
+      tap(tooLongPaths => {
+        if (!tooLongPaths.length) {
+          return;
         }
+
+        throw new Error(
+          'Windows has a path limit of 260 characters so we limit the length of paths in Kibana to 200 characters ' +
+          ' and the following files exceed this limit:' +
+          '\n - ' + tooLongPaths.join('\n - ')
+        );
       })
-    ]);
+    ).toPromise();
   }
 };
