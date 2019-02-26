@@ -25,6 +25,7 @@ export * from './target/types/type_exports';
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
 import * as LegacyElasticsearch from './src/legacy/core_plugins/elasticsearch';
+import * as LegacyKibanaPluginSpec from './src/legacy/plugin_discovery/plugin_spec/plugin_spec_options';
 import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 
 /**
@@ -45,13 +46,7 @@ export namespace Legacy {
     injectDefaultVars: (server: Server) => { [key: string]: any };
   }
 
-  export interface PluginFactoryConfig {
-    id: string;
-    require: string[];
-    publicDir: string;
-    uiExports?: UiExports;
-    init: InitPluginFunction;
-  }
+  export type PluginSpecOptions = LegacyKibanaPluginSpec.PluginSpecOptions;
 
   export namespace Plugins {
     export namespace elasticsearch {

@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Server } from '../../server/kbn_server';
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
-import { init } from './init';
+export type InitPluginFunction = (server: Server) => void;
+export interface UiExports {
+  injectDefaultVars: (server: Server) => { [key: string]: any };
+}
 
-export function InterpreterPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
-    },
-    init,
-  };
-
-  return new kibana.Plugin(config);
+export interface PluginSpecOptions {
+  id: string;
+  require: string[];
+  publicDir: string;
+  uiExports?: UiExports;
+  init: InitPluginFunction;
 }
