@@ -62,7 +62,7 @@ describe('suricata_row_renderer', () => {
       </ThemeProvider>
     );
     expect(wrapper.text()).toContain(
-      'some children ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)'
+      'some children 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
 

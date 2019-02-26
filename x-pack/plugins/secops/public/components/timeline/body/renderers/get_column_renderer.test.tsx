@@ -24,11 +24,9 @@ const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchem
 
 describe('get_column_renderer', () => {
   let nonSuricata: Ecs;
-  let suricata: Ecs;
 
   beforeEach(() => {
     nonSuricata = cloneDeep(mockEcsData[0]);
-    suricata = cloneDeep(mockEcsData[2]);
   });
 
   test('should render event id when dealing with data that is not suricata', () => {
@@ -50,18 +48,6 @@ describe('get_column_renderer', () => {
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('1');
-  });
-
-  test('should render CVE text as the event when dealing with a suricata event', () => {
-    const columnName = 'event.id';
-    const columnRenderer = getColumnRenderer(columnName, columnRenderers, suricata);
-    const column = columnRenderer.renderColumn(
-      columnName,
-      suricata,
-      allFieldsInSchemaByName[columnName]
-    );
-    const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual('CVE-2016-10174');
   });
 
   test('should render empty value when dealing with an empty value of user', () => {

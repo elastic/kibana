@@ -85,8 +85,7 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   // NOTE: This is only for the index filebeat. If you're using auditbeat, then this needs to be changed out for 'event.id': 'event.id'
   'event.id': 'suricata.eve.flow_id',
   'event.module': 'event.module',
-  // NOTE: This is only for the index filebeat. If you're using auditbeat, this doesn't matter as auditbeat does not have severities yet.
-  'event.severity': 'suricata.eve.alert.severity',
+  'event.severity': 'event.severity',
   'event.type': 'event.type',
 };
 
