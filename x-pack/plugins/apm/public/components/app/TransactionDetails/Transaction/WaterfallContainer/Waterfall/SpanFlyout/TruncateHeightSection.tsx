@@ -18,38 +18,27 @@ const ToggleButtonContainer = styled.div`
 `;
 
 interface Props {
-  previewHeight: string;
+  previewHeight: number;
 }
 
 export const TruncateHeightSection: React.SFC<Props> = ({
   children,
   previewHeight
 }) => {
-  const [isTruncated, setIsTruncated] = useState(true);
-  const [isContentClipping, setIsContentClipping] = useState(true);
-  const [forcedStaticHeight, setForcedStaticHeight] = useState(true);
   const contentContainerEl = useRef<HTMLDivElement>(null);
 
-  useEffect(
-    () => {
-      setForcedStaticHeight(true);
-    },
-    [children, previewHeight]
-  );
+  const [showToggle, setShowToggle] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(
     () => {
-      if (forcedStaticHeight) {
-        if (contentContainerEl.current) {
-          setIsContentClipping(
-            contentContainerEl.current.scrollHeight >
-              contentContainerEl.current.clientHeight
-          );
-        }
-        setForcedStaticHeight(false);
+      if (contentContainerEl.current) {
+        const shouldShow =
+          contentContainerEl.current.scrollHeight > previewHeight;
+        setShowToggle(shouldShow);
       }
     },
-    [forcedStaticHeight]
+    [children, previewHeight]
   );
 
   return (
@@ -58,26 +47,23 @@ export const TruncateHeightSection: React.SFC<Props> = ({
         ref={contentContainerEl}
         style={{
           overflow: 'hidden',
-          height:
-            forcedStaticHeight || (isContentClipping && isTruncated)
-              ? previewHeight
-              : 'auto'
+          maxHeight: isOpen ? 'initial' : px(previewHeight)
         }}
       >
         {children}
       </div>
-      {isContentClipping ? (
+      {showToggle ? (
         <ToggleButtonContainer>
           <EuiLink
             onClick={() => {
-              setIsTruncated(!isTruncated);
+              setIsOpen(!isOpen);
             }}
           >
             <Ellipsis
-              horizontal={!isTruncated}
+              horizontal={!isOpen}
               style={{ marginRight: units.half }}
             />{' '}
-            {isTruncated
+            {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
                   defaultMessage: 'Show more lines'
                 })
