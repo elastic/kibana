@@ -71,7 +71,7 @@ export class SampleDataSetCard extends React.Component {
                       datasetName: this.props.name,
                     },
                   })
-                  : i18n.translate('kbn.home.sampleDataSetCard.removeButtonLabel', {
+                  : i18n.translate('kbn.home.sampleDataSetCard.removeButtonAriaLabel', {
                     defaultMessage: 'Remove {datasetName}',
                     values: {
                       datasetName: this.props.name,
