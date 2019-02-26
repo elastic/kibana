@@ -22,6 +22,11 @@ export interface TimeRange {
   from: string;
 }
 
+export interface RefreshConfig {
+  isPaused: boolean;
+  interval: number;
+}
+
 export interface FilterMeta {
   disabled: boolean;
 }
@@ -54,6 +59,8 @@ export interface ContainerState {
   timeRange: TimeRange;
 
   filters: Filters;
+
+  refreshConfig: RefreshConfig;
 
   query: Query;
 

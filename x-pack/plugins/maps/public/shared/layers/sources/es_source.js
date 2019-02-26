@@ -40,6 +40,43 @@ export class AbstractESSource extends AbstractVectorSource {
     this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  _getValidMetrics() {
+    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
+      if (type === 'count') {
+        return true;
+      }
+
+      if (field) {
+        return true;
+      }
+      return false;
+    });
+    if (metrics.length === 0) {
+      metrics.push({ type: 'count' });
+    }
+    return metrics;
+  }
+
+  _formatMetricKey() {
+    throw new Error('should implement');
+  }
+
+  _formatMetricLabel() {
+    throw new Error('should implement');
+  }
+
+  getMetricFields() {
+    return this._getValidMetrics().map(metric => {
+      const metricKey = this._formatMetricKey(metric);
+      const metricLabel = this._formatMetricLabel(metric);
+      return {
+        ...metric,
+        propertyKey: metricKey,
+        propertyLabel: metricLabel
+      };
+    });
+  }
+
   async _runEsQuery(layerName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({
@@ -140,6 +177,18 @@ export class AbstractESSource extends AbstractVectorSource {
       throw new Error(`Unable to find Index pattern for id: ${this._descriptor.indexPatternId}`);
     }
   }
+
+  async supportsFitToBounds() {
+    try {
+      const geoField = await this._getGeoField();
+      // geo_bounds aggregation only supports geo_point
+      // there is currently no backend support for getting bounding box of geo_shape field
+      return geoField.type !== 'geo_shape';
+    } catch (error) {
+      return false;
+    }
+  }
+
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();

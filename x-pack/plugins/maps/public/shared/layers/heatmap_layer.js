@@ -9,6 +9,7 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -153,13 +154,13 @@ export class HeatmapLayer extends AbstractLayer {
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters }) {
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
-    startLoading('source', requestToken, searchFilters);
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints(layerName, searchFilters);
-      stopLoading('source', requestToken, data);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data);
     } catch (error) {
-      onLoadError('source', requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
 
