@@ -17,7 +17,7 @@ export function fetchUserActions(
   server: Server,
   appName: string,
   actionTypes: string[]
-): Promise<UserActionRecord | undefined> {
+): Promise<Array<UserActionRecord | undefined>> {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
