@@ -24,7 +24,7 @@ const RooComponent = (props: { setupOk: boolean }) => {
   if (props.setupOk) {
     return <Redirect to={'/admin'} />;
   }
-  return <SetupGuide setupFailed={true} />;
+  return <SetupGuide />;
 };
 
 const mapStateToProps = (state: RootState) => ({
