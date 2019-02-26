@@ -59,8 +59,8 @@ function getUpdateStatus<T extends Status>(
   requiresUpdateStatus: T[] = [],
   obj: any,
   param: { vis: Vis; visData: any; uiState: PersistedState }
-): { [reqStats in T]: boolean } {
-  const status = {} as { [reqStats in T]: boolean };
+): { [reqStats in Status]: boolean } {
+  const status = {} as { [reqStats in Status]: boolean };
 
   // If the vis type doesn't need update status, skip all calculations
   if (requiresUpdateStatus.length === 0) {

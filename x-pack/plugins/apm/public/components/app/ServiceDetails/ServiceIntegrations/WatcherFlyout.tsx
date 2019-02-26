@@ -253,18 +253,21 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <UnconnectedKibanaLink
-            location={this.props.location}
-            pathname={'/app/kibana'}
-            hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
-              {
-                defaultMessage: 'View watch'
-              }
-            )}
-          </UnconnectedKibanaLink>
+          {
+            // @ts-ignore
+            <UnconnectedKibanaLink
+              location={this.props.location}
+              pathname={'/app/kibana'}
+              hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
+                {
+                  defaultMessage: 'View watch'
+                }
+              )}
+            </UnconnectedKibanaLink>
+          }
         </p>
       )
     });
