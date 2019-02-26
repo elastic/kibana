@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -37,6 +37,24 @@ export default function ({ getPageObjects, getService }) {
       const gridExampleRequestNames = await inspector.getRequestNames();
       await inspector.close();
       expect(gridExampleRequestNames).to.equal('logstash-*');
+    });
+
+    it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
+      await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
+      const requestStats = await inspector.getTableData();
+      const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+      await inspector.close();
+      expect(totalHits).to.equal('6');
+    });
+
+    it('should apply new container state (time, query, filters) to embeddable', async () => {
+      await filterBar.selectIndexPattern('logstash-*');
+      await filterBar.addFilter('machine.os', 'is', 'win 8');
+      await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
+      const requestStats = await inspector.getTableData();
+      const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+      await inspector.close();
+      expect(totalHits).to.equal('1');
     });
   });
 }

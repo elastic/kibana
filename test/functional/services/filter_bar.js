@@ -134,6 +134,11 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await this.ensureFieldEditorModalIsClosed();
       return indexPatterns.trim().split('\n').join(',');
     }
+
+    async selectIndexPattern(indePatternTitle) {
+      await testSubjects.click('addFilter');
+      await comboBox.set('filterIndexPatternsSelect', indePatternTitle);
+    }
   }
 
   return new FilterBar();
