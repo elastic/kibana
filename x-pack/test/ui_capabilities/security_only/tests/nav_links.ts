@@ -30,6 +30,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'all':
           case 'dual_privileges_all':
           case 'dual_privileges_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             for (const [, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
               expect(enabled).to.be(true);
             }

@@ -6,9 +6,10 @@
 
 import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { navLinksBuilder } from '../../common/nav_links_builder';
+import { Features } from '../../common/features';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
+const features = new Features();
 
 // tslint:disable:no-default-export
 export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
@@ -22,87 +23,33 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            for (const [, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
+              expect(enabled).to.be(true);
+            }
             break;
           case 'nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            // only management should be enabled in this situation
+            for (const [navLinkId, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
+              if (navLinkId === features.management.navLinkId) {
+                expect(enabled).to.be(true);
+              } else {
+                expect(enabled).to.be(false);
+              }
+            }
             break;
-          case 'advanced_settings_disabled_space':
+          case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
-            break;
-          case 'apm_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('apm'));
-            break;
-          case 'canvas_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('canvas'));
-            break;
-          case 'dashboard_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('dashboard'));
-            break;
-          case 'dev_tools_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('dev_tools'));
-            break;
-          case 'discover_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('discover'));
-            break;
-          case 'graph_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('graph'));
-            break;
-          case 'maps_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('maps'));
-            break;
-          case 'infrastructure_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('infrastructure'));
-            break;
-          case 'logs_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('logs'));
-            break;
-          case 'ml_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('ml'));
-            break;
-          case 'monitoring_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('monitoring'));
-            break;
-          case 'timelion_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('timelion'));
-            break;
-          case 'uptime_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('uptime'));
-            break;
-          case 'visualize_disabled_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('visualize'));
+            // only management should be enabled in this situation
+            for (const [navLinkId, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
+              if (navLinkId === features.foo.navLinkId) {
+                expect(enabled).to.be(false);
+              } else {
+                expect(enabled).to.be(true);
+              }
+            }
             break;
           default:
             throw new UnreachableError(scenario);

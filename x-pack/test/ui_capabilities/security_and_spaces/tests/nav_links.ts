@@ -35,6 +35,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'global_read at everything_space':
           case 'everything_space_all at everything_space':
           case 'everything_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             for (const [, enabled] of Object.entries(uiCapabilities.value!.navLinks)) {
               expect(enabled).to.be(true);
             }

@@ -13,9 +13,7 @@ import {
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function advancedSettingsTests({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
