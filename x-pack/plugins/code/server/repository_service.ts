@@ -142,12 +142,12 @@ export class RepositoryService {
       // TODO(mengwei): deal with the case when the default branch has changed.
       const currentBranch = await repo.getCurrentBranch();
       const currentBranchName = currentBranch.shorthand();
-      await repo.mergeBranches(
-        currentBranchName,
-        `origin/${currentBranchName}`,
-        Git.Signature.default(repo),
-        Git.Merge.PREFERENCE.FASTFORWARD_ONLY
-      );
+      const originBranchName = `origin/${currentBranchName}`;
+      const originRef = await repo.getReference(originBranchName);
+      const headRef = await repo.getReference(currentBranchName);
+      if (!originRef.target().equal(headRef.target())) {
+        await headRef.setTarget(originRef.target(), 'update');
+      }
       const headCommit = await repo.getHeadCommit();
       this.log.debug(`Update repository to revision ${headCommit.sha()}`);
       return {
