@@ -64,6 +64,21 @@ describe('ReindexActions', () => {
       });
     });
 
+    it(`replaces .security-6 with .security-7`, async () => {
+      await actions.createReindexOp('.security-6');
+      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
+        indexName: '.security-6',
+        newIndexName: `.security-7`,
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        runningReindexCount: null,
+      });
+    });
+
     it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name, preserving leading period`, async () => {
       await actions.createReindexOp('.internalIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {

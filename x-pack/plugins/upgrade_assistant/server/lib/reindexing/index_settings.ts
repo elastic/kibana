@@ -7,6 +7,7 @@
 import { flow, omit } from 'lodash';
 import {
   CURRENT_MAJOR_VERSION,
+  NEXT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
@@ -18,6 +19,13 @@ export interface ParsedIndexName {
   newIndexName: string;
   cleanBaseName: string;
 }
+
+// the security indices must be whitelisted and follow the pattern set forth in v5
+const SECURITY_MATCHER = new RegExp(`^.security(-${CURRENT_MAJOR_VERSION})?$`);
+
+// in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
+// avoid conflicts with index patterns/templates/etc
+const REINDEXED_MATCHER = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -45,11 +53,13 @@ export const sourceNameForIndex = (indexName: string): string => {
   const internal = matches[1] || '';
   const baseName = matches[2];
 
-  // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
-  // avoid conflicts with index patterns/templates/etc
-  const reindexedMatcher = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
+  // special handling for security index
+  if (indexName.match(SECURITY_MATCHER)) {
+    return '.security';
+  }
 
-  const cleanBaseName = baseName.replace(reindexedMatcher, '');
+  const cleanBaseName = baseName.replace(REINDEXED_MATCHER, '');
+
   return `${internal}${cleanBaseName}`;
 };
 
@@ -62,6 +72,10 @@ export const sourceNameForIndex = (indexName: string): string => {
 export const generateNewIndexName = (indexName: string): string => {
   const sourceName = sourceNameForIndex(indexName);
   const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
+
+  if (sourceName === '.security') {
+    return `.security-${NEXT_MAJOR_VERSION}`;
+  }
 
   return indexName.startsWith('.')
     ? `.${currentVersion}-${sourceName.substr(1)}`
