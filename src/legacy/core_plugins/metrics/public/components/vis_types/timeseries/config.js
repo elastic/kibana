@@ -62,6 +62,13 @@ const TimeseriesConfig = injectI18n(function (props) {
   const stackedOptions = [
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.timeSeries.stackedWithinSeriesLabel',
+        defaultMessage: 'Stacked within series'
+      }),
+      value: 'stacked_within_series'
+    },
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }), value: 'percent' }
   ];
   const selectedStackedOption = stackedOptions.find(option => {
