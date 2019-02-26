@@ -5,12 +5,15 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
-import { routes } from './routeConfig';
-import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
-import { px, units, unit, topNavHeight } from '../../../style/variables';
+import styled from 'styled-components';
+import { px, topNavHeight, unit, units } from '../../../style/variables';
+// @ts-ignore
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
+import { LicenseCheck } from './LicenseCheck';
+import { routes } from './routeConfig';
+// @ts-ignore
+import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
 
 const MainContainer = styled.div`
@@ -19,17 +22,19 @@ const MainContainer = styled.div`
   min-height: calc(100vh - ${topNavHeight});
 `;
 
-export default function Main() {
+export function Main() {
   return (
     <MainContainer>
       <UpdateBreadcrumbs />
       <Route component={ConnectRouterToRedux} />
       <Route component={ScrollToTopOnPathChange} />
-      <Switch>
-        {routes.map((route, i) => (
-          <Route key={i} {...route} />
-        ))}
-      </Switch>
+      <LicenseCheck>
+        <Switch>
+          {routes.map((route, i) => (
+            <Route key={i} {...route} />
+          ))}
+        </Switch>
+      </LicenseCheck>
     </MainContainer>
   );
 }
