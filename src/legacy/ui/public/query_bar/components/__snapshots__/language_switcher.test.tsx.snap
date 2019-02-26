@@ -60,7 +60,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Kibana query language"
+                  defaultMessage="Kibana Query Language"
                   id="common.ui.queryBar.kqlFullLanguageName"
                   values={Object {}}
                 />
@@ -80,7 +80,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Kibana query language"
+            defaultMessage="Kibana Query Language"
             id="common.ui.queryBar.kqlFullLanguageName"
             values={Object {}}
           />
@@ -166,7 +166,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
                 type="button"
               >
                 <FormattedMessage
-                  defaultMessage="Kibana query language"
+                  defaultMessage="Kibana Query Language"
                   id="common.ui.queryBar.kqlFullLanguageName"
                   values={Object {}}
                 />
@@ -186,7 +186,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Kibana query language"
+            defaultMessage="Kibana Query Language"
             id="common.ui.queryBar.kqlFullLanguageName"
             values={Object {}}
           />
