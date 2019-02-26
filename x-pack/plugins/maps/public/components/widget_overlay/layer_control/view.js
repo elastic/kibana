@@ -19,7 +19,12 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
   if (!isReadOnly) {
     addLayer = (
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="xs" flush="right" onClick={showAddLayerWizard}>
+        <EuiButtonEmpty
+          size="xs"
+          flush="right"
+          onClick={showAddLayerWizard}
+          data-test-subj="addLayerButton"
+        >
           Add layer
         </EuiButtonEmpty>
       </EuiFlexItem>

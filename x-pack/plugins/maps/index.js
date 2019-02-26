@@ -11,6 +11,7 @@ import fligthsSavedObjects from './server/sample_data/flights_saved_objects.json
 import webLogsSavedObjects from './server/sample_data/web_logs_saved_objects.json';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
+import { migrations } from './migrations';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
@@ -53,7 +54,8 @@ export function maps(kibana) {
           isNamespaceAgnostic: true
         }
       },
-      mappings
+      mappings,
+      migrations,
     },
     config(Joi) {
       return Joi.object({
