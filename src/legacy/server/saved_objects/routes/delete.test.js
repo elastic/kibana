@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { createDeleteRoute } from './delete';
 import { MockServer } from './_mock_server';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
-  const savedObjectsClient = { delete: sinon.stub() };
+  const savedObjectsClient = { delete: jest.fn() };
   let server;
 
   beforeEach(() => {
+    savedObjectsClient.delete.mockImplementation(() => Promise.resolve('{}'));
     server = new MockServer();
 
     const prereqs = {
@@ -41,7 +41,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.delete.resetHistory();
+    savedObjectsClient.delete.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -49,15 +49,12 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       method: 'DELETE',
       url: '/api/saved_objects/index-pattern/logstash-*'
     };
-    const clientResponse = true;
-
-    savedObjectsClient.delete.returns(Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(response).toEqual({});
   });
 
   it('calls upon savedObjectClient.delete', async () => {
@@ -67,9 +64,6 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.delete.calledOnce).toBe(true);
-
-    const args = savedObjectsClient.delete.getCall(0).args;
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 });

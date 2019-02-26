@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { createUpdateRoute } from './update';
 import { MockServer } from './_mock_server';
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
-  const savedObjectsClient = { update: sinon.stub().returns('') };
+
+  const savedObjectsClient = { update: jest.fn() };
   let server;
 
   beforeEach(() => {
     server = new MockServer();
+    savedObjectsClient.update.mockImplementation(() => Promise.resolve(true));
 
     const prereqs = {
       getSavedObjectsClient: {
@@ -41,7 +42,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.update.resetHistory();
+    savedObjectsClient.update.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -56,31 +57,40 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       }
     };
 
-    savedObjectsClient.update.returns(Promise.resolve(true));
+    const clientResponse = {
+      id: 'logstash-*',
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+      notExpandable: true,
+      references: [],
+    };
+
+    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(true);
+    expect(response).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.update', async () => {
-    const attributes = { title: 'Testing' };
-    const options = { version: 'foo', references: [] };
     const request = {
       method: 'PUT',
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
-        attributes,
-        version: options.version
+        attributes: { title: 'Testing' },
+        version: 'foo',
       }
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.update.calledOnce).toBe(true);
 
-    const args = savedObjectsClient.update.getCall(0).args;
-    expect(args).toEqual(['index-pattern', 'logstash-*', attributes, options]);
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'logstash-*',
+      { title: 'Testing' },
+      { version: 'foo', references: [] }
+    );
   });
 });

@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { createBulkGetRoute } from './bulk_get';
 import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/_bulk_get', () => {
-  const savedObjectsClient = { bulkGet: sinon.stub().returns('') };
+  const savedObjectsClient = { bulkGet: jest.fn() };
   let server;
 
   beforeEach(() => {
+    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(''));
     server = new MockServer();
-
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -41,7 +40,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkGet.resetHistory();
+    savedObjectsClient.bulkGet.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -64,7 +63,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       }]
     };
 
-    savedObjectsClient.bulkGet.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -86,9 +85,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.bulkGet.calledOnce).toBe(true);
 
-    const args = savedObjectsClient.bulkGet.getCall(0).args;
-    expect(args[0]).toEqual(docs);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(docs);
   });
 });

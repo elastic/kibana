@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { createBulkCreateRoute } from './bulk_create';
 import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/_bulk_create', () => {
-  const savedObjectsClient = { bulkCreate: sinon.stub().returns('') };
+  const savedObjectsClient = { bulkCreate: jest.fn() };
   let server;
 
   beforeEach(() => {
+    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(''));
     server = new MockServer();
 
     const prereqs = {
@@ -41,7 +41,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkCreate.resetHistory();
+    savedObjectsClient.bulkCreate.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -67,7 +67,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       }]
     };
 
-    savedObjectsClient.bulkCreate.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -100,9 +100,9 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();
 
-    const args = savedObjectsClient.bulkCreate.getCall(0).args;
+    const args = savedObjectsClient.bulkCreate.mock.calls[0];
     expect(args[0]).toEqual(docs);
   });
 
@@ -114,15 +114,15 @@ describe('POST /api/saved_objects/_bulk_create', () => {
         id: 'abc1234',
         type: 'index-pattern',
         attributes: {
-          title: 'bar',
+          title: 'foo',
         },
         references: [],
       }]
     });
 
-    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();
 
-    const args = savedObjectsClient.bulkCreate.getCall(0).args;
+    const args = savedObjectsClient.bulkCreate.mock.calls[0];
     expect(args[1]).toEqual({ overwrite: true });
   });
 });

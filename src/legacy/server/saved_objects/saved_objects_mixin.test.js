@@ -18,20 +18,19 @@
  */
 
 import { savedObjectsMixin } from './saved_objects_mixin';
-import sinon from 'sinon';
 
 describe('Saved Objects Mixin', () => {
   let mockKbnServer;
   let mockServer;
-  const mockCallCluster = sinon.spy();
-  const stubCallCluster = sinon.stub();
-  const stubConfig = sinon.stub();
+  const mockCallCluster = jest.fn();
+  const stubCallCluster = jest.fn();
+  const stubConfig = jest.fn();
 
   beforeEach(() => {
     mockServer = {
-      log: sinon.spy(),
-      route: sinon.spy(),
-      decorate: sinon.spy(),
+      log: jest.fn(),
+      route: jest.fn(),
+      decorate: jest.fn(),
       config: () => {
         return {
           get: stubConfig,
@@ -45,7 +44,7 @@ describe('Saved Objects Mixin', () => {
               callWithInternalUser: stubCallCluster,
             };
           },
-          waitUntilReady: sinon.spy(),
+          waitUntilReady: jest.fn(),
         },
       },
     };
@@ -89,45 +88,45 @@ describe('Saved Objects Mixin', () => {
     it('should not try to create anything', () => {
       mockKbnServer.pluginSpecs.some = () => false;
       savedObjectsMixin(mockKbnServer, mockServer);
-      mockServer.log.calledWithMatch(sinon.match.array, sinon.match.string);
-      mockServer.decorate.calledWithMatch('server', 'kibanaMigrator', sinon.match.object);
-      expect(mockServer.decorate.callCount).toBe(1);
-      expect(mockServer.route.callCount).toBe(0);
+      expect(mockServer.log).toHaveBeenCalledWith(expect.any(Array), expect.any(String));
+      expect(mockServer.decorate).toHaveBeenCalledWith('server', 'kibanaMigrator', expect.any(Object));
+      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
+      expect(mockServer.route).not.toHaveBeenCalled();
     });
   });
 
   describe('Routes', () => {
     it('should create 7 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.callCount).toBe(7);
+      expect(mockServer.route).toHaveBeenCalledTimes(7);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/_bulk_create', method: 'POST' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_bulk_create', method: 'POST' }));
     });
     it('should add POST /api/saved_objects/_bulk_get', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/_bulk_get', method: 'POST' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_bulk_get', method: 'POST' }));
     });
     it('should add POST /api/saved_objects/{type}/{id?}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/{type}/{id?}', method: 'POST' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/{type}/{id?}', method: 'POST' }));
     });
     it('should add DELETE /api/saved_objects/{type}/{id}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/{type}/{id}', method: 'DELETE' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'DELETE' }));
     });
     it('should add GET /api/saved_objects/_find', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/_find', method: 'GET' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_find', method: 'GET' }));
     });
     it('should add GET /api/saved_objects/{type}/{id}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/{type}/{id}', method: 'GET' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'GET' }));
     });
     it('should add PUT /api/saved_objects/{type}/{id}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/{type}/{id}', method: 'PUT' }))).toBeTruthy();
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'PUT' }));
     });
   });
 
@@ -136,13 +135,8 @@ describe('Saved Objects Mixin', () => {
 
     beforeEach(() => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      for(let n = 0; n < mockServer.decorate.callCount; ++n) {
-        const decorateCall = mockServer.decorate.getCall(n);
-        if(decorateCall.calledWithMatch('server', 'savedObjects', sinon.match({}))) {
-          service = decorateCall.args[2];
-          break;
-        }
-      }
+      const call = mockServer.decorate.mock.calls.filter(([objName, methodName]) => objName === 'server' && methodName === 'savedObjects');
+      service = call[0][2];
     });
 
     it('should return all but hidden types', () => {
@@ -150,7 +144,7 @@ describe('Saved Objects Mixin', () => {
       expect(service.types).toEqual(['config', 'testtype']);
     });
 
-    const mockCallEs = sinon.spy();
+    const mockCallEs = jest.fn();
     describe('repository creation', () => {
       it('should not allow a repository with an undefined type', () => {
         expect(() => {
@@ -208,13 +202,19 @@ describe('Saved Objects Mixin', () => {
       });
 
       it('should call underlining callCluster', async () => {
-        stubCallCluster.withArgs('indices.get').returns({ status: 404 });
-        stubCallCluster.withArgs('indices.getAlias').returns({ status: 404 });
-        stubCallCluster.withArgs('cat.templates').returns([]);
-        stubConfig.withArgs('kibana.index').returns('kibana-index');
+        stubCallCluster.mockImplementation((method) => {
+          if (method === 'indices.get') {
+            return { status: 404 };
+          } else if (method === 'indices.getAlias') {
+            return { status: 404 };
+          } else if (method === 'cat.templates') {
+            return [];
+          }
+        });
+        stubConfig.mockImplementation(() => 'kibana-index');
         const client = await service.getScopedSavedObjectsClient();
         await client.create('testtype');
-        expect(stubCallCluster.calledWithMatch('create', sinon.match.object)).toBeTruthy();
+        expect(stubCallCluster).toHaveBeenCalled();
       });
     });
 
@@ -223,13 +223,10 @@ describe('Saved Objects Mixin', () => {
 
       beforeEach(() => {
         savedObjectsMixin(mockKbnServer, mockServer);
-        for(let n = 0; n < mockServer.decorate.callCount; ++n) {
-          const decorateCall = mockServer.decorate.getCall(n);
-          if(decorateCall.calledWithMatch('request', 'getSavedObjectsClient', sinon.match.func)) {
-            getSavedObjectsClient = decorateCall.args[2];
-            break;
-          }
-        }
+        const call = mockServer.decorate.mock.calls.filter(
+          ([objName, methodName]) => objName === 'request' && methodName === 'getSavedObjectsClient'
+        );
+        getSavedObjectsClient = call[0][2];
       });
 
       it('should be callable', () => {

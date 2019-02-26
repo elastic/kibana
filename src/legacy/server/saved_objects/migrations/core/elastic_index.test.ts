@@ -18,18 +18,19 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
   describe('fetchInfo', () => {
     test('it handles 404', async () => {
-      const callCluster = sinon.spy(async (path: string, { ignore, index }: any) => {
-        expect(path).toEqual('indices.get');
-        expect(ignore).toEqual([404]);
-        expect(index).toEqual('.kibana-test');
-        return { status: 404 };
-      });
+      const callCluster = jest
+        .fn()
+        .mockImplementation(async (path: string, { ignore, index }: any) => {
+          expect(path).toEqual('indices.get');
+          expect(ignore).toEqual([404]);
+          expect(index).toEqual('.kibana-test');
+          return { status: 404 };
+        });
 
       const info = await Index.fetchInfo(callCluster, '.kibana-test');
       expect(info).toEqual({
@@ -41,7 +42,7 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if the index doc type is unsupported', async () => {
-      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+      const callCluster = jest.fn(async (path: string, { index }: any) => {
         return {
           [index]: {
             aliases: { foo: index },
@@ -56,7 +57,7 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if there are multiple root types', async () => {
-      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+      const callCluster = jest.fn().mockImplementation(async (path: string, { index }: any) => {
         return {
           [index]: {
             aliases: { foo: index },
@@ -74,7 +75,7 @@ describe('ElasticIndex', () => {
     });
 
     test('decorates index info with exists and indexName', async () => {
-      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+      const callCluster = jest.fn().mockImplementation(async (path: string, { index }: any) => {
         return {
           [index]: {
             aliases: { foo: index },
@@ -95,7 +96,7 @@ describe('ElasticIndex', () => {
 
   describe('createIndex', () => {
     test('calls indices.create', async () => {
-      const callCluster = sinon.spy(async (path: string, { body, index }: any) => {
+      const callCluster = jest.fn(async (path: string, { body, index }: any) => {
         expect(path).toEqual('indices.create');
         expect(body).toEqual({
           mappings: { foo: 'bar' },
@@ -105,25 +106,25 @@ describe('ElasticIndex', () => {
       });
 
       await Index.createIndex(callCluster, '.abcd', { foo: 'bar' } as any);
-      sinon.assert.called(callCluster);
+      expect(callCluster).toHaveBeenCalled();
     });
   });
 
   describe('deleteIndex', () => {
     test('calls indices.delete', async () => {
-      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+      const callCluster = jest.fn(async (path: string, { index }: any) => {
         expect(path).toEqual('indices.delete');
         expect(index).toEqual('.lotr');
       });
 
       await Index.deleteIndex(callCluster, '.lotr');
-      sinon.assert.called(callCluster);
+      expect(callCluster).toHaveBeenCalled();
     });
   });
 
   describe('claimAlias', () => {
-    function assertCalled(callCluster: sinon.SinonSpy) {
-      expect(callCluster.args.map(([path]) => path)).toEqual([
+    function assertCalled(callCluster: jest.Mock) {
+      expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
         'indices.getAlias',
         'indices.updateAliases',
         'indices.refresh',
@@ -131,7 +132,7 @@ describe('ElasticIndex', () => {
     }
 
     test('handles unaliased indices', async () => {
-      const callCluster = sinon.spy(async (path: string, arg: any) => {
+      const callCluster = jest.fn(async (path: string, arg: any) => {
         switch (path) {
           case 'indices.getAlias':
             expect(arg.ignore).toEqual([404]);
@@ -156,7 +157,7 @@ describe('ElasticIndex', () => {
     });
 
     test('removes existing alias', async () => {
-      const callCluster = sinon.spy(async (path: string, arg: any) => {
+      const callCluster = jest.fn(async (path: string, arg: any) => {
         switch (path) {
           case 'indices.getAlias':
             return { '.my-fanci-index': '.muchacha' };
@@ -182,7 +183,7 @@ describe('ElasticIndex', () => {
     });
 
     test('allows custom alias actions', async () => {
-      const callCluster = sinon.spy(async (path: string, arg: any) => {
+      const callCluster = jest.fn(async (path: string, arg: any) => {
         switch (path) {
           case 'indices.getAlias':
             return { '.my-fanci-index': '.muchacha' };
@@ -213,7 +214,7 @@ describe('ElasticIndex', () => {
 
   describe('convertToAlias', () => {
     test('it creates the destination index, then reindexes to it', async () => {
-      const callCluster = sinon.spy(async (path: string, arg: any) => {
+      const callCluster = jest.fn(async (path: string, arg: any) => {
         switch (path) {
           case 'indices.create':
             expect(arg.body).toEqual({
@@ -268,7 +269,7 @@ describe('ElasticIndex', () => {
       };
       await Index.convertToAlias(callCluster, info, '.muchacha', 10);
 
-      expect(callCluster.args.map(([path]) => path)).toEqual([
+      expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
         'indices.create',
         'reindex',
         'tasks.get',
@@ -279,7 +280,7 @@ describe('ElasticIndex', () => {
     });
 
     test('throws error if re-index task fails', async () => {
-      const callCluster = sinon.spy(async (path: string, arg: any) => {
+      const callCluster = jest.fn(async (path: string, arg: any) => {
         switch (path) {
           case 'indices.create':
             expect(arg.body).toEqual({
@@ -329,7 +330,7 @@ describe('ElasticIndex', () => {
         /Re-index failed \[search_phase_execution_exception\] all shards failed/
       );
 
-      expect(callCluster.args.map(([path]) => path)).toEqual([
+      expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
         'indices.create',
         'reindex',
         'tasks.get',
@@ -340,7 +341,11 @@ describe('ElasticIndex', () => {
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
       const index = '.myalias';
-      const callCluster = sinon.stub();
+      const callCluster = jest.fn(() =>
+        Promise.resolve({
+          items: [],
+        })
+      );
       const docs = [
         {
           _id: 'niceguy:fredrogers',
@@ -364,21 +369,19 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      callCluster.returns(
-        Promise.resolve({
-          items: [],
-        })
-      );
-
       await Index.write(callCluster, index, docs);
 
-      sinon.assert.calledOnce(callCluster);
-      expect(callCluster.args[0]).toMatchSnapshot();
+      expect(callCluster).toHaveBeenCalled();
+      expect(callCluster.mock.calls[0]).toMatchSnapshot();
     });
 
     test('fails if any document fails', async () => {
       const index = '.myalias';
-      const callCluster = sinon.stub();
+      const callCluster = jest.fn(() =>
+        Promise.resolve({
+          items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
+        })
+      );
       const docs = [
         {
           _id: 'niceguy:fredrogers',
@@ -391,21 +394,15 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      callCluster.returns(
-        Promise.resolve({
-          items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
-        })
-      );
-
       await expect(Index.write(callCluster, index, docs)).rejects.toThrow(/dern/);
-      sinon.assert.calledOnce(callCluster);
+      expect(callCluster).toHaveBeenCalled();
     });
   });
 
   describe('reader', () => {
     test('returns docs in batches', async () => {
       const index = '.myalias';
-      const callCluster = sinon.stub();
+      const callCluster = jest.fn();
 
       const batch1 = [
         {
@@ -430,32 +427,28 @@ describe('ElasticIndex', () => {
       ];
 
       callCluster
-        .onCall(0)
-        .returns(
+        .mockReturnValueOnce(
           Promise.resolve({
             _scroll_id: 'x',
             _shards: { success: 1, total: 1 },
             hits: { hits: _.cloneDeep(batch1) },
           })
         )
-        .onCall(1)
-        .returns(
+        .mockReturnValueOnce(
           Promise.resolve({
             _scroll_id: 'y',
             _shards: { success: 1, total: 1 },
             hits: { hits: _.cloneDeep(batch2) },
           })
         )
-        .onCall(2)
-        .returns(
+        .mockReturnValueOnce(
           Promise.resolve({
             _scroll_id: 'z',
             _shards: { success: 1, total: 1 },
             hits: { hits: [] },
           })
         )
-        .onCall(3)
-        .returns(Promise.resolve());
+        .mockReturnValue(Promise.resolve());
 
       const read = Index.reader(callCluster, index, { batchSize: 100, scrollDuration: '5m' });
 
@@ -464,7 +457,7 @@ describe('ElasticIndex', () => {
       expect(await read()).toEqual([]);
 
       // Check order of calls, as well as args
-      expect(callCluster.args).toEqual([
+      expect(callCluster.mock.calls).toEqual([
         ['search', { body: { size: 100 }, index, scroll: '5m' }],
         ['scroll', { scroll: '5m', scrollId: 'x' }],
         ['scroll', { scroll: '5m', scrollId: 'y' }],
@@ -474,7 +467,7 @@ describe('ElasticIndex', () => {
 
     test('returns all root-level properties', async () => {
       const index = '.myalias';
-      const callCluster = sinon.stub();
+      const callCluster = jest.fn();
       const batch = [
         {
           _id: 'such:1',
@@ -488,16 +481,14 @@ describe('ElasticIndex', () => {
       ];
 
       callCluster
-        .onCall(0)
-        .returns(
+        .mockReturnValueOnce(
           Promise.resolve({
             _scroll_id: 'x',
             _shards: { success: 1, total: 1 },
             hits: { hits: _.cloneDeep(batch) },
           })
         )
-        .onCall(1)
-        .returns(
+        .mockReturnValue(
           Promise.resolve({
             _scroll_id: 'z',
             _shards: { success: 1, total: 1 },
@@ -515,9 +506,9 @@ describe('ElasticIndex', () => {
 
     test('fails if not all shards were successful', async () => {
       const index = '.myalias';
-      const callCluster = sinon.stub();
+      const callCluster = jest.fn();
 
-      callCluster.returns(Promise.resolve({ _shards: { successful: 1, total: 2 } }));
+      callCluster.mockReturnValue(Promise.resolve({ _shards: { successful: 1, total: 2 } }));
 
       const read = Index.reader(callCluster, index, {
         batchSize: 100,
@@ -529,7 +520,7 @@ describe('ElasticIndex', () => {
 
     test('handles shards not being returned', async () => {
       const index = '.myalias';
-      const callCluster = sinon.stub();
+      const callCluster = jest.fn();
       const batch = [
         {
           _id: 'such:1',
@@ -543,15 +534,13 @@ describe('ElasticIndex', () => {
       ];
 
       callCluster
-        .onCall(0)
-        .returns(
+        .mockReturnValueOnce(
           Promise.resolve({
             _scroll_id: 'x',
             hits: { hits: _.cloneDeep(batch) },
           })
         )
-        .onCall(1)
-        .returns(
+        .mockReturnValue(
           Promise.resolve({
             _scroll_id: 'z',
             hits: { hits: [] },
@@ -575,7 +564,7 @@ describe('ElasticIndex', () => {
       count,
       migrations,
     }: any) {
-      const callCluster = sinon.spy(async (path: string) => {
+      const callCluster = jest.fn(async (path: string) => {
         if (path === 'indices.get') {
           return {
             [index]: { mappings },
@@ -603,14 +592,12 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeFalsy();
-      expect(callCluster.args).toEqual([
-        [
-          'indices.get',
-          {
-            ignore: [404],
-            index: '.myalias',
-          },
-        ],
+      expect(callCluster.mock.calls[0]).toEqual([
+        'indices.get',
+        {
+          ignore: [404],
+          index: '.myalias',
+        },
       ]);
     });
 
@@ -631,8 +618,8 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeTruthy();
-      sinon.assert.calledOnce(callCluster);
-      expect(callCluster.args[0][0]).toEqual('indices.get');
+      expect(callCluster).toHaveBeenCalled();
+      expect(callCluster.mock.calls[0][0]).toEqual('indices.get');
     });
 
     test('is true if there are no documents out of date', async () => {
@@ -652,9 +639,9 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeTruthy();
-      sinon.assert.calledTwice(callCluster);
-      expect(callCluster.args[0][0]).toEqual('indices.get');
-      expect(callCluster.args[1][0]).toEqual('count');
+      expect(callCluster).toHaveBeenCalled();
+      expect(callCluster.mock.calls[0][0]).toEqual('indices.get');
+      expect(callCluster.mock.calls[1][0]).toEqual('count');
     });
 
     test('is false if there are documents out of date', async () => {
@@ -674,9 +661,8 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeFalsy();
-      sinon.assert.calledTwice(callCluster);
-      expect(callCluster.args[0][0]).toEqual('indices.get');
-      expect(callCluster.args[1][0]).toEqual('count');
+      expect(callCluster.mock.calls[0][0]).toEqual('indices.get');
+      expect(callCluster.mock.calls[1][0]).toEqual('count');
     });
 
     test('counts docs that are out of date', async () => {
@@ -714,7 +700,7 @@ describe('ElasticIndex', () => {
         };
       }
 
-      expect(callCluster.args[1]).toEqual([
+      expect(callCluster.mock.calls[1]).toEqual([
         'count',
         {
           body: {

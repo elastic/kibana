@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { createFindRoute } from './find';
 import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/_find', () => {
-  const savedObjectsClient = { find: sinon.stub().returns('') };
+  const savedObjectsClient = { find: jest.fn() };
   let server;
 
   beforeEach(() => {
+    savedObjectsClient.find.mockImplementation(() => Promise.resolve(''));
     server = new MockServer();
 
     const prereqs = {
@@ -41,7 +41,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.find.resetHistory();
+    savedObjectsClient.find.mockReset();
   });
 
   it('returns with status 400 when type is missing', async () => {
@@ -87,7 +87,7 @@ describe('GET /api/saved_objects/_find', () => {
       ]
     };
 
-    savedObjectsClient.find.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.find.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -104,9 +104,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 20, page: 1, type: ['foo', 'bar'], defaultSearchOperator: 'OR' });
   });
 
@@ -118,9 +118,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
@@ -132,9 +132,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'], type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
@@ -146,9 +146,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'], type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
@@ -160,9 +160,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20, page: 1, fields: ['title', 'description'], type: ['foo'], defaultSearchOperator: 'OR'
     });
@@ -176,9 +176,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern'], defaultSearchOperator: 'OR' });
   });
 
@@ -190,9 +190,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern', 'visualization'], defaultSearchOperator: 'OR' });
   });
 });

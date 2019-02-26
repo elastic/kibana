@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { createGetRoute } from './get';
 import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/{type}/{id}', () => {
-  const savedObjectsClient = { get: sinon.stub().returns('') };
+  const savedObjectsClient = { get: jest.fn() };
   let server;
 
   beforeEach(() => {
+    savedObjectsClient.get.mockImplementation(() => Promise.resolve(true));
     server = new MockServer();
 
     const prereqs = {
@@ -41,7 +41,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.get.resetHistory();
+    savedObjectsClient.get.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -57,7 +57,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       references: [],
     };
 
-    savedObjectsClient.get.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.get.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -73,9 +73,9 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.get.calledOnce).toBe(true);
+    expect(savedObjectsClient.get).toHaveBeenCalled();
 
-    const args = savedObjectsClient.get.getCall(0).args;
+    const args = savedObjectsClient.get.mock.calls[0];
     expect(args).toEqual(['index-pattern', 'logstash-*']);
   });
 });
