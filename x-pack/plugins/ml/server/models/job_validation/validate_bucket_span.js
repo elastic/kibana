@@ -88,7 +88,6 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
       aggTypes: [],
       duration,
       fields: [],
-      filters: [],
       index: job.datafeed_config.indices.join(','),
       query: wrapQuery(job.datafeed_config.query),
       splitField: undefined,

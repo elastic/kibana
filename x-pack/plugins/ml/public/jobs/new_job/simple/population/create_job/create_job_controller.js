@@ -114,8 +114,6 @@ module
     const {
       indexPattern,
       savedSearch,
-      query,
-      filters,
       combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
@@ -236,8 +234,6 @@ module
       influencerFields: [],
       firstSplitFieldName: undefined,
       indexPattern: indexPattern,
-      query,
-      filters,
       combinedQuery,
       usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',

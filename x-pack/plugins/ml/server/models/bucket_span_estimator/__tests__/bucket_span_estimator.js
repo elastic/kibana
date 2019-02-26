@@ -62,11 +62,10 @@ const formConfig = {
   aggTypes: ['count'],
   duration: {},
   fields: [null],
-  filters: [],
   index: '',
   query: {
     bool: {
-      must: [{ query_string: { analyze_wildcard: true, query: '*' } }],
+      must: [{ match_all: {} }],
       must_not: []
     }
   }
