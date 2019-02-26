@@ -9,12 +9,6 @@
 import { createSelector } from 'reselect';
 import { Pager } from '@elastic/eui';
 import {
-  defaultColdPhase,
-  defaultDeletePhase,
-  defaultHotPhase,
-  defaultWarmPhase,
-} from '../defaults';
-import {
   PHASE_HOT,
   PHASE_WARM,
   PHASE_COLD,
@@ -33,12 +27,18 @@ import {
   PHASE_REPLICA_COUNT,
   PHASE_ENABLED,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-  MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_SHRINK_ENABLED,
   PHASE_FREEZE_ENABLED,
-  PHASE_INDEX_PRIORITY
+  PHASE_INDEX_PRIORITY,
+  PHASE_ROLLOVER_MAX_DOCUMENTS
 } from '../constants';
+import {
+  defaultEmptyDeletePhase,
+  defaultEmptyColdPhase,
+  defaultEmptyWarmPhase,
+  defaultEmptyHotPhase
+} from '../defaults';
 import { filterItems, sortTable } from '../../services';
 
 
@@ -127,15 +127,14 @@ export const isEmptyObject = (obj) => {
   return Object.entries(obj).length === 0 && obj.constructor === Object;
 };
 
-export const phaseFromES = (phase, phaseName, defaultPolicy) => {
-  const policy = { ...defaultPolicy };
-
+export const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
+  const policy = { ...defaultEmptyPolicy };
   if (!phase) {
     return policy;
   }
 
   policy[PHASE_ENABLED] = true;
-  policy[PHASE_ROLLOVER_ENABLED] = false;
+
 
   if (phase.min_age) {
     if (phaseName === PHASE_WARM && phase.min_age === '0ms') {
@@ -149,7 +148,8 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     }
   }
   if (phaseName === PHASE_WARM) {
-    policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
+    policy[PHASE_SHRINK_ENABLED] = false;
+    policy[PHASE_FORCE_MERGE_ENABLED] = false;
   }
   if (phase.actions) {
     const actions = phase.actions;
@@ -172,8 +172,7 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
       }
       if (rollover.max_docs) {
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = rollover.max_docs;
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = MAX_SIZE_TYPE_DOCUMENT;
+        policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
       }
     }
 
@@ -214,10 +213,10 @@ export const policyFromES = (policy) => {
   return {
     name,
     phases: {
-      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultHotPhase),
-      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhase),
-      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultColdPhase),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultDeletePhase)
+      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultEmptyHotPhase),
+      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultEmptyWarmPhase),
+      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultEmptyColdPhase),
+      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultEmptyDeletePhase)
     },
     isNew: false,
     saveAsNew: false
@@ -245,13 +244,12 @@ export const phaseToES = (phase, originalEsPhase) => {
       }`;
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])) {
-      if (phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] === MAX_SIZE_TYPE_DOCUMENT) {
-        esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_SIZE_STORED];
-      } else {
-        esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
-          phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
-        }`;
-      }
+      esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
+        phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
+      }`;
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS])) {
+      esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_DOCUMENTS];
     }
   } else {
     delete esPhase.actions.rollover;

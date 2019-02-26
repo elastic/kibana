@@ -27,7 +27,7 @@ import topN from './vis_types/top_n/vis';
 import table from './vis_types/table/vis';
 import gauge from './vis_types/gauge/vis';
 import markdown from './vis_types/markdown/vis';
-import Error from './error';
+import ErrorComponent from './error';
 import NoData from './no_data';
 
 const types = {
@@ -46,7 +46,7 @@ function Visualization(props) {
   if (error) {
     return (
       <div className={props.className}>
-        <Error error={error} />
+        <ErrorComponent error={error} />
       </div>
     );
   }
