@@ -24,11 +24,11 @@ import _ from 'lodash';
 import React from 'react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
-import { documentationLinks } from '../../../../documentation_links/documentation_links';
 
 interface VisEditorAggSelectProps {
   agg: AggConfig;
   label: string;
+  aggHelpLink: string;
   aggTypeOptions: AggType[];
   isSelectValid: () => boolean;
   onChangeAggType: (agg: AggConfig, aggType: AggType) => void;
@@ -42,17 +42,12 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
 function VisEditorAggSelect({
   agg,
   label,
+  aggHelpLink,
   aggTypeOptions,
   onChangeAggType,
   isSelectValid,
 }: VisEditorAggSelectProps) {
   const selectedOptions = agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
-  let aggHelpLink = null;
-
-  if (_.has(agg, 'type.name')) {
-    aggHelpLink = _.get(documentationLinks, ['aggs', agg.type.name]);
-  }
-
   const labelNode = (
     <div>
       {label}
@@ -120,7 +115,7 @@ function VisEditorAggSelect({
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         onChange={onChange}
-        data-test-subj="visEditorAggSelect"
+        data-test-subj={agg.title}
         isClearable={false}
         isInvalid={isSelectValid && !isSelectValid()}
       />

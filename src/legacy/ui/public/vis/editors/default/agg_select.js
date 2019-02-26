@@ -26,6 +26,7 @@ uiModules
   .get('app/kibana', ['react'])
   .directive('visEditorAggSelect', reactDirective => reactDirective(wrapInI18nContext(VisEditorAggSelect), [
     'label',
+    'aggHelpLink',
     'onChangeAggType',
     'isSelectValid',
     ['agg', { watchDepth: 'collection' }],

@@ -18,12 +18,13 @@
  */
 
 import $ from 'jquery';
-import { get } from 'lodash';
+import { has, get } from 'lodash';
 import advancedToggleHtml from './advanced_toggle.html';
 import '../../../filters/match_any';
 import './agg_param';
 import { aggTypes } from '../../../agg_types';
 import { uiModules } from '../../../modules';
+import { documentationLinks } from '../../../documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { editorConfigProviders } from '../config/editor_config_providers';
@@ -54,6 +55,13 @@ uiModules
           updateAggParamEditor();
           updateEditorConfig('default');
         });
+
+        $scope.label = getAggSelectLabel();
+        $scope.isSelectValid = () => Boolean($scope.agg.type);
+        $scope.onChangeAggType = (agg, aggType) => {
+          agg.type = aggType;
+          aggForm.aggType.$setDirty();
+        };
 
         function updateEditorConfig(property = 'fixedValue') {
           $scope.editorConfig = editorConfigProviders.getConfigForAgg(
@@ -99,6 +107,10 @@ uiModules
 
         function updateAggParamEditor() {
           updateEditorConfig();
+          $scope.aggHelpLink = null;
+          if (has($scope, 'agg.type.name')) {
+            $scope.aggHelpLink = get(documentationLinks, ['aggs', $scope.agg.type.name]);
+          }
 
           if ($aggParamEditors) {
             $aggParamEditors.remove();
@@ -189,13 +201,6 @@ uiModules
             .append(param.editor)
             .get(0);
         }
-
-        $scope.label = getAggSelectLabel();
-        $scope.isSelectValid = () => Boolean($scope.agg.type);
-        $scope.onChangeAggType = (agg, aggType) => {
-          agg.type = aggType;
-          aggForm.aggType.$setDirty();
-        };
 
         function getAggSelectLabel() {
           let aggSelectLabel = '';
