@@ -39,6 +39,15 @@ module.factory('SavedGisMap', function (Private) {
         });
 
         savedObject.layerListJSON = attributes.layerListJSON;
+
+        const indexPatternIds = references
+          .filter(reference => {
+            return reference.type === 'index-pattern';
+          })
+          .map(reference => {
+            return reference.id;
+          });
+        savedObject.indexPatternIds = _.uniq(indexPatternIds);
       },
 
       // if this is null/undefined then the SavedObject will be assigned the defaults

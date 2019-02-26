@@ -26,8 +26,8 @@ import { getInspectorAdapters } from '../store/non_serializable_instances';
 
 export class MapEmbeddable extends Embeddable {
 
-  constructor({ onEmbeddableStateChanged, savedMap, editUrl }) {
-    super({ title: savedMap.title, editUrl });
+  constructor({ onEmbeddableStateChanged, savedMap, editUrl, indexPatterns = [] }) {
+    super({ title: savedMap.title, editUrl, indexPatterns });
 
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedMap = savedMap;
