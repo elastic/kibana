@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
@@ -18,19 +19,33 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
         switch (scenario.id) {
-          case 'everything_space':
+          case 'everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            expect(uiCapabilities.value!.catalogue).to.have.property('foo');
-            expect(uiCapabilities.value!.catalogue.foo).to.be(true);
+            // everything is enabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
-          case 'nothing_space':
-          case 'foo_disabled_space':
+          }
+          case 'nothing_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            expect(uiCapabilities.value!.catalogue).to.have.property('foo');
-            expect(uiCapabilities.value!.catalogue.foo).to.be(false);
+            // everything is disabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
+          }
+          case 'foo_disabled_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // only foo is enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (value, catalogueId) => catalogueId === 'foo'
+            );
+            expect(expected).to.eql(expected);
+            break;
+          }
           default:
             throw new UnreachableError(scenario);
         }
