@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { InjectedMetadataStartContract } from '../injected_metadata';
+import { InjectedMetadataStart } from '../injected_metadata';
 import { modifyUrl } from '../utils';
 
 interface Deps {
-  injectedMetadata: InjectedMetadataStartContract;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export class BasePathService {
@@ -71,4 +71,4 @@ export class BasePathService {
   }
 }
 
-export type BasePathStartContract = ReturnType<BasePathService['start']>;
+export type BasePathStart = ReturnType<BasePathService['start']>;

@@ -59,17 +59,17 @@ const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient,
 // Load the service
 import { UiSettingsService } from './ui_settings_service';
 
-const httpStartContract = {
+const httpStart = {
   addLoadingCount: jest.fn(),
 };
 
 const defaultDeps: any = {
   notifications: {
-    notificationsStartContract: true,
+    notificationsStart: true,
   },
-  http: httpStartContract,
+  http: httpStart,
   injectedMetadata: {
-    injectedMetadataStartContract: true,
+    injectedMetadataStart: true,
     getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
     getLegacyMetadata: jest.fn().mockReturnValue({
       uiSettings: {
@@ -79,7 +79,7 @@ const defaultDeps: any = {
     }),
   },
   basePath: {
-    basePathStartContract: true,
+    basePathStart: true,
   },
 };
 
@@ -103,7 +103,7 @@ describe('#start', () => {
   it('passes the uiSettings loading count to the loading count api', () => {
     new UiSettingsService().start(defaultDeps);
 
-    expect(httpStartContract.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
+    expect(httpStart.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
   });
 });
 
