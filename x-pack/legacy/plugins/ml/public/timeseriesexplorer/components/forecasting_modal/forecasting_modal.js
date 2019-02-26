@@ -22,6 +22,8 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 
+import { timefilter } from 'ui/timefilter';
+
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../common/constants/states';
@@ -68,7 +70,6 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     detectorIndex: PropTypes.number,
     entities: PropTypes.array,
     loadForForecastId: PropTypes.func,
-    timefilter: PropTypes.object,
   };
 
   constructor(props) {
@@ -348,7 +349,7 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
 
     if (typeof job === 'object') {
       // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
-      const bounds = this.props.timefilter.getActiveBounds();
+      const bounds = timefilter.getActiveBounds();
       const statusFinishedQuery = {
         term: {
           forecast_status: FORECAST_REQUEST_STATE.FINISHED
@@ -458,7 +459,6 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
     const forecastButton = (
       <EuiButton
         onClick={this.openModal}
-        size="s"
         isDisabled={isForecastingDisabled}
         fill
         data-test-subj="mlSingleMetricViewerButtonForecast"

@@ -6,48 +6,6 @@
 
   <ml-timeseriesexplorer-react-wrapper />
 
-  <div class="series-controls" ng-show="jobs.length > 0" data-test-subj="mlSingleMetricViewerSeriesControls">
-    <label
-      for="selectDetector"
-      class="kuiLabel"
-      i18n-id="xpack.ml.timeSeriesExplorer.detectorLabel"
-      i18n-default-message="Detector:"
-    ></label>
-    <select id="selectDetector" class="kuiSelect kuiSelect--large" ng-model="detectorId" ng-change="detectorIndexChanged()">
-      <option ng-repeat="detector in detectors track by detector.index" value="{{detector.index}}">{{detector.detector_description}}</option>
-    </select>
-
-    <div class="entity-controls" ng-repeat="entity in entities">
-      <datalist id="{{entity.fieldName}}_datalist">
-        <option ng-repeat="value in entity.fieldValues">{{value}}</option>
-      </datalist>
-
-      <label for="select{{entity.fieldName}}" class="kuiLabel">{{entity.fieldName}}:</label>
-      <input id="select{{entity.fieldName}}" class="kuiTextInput entity-input"
-        ng-class="{ 'entity-input-blank': entity.fieldValue.length === 0 }"
-        ng-model="entity.fieldValue" ng-model-options="{ updateOn: 'blur' }"
-        placeholder="{{ ::'xpack.ml.timeSeriesExplorer.enterValuePlaceholder' | i18n: {defaultMessage: 'Enter value'} }}"
-        list='{{entity.fieldName}}_datalist' />
-    </div>
-
-    <button
-      class="kuiButton kuiButton--primary"
-      ng-click="saveSeriesPropertiesAndRefresh()"
-      aria-label="{{ ::'xpack.ml.timeSeriesExplorer.refreshButtonAriLabel' | i18n: {defaultMessage: 'refresh'} }}"
-    >
-      <i class="fa fa-play" ></i>
-    </button>
-
-    <ml-forecasting-modal
-      job="selectedJob"
-      detectorIndex="+detectorId"
-      entities="entities"
-      loadForForecastId="loadForForecastId"
-      class="forecast-controls"
-    />
-
-  </div>
-
   <ml-loading-indicator
     label="{{ ::'xpack.ml.timeSeriesExplorer.loadingLabel' | i18n: {defaultMessage: 'Loading'} }}"
     is-loading="loading === true"

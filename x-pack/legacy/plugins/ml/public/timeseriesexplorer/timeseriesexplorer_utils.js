@@ -37,7 +37,12 @@ export function mapScopeToProps(scope) {
     detectorId: scope.detectorId,
     detectorIndexChanged: scope.detectorIndexChanged,
     detectors: scope.detectors,
+    entities: scope.entities,
+    entityFieldValueChanged: scope.entityFieldValueChanged,
+    loadForForecastId: scope.loadForForecastId,
     jobs: scope.jobs,
+    saveSeriesPropertiesAndRefresh: scope.saveSeriesPropertiesAndRefresh,
+    selectedJob: scope.selectedJob,
   };
 }
 

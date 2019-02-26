@@ -10,16 +10,18 @@
 
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButtonIcon,
+  EuiButton,
   EuiSelect,
 } from '@elastic/eui';
 
+import { EntityControl } from './components/entity_control';
+import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
 import { TimeseriesexplorerNoResultsFound } from './components/timeseriesexplorer_no_results_found';
@@ -37,7 +39,11 @@ export const TimeSeriesExplorer = injectI18n(
       detectorIndexChanged: PropTypes.func.isRequired,
       detectorId: PropTypes.string,
       detectors: PropTypes.array.isRequired,
+      entityFieldValueChanged: PropTypes.func.isRequired,
       jobs: PropTypes.array.isRequired,
+      loadForForecastId: PropTypes.func.isRequired,
+      saveSeriesPropertiesAndRefresh: PropTypes.func.isRequired,
+      selectedJob: PropTypes.object,
     };
 
     state = getTimeseriesexplorerDefaultState();
@@ -48,8 +54,13 @@ export const TimeSeriesExplorer = injectI18n(
       const {
         detectorId,
         detectors,
+        entities,
+        entityFieldValueChanged,
         intl,
         jobs,
+        loadForForecastId,
+        saveSeriesPropertiesAndRefresh,
+        selectedJob,
       } = this.props;
 
       const {
@@ -69,9 +80,9 @@ export const TimeSeriesExplorer = injectI18n(
 
       return (
         <Fragment>
-          <div className="series-controls">
-            <EuiFlexGroup style={{ maxWidth: 600 }}>
-              <EuiFlexItem>
+          <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
                 <EuiFormRow
                   label={intl.formatMessage({
                     id: 'xpack.ml.timeSeriesExplorer.detectorLabel',
@@ -85,18 +96,38 @@ export const TimeSeriesExplorer = injectI18n(
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <div className="entity-controls">Entity Controls</div>
-              </EuiFlexItem>
+              {entities.map((entity) => {
+                const entityKey = `${entity.fieldName}`;
+                return (
+                  <EntityControl
+                    entity={entity}
+                    entityFieldValueChanged={entityFieldValueChanged}
+                    key={entityKey}
+                  />
+                );
+              })}
               <EuiFlexItem grow={false}>
                 <EuiFormRow hasEmptyLabelSpace>
-                  <EuiButtonIcon
-                    aria-label={intl.formatMessage({
-                      id: 'xpack.ml.timeSeriesExplorer.refreshButtonAriLabel',
-                      defaultMessage: 'refresh',
-                    })}
+                  <EuiButton
                     fill
-                    iconType="play"
+                    iconType="refresh"
+                    onClick={saveSeriesPropertiesAndRefresh}
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.refreshButtonAriaLabel"
+                      defaultMessage="Refresh"
+                    />
+                  </EuiButton>
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ textAlign: 'right' }}>
+                <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
+                  <ForecastingModal
+                    job={selectedJob}
+                    detectorIndex={+detectorId}
+                    entities={entities}
+                    loadForForecastId={loadForForecastId}
+                    className="forecast-controls"
                   />
                 </EuiFormRow>
               </EuiFlexItem>

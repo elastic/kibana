@@ -662,6 +662,16 @@ module.controller('MlTimeSeriesExplorerController', function (
     loadEntityValues();
   };
 
+  $scope.entityFieldValueChanged = function (entity, fieldValue) {
+    $scope.entities = $scope.entities.map((scopeEntity) => {
+      if (scopeEntity.fieldName === entity.fieldName) {
+        scopeEntity.fieldValue = fieldValue;
+      }
+      return scopeEntity;
+    });
+    $scope.$applyAsync();
+  };
+
   $scope.toggleShowModelBounds = function () {
     $timeout(() => {
       $scope.showModelBounds = !$scope.showModelBounds;
