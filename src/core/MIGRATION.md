@@ -736,12 +736,8 @@ new Plugin().start(core);
 import { coreInternals } from 'ui/core';
 import 'ui/autoload/styles';
 
-import template from './templates/index.html';
-chrome.setRootTemplate(template);
-
-chrome.setRootController(() => {
-  const domElement = document.getElementById('custom-app-root');
-  coreInternals.applications.mountApp('demo', domElement);
+chrome.setRootController(function ($element) {
+  coreInternals.applications.mountApp('demo', $element[0]);
 });
 ```
 
