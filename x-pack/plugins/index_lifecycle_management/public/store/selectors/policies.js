@@ -33,6 +33,12 @@ import {
   PHASE_INDEX_PRIORITY,
   PHASE_ROLLOVER_MAX_DOCUMENTS
 } from '../constants';
+import {
+  defaultEmptyDeletePhase,
+  defaultEmptyColdPhase,
+  defaultEmptyWarmPhase,
+  defaultEmptyHotPhase
+} from '../defaults';
 import { filterItems, sortTable } from '../../services';
 
 
@@ -121,13 +127,9 @@ export const isEmptyObject = (obj) => {
   return Object.entries(obj).length === 0 && obj.constructor === Object;
 };
 
-export const phaseFromES = (phase, phaseName) => {
-  const policy = { };
-  policy[PHASE_ROLLOVER_ENABLED] = false;
-  policy[PHASE_INDEX_PRIORITY] = '';
+export const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
+  const policy = { ...defaultEmptyPolicy };
   if (!phase) {
-    policy[PHASE_ENABLED] = false;
-    policy[PHASE_ROLLOVER_ENABLED] = false;
     return policy;
   }
 
@@ -146,8 +148,8 @@ export const phaseFromES = (phase, phaseName) => {
     }
   }
   if (phaseName === PHASE_WARM) {
-    policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
-    policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
+    policy[PHASE_SHRINK_ENABLED] = false;
+    policy[PHASE_FORCE_MERGE_ENABLED] = false;
   }
   if (phase.actions) {
     const actions = phase.actions;
@@ -161,9 +163,6 @@ export const phaseFromES = (phase, phaseName) => {
         );
         policy[PHASE_ROLLOVER_MAX_AGE] = maxAge;
         policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = maxAgeUnits;
-      } else {
-        policy[PHASE_ROLLOVER_MAX_AGE] = '';
-        policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = 'd';
       }
       if (rollover.max_size) {
         const { size: maxSize, units: maxSizeUnits } = splitSizeAndUnits(
@@ -171,14 +170,9 @@ export const phaseFromES = (phase, phaseName) => {
         );
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = maxSize;
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
-      } else {
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = '';
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = 'gb';
       }
       if (rollover.max_docs) {
         policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
-      } else {
-        policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = '';
       }
     }
 
@@ -199,9 +193,6 @@ export const phaseFromES = (phase, phaseName) => {
       const forcemerge = actions.forcemerge;
       policy[PHASE_FORCE_MERGE_ENABLED] = true;
       policy[PHASE_FORCE_MERGE_SEGMENTS] = forcemerge.max_num_segments;
-    } else {
-      policy[PHASE_FORCE_MERGE_ENABLED] = false;
-      policy[PHASE_FORCE_MERGE_SEGMENTS] = '';
     }
 
     if (actions.shrink) {
@@ -222,10 +213,10 @@ export const policyFromES = (policy) => {
   return {
     name,
     phases: {
-      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT),
-      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM),
-      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE)
+      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultEmptyHotPhase),
+      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultEmptyWarmPhase),
+      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultEmptyColdPhase),
+      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultEmptyDeletePhase)
     },
     isNew: false,
     saveAsNew: false
