@@ -647,17 +647,17 @@ In the new plugin system, a plugin registers an application via the application 
 The basic interface would be something similar to:
 
 ```ts
-async function mount({ dom }) {
+async function mount({ domElement }) {
   const { bootstrapApp } = await import('/application');
 
-  const unmount = bootstrapApp({ dom });
+  const unmount = bootstrapApp({ domElement });
 
   // returns a function that cleans up after app when navigating away
   return unmount;
 }
 
 // application.ts
-export function bootstrapApp({ dom }) {
+export function bootstrapApp({ domElement }) {
   // all of the application-specific setup logic
   // application renders into the given dom element
 }
@@ -678,9 +678,9 @@ Let's look at an example for a react application.
 export class Plugin {
   start(core) {
     const { I18nContext } = core.i18n;
-    core.applications.register('demo', async function mount(dom) {
+    core.applications.register('demo', async function mount(domElement) {
       const { bootstrapApp } = await import('../application');
-      return bootstrapApp({ dom, I18nContext });
+      return bootstrapApp({ domElement, I18nContext });
     });
   }
 }
@@ -697,7 +697,7 @@ import { Main } from './components/Main';
 
 import './style/demo_custom_styles.css';
 
-export function bootstrapApp({ dom, I18nContext }) {
+export function bootstrapApp({ domElement, I18nContext }) {
   const store = configureStore();
 
   ReactDOM.render(
@@ -708,11 +708,11 @@ export function bootstrapApp({ dom, I18nContext }) {
         </Router>
       </Provider>
     </I18nContext>,
-    dom
+    domElement
   );
 
   return function destroyApp() {
-    ReactDOM.unmountComponentAtNode(dom);
+    ReactDOM.unmountComponentAtNode(domElement);
   }
 }
 
@@ -738,9 +738,9 @@ import 'ui/autoload/all';
 
 import template from './templates/index.html';
 chrome.setRootTemplate(template);
-const dom = document.getElementById('react-apm-root');
+const domElement = document.getElementById('react-apm-root');
 
-core.applications.mountApp('demo', dom);
+core.applications.mountApp('demo', domElement);
 ```
 
 
@@ -781,11 +781,11 @@ export class Plugin {
   }
 
   start(core, dependencies) {
-    core.applications.registerApp('visualize', (dom) => {
+    core.applications.registerApp('visualize', (domElement) => {
       this.legacyHackApp();
 
       import('../application').then(({ bootstrapApp }) => {
-        const app = bootstrapApp(dom);
+        const app = bootstrapApp(domElement);
       });
 
       return app.start();
