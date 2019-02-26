@@ -35,28 +35,6 @@ Add a `debugger` line to create a breakpoint, and then:
   gulp sync && mocha debug --compilers js:babel-register /pathto/kibana/plugins/monitoring/pathto/__tests__/testfile.js
   ```
 
-## Deploying
-
-Monitoring is part of XPack, and only a single XPack artifact needs to be
-deployed. Previously, the instructions to deploy were:
-
-> The `release task` creates archives and uploads them to
-download.elasticsearch.org/elasticsearch/monitoring/VERSION. You will need S3
-credentials in `$HOME/.aws-config.json`. Format as so:
-
-> ```
-> {
->   "key":"MY_KEY_HERE",
->   "secret":"your/long/secret/string"
-> }
-> ```
-
-> To upload the current archive as the "latest" release, use:
-
-> ```
-> gulp release
-> ```
-
 ## Multicluster Setup for Development
 
 To run the UI with multiple clusters, the easiest way is to run 2 nodes out of
