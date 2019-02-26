@@ -4107,7 +4107,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage": "您仍在查询自己的索引，但其为只读。您可以将分片分配给效率较低的硬件。为了获取更快的搜索，您可以减少分片数目并强制合并段。",
     "xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel": "温阶段",
     "xpack.indexLifecycleMgmt.hotPhase.daysLabel": "天",
-    "xpack.indexLifecycleMgmt.hotPhase.documentsLabel": "文档",
     "xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel": "启用滚动更新",
     "xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel": "千兆字节",
     "xpack.indexLifecycleMgmt.hotPhase.hoursLabel": "小时",
