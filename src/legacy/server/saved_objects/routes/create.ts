@@ -22,7 +22,8 @@ import Joi from 'joi';
 import { SavedObjectsClient } from '../';
 import { Prerequisites, SavedObjectReference } from './types';
 
-// @ts-ignore
+// @ts-ignore - Hapi.Request "query" doesn't allow non string types
+// but Hapi allows types to change in "validate" using Joi (boolean in this scenario).
 interface CreateRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;

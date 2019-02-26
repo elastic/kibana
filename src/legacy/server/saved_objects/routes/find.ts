@@ -23,7 +23,8 @@ import { SavedObjectsClient } from '../';
 import { keysToCamelCaseShallow } from '../../../utils/case_conversion';
 import { Prerequisites } from './types';
 
-// @ts-ignore
+// @ts-ignore - Hapi.Request "query" doesn't allow non string types
+// but Hapi allows types to change in "validate" using Joi (boolean, number, etc in this scenario).
 interface FindRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;

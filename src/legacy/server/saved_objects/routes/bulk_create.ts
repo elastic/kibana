@@ -31,7 +31,8 @@ interface SavedObject {
   references: SavedObjectReference[];
 }
 
-// @ts-ignore
+// @ts-ignore - Hapi.Request "query" doesn't allow non string types
+// but Hapi allows it to be changed in "validate" (boolean in this scenario).
 interface BulkCreateRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
