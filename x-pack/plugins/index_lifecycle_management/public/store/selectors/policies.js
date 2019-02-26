@@ -162,6 +162,7 @@ export const phaseFromES = (phase, phaseName) => {
         policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = maxAgeUnits;
       } else {
         policy[PHASE_ROLLOVER_MAX_AGE] = '';
+        policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = 'd';
       }
       if (rollover.max_size) {
         const { size: maxSize, units: maxSizeUnits } = splitSizeAndUnits(
@@ -171,9 +172,12 @@ export const phaseFromES = (phase, phaseName) => {
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
       } else {
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = '';
+        policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = 'gb';
       }
       if (rollover.max_docs) {
         policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
+      } else {
+        policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = '';
       }
     }
 
