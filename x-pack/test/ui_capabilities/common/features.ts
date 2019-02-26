@@ -59,6 +59,6 @@ export class Features {
     navLinkId: 'kibana:visualize',
   };
   public foo: Feature = {
-    navLinkId: 'foo',
+    navLinkId: 'foo_plugin',
   };
 }

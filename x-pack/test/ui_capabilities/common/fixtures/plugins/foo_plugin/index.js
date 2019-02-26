@@ -21,20 +21,19 @@ export default function (kibana) {
     config() {},
 
     init(server) {
-      console.log('I WILL INIT');
       server.plugins.xpack_main.registerFeature({
         id: 'foo',
         name: 'Foo',
         icon: 'upArrow',
-        navLinkId: 'foo',
-        app: [],
+        navLinkId: 'foo_plugin',
+        app: ['kibana'],
         privileges: {
           all: {
             savedObject: {
               all: ['foo'],
               read: ['index-pattern', 'config'],
             },
-            ui: ['create', 'edit', 'delete'],
+            ui: ['create', 'edit', 'delete', 'show'],
           },
           read: {
             savedObject: {

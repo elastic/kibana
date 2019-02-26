@@ -13,10 +13,12 @@ import {
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function devToolsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function advancedSettingsTests({
+  getService,
+}: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('dev_tools', () => {
+  describe('foo', () => {
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
@@ -24,25 +26,29 @@ export default function devToolsTests({ getService }: KibanaFunctionalTestDefaul
           password: scenario.password,
         });
         switch (scenario.username) {
-          // these users have a read/write view of Dev Tools
+          // these users have a read/write view of Foo
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
-          case 'dev_tools_all':
+          case 'foo_all':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('dev_tools');
-            expect(uiCapabilities.value!.dev_tools).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: true,
+              edit: true,
+              delete: true,
               show: true,
             });
             break;
-          // these users have a read-only view of Dev Tools
-          // for the time being, this is functionally equivalent to the read/write view
+          // these users have a read-only view of Foo
           case 'dual_privileges_read':
-          case 'dev_tools_all':
-          case 'dev_tools_read':
+          case 'foo_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('dev_tools');
-            expect(uiCapabilities.value!.dev_tools).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
               show: true,
             });
             break;
@@ -52,13 +58,9 @@ export default function devToolsTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
-          // all other users can't do anything with Dashboard
+          // all other users can't do anything with Foo
           default:
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('dev_tools');
-            expect(uiCapabilities.value!.dev_tools).to.eql({
-              show: false,
-            });
+            throw new UnreachableError(scenario);
         }
       });
     });
