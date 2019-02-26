@@ -56,7 +56,7 @@ function VisEditorAggSelect({
           href={aggHelpLink}
           target="_blank"
           rel="noopener"
-          className="pull-right"
+          className="visEditorAggSelect__helpLink pull-right"
           type="button"
         >
           <FormattedMessage
