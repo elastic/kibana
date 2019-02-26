@@ -32,30 +32,5 @@
       "uiStateJSON":"{\"isDarkMode\":false}",
       "bounds":{"type":"envelope","coordinates":[[-124.45342,54.91445],[-53.38872,26.21461]]}
     }
-  },
-  {
-    "id": "19906970-2e40-11e9-85cb-6965aae20f13",
-    "type": "dashboard",
-    "updated_at": "2019-02-11T00:00:00.000Z",
-    "version": 3,
-    "migrationVersion": {},
-    "attributes": {
-      "title": "[Logs] Total Requests and Bytes",
-      "hits": 0,
-      "description": "",
-      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":20,\"i\":\"1\"},\"id\":\"de71f4f0-1902-11e9-919b-ffe5949a18d2\",\"panelIndex\":\"1\",\"type\":\"map\",\"version\":\"7.0.0-alpha1\"}]",
-      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-      "version": 1,
-      "timeRestore": true,
-      "timeTo": "now",
-      "timeFrom": "now-7d",
-      "refreshInterval": {
-        "pause": false,
-        "value": 900000
-      },
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
-      }
-    }
   }
 ]
