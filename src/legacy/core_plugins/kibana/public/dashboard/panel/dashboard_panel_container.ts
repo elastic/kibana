@@ -46,12 +46,13 @@ import {
   getPanel,
   getPanelType,
   getViewMode,
+  PanelId,
   PanelState,
 } from '../selectors';
 import { DashboardPanel } from './dashboard_panel';
 
 export interface DashboardPanelContainerOwnProps {
-  panelId: string;
+  panelId: PanelId;
   embeddableFactory: EmbeddableFactory;
 }
 

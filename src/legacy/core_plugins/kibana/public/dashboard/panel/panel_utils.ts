@@ -29,15 +29,16 @@ const PANEL_WIDTH_SCALE_FACTOR = 4;
 
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
+  // Earlier versions allowed panelIndex to be a number, explicity casting panelIndex to type string for compatibility
   public static convertPanelDataPre_6_1(panel: {
     panelIndex: PanelId;
     gridData: GridData;
     col: number;
     row: number;
-    size_x: any;
-    size_y: any;
+    size_x: number;
+    size_y: number;
     version: string;
-  }) {
+  }): Partial<PanelState> {
     // eslint-disable-line camelcase
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
@@ -58,8 +59,8 @@ export class PanelUtils {
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
       i: panel.panelIndex.toString(),
     };
+
     panel.version = chrome.getKibanaVersion();
-    panel.panelIndex = panel.panelIndex;
     delete panel.size_x;
     delete panel.size_y;
     delete panel.row;

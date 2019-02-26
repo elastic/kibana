@@ -42,7 +42,7 @@ test('convertPanelDataPre_6_1 gives supplies width and height when missing', () 
       id: 'foo1',
       row: 1,
       type: 'visualization',
-      panelIndex: 1,
+      panelIndex: '1',
       gridData: createPanelState,
     },
     {
@@ -52,7 +52,7 @@ test('convertPanelDataPre_6_1 gives supplies width and height when missing', () 
       size_x: 3,
       size_y: 2,
       type: 'visualization',
-      panelIndex: 2,
+      panelIndex: '2',
       gridData: createPanelState,
     },
   ];
