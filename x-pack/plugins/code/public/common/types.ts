@@ -35,6 +35,7 @@ export interface MainRouteParams {
   org: string;
   revision: string;
   pathType: PathTypes;
+  goto?: string;
 }
 
 export interface EuiSideNavItem {
