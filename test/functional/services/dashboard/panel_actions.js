@@ -88,6 +88,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
     }
 
+    async openInspectorByTitle(title) {
+      const header = await this.getPanelHeading(title);
+      await this.openInspector(header);
+    }
+
     async openInspector(parent) {
       await this.openContextMenu(parent);
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);

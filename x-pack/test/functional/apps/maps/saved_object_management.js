@@ -66,7 +66,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query stored with map', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
@@ -85,7 +86,8 @@ export default function ({ getPageObjects, getService }) {
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');
 
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           await inspector.close();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
