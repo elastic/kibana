@@ -21,6 +21,7 @@ import { resolve } from 'path';
 
 import fieldsRoutes from './server/routes/fields';
 import visDataRoutes from './server/routes/vis';
+import { SearchStrategiesRegister } from './server/lib/search_strategies/search_strategies_register';
 import { getTableData } from './server/lib/vis_data/get_table_data';
 
 export default function (kibana) {
@@ -29,7 +30,7 @@ export default function (kibana) {
 
     uiExports: {
       visTypes: [
-        'plugins/metrics/kbn_vis_types'
+        'plugins/metrics/kbn_vis_types',
       ],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
@@ -38,7 +39,7 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
-        minimumBucketSize: Joi.number().default(10)
+        minimumBucketSize: Joi.number().default(10),
       }).default();
     },
 
@@ -46,9 +47,9 @@ export default function (kibana) {
       fieldsRoutes(server);
       visDataRoutes(server);
 
-      // Apps built on top of visualizations (Inspector, Share) need our getTableData function
-      server.expose('getTableData', getTableData);
-    }
+      SearchStrategiesRegister.init(server);
 
+      server.expose('getTableData', getTableData);
+    },
   });
 }
