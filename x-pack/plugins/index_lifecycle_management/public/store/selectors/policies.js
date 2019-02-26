@@ -123,16 +123,16 @@ export const isEmptyObject = (obj) => {
 
 export const phaseFromES = (phase, phaseName) => {
   const policy = { };
-
+  policy[PHASE_ROLLOVER_ENABLED] = false;
+  policy[PHASE_INDEX_PRIORITY] = '';
   if (!phase) {
     policy[PHASE_ENABLED] = false;
     policy[PHASE_ROLLOVER_ENABLED] = false;
-    policy[PHASE_INDEX_PRIORITY] = '';
     return policy;
   }
 
   policy[PHASE_ENABLED] = true;
-  policy[PHASE_ROLLOVER_ENABLED] = false;
+
 
   if (phase.min_age) {
     if (phaseName === PHASE_WARM && phase.min_age === '0ms') {
@@ -146,6 +146,7 @@ export const phaseFromES = (phase, phaseName) => {
     }
   }
   if (phaseName === PHASE_WARM) {
+    policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
     policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
   }
   if (phase.actions) {
@@ -198,6 +199,9 @@ export const phaseFromES = (phase, phaseName) => {
       const forcemerge = actions.forcemerge;
       policy[PHASE_FORCE_MERGE_ENABLED] = true;
       policy[PHASE_FORCE_MERGE_SEGMENTS] = forcemerge.max_num_segments;
+    } else {
+      policy[PHASE_FORCE_MERGE_ENABLED] = false;
+      policy[PHASE_FORCE_MERGE_SEGMENTS] = '';
     }
 
     if (actions.shrink) {

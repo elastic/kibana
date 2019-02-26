@@ -49,7 +49,6 @@ class HotPhaseUi extends PureComponent {
       intl,
       setWarmPhaseOnRollover
     } = this.props;
-
     return (
       <Fragment>
         <EuiDescribedFormGroup
