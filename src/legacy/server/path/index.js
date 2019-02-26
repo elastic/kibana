@@ -22,11 +22,14 @@ import { find } from 'lodash';
 import { fromRoot } from '../../utils';
 
 const CONFIG_PATHS = [
+  process.env.KIBANA_PATH_CONF,
+  process.env.CONFIG_PATH, //deprecated
   fromRoot('config/kibana.yml'),
   '/etc/kibana/kibana.yml'
 ].filter(Boolean);
 
 const DATA_PATHS = [
+  process.env.DATA_PATH, //deprecated
   fromRoot('data'),
   '/var/lib/kibana'
 ].filter(Boolean);
