@@ -347,59 +347,43 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      "123",
-    ],
+      expect(savedObjectsClient.get.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
+    "123",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": Promise {},
-    },
-  ],
-}
+]
 `);
-      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      Object {
-        "@created": "2019-02-12T21:01:22.479Z",
-        "@timestamp": "2019-02-12T21:01:22.479Z",
-        "assets": Object {
-          "asset-123": Object {
-            "@created": "2019-02-14T00:00:00.000Z",
-            "id": "asset-123",
-            "type": "dataurl",
-            "value": "mockbase64data",
-          },
-          "asset-456": Object {
-            "@created": "2019-02-15T00:00:00.000Z",
-            "id": "asset-456",
-            "type": "dataurl",
-            "value": "mockbase64data",
-          },
-        },
-        "name": "fake workpad",
-      },
-      Object {
-        "id": "123",
-        "overwrite": true,
-      },
-    ],
-  ],
-  "results": Array [
+      expect(savedObjectsClient.create.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
     Object {
-      "isThrow": false,
-      "value": Promise {},
+      "@created": "2019-02-12T21:01:22.479Z",
+      "@timestamp": "2019-02-12T21:01:22.479Z",
+      "assets": Object {
+        "asset-123": Object {
+          "@created": "2019-02-14T00:00:00.000Z",
+          "id": "asset-123",
+          "type": "dataurl",
+          "value": "mockbase64data",
+        },
+        "asset-456": Object {
+          "@created": "2019-02-15T00:00:00.000Z",
+          "id": "asset-456",
+          "type": "dataurl",
+          "value": "mockbase64data",
+        },
+      },
+      "name": "fake workpad",
+    },
+    Object {
+      "id": "123",
+      "overwrite": true,
     },
   ],
-}
+]
 `);
     });
   });
@@ -441,54 +425,38 @@ Object {
   "ok": true,
 }
 `);
-      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      "123",
-    ],
+      expect(savedObjectsClient.get.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
+    "123",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": Promise {},
-    },
-  ],
-}
+]
 `);
-      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "canvas-workpad",
-      Object {
-        "@created": "2019-02-12T21:01:22.479Z",
-        "@timestamp": "2019-02-12T21:01:22.479Z",
-        "assets": Object {
-          "asset-123": Object {
-            "@created": "2019-02-14T00:00:00.000Z",
-            "id": "asset-123",
-            "type": "dataurl",
-            "value": "mockbase64data",
-          },
-        },
-        "css": ".canvasPage { color: LavenderBlush; }",
-        "name": "renamed workpad",
-      },
-      Object {
-        "id": "123",
-        "overwrite": true,
-      },
-    ],
-  ],
-  "results": Array [
+      expect(savedObjectsClient.create.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "canvas-workpad",
     Object {
-      "isThrow": false,
-      "value": Promise {},
+      "@created": "2019-02-12T21:01:22.479Z",
+      "@timestamp": "2019-02-12T21:01:22.479Z",
+      "assets": Object {
+        "asset-123": Object {
+          "@created": "2019-02-14T00:00:00.000Z",
+          "id": "asset-123",
+          "type": "dataurl",
+          "value": "mockbase64data",
+        },
+      },
+      "css": ".canvasPage { color: LavenderBlush; }",
+      "name": "renamed workpad",
+    },
+    Object {
+      "id": "123",
+      "overwrite": true,
     },
   ],
-}
+]
 `);
     });
   });
