@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export default function getEsShardTimeout(req) {
+export function getEsShardTimeout(req) {
   return req.server.config().get('elasticsearch.shardTimeout');
 }

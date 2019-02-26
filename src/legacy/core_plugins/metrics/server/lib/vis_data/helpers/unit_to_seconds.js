@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 
 const units = {
   ms: 0.001,
@@ -23,11 +24,33 @@ const units = {
   m: 60,
   h: 3600,
   d: 86400,
-  w: (86400) * 7, // Hum... might be wrong
-  M: (86400) * 30, // this too... 29,30,31?
-  y: (86400) * 356 // Leap year?
+  w: 86400 * 7, // Hum... might be wrong
+  M: 86400 * 7 * 4, // this too... 29,30,31?
+  y: 86400 * 7 * 4 * 12, // Leap year?
+};
+
+export const parseInterval = (intervalString) => {
+  let value;
+  let unit;
+
+  if (intervalString) {
+    const matches = intervalString.match(INTERVAL_STRING_RE);
+
+    value = Number(matches[1]);
+    unit = matches[2];
+  }
+
+  return { value, unit };
+};
+
+export const convertIntervalToUnit = (intervalString, unit) => {
+  const parsedInterval = parseInterval(intervalString);
+  const value = Number((parsedInterval.value * units[parsedInterval.unit] / units[unit]).toFixed(2));
+
+  return { value, unit };
 };
 
 export default (unit) => {
   return units[unit];
 };
+

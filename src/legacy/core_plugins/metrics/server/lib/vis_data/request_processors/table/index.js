@@ -25,6 +25,7 @@ import dateHistogram from './date_histogram';
 import metricBuckets from './metric_buckets';
 import siblingBuckets from './sibling_buckets';
 import filterRatios from './filter_ratios';
+import normalizeQuery from './normalize_query';
 
 export default [
   query,
@@ -34,5 +35,6 @@ export default [
   dateHistogram,
   metricBuckets,
   siblingBuckets,
-  filterRatios
+  filterRatios,
+  normalizeQuery
 ];

@@ -16,29 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash';
+
 import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
+import { get } from 'lodash';
 import processBucket from './table/process_bucket';
-import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
-
+import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
-
+  const panelIndexPattern = panel.index_pattern;
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
-  const indexPattern = panel.index_pattern;
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
+  const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
 
-  const params = {
-    index: indexPatternString,
-    ignore_throttled: !includeFrozen,
-    body: buildRequestBody(req, panel, esQueryConfig, indexPatternObject)
-  };
   try {
-    const resp = await callWithRequest(req, 'search', params);
+    const [resp] = await searchRequest.search({ body });
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
     return { type: 'table', series: buckets.map(processBucket(panel)) };
   } catch (err) {
