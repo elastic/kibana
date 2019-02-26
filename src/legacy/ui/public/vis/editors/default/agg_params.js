@@ -38,7 +38,7 @@ uiModules
       restrict: 'E',
       template: aggParamsTemplate,
       scope: true,
-      require: '^form',
+      require: '^^form',
       link: function ($scope, $el, attr, aggForm) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
