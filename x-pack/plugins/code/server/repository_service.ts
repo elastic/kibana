@@ -122,7 +122,7 @@ export class RepositoryService {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     try {
       // For now, just `rm -rf`
-      await del([localPath]);
+      await del([localPath], { force: true });
       this.log.info(`Remove local repository ${uri} done.`);
       return {
         uri,
