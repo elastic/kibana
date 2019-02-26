@@ -186,7 +186,8 @@ describe('sourceNameForIndex', () => {
   });
 
   it('parses security index', () => {
-    expect(sourceNameForIndex(`.security-${CURRENT_MAJOR_VERSION}`)).toEqual('.security');
+    expect(sourceNameForIndex('.security-6')).toEqual('.security');
+    expect(sourceNameForIndex('.security-7')).toEqual('.security');
     expect(sourceNameForIndex('.security')).toEqual('.security');
   });
 });

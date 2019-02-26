@@ -21,7 +21,7 @@ export interface ParsedIndexName {
 }
 
 // the security indices must be whitelisted and follow the pattern set forth in v5
-const SECURITY_MATCHER = new RegExp(`^.security(-${CURRENT_MAJOR_VERSION})?$`);
+const SECURITY_MATCHER = new RegExp(`^.security(-[67])?$`);
 
 // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
 // avoid conflicts with index patterns/templates/etc
