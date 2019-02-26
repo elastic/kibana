@@ -36,8 +36,8 @@ interface FindRequest extends Hapi.Request {
     default_search_operator: string;
     search_fields?: string[];
     sort_field?: string[];
-    has_reference: TypeAndIdPair[];
-    fields: string[];
+    has_reference?: TypeAndIdPair[];
+    fields?: string[];
   };
 }
 
