@@ -43,6 +43,7 @@ export default function uiCapabilitesTests({
       }
     });
 
+    loadTestFile(require.resolve('./catalogue'));
     loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
   });

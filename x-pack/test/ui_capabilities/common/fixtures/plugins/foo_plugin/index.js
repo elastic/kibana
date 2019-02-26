@@ -27,6 +27,7 @@ export default function (kibana) {
         icon: 'upArrow',
         navLinkId: 'foo_plugin',
         app: ['kibana'],
+        catalogue: ['foo'],
         privileges: {
           all: {
             savedObject: {
