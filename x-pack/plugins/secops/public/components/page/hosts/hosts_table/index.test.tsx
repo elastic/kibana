@@ -11,8 +11,9 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockGlobalState } from '../../../../mock';
+import { mockFramework, mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
+import { KibanaConfigContext } from '../../../formatted_date';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
@@ -30,15 +31,17 @@ describe('Load More Table Component', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <HostsTable
-            loading={false}
-            data={mockData.Hosts.edges}
-            totalCount={mockData.Hosts.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
-            loadMore={loadMore}
-            type={hostsModel.HostsType.page}
-          />
+          <KibanaConfigContext.Provider value={mockFramework}>
+            <HostsTable
+              loading={false}
+              data={mockData.Hosts.edges}
+              totalCount={mockData.Hosts.totalCount}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+              loadMore={loadMore}
+              type={hostsModel.HostsType.page}
+            />
+          </KibanaConfigContext.Provider>
         </ReduxStoreProvider>
       );
 

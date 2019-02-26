@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
+import { FormattedRelative } from '@kbn/i18n/react';
 import { HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -163,7 +164,12 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
     name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.firstSeen),
+    render: ({ node }) =>
+      node.firstSeen && node.firstSeen !== '' ? (
+        <FormattedRelative value={node.firstSeen} />
+      ) : (
+        defaultToEmptyTag(node.firstSeen)
+      ),
   },
   {
     name: i18n.OS,

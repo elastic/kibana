@@ -179,7 +179,7 @@ export interface UserEcsFields {
 }
 
 export interface LastSourceHost {
-  timestamp?: string | null;
+  timestamp?: Date | null;
 
   source?: SourceEcsFields | null;
 
@@ -275,7 +275,7 @@ export interface Ecs {
 
   suricata?: SuricataEcsFields | null;
 
-  timestamp?: string | null;
+  timestamp?: Date | null;
 
   user?: UserEcsFields | null;
 }
@@ -345,7 +345,7 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
-  firstSeen?: string | null;
+  firstSeen?: Date | null;
 
   host?: HostEcsFields | null;
 
@@ -369,7 +369,7 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  timestamp?: string | null;
+  timestamp?: Date | null;
 
   source?: TopNFlowItem | null;
 
@@ -1065,7 +1065,7 @@ export namespace UserEcsFieldsResolvers {
 
 export namespace LastSourceHostResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = LastSourceHost> {
-    timestamp?: TimestampResolver<string | null, TypeParent, Context>;
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
     source?: SourceResolver<SourceEcsFields | null, TypeParent, Context>;
 
@@ -1073,7 +1073,7 @@ export namespace LastSourceHostResolvers {
   }
 
   export type TimestampResolver<
-    R = string | null,
+    R = Date | null,
     Parent = LastSourceHost,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1343,7 +1343,7 @@ export namespace EcsResolvers {
 
     suricata?: SuricataResolver<SuricataEcsFields | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<string | null, TypeParent, Context>;
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
   }
@@ -1388,11 +1388,11 @@ export namespace EcsResolvers {
     Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = string | null,
-    Parent = Ecs,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
+  export type TimestampResolver<R = Date | null, Parent = Ecs, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type UserResolver<
     R = UserEcsFields | null,
     Parent = Ecs,
@@ -1605,7 +1605,7 @@ export namespace HostItemResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    firstSeen?: FirstSeenResolver<string | null, TypeParent, Context>;
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
 
     host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
 
@@ -1618,7 +1618,7 @@ export namespace HostItemResolvers {
     Context
   >;
   export type FirstSeenResolver<
-    R = string | null,
+    R = Date | null,
     Parent = HostItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1683,7 +1683,7 @@ export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<string | null, TypeParent, Context>;
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
     source?: SourceResolver<TopNFlowItem | null, TypeParent, Context>;
 
@@ -1702,7 +1702,7 @@ export namespace NetworkTopNFlowItemResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type TimestampResolver<
-    R = string | null,
+    R = Date | null,
     Parent = NetworkTopNFlowItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

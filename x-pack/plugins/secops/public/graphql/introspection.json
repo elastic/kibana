@@ -1110,7 +1110,7 @@
             "name": "timestamp",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1133,6 +1133,16 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Date",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -1635,7 +1645,7 @@
             "name": "timestamp",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1978,7 +1988,7 @@
             "name": "firstSeen",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2001,16 +2011,6 @@
         ],
         "inputFields": null,
         "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "Date",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -2164,7 +2164,7 @@
             "name": "timestamp",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Date", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },

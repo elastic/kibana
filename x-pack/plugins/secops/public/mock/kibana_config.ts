@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './global_state';
-export * from './index_pattern';
-export * from './kibana_config';
-export * from './mock_ecs';
+import { AppFrameworkAdapter } from '../lib/lib';
+
+export const mockFramework: Partial<AppFrameworkAdapter> = {
+  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+  dateFormatTz: 'UTC',
+};

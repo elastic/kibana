@@ -150,7 +150,7 @@ export interface UserEcsFields {
 }
 
 export interface LastSourceHost {
-  timestamp?: string | null;
+  timestamp?: Date | null;
 
   source?: SourceEcsFields | null;
 
@@ -246,7 +246,7 @@ export interface Ecs {
 
   suricata?: SuricataEcsFields | null;
 
-  timestamp?: string | null;
+  timestamp?: Date | null;
 
   user?: UserEcsFields | null;
 }
@@ -316,7 +316,7 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
-  firstSeen?: string | null;
+  firstSeen?: Date | null;
 
   host?: HostEcsFields | null;
 
@@ -340,7 +340,7 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  timestamp?: string | null;
+  timestamp?: Date | null;
 
   source?: TopNFlowItem | null;
 
@@ -618,7 +618,7 @@ export namespace GetAuthenticationsQuery {
   export type LastSuccess = {
     __typename?: 'LastSourceHost';
 
-    timestamp?: string | null;
+    timestamp?: Date | null;
 
     source?: _Source | null;
 
@@ -642,7 +642,7 @@ export namespace GetAuthenticationsQuery {
   export type LastFailure = {
     __typename?: 'LastSourceHost';
 
-    timestamp?: string | null;
+    timestamp?: Date | null;
 
     source?: __Source | null;
 
@@ -746,7 +746,7 @@ export namespace GetEventsQuery {
 
     _index?: string | null;
 
-    timestamp?: string | null;
+    timestamp?: Date | null;
 
     event?: Event | null;
 
@@ -879,7 +879,7 @@ export namespace GetHostSummaryQuery {
 
     _id?: string | null;
 
-    firstSeen?: string | null;
+    firstSeen?: Date | null;
 
     lastBeat?: Date | null;
 
@@ -982,7 +982,7 @@ export namespace GetHostsTableQuery {
 
     _id?: string | null;
 
-    firstSeen?: string | null;
+    firstSeen?: Date | null;
 
     lastBeat?: Date | null;
 
@@ -1317,7 +1317,7 @@ export namespace GetTimelineQuery {
 
     _index?: string | null;
 
-    timestamp?: string | null;
+    timestamp?: Date | null;
 
     event?: Event | null;
 
