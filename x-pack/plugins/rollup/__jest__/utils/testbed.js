@@ -33,5 +33,32 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
   const testSubjectExists = registerTestSubjExists(component);
   const findTestSubject = testSubject => findTestSubjectHelper(component, testSubject);
 
-  return { component, testSubjectExists, findTestSubject, setProps };
+  const getFormErrorsMessages = () => {
+    const errorMessagesWrappers = component.find('.euiFormErrorText');
+    return errorMessagesWrappers.map(err => err.text());
+  };
+
+  const setFormInputValue = (inputTestSubject, value, isAsync = false) => {
+    const formInput = findTestSubject(inputTestSubject);
+    formInput.simulate('change', { target: { value } });
+    component.update();
+
+    if (!isAsync) {
+      return;
+    }
+    return new Promise((resolve) => {
+      setTimeout(resolve);
+    });
+  };
+
+  return {
+    component,
+    testSubjectExists,
+    findTestSubject,
+    setProps,
+    getFormErrorsMessages,
+    form: {
+      setInputValue: setFormInputValue,
+    }
+  };
 };
