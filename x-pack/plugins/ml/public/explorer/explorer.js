@@ -607,6 +607,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     annotationsTablePreviousData = null;
     async updateExplorer(stateUpdate = {}, showOverallLoadingIndicator = true) {
       const {
+        filterActive,
+        filteredFields,
         maskAll,
         influencersFilterQuery,
         noInfluencersConfigured,
@@ -683,6 +685,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, swimlaneViewByFieldName);
+      // filter View by options to relevant filter fields
+      if (filterActive === true && viewBySwimlaneOptions !== undefined && Array.isArray(viewBySwimlaneOptions.viewBySwimlaneOptions)) {
+        viewBySwimlaneOptions.viewBySwimlaneOptions = viewBySwimlaneOptions.viewBySwimlaneOptions.filter(option => {
+          return (filteredFields.includes(option) || option === 'job ID');
+        });
+      }
+
       Object.assign(stateUpdate, viewBySwimlaneOptions);
       if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
         // this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
