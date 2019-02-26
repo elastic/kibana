@@ -41,37 +41,33 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
               className="kuiLocalSearchAssistedInput"
             >
               <EuiFieldText
+                append={
+                  <QueryLanguageSwitcher
+                    language="kuery"
+                    onSelectLanguage={[Function]}
+                  />
+                }
                 aria-activedescendant=""
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
                 aria-label="Search input"
                 autoComplete="off"
                 autoFocus={false}
-                className="kuiLocalSearchAssistedInput__input"
                 compressed={false}
                 data-test-subj="queryInput"
                 fullWidth={true}
-                icon="console"
                 inputRef={[Function]}
                 isLoading={false}
                 onChange={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search… (e.g. status:200 AND extension:PHP)"
+                placeholder="Search"
                 role="textbox"
                 spellCheck={false}
                 type="text"
                 value="response:200"
               />
-              <div
-                className="kuiLocalSearchAssistedInput__assistance"
-              >
-                <QueryLanguageSwitcher
-                  language="kuery"
-                  onSelectLanguage={[Function]}
-                />
-              </div>
             </div>
           </div>
         </form>
@@ -142,37 +138,33 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
               className="kuiLocalSearchAssistedInput"
             >
               <EuiFieldText
+                append={
+                  <QueryLanguageSwitcher
+                    language="lucene"
+                    onSelectLanguage={[Function]}
+                  />
+                }
                 aria-activedescendant=""
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
                 aria-label="Search input"
                 autoComplete="off"
                 autoFocus={true}
-                className="kuiLocalSearchAssistedInput__input"
                 compressed={false}
                 data-test-subj="queryInput"
                 fullWidth={true}
-                icon="console"
                 inputRef={[Function]}
                 isLoading={false}
                 onChange={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search… (e.g. status:200 AND extension:PHP)"
+                placeholder="Search"
                 role="textbox"
                 spellCheck={false}
                 type="text"
                 value="response:200"
               />
-              <div
-                className="kuiLocalSearchAssistedInput__assistance"
-              >
-                <QueryLanguageSwitcher
-                  language="lucene"
-                  onSelectLanguage={[Function]}
-                />
-              </div>
             </div>
           </div>
         </form>
@@ -243,37 +235,33 @@ exports[`QueryBar Should render the given query 1`] = `
               className="kuiLocalSearchAssistedInput"
             >
               <EuiFieldText
+                append={
+                  <QueryLanguageSwitcher
+                    language="kuery"
+                    onSelectLanguage={[Function]}
+                  />
+                }
                 aria-activedescendant=""
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
                 aria-label="Search input"
                 autoComplete="off"
                 autoFocus={true}
-                className="kuiLocalSearchAssistedInput__input"
                 compressed={false}
                 data-test-subj="queryInput"
                 fullWidth={true}
-                icon="console"
                 inputRef={[Function]}
                 isLoading={false}
                 onChange={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search… (e.g. status:200 AND extension:PHP)"
+                placeholder="Search"
                 role="textbox"
                 spellCheck={false}
                 type="text"
                 value="response:200"
               />
-              <div
-                className="kuiLocalSearchAssistedInput__assistance"
-              >
-                <QueryLanguageSwitcher
-                  language="kuery"
-                  onSelectLanguage={[Function]}
-                />
-              </div>
             </div>
           </div>
         </form>

@@ -19,13 +19,13 @@
 
 import { IRootScopeService } from 'angular';
 import { fatalError } from 'ui/notify/fatal_error';
-import { Breadcrumb, ChromeStartContract } from '../../../../../core/public/chrome';
+import { Breadcrumb, ChromeStart } from '../../../../../core/public/chrome';
 export { Breadcrumb };
 
 export type BreadcrumbsApi = ReturnType<typeof createBreadcrumbsApi>['breadcrumbs'];
 
-let newPlatformChrome: ChromeStartContract;
-export function __newPlatformInit__(instance: ChromeStartContract) {
+let newPlatformChrome: ChromeStart;
+export function __newPlatformInit__(instance: ChromeStart) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/breadcrumbs is already initialized');
   }

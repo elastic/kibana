@@ -263,7 +263,18 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
 
   // read updated element from state and fetch renderable
   const updatedElement = getNodeById(getState(), elementId, pageId);
-  if (doRender === true) {
+
+  // reset element.filter if element is no longer a filter
+  // TODO: find a way to extract a list of filter renderers from the functions registry
+  if (
+    updatedElement.filter &&
+    !['dropdownControl', 'timefilterControl', 'exactly'].some(filter =>
+      updatedElement.expression.includes(filter)
+    )
+  ) {
+    dispatch(setFilter('', elementId, pageId, doRender));
+    // setFilter will trigger a re-render so we can skip the fetch here
+  } else if (doRender === true) {
     dispatch(fetchRenderable(updatedElement));
   }
 }

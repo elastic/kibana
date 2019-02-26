@@ -22,14 +22,14 @@
       class="visLegend__value color"
     >
 
-      <div ng-keydown="onLegendEntryKeydown($event, this)">
+      <div ng-keydown="onLegendEntryKeydown($event)">
         <div
           kbn-accessible-click
           data-label="{{legendData.label}}"
           ng-focus="highlight($event)"
           ng-blur="unhighlight($event)"
-          ng-click="showDetails = !showDetails"
-          ng-class="showDetails ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate'"
+          ng-click="$parent.toggleDetails(legendData.label)"
+          ng-class="$parent.areDetailsVisible(legendData.label) ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate'"
           class="visLegend__valueTitle"
           title="{{legendData.label}}"
           aria-label="{{::'common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel' | i18n: { defaultMessage: '{legendDataLabel}, toggle options', values: { legendDataLabel: legendData.label } } }}"
@@ -43,7 +43,7 @@
           {{legendData.label}}
         </div>
 
-        <div ng-if="showDetails" class="visLegend__valueDetails">
+        <div ng-if="$parent.areDetailsVisible(legendData.label)" class="visLegend__valueDetails">
           <div
             class="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth"
             ng-show="canFilter(legendData)"

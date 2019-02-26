@@ -219,13 +219,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
-      const exists = await testSubjects.exists('newDashboardLink');
+      // newDashboardLink button is only visible when dashboard listing table is displayed
+      // (at least one dashboard).
+      const exists = await testSubjects.exists('newItemButton');
       if (exists) {
-        return await testSubjects.click('newDashboardLink');
+        return await testSubjects.click('newItemButton');
       }
 
-      // no dashboards exist, click createDashboardPromptButton to create new dashboard
+      // If no dashboards exist, then newItemButton to create a new dashboard.
       return await this.clickCreateDashboardPrompt();
     }
 
@@ -251,7 +252,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickDeleteSelectedDashboards() {
-      await testSubjects.click('deleteSelectedDashboards');
+      await testSubjects.click('deleteSelectedItems');
     }
 
     async isOptionsOpen() {
@@ -382,15 +383,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
-        const searchFilter = await testSubjects.find('searchFilter');
+        const searchFilter = await this.getSearchFilter();
         await searchFilter.clearValue();
         await PageObjects.common.pressEnterKey();
       });
     }
 
     async getSearchFilterValue() {
-      const searchFilter = await testSubjects.find('searchFilter');
+      const searchFilter = await this.getSearchFilter();
       return await searchFilter.getProperty('value');
+    }
+
+    async getSearchFilter() {
+      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      return searchFilter[0];
     }
 
     async searchForDashboardWithName(dashName) {
@@ -399,7 +405,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
-        const searchFilter = await testSubjects.find('searchFilter');
+        const searchFilter = await this.getSearchFilter();
         await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
@@ -419,7 +425,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await find.allByLinkText(dashName);
+      const links = await testSubjects.findAll(`dashboardListingTitleLink-${dashName.replace(/ /g, '-')}`);
       return links.length;
     }
 
