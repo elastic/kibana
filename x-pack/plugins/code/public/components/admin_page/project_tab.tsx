@@ -72,6 +72,7 @@ interface Props {
 }
 interface State {
   showImportProjectModal: boolean;
+  importLoading: boolean;
   settingModal: { url?: string; uri?: string; show: boolean };
   repoURL: string;
   sortOption: SortOptionsValue;
@@ -79,15 +80,16 @@ interface State {
 
 class CodeProjectTab extends React.PureComponent<Props, State> {
   public static getDerivedStateFromProps(props: Props, state: State) {
-    if (state.showImportProjectModal && !props.importLoading) {
-      return { showImportProjectModal: false };
+    if (state.importLoading && !props.importLoading) {
+      return { showImportProjectModal: false, importLoading: props.importLoading };
     }
-    return null;
+    return { importLoading: props.importLoading };
   }
 
   constructor(props: Props) {
     super(props);
     this.state = {
+      importLoading: false,
       showImportProjectModal: false,
       settingModal: { show: false },
       repoURL: '',
