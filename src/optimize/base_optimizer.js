@@ -263,6 +263,7 @@ export default class BaseOptimizer {
       profile: this.profile || false,
 
       output: {
+        futureEmitAssets: true,
         path: this.uiBundles.getWorkingDir(),
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',

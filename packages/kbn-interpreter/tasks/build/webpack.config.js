@@ -45,6 +45,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
     target: 'webworker',
 
     output: {
+      futureEmitAssets: true,
       path: PLUGIN_BUILD_DIR,
       filename: '[name].js', // Need long paths here.
       libraryTarget: 'umd',

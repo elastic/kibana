@@ -48,6 +48,7 @@ function generateDLL(config) {
     entry: dllEntry,
     context: dllContext,
     output: {
+      futureEmitAssets: true,
       filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,

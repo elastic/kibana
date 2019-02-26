@@ -61,11 +61,11 @@
     "strip-ansi": "^4.0.0",
     "strong-log-transformer": "^2.1.0",
     "tempy": "^0.2.1",
-    "ts-loader": "^5.2.2",
+    "ts-loader": "^5.3.3",
     "typescript": "^3.0.3",
     "unlazy-loader": "^0.1.3",
     "webpack": "^4.23.1",
-    "webpack-cli": "^3.1.2",
+    "webpack-cli": "^3.2.3",
     "wrap-ansi": "^3.0.1",
     "write-pkg": "^3.1.0"
   },

@@ -26,8 +26,8 @@
     "uuid": "3.0.1"
   },
   "peerDependencies": {
-    "enzyme": "3.2.0",
-    "enzyme-adapter-react-16": "^1.1.1"
+    "enzyme": "3.9.0",
+    "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
     "@elastic/eui": "0.0.23",
@@ -39,9 +39,9 @@
     "brace": "0.10.0",
     "chalk": "^2.4.1",
     "chokidar": "1.6.0",
-    "css-loader": "^1.0.0",
+    "css-loader": "^2.1.0",
     "expose-loader": "^0.7.5",
-    "file-loader": "^2.0.0",
+    "file-loader": "^3.0.1",
     "grunt": "1.0.3",
     "grunt-babel": "^7.0.0",
     "grunt-contrib-clean": "^1.1.0",
@@ -53,10 +53,10 @@
     "jquery": "^3.3.1",
     "keymirror": "0.1.1",
     "moment": "^2.20.1",
-    "node-sass": "^4.9.4",
-    "postcss": "^7.0.5",
+    "node-sass": "^4.11.0",
+    "postcss": "^7.0.14",
     "postcss-loader": "^3.0.0",
-    "raw-loader": "^0.5.1",
+    "raw-loader": "^1.0.0",
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.6",
     "react-router": "^3.2.0",
@@ -68,7 +68,7 @@
     "sinon": "^5.0.7",
     "style-loader": "^0.23.1",
     "webpack": "^4.23.1",
-    "webpack-dev-server": "^3.1.10",
+    "webpack-dev-server": "^3.2.1",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.5"
   }
