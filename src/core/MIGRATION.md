@@ -718,10 +718,12 @@ export function bootstrapApp({ domElement, I18nContext }) {
 
 
 // demo/public/hacks/shim_plugin.js
+import { coreStart } from 'ui/core';
 import { I18nContext } from 'ui/i18n';
 import { Plugin } from '../plugin';
 
 const core = {
+  ...coreStart,
   i18n: {
     I18nContext
   }
@@ -731,14 +733,16 @@ new Plugin().start(core);
 
 
 // demo/public/index.js
-import { core } from 'ui/core';
+import { coreInternals } from 'ui/core';
 import 'ui/autoload/styles';
 
 import template from './templates/index.html';
 chrome.setRootTemplate(template);
-const domElement = document.getElementById('react-apm-root');
 
-core.applications.mountApp('demo', domElement);
+chrome.setRootController(() => {
+  const domElement = document.getElementById('custom-app-root');
+  coreInternals.applications.mountApp('demo', domElement);
+});
 ```
 
 
