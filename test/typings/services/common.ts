@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { ServicesMap } from './services';
+import {
+  EsArchiverProvider,
+  EsProvider,
+  KibanaServerProvider,
+  RetryProvider,
+} from 'common/services';
 
-export interface TestWrapper {
-  getService<K extends keyof ServicesMap>(service: K): ServicesMap[K];
-  getPageObject(page: string): any;
-  getPageObjects(pages: string[]): { [name: string]: any };
-  readConfigFile(file: string): any; // workaround circular dependency
-  loadTestFile(testFile: string): void;
-  hasService<K extends keyof ServicesMap>(service: K): service is K;
-  hasService(service: string): service is keyof ServicesMap;
+export interface CommonServicesMap {
+  kibanaServer: ReturnType<typeof KibanaServerProvider>;
+  es: ReturnType<typeof EsProvider>;
+  esArchiver: ReturnType<typeof EsArchiverProvider>;
+  retry: ReturnType<typeof RetryProvider>;
 }

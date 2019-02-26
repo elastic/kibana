@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ServicesMap } from './services';
+import {
+  ElasticsearchSupertestProvider,
+  KibanaSupertestProvider,
+  KibanaSupertestWithoutAuthProvider,
+} from 'server_integration/services';
 
-export interface TestWrapper {
-  getService<K extends keyof ServicesMap>(service: K): ServicesMap[K];
-  getPageObject(page: string): any;
-  getPageObjects(pages: string[]): { [name: string]: any };
-  readConfigFile(file: string): any; // workaround circular dependency
-  loadTestFile(testFile: string): void;
-  hasService<K extends keyof ServicesMap>(service: K): service is K;
-  hasService(service: string): service is keyof ServicesMap;
+export interface ServerIntegrationServicesMap {
+  elasticsearchSupertest: ReturnType<typeof ElasticsearchSupertestProvider>;
+  supertest: ReturnType<typeof KibanaSupertestProvider>;
+  kibanaSupertestWithoutAuth: ReturnType<typeof KibanaSupertestWithoutAuthProvider>;
 }
