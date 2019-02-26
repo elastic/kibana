@@ -638,7 +638,115 @@ FooRegistryProvider.getAll().subscribe(foos => {
 });
 ```
 
+##### Plugin with generic application
 
+It is difficult to provide concrete guidance for migrating an application because most applications have unique architectures and bootstrapping logic.
+
+In the new plugin system, a plugin registers an application via the application service by providing an asyncronous `mount` function that core invokes when a user attempts to load the app. In this mounting function, a plugin would use an async import statement to load the application code so it wasn't loaded by the browser until it was first navigated to.
+
+The basic interface would be something similar to:
+
+```ts
+async function mount({ dom }) {
+  const { bootstrapApp } = await import('/application');
+
+  const unmount = bootstrapApp({ dom });
+
+  // returns a function that cleans up after app when navigating away
+  return unmount;
+}
+
+// application.ts
+export function bootstrapApp({ dom }) {
+  // all of the application-specific setup logic
+  // application renders into the given dom element
+}
+```
+
+This pattern provides flexibility for applications to have bootstrap logic and technologies that are not prescribed by or coupled to core itself.
+
+Applications in legacy plugins are instead resolved on the server-side and then get served to the client via application-specific entry files. Migrating applications involves adopting the above pattern for defining mounting logic in the global plugin definition hack, and then updating the legacy app entry file to behave like the new platform core will by invoking the mounting logic.
+
+As before, shims will need to be created for legacy integrations with core and other plugins, and all webpack alias-based imports will need to move to those shims.
+
+**React application:**
+
+Let's look at an example for a react application.
+
+```ts
+// demo/public/plugin.js
+export class Plugin {
+  start(core) {
+    const { I18nContext } = core.i18n;
+    core.applications.register('demo', async function mount(dom) {
+      const { bootstrapApp } = await import('../application');
+      return bootstrapApp({ dom, I18nContext });
+    });
+  }
+}
+
+
+// demo/public/application.js
+import React from 'react';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+import ReactDOM from 'react-dom';
+
+import { configureStore } from './store';
+import { Main } from './components/Main';
+
+import './style/demo_custom_styles.css';
+
+export function bootstrapApp({ dom, I18nContext }) {
+  const store = configureStore();
+
+  ReactDOM.render(
+    <I18nContext>
+      <Provider store={store}>
+        <Router>
+          <Main />
+        </Router>
+      </Provider>
+    </I18nContext>,
+    dom
+  );
+
+  return function destroyApp() {
+    ReactDOM.unmountComponentAtNode(dom);
+  }
+}
+
+
+// demo/public/hacks/shim_plugin.js
+import { I18nContext } from 'ui/i18n';
+import { Plugin } from '../plugin';
+
+const core = {
+  i18n: {
+    I18nContext
+  }
+};
+
+new Plugin().start(core);
+
+
+// demo/public/index.js
+import { core } from 'ui/core';
+import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
+import 'ui/autoload/styles';
+import 'ui/autoload/all';
+
+import template from './templates/index.html';
+chrome.setRootTemplate(template);
+const dom = document.getElementById('react-apm-root');
+
+core.applications.mountApp('demo', dom);
+```
+
+
+
+
+# Random temporary idea thrashing below
 
 * Plugin without app
 * Plugin with angular app
@@ -715,61 +823,6 @@ uiModules.get('kibana').run(showAppRedirectNotification);
 
 
 
-// example of plugin file for upgraded react plugin
-// plugin
-export class Plugin {
-  start(core, dependencies) {
-    const { I18nContext } = core.i18n;
-    core.applications.register('demo', async (dom) => {
-      const { mount } = await import('../application');
-      return mount({ dom, I18nContext });
-    });
-  }
-}
-
-// example of app entry file for upgraded react plugin
-// application
-import React from 'react';
-import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
-import ReactDOM from 'react-dom';
-
-import { configureStore } from './store';
-import { Main } from './components/Main';
-
-import './style/global_overrides.css';
-
-export function mount({ dom, I18nContext }) {
-  const store = configureStore();
-
-  ReactDOM.render(
-    <I18nContext>
-      <Provider store={store}>
-        <Router>
-          <Main />
-        </Router>
-      </Provider>
-    </I18nContext>,
-    dom
-  );
-
-  return function unmount() {
-    ReactDOM.unmountComponentAtNode(dom);
-  }
-}
-
-
-// entry
-import { core } from 'ui/core';
-import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
-import 'ui/autoload/styles';
-import 'ui/autoload/all';
-
-import template from './templates/index.html';
-chrome.setRootTemplate(template);
-const dom = document.getElementById('react-apm-root');
-
-core.applications.mountApp('demo', dom);
 
 
 // tag_cloud/hacks/plugin.js
