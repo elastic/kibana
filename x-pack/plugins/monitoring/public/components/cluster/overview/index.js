@@ -13,7 +13,7 @@ import { BeatsPanel } from './beats_panel';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
-import { MetricbeatMigration } from './metricbeat_migration';
+import { MetricbeatMigration } from '../../metricbeat_migration';
 
 export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
