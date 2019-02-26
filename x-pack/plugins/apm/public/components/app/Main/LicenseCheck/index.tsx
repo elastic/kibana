@@ -8,7 +8,7 @@ import { STATUS } from '../../../../constants/index';
 import { LicenceRequest } from '../../../../store/reactReduxRequest/license';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
-export const LicenseCheck: React.SFC = ({ children }) => {
+export const LicenseCheck: React.FunctionComponent = ({ children }) => {
   return (
     <LicenceRequest
       render={({ data: licenseData, status: licenseStatus }) => {
