@@ -15,12 +15,20 @@ export interface SavedObjectMeta {
   searchSource?: any;
 }
 
-export interface SavedObjectAttributes {
+export interface VisObjectAttributes {
   title: string;
   visState: string;
   uiStateJSON: string;
   description: string;
-  columns?: string[];
+  version: number;
+}
+
+export interface SavedSearchObjectAttributes {
+  title: string;
+  uiStateJSON: string;
+  description: string;
+  sort: any[];
+  columns: string[];
   version: number;
   kibanaSavedObjectMeta: SavedObjectMeta;
 }
@@ -32,7 +40,7 @@ export interface SavedObjectReference {
 }
 
 export interface SavedObject {
-  attributes: SavedObjectAttributes;
+  attributes: VisObjectAttributes | SavedSearchObjectAttributes;
   references?: SavedObjectReference[];
 }
 
@@ -54,6 +62,7 @@ export interface TsvbPanel {
     }>;
   }>;
   type: string; // e.g 'table' for TSVB Table,
+  timerange: TimeRangeParams; // throw-on
 }
 
 interface TsvbAggregationCell {
@@ -80,8 +89,45 @@ export interface VisState {
   type: string; // e.g 'metrics' for TSVB
 }
 
+export interface TimeRangeParams {
+  timezone: string;
+  min: Date;
+  max: Date;
+}
+
 export interface SearchPanel {
   indexPatternSavedObject: any;
-  attributes: SavedObjectAttributes;
+  attributes: VisObjectAttributes | SavedSearchObjectAttributes;
   references: SavedObjectReference[];
+  timerange: TimeRangeParams;
+}
+
+export interface SearchRequest {
+  index: string;
+  body:
+    | {
+        stored_fields: string[];
+      }
+    | any;
+  query:
+    | {
+        bool: {
+          filter: any[];
+          must_not: any[];
+          should: any[];
+          must: any[];
+        };
+      }
+    | any;
+  script_fields: string[];
+  _source: {
+    excludes: string[];
+    includes: string[];
+  };
+  docvalue_fields: string[];
+  sort: Array<{
+    [key: string]: {
+      order: string;
+    };
+  }>;
 }

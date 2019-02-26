@@ -7,14 +7,23 @@
 import {
   SavedObject,
   SavedObjectMeta,
-  SavedObjectReference
+  SavedObjectReference,
+  SearchPanel,
+  TimeRangeParams,
 } from '../../types';
+
+interface SearchPanelData {
+  title: string;
+  visType: string;
+  panel: SearchPanel;
+}
 
 export async function createJobSearch(
   savedObjectsClient: any,
+  timerange: TimeRangeParams,
   savedObject: SavedObject,
   kibanaSavedObjectMeta: SavedObjectMeta
-) {
+): Promise<SearchPanelData> {
   const { attributes, references } = savedObject;
 
   const { searchSourceJSON } = kibanaSavedObjectMeta;
@@ -23,11 +32,16 @@ export async function createJobSearch(
   }
   const searchSource = JSON.parse(searchSourceJSON);
 
-  const indexPatternMeta = references.find((ref: SavedObjectReference) => ref.type === 'index-pattern');
+  const indexPatternMeta = references.find(
+    (ref: SavedObjectReference) => ref.type === 'index-pattern'
+  );
   if (!indexPatternMeta) {
     throw new Error('Could not find index pattern for the saved search!');
   }
-  const indexPatternSavedObject = await savedObjectsClient.get('index-pattern', indexPatternMeta.id);
+  const indexPatternSavedObject = await savedObjectsClient.get(
+    'index-pattern',
+    indexPatternMeta.id
+  );
 
   const sPanel = {
     indexPatternSavedObject,
@@ -35,6 +49,7 @@ export async function createJobSearch(
       ...attributes,
       kibanaSavedObjectMeta: { searchSource },
     },
+    timerange,
     references,
   };
   return { panel: sPanel, title: attributes.title, visType: 'search' };
