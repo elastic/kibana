@@ -61,7 +61,7 @@ describe('<JobTable />', () => {
     });
 
     it('should set the correct job value in each row cell', () => {
-      const fieldNames = [
+      const unformattedFields = [
         'id',
         'indexPattern',
         'rollupIndex',
@@ -72,10 +72,9 @@ describe('<JobTable />', () => {
       const job = jobs[0];
       const getCellText = (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
 
-      // Simple fields
-      fieldNames.forEach((fieldName) => {
-        const cellText = getCellText(fieldName);
-        expect(cellText).toEqual(job[fieldName]);
+      unformattedFields.forEach((field) => {
+        const cellText = getCellText(field);
+        expect(cellText).toEqual(job[field]);
       });
 
       // Status
@@ -84,16 +83,8 @@ describe('<JobTable />', () => {
       expect(cellStatusText).toEqual('Stopped');
 
       // Groups
-      const expectedJobGroups = ['histogram', 'terms'].reduce((text, field) => {
-        if (job[field].length) {
-          return text
-            ? `${text}, ${field}`
-            : field.replace(/^\w/, char => char.toUpperCase());
-        }
-        return text;
-      }, '');
       const cellGroupsText = getCellText('groups');
-      expect(cellGroupsText).toEqual(expectedJobGroups);
+      expect(cellGroupsText).toEqual('Histogram, terms');
 
       // Metrics
       const expectedJobMetrics = job.metrics.reduce((text, { name }) => (

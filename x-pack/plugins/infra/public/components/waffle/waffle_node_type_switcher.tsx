@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import { EuiKeyPadMenu, EuiKeyPadMenuItemButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
@@ -25,7 +25,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   public render() {
     return (
       <EuiKeyPadMenu>
-        <EuiKeyPadMenuItem
+        <EuiKeyPadMenuItemButton
           label={
             <FormattedMessage
               id="xpack.infra.waffle.nodeTypeSwitcher.hostsLabel"
@@ -40,23 +40,23 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
             alt=""
             className="euiIcon euiIcon--large"
           />
-        </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
+        </EuiKeyPadMenuItemButton>
+        <EuiKeyPadMenuItemButton label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
           <img
             src="../plugins/infra/images/k8.svg"
             role="presentation"
             alt=""
             className="euiIcon euiIcon--large"
           />
-        </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
+        </EuiKeyPadMenuItemButton>
+        <EuiKeyPadMenuItemButton label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
           <img
             src="../plugins/infra/images/docker.svg"
             role="presentation"
             alt=""
             className="euiIcon euiIcon--large"
           />
-        </EuiKeyPadMenuItem>
+        </EuiKeyPadMenuItemButton>
       </EuiKeyPadMenu>
     );
   }

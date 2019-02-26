@@ -21,11 +21,11 @@ import _ from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
 import mapBucket from '../../helpers/map_bucket';
-export default function stdDeviationBands(resp, panel, series) {
+export default function stdDeviationBands(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.type === 'std_deviation' && metric.mode === 'band') {
-      getSplits(resp, panel, series).forEach((split) => {
+      getSplits(resp, panel, series, meta).forEach((split) => {
         const upper = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'upper' })));
         const lower = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'lower' })));
         results.push({

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { I18nStartContract } from '../i18n';
+import { I18nStart } from '../i18n';
 import { ToastsService } from './toasts';
 
 interface Params {
@@ -25,7 +25,7 @@ interface Params {
 }
 
 interface Deps {
-  i18n: I18nStartContract;
+  i18n: I18nStart;
 }
 
 export class NotificationsService {
@@ -55,4 +55,4 @@ export class NotificationsService {
   }
 }
 
-export type NotificationsStartContract = ReturnType<NotificationsService['start']>;
+export type NotificationsStart = ReturnType<NotificationsService['start']>;

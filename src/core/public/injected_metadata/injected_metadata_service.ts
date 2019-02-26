@@ -100,4 +100,4 @@ export class InjectedMetadataService {
   }
 }
 
-export type InjectedMetadataStartContract = ReturnType<InjectedMetadataService['start']>;
+export type InjectedMetadataStart = ReturnType<InjectedMetadataService['start']>;
