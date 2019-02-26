@@ -201,6 +201,19 @@ export const apmReindexScript = `
 
       }
 
+      // bump timestamp.us by span.start.us for spans
+      // shouldn't @timestamp this already be a Date?
+      if (ctx._source.processor.event == "span" && context.service.agent.name == "js-base"){
+        def ts = ctx._source.get("@timestamp");
+        if (ts != null && !ctx._source.containsKey("timestamp") && ctx._source.span.start.containsKey("us")) {
+           // add span.start to @timestamp for rum documents v1
+            ctx._source.timestamp = new HashMap();
+            def tsms = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(ts).getTime();
+            ctx._source['@timestamp'] = Instant.ofEpochMilli(tsms + (ctx._source.span.start.us/1000));
+            ctx._source.timestamp.us = (tsms*1000) + ctx._source.span.start.us;
+        }
+      }
+
       // context.service.agent -> agent
       HashMap service = context.remove("service");
       ctx._source.agent = service.remove("agent");
@@ -326,6 +339,16 @@ export const apmReindexScript = `
           }
       }
 
+      // context.page -> error.page,transaction.page
+      def page = context.remove("page");
+      if (page != null) {
+          if (ctx._source.processor.event == "transaction") {
+              ctx._source.transaction.page = page;
+          } else if (ctx._source.processor.event == "error") {
+              ctx._source.error.page = page;
+          }
+      }
+
       // context.db -> span.db
       def db = context.remove("db");
       if (db != null) {
@@ -349,26 +372,25 @@ export const apmReindexScript = `
           if (status_code != null) {
               http.response = ["status_code": status_code];
           }
+          // lowercase span.http.method
+          if (http.containsKey("method")) {
+              http.method = http.method.toLowerCase();
+          }
           ctx._source.span.http = http;
       }
   }
 
   if (ctx._source.processor.event == "span") {
-      // bump timestamp.us by span.start.us for spans
-      // shouldn't @timestamp this already be a Date?
-      def ts = ctx._source.get("@timestamp");
-      if (ts != null && !ctx._source.containsKey("timestamp")) {
-          // add span.start to @timestamp for rum documents v1
-          if (ctx._source.context.service.agent.name == "js-base" && ctx._source.span.start.containsKey("us")) {
-             ts += ctx._source.span.start.us/1000;
-          }
-      }
-      if (ctx._source.span.containsKey("hex_id")) {
-        ctx._source.span.id = ctx._source.span.remove("hex_id");
+      def hex_id = ctx._source.span.remove("hex_id");
+      def span_id = ctx._source.span.remove("id");
+      if (hex_id != null) {
+        ctx._source.span.id = hex_id;
+      } else if (span_id != null){
+        ctx._source.span.id = span_id.toString();
       }
       def parent = ctx._source.span.remove("parent");
       if (parent != null && ctx._source.parent == null) {
-        ctx._source.parent = ["id": parent];
+        ctx._source.parent = ["id": parent.toString()];
       }
   }
 
@@ -389,7 +411,7 @@ export const apmReindexScript = `
     if (ts != null && !ctx._source.containsKey("timestamp")) {
       //set timestamp.microseconds to @timestamp
       ctx._source.timestamp = new HashMap();
-      ctx._source.timestamp.us = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(ts).getTime()*1000;
+      ctx._source.timestamp.us = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(ts).getTime()*1000;
     }
 
   }
