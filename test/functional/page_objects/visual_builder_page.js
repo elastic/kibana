@@ -132,7 +132,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     /**
      * get all sub-tabs count for `time series`, `metric`, `top n`, `gauge`, `markdown` or `table` tab.
      *
-     * @returns {Promise<number>}
+     * @returns {Promise<any[]>}
      * @memberof VisualBuilderPage
      */
     async getSubTabs() {

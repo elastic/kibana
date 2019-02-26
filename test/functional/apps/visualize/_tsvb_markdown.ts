@@ -39,7 +39,7 @@ export default function({ getService, getPageObjects }: TestWrapper) {
 
       it('should render subtabs and table variables markdown components', async () => {
         const tabs = await visualBuilder.getSubTabs();
-        expect(tabs.length).to.be(3);
+        expect(tabs).to.have.length(3);
 
         const variables = await visualBuilder.getMarkdownTableVariables();
         expect(variables).not.to.be.empty();
