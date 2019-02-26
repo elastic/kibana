@@ -24,10 +24,10 @@ import {
   PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MAX_AGE,
   PHASE_ROLLOVER_MAX_AGE_UNITS,
+  PHASE_ROLLOVER_MAX_DOCUMENTS,
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ENABLED,
-  MAX_SIZE_TYPE_DOCUMENT
 } from '../../../../store/constants';
 import { SetPriorityInput } from '../set_priority_input';
 
@@ -185,11 +185,38 @@ class HotPhaseUi extends PureComponent {
                           id: 'xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel',
                           defaultMessage: 'gigabytes'
                         }) },
-                        { value: MAX_SIZE_TYPE_DOCUMENT, text: intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.hotPhase.documentsLabel',
-                          defaultMessage: 'documents'
+                        { value: 'mb', text: intl.formatMessage({
+                          id: 'xpack.indexLifecycleMgmt.hotPhase.megabytesLabel',
+                          defaultMessage: 'megabytes'
                         }) }
                       ]}
+                    />
+                  </ErrableFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+              <EuiFlexGroup>
+                <EuiFlexItem style={{ maxWidth: 188 }}>
+                  <ErrableFormRow
+                    id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
+                    label={intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel',
+                      defaultMessage: 'Maximum documents'
+                    })}
+                    errorKey={PHASE_ROLLOVER_MAX_DOCUMENTS}
+                    isShowingErrors={isShowingErrors}
+                    errors={errors}
+                  >
+                    <EuiFieldNumber
+                      id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
+                      value={phaseData[PHASE_ROLLOVER_MAX_DOCUMENTS]}
+                      onChange={async e => {
+                        await setPhaseData(
+                          PHASE_ROLLOVER_MAX_DOCUMENTS,
+                          e.target.value
+                        );
+                      }}
+                      min={1}
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>

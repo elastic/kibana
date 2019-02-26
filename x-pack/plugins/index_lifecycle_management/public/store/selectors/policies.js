@@ -33,11 +33,11 @@ import {
   PHASE_REPLICA_COUNT,
   PHASE_ENABLED,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-  MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_SHRINK_ENABLED,
   PHASE_FREEZE_ENABLED,
-  PHASE_INDEX_PRIORITY
+  PHASE_INDEX_PRIORITY,
+  PHASE_ROLLOVER_MAX_DOCUMENTS
 } from '../constants';
 import { filterItems, sortTable } from '../../services';
 
@@ -163,6 +163,8 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
         );
         policy[PHASE_ROLLOVER_MAX_AGE] = maxAge;
         policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = maxAgeUnits;
+      } else {
+        policy[PHASE_ROLLOVER_MAX_AGE] = '';
       }
       if (rollover.max_size) {
         const { size: maxSize, units: maxSizeUnits } = splitSizeAndUnits(
@@ -170,10 +172,11 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
         );
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = maxSize;
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
+      } else {
+        policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = '';
       }
       if (rollover.max_docs) {
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = rollover.max_docs;
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = MAX_SIZE_TYPE_DOCUMENT;
+        policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
       }
     }
 
@@ -245,13 +248,12 @@ export const phaseToES = (phase, originalEsPhase) => {
       }`;
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])) {
-      if (phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] === MAX_SIZE_TYPE_DOCUMENT) {
-        esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_SIZE_STORED];
-      } else {
-        esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
-          phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
-        }`;
-      }
+      esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
+        phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
+      }`;
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS])) {
+      esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_DOCUMENTS];
     }
   } else {
     delete esPhase.actions.rollover;
