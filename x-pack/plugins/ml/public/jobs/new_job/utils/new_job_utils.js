@@ -21,7 +21,7 @@ export function SearchItemsProvider(Private, $route, config) {
     let indexPattern = $route.current.locals.indexPattern;
 
     // query is only used by the data visualizer as it needs
-    // a lucene string_string.
+    // a lucene query_string.
     // Using a blank query will cause match_all:{} to be used
     // when passed through luceneStringToDsl
     let query = {
