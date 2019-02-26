@@ -43,7 +43,7 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
               uiCapabilities.value!.catalogue,
               (value, catalogueId) => catalogueId === 'foo'
             );
-            expect(expected).to.eql(expected);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
           default:
