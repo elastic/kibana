@@ -1779,15 +1779,6 @@
     moment ">=2.14.0"
     popper.js "^1.14.1"
 
-"@types/react-datepicker@^1.1.5":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@types/react-datepicker/-/react-datepicker-1.1.5.tgz#2070d5ab86eacf69f5e9573b1d69af9982841c02"
-  integrity sha512-ngVoBPI60NIzqCl8PeJ292MjPkIvHNrRW0krjsW9IEC4TANaAeFjW+ql9bnmPQW8MdhxB6OGU5P0EcNceEL91g==
-  dependencies:
-    "@types/react" "*"
-    moment ">=2.14.0"
-    popper.js "^1.14.1"
-
 "@types/react-dom@^16.0.5":
   version "16.0.6"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-16.0.6.tgz#f1a65a4e7be8ed5d123f8b3b9eacc913e35a1a3c"

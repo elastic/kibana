@@ -48,7 +48,7 @@
     "@types/pngjs": "^3.3.1",
     "@types/prop-types": "^15.5.3",
     "@types/react": "16.3.14",
-    "@types/react-datepicker": "^1.1.5",
+    "@types/react-datepicker": "1.8.0",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
     "@types/react-router-dom": "^4.3.1",
