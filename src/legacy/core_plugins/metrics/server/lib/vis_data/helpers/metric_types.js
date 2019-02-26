@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import buildProcessorFunction from './build_processor_function';
-import processors from './request_processors/annotations';
+export const EXTENDED_STATS_TYPES = [
+  'std_deviation',
+  'variance',
+  'sum_of_squares'
+];
 
-export default function buildAnnotationRequest(req, panel, annotation,  esQueryConfig, indexPattern) {
-  const processor = buildProcessorFunction(processors, req, panel, annotation,  esQueryConfig, indexPattern);
-  const doc = processor({});
-  return doc;
-}
+export const METRIC_TYPES = {
+  PERCENTILE: 'percentile',
+  PERCENTILE_RANK: 'percentile_rank',
+  TOP_HIT: 'top_hit',
+  COUNT: 'count'
+};

@@ -183,6 +183,7 @@ app.directive('dashboardApp', function ($injector) {
         courier.fetch();
       };
       dashboardStateManager.handleTimeChange(timefilter.getTime());
+      dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
 
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
@@ -291,7 +292,10 @@ app.directive('dashboardApp', function ($injector) {
         // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
         $scope.refresh();
       });
-      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateState);
+      $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
+        dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
+        updateState();
+      });
       $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateState);
 
       function updateViewMode(newMode) {

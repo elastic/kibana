@@ -80,10 +80,10 @@ export interface PluginManifest {
   readonly server: boolean;
 }
 
-type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName, unknown>> = (
+type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknown>> = (
   coreContext: PluginInitializerContext
 ) => {
-  start: (pluginStartContext: PluginStartContext, dependencies: TDependencies) => TExposedContract;
+  start: (pluginStartContext: PluginStartContext, dependencies: TDependencies) => TExposed;
   stop?: () => void;
 };
 
@@ -93,7 +93,7 @@ type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName
  * @internal
  */
 export class Plugin<
-  TStartContract = unknown,
+  TStart = unknown,
   TDependencies extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
@@ -105,7 +105,7 @@ export class Plugin<
 
   private readonly log: Logger;
 
-  private instance?: ReturnType<PluginInitializer<TStartContract, TDependencies>>;
+  private instance?: ReturnType<PluginInitializer<TStart, TDependencies>>;
 
   constructor(
     public readonly path: string,
@@ -162,7 +162,7 @@ export class Plugin<
     }
 
     const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TStartContract, TDependencies>;
+      plugin: PluginInitializer<TStart, TDependencies>;
     };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
