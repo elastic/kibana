@@ -160,7 +160,7 @@ class DashboardListingUi extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            onClick={() => this.props.editItem(record)}
+            href={this.props.getViewUrl(record)}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
@@ -185,6 +185,7 @@ DashboardListingUi.propTypes = {
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
+  getViewUrl: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,

@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect';
+import { map } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -38,10 +39,11 @@ import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { CheckboxShowCharts, mlCheckboxShowChartsService } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
-import { SelectInterval, mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
-import { SelectLimit, mlSelectLimitService } from './select_limit/select_limit';
-import { SelectSeverity, mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
+import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
+import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
+import { SelectLimit, limit$ } from './select_limit/select_limit';
+import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
+import { injectObservablesAsProps } from '../util/observable_utils';
 
 import {
   getClearedSelectedAnomaliesState,
@@ -70,7 +72,6 @@ import {
   DRAG_SELECT_ACTION,
   APP_STATE_ACTION,
   EXPLORER_ACTION,
-  SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
@@ -111,7 +112,15 @@ function mapSwimlaneOptionsToEuiOptions(options) {
   }));
 }
 
-export const Explorer = injectI18n(
+export const Explorer = injectI18n(injectObservablesAsProps(
+  {
+    annotationsRefresh: annotationsRefresh$,
+    explorer: explorer$,
+    showCharts: showCharts$,
+    swimlaneLimit: limit$.pipe(map(d => d.val)),
+    tableInterval: interval$.pipe(map(d => d.val)),
+    tableSeverity: severity$.pipe(map(d => d.val)),
+  },
   class Explorer extends React.Component {
     static propTypes = {
       appStateHandler: PropTypes.func.isRequired,
@@ -169,16 +178,6 @@ export const Explorer = injectI18n(
       this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
     };
 
-    // These are observable subscriptions, they get assigned in componentDidMount().
-    // In componentWillUnmount() they will be unsubscribed again.
-    annotationsRefreshSub = null;
-    explorerSub = null;
-    showChartsSub = null;
-    limitSub = null;
-    chartsSeveritySub = null;
-    intervalSub = null;
-    tableSeveritySub = null;
-
     componentDidMount() {
       this.updateCharts = explorerChartsContainerServiceFactory((data) => {
         this.setState({
@@ -191,17 +190,32 @@ export const Explorer = injectI18n(
           }
         });
       });
+    }
 
-      this.explorerSub = explorer$.subscribe(({ action, payload = {} }) => {
-        // Listen to the initial loading of jobs
+    // based on the pattern described here:
+    // https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#fetching-external-data-when-props-change
+    // instead of our previous approach using custom listeners, here we react to prop changes
+    // and trigger corresponding updates to the component's state via updateExplorer()
+    previousSwimlaneLimit = limit$.getValue().val;
+    previousTableInterval = interval$.getValue().val;
+    previousTableSeverity = severity$.getValue().val;
+    async componentDidUpdate() {
+      if (this.props.explorer !== undefined && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
+        explorer$.next({ action: EXPLORER_ACTION.IDLE });
+
+        const { action, payload } = this.props.explorer;
+
         if (action === EXPLORER_ACTION.INITIALIZE) {
           const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
           let currentSelectedCells = this.state.selectedCells;
           let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
 
+          if (swimlaneViewByFieldName !== undefined) {
+            currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
+          }
+
           if (selectedCells !== undefined && currentSelectedCells === null) {
             currentSelectedCells = selectedCells;
-            currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
           }
 
           const stateUpdate = {
@@ -252,85 +266,23 @@ export const Explorer = injectI18n(
         if (action === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
         }
-      });
-
-      this.showChartsSub = mlCheckboxShowChartsService.state.watch(() => {
-        const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-        const { selectedCells, selectedJobs } = this.state;
-
-        const bounds = timefilter.getActiveBounds();
-        const timerange = getSelectionTimeRange(
-          selectedCells,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-          bounds,
-        );
-
-        if (showCharts && selectedCells !== null) {
-          this.updateCharts(
-            this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-          );
-        } else {
-          this.updateCharts(
-            [], timerange.earliestMs, timerange.latestMs
-          );
-        }
-      });
-
-      this.limitSub = mlSelectLimitService.state.watch(() => {
+      } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
+        this.previousSwimlaneLimit = this.props.swimlaneLimit;
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         this.updateExplorer(getClearedSelectedAnomaliesState(), false);
-      });
-
-      this.chartsSeveritySub = mlSelectSeverityService.state.watch(() => {
-        const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-        const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
-        if (showCharts && selectedCells !== null) {
-          const bounds = timefilter.getActiveBounds();
-          const timerange = getSelectionTimeRange(
-            selectedCells,
-            this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-            bounds,
-          );
-          this.updateCharts(
-            anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-          );
-        }
-      });
-
-      const tableControlsListener = async () => {
-        const { dateFormatTz } = this.props;
-        const { selectedCells, swimlaneViewByFieldName, selectedJobs } = this.state;
-        const bounds = timefilter.getActiveBounds();
-        const tableData = await loadAnomaliesTableData(
-          selectedCells,
-          selectedJobs,
-          dateFormatTz,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-          bounds,
-          swimlaneViewByFieldName
-        );
-        this.setState({ tableData });
-      };
-
-      this.intervalSub = mlSelectIntervalService.state.watch(tableControlsListener);
-      this.tableSeveritySub = mlSelectSeverityService.state.watch(tableControlsListener);
-
-      this.annotationsRefreshSub = annotationsRefresh$.subscribe(() => {
+      } else if (this.previousTableInterval !== this.props.tableInterval) {
+        this.previousTableInterval = this.props.tableInterval;
+        this.updateExplorer();
+      } else if (this.previousTableSeverity !== this.props.tableSeverity) {
+        this.previousTableSeverity = this.props.tableSeverity;
+        this.updateExplorer();
+      } else if (this.props.annotationsRefresh === true) {
+        annotationsRefresh$.next(false);
         // clear the annotations cache and trigger an update
         this.annotationsTablePreviousArgs = null;
         this.annotationsTablePreviousData = null;
         this.updateExplorer();
-      });
-    }
-
-    componentWillUnmount() {
-      this.explorerSub.unsubscribe();
-      this.showChartsSub.unsubscribe();
-      this.limitSub.unsubscribe();
-      this.chartsSeveritySub.unsubscribe();
-      this.intervalSub.unsubscribe();
-      this.tableSeveritySub.unsubscribe();
-      this.annotationsRefreshSub.unsubscribe();
+      }
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
@@ -456,8 +408,7 @@ export const Explorer = injectI18n(
     loadViewBySwimlanePreviousArgs = null;
     loadViewBySwimlanePreviousData = null;
     loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName) {
-      const limit = mlSelectLimitService.state.get('limit');
-      const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
+      const { swimlaneLimit } = this.props;
 
       const compareArgs = {
         fieldValues,
@@ -559,8 +510,7 @@ export const Explorer = injectI18n(
     topFieldsPreviousData = null;
     loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
-      const limit = mlSelectLimitService.state.get('limit');
-      const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
+      const { swimlaneLimit } = this.props;
 
       const compareArgs = {
         earliestMs, latestMs, selectedJobIds, swimlaneLimit, swimlaneViewByFieldName,
@@ -624,6 +574,7 @@ export const Explorer = injectI18n(
         noJobsFound,
         selectedCells,
         selectedJobs,
+        swimlaneViewByFieldName,
       } = {
         ...this.state,
         ...stateUpdate
@@ -692,7 +643,7 @@ export const Explorer = injectI18n(
         );
       }
 
-      const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, this.state.swimlaneViewByFieldName);
+      const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, swimlaneViewByFieldName);
       Object.assign(stateUpdate, viewBySwimlaneOptions);
       if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
         // this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
@@ -776,7 +727,7 @@ export const Explorer = injectI18n(
 
       this.setState(stateUpdate);
 
-      if (mlCheckboxShowChartsService.state.get('showCharts') && selectedCells !== null) {
+      if (selectedCells !== null) {
         this.updateCharts(
           stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -786,6 +737,7 @@ export const Explorer = injectI18n(
         );
       }
 
+      const { tableInterval, tableSeverity } = this.props;
       const anomaliesTableCompareArgs = {
         selectedCells,
         selectedJobs,
@@ -794,6 +746,8 @@ export const Explorer = injectI18n(
         boundsMin: bounds.min.valueOf(),
         boundsMax: bounds.max.valueOf(),
         swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
+        tableInterval,
+        tableSeverity,
       };
 
       if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
@@ -806,7 +760,9 @@ export const Explorer = injectI18n(
           dateFormatTz,
           this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
           bounds,
-          viewBySwimlaneOptions.swimlaneViewByFieldName
+          viewBySwimlaneOptions.swimlaneViewByFieldName,
+          tableInterval,
+          tableSeverity,
         );
         this.setState({ tableData });
       }
@@ -1123,7 +1079,7 @@ export const Explorer = injectI18n(
             <EuiSpacer size="m" />
 
             <div className="euiText explorer-charts">
-              <ExplorerChartsContainer {...chartsData} />
+              {this.props.showCharts && <ExplorerChartsContainer {...chartsData} />}
             </div>
 
             <AnomaliesTable tableData={tableData} timefilter={timefilter} />
@@ -1132,4 +1088,4 @@ export const Explorer = injectI18n(
       );
     }
   }
-);
+));

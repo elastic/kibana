@@ -109,7 +109,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -126,7 +126,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -206,7 +206,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -223,7 +223,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -366,7 +366,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={splitColorOptions}
               selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
               onChange={handleSelectChange('split_color_mode')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -444,7 +444,7 @@ const TimeseriesConfig = injectI18n(function (props) {
               options={positionOptions}
               selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
               onChange={handleSelectChange('axis_position')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>

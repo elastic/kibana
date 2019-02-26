@@ -5,8 +5,17 @@
  */
 
 import Hapi from 'hapi';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
+import {
+  CANVAS_TYPE,
+  API_ROUTE_WORKPAD,
+  API_ROUTE_WORKPAD_ASSETS,
+  API_ROUTE_WORKPAD_STRUCTURES,
+} from '../../common/lib/constants';
 import { workpad } from './workpad';
+
+const routePrefix = API_ROUTE_WORKPAD;
+const routePrefixAssets = API_ROUTE_WORKPAD_ASSETS;
+const routePrefixStructures = API_ROUTE_WORKPAD_STRUCTURES;
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
@@ -53,11 +62,11 @@ describe(`${CANVAS_TYPE} API`, () => {
   });
   workpad(mockServer);
 
-  describe(`GET ${API_ROUTE_WORKPAD}/{id}`, () => {
+  describe(`GET ${routePrefix}/{id}`, () => {
     test('returns successful response', async () => {
       const request = {
         method: 'GET',
-        url: `${API_ROUTE_WORKPAD}/123`,
+        url: `${routePrefix}/123`,
       };
 
       savedObjectsClient.get.mockResolvedValueOnce({ id: '123', attributes: { foo: true } });
@@ -83,11 +92,11 @@ Array [
     });
   });
 
-  describe(`POST ${API_ROUTE_WORKPAD}`, () => {
+  describe(`POST ${routePrefix}`, () => {
     test('returns successful response without id in payload', async () => {
       const request = {
         method: 'POST',
-        url: API_ROUTE_WORKPAD,
+        url: routePrefix,
         payload: {
           foo: true,
         },
@@ -124,7 +133,7 @@ Array [
     test('returns succesful response with id in payload', async () => {
       const request = {
         method: 'POST',
-        url: API_ROUTE_WORKPAD,
+        url: routePrefix,
         payload: {
           id: '123',
           foo: true,
@@ -160,11 +169,11 @@ Array [
     });
   });
 
-  describe(`PUT ${API_ROUTE_WORKPAD}/{id}`, () => {
+  describe(`PUT ${routePrefix}/{id}`, () => {
     test('formats successful response', async () => {
       const request = {
         method: 'PUT',
-        url: `${API_ROUTE_WORKPAD}/123`,
+        url: `${routePrefix}/123`,
         payload: {
           id: '234',
           foo: true,
@@ -214,11 +223,11 @@ Array [
     });
   });
 
-  describe(`DELETE ${API_ROUTE_WORKPAD}/{id}`, () => {
+  describe(`DELETE ${routePrefix}/{id}`, () => {
     test('formats successful response', async () => {
       const request = {
         method: 'DELETE',
-        url: `${API_ROUTE_WORKPAD}/123`,
+        url: `${routePrefix}/123`,
       };
 
       savedObjectsClient.delete.mockResolvedValueOnce({});
@@ -243,10 +252,10 @@ Array [
     });
   });
 
-  describe(`GET ${API_ROUTE_WORKPAD}/find`, async () => {
+  describe(`GET ${routePrefix}/find`, async () => {
     const request = {
       method: 'GET',
-      url: `${API_ROUTE_WORKPAD}/find?name=abc&page=2&perPage=10`,
+      url: `${routePrefix}/find?name=abc&page=2&perPage=10`,
     };
 
     savedObjectsClient.find.mockResolvedValueOnce({
@@ -297,5 +306,190 @@ Array [
   ],
 ]
 `);
+  });
+
+  describe(`PUT ${routePrefixAssets}/{id}`, () => {
+    test('only updates assets', async () => {
+      const request = {
+        method: 'PUT',
+        url: `${routePrefixAssets}/123`,
+        payload: {
+          'asset-123': {
+            id: 'asset-123',
+            '@created': '2019-02-14T00:00:00.000Z',
+            type: 'dataurl',
+            value: 'mockbase64data',
+          },
+          'asset-456': {
+            id: 'asset-456',
+            '@created': '2019-02-15T00:00:00.000Z',
+            type: 'dataurl',
+            value: 'mockbase64data',
+          },
+        },
+      };
+
+      // provide some existing workpad data to check that it's preserved
+      savedObjectsClient.get.mockResolvedValueOnce({
+        attributes: {
+          '@created': new Date().toISOString(),
+          name: 'fake workpad',
+        },
+      });
+      savedObjectsClient.create.mockResolvedValueOnce({});
+
+      const { payload, statusCode } = await mockServer.inject(request);
+      const response = JSON.parse(payload);
+
+      expect(statusCode).toBe(200);
+      expect(response).toMatchInlineSnapshot(`
+Object {
+  "ok": true,
+}
+`);
+      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      "123",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
+      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      Object {
+        "@created": "2019-02-12T21:01:22.479Z",
+        "@timestamp": "2019-02-12T21:01:22.479Z",
+        "assets": Object {
+          "asset-123": Object {
+            "@created": "2019-02-14T00:00:00.000Z",
+            "id": "asset-123",
+            "type": "dataurl",
+            "value": "mockbase64data",
+          },
+          "asset-456": Object {
+            "@created": "2019-02-15T00:00:00.000Z",
+            "id": "asset-456",
+            "type": "dataurl",
+            "value": "mockbase64data",
+          },
+        },
+        "name": "fake workpad",
+      },
+      Object {
+        "id": "123",
+        "overwrite": true,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
+    });
+  });
+
+  describe(`PUT ${routePrefixStructures}/{id}`, () => {
+    test('only updates workpad', async () => {
+      const request = {
+        method: 'PUT',
+        url: `${routePrefixStructures}/123`,
+        payload: {
+          name: 'renamed workpad',
+          css: '.canvasPage { color: LavenderBlush; }',
+        },
+      };
+
+      // provide some existing asset data and a name to replace
+      savedObjectsClient.get.mockResolvedValueOnce({
+        attributes: {
+          '@created': new Date().toISOString(),
+          name: 'fake workpad',
+          assets: {
+            'asset-123': {
+              id: 'asset-123',
+              '@created': '2019-02-14T00:00:00.000Z',
+              type: 'dataurl',
+              value: 'mockbase64data',
+            },
+          },
+        },
+      });
+      savedObjectsClient.create.mockResolvedValueOnce({});
+
+      const { payload, statusCode } = await mockServer.inject(request);
+      const response = JSON.parse(payload);
+
+      expect(statusCode).toBe(200);
+      expect(response).toMatchInlineSnapshot(`
+Object {
+  "ok": true,
+}
+`);
+      expect(savedObjectsClient.get).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      "123",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
+      expect(savedObjectsClient.create).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "canvas-workpad",
+      Object {
+        "@created": "2019-02-12T21:01:22.479Z",
+        "@timestamp": "2019-02-12T21:01:22.479Z",
+        "assets": Object {
+          "asset-123": Object {
+            "@created": "2019-02-14T00:00:00.000Z",
+            "id": "asset-123",
+            "type": "dataurl",
+            "value": "mockbase64data",
+          },
+        },
+        "css": ".canvasPage { color: LavenderBlush; }",
+        "name": "renamed workpad",
+      },
+      Object {
+        "id": "123",
+        "overwrite": true,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Promise {},
+    },
+  ],
+}
+`);
+    });
   });
 });

@@ -16,6 +16,7 @@ import {
   getTransientLayerId,
 } from '../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../store/ui';
+import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
@@ -32,6 +33,7 @@ export const MAP_DESTROYED = 'MAP_DESTROYED';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
+export const UPDATE_SOURCE_DATA_REQUEST = 'UPDATE_SOURCE_DATA_REQUEST';
 export const SET_JOINS = 'SET_JOINS';
 export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
@@ -58,6 +60,9 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
         type: TOUCH_LAYER,
         layerId: layerId
       });
+    },
+    updateSourceData: (newData) => {
+      dispatch(updateSourceDataRequest(layerId, newData));
     }
   };
 }
@@ -351,6 +356,15 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   });
 }
 
+export function updateSourceDataRequest(layerId, newData) {
+  return ({
+    type: UPDATE_SOURCE_DATA_REQUEST,
+    dataId: SOURCE_DATA_ID_ORIGIN,
+    layerId,
+    newData
+  });
+}
+
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
@@ -445,6 +459,7 @@ export function removeSelectedLayer() {
     const state = getState();
     const layerId = getSelectedLayerId(state);
     dispatch(removeLayer(layerId));
+    dispatch(setSelectedLayer(null));
   };
 }
 
