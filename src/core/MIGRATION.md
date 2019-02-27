@@ -780,8 +780,6 @@ export class Plugin {
 
   start(core, dependencies) {
     core.applications.registerApp('visualize', (domElement) => {
-      this.legacyHackApp();
-
       import('../application').then(({ bootstrapApp }) => {
         const app = bootstrapApp(domElement);
       });
@@ -810,6 +808,25 @@ import './visualize';
 import 'ui/vislib';
 import { showAppRedirectNotification } from 'ui/notify';
 
+import { application } from 'ui/core';
+
+chrome.setRootController(class {
+  constructor($element) {
+    core.applications.mountApp('demo', $element[0]);
+  }
+});
+
+import template from './templates/index.html';
+chrome.setRootTemplate(template);
+initTimepicker().then(() => {
+
+})
+
+
+
+
+
+
 routes.enable();
 
 routes
@@ -818,6 +835,9 @@ routes
   });
 
 uiModules.get('kibana').run(showAppRedirectNotification);
+
+bootstrapAngularChrome();
+
 
 
 
