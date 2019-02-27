@@ -194,7 +194,7 @@ export class StepDateHistogramUi extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="rollupJobCreateDateHistogramTitle">
               <h3>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogramTitle"
@@ -271,6 +271,7 @@ export class StepDateHistogramUi extends Component {
                 value={dateHistogramField}
                 onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
                 fullWidth
+                data-test-subj="rollupJobCreateDateFieldSelect"
               />
             </EuiFormRow>
 
@@ -311,6 +312,7 @@ export class StepDateHistogramUi extends Component {
                 value={dateHistogramTimeZone}
                 onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
                 fullWidth
+                data-test-subj="rollupJobCreateTimeZoneSelect"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

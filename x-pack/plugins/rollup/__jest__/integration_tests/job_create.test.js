@@ -5,6 +5,7 @@
  */
 import sinon from 'sinon';
 import axios from 'axios';
+import moment from 'moment-timezone';
 
 import { registerTestBed } from '../utils';
 import { rollupJobsStore } from '../../public/crud_app/store';
@@ -39,6 +40,14 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 // axios has a $http like interface so using it to simulate $http
 setHttp(axios.create());
 
+// This is the Rollup job we will be creating in our tests
+const JOB_TO_CREATE = {
+  id: 'test-job',
+  indexPattern: 'test-pattern-*',
+  rollupIndex: 'rollup-index',
+  interval: '24h'
+};
+
 const initUserActions = (component, findTestSubject) => {
   const clickNextStep = () => {
     const button = findTestSubject('rollupJobNextButton');
@@ -65,30 +74,53 @@ const initUserActions = (component, findTestSubject) => {
   };
 };
 
-const initFillFormFields = (form) => async (step) => {
+const initFillFormFields = form => async (step) => {
   switch (step) {
     case 'logistics':
-      form.setInputValue('rollupJobName', 'test-job');
-      await form.setInputValue('rollupIndexPattern', 'test-pattern-*', true);
-      form.setInputValue('rollupIndexName', 'rollup-index');
+      form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
+      await form.setInputValue('rollupIndexPattern', JOB_TO_CREATE.indexPattern, true);
+      form.setInputValue('rollupIndexName', JOB_TO_CREATE.rollupIndex);
+      break;
+    case 'date-histogram':
+      form.setInputValue('rollupJobInterval', JOB_TO_CREATE.interval);
       break;
     default:
       return;
   }
 };
 
+const initGoToStep = (fillFormFields, clickNextStep) => async (step) => {
+  if (!step) {
+    return;
+  }
+
+  await fillFormFields('logistics');
+  clickNextStep();
+
+  if (step > 2) {
+    await fillFormFields('date-histogram');
+    clickNextStep();
+  }
+};
+
 const initTestBed = () => {
   const testBed = registerTestBed(JobCreate, {}, rollupJobsStore)();
+  const userActions = initUserActions(testBed.component, testBed.findTestSubject);
+  const fillFormFields = initFillFormFields(testBed.form);
+  const goToStep = initGoToStep(fillFormFields, userActions.clickNextStep);
+  const getEuiStepsHorizontalActive = () => testBed.component.find('.euiStepHorizontal-isSelected').text();
 
   return {
     ...testBed,
     userActions: {
-      ...initUserActions(testBed.component, testBed.findTestSubject)
+      ...userActions
     },
     form: {
       ...testBed.form,
-      fillFormFields: initFillFormFields(testBed.form)
-    }
+      fillFormFields,
+    },
+    goToStep,
+    getEuiStepsHorizontalActive,
   };
 };
 
@@ -97,7 +129,7 @@ const mockServerResponses = server => {
     const defaultResponse = {
       doesMatchIndices: true,
       doesMatchRollupIndices: false,
-      dateFields: ['foo.bar'],
+      dateFields: ['foo', 'bar'],
       numericFields: [],
       keywordFields: [],
     };
@@ -113,9 +145,9 @@ const mockServerResponses = server => {
   return { mockIndexPatternValidityResponse };
 };
 
+
 describe('Create Rollup Job', () => {
   let server;
-  let component;
   let findTestSubject;
   let testSubjectExists;
   let userActions;
@@ -123,20 +155,21 @@ describe('Create Rollup Job', () => {
   let form;
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
+  let goToStep;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
     ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
     ({
-      component,
       findTestSubject,
       testSubjectExists,
       userActions,
       getFormErrorsMessages,
-      form
+      form,
+      goToStep,
+      getEuiStepsHorizontalActive,
     } = initTestBed());
-    getEuiStepsHorizontalActive = () => component.find('.euiStepHorizontal-isSelected').text();
   });
 
   afterEach(() => {
@@ -158,7 +191,7 @@ describe('Create Rollup Job', () => {
       expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
     });
 
-    it('should output errors when clicking "next" without filling the form', () => {
+    it('should display errors when clicking "next" without filling the form', () => {
       expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
 
       userActions.clickNextStep();
@@ -487,13 +520,99 @@ describe('Create Rollup Job', () => {
     });
 
     describe('navigation', () => {
-      it('should go to the next step when all form fields are valid', async () => {
+      it('should go to "Date histogram" when all form fields are valid', async () => {
         expect(getEuiStepsHorizontalActive()).toContain('Logistics'); // Make sure we are on Logistics
 
         await form.fillFormFields('logistics');
         userActions.clickNextStep();
 
         expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
+      });
+    });
+  });
+
+  describe('Step 2: Date histogram', () => {
+    describe('layout', () => {
+      beforeEach(async () => {
+        await goToStep(2);
+      });
+
+      it('should have the horizontal step active on "Date histogramm"', () => {
+        expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
+      });
+
+      it('should have the title set to "Date histogram"', () => {
+        expect(testSubjectExists('rollupJobCreateDateHistogramTitle')).toBe(true);
+      });
+
+      it('should have the "next" and "back" button visible', () => {
+        expect(testSubjectExists('rollupJobBackButton')).toBe(true);
+        expect(testSubjectExists('rollupJobNextButton')).toBe(true);
+        expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      });
+
+      it('should go to the "Logistics" step when clicking the back button', async () => {
+        userActions.clickPreviousStep();
+        expect(getEuiStepsHorizontalActive()).toContain('Logistics');
+      });
+    });
+
+    describe('Date field select', () => {
+      it('should set the options value from the index pattern', async () => {
+        const dateFields = ['field1', 'field2', 'field3'];
+        mockIndexPatternValidityResponse({ dateFields });
+
+        await goToStep(2);
+
+        const dateFieldSelectOptionsValues = findTestSubject('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
+        expect(dateFieldSelectOptionsValues).toEqual(dateFields);
+      });
+    });
+
+    describe('time zone', () => {
+      it('should have a select with all the timezones', async () => {
+        await goToStep(2);
+
+        const timeZoneSelect = findTestSubject('rollupJobCreateTimeZoneSelect');
+        const options = timeZoneSelect.find('option').map(option => option.text());
+        expect(options).toEqual(moment.tz.names());
+      });
+    });
+
+    describe('form validation', () => {
+      beforeEach(async () => {
+        await goToStep(2);
+      });
+
+      it('should display errors when clicking "next" without filling the form', () => {
+        expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+
+        userActions.clickNextStep();
+
+        expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
+        expect(getFormErrorsMessages()).toEqual(['Interval is required.']);
+      });
+
+      describe('interval', () => {
+        it('should validate the interval format', () => {
+          form.setInputValue('rollupJobInterval', 'abc');
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toContain('Invalid interval format.');
+        });
+
+        it('should validate the calendar format', () => {
+          form.setInputValue('rollupJobInterval', '3y');
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
+        });
+      });
+    });
+
+    describe('navigation', () => {
+      it('should go to "Terms" when all form fields are valid', async () => {
+        await goToStep(3);
+
+        expect(getEuiStepsHorizontalActive()).toContain('Terms');
       });
     });
   });
