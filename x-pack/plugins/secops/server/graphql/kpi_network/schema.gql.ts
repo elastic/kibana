@@ -7,14 +7,13 @@
 import gql from 'graphql-tag';
 
 export const kpiNetworkSchema = gql`
-  type kpiNetworkData {
-    "The id of the source"
+  type KpiNetworkData {
     networkEvents: Float!
     uniqueFlowId: Float!
     activeAgents: Float
   }
 
   extend type Source {
-    KpiNetwork(id: String, timerange: TimerangeInput!, filterQuery: String): kpiNetworkData
+    KpiNetwork(id: String, timerange: TimerangeInput!, filterQuery: String): KpiNetworkData
   }
 `;

@@ -377,7 +377,7 @@
                 "defaultValue": null
               }
             ],
-            "type": { "kind": "OBJECT", "name": "kpiNetworkData", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "KpiNetworkData", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -2663,12 +2663,12 @@
       },
       {
         "kind": "OBJECT",
-        "name": "kpiNetworkData",
+        "name": "KpiNetworkData",
         "description": "",
         "fields": [
           {
             "name": "networkEvents",
-            "description": "The id of the source",
+            "description": "",
             "args": [],
             "type": {
               "kind": "NON_NULL",

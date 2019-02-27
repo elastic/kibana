@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NETWORK_EVENTS = i18n.translate('xpack.secops.kpiNetwork.source.networkEvents', {
+export const NETWORK_EVENTS = i18n.translate('xpack.secops.kpiNetwork.source.networkEventsTitle', {
   defaultMessage: 'Network Events',
 });
 
-export const UNIQUE_ID = i18n.translate('xpack.secops.kpiNetwork.source.uniquiId', {
-  defaultMessage: 'Unique ID',
+export const UNIQUE_ID = i18n.translate('xpack.secops.kpiNetwork.source.uniquiIdTitle', {
+  defaultMessage: 'Unique Flow ID',
 });
 
-export const ACTIVE_AGENTS = i18n.translate('xpack.secops.kpiNetwork.source.activeAgents', {
+export const ACTIVE_AGENTS = i18n.translate('xpack.secops.kpiNetwork.source.activeAgentsTitle', {
   defaultMessage: 'Active Agents',
 });

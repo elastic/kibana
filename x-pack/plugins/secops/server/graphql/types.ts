@@ -456,7 +456,6 @@ export interface SayMyName {
 }
 
 export interface KpiNetworkData {
-  /** The id of the source */
   networkEvents: number;
 
   uniqueFlowId: number;
@@ -1997,7 +1996,6 @@ export namespace SayMyNameResolvers {
 
 export namespace KpiNetworkDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = KpiNetworkData> {
-    /** The id of the source */
     networkEvents?: NetworkEventsResolver<number, TypeParent, Context>;
 
     uniqueFlowId?: UniqueFlowIdResolver<number, TypeParent, Context>;

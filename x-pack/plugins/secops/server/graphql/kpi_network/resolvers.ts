@@ -10,7 +10,7 @@ import { KpiNetwork } from '../../lib/kpi_network';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-export type QueryKipNetWorkResolver = ChildResolverOf<
+export type QueryKipNetworkResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.KpiNetworkResolver>,
   QuerySourceResolver
 >;
@@ -23,7 +23,7 @@ export const createKpiNetworkResolvers = (
   libs: KpiNetworkResolversDeps
 ): {
   Source: {
-    KpiNetwork: QueryKipNetWorkResolver;
+    KpiNetwork: QueryKipNetworkResolver;
   };
 } => ({
   Source: {

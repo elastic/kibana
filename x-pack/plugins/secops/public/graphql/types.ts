@@ -427,7 +427,6 @@ export interface SayMyName {
 }
 
 export interface KpiNetworkData {
-  /** The id of the source */
   networkEvents: number;
 
   uniqueFlowId: number;
@@ -1106,7 +1105,7 @@ export namespace GetKpiNetworkQuery {
   };
 
   export type KpiNetwork = {
-    __typename?: 'kpiNetworkData';
+    __typename?: 'KpiNetworkData';
 
     networkEvents: number;
 

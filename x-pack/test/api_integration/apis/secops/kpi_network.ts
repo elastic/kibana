@@ -17,8 +17,8 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      const FROM = new Date('2019-02-09T01:57:24.870Z').valueOf();
-      const TO = new Date('2019-02-12T01:57:24.870Z').valueOf();
+      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
       it('Make sure that we get KpiNetwork data', () => {
         return client
@@ -46,8 +46,8 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
 
-      const FROM = new Date('2019-02-19T23:22:09.675Z').valueOf();
-      const TO = new Date('2019-02-19T23:26:50.001Z').valueOf();
+      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
+      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
       it('Make sure that we get KpiNetwork data', () => {
         return client
@@ -64,9 +64,9 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
           })
           .then(resp => {
             const kpiNetwork = resp.data.source.KpiNetwork;
-            expect(kpiNetwork.networkEvents).to.be(515);
-            expect(kpiNetwork.uniqueFlowId).to.be(93);
-            expect(kpiNetwork.activeAgents).to.equal(6);
+            expect(kpiNetwork.networkEvents).to.be(6157);
+            expect(kpiNetwork.uniqueFlowId).to.be(712);
+            expect(kpiNetwork.activeAgents).to.equal(1);
           });
       });
     });
