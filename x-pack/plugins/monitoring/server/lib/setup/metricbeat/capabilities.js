@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortByOrder } from 'lodash';
+import { get, sortByOrder, uniq } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
 
 export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
@@ -60,10 +60,10 @@ export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUu
 
 export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
   const capabilitiesModel = {
-    totalInstanceCount: 0,
+    totalUniqueInstanceCount: 0,
     isInternalCollector: false,
     isNetNewUser: false,
-    isPartiallyUpgraded: false,
+    isPartiallyMigrated: false,
     isFullyMigrated: false,
     internalCollectorsUuids: [],
     fullyMigratedUuids: [],
@@ -87,12 +87,12 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
 
     // If there is no data, then they are a net new user
     if (!buckets || buckets.length === 0) {
-      capabilities.totalInstanceCount = 0;
+      capabilities.totalUniqueInstanceCount = 0;
       capabilities.isNetNewUser = true;
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (buckets.length === 1) {
-      capabilities.totalInstanceCount = 1;
+      capabilities.totalUniqueInstanceCount = 1;
       const uuidBuckets = get(buckets[0], 'uuids.buckets', []);
       if (buckets[0].key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
         capabilities.isFullyMigrated = true;
@@ -104,20 +104,20 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
-      capabilities.totalInstanceCount = buckets.length;
       for (const bucket of buckets) {
         const uuidBuckets = get(bucket, 'uuids.buckets', []);
         if (bucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
           capabilities.fullyMigratedUuids.push(...uuidBuckets.map(bucket => bucket.key));
-          capabilities.isPartiallyUpgraded = true;
+          capabilities.isPartiallyMigrated = true;
         } else {
           capabilities.internalCollectorsUuids.push(...uuidBuckets.map(bucket => bucket.key));
         }
       }
-      if (!capabilities.isPartiallyUpgraded) {
+      if (!capabilities.isPartiallyMigrated) {
         // TODO: is this right? should this even happen?
         capabilities.isInternalCollector = true;
       }
+      capabilities.totalUniqueInstanceCount = uniq([...capabilities.fullyMigratedUuids, ...capabilities.internalCollectorsUuids]).length;
     }
 
     return {
@@ -126,5 +126,5 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
     };
   }, {});
 
-  return sortByOrder(products, ['isInternalCollector', 'isPartiallyUpgraded', 'isFullyMigrated', 'isNetNewUser'], 'desc');
+  return sortByOrder(products, ['isInternalCollector', 'isPartiallyMigrated', 'isFullyMigrated', 'isNetNewUser'], 'desc');
 };

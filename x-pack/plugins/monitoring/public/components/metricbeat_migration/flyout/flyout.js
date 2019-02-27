@@ -19,13 +19,18 @@ import {
 import { Tabs } from '../tabs';
 
 export class Flyout extends Component {
-  state = {
-    activeStep: 2,
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      activeStep: 2,
+      esMonitoringUrl: props.monitoringHosts ? props.monitoringHosts[0] : '',
+    };
   }
 
   renderActiveStep() {
-    const { esMonitoringUrl, setMonitoringUrl, products, instructionOpts } = this.props;
-    const { activeStep } = this.state;
+    const { products, fetchCapabilities, setCapabilitiesFetchingPaused, updateData } = this.props;
+    const { activeStep, esMonitoringUrl } = this.state;
 
     switch (activeStep) {
       case 1:
@@ -35,7 +40,7 @@ export class Flyout extends Component {
               label="Monitoring cluster URL"
               helpText="The running metricbeat instance will need to be able to react this location."
             >
-              <EuiFieldText value={esMonitoringUrl} onChange={e => setMonitoringUrl(e.target.value)}/>
+              <EuiFieldText value={esMonitoringUrl} onChange={e => this.setState({ esMonitoringUrl: e.target.value })}/>
             </EuiFormRow>
             <EuiButton type="submit" fill onClick={() => this.setState({ activeStep: 2 })}>
               Next
@@ -46,7 +51,10 @@ export class Flyout extends Component {
         return (
           <Tabs
             products={products}
-            instructionOpts={instructionOpts}
+            esMonitoringUrl={esMonitoringUrl}
+            updateData={updateData}
+            fetchCapabilities={fetchCapabilities}
+            setCapabilitiesFetchingPaused={setCapabilitiesFetchingPaused}
           />
         );
     }

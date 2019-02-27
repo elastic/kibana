@@ -15,36 +15,66 @@ import {
 } from '@elastic/eui';
 import { Flyout } from './flyout';
 
-
 export class MetricbeatMigration extends Component {
-  state = {
-    isShowingFlyout: true,
-    esMonitoringUrl: ''
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isShowingFlyout: false,
+      // esMonitoringUrl: props.monitoringHosts ? props.monitoringHosts[0] : '',
+      // checkingMigrationStatus: false,
+      // checkedMigrationStatus: false,
+      // updatedProducts: null,
+    };
   }
 
   renderFlyout() {
-    const { isShowingFlyout, esMonitoringUrl } = this.state;
-    const { clusterCapabilities } = this.props;
+    const { isShowingFlyout } = this.state;
+    const { clusterCapabilities, fetchCapabilities, setCapabilitiesFetchingPaused, updateData } = this.props;
 
     if (!isShowingFlyout) {
       return null;
     }
 
-    const instructionOpts = {
-      kibanaUrl: '',
-      esMonitoringUrl: '',
-      checkForData: () => {}
-    };
+    // const instructionOpts = {
+    //   kibanaUrl: '',
+    //   esMonitoringUrl,
+    //   migrationSuccessful: true,
+    //   checkingMigrationStatus,
+    //   checkForMigrationStatus: async () => {
+    // this.setState({ checkingMigrationStatus: true });
+    // this.props.setCapabilitiesFetchingPaused(false);
+    // await fetchCapabilities();
+    // this.props.setCapabilitiesFetchingPaused(true);
+    // this.setState({ checkingMigrationStatus: false, checkedMigrationStatus: true });
+    //   }
+    // };
 
     return (
       <Flyout
-        onClose={() => this.setState({ isShowingFlyout: false })}
+        onClose={() => this.closeFlyout()}
         products={clusterCapabilities}
-        instructionOpts={instructionOpts}
-        esMonitoringUrl={esMonitoringUrl}
-        setMonitoringUrl={esMonitoringUrl => this.setState({ esMonitoringUrl })}
+        updateData={updateData}
+        fetchCapabilities={fetchCapabilities}
+        setCapabilitiesFetchingPaused={setCapabilitiesFetchingPaused}
+        // updatedProducts={updatedProducts}
+        // checkingMigrationStatus={checkingMigrationStatus}
+        // checkedMigrationStatus={checkedMigrationStatus}
+        // instructionOpts={instructionOpts}
+        // esMonitoringUrl={esMonitoringUrl}
+        // setMonitoringUrl={esMonitoringUrl => this.setState({ esMonitoringUrl })}
       />
     );
+  }
+
+  showFlyout() {
+    this.props.setCapabilitiesFetchingPaused(true);
+    this.setState({ isShowingFlyout: true });
+  }
+
+  closeFlyout() {
+    this.props.setCapabilitiesFetchingPaused(false);
+    this.setState({ isShowingFlyout: false });
   }
 
   render() {
@@ -71,7 +101,7 @@ export class MetricbeatMigration extends Component {
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton fill={true} onClick={() => this.setState({ isShowingFlyout: true })}>
+              <EuiButton fill={true} onClick={() => this.showFlyout()}>
                Use Wizard
               </EuiButton>
             </EuiFlexItem>

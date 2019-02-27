@@ -23,7 +23,13 @@ export function Overview(props) {
       <EuiPageBody>
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
-        <MetricbeatMigration clusterCapabilities={props.clusterCapabilities} monitoringHosts={props.monitoringHosts}/>
+        <MetricbeatMigration
+          clusterCapabilities={props.clusterCapabilities}
+          monitoringHosts={props.monitoringHosts}
+          fetchCapabilities={props.fetchCapabilities}
+          updateData={props.updateData}
+          setCapabilitiesFetchingPaused={props.setCapabilitiesFetchingPaused}
+        />
 
         { !isFromStandaloneCluster ?
           (

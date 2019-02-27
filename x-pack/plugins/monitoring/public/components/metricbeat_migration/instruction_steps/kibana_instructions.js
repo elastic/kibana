@@ -11,11 +11,19 @@ import {
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton
+  EuiButton,
+  EuiCallOut
 } from '@elastic/eui';
 
-export function getKibanaInstructions({ kibanaUrl, esMonitoringUrl, checkForData }) {
-  return [
+export function getKibanaInstructions({
+  updatedProduct,
+  doneWithMigration,
+  kibanaUrl,
+  esMonitoringUrl,
+  checkForMigrationStatus,
+  checkingMigrationStatus
+}) {
+  const instructions = [
     {
       title: 'Enable monitoring collection',
       children: (
@@ -32,9 +40,9 @@ export function getKibanaInstructions({ kibanaUrl, esMonitoringUrl, checkForData
             {`
 PUT _cluster/settings
 {
-"persistent": {
-"xpack.monitoring.collection.enabled": true
-}
+  "persistent": {
+    "xpack.monitoring.collection.enabled": true
+  }
 }
             `}
           </EuiCodeBlock>
@@ -88,11 +96,11 @@ PUT _cluster/settings
           >
             {`
 - module: kibana
-metricsets:
-- stats
-period: 10s
-hosts: ["${kibanaUrl}"]
-xpack.enabled: true
+  metricsets:
+  - stats
+  period: 10s
+  hosts: ["${kibanaUrl}"]
+  xpack.enabled: true
 `}
           </EuiCodeBlock>
         </Fragment>
@@ -107,7 +115,7 @@ xpack.enabled: true
           >
             {`
 output.elasticsearch:
-hosts: ["${esMonitoringUrl}"]
+  hosts: ["${esMonitoringUrl}"]
 `}
           </EuiCodeBlock>
         </Fragment>
@@ -129,23 +137,66 @@ hosts: ["${esMonitoringUrl}"]
 
       )
     },
-    {
-      title: 'Migration status',
-      status: 'incomplete',
-      children: (
-        <Fragment>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <p>
-                Check that data is received from the Metricbeat apache module
-              </p>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={checkForData}>Check data</EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
-      )
-    }
   ];
+
+  if (!updatedProduct || updatedProduct.isInternalCollector) {
+    let status = null;
+    if (updatedProduct) {
+      status = (
+        <Fragment>
+          <EuiSpacer size="m"/>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            title="We have not detected any monitoring data coming from Metricbeat for Kibana"
+          />
+        </Fragment>
+      );
+    }
+
+    instructions.push(
+      {
+        title: 'Migration status',
+        status: 'incomplete',
+        children: (
+          <Fragment>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <p>
+                  Check that data is received from the Metricbeat apache module
+                </p>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={checkForMigrationStatus} isDisabled={checkingMigrationStatus}>
+                  {checkingMigrationStatus ? 'Checking for data...' : 'Check data' }
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {status}
+          </Fragment>
+        )
+      }
+    );
+  }
+  else if (updatedProduct.isFullyMigrated || updatedProduct.isPartiallyMigrated) {
+    instructions.push(
+      {
+        title: 'Migration status',
+        status: 'complete',
+        children: (
+          <Fragment>
+            <EuiCallOut
+              size="s"
+              color="success"
+              title="Congratulations! We are now seeing monitoring data shipping from Metricbeat!"
+            />
+            <EuiSpacer size="m"/>
+            <EuiButton onClick={doneWithMigration}>Done</EuiButton>
+          </Fragment>
+        )
+      }
+    );
+  }
+
+  return instructions;
 }

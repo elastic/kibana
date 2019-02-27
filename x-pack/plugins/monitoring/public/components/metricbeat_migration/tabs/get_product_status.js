@@ -35,7 +35,7 @@ export const getProductStatus = product => {
     status.color = 'primary';
     status.stepStatus = 'incomplete';
   }
-  else if (product.isPartiallyUpgraded) {
+  else if (product.isPartiallyMigrated) {
     status.label = `Found ${product.fullyMigratedUuids.length} migrated
     instances and ${product.internalCollectorsUuids.length} unmigrated instance`;
     status.icon = 'branch';

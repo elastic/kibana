@@ -36,16 +36,24 @@ uiRoutes.when('/overview', {
       const capabilities = $injector.get('capabilities');
       const globalState = $injector.get('globalState');
 
+      // While the flyout is active (and the user is going through migration steps),
+      // do not refetch this data automatically. Instead, require the user to click
+      // the button to check for new data
+      let isCapabilitiesFetchingPaused = false;
+      let lastCapabilities = null;
+
       super({
         title: i18n('xpack.monitoring.cluster.overviewTitle', {
           defaultMessage: 'Overview'
         }),
         defaultData: {},
         getPageData: async () => {
-          const [ cluster, clusterCapabilities ] = await Promise.all([
-            monitoringClusters(globalState.cluster_uuid, globalState.ccs),
-            capabilities(globalState.cluster_uuid, globalState.ccs),
-          ]);
+          const cluster = await monitoringClusters(globalState.cluster_uuid, globalState.ccs);
+          const clusterCapabilities = isCapabilitiesFetchingPaused
+            ? lastCapabilities
+            : await capabilities(globalState.cluster_uuid, globalState.ccs);
+
+          lastCapabilities = clusterCapabilities;
 
           return {
             ...cluster,
@@ -75,6 +83,9 @@ uiRoutes.when('/overview', {
               clusterCapabilities={data.clusterCapabilities}
               monitoringHosts={clusterMonitoringHosts}
               changeUrl={changeUrl}
+              updateData={this.updateData}
+              fetchCapabilities={async () => await capabilities(globalState.cluster_uuid, globalState.ccs)}
+              setCapabilitiesFetchingPaused={value => isCapabilitiesFetchingPaused = value}
               showLicenseExpiration={true}
             />
           </I18nContext>
