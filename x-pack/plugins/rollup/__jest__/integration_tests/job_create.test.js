@@ -65,6 +65,18 @@ const initUserActions = (component, findTestSubject) => {
   };
 };
 
+const initFillFormFields = (form) => async (step) => {
+  switch (step) {
+    case 'logistics':
+      form.setInputValue('rollupJobName', 'test-job');
+      await form.setInputValue('rollupIndexPattern', 'test-pattern-*', true);
+      form.setInputValue('rollupIndexName', 'rollup-index');
+      break;
+    default:
+      return;
+  }
+};
+
 const initTestBed = () => {
   const testBed = registerTestBed(JobCreate, {}, rollupJobsStore)();
 
@@ -72,6 +84,10 @@ const initTestBed = () => {
     ...testBed,
     userActions: {
       ...initUserActions(testBed.component, testBed.findTestSubject)
+    },
+    form: {
+      ...testBed.form,
+      fillFormFields: initFillFormFields(testBed.form)
     }
   };
 };
@@ -106,6 +122,7 @@ describe('Create Rollup Job', () => {
   let getFormErrorsMessages;
   let form;
   let mockIndexPatternValidityResponse;
+  let getEuiStepsHorizontalActive;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
@@ -119,6 +136,7 @@ describe('Create Rollup Job', () => {
       getFormErrorsMessages,
       form
     } = initTestBed());
+    getEuiStepsHorizontalActive = () => component.find('.euiStepHorizontal-isSelected').text();
   });
 
   afterEach(() => {
@@ -127,8 +145,7 @@ describe('Create Rollup Job', () => {
 
   describe('Step 1: Logistics', () => {
     it('should have the horizontal step active on "Logistics"', () => {
-      const activeSteps = component.find('.euiStepHorizontal-isSelected');
-      expect(activeSteps.text()).toContain('Logistics');
+      expect(getEuiStepsHorizontalActive()).toContain('Logistics');
     });
 
     it('should have the title set to "Logistics"', () => {
@@ -450,8 +467,33 @@ describe('Create Rollup Job', () => {
         it('should be greater than 0', () => {
           form.setInputValue('rollupPageSize', '-1');
           userActions.clickNextStep();
-          expect(getFormErrorsMessages()).toContain('Page size must be greater than 0.');
+          expect(getFormErrorsMessages()).toContain('Page size must be greater than zero.');
         });
+      });
+
+      describe('delay', () => {
+        it('should validate the interval format', () => {
+          form.setInputValue('rollupDelay', 'abc');
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toContain('Invalid delay format.');
+        });
+
+        it('should validate the calendar format', () => {
+          form.setInputValue('rollupDelay', '3y');
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
+        });
+      });
+    });
+
+    describe('navigation', () => {
+      it('should go to the next step when all form fields are valid', async () => {
+        expect(getEuiStepsHorizontalActive()).toContain('Logistics'); // Make sure we are on Logistics
+
+        await form.fillFormFields('logistics');
+        userActions.clickNextStep();
+
+        expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
       });
     });
   });
