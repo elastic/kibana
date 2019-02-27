@@ -74,7 +74,7 @@ export default function({ getPageObjects }: TestWrapper) {
         expect(markdownText).to.be(expectedRenderer);
       });
 
-      it.skip('should render first table variable', async () => {
+      it('should render first table variable', async () => {
         await visualBuilder.clearMarkdown();
         const variables = await visualBuilder.getMarkdownTableVariables();
         const beforeClickText = await visualBuilder.getMarkdownText();
