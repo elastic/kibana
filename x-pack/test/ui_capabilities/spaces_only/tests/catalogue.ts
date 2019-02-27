@@ -38,10 +38,10 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           case 'foo_disabled_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // only foo is enabled
+            // only foo is disabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (value, catalogueId) => catalogueId === 'foo'
+              (value, catalogueId) => catalogueId !== 'foo'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
