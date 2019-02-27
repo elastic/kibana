@@ -11,6 +11,7 @@ import { rootSchema } from '../../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
 import { ecsSchema } from '../ecs';
+import { dateSchema } from '../scalar_date';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import { uncommonProcessesSchema } from './schema.gql';
@@ -94,6 +95,7 @@ describe('Test Source Schema', () => {
     sourceStatusSchema,
     ecsSchema,
     uncommonProcessesSchema,
+    dateSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });
 

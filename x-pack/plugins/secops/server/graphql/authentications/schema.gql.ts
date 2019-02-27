@@ -8,7 +8,7 @@ import gql from 'graphql-tag';
 
 export const authenticationsSchema = gql`
   type LastSourceHost {
-    timestamp: String
+    timestamp: Date
     source: SourceEcsFields
     host: HostEcsFields
   }

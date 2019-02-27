@@ -23,6 +23,7 @@ export type AppApolloClient = ApolloClient<NormalizedCacheObject>;
 export interface AppFrameworkAdapter {
   appState?: object;
   dateFormat?: string;
+  dateFormatTz?: string;
   darkMode?: boolean;
   kbnVersion?: string;
   scaledDateFormat?: string;

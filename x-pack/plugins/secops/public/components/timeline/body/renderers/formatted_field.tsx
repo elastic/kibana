@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import { Ecs } from '../../../../../server/graphql/types';
 import { getMappedEcsValue } from '../../../../lib/ecs';
 import { getOrEmptyTag } from '../../../empty_value';
+import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 
 export const FormattedField = pure<{ data: Ecs; fieldName: string; fieldType: string }>(
@@ -18,7 +19,9 @@ export const FormattedField = pure<{ data: Ecs; fieldName: string; fieldType: st
     const maybeDate = moment(new Date(value!));
 
     return fieldType === 'date' && value != null && maybeDate.isValid() ? (
-      <LocalizedDateTooltip date={maybeDate.toDate()}>{value}</LocalizedDateTooltip>
+      <LocalizedDateTooltip date={maybeDate.toDate()}>
+        <PreferenceFormattedDate value={value} />
+      </LocalizedDateTooltip>
     ) : (
       getOrEmptyTag(fieldName, data)
     );

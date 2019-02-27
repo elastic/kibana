@@ -12,14 +12,17 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
+import moment from 'moment-timezone';
 import { plainColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
-import { mockEcsData } from '../../../../mock';
+import { mockEcsData, mockFrameworks } from '../../../../mock';
 import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
+import { KibanaConfigContext } from '../../../formatted_date';
 
 const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
+const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {
   let mockDatum: Ecs;
@@ -55,11 +58,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('Access');
@@ -73,11 +78,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('192.168.0.3');
@@ -91,11 +98,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('1');
@@ -109,11 +118,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('xx');
@@ -127,11 +138,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('3');
@@ -145,17 +158,19 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('192.168.0.1');
   });
 
-  test('should return the (unformatted) time if timestamp has a valid value', () => {
+  test('should return the time formatted as per Kibana advanced settings if timestamp has a valid value', () => {
     const column = plainColumnRenderer.renderColumn(
       'timestamp',
       mockDatum,
@@ -163,14 +178,18 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
-    expect(wrapper.text()).toEqual(mockDatum.timestamp!);
+    expect(wrapper.text()).toEqual(
+      moment.tz(mockDatum.timestamp!, mockFramework.dateFormatTz!).format(mockFramework.dateFormat)
+    );
   });
 
   test('should return the value of event.action if event.action has a valid value', () => {
@@ -181,11 +200,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('Action');
@@ -199,11 +220,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{column}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual('john.dee');
@@ -218,11 +241,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -237,11 +262,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -256,11 +283,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -275,11 +304,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -294,11 +325,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -313,11 +346,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -332,11 +367,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -351,11 +388,13 @@ describe('plain_column_renderer', () => {
     );
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{emptyColumn}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
+        <KibanaConfigContext.Provider value={mockFramework}>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <span>{emptyColumn}</span>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </KibanaConfigContext.Provider>
       </ThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());

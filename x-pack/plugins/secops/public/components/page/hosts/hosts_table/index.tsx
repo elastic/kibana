@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 import { get, isNil } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
+import { FormattedRelative } from '@kbn/i18n/react';
 import { HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -163,7 +164,14 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
     name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.firstSeen),
+    render: ({ node }) =>
+      node.firstSeen && node.firstSeen !== '' ? (
+        <EuiToolTip position="bottom" content={node.firstSeen}>
+          <FormattedRelative value={node.firstSeen} />
+        </EuiToolTip>
+      ) : (
+        defaultToEmptyTag(node.firstSeen)
+      ),
   },
   {
     name: i18n.OS,

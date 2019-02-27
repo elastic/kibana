@@ -16,6 +16,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { I18nContext } from 'ui/i18n';
 
 import { ErrorToast } from '../components/error_toast';
+import { KibanaConfigContext } from '../components/formatted_date';
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { store } from '../store';
@@ -34,7 +35,9 @@ export const startApp = async (libs: AppFrontendLibs) => {
                 darkMode: libs.framework.darkMode,
               })}
             >
-              <PageRouter history={history} />
+              <KibanaConfigContext.Provider value={libs.framework}>
+                <PageRouter history={history} />
+              </KibanaConfigContext.Provider>
             </ThemeProvider>
             <ErrorToast />
           </ApolloProvider>

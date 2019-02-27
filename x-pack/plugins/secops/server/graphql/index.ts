@@ -14,15 +14,17 @@ import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
 import { networkTopNFlowSchema } from './network_top_n_flow';
+import { dateSchema } from './scalar_date';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
 
 export const schemas = [
-  ecsSchema,
   authenticationsSchema,
+  ecsSchema,
   eventsSchema,
+  dateSchema,
   hostsSchema,
   networkTopNFlowSchema,
   rootSchema,
