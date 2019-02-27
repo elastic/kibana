@@ -46,9 +46,6 @@ type ProvidedTypeMap<T extends ProviderMap> = {
   [K in keyof T]: MaybeAsyncInstance<ReturnType<T[K]>>
 };
 
-// helper to extract value type in array of strings
-type ValuesOf<T extends string[]> = T extends Array<infer X> ? X : unknown;
-
 export interface GenericFtrProviderContext<
   ServiceProviders extends ProviderMap,
   PageObjectProviders extends ProviderMap,
@@ -59,9 +56,7 @@ export interface GenericFtrProviderContext<
 
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
-  getPageObjects<T extends Array<keyof PageObjectMap>>(
-    pageObjectNames: T
-  ): { [K in ValuesOf<T>]: PageObjectMap[K] };
+  getPageObjects<K extends keyof PageObjectMap>(pageObjects: K[]): Pick<PageObjectMap, K>;
 
   loadTestFile(path: string): void;
 }
