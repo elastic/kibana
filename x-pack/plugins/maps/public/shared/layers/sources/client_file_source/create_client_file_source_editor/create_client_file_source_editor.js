@@ -12,9 +12,11 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { importFile } from '../../util/import_file';
+import { importFile } from '../../../util/import_file';
 
-export function ClientFileCreateSourceEditor({ previewGeojsonFile }) {
+export function ClientFileCreateSourceEditor(
+  { previewGeojsonFile, removeTransientLayer }
+) {
   return (
     <EuiFormRow
       label={(
@@ -32,9 +34,13 @@ export function ClientFileCreateSourceEditor({ previewGeojsonFile }) {
           />
         )}
         onChange={async ([geojsonFile]) => {
-          const defaultLayerName = geojsonFile.name;
-          const parsedFile = await importFile(geojsonFile);
-          previewGeojsonFile(parsedFile, defaultLayerName);
+          if (geojsonFile) {
+            const defaultLayerName = geojsonFile.name;
+            const parsedFile = await importFile(geojsonFile);
+            previewGeojsonFile(parsedFile, defaultLayerName);
+          } else {
+            removeTransientLayer();
+          }
         }}
       />
     </EuiFormRow>
