@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ILLEGAL_CHARACTERS_ROLLUP_INDEX } from '../../../constants';
+import { findIllegalCharactersInIndexName } from 'ui/indices';
 
 export function validateRollupIndex(rollupIndex, indexPattern) {
   if (!rollupIndex || !rollupIndex.trim()) {
@@ -27,13 +27,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     )];
   }
 
-  const illegalCharacters = ILLEGAL_CHARACTERS_ROLLUP_INDEX.reduce((chars, char) => {
-    if (rollupIndex.includes(char)) {
-      chars.push(char);
-    }
-
-    return chars;
-  }, []);
+  const illegalCharacters = findIllegalCharactersInIndexName(rollupIndex);
 
   if (illegalCharacters.length) {
     return [(
