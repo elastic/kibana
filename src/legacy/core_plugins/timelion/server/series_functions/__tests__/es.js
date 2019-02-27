@@ -143,7 +143,7 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
           avg: {
             script: {
-              inline: 'doc["bytes"].value',
+              source: 'doc["bytes"].value',
               lang: 'painless'
             }
           }
@@ -338,14 +338,14 @@ describe(filename, () => {
 
         expect(aggs.scriptedBeer.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.terms.script).to.eql({
-          inline: 'doc["beer"].value',
+          source: 'doc["beer"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.terms.size).to.eql(5);
 
         expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
-          inline: 'doc["wine"].value',
+          source: 'doc["wine"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);

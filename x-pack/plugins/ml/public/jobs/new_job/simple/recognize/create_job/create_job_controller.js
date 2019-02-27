@@ -87,7 +87,6 @@ module
     const {
       indexPattern,
       savedSearch,
-      query,
       combinedQuery } = createSearchItems();
 
     const pageTitle = (savedSearch.id !== undefined) ?
@@ -145,8 +144,6 @@ module
       kibanaObjects: {},
       start: 0,
       end: 0,
-      query,
-      filters: [],
       useFullIndexData: true,
       startDatafeedAfterSave: true,
       useDedicatedIndex: false,
@@ -157,7 +154,6 @@ module
     $scope.resetJob = function () {
       $scope.overallState = SAVE_STATE.NOT_SAVED;
       $scope.formConfig.jobs = [];
-      $scope.formConfig.filters = [];
       $scope.formConfig.kibanaObjects = {};
 
       loadJobConfigs();

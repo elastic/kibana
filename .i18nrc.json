@@ -40,6 +40,7 @@
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
+    "xpack.server": "x-pack/server",
     "xpack.spaces": "x-pack/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
     "xpack.uptime": "x-pack/plugins/uptime",
@@ -48,9 +49,6 @@
   "exclude": [
     "src/legacy/ui/ui_render/bootstrap/app_bootstrap.js",
     "src/legacy/ui/ui_render/ui_render_mixin.js",
-    "x-pack/plugins/infra/public/graphql/types.ts",
-    "x-pack/plugins/infra/public/utils/loading_state/loading_result.ts",
-    "x-pack/plugins/infra/server/graphql/types.ts",
     "x-pack/plugins/infra/server/lib/domains/log_entries_domain/log_entries_domain.ts"
   ],
   "translations": [

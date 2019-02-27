@@ -134,10 +134,10 @@ describe('start.get$()', () => {
   it('provides info about the errors passed to fatalErrors.add()', () => {
     const { fatalErrors, i18n } = setup();
 
-    const startContract = fatalErrors.start({ i18n });
+    const start = fatalErrors.start({ i18n });
 
     const onError = jest.fn();
-    startContract.get$().subscribe(onError);
+    start.get$().subscribe(onError);
 
     expect(onError).not.toHaveBeenCalled();
     expect(() => {
