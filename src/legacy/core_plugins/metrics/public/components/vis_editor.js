@@ -26,9 +26,6 @@ import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
-import { fetchFields } from '../lib/fetch_fields';
-import chrome from 'ui/chrome';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -39,7 +36,7 @@ class VisEditor extends Component {
       model: props.vis.params,
       dirty: false,
       autoApply: true,
-      visFields: {},
+      visFields: props.vis.fields
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.Subject();
@@ -50,41 +47,12 @@ class VisEditor extends Component {
     return this.props.vis.getUiState();
   }
 
-  get visFields() {
-    return this.uiState.get('visFields') || {};
-  }
-
   getConfig = (...args) => {
     return this.props.config.get(...args);
   }
 
   handleUiState = (field, value) =>  {
     this.props.vis.uiStateVal(field, value);
-  }
-
-  fetchIndexPatternFields = async () => {
-    const { params } = this.props.vis;
-    const { visFields } = this.state;
-    const indexPatterns = extractIndexPatterns(params, visFields);
-    const fields = await fetchFields(indexPatterns);
-    this.setState((previousState) => {
-      const visFields = {
-        ...previousState.visFields,
-        ...fields,
-      };
-      this.handleUiState('visFields', visFields);
-      return { visFields };
-    });
-  }
-
-  setDefaultIndexPattern = async () => {
-    if (this.props.vis.params.index_pattern === '') {
-      // set the default index pattern if none is defined.
-      const savedObjectsClient = chrome.getSavedObjectsClient();
-      const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
-      const defaultIndexPattern = indexPattern.attributes.title;
-      this.props.vis.params.index_pattern = defaultIndexPattern;
-    }
   }
 
   handleChange = async (partialModel) => {
@@ -95,9 +63,12 @@ class VisEditor extends Component {
     }
     this.setState({
       model: nextModel,
-      dirty: !this.state.autoApply,
+      dirty: !this.state.autoApply
     });
-    this.fetchIndexPatternFields();
+
+    this.props.fetchIndexPatternFields().then(visFields => {
+      this.setState({ visFields });
+    });
   }
 
   handleCommit = () => {
@@ -124,7 +95,7 @@ class VisEditor extends Component {
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
           uiState={this.uiState}
-          fields={this.visFields}
+          fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData}
           getConfig={this.getConfig}
@@ -175,9 +146,7 @@ class VisEditor extends Component {
     return null;
   }
 
-  async componentDidMount() {
-    await this.setDefaultIndexPattern();
-    await this.fetchIndexPatternFields();
+  componentDidMount() {
     this.props.renderComplete();
   }
 
