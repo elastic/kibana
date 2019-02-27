@@ -45,8 +45,8 @@ export interface BatchOpts<T> {
 // The subset of XMLHttpRequest that we use
 export interface XMLHttpRequestLike {
   abort: () => void;
-  onreadystatechange: () => void;
-  onprogress: () => void;
+  onreadystatechange: any;
+  onprogress: any;
   open: (method: string, url: string) => void;
   readyState: number;
   responseText: string;
