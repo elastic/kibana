@@ -21,7 +21,8 @@ import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
 import { init } from './init';
 
-export function InterpreterPlugin(kibana: any) {
+// tslint:disable-next-line
+export default function InterpreterPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'interpreter',
     require: ['kibana', 'elasticsearch'],
