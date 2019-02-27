@@ -144,8 +144,7 @@ export class EditorComponent extends React.Component<IProps> {
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
       this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
         if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-          const { repo: repoName, org, resource, pathType, path } = this.props.match.params;
-          const uri = `${resource}/${org}/${repoName}/${pathType}/${revision}/${path}`;
+          const uri = `${repo}/blob/${revision}/${file}`;
           history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
         }
         this.monaco!.container.focus();
