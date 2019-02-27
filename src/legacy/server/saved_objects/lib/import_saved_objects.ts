@@ -104,8 +104,24 @@ export async function importSavedObjects({
   overwrites,
   overwriteAll,
   savedObjectsClient,
+  replaceReferences,
 }: ImportSavedObjectsOptions) {
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
+
+  // Replace references
+  for (const referenceToReplace of replaceReferences) {
+    for (const savedObject of objectsToImport) {
+      for (const reference of savedObject.references || []) {
+        if (
+          reference.type === referenceToReplace.type &&
+          reference.id === referenceToReplace.from
+        ) {
+          reference.id = referenceToReplace.to;
+        }
+      }
+    }
+  }
+
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
     objectsToImport,
     overwriteAll,

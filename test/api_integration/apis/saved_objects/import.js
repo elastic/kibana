@@ -54,6 +54,53 @@ export default function ({ getService }) {
               });
             });
         });
+
+        it('should return 200 when replacing references', async () => {
+          const objToInsert = {
+            id: '1',
+            type: 'visualization',
+            attributes: {
+              title: 'My favorite vis',
+            },
+            references: [
+              {
+                name: 'ref_0',
+                type: 'search',
+                id: '1',
+              },
+            ]
+          };
+          await supertest
+            .post('/api/saved_objects/_import')
+            .field('replaceReferences', JSON.stringify(
+              [
+                {
+                  type: 'search',
+                  from: '1',
+                  to: '2',
+                }
+              ]
+            ))
+            .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: true,
+              });
+            });
+          await supertest
+            .get('/api/saved_objects/visualization/1')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body.references).to.eql([
+                {
+                  name: 'ref_0',
+                  type: 'search',
+                  id: '2',
+                },
+              ]);
+            });
+        });
       });
 
       describe('with basic data existing', () => {
