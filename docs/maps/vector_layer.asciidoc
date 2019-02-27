@@ -1,4 +1,4 @@
-[[maps]]
+[[vector-layer]]
 == Vector layer
 
 Vector layers are awesome

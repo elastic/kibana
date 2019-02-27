@@ -1,4 +1,4 @@
-[[maps]]
+[[tile-layer]]
 == Tile layer
 
 Tile layers are awesome
