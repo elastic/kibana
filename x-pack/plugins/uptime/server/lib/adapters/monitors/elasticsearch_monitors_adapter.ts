@@ -227,56 +227,30 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    let up: number = 0;
-    let down: number = 0;
-    let searchAfter: any = null;
+    const results = await Promise.all([
+      this.performSnapshotQuery(
+        request,
+        icmpParams,
+        'body.aggs.ids.composite.after',
+        'aggregations.icmp.ids.buckets',
+        statusFilter
+      ),
+      this.performSnapshotQuery(
+        request,
+        params,
+        'body.aggs.ids.composite.after',
+        'aggregations.ids.buckets',
+        statusFilter
+      ),
+    ]);
 
-    do {
-      if (searchAfter) {
-        set(params, 'body.aggs.ids.composite.after', searchAfter);
+    const { up, down } = results.reduce(
+      (acc: any, cur: any) => ({ up: acc.up + cur.up, down: acc.down + cur.down }),
+      {
+        up: 0,
+        down: 0,
       }
-
-      const queryResult = await this.database.search(request, params);
-      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
-
-      idBuckets.forEach(bucket => {
-        // We only get the latest doc
-        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (!statusFilter || (statusFilter && statusFilter === status)) {
-          if (status === 'up') {
-            up++;
-          } else {
-            down++;
-          }
-        }
-      });
-
-      searchAfter = get(queryResult, 'aggregations.ids.after_key');
-    } while (searchAfter);
-
-    let icmpSearchAfter: any = null;
-    do {
-      if (icmpSearchAfter) {
-        set(params, 'body.aggs.ids.composite.after', icmpSearchAfter);
-      }
-
-      const queryResult = await this.database.search(request, icmpParams);
-      const idBuckets = get(queryResult, 'aggregations.icmp.ids.buckets', []);
-
-      idBuckets.forEach(bucket => {
-        // We only get the latest doc
-        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (!statusFilter || (statusFilter && statusFilter === status)) {
-          if (status === 'up') {
-            up++;
-          } else {
-            down++;
-          }
-        }
-      });
-
-      icmpSearchAfter = get(queryResult, 'aggregations.ids.after_key');
-    } while (icmpSearchAfter);
+    );
 
     return { up, down, total: up + down };
   }
@@ -573,21 +547,29 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 'monitor.type': 'icmp',
               },
             },
-          },
-          error_type: {
-            terms: {
-              field: 'error.type',
-            },
             aggs: {
-              by_id: {
+              error_type: {
                 terms: {
-                  field: 'monitor.ip',
+                  field: 'error.type',
                 },
                 aggs: {
-                  latest: {
-                    top_hits: {
-                      sort: [{ '@timestamp': { order: 'desc' } }],
-                      size: 1,
+                  by_id: {
+                    terms: {
+                      field: 'monitor.ip',
+                    },
+                    aggs: {
+                      latest: {
+                        top_hits: {
+                          sort: [
+                            {
+                              '@timestamp': {
+                                order: 'desc',
+                              },
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
                     },
                   },
                 },
@@ -637,5 +619,41 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }
     );
     return errorsList;
+  }
+
+  private async performSnapshotQuery(
+    request: any,
+    params: any,
+    pathToAfterKey: string,
+    pathToIds: string,
+    statusFilter?: string
+  ): Promise<any> {
+    let up: number = 0;
+    let down: number = 0;
+    let searchAfter: any = null;
+
+    do {
+      if (searchAfter) {
+        set(params, pathToAfterKey, searchAfter);
+      }
+
+      const queryResult = await this.database.search(request, params);
+      const idBuckets = get(queryResult, pathToIds, []);
+
+      idBuckets.forEach(bucket => {
+        // We only get the latest doc
+        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
+        if (!statusFilter || (statusFilter && statusFilter === status)) {
+          if (status === 'up') {
+            up++;
+          } else {
+            down++;
+          }
+        }
+      });
+
+      searchAfter = get(queryResult, 'aggregations.ids.after_key');
+    } while (searchAfter);
+    return { up, down };
   }
 }
