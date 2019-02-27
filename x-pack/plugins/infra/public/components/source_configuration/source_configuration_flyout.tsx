@@ -144,7 +144,7 @@ export const SourceConfigurationFlyout = injectI18n(
                             )}
                           </EuiFlexItem>
                           <EuiFlexItem />
-                          {!!shouldAllowEdit && (
+                          {shouldAllowEdit && (
                             <EuiFlexItem grow={false}>
                               {isLoading ? (
                                 <EuiButton color="primary" isLoading fill>
