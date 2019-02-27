@@ -35,6 +35,5 @@ export default function (id, mapping) {
     sort: [id],
     $$_formatted: fakeVals('formatted'),
     $$_partialFormatted: fakeVals('formatted'),
-    $$_flattened: fakeVals('_flattened')
   };
 }
