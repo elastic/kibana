@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { MainRouteParams } from '../../common/types';

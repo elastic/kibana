@@ -19,8 +19,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  // @ts-ignore
   EuiSpacer,
+  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -84,7 +84,7 @@ interface State {
 }
 
 class CodeProjectTab extends React.PureComponent<Props, State> {
-  public static getDerivedStateFromProps(props: Props, state: State) {
+  public static getDerivedStateFromProps(props: Readonly<Props>, state: State) {
     if (state.importLoading && !props.importLoading) {
       return { showImportProjectModal: false, importLoading: props.importLoading };
     }
@@ -256,4 +256,5 @@ const mapDispatchToProps = {
 export const ProjectTab = connect(
   mapStateToProps,
   mapDispatchToProps
+  // @ts-ignore
 )(CodeProjectTab);
