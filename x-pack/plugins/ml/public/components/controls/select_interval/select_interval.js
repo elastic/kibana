@@ -9,6 +9,8 @@
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
+
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -53,9 +55,13 @@ function optionValueToInterval(value) {
   return interval;
 }
 
-export const interval$ = new BehaviorSubject(OPTIONS[0]);
+export const interval$ = new BehaviorSubject(optionValueToInterval(OPTIONS[0].value));
 
 class SelectIntervalUnwrapped extends Component {
+  static propTypes = {
+    interval: PropTypes.object.isRequired,
+  };
+
   onChange = (e) => {
     const interval = optionValueToInterval(e.target.value);
     interval$.next(interval);
@@ -66,7 +72,7 @@ class SelectIntervalUnwrapped extends Component {
       <EuiSelect
         options={OPTIONS}
         className="ml-select-interval"
-        value={this.props.interval.value}
+        value={this.props.interval.val}
         onChange={this.onChange}
       />
     );

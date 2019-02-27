@@ -37,7 +37,7 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
-const JOB_DETAILS_TABS = [
+export const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
@@ -50,6 +50,7 @@ export class DetailPanelUi extends Component {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
     job: PropTypes.object,
+    jobId: PropTypes.string,
     panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
@@ -137,7 +138,7 @@ export class DetailPanelUi extends Component {
 
     return (
       <Fragment>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody data-test-subj="rollupJobDetailTabContent">
           <EuiErrorBoundary>
             <JobDetails
               tab={panelType}
@@ -186,7 +187,9 @@ export class DetailPanelUi extends Component {
 
     if (isLoading) {
       content = (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailLoading"
+        >
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="center"
@@ -213,7 +216,9 @@ export class DetailPanelUi extends Component {
       content = this.renderJob();
     } else {
       content = (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          data-test-subj="rollupJobDetailJobNotFound"
+        >
           <EuiFlexGroup
             justifyContent="flexStart"
             alignItems="center"
@@ -247,7 +252,11 @@ export class DetailPanelUi extends Component {
         maxWidth={400}
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
+          <EuiTitle
+            size="m"
+            id="rollupJobDetailsFlyoutTitle"
+            data-test-subj="rollupJobDetailsFlyoutTitle"
+          >
             <h2>{jobId}</h2>
           </EuiTitle>
 

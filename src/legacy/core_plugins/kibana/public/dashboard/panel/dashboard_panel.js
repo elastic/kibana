@@ -177,6 +177,7 @@ DashboardPanelUi.propTypes = {
   destroy: PropTypes.func.isRequired,
   containerState: PropTypes.shape({
     timeRange: PropTypes.object,
+    refreshConfig: PropTypes.object,
     filters: PropTypes.array,
     query: PropTypes.object,
     embeddableCustomization: PropTypes.object,

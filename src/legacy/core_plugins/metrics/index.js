@@ -21,6 +21,7 @@ import { resolve } from 'path';
 
 import fieldsRoutes from './server/routes/fields';
 import visDataRoutes from './server/routes/vis';
+import { SearchStrategiesRegister } from './server/lib/search_strategies/search_strategies_register';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -28,7 +29,7 @@ export default function (kibana) {
 
     uiExports: {
       visTypes: [
-        'plugins/metrics/kbn_vis_types'
+        'plugins/metrics/kbn_vis_types',
       ],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
@@ -37,16 +38,15 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
-        minimumBucketSize: Joi.number().default(10)
+        minimumBucketSize: Joi.number().default(10),
       }).default();
     },
-
 
     init(server) {
       fieldsRoutes(server);
       visDataRoutes(server);
-    }
 
-
+      SearchStrategiesRegister.init(server);
+    },
   });
 }
