@@ -73,8 +73,7 @@ function Visualization(props) {
         onUiState: props.onUiState,
         uiState: props.uiState,
         visData: visData.type === model.type ? visData : {},
-        getConfig: props.getConfig,
-        fields: props.fields
+        getConfig: props.getConfig
       })
     );
   }
@@ -91,8 +90,7 @@ Visualization.propTypes = {
   uiState: PropTypes.object,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func,
-  fields: PropTypes.object
+  getConfig: PropTypes.func
 };
 
 Visualization.defaultProps = {

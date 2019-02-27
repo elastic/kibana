@@ -51,9 +51,9 @@ class TableVis extends Component {
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
 
-  renderRow = (isDateTypeField = false) => row => {
+  renderRow = row => {
     const { model } = this.props;
-    let rowDisplay = isDateTypeField ? this.dateFormatter.convert(row.key) : row.key;
+    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = (<a href={url}>{rowDisplay}</a>);
@@ -174,16 +174,12 @@ class TableVis extends Component {
   }
 
   render() {
-    const { visData, model, fields } = this.props;
+    const { visData, model } = this.props;
     const header = this.renderHeader();
     let rows;
 
     if (_.isArray(visData.series) && visData.series.length) {
-      const field = fields[model.index_pattern] &&
-        fields[model.index_pattern].find(field => field.name === model.pivot_id);
-      const isDateTypeField = field && field.type === 'date';
-
-      rows = visData.series.map(this.renderRow(isDateTypeField));
+      rows = visData.series.map(this.renderRow);
     } else {
       const message = model.pivot_id ?
         (<FormattedMessage
@@ -232,8 +228,7 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  getConfig: PropTypes.func,
-  fields: PropTypes.object
+  getConfig: PropTypes.func
 };
 
 export default TableVis;
