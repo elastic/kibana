@@ -25,21 +25,24 @@ interface KpiNetworkProps {
 
 const kpiNetworkCards = (data: KpiNetworkData) => [
   {
-    title: has('networkEvents', data)
-      ? numeral(data.networkEvents).format('0,0')
-      : getEmptyTagValue(),
+    title:
+      has('networkEvents', data) && data.networkEvents !== null
+        ? numeral(data.networkEvents).format('0,0')
+        : getEmptyTagValue(),
     description: i18n.NETWORK_EVENTS,
   },
   {
-    title: has('uniqueFlowId', data)
-      ? numeral(data.uniqueFlowId).format('0,0')
-      : getEmptyTagValue(),
+    title:
+      has('uniqueFlowId', data) && data.uniqueFlowId !== null
+        ? numeral(data.uniqueFlowId).format('0,0')
+        : getEmptyTagValue(),
     description: i18n.UNIQUE_ID,
   },
   {
-    title: has('activeAgents', data)
-      ? numeral(data.activeAgents).format('0,0')
-      : getEmptyTagValue(),
+    title:
+      has('activeAgents', data) && data.activeAgents !== null
+        ? numeral(data.activeAgents).format('0,0')
+        : getEmptyTagValue(),
     description: i18n.ACTIVE_AGENTS,
   },
 ];
