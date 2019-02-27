@@ -9,7 +9,9 @@ import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
 import { cryptoFactory, oncePerServer } from '../../../../server/lib';
-import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
+// @ts-ignore
+import { createTaggedLogger } from '../../../../server/lib/create_tagged_logger';
+import { JobDocPayload, JobParams, KbnServer, Logger } from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -19,7 +21,7 @@ import {
   TsvbPanel,
   VisObjectAttributes,
 } from '../../types';
-import { generateCsv } from '../lib/generate_csv';
+import { createGenerateCsv } from '../lib/generate_csv';
 import { createJobSearch } from './create_job_search';
 import { createJobVis } from './create_job_vis';
 
@@ -31,6 +33,12 @@ interface VisData {
 
 function createJobFn(server: KbnServer) {
   const crypto = cryptoFactory(server);
+  const logger: Logger = {
+    debug: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'debug']),
+    warning: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'warning']),
+    error: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'error']),
+  };
+  const generateCsv = createGenerateCsv(logger);
 
   return async function createJob(
     jobParams: JobParams,
@@ -72,14 +80,21 @@ function createJobFn(server: KbnServer) {
         throw new Error(`Unable to retrieve saved object! Error: ${err}`);
       });
 
-    const { type, rows } = await generateCsv(req, server, visType, panel);
-    const csvRows = rows ? rows.join('\n') : rows;
+    let type: string = '';
+    let result: any = null;
+
+    try {
+      ({ type, result } = await generateCsv(req, server, visType, panel));
+    } catch (err) {
+      logger.error(`Generate CSV Error! ${err}`);
+      throw err;
+    }
 
     return {
       jobParams: { ...jobParams, panel, visType },
       title,
       type,
-      objects: csvRows,
+      objects: result ? result.content : result,
       headers: serializedEncryptedHeaders,
       basePath: req.getBasePath(),
     };

@@ -11,7 +11,19 @@ import { TsvbAggregationCell, TsvbAggregationRow, TsvbPanel, TsvbTableData } fro
 
 const JOB_DATA_TYPE = 'CSV from TSVB table visualization';
 
-export async function generateCsvTsvb(req: Request, server: KbnServer, logger: Logger, tsvbPanel: TsvbPanel) {
+interface CsvResultFromTsvb {
+  type: string;
+  result: {
+    content: string[];
+  } | null;
+}
+
+export async function generateCsvTsvb(
+  req: Request,
+  server: KbnServer,
+  logger: Logger,
+  tsvbPanel: TsvbPanel
+): Promise<CsvResultFromTsvb> {
   const { getTableData: getTableDataTSVB } = server.plugins.metrics; // FIXME: don't crash if config has tsvb disabled
   const tableDataTSVB: TsvbTableData = await getTableDataTSVB(req, tsvbPanel);
 
@@ -49,6 +61,8 @@ export async function generateCsvTsvb(req: Request, server: KbnServer, logger: L
 
   return {
     type: JOB_DATA_TYPE,
-    rows: csvRows,
+    result: {
+      content: csvRows,
+    },
   };
 }

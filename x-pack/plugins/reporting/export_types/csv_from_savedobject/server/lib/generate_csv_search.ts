@@ -10,9 +10,15 @@ import { KbnServer, Logger } from '../../../../types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { SavedSearchObjectAttributes, SearchPanel, SearchRequest } from '../../types';
 
-interface CsvResult {
+interface GeneratorResult {
+  content: string;
+  maxSizeReached: boolean;
+  size: number;
+}
+
+interface CsvResultFromSearch {
   type: string;
-  rows: string[] | null;
+  result: GeneratorResult;
 }
 
 type EndpointCaller = (method: string, params: any) => Promise<any>;
@@ -39,7 +45,7 @@ export async function generateCsvSearch(
   server: KbnServer,
   logger: Logger,
   searchPanel: SearchPanel
-): Promise<CsvResult> {
+): Promise<CsvResultFromSearch> {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const callCluster = (...params: any[]) => {
     return callWithRequest(req, ...params);
@@ -77,6 +83,6 @@ export async function generateCsvSearch(
   const generateCsv = createGenerateCsv(logger);
   return {
     type: 'CSV from Saved Search',
-    rows: generateCsv(generateCsvParams),
+    result: await generateCsv(generateCsvParams),
   };
 }
