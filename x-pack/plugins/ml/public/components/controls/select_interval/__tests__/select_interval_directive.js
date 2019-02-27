@@ -21,15 +21,11 @@ describe('ML - mlSelectIntervalService', () => {
       save: () => {}
     };
 
-    $provide.factory('AppState', function () {
-      return function () {
-        return appState;
-      };
-    });
+    $provide.factory('AppState', () => () => appState);
   }));
 
   it('initializes AppState with correct default value', (done) => {
-    ngMock.inject(function ($injector) {
+    ngMock.inject(($injector) => {
       $injector.get('mlSelectIntervalService');
       const defaultValue = { display: 'Auto', val: 'auto' };
 
@@ -41,7 +37,7 @@ describe('ML - mlSelectIntervalService', () => {
   });
 
   it('restores AppState to interval$ observable', (done) => {
-    ngMock.inject(function ($injector) {
+    ngMock.inject(($injector) => {
       const restoreValue = { display: '1 day', val: 'day' };
       appState.mlSelectInterval = restoreValue;
 
