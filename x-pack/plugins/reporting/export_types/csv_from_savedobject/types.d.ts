@@ -44,6 +44,12 @@ export interface SavedObject {
   references?: SavedObjectReference[];
 }
 
+export interface TimeRangeParams {
+  timezone: string;
+  min: Date;
+  max: Date;
+}
+
 export interface TsvbPanel {
   filter: string;
   id: string;
@@ -89,12 +95,6 @@ export interface VisState {
   type: string; // e.g 'metrics' for TSVB
 }
 
-export interface TimeRangeParams {
-  timezone: string;
-  min: Date;
-  max: Date;
-}
-
 export interface IndexPatternSavedObject {
   title: string;
   timeFieldName: string;
@@ -115,28 +115,28 @@ export interface SearchRequest {
   index: string;
   body:
     | {
+        _source: {
+          excludes: string[];
+          includes: string[];
+        };
+        docvalue_fields: string[];
+        query:
+          | {
+              bool: {
+                filter: any[];
+                must_not: any[];
+                should: any[];
+                must: any[];
+              };
+            }
+          | any;
+        script_fields: any;
+        sort: Array<{
+          [key: string]: {
+            order: string;
+          };
+        }>;
         stored_fields: string[];
       }
     | any;
-  query:
-    | {
-        bool: {
-          filter: any[];
-          must_not: any[];
-          should: any[];
-          must: any[];
-        };
-      }
-    | any;
-  script_fields: string[];
-  _source: {
-    excludes: string[];
-    includes: string[];
-  };
-  docvalue_fields: string[];
-  sort: Array<{
-    [key: string]: {
-      order: string;
-    };
-  }>;
 }

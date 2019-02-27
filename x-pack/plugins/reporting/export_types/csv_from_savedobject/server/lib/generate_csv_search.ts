@@ -5,7 +5,10 @@
  */
 
 import { Request } from 'hapi';
+import moment from 'moment';
 import { KbnServer, Logger } from '../../../../types';
+// @ts-ignore
+import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map';
 // @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { SavedSearchObjectAttributes, SearchPanel, SearchRequest } from '../../types';
@@ -22,15 +25,16 @@ interface CsvResultFromSearch {
 }
 
 type EndpointCaller = (method: string, params: any) => Promise<any>;
+type FormatsMap = Map<string, any>;
 
 interface GenerateCsvParams {
   searchRequest: SearchRequest;
-  fields: string[];
-  formatsMap: any;
-  metaFields: string[];
-  conflictedTypesFields: string[];
   callEndpoint: EndpointCaller;
-  cancellationToken: any;
+  fields: string[];
+  formatsMap: FormatsMap;
+  metaFields: string[]; // FIXME not sure what this is for
+  conflictedTypesFields: string[]; // FIXME not sure what this is for
+  cancellationToken: any; // FIXME not sure what this is for
   settings: {
     separator: string;
     quoteValues: boolean;
@@ -46,41 +50,83 @@ export async function generateCsvSearch(
   logger: Logger,
   searchPanel: SearchPanel
 ): Promise<CsvResultFromSearch> {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: any[]) => {
-    return callWithRequest(req, ...params);
-  };
-  const csvSettings = {
-    separator: ',',
-    quoteValues: true,
-    timezone: 'UTC',
-    maxSizeBytes: 10485760,
-    scroll: { duration: '30s', size: 500 },
-  };
+  const { savedObjects, uiSettingsServiceFactory, fieldFormatServiceFactory } = server;
 
-  const indexPatternSavedObject = searchPanel.indexPatternSavedObject;
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
+  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
+  const { indexPatternSavedObject, timerange } = searchPanel;
+
+  const [formatsMap, uiSettings] = await Promise.all([
+    (async () => {
+      const fieldFormats = await fieldFormatServiceFactory(uiConfig);
+      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+    })(),
+    (async () => {
+      const [separator, quoteValues] = await Promise.all([
+        uiConfig.get('csv:separator'),
+        uiConfig.get('csv:quoteValues'),
+      ]);
+
+      return {
+        quoteValues: !!quoteValues,
+        separator,
+      };
+    })(),
+  ]);
+
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
   const [sortField, sortOrder] = savedSearchObjectAttr.sort;
-  const generateCsvParams: GenerateCsvParams = {
-    searchRequest: {
-      index: indexPatternSavedObject.title,
-      body: { stored_fields: [indexPatternSavedObject.timeFieldName] },
-      query: { bool: { must: [{ match_all: {} }, { range: searchPanel.timerange }] } },
-      script_fields: [],
-      _source: { includes: [], excludes: [] },
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
+  const config = server.config();
+  const searchRequest: SearchRequest = {
+    index: indexPatternSavedObject.title,
+    body: {
+      _source: {
+        includes: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
+      },
       docvalue_fields: [],
+      query: {
+        bool: {
+          filter: [],
+          must_not: [],
+          should: [],
+          must: [
+            { match_all: {} },
+            {
+              range: {
+                [indexPatternSavedObject.timeFieldName]: {
+                  format: 'epoch_millis',
+                  gte: moment(timerange.min).valueOf(),
+                  lte: moment(timerange.max).valueOf(),
+                },
+              },
+            },
+          ],
+        },
+      },
+      script_fields: {},
       sort: [{ [sortField]: { order: sortOrder } }],
     },
+  };
+  const generateCsvParams: GenerateCsvParams = {
+    searchRequest,
+    callEndpoint: callCluster,
     fields: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
-    formatsMap: [],
+    formatsMap,
     metaFields: [],
     conflictedTypesFields: [],
     cancellationToken: [],
-    callEndpoint: callCluster,
-    settings: csvSettings,
+    settings: {
+      ...uiSettings,
+      timezone: timerange.timezone,
+      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
+      scroll: config.get('xpack.reporting.csv.scroll'),
+    },
   };
 
   const generateCsv = createGenerateCsv(logger);
+
   return {
     type: 'CSV from Saved Search',
     result: await generateCsv(generateCsvParams),
