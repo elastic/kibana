@@ -26,6 +26,9 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
 
   return new class AppsMenu {
+    /**
+     * Get the text and href from each of the links in the apps menu
+     */
     public async readLinks() {
       await this.ensureMenuOpen();
       const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
@@ -47,16 +50,24 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
       return links;
     }
 
+    /**
+     * Determine if an app link with the given name exists
+     * @param name
+     */
     public async linkExists(name: string) {
       return (await this.readLinks()).some(nl => nl.text === name);
     }
 
-    public async clickLink(appTitle: string) {
+    /**
+     * Click the app link within the app menu that has the given name
+     * @param name
+     */
+    public async clickLink(name: string) {
       try {
-        log.debug(`click "${appTitle}" tab`);
+        log.debug(`click "${name}" app link`);
         await this.ensureMenuOpen();
         const container = await testSubjects.find('navDrawer&expanded appsMenu');
-        const link = await container.findByPartialLinkText(appTitle);
+        const link = await container.findByPartialLinkText(name);
         await link.click();
       } finally {
         await this.ensureMenuClosed();
