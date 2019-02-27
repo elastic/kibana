@@ -73,6 +73,10 @@ function createFuture() {
   let reject;
 
   return {
+    // We use once here, because we reject all promises if there
+    // is a network failure event or similar, but *some* promises
+    // may have already resolved / rejected prior to that, if they
+    // were resolved / rejected early in the stream prior to failure.
     resolve: once((val) => resolve(val)),
     reject: once((val) => reject(val)),
     promise: new Promise((res, rej) => {

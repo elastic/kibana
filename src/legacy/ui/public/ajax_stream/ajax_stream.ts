@@ -119,7 +119,9 @@ export function ajaxStream<T>(
     // in "once" as a safeguard against cases where we attempt more than one call. (e.g.
     // a batch handler fails, so we reject the promise, but then new data comes in for
     // a subsequent batch item)
-    const complete = once((err: any = undefined) => (err ? reject(err) : resolve(req)));
+    const complete = once((err: Error | undefined = undefined) =>
+      err ? reject(err) : resolve(req)
+    );
 
     // Begin the request
     req.open(method || 'POST', `${basePath}/${url.replace(/^\//, '')}`);
@@ -152,7 +154,7 @@ export function ajaxStream<T>(
       if (req.readyState === 4) {
         // 0 indicates a network failure. 400+ messages are considered server errors
         if (req.status === 0 || req.status >= 400) {
-          complete({ message: `Batch request failed with status ${req.status}` });
+          complete(new Error(`Batch request failed with status ${req.status}`));
         } else {
           complete();
         }
