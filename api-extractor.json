@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/api-extractor.schema.json",
+  "compiler" : {
+    "configType": "tsconfig",
+    "rootFolder": "."
+  },
+  "project": {
+    "entryPointSourceFile": "target/types/type_exports.d.ts"
+  },
+  "apiReviewFile": {
+    "enabled": true,
+    "apiReviewFolder": "./common/core-api-review/",
+    "tempFolder": "./build"
+  },
+  "apiJsonFile": {
+    "enabled": true,
+    "outputFolder": "./build"
+  },
+  "dtsRollup": {
+    "enabled": false,
+    "trimming": true,
+    "publishFolderForInternal": "",
+    "publishFolderForBeta": "",
+    "publishFolderForPublic": "",
+    "mainDtsRollupPath": ""
+  }
+}
