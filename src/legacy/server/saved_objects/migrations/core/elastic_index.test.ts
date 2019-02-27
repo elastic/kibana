@@ -341,11 +341,7 @@ describe('ElasticIndex', () => {
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
       const index = '.myalias';
-      const callCluster = jest.fn(() =>
-        Promise.resolve({
-          items: [],
-        })
-      );
+      const callCluster = jest.fn().mockResolvedValue({ items: [] });
       const docs = [
         {
           _id: 'niceguy:fredrogers',
@@ -427,28 +423,22 @@ describe('ElasticIndex', () => {
       ];
 
       callCluster
-        .mockReturnValueOnce(
-          Promise.resolve({
-            _scroll_id: 'x',
-            _shards: { success: 1, total: 1 },
-            hits: { hits: _.cloneDeep(batch1) },
-          })
-        )
-        .mockReturnValueOnce(
-          Promise.resolve({
-            _scroll_id: 'y',
-            _shards: { success: 1, total: 1 },
-            hits: { hits: _.cloneDeep(batch2) },
-          })
-        )
-        .mockReturnValueOnce(
-          Promise.resolve({
-            _scroll_id: 'z',
-            _shards: { success: 1, total: 1 },
-            hits: { hits: [] },
-          })
-        )
-        .mockReturnValue(Promise.resolve());
+        .mockResolvedValueOnce({
+          _scroll_id: 'x',
+          _shards: { success: 1, total: 1 },
+          hits: { hits: _.cloneDeep(batch1) },
+        })
+        .mockResolvedValueOnce({
+          _scroll_id: 'y',
+          _shards: { success: 1, total: 1 },
+          hits: { hits: _.cloneDeep(batch2) },
+        })
+        .mockResolvedValueOnce({
+          _scroll_id: 'z',
+          _shards: { success: 1, total: 1 },
+          hits: { hits: [] },
+        })
+        .mockResolvedValue({});
 
       const read = Index.reader(callCluster, index, { batchSize: 100, scrollDuration: '5m' });
 
@@ -481,20 +471,16 @@ describe('ElasticIndex', () => {
       ];
 
       callCluster
-        .mockReturnValueOnce(
-          Promise.resolve({
-            _scroll_id: 'x',
-            _shards: { success: 1, total: 1 },
-            hits: { hits: _.cloneDeep(batch) },
-          })
-        )
-        .mockReturnValue(
-          Promise.resolve({
-            _scroll_id: 'z',
-            _shards: { success: 1, total: 1 },
-            hits: { hits: [] },
-          })
-        );
+        .mockResolvedValueOnce({
+          _scroll_id: 'x',
+          _shards: { success: 1, total: 1 },
+          hits: { hits: _.cloneDeep(batch) },
+        })
+        .mockResolvedValue({
+          _scroll_id: 'z',
+          _shards: { success: 1, total: 1 },
+          hits: { hits: [] },
+        });
 
       const read = Index.reader(callCluster, index, {
         batchSize: 100,
@@ -508,7 +494,7 @@ describe('ElasticIndex', () => {
       const index = '.myalias';
       const callCluster = jest.fn();
 
-      callCluster.mockReturnValue(Promise.resolve({ _shards: { successful: 1, total: 2 } }));
+      callCluster.mockResolvedValue({ _shards: { successful: 1, total: 2 } });
 
       const read = Index.reader(callCluster, index, {
         batchSize: 100,
@@ -534,18 +520,8 @@ describe('ElasticIndex', () => {
       ];
 
       callCluster
-        .mockReturnValueOnce(
-          Promise.resolve({
-            _scroll_id: 'x',
-            hits: { hits: _.cloneDeep(batch) },
-          })
-        )
-        .mockReturnValue(
-          Promise.resolve({
-            _scroll_id: 'z',
-            hits: { hits: [] },
-          })
-        );
+        .mockResolvedValueOnce({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch) } })
+        .mockResolvedValue({ _scroll_id: 'z', hits: { hits: [] } });
 
       const read = Index.reader(callCluster, index, {
         batchSize: 100,

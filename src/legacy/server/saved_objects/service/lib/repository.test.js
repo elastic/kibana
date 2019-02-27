@@ -634,7 +634,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('mockReturnValue document errors', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve({
+      callAdminCluster.mockResolvedValue({
         errors: false,
         items: [{
           create: {
@@ -651,7 +651,7 @@ describe('SavedObjectsRepository', () => {
             ...mockVersionProps,
           }
         }]
-      }));
+      });
 
       const response = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -677,7 +677,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('formats Elasticsearch response', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve({
+      callAdminCluster.mockResolvedValue({
         errors: false,
         items: [{
           create: {
@@ -692,7 +692,7 @@ describe('SavedObjectsRepository', () => {
             ...mockVersionProps
           }
         }]
-      }));
+      });
 
       const response = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -763,24 +763,22 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.mockReturnValue(
-        Promise.resolve({
-          errors: false,
-          items: [{
-            create: {
-              _type: '_doc',
-              _id: 'config:one',
-              ...mockVersionProps
-            }
-          }, {
-            create: {
-              _type: '_doc',
-              _id: 'index-pattern:two',
-              ...mockVersionProps
-            }
-          }]
-        })
-      );
+      callAdminCluster.mockResolvedValue({
+        errors: false,
+        items: [{
+          create: {
+            _type: '_doc',
+            _id: 'config:one',
+            ...mockVersionProps
+          }
+        }, {
+          create: {
+            _type: '_doc',
+            _id: 'index-pattern:two',
+            ...mockVersionProps
+          }
+        }]
+      });
       await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
@@ -827,9 +825,7 @@ describe('SavedObjectsRepository', () => {
   describe('#delete', () => {
     it('waits until migrations are complete before proceeding', async () => {
       migrator.awaitMigration = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
-      callAdminCluster.mockReturnValue({
-        result: 'deleted'
-      });
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
       await expect(savedObjectsRepository.delete('index-pattern', 'logstash-*', {
         namespace: 'foo-namespace',
       })).resolves.toBeDefined();
@@ -840,9 +836,7 @@ describe('SavedObjectsRepository', () => {
     it('throws notFound when ES is unable to find the document', async () => {
       expect.assertions(1);
 
-      callAdminCluster.mockReturnValue(Promise.resolve({
-        result: 'not_found'
-      }));
+      callAdminCluster.mockResolvedValue({ result: 'not_found' });
 
       try {
         await savedObjectsRepository.delete('index-pattern', 'logstash-*');
@@ -852,9 +846,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`prepends namespace to the id when providing namespace for namespaced type`, async () => {
-      callAdminCluster.mockReturnValue({
-        result: 'deleted'
-      });
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
       await savedObjectsRepository.delete('index-pattern', 'logstash-*', {
         namespace: 'foo-namespace',
       });
@@ -872,9 +864,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.mockReturnValue({
-        result: 'deleted'
-      });
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
       await savedObjectsRepository.delete('index-pattern', 'logstash-*');
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -890,9 +880,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.mockReturnValue({
-        result: 'deleted'
-      });
+      callAdminCluster.mockReturnValue({ result: 'deleted' });
       await savedObjectsRepository.delete('globaltype', 'logstash-*', {
         namespace: 'foo-namespace',
       });
@@ -1137,14 +1125,14 @@ describe('SavedObjectsRepository', () => {
     it('waits until migrations are complete before proceeding', async () => {
       migrator.awaitMigration = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
 
-      callAdminCluster.mockReturnValue(Promise.resolve(noNamespaceResult));
+      callAdminCluster.mockResolvedValue(noNamespaceResult);
       await expect(savedObjectsRepository.get('index-pattern', 'logstash-*')).resolves.toBeDefined();
 
       expect(migrator.awaitMigration).toHaveBeenCalledTimes(1);
     });
 
     it('formats Elasticsearch response when there is no namespace', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve(noNamespaceResult));
+      callAdminCluster.mockResolvedValue(noNamespaceResult);
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
       expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(response).toEqual({
@@ -1160,7 +1148,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('formats Elasticsearch response when there are namespaces', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve(namespacedResult));
+      callAdminCluster.mockResolvedValue(namespacedResult);
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
       expect(onBeforeWrite).not.toHaveBeenCalled();
       expect(response).toEqual({
@@ -1176,7 +1164,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('prepends namespace and type to the id when providing namespace for namespaced type', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve(namespacedResult));
+      callAdminCluster.mockResolvedValue(namespacedResult);
       await savedObjectsRepository.get('index-pattern', 'logstash-*', {
         namespace: 'foo-namespace',
       });
@@ -1190,7 +1178,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`only prepends type to the id when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve(noNamespaceResult));
+      callAdminCluster.mockResolvedValue(noNamespaceResult);
       await savedObjectsRepository.get('index-pattern', 'logstash-*');
 
       expect(onBeforeWrite).not.toHaveBeenCalled();
@@ -1202,7 +1190,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve(namespacedResult));
+      callAdminCluster.mockResolvedValue(namespacedResult);
       await savedObjectsRepository.get('globaltype', 'logstash-*', {
         namespace: 'foo-namespace',
       });
@@ -1291,7 +1279,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('handles missing ids gracefully', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve({
+      callAdminCluster.mockResolvedValue({
         docs: [{
           _type: '_doc',
           _id: 'config:good',
@@ -1303,7 +1291,7 @@ describe('SavedObjectsRepository', () => {
           _id: 'config:bad',
           found: false
         }]
-      }));
+      });
 
       const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
         [{ id: 'good', type: 'config' }, { type: 'config' }]
@@ -1316,7 +1304,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('reports error on missed objects', async () => {
-      callAdminCluster.mockReturnValue(Promise.resolve({
+      callAdminCluster.mockResolvedValue({
         docs: [{
           _type: '_doc',
           _id: 'config:good',
@@ -1328,7 +1316,7 @@ describe('SavedObjectsRepository', () => {
           _id: 'config:bad',
           found: false
         }]
-      }));
+      });
 
       const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
         [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
@@ -1360,12 +1348,12 @@ describe('SavedObjectsRepository', () => {
     const attributes = { title: 'Testing' };
 
     beforeEach(() => {
-      callAdminCluster.mockReturnValue(Promise.resolve({
+      callAdminCluster.mockResolvedValue({
         _id: `${type}:${id}`,
         _type: '_doc',
         ...mockVersionProps,
         result: 'updated'
-      }));
+      });
     });
 
     it('waits until migrations are complete before proceeding', async () => {

@@ -34,9 +34,7 @@ describe('coordinateMigration', () => {
     });
     const isMigrated = jest.fn();
 
-    isMigrated
-      .mockReturnValueOnce(Promise.resolve(false))
-      .mockReturnValueOnce(Promise.resolve(true));
+    isMigrated.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
     await coordinateMigration({
       log,
