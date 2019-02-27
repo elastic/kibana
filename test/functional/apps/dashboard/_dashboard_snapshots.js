@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
-      await browser.setWindowSize(1000, 500);
+      await browser.setWindowSize(1250, 600);
     });
 
     after(async function () {
@@ -38,8 +38,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
-    it.skip('compare TSVB snapshot', async () => {
+    it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInLogstashDataRange();
