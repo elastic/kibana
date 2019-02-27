@@ -15,6 +15,7 @@ import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
 
 import { Header } from '../../components/header';
+import { HelpCenterContent } from '../../components/help_center_content';
 import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
 
@@ -68,6 +69,13 @@ export const LogsPage = injectI18n(
                   title={intl.formatMessage({
                     id: 'xpack.infra.logsPage.documentTitle',
                     defaultMessage: 'Logs',
+                  })}
+                />
+                <HelpCenterContent
+                  feedbackLink="https://discuss.elastic.co/c/logs"
+                  feedbackLinkText={intl.formatMessage({
+                    id: 'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
+                    defaultMessage: 'Provide feedback for Logs',
                   })}
                 />
                 <SourceConfigurationFlyout />
