@@ -38,7 +38,7 @@ uiModules
       restrict: 'E',
       template: aggParamsTemplate,
       scope: true,
-      require: '^^form',
+      require: '^form',
       link: function ($scope, $el, attr, aggForm) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
@@ -60,7 +60,10 @@ uiModules
         $scope.isSelectValid = () => Boolean($scope.agg.type);
         $scope.onChangeAggType = (agg, aggType) => {
           agg.type = aggType;
-          aggForm.aggType.$setDirty();
+
+          if (aggForm && aggForm.aggType) {
+            aggForm.aggType.$setDirty();
+          }
         };
 
         function updateEditorConfig(property = 'fixedValue') {
