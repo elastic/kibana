@@ -188,6 +188,49 @@ describe('VegaVisualizations', () => {
 
     });
 
+    it('should add a small subpixel value to the height of the canvas to avoid getting it set to 0', async () => {
+      let vegaVis;
+      try {
+
+        vegaVis = new VegaVisualization(domNode, vis);
+        const vegaParser = new VegaParser(`{
+            "$schema": "https://vega.github.io/schema/vega/v3.json",
+            "marks": [
+              {
+                "type": "text",
+                "encode": {
+                  "update": {
+                    "text": {
+                      "value": "Test"
+                    },
+                    "align": {"value": "center"},
+                    "baseline": {"value": "middle"},
+                    "xc": {"signal": "width/2"},
+                    "yc": {"signal": "height/2"}
+                    fontSize: {value: "14"}
+                  }
+                }
+              }
+            ]
+          }`, new SearchCache());
+        await vegaParser.parseAsync();
+
+        domNode.style.width = '256px';
+        domNode.style.height = '256px';
+
+        await vegaVis.render(vegaParser, { data: true });
+        const vegaView = vegaVis._vegaView._view;
+        expect(vegaView.height()).to.be(250.00000001);
+
+        vegaView.height(250);
+        await vegaView.runAsync();
+        // as soon as this test fails, the workaround with the subpixel value can be removed.
+        expect(vegaView.height()).to.be(0);
+      } finally {
+        vegaVis.destroy();
+      }
+    });
+
   });
 
 

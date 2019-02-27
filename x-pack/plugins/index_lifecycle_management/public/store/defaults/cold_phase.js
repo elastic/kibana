@@ -24,3 +24,7 @@ export const defaultColdPhase = {
   [PHASE_FREEZE_ENABLED]: false,
   [PHASE_INDEX_PRIORITY]: 0
 };
+export const defaultEmptyColdPhase = {
+  ...defaultColdPhase,
+  [PHASE_INDEX_PRIORITY]: ''
+};
