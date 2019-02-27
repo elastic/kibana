@@ -18,7 +18,6 @@ import {
 import { Join } from './resources/join';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-// export const JoinEditor = injectI18n(({intl}) => {
 export const JoinEditor = injectI18n(({ joins, layer, onChange, intl }) => {
 
   const renderJoins = () => {
