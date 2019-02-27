@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import sinon from 'sinon';
+jest.mock('./query_params');
+jest.mock('./sorting_params');
+
 import { getSearchDsl } from './search_dsl';
 import * as queryParamsNS from './query_params';
 import * as sortParamsNS from './sorting_params';
 
 describe('getSearchDsl', () => {
-  const sandbox = sinon.createSandbox();
-  afterEach(() => sandbox.restore());
+  afterEach(() => {
+    queryParamsNS.getQueryParams.mockReset();
+    sortParamsNS.getSortingParams.mockReset();
+  });
 
   describe('validation', () => {
     it('throws when type is not specified', () => {
@@ -47,7 +51,6 @@ describe('getSearchDsl', () => {
 
   describe('passes control', () => {
     it('passes (mappings, schema, namespace, type, search, searchFields, hasReference) to getQueryParams', () => {
-      const spy = sandbox.spy(queryParamsNS, 'getQueryParams');
       const mappings = { type: { properties: {} } };
       const schema = { isNamespaceAgnostic: () => {} };
       const opts = {
@@ -63,9 +66,8 @@ describe('getSearchDsl', () => {
       };
 
       getSearchDsl(mappings, schema, opts);
-      sinon.assert.calledOnce(spy);
-      sinon.assert.calledWithExactly(
-        spy,
+      expect(queryParamsNS.getQueryParams).toHaveBeenCalledTimes(1);
+      expect(queryParamsNS.getQueryParams).toHaveBeenCalledWith(
         mappings,
         schema,
         opts.namespace,
@@ -78,7 +80,7 @@ describe('getSearchDsl', () => {
     });
 
     it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
-      const spy = sandbox.stub(sortParamsNS, 'getSortingParams').returns({});
+      sortParamsNS.getSortingParams.mockReturnValue({});
       const mappings = { type: { properties: {} } };
       const schema = { isNamespaceAgnostic: () => {} };
       const opts = {
@@ -88,9 +90,8 @@ describe('getSearchDsl', () => {
       };
 
       getSearchDsl(mappings, schema, opts);
-      sinon.assert.calledOnce(spy);
-      sinon.assert.calledWithExactly(
-        spy,
+      expect(sortParamsNS.getSortingParams).toHaveBeenCalledTimes(1);
+      expect(sortParamsNS.getSortingParams).toHaveBeenCalledWith(
         mappings,
         opts.type,
         opts.sortField,
@@ -99,8 +100,8 @@ describe('getSearchDsl', () => {
     });
 
     it('returns combination of getQueryParams and getSortingParams', () => {
-      sandbox.stub(queryParamsNS, 'getQueryParams').returns({ a: 'a' });
-      sandbox.stub(sortParamsNS, 'getSortingParams').returns({ b: 'b' });
+      queryParamsNS.getQueryParams.mockReturnValue({ a: 'a' });
+      sortParamsNS.getSortingParams.mockReturnValue({ b: 'b' });
       expect(getSearchDsl(null, null, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
     });
   });
