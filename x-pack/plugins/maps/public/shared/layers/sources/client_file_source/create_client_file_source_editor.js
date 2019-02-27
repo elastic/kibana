@@ -6,14 +6,15 @@
 
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiFilePicker,
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-// import { importFile } from '../../util/import_file';
+import { importFile } from '../../util/import_file';
 
-export function ClientFileCreateSourceEditor() {
+export function ClientFileCreateSourceEditor({ previewGeojsonFile }) {
   return (
     <EuiFormRow
       label={(
@@ -30,8 +31,16 @@ export function ClientFileCreateSourceEditor() {
             defaultMessage="Import"
           />
         )}
-        onChange={(thing) => console.log(thing)}
+        onChange={async ([geojsonFile]) => {
+          const defaultLayerName = geojsonFile.name;
+          const parsedFile = await importFile(geojsonFile);
+          previewGeojsonFile(parsedFile, defaultLayerName);
+        }}
       />
     </EuiFormRow>
   );
 }
+
+ClientFileCreateSourceEditor.propTypes = {
+  previewGeojsonFile: PropTypes.func.isRequired
+};

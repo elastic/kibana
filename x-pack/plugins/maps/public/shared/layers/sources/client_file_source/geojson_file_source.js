@@ -16,20 +16,40 @@ export class GeojsonFileSource extends AbstractVectorSource {
   static description = 'Client-provided GeoJSON vector shape file';
   static icon = 'emsApp';
 
-  static createDescriptor(id) {
+  static createDescriptor(featureCollection, name) {
     return {
       type: GeojsonFileSource.type,
-      id: id
+      featureCollection,
+      name
     };
   }
 
-  static renderEditor() {
-    return <ClientFileCreateSourceEditor />;
+  static previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
+    return (geojsonFile, name) => {
+      const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+      const source = new GeojsonFileSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+  };
+
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
+    return (<ClientFileCreateSourceEditor
+      previewGeojsonFile={
+        GeojsonFileSource.previewGeojsonFile(onPreviewSource, inspectorAdapters)
+      }
+    />);
+  }
+
+  async getGeoJsonWithMeta() {
+    return {
+      data: this._descriptor.featureCollection,
+      meta: {}
+    };
   }
 
   async getDisplayName() {
     try {
-      return 'Bill the vector file';
+      return this._descriptor.name;
     } catch (error) {
       return this._descriptor.id;
     }
