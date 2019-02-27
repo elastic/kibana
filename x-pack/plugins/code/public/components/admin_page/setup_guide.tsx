@@ -94,28 +94,33 @@ const steps = [
 ];
 
 export const SetupGuide = (props: { setupFailed?: boolean }) => {
-  return (
-    <Root>
-      {props.setupFailed && (
-        <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
-          <p>
-            Please follow the guide below to configure your Kibana instance and then refresh this
-            page.
-          </p>
-        </EuiCallOut>
-      )}
-      {!props.setupFailed && (
-        <EuiButton iconType="sortLeft">
-          <Link to="/admin">Back To Project Dashboard</Link>
-        </EuiButton>
-      )}
-      <EuiPanel>
-        <EuiTitle>
-          <h3>Getting started in Elastic Code</h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiSteps steps={steps} />
-      </EuiPanel>
-    </Root>
-  );
+  let setup = null;
+  if (props.setupFailed !== undefined) {
+    setup = (
+      <React.Fragment>
+        {props.setupFailed && (
+          <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
+            <p>
+              Please follow the guide below to configure your Kibana instance and then refresh this
+              page.
+            </p>
+          </EuiCallOut>
+        )}
+        {props.setupFailed === false && (
+          <EuiButton iconType="sortLeft">
+            <Link to="/admin">Back To Project Dashboard</Link>
+          </EuiButton>
+        )}
+        <EuiPanel>
+          <EuiTitle>
+            <h3>Getting started in Elastic Code</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiSteps steps={steps} />
+        </EuiPanel>
+      </React.Fragment>
+    );
+  }
+
+  return <Root>{setup}</Root>;
 };
