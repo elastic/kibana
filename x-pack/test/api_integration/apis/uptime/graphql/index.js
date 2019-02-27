@@ -22,5 +22,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./monitor_status_bar'));
     loadTestFile(require.resolve('./ping_list'));
     loadTestFile(require.resolve('./snapshot'));
+    loadTestFile(require.resolve('./icmp_queries'));
   });
 }
