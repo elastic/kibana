@@ -22,6 +22,7 @@ const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
 const del = require('del');
+const url = require('url');
 const { log: defaultLog, decompress, downloadFile } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 
@@ -45,7 +46,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   } = options;
 
   let dest = archive;
-  if (archive.startsWith('http')) {
+  if (['http:', 'https:'].includes(url.parse(archive).protocol)) {
     dest = path.resolve(basePath, 'cache', path.basename(archive));
     await downloadFile(archive, dest, log);
   }
