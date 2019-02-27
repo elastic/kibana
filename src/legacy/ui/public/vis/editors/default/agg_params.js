@@ -32,7 +32,7 @@ import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAggParams', function ($compile, i18n) {
+  .directive('visEditorAggParams', function ($compile) {
 
     return {
       restrict: 'E',
@@ -56,7 +56,7 @@ uiModules
           updateEditorConfig('default');
         });
 
-        $scope.label = getAggSelectLabel();
+        $scope.isSubAggregation = $scope.$index >= 1 && $scope.groupName === 'buckets';
         $scope.isSelectValid = () => Boolean($scope.agg.type);
         $scope.onChangeAggType = (agg, aggType) => {
           agg.type = aggType;
@@ -203,23 +203,6 @@ uiModules
             .attr(attrs)
             .append(param.editor)
             .get(0);
-        }
-
-        function getAggSelectLabel() {
-          let aggSelectLabel = '';
-
-          if ($scope.$index < 1 || $scope.groupName !== 'buckets') {
-            aggSelectLabel = i18n('common.ui.vis.editors.aggSelect.aggregationLabel', {
-              defaultMessage: 'Aggregation',
-            });
-          }
-          if ($scope.$index >= 1 && $scope.groupName === 'buckets') {
-            aggSelectLabel = i18n('common.ui.vis.editors.aggSelect.subAggregationLabel', {
-              defaultMessage: 'Sub Aggregation',
-            });
-          }
-
-          return aggSelectLabel;
         }
       }
     };

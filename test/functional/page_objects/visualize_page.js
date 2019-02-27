@@ -436,7 +436,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        [data-test-subj="visEditorAggSelect"]
+        [data-test-subj="defaultEditorAggSelect"]
       `);
 
       await comboBox.setElement(selector, myString);
@@ -479,7 +479,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.toggleOpenEditor(index);
 
       // select our agg
-      await comboBox.set('visEditorAggSelect', agg);
+      await comboBox.set('defaultEditorAggSelect', agg);
 
       const fieldSelect = await find
         .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);

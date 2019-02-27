@@ -20,13 +20,14 @@
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
+import { get } from 'lodash';
 import React from 'react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
 
-interface VisEditorAggSelectProps {
+interface DefaultEditorAggSelectProps {
   agg: AggConfig;
+  isSubAggregation: boolean;
   label: string;
   aggHelpLink: string;
   aggTypeOptions: AggType[];
@@ -39,20 +40,30 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   options?: EuiComboBoxOptionProps[];
 };
 
-function VisEditorAggSelect({
+function DefaultEditorAggSelect({
   agg,
-  label,
+  isSubAggregation,
   aggHelpLink,
   aggTypeOptions,
   onChangeAggType,
   isSelectValid,
-}: VisEditorAggSelectProps) {
+}: DefaultEditorAggSelectProps) {
   // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
   // we added null check for agg. It can be removed after 'agg_params' is converted to React
   const selectedOptions = agg && agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
   const labelNode = (
     <div>
-      {label}
+      {isSubAggregation ? (
+        <FormattedMessage
+          id="common.ui.vis.editors.aggSelect.subAggregationLabel"
+          defaultMessage="Sub Aggregation"
+        />
+      ) : (
+        <FormattedMessage
+          id="common.ui.vis.editors.aggSelect.aggregationLabel"
+          defaultMessage="Aggregation"
+        />
+      )}
       {aggHelpLink && (
         <EuiLink
           href={aggHelpLink}
@@ -72,28 +83,28 @@ function VisEditorAggSelect({
   );
 
   const onChange = (options: ComboBoxGroupedOption[]) => {
-    onChangeAggType(agg, _.get(options, '0.value'));
+    onChangeAggType(agg, get(options, '0.value'));
   };
 
   const getGroupedOptions = (): ComboBoxGroupedOption[] => {
-    const groupedOptions: ComboBoxGroupedOption[] =
-      aggTypeOptions && aggTypeOptions.length
-        ? aggTypeOptions.reduce((array: AggType[], type: AggType) => {
-            const group = array.find(element => element.label === type.subtype);
-            const option = {
-              label: type.title,
-              value: type,
-            };
+    const groupedOptions: ComboBoxGroupedOption[] = aggTypeOptions.reduce(
+      (array: AggType[], type: AggType) => {
+        const group = array.find(element => element.label === type.subtype);
+        const option = {
+          label: type.title,
+          value: type,
+        };
 
-            if (group) {
-              group.options.push(option);
-            } else {
-              array.push({ label: type.subtype, options: [option] });
-            }
+        if (group) {
+          group.options.push(option);
+        } else {
+          array.push({ label: type.subtype, options: [option] });
+        }
 
-            return array;
-          }, [])
-        : [];
+        return array;
+      },
+      []
+    );
 
     groupedOptions.sort(sortByLabel);
 
@@ -112,12 +123,12 @@ function VisEditorAggSelect({
         placeholder={i18n.translate('common.ui.vis.editors.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',
         })}
-        id="agg"
+        id={`visDefaultEditorAggSelect${agg.id}`}
         options={getGroupedOptions()}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         onChange={onChange}
-        data-test-subj="visEditorAggSelect"
+        data-test-subj="defaultEditorAggSelect"
         isClearable={false}
         isInvalid={isSelectValid && !isSelectValid()}
       />
@@ -129,4 +140,4 @@ function sortByLabel(a: { label: string }, b: { label: string }) {
   return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
 }
 
-export { VisEditorAggSelect };
+export { DefaultEditorAggSelect };

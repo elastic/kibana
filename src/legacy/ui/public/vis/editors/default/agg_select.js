@@ -19,13 +19,13 @@
 
 import 'ngreact';
 import { uiModules } from '../../../modules';
-import { VisEditorAggSelect } from './vis_editor_agg_select';
+import { DefaultEditorAggSelect } from './components/default_editor_agg_select';
 import { wrapInI18nContext } from 'ui/i18n';
 
 uiModules
   .get('app/kibana', ['react'])
-  .directive('visEditorAggSelect', reactDirective => reactDirective(wrapInI18nContext(VisEditorAggSelect), [
-    'label',
+  .directive('defaultEditorAggSelect', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggSelect), [
+    'isSubAggregation',
     'aggHelpLink',
     'onChangeAggType',
     'isSelectValid',

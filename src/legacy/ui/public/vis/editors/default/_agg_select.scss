@@ -20,11 +20,4 @@
 .visEditorAggSelect__helpLink {
   font-weight: $euiFontWeightRegular;
   @include euiFontSizeXS;
-
-  &:hover {
-    text-decoration: none;
-  }
-  &:focus {
-    text-decoration: none;
-  }
 }
