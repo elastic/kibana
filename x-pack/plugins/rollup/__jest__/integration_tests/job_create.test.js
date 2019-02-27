@@ -423,7 +423,6 @@ describe('Create Rollup Job', () => {
           it('should not be empty', () => {
             activateAdvancedCronExpression();
 
-            // Set empty cron expression
             form.setInputValue('rollupAdvancedCron', '');
             userActions.clickNextStep();
 
@@ -433,12 +432,25 @@ describe('Create Rollup Job', () => {
           it('should not allow unvalid expression', () => {
             activateAdvancedCronExpression();
 
-            // Set empty cron expression
             form.setInputValue('rollupAdvancedCron', 'invalid');
             userActions.clickNextStep();
 
             expect(getFormErrorsMessages()).toContain('Expression has only 1 part. At least 5 parts are required.');
           });
+        });
+      });
+
+      describe('page size', () => {
+        it('should not be empty', () => {
+          form.setInputValue('rollupPageSize', '');
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toContain('Page size is required.');
+        });
+
+        it('should be greater than 0', () => {
+          form.setInputValue('rollupPageSize', '-1');
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toContain('Page size must be greater than 0.');
         });
       });
     });
