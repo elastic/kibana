@@ -1,8 +1,6 @@
 [[vector-style]]
 === Vector style
 
-Use vector styling to customize vector layers to create unique maps..
-
 *Border color*:: Defines the border color of the vector features.
 
 *Border width*:: Defines the border width of the vector features.
@@ -19,4 +17,4 @@ image::maps/images/vector_style_static.png[]
 [role="screenshot"]
 image::maps/images/vector_style_dynamic.png[]
 
-NOTE: The *link* button is only available when your vector features contain numeric fields.
+NOTE: The *link* button is only available when your vector features contain numeric properties.
