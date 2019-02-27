@@ -52,11 +52,29 @@ export interface GenericFtrProviderContext<
   ServiceMap = ProvidedTypeMap<ServiceProviders & DefaultServiceProviders>,
   PageObjectMap = ProvidedTypeMap<PageObjectProviders>
 > {
+  /**
+   * Determine if a service is avaliable
+   * @param serviceName
+   */
   hasService(serviceName: string): boolean;
 
+  /**
+   * Get the instance of a service, if the service is loaded async and the service needs to be used
+   * outside of a test/hook, then make sure to call its `.init()` method and await it's promise.
+   * @param serviceName
+   */
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
+  /**
+   * Get a map of PageObjects
+   * @param pageObjects
+   */
   getPageObjects<K extends keyof PageObjectMap>(pageObjects: K[]): Pick<PageObjectMap, K>;
 
+  /**
+   * Synchronously load a test file, can be called within a `describe()` block to add
+   * common setup/teardown steps to several suites
+   * @param path
+   */
   loadTestFile(path: string): void;
 }
