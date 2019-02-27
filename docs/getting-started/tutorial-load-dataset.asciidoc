@@ -4,11 +4,11 @@
 This tutorial requires three data sets:
 
 * The complete works of William Shakespeare, suitably parsed into fields. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare_6.0.json[`shakespeare.json`].
+  https://download.elastic.co/demos/kibana/gettingstarted/7.x/shakespeare.json[`shakespeare.json`].
 * A set of fictitious accounts with randomly generated data. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[`accounts.zip`].
+  https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip[`accounts.zip`].
 * A set of randomly generated log files. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[`logs.jsonl.gz`].
+  https://download.elastic.co/demos/kibana/gettingstarted/7.x/logs.jsonl.gz[`logs.jsonl.gz`].
 
 Two of the data sets are compressed. To extract the files, use these commands:
 
@@ -157,7 +157,7 @@ API to load the data sets:
 
 [source,shell]
 curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
-curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare_6.0.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
 curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
 
 Or for Windows users, in Powershell:
