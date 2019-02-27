@@ -218,7 +218,7 @@ describe('VegaVisualizations', () => {
         domNode.style.width = '256px';
         domNode.style.height = '256px';
 
-        await vegaVis.render(vegaParser, { data: true });
+        await vegaVis.render(vegaParser, vis.params, { data: true });
         const vegaView = vegaVis._vegaView._view;
         expect(vegaView.height()).to.be(250.00000001);
 
