@@ -9,6 +9,8 @@ image::maps/images/heatmap_layer.png[]
 Heatmap layers can be created from the following source
 
 *Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
+Set *Show as* to *heatmap*.
+The index must contain at least one field mapped as {ref}/geo-shape.html[geo_shape].
 
 NOTE: Only count and sum metric aggregations are available with the grid aggregation source and heatmap layers.
 Mean/median/min/max are turned off because the heatmap will blend nearby values.

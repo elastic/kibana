@@ -1,0 +1,4 @@
+[[vector-style]]
+=== Vector style
+
+Vector style

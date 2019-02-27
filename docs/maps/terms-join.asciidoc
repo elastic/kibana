@@ -1,0 +1,118 @@
+[[terms-join]]
+=== Terms join
+
+Use *Terms joins* to augment vector sources with additional properties.
+You can then use these additional properties to dynamically style the vector source
+and provide richer tooltip context.
+
+[role="screenshot"]
+image::maps/images/terms_join.png[]
+
+*Terms joins* join the result of an Elasticsearch terms aggregation and a vector source based on a shared key.
+Follow the example below to understand how *Terms joins* augments your vector source with addtional properties.
+This example will use Elastic Maps Service(EMS) World Countries as the vector source and
+the Kibana sample data set "Sample web logs" as the elasticsearch index.
+
+Example feature from World Countries
+--------------------------------------------------
+{
+  geometry: {
+    coordinates: [...],
+    type: "Polygon"
+  },
+  properties: {
+    name: "Sweden",
+    iso2: "SE",
+    iso3: "SWE"
+  },
+  type: "Feature"
+}
+--------------------------------------------------
+
+Example documents from Sample web logs
+--------------------------------------------------
+{
+  bytes: 1837,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 28, 2019 @ 07:23:08.754"
+},
+{
+  bytes: 971,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 27, 2019 @ 08:10:45.205"
+},
+{
+  bytes: 4277,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 21, 2019 @ 05:24:33.945"
+},
+{
+  bytes: 5624,
+  geo: {
+    src: "SE"
+  },
+  timestamp: "Feb 21, 2019 @ 04:57:05.921"
+}
+--------------------------------------------------
+
+The join configuration joins the vector source "World Countries" to the elasticsearch index "kibana_sample_data_logs"
+on the shared key *iso2 = geo.src*.
+[role="screenshot"]
+image::maps/images/terms_join_shared_key_config.png[]
+
+The metric configuration defines two metric aggregations,
+the count of all documents in the terms bucket and
+the average of the field "bytes" for all documents in the terms bucket.
+[role="screenshot"]
+image::maps/images/terms_join_metric_config.png[]
+
+Example terms aggregation response
+--------------------------------------------------
+{
+  aggregations: {
+    join: {
+      buckets: [
+        {
+          doc_count: 4,
+          key: "SE",
+          avg_of_bytes: {
+            value: 3177.25
+          }
+        }
+      ]
+    }
+  }
+}
+--------------------------------------------------
+
+Finally, the terms aggregation response is then joined with the vector source features.
+--------------------------------------------------
+{
+  geometry: {
+    coordinates: [...],
+    type: "Polygon"
+  },
+  properties: {
+    name: "Sweden",
+    iso2: "SE",
+    iso3: "SWE",
+    join_prop_count: 4,
+    join_prop_avg_of_bytes: 3177.25
+  },
+  type: "Feature"
+}
+--------------------------------------------------
+
+NOTE: This example is for demonstration purposes only and the actual implemention uses different key
+names to avoid naming collisions with vector source properties.
+
+
+
+
+

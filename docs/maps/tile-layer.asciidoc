@@ -1,7 +1,7 @@
 [[tile-layer]]
 == Tile layer
 
-Display tiles served from a tile server.
+Display image tiles served from a tile server.
 
 [role="screenshot"]
 image::maps/images/tile_layer.png[]
