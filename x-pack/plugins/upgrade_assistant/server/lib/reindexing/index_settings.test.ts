@@ -6,6 +6,7 @@
 
 import {
   CURRENT_MAJOR_VERSION,
+  NEXT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
@@ -183,6 +184,12 @@ describe('sourceNameForIndex', () => {
       '.myInternalIndex'
     );
   });
+
+  it('parses security index', () => {
+    expect(sourceNameForIndex('.security-6')).toEqual('.security');
+    expect(sourceNameForIndex('.security-7')).toEqual('.security');
+    expect(sourceNameForIndex('.security')).toEqual('.security');
+  });
 });
 
 describe('generateNewIndexName', () => {
@@ -214,6 +221,16 @@ describe('generateNewIndexName', () => {
     expect(generateNewIndexName(`.reindexed-v${PREV_MAJOR_VERSION}-myInternalIndex`)).toEqual(
       `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`
     );
+  });
+
+  it('maintains security naming convention when aleady re-indexed', () => {
+    expect(generateNewIndexName(`.security-${CURRENT_MAJOR_VERSION}`)).toEqual(
+      `.security-${NEXT_MAJOR_VERSION}`
+    );
+  });
+
+  it('maintains security naming convention', () => {
+    expect(generateNewIndexName(`.security`)).toEqual(`.security-${NEXT_MAJOR_VERSION}`);
   });
 });
 
