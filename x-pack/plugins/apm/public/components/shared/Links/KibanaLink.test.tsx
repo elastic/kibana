@@ -12,7 +12,6 @@ import { UnconnectedKibanaLink } from './KibanaLink';
 describe('UnconnectedKibanaLink', () => {
   it('should render correct markup', () => {
     const wrapper = shallow(
-      // @ts-ignore
       <UnconnectedKibanaLink
         location={{ search: '' } as Location}
         pathname={'/app/kibana'}
