@@ -150,6 +150,21 @@ describe('Keystore', () => {
     });
   });
 
+  describe('get', () => {
+    it('gets a value by key', () => {
+      const keystore = new Keystore('/data/unprotected.keystore');
+      expect(keystore.get('a2')).toEqual('bar');
+      keystore.add('foo', 'baz');
+      expect(keystore.get('foo')).toEqual('baz');
+    });
+
+    it('gets a value that has been added', () => {
+      const keystore = new Keystore('/data/unprotected.keystore');
+      keystore.add('foo', 'baz');
+      expect(keystore.get('foo')).toEqual('baz');
+    });
+  });
+
   describe('add', () => {
     it('adds a key/value pair', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
