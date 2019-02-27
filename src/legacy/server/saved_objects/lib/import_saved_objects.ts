@@ -73,26 +73,23 @@ function splitOverwrites(
         id: string;
       }>
 ) {
-  return savedObjects.reduce(
-    ([doOverwrite, dontOverwrite], obj) => {
-      if (skip.some(skipObj => skipObj.type === obj.type && skipObj.id === obj.id)) {
-        return [doOverwrite, dontOverwrite];
-      }
-      if (
-        overwrite === true ||
-        (Array.isArray(overwrite) &&
-          overwrite.some(
-            overwriteObj => overwriteObj.type === obj.type && overwriteObj.id === obj.id
-          ))
-      ) {
-        doOverwrite.push(obj);
-      } else {
-        dontOverwrite.push(obj);
-      }
-      return [doOverwrite, dontOverwrite];
-    },
-    [[] as SavedObject[], [] as SavedObject[]]
-  );
+  const objectsToOverwrite: SavedObject[] = [];
+  const objectsToNotOverwrite: SavedObject[] = [];
+  for (const savedObject of savedObjects) {
+    if (skip.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
+      continue;
+    }
+    if (
+      overwrite === true ||
+      (Array.isArray(overwrite) &&
+        overwrite.some(obj => obj.type === savedObject.type && obj.id === savedObject.id))
+    ) {
+      objectsToOverwrite.push(savedObject);
+    } else {
+      objectsToNotOverwrite.push(savedObject);
+    }
+  }
+  return { objectsToOverwrite, objectsToNotOverwrite };
 }
 
 export async function importSavedObjects({
@@ -103,7 +100,7 @@ export async function importSavedObjects({
   savedObjectsClient,
 }: ImportSavedObjectsOptions) {
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
-  const [objectsToOverwrite, objectsToNotOverwrite] = splitOverwrites(
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
     objectsToImport,
     skip,
     overwrite
