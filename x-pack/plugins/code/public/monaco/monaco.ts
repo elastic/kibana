@@ -49,6 +49,8 @@ import 'monaco-editor/esm/vs/editor/contrib/goToDefinition/goToDefinitionMouse';
 // import 'monaco-editor/esm/vs/editor/standalone/browser/toggleHighContrast/toggleHighContrast.js';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
 
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 // (2) Desired languages:
 // import 'monaco-editor/esm/vs/language/typescript/monaco.contribution';
 // import 'monaco-editor/esm/vs/language/css/monaco.contribution';
@@ -95,8 +97,6 @@ import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution'
 // import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution';
 import chrome from '../../../../../src/legacy/ui/public/chrome';
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
