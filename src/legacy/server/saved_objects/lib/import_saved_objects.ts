@@ -32,17 +32,21 @@ import { SavedObject, SavedObjectsClient } from '../service';
 interface ImportSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
-  skip: Array<{
+  overwriteAll: boolean;
+  savedObjectsClient: SavedObjectsClient;
+  overwrites: Array<{
     type: string;
     id: string;
   }>;
-  overwrite:
-    | boolean
-    | Array<{
-        type: string;
-        id: string;
-      }>;
-  savedObjectsClient: SavedObjectsClient;
+  replaceReferences: Array<{
+    type: string;
+    from: string;
+    to: string;
+  }>;
+  skips: Array<{
+    type: string;
+    id: string;
+  }>;
 }
 
 async function collectSavedObjects(
@@ -65,24 +69,25 @@ async function collectSavedObjects(
 
 function splitOverwrites(
   savedObjects: SavedObject[],
-  skip: Array<{ type: string; id: string }>,
-  overwrite:
-    | boolean
-    | Array<{
-        type: string;
-        id: string;
-      }>
+  overwriteAll: boolean,
+  overwrites: Array<{
+    type: string;
+    id: string;
+  }>,
+  skips: Array<{
+    type: string;
+    id: string;
+  }>
 ) {
   const objectsToOverwrite: SavedObject[] = [];
   const objectsToNotOverwrite: SavedObject[] = [];
   for (const savedObject of savedObjects) {
-    if (skip.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
+    if (skips.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
       continue;
     }
     if (
-      overwrite === true ||
-      (Array.isArray(overwrite) &&
-        overwrite.some(obj => obj.type === savedObject.type && obj.id === savedObject.id))
+      overwriteAll === true ||
+      overwrites.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)
     ) {
       objectsToOverwrite.push(savedObject);
     } else {
@@ -95,15 +100,17 @@ function splitOverwrites(
 export async function importSavedObjects({
   readStream,
   objectLimit,
-  skip,
-  overwrite,
+  skips,
+  overwrites,
+  overwriteAll,
   savedObjectsClient,
 }: ImportSavedObjectsOptions) {
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
     objectsToImport,
-    skip,
-    overwrite
+    overwriteAll,
+    overwrites,
+    skips
   );
 
   // Overwrite objects

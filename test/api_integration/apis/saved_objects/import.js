@@ -93,7 +93,7 @@ export default function ({ getService }) {
         it('should return 200 when conflicts exist but overwrite is passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .field('overwrite', true)
+            .field('overwriteAll', true)
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
@@ -104,7 +104,7 @@ export default function ({ getService }) {
         it('should return 200 when skipping all the records', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .field('skip', JSON.stringify(
+            .field('skips', JSON.stringify(
               [
                 {
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -130,7 +130,7 @@ export default function ({ getService }) {
         it('should return 200 when manually overwriting each object', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .field('overwrite', JSON.stringify(
+            .field('overwrites', JSON.stringify(
               [
                 {
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -156,7 +156,7 @@ export default function ({ getService }) {
         it('should return 409 with only one record when overwriting 1 and skipping 1', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .field('overwrite', JSON.stringify(
+            .field('overwrites', JSON.stringify(
               [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -164,7 +164,7 @@ export default function ({ getService }) {
                 },
               ]
             ))
-            .field('skip', JSON.stringify(
+            .field('skips', JSON.stringify(
               [
                 {
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',

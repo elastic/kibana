@@ -25,11 +25,6 @@ import { SavedObjectsClient } from '../';
 import { importSavedObjects } from '../lib';
 import { Prerequisites } from './types';
 
-interface TypeAndIdPair {
-  type: string;
-  id: string;
-}
-
 interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
@@ -42,8 +37,20 @@ interface ImportRequest extends Hapi.Request {
   };
   payload: {
     file: HapiReadableStream;
-    overwrite: boolean | TypeAndIdPair[];
-    skip: TypeAndIdPair[];
+    overwriteAll: boolean;
+    overwrites: Array<{
+      type: string;
+      id: string;
+    }>;
+    replaceReferences: Array<{
+      type: string;
+      from: string;
+      to: string;
+    }>;
+    skips: Array<{
+      type: string;
+      id: string;
+    }>;
   };
 }
 
@@ -58,16 +65,9 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
     },
     validate: {
       payload: Joi.object({
-        overwrite: Joi.alternatives([
-          Joi.boolean(),
-          Joi.array().items(
-            Joi.object({
-              type: Joi.string().required(),
-              id: Joi.string().required(),
-            })
-          ),
-        ]).default(false),
-        skip: Joi.array()
+        file: Joi.object().required(),
+        overwriteAll: Joi.boolean().default(false),
+        overwrites: Joi.array()
           .items(
             Joi.object({
               type: Joi.string().required(),
@@ -75,8 +75,24 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
             })
           )
           .default([]),
-        file: Joi.object().required(),
-      }),
+        replaceReferences: Joi.array()
+          .items(
+            Joi.object({
+              type: Joi.string().required(),
+              from: Joi.string().required(),
+              to: Joi.string().required(),
+            })
+          )
+          .default([]),
+        skips: Joi.array()
+          .items(
+            Joi.object({
+              type: Joi.string().required(),
+              id: Joi.string().required(),
+            })
+          )
+          .default([]),
+      }).default(),
     },
   },
   async handler(request: ImportRequest) {
@@ -88,8 +104,10 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
         savedObjectsClient,
         readStream: request.payload.file,
         objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
-        skip: request.payload.skip,
-        overwrite: request.payload.overwrite,
+        skips: request.payload.skips,
+        overwrites: request.payload.overwrites,
+        overwriteAll: request.payload.overwriteAll,
+        replaceReferences: request.payload.replaceReferences,
       });
     }
   },
