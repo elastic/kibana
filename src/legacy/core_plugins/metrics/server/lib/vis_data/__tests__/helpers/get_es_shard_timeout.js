@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { of } from 'rxjs';
 import { expect } from 'chai';
-import getEsShardTimeout from '../../helpers/get_es_shard_timeout';
+import { getEsShardTimeout } from '../../helpers/get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
   it('should return the elasticsearch.shardTimeout', async () => {

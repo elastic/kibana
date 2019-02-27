@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { first, map } from 'rxjs/operators';
 
-export default async function getEsShardTimeout(req) {
+export async function getEsShardTimeout(req) {
   return await req.server.core.elasticsearch.legacy.config$.pipe(
     first(),
     map(config => config.shardTimeout.asMilliseconds())

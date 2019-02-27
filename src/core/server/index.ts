@@ -25,7 +25,7 @@ import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
 import { ElasticsearchModule } from './elasticsearch';
 import { HttpConfig, HttpModule, HttpServerInfo } from './http';
-import { LegacyCompatModule } from './legacy_compat';
+import { LegacyCompatModule } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 
 export class Server {

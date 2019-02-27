@@ -33,7 +33,7 @@ jest.mock('./elasticsearch/elasticsearch_service', () => ({
 }));
 
 const mockLegacyService = { start: jest.fn(), stop: jest.fn() };
-jest.mock('./legacy_compat/legacy_service', () => ({
+jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
 
