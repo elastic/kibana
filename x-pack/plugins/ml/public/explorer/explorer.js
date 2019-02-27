@@ -948,17 +948,16 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
           { influencersFilterQuery, filterActive: true, filteredFields, queryString });
 
-        this.setState({ swimlaneViewByFieldName: selectedViewByFieldName }, () => {
-          this.updateExplorer({
-            filterActive: true,
-            filteredFields,
-            influencersFilterQuery,
-            isAndOperator,
-            queryString,
-            maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
-              filteredFields.includes(selectedViewByFieldName) === false)
-          }, false);
-        });
+        this.updateExplorer({
+          filterActive: true,
+          filteredFields,
+          influencersFilterQuery,
+          isAndOperator,
+          queryString,
+          maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
+            filteredFields.includes(selectedViewByFieldName) === false),
+          swimlaneViewByFieldName: selectedViewByFieldName
+        }, false);
       }
     }
 
