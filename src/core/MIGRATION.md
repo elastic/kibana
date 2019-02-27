@@ -741,6 +741,7 @@ chrome.setRootController(function ($element) {
 });
 ```
 
+The plugin and application bundles do not use webpack aliases for imports. Stateful services are passed around as function arguments. The plugin definition shim wires up the necessary bits of the core start contract, and the legacy app entry file shims the app-specific behaviors that ultimately will move into core (e.g. mounting the application) or will go away entirely (ui/autoload/styles).
 
 
 
