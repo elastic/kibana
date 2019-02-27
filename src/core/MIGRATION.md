@@ -743,59 +743,18 @@ chrome.setRootController(function ($element) {
 
 The plugin and application bundles do not use webpack aliases for imports. Stateful services are passed around as function arguments. The plugin definition shim wires up the necessary bits of the core start contract, and the legacy app entry file shims the app-specific behaviors that ultimately will move into core (e.g. mounting the application) or will go away entirely (ui/autoload/styles).
 
+**Angular application:**
+
+Angular applications must be handled a little differently since angular is still temporarily a part of core, and you cannot easily embed isolated angular applications within one another at runtime. Angular will be moved out of core and into individual plugins in 7.x, but in the meantime plugins can adopt at least some of the new plugin system conventions in their legacy angular applications.
+
+
+
 
 
 # Random temporary idea thrashing below
 
-* Plugin without app
-* Plugin with angular app
-* Plugin with react app
-
-Client-side legacy plugin code is where things get weird, but the approach is largely the same - in the public entry file of the plugin, we separate the legacy integrations with the new plugin definition using a temporary "shim".
-
-As before, let's start with an example legacy client-side plugin. This example integrates with core, consumes functionality from another plugin, and exposes functionality for other plugins to consume via `uiExports`. This would be the rough shape of the code that would originate in the entry file, which would be either `index.ts` or `<pluginname>.ts`:
 
 ```js
-// visualize/hacks/plugin.js
-// example init of updated plugin that preserves legacy API and introduces new one
-import { startContracts } from 'ui/legacy/plugins';
-import { Plugin } from '../plugin';
-
-const core = {};
-const dependencies = {}
-
-const plugin = new Plugin();
-const start = plugin.start(core, dependencies);
-startContracts.set('visualize', start);
-
-require('ui/registry/vis_types').__shimYourStuff__(plugin.visTypes$);
-require('uiExports/visTypes');
-
-
-// visualize/plugin.js
-// example of upgraded plugin definition
-export class Plugin {
-  constructor() {
-    this.visTypes$ = new ReplaySubject(1);
-  }
-
-  start(core, dependencies) {
-    core.applications.registerApp('visualize', (domElement) => {
-      import('../application').then(({ bootstrapApp }) => {
-        const app = bootstrapApp(domElement);
-      });
-
-      return app.start();
-    });
-
-    return {
-      registerVisType(type) {
-        this.visTypes$.push(type);
-      }
-    };
-  }
-}
-
 // visualize/index.js
 // example of app entry file for upgraded angular plugin
 import chrome from 'ui/chrome';
@@ -824,10 +783,6 @@ initTimepicker().then(() => {
 })
 
 
-
-
-
-
 routes.enable();
 
 routes
@@ -838,119 +793,6 @@ routes
 uiModules.get('kibana').run(showAppRedirectNotification);
 
 bootstrapAngularChrome();
-
-
-
-
-
-
-// tag_cloud/hacks/plugin.js
-// example init of updated plugin that consumes new interface
-import { startContracts } from 'ui/legacy/plugins';
-import { Plugin } from '../plugin';
-
-const core = {};
-const dependencies = {
-  ...startContracts
-}
-
-const plugin = new Plugin();
-plugin.start(core, dependencies);
-
-
-
-
-
-
-
-
-
-
-
-// visualize/public/index.js
-import { coreStart } from 'ui/core';
-import { foo } from 'ui/plugins';
-
-import { visualize } from 'ui/legacy_plugins';
-
-import { getBar } from 'plugins/bar';
-
-const core = {
-  chrome: coreStart.chrome
-};
-
-const dependencies = {
-  bar: {
-    getBar
-  }
-};
-
-export class Plugin {
-  constructor() {
-    this.visTypes$ = new ReplaySubject(1);
-  }
-  start(core, dependencies) {
-    //require('ui/registry/vis_types').__shimYourStuff__(this.visTypes$);
-    require('uiExports/visTypes');
-
-    return {
-      visTypes$ = this.visTypes$.asObservable();
-      myVis() {
-
-      }
-    }
-  }
-}
-
-export startContract = new Plugin();
-
-//const start = new Plugin().start(core);
-
-export function myVis() {
-  return start.myVis();
-}
-
-
-
-
-// my_custom_visualization/index.js
-{
-  uiExports: {
-    vis_type: 'plugins/my_custom_visulaization/some_file'
-  }
-}
-// my_custom_visualization/public/some_file.js
-import { VisTypesProvider } from 'ui/registry/vis_types';
-VisTypesProvider.register(($http) => {
-  return { type: 'mycustomvis' };
-});
-```
-
-Expressed in the shape of a new plugin:
-
-```ts
-import { CoreStart } from '../../core/public';
-import { FooPluginStart } from '../foo/public';
-
-interface DemoStartDependencies {
-  foo: FooPluginStart
-}
-
-export type DemoPluginStart = ReturnType<Plugin['start']>;
-
-export class Plugin {
-  public start(core: CoreStart, dependencies: DemoStartDependencies) {
-    core.router.when('/demo-foo', async (request) => {
-
-    });
-
-    return {
-      registerExtension() {
-
-      }
-    };
-  }
-}
 ```
 
 
