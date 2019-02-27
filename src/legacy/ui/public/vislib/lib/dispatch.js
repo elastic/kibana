@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import { get } from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
 
@@ -49,8 +49,8 @@ export function VislibLibDispatchProvider(Private, config) {
         dataPointer = dataPointer.parent;
       }
 
-      if (data.rawData.table.$parent) {
-        const { table, column, row, key } = data.rawData.table.$parent;
+      if (get(data, 'rawData.table.$parent')) {
+        const { table, column, row, key } = get(data, 'rawData.table.$parent');
         points.push({ table, column, row, value: key });
       }
 
@@ -61,7 +61,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const points = [];
 
       ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
-        if (data[val]) {
+        if (data[val] && data[val].column !== undefined && data[val].row !== undefined) {
           points.push(data[val]);
         }
       });
@@ -75,10 +75,13 @@ export function VislibLibDispatchProvider(Private, config) {
      * @param d {Object} Data point
      * @returns event with list of data points related to the click
      */
-    clickEventResponse(d) {
-      const _data = d3.event.target.nearestViewportElement ?
-        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
-      const isSlices = !!(_data && _data.slices);
+    clickEventResponse(d, props = {}) {
+      let isSlices = props.isSlices;
+      if (isSlices === undefined) {
+        const _data = d3.event.target.nearestViewportElement ?
+          d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
+        isSlices = !!(_data && _data.slices);
+      }
 
       const data = d.input || d;
 
@@ -107,7 +110,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const series = isSeries ? data.series : undefined;
       const slices = isSlices ? data.slices : undefined;
       const handler = this.handler;
-      const color = _.get(handler, 'data.color');
+      const color = get(handler, 'data.color');
 
       const eventData = {
         value: d.y,

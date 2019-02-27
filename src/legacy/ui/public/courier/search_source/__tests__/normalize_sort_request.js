@@ -78,7 +78,7 @@ describe('SearchSource#normalizeSortRequest', function () {
     normalizedSort = {
       _script: {
         script: {
-          inline: indexField.script,
+          source: indexField.script,
           lang: indexField.lang
         },
         type: indexField.type,

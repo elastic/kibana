@@ -29,7 +29,7 @@
  * ```ts
  * import { Logger, PluginInitializerContext, PluginStartContext } from '../../kibana';
  *
- * export interface SomePluginContract {
+ * export interface SomePlugin {
  *   setValue: (val: string) => void;
  * }
  *

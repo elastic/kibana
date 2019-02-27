@@ -16,13 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { SearchStrategiesRegister } from './search_strategies/search_strategies_register';
 import { uniq } from 'lodash';
 
 export async function getFields(req) {
-  const { indexPatternsService } = req.pre;
-  const index = req.query.index || '*';
-  const resp = await indexPatternsService.getFieldsForWildcard({ pattern: index });
-  const fields = resp.filter(field => field.aggregatable);
+  const indexPattern = req.query.index || '*';
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+
+  const fields = (await searchStrategy
+    .getFieldsForWildcard(req, indexPattern, capabilities))
+    .filter(field => field.aggregatable);
+
   return uniq(fields, field => field.name);
 }

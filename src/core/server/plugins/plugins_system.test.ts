@@ -78,10 +78,10 @@ afterEach(() => {
 });
 
 test('can be started even without plugins', async () => {
-  const pluginsContracts = await pluginsSystem.startPlugins();
+  const pluginsStart = await pluginsSystem.startPlugins();
 
-  expect(pluginsContracts).toBeInstanceOf(Map);
-  expect(pluginsContracts.size).toBe(0);
+  expect(pluginsStart).toBeInstanceOf(Map);
+  expect(pluginsStart.size).toBe(0);
 });
 
 test('`startPlugins` throws plugin has missing required dependency', async () => {
