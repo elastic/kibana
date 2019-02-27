@@ -745,8 +745,32 @@ The plugin and application bundles do not use webpack aliases for imports. State
 
 **Angular application:**
 
-Angular applications must be handled a little differently since angular is still temporarily a part of core, and you cannot easily embed isolated angular applications within one another at runtime. Angular will be moved out of core and into individual plugins in 7.x, but in the meantime plugins can adopt at least some of the new plugin system conventions in their legacy angular applications.
+WIP
 
+Angular applications must be handled a little differently since angular is still temporarily a part of core, and you cannot easily embed isolated angular applications within one another at runtime. Angular will be moved out of core and into individual plugins in 7.x, but in the meantime the angular application logic should continue to be bootstrapped through the legacy app entry file.
+
+The best possible outcome is for applications to remove angular entirely in favor of React, but if the intention is to preserve the angular app post-migration, then the focus today should be on removing dependencies on external services (provided by core or other plugins) that are injected through the angular dependency injection mechanism.
+
+In the future, services provided by core and other plugins will not be available automatically via the angular dependency injection system. To prepare for that inevitability, angular applications should be updated to define those services themselves. For now, this can be done through shims.
+
+Let's consider the following example that relies on the core `chrome` service accessed through the angular dependency injection mechanism.
+
+```js
+// demo/public/index.js
+import routes from 'ui/routes';
+
+import './directives';
+import './services';
+
+routes.enable();
+routes.when('/demo', {
+  controller(chrome) {
+    this.basePath = chrome.getBasePath();
+  }
+});
+```
+
+The demo application does not "own" `chrome`, so it won't exist automatically in the future. To continue using it, the demo application will need to configure it
 
 
 
