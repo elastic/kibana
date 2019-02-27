@@ -21,13 +21,13 @@ import * as Rx from 'rxjs';
 
 import { isSystemApiRequest } from '../../system_api';
 
-let newPlatformLoadingCount;
+let newPlatformHttp;
 
 export function __newPlatformInit__(instance) {
-  if (newPlatformLoadingCount) {
+  if (newPlatformHttp) {
     throw new Error('ui/chrome/api/loading_count already initialized with new platform apis');
   }
-  newPlatformLoadingCount = instance;
+  newPlatformHttp = instance;
 }
 
 export function initLoadingCountApi(chrome, internals) {
@@ -41,7 +41,7 @@ export function initLoadingCountApi(chrome, internals) {
    * @return {undefined}
    */
   internals.capture$httpLoadingCount = function ($rootScope, $http) {
-    newPlatformLoadingCount.add(new Rx.Observable(observer => {
+    newPlatformHttp.addLoadingCount(new Rx.Observable(observer => {
       const unwatch = $rootScope.$watch(() => {
         const reqs = $http.pendingRequests || [];
         observer.next(reqs.filter(req => !isSystemApiRequest(req)).length);
@@ -52,7 +52,7 @@ export function initLoadingCountApi(chrome, internals) {
   };
 
   const manualCount$ = new Rx.BehaviorSubject(0);
-  newPlatformLoadingCount.add(manualCount$);
+  newPlatformHttp.addLoadingCount(manualCount$);
 
   chrome.loadingCount = new class ChromeLoadingCountApi {
     /**
@@ -63,7 +63,7 @@ export function initLoadingCountApi(chrome, internals) {
      * @return {Function} unsubscribe
      */
     subscribe(handler) {
-      const subscription = newPlatformLoadingCount.getCount$().subscribe({
+      const subscription = newPlatformHttp.getLoadingCount$().subscribe({
         next(count) {
           handler(count);
         }

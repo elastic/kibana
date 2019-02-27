@@ -27,10 +27,10 @@ import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export type PluginsServiceStartContract = Map<PluginName, unknown>;
+export type PluginsServiceStart = Map<PluginName, unknown>;
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceStartContract> {
+export class PluginsService implements CoreService<PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
