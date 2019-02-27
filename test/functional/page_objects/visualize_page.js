@@ -479,7 +479,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.toggleOpenEditor(index);
 
       // select our agg
-      await comboBox.set('defaultEditorAggSelect', agg);
+      const aggSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="defaultEditorAggSelect"]`);
+      await comboBox.setElement(aggSelect, agg);
 
       const fieldSelect = await find
         .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);

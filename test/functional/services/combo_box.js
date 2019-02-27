@@ -36,6 +36,8 @@ export function ComboBoxProvider({ getService }) {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
+
+      // if it doesn't find the item where the text mates exactly, it will chose the first option
       try {
         await find.clickByCssSelector(`.euiComboBoxOption[title="${value}"]`);
       } catch (err) {
