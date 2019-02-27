@@ -17,14 +17,26 @@
  * under the License.
  */
 
-export { concatStreamProviders } from './concat_stream_providers';
-export { createIntersperseStream } from './intersperse_stream';
-export { createSplitStream } from './split_stream';
-export { createListStream } from './list_stream';
-export { createReduceStream } from './reduce_stream';
-export { createPromiseFromStreams } from './promise_from_streams';
-export { createConcatStream } from './concat_stream';
-export { createMapStream } from './map_stream';
-export { createReplaceStream } from './replace_stream';
-export { createFilterStream } from './filter_stream';
-export { createLimitStream } from './limit_stream';
+import { Transform } from 'stream';
+
+export function createFilterStream<T>(fn: (obj: T) => boolean) {
+  return new Transform({
+    objectMode: true,
+    async transform(obj, enc, done) {
+      const canPushDownStream = fn(obj);
+      if (canPushDownStream) {
+        this.push(obj);
+      }
+      done();
+    },
+    async writev(chunks, done) {
+      chunks
+        .map(({ chunk: record }) => record)
+        .filter(obj => fn(obj))
+        .forEach((obj: T) => {
+          this.push(obj);
+        });
+      done();
+    },
+  });
+}

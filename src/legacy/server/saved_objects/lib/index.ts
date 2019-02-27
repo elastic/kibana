@@ -17,14 +17,4 @@
  * under the License.
  */
 
-export { concatStreamProviders } from './concat_stream_providers';
-export { createIntersperseStream } from './intersperse_stream';
-export { createSplitStream } from './split_stream';
-export { createListStream } from './list_stream';
-export { createReduceStream } from './reduce_stream';
-export { createPromiseFromStreams } from './promise_from_streams';
-export { createConcatStream } from './concat_stream';
-export { createMapStream } from './map_stream';
-export { createReplaceStream } from './replace_stream';
-export { createFilterStream } from './filter_stream';
-export { createLimitStream } from './limit_stream';
+export { importSavedObjects } from './import_saved_objects';

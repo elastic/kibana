@@ -17,14 +17,18 @@
  * under the License.
  */
 
-export { concatStreamProviders } from './concat_stream_providers';
-export { createIntersperseStream } from './intersperse_stream';
-export { createSplitStream } from './split_stream';
-export { createListStream } from './list_stream';
-export { createReduceStream } from './reduce_stream';
-export { createPromiseFromStreams } from './promise_from_streams';
-export { createConcatStream } from './concat_stream';
-export { createMapStream } from './map_stream';
-export { createReplaceStream } from './replace_stream';
-export { createFilterStream } from './filter_stream';
-export { createLimitStream } from './limit_stream';
+import { Transform } from 'stream';
+
+export function createLimitStream(limit: number) {
+  let counter = 0;
+  return new Transform({
+    objectMode: true,
+    async transform(obj, enc, done) {
+      if (counter >= limit) {
+        return done(new Error(`Limit of ${limit} objects reached`));
+      }
+      counter++;
+      return done(undefined, obj);
+    },
+  });
+}
