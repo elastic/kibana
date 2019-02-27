@@ -61,15 +61,15 @@ interface Props {
 }
 
 interface ITableChange {
-  page: { index: number; size: number };
+  page: { index?: number; size?: number };
   sort: {
-    field: string;
-    direction: string;
+    field?: string;
+    direction?: string;
   };
 }
 
 interface State {
-  page: { index: number; size: number };
+  page: { index?: number; size?: number };
 }
 
 export class ErrorGroupList extends Component<Props, State> {
@@ -80,7 +80,7 @@ export class ErrorGroupList extends Component<Props, State> {
     }
   };
 
-  public onTableChange = ({ page, sort }: ITableChange) => {
+  public onTableChange = ({ page = {}, sort = {} }: ITableChange) => {
     this.setState({ page });
 
     const { location } = this.props;
