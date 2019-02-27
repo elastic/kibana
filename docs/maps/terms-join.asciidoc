@@ -1,15 +1,16 @@
 [[terms-join]]
 === Terms join
 
-Use *Terms joins* to augment vector sources with additional properties.
-You can then use these additional properties to dynamically style the vector source
+*Terms joins* combine the result of an Elasticsearch terms aggregation and a vector features based on a shared key.
+
+Use *Terms joins* to augment vector features with additional properties.
+You can then use these additional properties values to symbolize features
 and provide richer tooltip context.
 
 [role="screenshot"]
 image::maps/images/terms_join.png[]
 
-*Terms joins* join the result of an Elasticsearch terms aggregation and a vector source based on a shared key.
-Follow the example below to understand how *Terms joins* augments your vector source with addtional properties.
+Follow the example below to understand how *Terms joins* augments vector features with additional properties.
 This example will use Elastic Maps Service(EMS) World Countries as the vector source and
 the Kibana sample data set "Sample web logs" as the elasticsearch index.
 
@@ -61,12 +62,12 @@ Example documents from Sample web logs
 }
 --------------------------------------------------
 
-The join configuration joins the vector source "World Countries" to the elasticsearch index "kibana_sample_data_logs"
+The JOIN configuration links the vector source "World Countries" to the elasticsearch index "kibana_sample_data_logs"
 on the shared key *iso2 = geo.src*.
 [role="screenshot"]
 image::maps/images/terms_join_shared_key_config.png[]
 
-The metric configuration defines two metric aggregations,
+The METRICS configuration defines two metric aggregations;
 the count of all documents in the terms bucket and
 the average of the field "bytes" for all documents in the terms bucket.
 [role="screenshot"]
@@ -91,7 +92,7 @@ Example terms aggregation response
 }
 --------------------------------------------------
 
-Finally, the terms aggregation response is then joined with the vector source features.
+Finally, the terms aggregation response is then joined with the vector features.
 --------------------------------------------------
 {
   geometry: {
@@ -110,7 +111,7 @@ Finally, the terms aggregation response is then joined with the vector source fe
 --------------------------------------------------
 
 NOTE: This example is for demonstration purposes only and the actual implemention uses different key
-names to avoid naming collisions with vector source properties.
+names to avoid naming collisions with vector feauture properties.
 
 
 
