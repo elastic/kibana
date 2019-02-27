@@ -820,10 +820,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-8.0.0.tgz#36247a32f27b10ad3b3f886378d57aaaaa583064"
-  integrity sha512-XVhoHcDqnI60gct9PiqVwL4rpui7cdjYZf2/n+SAXBhqqYXQIZ5YX6HiVSkN84gcmWGODXbXCA27Oj35lOWW9A==
+"@elastic/eui@9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.0.0.tgz#439053ae7fceb41bbbfb87ed391114b1e74b6e5a"
+  integrity sha512-a3qs/NO1ikLY27bS2trTIvTPKEdILdiJRFOX4mTnqKDY7vQDRPtISbbySa3habmXGqUW1Y7WwIGilcQspHM94Q==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -2168,15 +2168,6 @@
   integrity sha512-IvrvZfWjITUH7q4WrM25ul9xlIeLM3Oh+hV2FL7xQQSroVf8mX3lMZaN7XEsw6Bdfp99Qm7I4GcD+ak5+wIEfA==
   dependencies:
     "@types/node" "*"
-
-"@types/react-datepicker@^1.1.5":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@types/react-datepicker/-/react-datepicker-1.1.5.tgz#2070d5ab86eacf69f5e9573b1d69af9982841c02"
-  integrity sha512-ngVoBPI60NIzqCl8PeJ292MjPkIvHNrRW0krjsW9IEC4TANaAeFjW+ql9bnmPQW8MdhxB6OGU5P0EcNceEL91g==
-  dependencies:
-    "@types/react" "*"
-    moment ">=2.14.0"
-    popper.js "^1.14.1"
 
 "@types/react-dom@^16.8.0":
   version "16.8.2"
