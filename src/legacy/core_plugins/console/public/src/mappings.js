@@ -313,13 +313,6 @@ function retrieveAutocompleteInfoFromServer() {
   ;
 }
 
-function autocompleteRetriever() {
-  retrieveAutocompleteInfoFromServer();
-  setTimeout(function () {
-    autocompleteRetriever();
-  }, 60000);
-}
-
 export default _.assign(mappingObj, {
   getFields: getFields,
   getTemplates: getTemplates,
@@ -329,5 +322,5 @@ export default _.assign(mappingObj, {
   loadAliases: loadAliases,
   expandAliases: expandAliases,
   clear: clear,
-  startRetrievingAutoCompleteInfo: autocompleteRetriever
+  startRetrievingAutoCompleteInfo: retrieveAutocompleteInfoFromServer
 });
