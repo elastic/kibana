@@ -117,22 +117,20 @@ export default function ({ getService }) {
                 message: 'Conflict',
                 statusCode: 409,
                 error: 'Conflict',
-                attributes: {
-                  objects: [
-                    {
-                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      type: 'index-pattern',
-                    },
-                    {
-                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                      type: 'visualization',
-                    },
-                    {
-                      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                      type: 'dashboard',
-                    },
-                  ],
-                },
+                objects: [
+                  {
+                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                    type: 'index-pattern',
+                  },
+                  {
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    type: 'visualization',
+                  },
+                  {
+                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                    type: 'dashboard',
+                  },
+                ],
               });
             });
         });
@@ -226,14 +224,12 @@ export default function ({ getService }) {
                 message: 'Conflict',
                 statusCode: 409,
                 error: 'Conflict',
-                attributes: {
-                  objects: [
-                    {
-                      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                      type: 'dashboard',
-                    },
-                  ],
-                },
+                objects: [
+                  {
+                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                    type: 'dashboard',
+                  },
+                ],
               });
             });
         });

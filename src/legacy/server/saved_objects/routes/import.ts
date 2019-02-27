@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { extname } from 'path';
@@ -95,12 +96,12 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
       }).default(),
     },
   },
-  async handler(request: ImportRequest) {
+  async handler(request: ImportRequest, h: Hapi.ResponseToolkit) {
     const { savedObjectsClient } = request.pre;
     const { filename } = request.payload.file.hapi;
     const fileExtension = extname(filename);
     if (fileExtension.toLowerCase() === '.ndjson') {
-      return await importSavedObjects({
+      const importResult = await importSavedObjects({
         savedObjectsClient,
         readStream: request.payload.file,
         objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
@@ -109,6 +110,28 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
         overwriteAll: request.payload.overwriteAll,
         replaceReferences: request.payload.replaceReferences,
       });
+      if (importResult.success === false) {
+        // Throw non 409 errors first
+        for (const error of importResult.errors) {
+          if (error.statusCode !== 409) {
+            return new Boom(error.message, { statusCode: error.statusCode });
+          }
+        }
+        // Throw 409s
+        return h
+          .response({
+            message: 'Conflict',
+            statusCode: 409,
+            error: 'Conflict',
+            objects: importResult.errors
+              .filter(err => err.statusCode === 409)
+              .map(err => ({ id: err.id, type: err.type })),
+          })
+          .code(409);
+      }
+      return { success: importResult.success };
+    } else {
+      return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
   },
 });

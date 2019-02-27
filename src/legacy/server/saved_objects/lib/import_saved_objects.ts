@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Boom from 'boom';
 import { Readable } from 'stream';
 import {
   createConcatStream,
@@ -28,6 +27,13 @@ import {
   createSplitStream,
 } from '../../../utils/streams';
 import { SavedObject, SavedObjectsClient } from '../service';
+
+interface Errors {
+  message: string;
+  statusCode: number;
+  id: string;
+  type: string;
+}
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
@@ -47,6 +53,20 @@ interface ImportSavedObjectsOptions {
     type: string;
     id: string;
   }>;
+}
+
+function extractErrors(savedObjects: SavedObject[]) {
+  const errors: Errors[] = [];
+  for (const savedObject of savedObjects) {
+    if (savedObject.error) {
+      errors.push({
+        ...savedObject.error,
+        id: savedObject.id,
+        type: savedObject.type,
+      });
+    }
+  }
+  return errors;
 }
 
 async function collectSavedObjects(
@@ -106,6 +126,7 @@ export async function importSavedObjects({
   savedObjectsClient,
   replaceReferences,
 }: ImportSavedObjectsOptions) {
+  const errors: Errors[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
   // Replace references
@@ -131,22 +152,20 @@ export async function importSavedObjects({
 
   // Overwrite objects
   if (objectsToOverwrite.length) {
-    await savedObjectsClient.bulkCreate(objectsToOverwrite, { overwrite: true });
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
+      overwrite: true,
+    });
+    errors.push(...extractErrors(bulkCreateResult.saved_objects));
   }
 
   // Create other objects, detect collisions
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
-    const failedObjects = bulkCreateResult.saved_objects.filter(obj => !!obj.error);
-    if (failedObjects.length) {
-      const err = Boom.conflict();
-      // Boom's method to add data to the error
-      err.output.payload.attributes = {
-        objects: failedObjects.map(obj => ({ id: obj.id, type: obj.type })),
-      };
-      throw err;
-    }
+    errors.push(...extractErrors(bulkCreateResult.saved_objects));
   }
 
-  return { success: true };
+  return {
+    errors,
+    success: errors.length === 0,
+  };
 }
