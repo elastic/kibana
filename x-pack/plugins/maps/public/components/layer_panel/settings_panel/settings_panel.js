@@ -18,6 +18,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { ValidatedRange } from '../../../shared/components/validated_range';
+import { i18n } from '@kbn/i18n';
 
 export function SettingsPanel(props) {
 
@@ -53,7 +54,11 @@ export function SettingsPanel(props) {
       <Fragment>
         <EuiCallOut
           color="warning"
-          title="Unable to load layer"
+          title={
+            i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoad', {
+              defaultMessage: 'Unable to load layer'
+            })
+          }
         >
           <p data-test-subj="layerErrorMessage">
             {props.layer.getErrors()}
@@ -67,7 +72,11 @@ export function SettingsPanel(props) {
   const renderZoomSliders = () => {
     return (
       <EuiFormRow
-        helpText="Display layer when map is in zoom range."
+        helpText={
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.zoomFeedback', {
+            defaultMessage: 'Display layer when map is in zoom range.'
+          })
+        }
       >
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -106,7 +115,11 @@ export function SettingsPanel(props) {
   const renderLabel = () => {
     return (
       <EuiFormRow
-        label="Layer name"
+        label={
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerName', {
+            defaultMessage: 'Layer name'
+          })
+        }
       >
         <EuiFieldText
           value={props.label}
@@ -119,7 +132,11 @@ export function SettingsPanel(props) {
   const renderAlphaSlider = () => {
     return (
       <EuiFormRow
-        label="Layer transparency"
+        label={
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparency', {
+            defaultMessage: 'Layer transparency'
+          })
+        }
       >
         <div className="mapAlphaRange">
           <ValidatedRange
