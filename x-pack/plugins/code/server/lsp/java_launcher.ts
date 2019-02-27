@@ -5,7 +5,7 @@
  */
 
 import { execFile, spawn } from 'child_process';
-import { chmodSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
@@ -50,13 +50,13 @@ export class JavaLauncher implements ILanguageServerLauncher {
         }
       });
     } else {
-      let child = this.spawnJava(installationPath, port, log);
-      proxy.onDisconnected(() => {
+      let child = await this.spawnJava(installationPath, port, log);
+      proxy.onDisconnected(async () => {
         if (!proxy.isClosed) {
           child.kill();
           proxy.awaitServerConnection();
           log.warn('language server disconnected, restarting it');
-          child = this.spawnJava(installationPath, port, log);
+          child = await this.spawnJava(installationPath, port, log);
         } else {
           child.kill();
         }
@@ -75,7 +75,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     });
   }
 
-  private spawnJava(installationPath: string, port: number, log: Logger) {
+  private async spawnJava(installationPath: string, port: number, log: Logger) {
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
       cwd: installationPath,
     });
@@ -115,7 +115,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
 
     if (this.getSystemJavaHome()) {
       javaHomePath = this.getSystemJavaHome();
-      if (!this.checkJavaVersion(javaHomePath)) {
+      if (!(await this.checkJavaVersion(javaHomePath))) {
         javaHomePath = '';
       }
     }
@@ -127,8 +127,6 @@ export class JavaLauncher implements ILanguageServerLauncher {
       'bin',
       process.platform === 'win32' ? 'java.exe' : 'java'
     );
-
-    chmodSync(path.dirname(javaPath), '755');
 
     const p = spawn(
       javaPath,
@@ -166,9 +164,9 @@ export class JavaLauncher implements ILanguageServerLauncher {
     this.isRunning = true;
     p.on('exit', () => (this.isRunning = false));
     log.info(
-      `Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${p.pid}, JAVA_HOME:${
-        process.env.JAVA_HOME
-      }`
+      `Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${
+        p.pid
+      }, JAVA_HOME:${javaHomePath}`
     );
     return p;
   }
@@ -189,21 +187,22 @@ export class JavaLauncher implements ILanguageServerLauncher {
     return '';
   }
 
-  private checkJavaVersion(javaHome: string): boolean {
-    execFile(
-      path.resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java'),
-      ['-version'],
-      {},
-      (error, stdout, stderr) => {
-        const javaVersion = this.parseMajorVersion(stderr);
-        if (javaVersion < 8) {
-          return false;
-        } else {
-          return true;
+  private checkJavaVersion(javaHome: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      execFile(
+        path.resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java'),
+        ['-version'],
+        {},
+        (error, stdout, stderr) => {
+          const javaVersion = this.parseMajorVersion(stderr);
+          if (javaVersion < 8){
+            resolve(false);
+          } else{
+            resolve(true);
+          }
         }
-      }
-    );
-    return false;
+      );
+    });
   }
 
   private parseMajorVersion(content: string): number {
