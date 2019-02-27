@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Server } from 'hapi';
 import { resolve } from 'path';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
@@ -38,7 +39,7 @@ export function apm(kibana: any) {
       home: ['plugins/apm/register_feature'],
 
       // TODO: get proper types
-      injectDefaultVars(server: any) {
+      injectDefaultVars(server: Server) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
