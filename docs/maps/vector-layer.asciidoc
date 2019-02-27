@@ -1,4 +1,7 @@
 [[vector-layer]]
 == Vector layer
 
-Vector layers are awesome
+Display points, lines, and polygons.
+
+[role="screenshot"]
+image::maps/images/vector_layer.png[]

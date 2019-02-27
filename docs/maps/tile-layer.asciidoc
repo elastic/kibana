@@ -1,4 +1,7 @@
 [[tile-layer]]
 == Tile layer
 
-Tile layers are awesome
+Display tiles served from a tile server.
+
+[role="screenshot"]
+image::maps/images/tile_layer.png[]

@@ -13,5 +13,6 @@ image::maps/images/sample_data_ecommerce.png[]
 
 --
 
-include::vector-layer.asciidoc[]
+include::heatmap-layer.asciidoc[]
 include::tile-layer.asciidoc[]
+include::vector-layer.asciidoc[]

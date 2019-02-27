@@ -1,0 +1,7 @@
+[[heatmap-layer]]
+== Heatmap layer
+
+Cluster point data to show locations with higher densities.
+
+[role="screenshot"]
+image::maps/images/heatmap_layer.png[]
