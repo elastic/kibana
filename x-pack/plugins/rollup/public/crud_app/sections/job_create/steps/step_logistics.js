@@ -456,6 +456,7 @@ export class StepLogisticsUi extends Component {
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
                 min={0}
+                data-test-subj="rollupPageSize"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
