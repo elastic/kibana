@@ -508,6 +508,7 @@ export class StepLogisticsUi extends Component {
                 onChange={e => onFieldsChange({ rollupDelay: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
                 fullWidth
+                data-test-subj="rollupDelay"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
