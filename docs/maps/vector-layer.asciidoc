@@ -15,7 +15,7 @@ The index must contain at least one field mapped as {ref}/geo-point.html[geo_poi
 
 *Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
 Set *Show as* to *grid rectangles* or *points*.
-The index must contain at least one field mapped as *geo_point*.
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
 *Vector shapes*:: Vector shapes of administrative boundaries from Elastic Maps Service.
 
