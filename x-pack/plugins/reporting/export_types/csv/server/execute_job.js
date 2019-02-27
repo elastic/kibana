@@ -90,7 +90,7 @@ function executeJobFn(server) {
       })(),
     ]);
 
-    const { content, maxSizeReached, size } = await generateCsv({
+    const generateCsvOpts = {
       searchRequest,
       fields,
       metaFields,
@@ -103,7 +103,9 @@ function executeJobFn(server) {
         maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
         scroll: config.get('xpack.reporting.csv.scroll'),
       },
-    });
+    };
+
+    const { content, maxSizeReached, size } = await generateCsv(generateCsvOpts);
 
     return {
       content_type: 'text/csv',
