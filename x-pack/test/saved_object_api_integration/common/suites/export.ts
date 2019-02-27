@@ -50,8 +50,8 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: '"value" must contain at least one of [type, objects]',
-      validation: { source: 'query', keys: ['value'] },
+      message: '"value" must be an object',
+      validation: { source: 'payload', keys: ['value'] },
     });
   };
 
@@ -90,7 +90,10 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         tests.spaceAwareType.description
       } when querying by type`, async () => {
         await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export?type=visualization`)
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+          .send({
+            type: 'visualization',
+          })
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response);
@@ -100,14 +103,14 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         tests.spaceAwareType.description
       } when querying by objects`, async () => {
         await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-          .query({
-            objects: JSON.stringify([
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+          .send({
+            objects: [
               {
                 type: 'visualization',
                 id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
               },
-            ]),
+            ],
           })
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
@@ -119,7 +122,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           tests.noTypeOrObjects.description
         }`, async () => {
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
             .auth(user.username, user.password)
             .expect(tests.noTypeOrObjects.statusCode)
             .then(tests.noTypeOrObjects.response);

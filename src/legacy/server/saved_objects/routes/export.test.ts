@@ -21,7 +21,7 @@ import Hapi from 'hapi';
 import { MockServer } from './_mock_server';
 import { createExportRoute } from './export';
 
-describe('GET /api/saved_objects/_export', () => {
+describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
@@ -60,8 +60,11 @@ describe('GET /api/saved_objects/_export', () => {
 
   test('formats successful response', async () => {
     const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_export?type=index-pattern',
+      method: 'POST',
+      url: '/api/saved_objects/_export',
+      payload: {
+        type: 'index-pattern',
+      },
     };
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 1,

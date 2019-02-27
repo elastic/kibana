@@ -9,13 +9,15 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 
-`GET /api/saved_objects/_export`
+`POST /api/saved_objects/_export`
 
-==== Query Parameters
+==== Request Body
 `type` (optional)::
   (array|string) The saved object type(s) that the export should be limited to
 `objects` (optional)::
   (array) A list of objects to export
+
+Note: At least `type` or `objects` must be passed in.
 
 ==== Response body
 
@@ -27,7 +29,10 @@ The following example attempts to export index patterns
 
 [source,js]
 --------------------------------------------------
-GET api/saved_objects/_export?type=index-patterns
+POST api/saved_objects/_export
+{
+  "type": "index-patterns"
+}
 --------------------------------------------------
 // KIBANA
 

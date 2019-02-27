@@ -31,7 +31,7 @@ interface ExportRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
-  query: {
+  payload: {
     type?: string[];
     objects?: Array<{
       type: string;
@@ -42,11 +42,11 @@ interface ExportRequest extends Hapi.Request {
 
 export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
   path: '/api/saved_objects/_export',
-  method: 'GET',
+  method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
-      query: Joi.object()
+      payload: Joi.object()
         .keys({
           type: Joi.array()
             .items(Joi.string().valid(ALLOWED_TYPES))
@@ -69,8 +69,8 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
       const { savedObjectsClient } = request.pre;
       const docsToExport = await getSortedObjectsForExport({
         savedObjectsClient,
-        types: request.query.type,
-        objects: request.query.objects,
+        types: request.payload.type,
+        objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
       });
       return h

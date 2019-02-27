@@ -32,8 +32,8 @@ export default function ({ getService }) {
 
         it('should return objects in dependency order', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
+            .post('/api/saved_objects/_export')
+            .send({
               type: ['index-pattern', 'search', 'visualization', 'dashboard'],
             })
             .expect(200)
@@ -51,8 +51,8 @@ export default function ({ getService }) {
 
         it('should validate types', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
+            .post('/api/saved_objects/_export')
+            .send({
               type: ['foo'],
             })
             .expect(400)
@@ -61,22 +61,22 @@ export default function ({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 // eslint-disable-next-line max-len
-                message: 'child "type" fails because [single value of "type" fails because ["type" must be one of [index-pattern, search, visualization, dashboard]]]',
-                validation: { source: 'query', keys: [ 'type' ] },
+                message: 'child "type" fails because ["type" at position 0 fails because ["0" must be one of [index-pattern, search, visualization, dashboard]]]',
+                validation: { source: 'payload', keys: [ 'type.0' ] },
               });
             });
         });
 
         it('should validate types in objects', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
-              objects: JSON.stringify([
+            .post('/api/saved_objects/_export')
+            .send({
+              objects: [
                 {
                   type: 'foo',
                   id: '1',
                 },
-              ]),
+              ],
             })
             .expect(400)
             .then((resp) => {
@@ -85,7 +85,7 @@ export default function ({ getService }) {
                 error: 'Bad Request',
                 // eslint-disable-next-line max-len
                 message: 'child "objects" fails because ["objects" at position 0 fails because [child "type" fails because ["type" must be one of [index-pattern, search, visualization, dashboard]]]]',
-                validation: { source: 'query', keys: [ 'objects.0.type' ] },
+                validation: { source: 'payload', keys: [ 'objects.0.type' ] },
               });
             });
         });
@@ -97,22 +97,22 @@ export default function ({ getService }) {
 
         it('should return 400 when exporting without type or objects passed in', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
+            .post('/api/saved_objects/_export')
             .expect(400)
             .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"value" must contain at least one of [type, objects]',
-                validation: { source: 'query', keys: [ 'value' ] },
+                message: '"value" must be an object',
+                validation: { source: 'payload', keys: [ 'value' ] },
               });
             });
         });
 
         it('should return 200 when exporting by single type', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
+            .post('/api/saved_objects/_export')
+            .send({
               type: 'dashboard',
             })
             .expect(200)
@@ -164,8 +164,8 @@ export default function ({ getService }) {
 
         it('should return 200 when exporting by array type', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
+            .post('/api/saved_objects/_export')
+            .send({
               type: ['dashboard'],
             })
             .expect(200)
@@ -217,14 +217,14 @@ export default function ({ getService }) {
 
         it('should return 200 when exporting by objects', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
-              objects: JSON.stringify([
+            .post('/api/saved_objects/_export')
+            .send({
+              objects: [
                 {
                   type: 'dashboard',
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                 },
-              ]),
+              ],
             })
             .expect(200)
             .then((resp) => {
@@ -275,15 +275,15 @@ export default function ({ getService }) {
 
         it('should return 400 when exporting by type and objects', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
+            .post('/api/saved_objects/_export')
+            .send({
               type: 'dashboard',
-              objects: JSON.stringify([
+              objects: [
                 {
                   type: 'dashboard',
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                 },
-              ]),
+              ],
             })
             .expect(400)
             .then((resp) => {
@@ -291,7 +291,7 @@ export default function ({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: '"value" contains a conflict between exclusive peers [type, objects]',
-                validation: { source: 'query', keys: [ 'value' ] },
+                validation: { source: 'payload', keys: [ 'value' ] },
               });
             });
         });
@@ -322,8 +322,8 @@ export default function ({ getService }) {
 
         it('should return 400 when exporting more than 10,000', async () => {
           await supertest
-            .get('/api/saved_objects/_export')
-            .query({
+            .post('/api/saved_objects/_export')
+            .send({
               type: ['dashboard', 'visualization', 'search', 'index-pattern'],
             })
             .expect(400)
@@ -349,8 +349,8 @@ export default function ({ getService }) {
 
       it('should return empty response', async () => {
         await supertest
-          .get('/api/saved_objects/_export')
-          .query({
+          .post('/api/saved_objects/_export')
+          .send({
             type: ['index-pattern', 'search', 'visualization', 'dashboard'],
           })
           .expect(200)
