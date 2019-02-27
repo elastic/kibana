@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import { FtrProviderContext } from '../../../types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // tslint:disable-next-line:no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {

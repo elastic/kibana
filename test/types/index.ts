@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './ftr_provider_contetxt';
 export * from './mocha_decorations';

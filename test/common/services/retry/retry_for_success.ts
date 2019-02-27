@@ -32,7 +32,7 @@ const defaultOnFailure = (methodName: string) => (lastError: Error) => {
  * Run a function and return either an error or result
  * @param {Function} block
  */
-async function runAttempt<T>(block: () => Promise<T>) {
+async function runAttempt<T>(block: () => Promise<T>): Promise<{ result: T } | { error: Error }> {
   try {
     return {
       result: await block(),
@@ -70,11 +70,11 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
     const attempt = await runAttempt(block);
 
-    if (!attempt.error && accept(attempt.result)) {
+    if ('result' in attempt && accept(attempt.result)) {
       return attempt.result;
     }
 
-    if (attempt.error) {
+    if ('error' in attempt) {
       if (lastError && lastError.message === attempt.error.message) {
         log.debug(`--- ${methodName} failed again with the same message...`);
       } else {

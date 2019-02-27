@@ -54,7 +54,7 @@ const appUrlPartsSchema = () =>
     .default();
 
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault = (locals: any, options: any) => resolve(dirname(options.context.path), path);
+  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
   makeDefault.description = `<config.js directory>/${path}`;
   return makeDefault;
 };
