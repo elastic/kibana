@@ -50,7 +50,7 @@ export function savedObjectsMixin(kbnServer, server) {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
       method(req) {
-        return req.getSavedObjectsClient({ includeHiddenTypes: ['secretType'] });
+        return req.getSavedObjectsClient();
       },
     },
   };

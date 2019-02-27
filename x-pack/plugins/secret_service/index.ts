@@ -20,7 +20,7 @@ export const secretService = (kibana: any) => {
     uiExports: {
       mappings,
       savedObjectSchemas: {
-        secretType: {
+        secret: {
           hidden: true,
         },
       },
@@ -40,27 +40,22 @@ export const secretService = (kibana: any) => {
       const filePath = join(server.config().get('path.data'), 'kibana.keystore');
       const keystore: any = new server.Keystore(filePath);
 
-      if (!keystore.exists()) {
-        keystore.reset();
-        keystore.save();
-        warn(`Keystore missing, new keystore created ${keystore.path}`);
-      }
-
       if (!keystore.has(configKey)) {
         keystore.add(configKey, crypto.randomBytes(128).toString('hex'));
+        if (!keystore.exists()) {
+          warn(`Keystore missing, new keystore created ${keystore.path}`);
+        }
         warn('Missing key - one has been auto-generated for use.');
         keystore.save();
       }
 
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const so = server.savedObjects.getSavedObjectsRepository(callWithInternalUser, [
-        'secretType',
-      ]);
+      const so = server.savedObjects.getSavedObjectsRepository(callWithInternalUser, ['secret']);
 
       const auditor = new AuditLogger(server, this.id);
       server.expose(
         'secretService',
-        new SecretService(so, 'secretType', keystore.get(configKey), auditor)
+        new SecretService(so, 'secret', keystore.get(configKey), auditor)
       );
     },
   });
