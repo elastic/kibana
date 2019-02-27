@@ -7,7 +7,7 @@
 import { notImplemented } from 'boom';
 import { Request } from 'hapi';
 // @ts-ignore
-import { createTaggedLogger } from '../../../../server/lib/create_tagged_logger';
+import { createTaggedLogger } from '../../../../server/lib';
 import { KbnServer, Logger } from '../../../../types';
 import { SearchPanel } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';

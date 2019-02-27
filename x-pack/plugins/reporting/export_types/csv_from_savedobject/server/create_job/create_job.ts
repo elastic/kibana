@@ -8,9 +8,7 @@ import { notFound } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
-import { cryptoFactory, oncePerServer } from '../../../../server/lib';
-// @ts-ignore
-import { createTaggedLogger } from '../../../../server/lib/create_tagged_logger';
+import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../../server/lib';
 import { JobDocPayload, JobParams, KbnServer, Logger } from '../../../../types';
 import {
   SavedObject,

@@ -61,7 +61,6 @@ function executeJobFn(server: KbnServer) {
     logger.debug(`Execute job using previously-generated [${visType}] csv`);
 
     // if job was created with "immediate", just return the data in the job doc
-    // FIXME how would this work if they never had privilege to create a job
     return {
       content_type: CONTENT_TYPE_CSV,
       content: objects,

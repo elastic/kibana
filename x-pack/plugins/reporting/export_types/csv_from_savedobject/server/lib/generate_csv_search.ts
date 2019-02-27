@@ -34,7 +34,7 @@ interface GenerateCsvParams {
   formatsMap: FormatsMap;
   metaFields: string[]; // FIXME not sure what this is for
   conflictedTypesFields: string[]; // FIXME not sure what this is for
-  cancellationToken: any; // FIXME not sure what this is for
+  cancellationToken: any; // FIXME not sure how to do anything with this
   settings: {
     separator: string;
     quoteValues: boolean;

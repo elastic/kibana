@@ -21,9 +21,12 @@ const BASE_GENERATE = `${API_BASE_URL_V1}/generate`;
  * - "immediate" flag: whether to execute the job up front and make immediate download available
  * - saved object type and ID
  * - time range and time zone
- * - application state: generally, the filters and query bar state
+ * - application state:
+ *     - filters
+ *     - query bar
+ *     - local (transient) changes the user made to the saved object
  */
-export function registerGenerateCsvFromVis(
+export function registerGenerateCsvFromSavedObject(
   server: KbnServer,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
@@ -46,7 +49,7 @@ export function registerGenerateCsvFromVis(
       }),
     },
   };
-  const getResult = async (
+  const getExportHandlerResult = async (
     request: Request,
     h: ResponseToolkit,
     options: { isImmediate: boolean }
@@ -63,6 +66,11 @@ export function registerGenerateCsvFromVis(
     } catch (err) {
       throw handleError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
     }
+
+    if (get(result, 'source.job') == null) {
+      throw new Error(`The Export handler is expected to return a result with job info! ${result}`);
+    }
+
     return result;
   };
 
@@ -73,17 +81,11 @@ export function registerGenerateCsvFromVis(
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
       const getDocumentPayload = getDocumentPayloadFactory(server);
-      const result: HandlerResult = await getResult(request, h, { isImmediate: true });
+      const result: HandlerResult = await getExportHandlerResult(request, h, { isImmediate: true });
 
-      // FIXME this should still work if authentication does not grant job
-      // creation privilege!
-
+      // Emulate a document of a completed job and stick the generated contents into it
+      // FIXME this is REALLY ugly
       const docSource: JobDoc = get(result, 'source.job');
-      if (docSource == null) {
-        throw new Error(''); // FIXME
-      }
-
-      // FIXME this is a bit ugly
       const output: JobDocOutput = getDocumentPayload({
         _source: {
           ...docSource,
@@ -122,7 +124,7 @@ export function registerGenerateCsvFromVis(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      return getResult(request, h, { isImmediate: false });
+      return getExportHandlerResult(request, h, { isImmediate: false });
     },
   });
 }
