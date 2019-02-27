@@ -40,7 +40,8 @@ interface AsyncInstance<T> {
 type MaybeAsyncInstance<T> = T extends Promise<infer X> ? AsyncInstance<X> & X : T;
 
 /**
- * Convert a map of providers to
+ * Convert a map of providers to a map of the instance types they provide, also converting
+ * promise types into the async instances that other providers will receive.
  */
 type ProvidedTypeMap<T extends ProviderMap> = {
   [K in keyof T]: MaybeAsyncInstance<ReturnType<T[K]>>
