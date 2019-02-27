@@ -50,51 +50,6 @@ export interface TimeRangeParams {
   max: Date;
 }
 
-export interface TsvbPanel {
-  filter: string;
-  id: string;
-  index_pattern: string;
-  pivot_id: string;
-  pivot_label: string;
-  pivot_rows: number;
-  interval: string;
-  series: Array<{
-    formatter: string;
-    id: string;
-    metrics: Array<{
-      field: string;
-      id: string;
-      type: string;
-    }>;
-  }>;
-  type: string; // e.g 'table' for TSVB Table,
-  timerange: TimeRangeParams; // throw-on
-}
-
-interface TsvbAggregationCell {
-  label: string;
-  last: number;
-  slope?: number;
-  data?: [number, number]; // timestamp & metric
-}
-
-interface TsvbAggregationRow {
-  key: string;
-  series: TsvbAggregationCell[];
-}
-
-export interface TsvbTableData {
-  type: string;
-  series: TsvbAggregationRow[];
-}
-
-export interface VisState {
-  aggs: any[]; // unused?
-  params?: TsvbPanel;
-  title: string;
-  type: string; // e.g 'metrics' for TSVB
-}
-
 export interface IndexPatternSavedObject {
   title: string;
   timeFieldName: string;

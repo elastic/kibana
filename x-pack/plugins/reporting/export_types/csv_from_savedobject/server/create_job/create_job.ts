@@ -18,17 +18,14 @@ import {
   SavedSearchObjectAttributes,
   SearchPanel,
   TimeRangeParams,
-  TsvbPanel,
-  VisObjectAttributes,
 } from '../../types';
 import { createGenerateCsv } from '../lib/generate_csv';
 import { createJobSearch } from './create_job_search';
-import { createJobVis } from './create_job_vis';
 
 interface VisData {
   title: string;
   visType: string;
-  panel: TsvbPanel | SearchPanel;
+  panel: SearchPanel;
 }
 
 function createJobFn(server: KbnServer) {
@@ -53,20 +50,14 @@ function createJobFn(server: KbnServer) {
       .then(() => client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
         const { attributes } = savedObject;
-        const { visState: visStateJSON } = attributes as VisObjectAttributes;
         const { kibanaSavedObjectMeta } = attributes as SavedSearchObjectAttributes;
 
         let timerange: TimeRangeParams;
         // @ts-ignore
         timerange = req.payload.timerange;
 
-        if (!visStateJSON && !kibanaSavedObjectMeta) {
+        if (!kibanaSavedObjectMeta) {
           throw new Error('Could not parse saved object data!');
-        }
-
-        if (visStateJSON) {
-          // visualization type
-          return await createJobVis(visStateJSON, timerange);
         }
 
         // saved search type
