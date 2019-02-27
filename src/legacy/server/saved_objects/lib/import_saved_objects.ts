@@ -73,7 +73,7 @@ async function collectSavedObjects(
   readStream: Readable,
   objectLimit: number
 ): Promise<SavedObject[]> {
-  return await createPromiseFromStreams([
+  return (await createPromiseFromStreams([
     readStream,
     createSplitStream('\n'),
     createMapStream((str: string) => {
@@ -84,7 +84,7 @@ async function collectSavedObjects(
     createFilterStream<SavedObject>(obj => !!obj),
     createLimitStream(objectLimit),
     createConcatStream([]),
-  ]);
+  ])) as SavedObject[];
 }
 
 function splitOverwrites(
