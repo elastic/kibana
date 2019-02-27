@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
 import { DefaultServiceProviders } from '../../../src/functional_test_runner/types';
 
 interface AsyncInstance<T> {
