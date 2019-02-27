@@ -55,7 +55,8 @@ export interface GenericFtrProviderContext<
    * Determine if a service is avaliable
    * @param serviceName
    */
-  hasService(serviceName: string): boolean;
+  hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
+  hasService(serviceName: string): serviceName is keyof ServiceMap;
 
   /**
    * Get the instance of a service, if the service is loaded async and the service needs to be used
