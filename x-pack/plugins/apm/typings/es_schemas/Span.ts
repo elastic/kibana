@@ -5,6 +5,7 @@
  */
 
 import { APMDoc } from './APMDoc';
+import { Service } from './fields/Service';
 import { IStackframe } from './fields/Stackframe';
 
 interface Processor {
@@ -14,7 +15,7 @@ interface Processor {
 
 export interface Span extends APMDoc {
   processor: Processor;
-  service: { name: string };
+  service: Service;
   span: {
     action: string;
     duration: { us: number };
