@@ -143,7 +143,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter search_fields', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&search_fields=title'
+      url: '/api/saved_objects/_find?type=foo&search_fields=title',
     };
 
     await server.inject(request);
@@ -222,7 +222,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter type as an array', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern&type=visualization'
+      url: '/api/saved_objects/_find?type=index-pattern&type=visualization',
     };
 
     await server.inject(request);
