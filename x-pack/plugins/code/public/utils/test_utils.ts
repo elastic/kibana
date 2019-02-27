@@ -5,7 +5,7 @@
  */
 
 import { Action, History, Location } from 'history';
-import { match } from 'react-router';
+import { match } from 'react-router-dom';
 
 interface LocationParam {
   pathname?: string;

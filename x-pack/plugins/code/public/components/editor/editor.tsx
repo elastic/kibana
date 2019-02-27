@@ -8,7 +8,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { editor as editorInterfaces } from 'monaco-editor';
 import React from 'react';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver-protocol';
 import { GitBlame } from '../../../common/git_blame';
 import { closeReferences, FetchFileResponse, findReferences, hoverResult } from '../../actions';
@@ -200,6 +200,5 @@ export const Editor = withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
-    // @ts-ignore
   )(EditorComponent)
 );

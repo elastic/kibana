@@ -12,7 +12,7 @@ import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 
