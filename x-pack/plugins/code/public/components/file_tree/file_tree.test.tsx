@@ -43,6 +43,7 @@ test('render correctly', () => {
         match={match}
         location={location}
         closeTreePath={mockFunction}
+        openTreePath={mockFunction}
         fetchRepoTree={mockFunction}
       />
     )

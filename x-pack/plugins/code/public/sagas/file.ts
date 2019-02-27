@@ -35,37 +35,18 @@ import {
   fetchTreeCommitsSuccess,
   gotoRepo,
   Match,
-  openTreePath,
   setNotFound,
 } from '../actions';
 import { RootState } from '../reducers';
-import { requestedPathsSelector, treeCommitsSelector } from '../selectors';
+import { treeCommitsSelector } from '../selectors';
 import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
     const { uri, revision, path, parents, isDir } = action.payload!;
     if (path) {
-      const requestedPaths: string[] = yield select(requestedPathsSelector);
-      const isPathNotRequested = (p: string) => !requestedPaths.includes(p);
-      const shouldFetch = isDir
-        ? isPathNotRequested(path)
-        : requestedPaths.length === 0 ||
-          isPathNotRequested(
-            path
-              .split('/')
-              .slice(0, -1)
-              .join('/')
-          );
-      if (shouldFetch) {
+      if (isDir) {
         yield call(fetchPath, { uri, revision, path, parents, isDir });
-      }
-      const pathSegments = path.split('/');
-      let currentPath = '';
-      // open all directories on the path
-      for (const p of pathSegments) {
-        currentPath = currentPath ? `${currentPath}/${p}` : p;
-        yield put(openTreePath(currentPath));
       }
     } else {
       yield call(fetchPath, action.payload!);

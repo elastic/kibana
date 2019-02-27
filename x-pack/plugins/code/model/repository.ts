@@ -50,6 +50,14 @@ export interface FileTree {
   repoUri?: string;
 }
 
+export function sortFileTree(a: FileTree, b: FileTree) {
+  if (a.type !== b.type) {
+    return b.type - a.type;
+  } else {
+    return a.name.localeCompare(b.name);
+  }
+}
+
 export enum FileTreeItemType {
   File,
   Directory,

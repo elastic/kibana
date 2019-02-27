@@ -53,8 +53,6 @@ export const hasMoreCommitsSelector = (state: RootState) => {
   return !state.file.commitsFullyLoaded[path];
 };
 
-export const requestedPathsSelector = (state: RootState) => state.file.requestedPaths;
-
 function find(tree: FileTree, paths: string[]): FileTree | null {
   if (paths.length === 0) {
     return tree;
