@@ -165,7 +165,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
-      has('lastFailure.timestamp', node) ? (
+      has('lastFailure.timestamp', node) && node.lastFailure!.timestamp != null ? (
         <EuiToolTip position="bottom" content={node.lastFailure!.timestamp!}>
           <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
         </EuiToolTip>

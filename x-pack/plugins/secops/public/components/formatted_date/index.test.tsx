@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import * as React from 'react';
 
 import { KibanaConfigContext, PreferenceFormattedDate } from '.';
-import { AppFrameworkAdapter } from '../../lib/lib';
+import { AppTestingFrameworkAdapter } from '../../lib/adapters/framework/testing_framework_adapter';
 import { mockFrameworks } from '../../mock';
 
 describe('PreferenceFormattedDate', () => {
@@ -17,8 +17,14 @@ describe('PreferenceFormattedDate', () => {
     const isoDateString = '2019-02-25T22:27:05.000Z';
     const configFormattedDateString = (
       dateString: string,
-      config: Partial<AppFrameworkAdapter>
-    ): string => moment.tz(dateString, config.dateFormatTz!).format(config.dateFormat);
+      config: Partial<AppTestingFrameworkAdapter>
+    ): string =>
+      moment
+        .tz(
+          dateString,
+          config.dateFormatTz! === 'Browser' ? config.timezone! : config.dateFormatTz!
+        )
+        .format(config.dateFormat);
 
     test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {
       const wrapper = mount(
@@ -37,6 +43,17 @@ describe('PreferenceFormattedDate', () => {
       );
       expect(wrapper.text()).toEqual(
         configFormattedDateString(isoDateString, mockFrameworks.default_UTC)
+      );
+    });
+
+    test('it renders the correct tz when the default browser configuration exists', () => {
+      const wrapper = mount(
+        <KibanaConfigContext.Provider value={mockFrameworks.default_browser}>
+          <PreferenceFormattedDate value={isoDateString} />
+        </KibanaConfigContext.Provider>
+      );
+      expect(wrapper.text()).toEqual(
+        configFormattedDateString(isoDateString, mockFrameworks.default_browser)
       );
     });
 

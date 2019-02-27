@@ -9,6 +9,7 @@ import { AppFrameworkAdapter } from '../../lib';
 export class AppTestingFrameworkAdapter implements AppFrameworkAdapter {
   public appState?: object;
   public dateFormat?: string;
+  public dateFormatTz?: string;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
   public timezone?: string;
