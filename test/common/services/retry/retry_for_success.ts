@@ -17,15 +17,14 @@
  * under the License.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { inspect } from 'util';
 
-const delay = ms => new Promise(resolve => (
-  setTimeout(resolve, ms)
-));
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName) => (lastError) => {
+const defaultOnFailure = (methodName: string) => (lastError: Error) => {
   throw new Error(`${methodName} timeout: ${lastError.stack || lastError.message}`);
 };
 
@@ -33,51 +32,56 @@ const defaultOnFailure = (methodName) => (lastError) => {
  * Run a function and return either an error or result
  * @param {Function} block
  */
-async function runAttempt(block) {
+async function runAttempt<T>(block: () => Promise<T>) {
   try {
     return {
-      result: await block()
+      result: await block(),
     };
   } catch (error) {
     return {
       // we rely on error being truthy and throwing falsy values is *allowed*
       // so we cast falsy values to errors
-      error: error || new Error(`${inspect(error)} thrown`),
+      error: error instanceof Error ? error : new Error(`${inspect(error)} thrown`),
     };
   }
 }
 
-export async function retryForSuccess(log, {
-  timeout,
-  methodName,
-  block,
-  onFailure = defaultOnFailure(methodName),
-  accept = returnTrue
-}) {
+interface Options<T> {
+  timeout: number;
+  methodName: string;
+  block: () => Promise<T>;
+  onFailure?: ReturnType<typeof defaultOnFailure>;
+  accept?: (v: T) => boolean;
+}
+
+export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
+  const { timeout, methodName, block, accept = returnTrue } = options;
+  const { onFailure = defaultOnFailure(methodName) } = options;
+
   const start = Date.now();
   const retryDelay = 502;
   let lastError;
 
   while (true) {
-    if (Date.now() - start > timeout) {
+    if (lastError && Date.now() - start > timeout) {
       await onFailure(lastError);
       throw new Error('expected onFailure() option to throw an error');
     }
 
-    const { result, error } = await runAttempt(block);
+    const attempt = await runAttempt(block);
 
-    if (!error && accept(result)) {
-      return result;
+    if (!attempt.error && accept(attempt.result)) {
+      return attempt.result;
     }
 
-    if (error) {
-      if (lastError && lastError.message === error.message) {
+    if (attempt.error) {
+      if (lastError && lastError.message === attempt.error.message) {
         log.debug(`--- ${methodName} failed again with the same message...`);
       } else {
-        log.debug(`--- ${methodName} error: ${error.message}`);
+        log.debug(`--- ${methodName} error: ${attempt.error.message}`);
       }
 
-      lastError = error;
+      lastError = attempt.error;
     }
 
     await delay(retryDelay);

@@ -17,56 +17,51 @@
  * under the License.
  */
 
-import { retryForTruthy } from './retry_for_truthy';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { retryForSuccess } from './retry_for_success';
+import { retryForTruthy } from './retry_for_truthy';
 
-export function RetryProvider({ getService }) {
+export function RetryProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
 
   return new class Retry {
-    async tryForTime(timeout, block) {
+    public async tryForTime<T>(timeout: number, block: () => Promise<T>) {
       return await retryForSuccess(log, {
         timeout,
         methodName: 'retry.tryForTime',
-        block
+        block,
       });
     }
 
-    async try(block) {
+    public async try<T>(block: () => Promise<T>) {
       return await retryForSuccess(log, {
         timeout: config.get('timeouts.try'),
         methodName: 'retry.try',
-        block
+        block,
       });
     }
 
-    async tryMethod(object, method, ...args) {
-      return await retryForSuccess(log, {
-        timeout: config.get('timeouts.try'),
-        methodName: 'retry.tryMethod',
-        block: async () => (
-          await object[method](...args)
-        )
-      });
-    }
-
-    async waitForWithTimeout(description, timeout, block) {
+    public async waitForWithTimeout(
+      description: string,
+      timeout: number,
+      block: () => Promise<boolean>
+    ) {
       await retryForTruthy(log, {
         timeout,
         methodName: 'retry.waitForWithTimeout',
         description,
-        block
+        block,
       });
     }
 
-    async waitFor(description, block) {
+    public async waitFor(description: string, block: () => Promise<boolean>) {
       await retryForTruthy(log, {
         timeout: config.get('timeouts.waitFor'),
         methodName: 'retry.waitFor',
         description,
-        block
+        block,
       });
     }
-  };
+  }();
 }
