@@ -35,6 +35,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         switch (scenario.username) {
           case 'superuser':
           case 'all':
+          case 'read':
           case 'dual_privileges_all':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);

@@ -132,6 +132,24 @@ const All: All = {
   },
 };
 
+interface Read extends User {
+  username: 'read';
+}
+const Read: Read = {
+  username: 'read',
+  fullName: 'read',
+  password: 'read-password',
+  role: {
+    name: 'read_role',
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 interface FooAll extends User {
   username: 'foo_all';
 }
@@ -179,6 +197,7 @@ export type UserScenarios =
   | DualPrivilegesAll
   | DualPrivilegesRead
   | All
+  | Read
   | FooAll
   | FooRead;
 export const UserScenarios: UserScenarios[] = [
@@ -188,6 +207,7 @@ export const UserScenarios: UserScenarios[] = [
   DualPrivilegesAll,
   DualPrivilegesRead,
   All,
+  Read,
   FooAll,
   FooRead,
 ];

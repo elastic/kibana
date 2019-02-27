@@ -39,6 +39,7 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
             });
             break;
           // these users have a read-only view of Foo
+          case 'read':
           case 'dual_privileges_read':
           case 'foo_read':
             expect(uiCapabilities.success).to.be(true);
