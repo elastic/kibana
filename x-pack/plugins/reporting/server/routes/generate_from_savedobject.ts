@@ -16,6 +16,33 @@ import { HandlerErrorFunction, HandlerFunction, HandlerResult } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL_V1}/generate`;
 
+const getExportHandlerResult = async (
+  handler: HandlerFunction,
+  handleError: HandlerErrorFunction,
+  request: Request,
+  h: ResponseToolkit,
+  options: { isImmediate: boolean }
+): Promise<HandlerResult> => {
+  const { savedObjectType, savedObjectId } = request.params;
+  let result: HandlerResult;
+  try {
+    const jobParams: JobParams = {
+      savedObjectType,
+      savedObjectId,
+      isImmediate: options.isImmediate,
+    };
+    result = await handler(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
+  } catch (err) {
+    throw handleError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
+  }
+
+  if (get(result, 'source.job') == null) {
+    throw new Error(`The Export handler is expected to return a result with job info! ${result}`);
+  }
+
+  return result;
+};
+
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
  * - "immediate" flag: whether to execute the job up front and make immediate download available
@@ -49,30 +76,6 @@ export function registerGenerateCsvFromSavedObject(
       }),
     },
   };
-  const getExportHandlerResult = async (
-    request: Request,
-    h: ResponseToolkit,
-    options: { isImmediate: boolean }
-  ): Promise<HandlerResult> => {
-    const { savedObjectType, savedObjectId } = request.params;
-    let result: HandlerResult;
-    try {
-      const jobParams: JobParams = {
-        savedObjectType,
-        savedObjectId,
-        isImmediate: options.isImmediate,
-      };
-      result = await handler(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
-    } catch (err) {
-      throw handleError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
-    }
-
-    if (get(result, 'source.job') == null) {
-      throw new Error(`The Export handler is expected to return a result with job info! ${result}`);
-    }
-
-    return result;
-  };
 
   // csv: immediate download
   server.route({
@@ -81,7 +84,9 @@ export function registerGenerateCsvFromSavedObject(
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
       const getDocumentPayload = getDocumentPayloadFactory(server);
-      const result: HandlerResult = await getExportHandlerResult(request, h, { isImmediate: true });
+      const result: HandlerResult = await getExportHandlerResult(handler, handleError, request, h, {
+        isImmediate: true,
+      });
 
       // Emulate a document of a completed job and stick the generated contents into it
       // FIXME this is REALLY ugly
@@ -124,7 +129,7 @@ export function registerGenerateCsvFromSavedObject(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      return getExportHandlerResult(request, h, { isImmediate: false });
+      return getExportHandlerResult(handler, handleError, request, h, { isImmediate: false });
     },
   });
 }

@@ -50,9 +50,8 @@ function createJobFn(server: KbnServer) {
         const { attributes } = savedObject;
         const { kibanaSavedObjectMeta } = attributes as SavedSearchObjectAttributes;
 
-        let timerange: TimeRangeParams;
         // @ts-ignore
-        timerange = req.payload.timerange;
+        const timerange: TimeRangeParams = req.payload.timerange;
 
         if (!kibanaSavedObjectMeta) {
           throw new Error('Could not parse saved object data!');
