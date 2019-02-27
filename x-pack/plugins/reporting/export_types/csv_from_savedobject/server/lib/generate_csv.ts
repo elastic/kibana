@@ -20,6 +20,11 @@ export function createGenerateCsv(logger: Logger) {
     visType: string,
     panel: TsvbPanel | SearchPanel
   ) {
+    // This should support any vis type that is able to fetch
+    // and model data on the server-side
+
+    // This structure will not be needed when the vis data just consists of an
+    // expression that we could run through the interpreter to get csv
     switch (visType) {
       case 'metrics':
         // @ts-ignore
