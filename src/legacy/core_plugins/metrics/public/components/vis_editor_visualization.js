@@ -155,7 +155,7 @@ class VisEditorVisualization extends Component {
   }
 
   getFormattedPanelInterval() {
-    const interval = this.props.model.interval;
+    const interval = this.props.model && this.props.model.interval;
 
     if (this.hasShowPanelIntervalValue() && interval) {
       return interval === 'auto'
