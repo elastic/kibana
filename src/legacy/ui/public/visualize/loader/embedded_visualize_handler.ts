@@ -204,6 +204,10 @@ export class EmbeddedVisualizeHandler {
     this.render();
   }
 
+  public disableDefaultAction(eventName) {
+    delete this.actions[eventName];
+  }
+
   /**
    * Update properties of the embedded visualization. This method does not allow
    * updating all initial parameters, but only a subset of the ones allowed

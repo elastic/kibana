@@ -31,6 +31,8 @@ import {
   VisualizeUpdateParams,
 } from 'ui/visualize/loader/types';
 
+import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
+
 export interface VisualizeEmbeddableConfiguration {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedVisualization: VisSavedObject;
@@ -38,6 +40,8 @@ export interface VisualizeEmbeddableConfiguration {
   editUrl?: string;
   loader: VisualizeLoader;
 }
+
+import { actionRegistry } from 'plugins/interpreter/actions_registry';
 
 export class VisualizeEmbeddable extends Embeddable {
   private onEmbeddableStateChanged: OnEmbeddableStateChanged;
@@ -182,6 +186,17 @@ export class VisualizeEmbeddable extends Embeddable {
       this.savedVisualization,
       handlerParams
     );
+
+    if (containerState.embeddableCustomization.overrideClick) {
+      this.handler.disableDefaultAction('filterBucket');
+      this.handler.events$.subscribe((e) => {
+
+        runPipeline('extractSeriesName | navigateTo url="http://www.google.com/search?q=%VAR%"', e.data, {}).then(res => {
+          if (res.type !== 'action') return;
+          actionRegistry[res.as].execute(res.value);
+        });
+      });
+    }
   }
 
   public destroy() {

@@ -22,11 +22,18 @@ import { initializeInterpreter, registries } from '@kbn/interpreter/public';
 import { kfetch } from 'ui/kfetch';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
+import { actionRegistry } from './actions_registry';
 
 register(registries, {
   browserFunctions: functions,
   renderers: [visualization],
 });
+
+actionRegistry.navigate = {
+  execute: (val) => {
+    window.open(val, '_blank');
+  }
+}
 
 let _resolve;
 let _interpreterPromise;
