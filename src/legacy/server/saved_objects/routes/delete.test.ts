@@ -18,7 +18,6 @@
  */
 
 import Hapi from 'hapi';
-import sinon from 'sinon';
 import { createMockServer } from './_mock_server';
 import { createDeleteRoute } from './delete';
 
@@ -26,16 +25,17 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
-    bulkCreate: sinon.stub().returns(''),
-    bulkGet: sinon.stub().returns(''),
-    create: sinon.stub().returns(''),
-    delete: sinon.stub().returns(''),
-    find: sinon.stub().returns(''),
-    get: sinon.stub().returns(''),
-    update: sinon.stub().returns(''),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
+    savedObjectsClient.delete.mockImplementation(() => Promise.resolve('{}'));
     server = createMockServer();
 
     const prereqs = {
@@ -51,7 +51,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.delete.resetHistory();
+    savedObjectsClient.delete.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -59,15 +59,12 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       method: 'DELETE',
       url: '/api/saved_objects/index-pattern/logstash-*',
     };
-    const clientResponse = true;
-
-    savedObjectsClient.delete.returns(Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(response).toEqual({});
   });
 
   it('calls upon savedObjectClient.delete', async () => {
@@ -77,9 +74,6 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.delete.calledOnce).toBe(true);
-
-    const args = savedObjectsClient.delete.getCall(0).args;
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 });

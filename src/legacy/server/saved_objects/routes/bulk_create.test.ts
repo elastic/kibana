@@ -18,7 +18,6 @@
  */
 
 import Hapi from 'hapi';
-import sinon from 'sinon';
 import { createMockServer } from './_mock_server';
 import { createBulkCreateRoute } from './bulk_create';
 
@@ -26,16 +25,17 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
-    bulkCreate: sinon.stub().returns(''),
-    bulkGet: sinon.stub().returns(''),
-    create: sinon.stub().returns(''),
-    delete: sinon.stub().returns(''),
-    find: sinon.stub().returns(''),
-    get: sinon.stub().returns(''),
-    update: sinon.stub().returns(''),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
+    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(''));
     server = createMockServer();
 
     const prereqs = {
@@ -51,7 +51,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkCreate.resetHistory();
+    savedObjectsClient.bulkCreate.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -65,7 +65,6 @@ describe('POST /api/saved_objects/_bulk_create', () => {
           attributes: {
             title: 'my_title',
           },
-          references: [],
         },
       ],
     };
@@ -82,7 +81,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       ],
     };
 
-    savedObjectsClient.bulkCreate.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -118,9 +117,9 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();
 
-    const args = savedObjectsClient.bulkCreate.getCall(0).args;
+    const args = savedObjectsClient.bulkCreate.mock.calls[0];
     expect(args[0]).toEqual(docs);
   });
 
@@ -133,16 +132,16 @@ describe('POST /api/saved_objects/_bulk_create', () => {
           id: 'abc1234',
           type: 'index-pattern',
           attributes: {
-            title: 'bar',
+            title: 'foo',
           },
           references: [],
         },
       ],
     });
 
-    expect(savedObjectsClient.bulkCreate.calledOnce).toBe(true);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();
 
-    const args = savedObjectsClient.bulkCreate.getCall(0).args;
+    const args = savedObjectsClient.bulkCreate.mock.calls[0];
     expect(args[1]).toEqual({ overwrite: true });
   });
 });

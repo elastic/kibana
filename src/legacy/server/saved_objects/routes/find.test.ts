@@ -18,7 +18,6 @@
  */
 
 import Hapi from 'hapi';
-import sinon from 'sinon';
 import { createMockServer } from './_mock_server';
 import { createFindRoute } from './find';
 
@@ -26,16 +25,17 @@ describe('GET /api/saved_objects/_find', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
-    bulkCreate: sinon.stub().returns(''),
-    bulkGet: sinon.stub().returns(''),
-    create: sinon.stub().returns(''),
-    delete: sinon.stub().returns(''),
-    find: sinon.stub().returns(''),
-    get: sinon.stub().returns(''),
-    update: sinon.stub().returns(''),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
+    savedObjectsClient.find.mockImplementation(() => Promise.resolve(''));
     server = createMockServer();
 
     const prereqs = {
@@ -51,7 +51,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.find.resetHistory();
+    savedObjectsClient.find.mockReset();
   });
 
   it('returns with status 400 when type is missing', async () => {
@@ -98,7 +98,7 @@ describe('GET /api/saved_objects/_find', () => {
       ],
     };
 
-    savedObjectsClient.find.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.find.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -115,9 +115,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20,
       page: 1,
@@ -134,23 +134,23 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
   it('accepts the query parameter search_fields', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&search_fields=title',
+      url: '/api/saved_objects/_find?type=foo&search_fields=title'
     };
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20,
       page: 1,
@@ -168,9 +168,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20,
       page: 1,
@@ -188,9 +188,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20,
       page: 1,
@@ -208,9 +208,9 @@ describe('GET /api/saved_objects/_find', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20,
       page: 1,
@@ -222,14 +222,14 @@ describe('GET /api/saved_objects/_find', () => {
   it('accepts the query parameter type as an array', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern&type=visualization',
+      url: '/api/saved_objects/_find?type=index-pattern&type=visualization'
     };
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).toBe(true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.getCall(0).args[0];
+    const options = savedObjectsClient.find.mock.calls[0][0];
     expect(options).toEqual({
       perPage: 20,
       page: 1,

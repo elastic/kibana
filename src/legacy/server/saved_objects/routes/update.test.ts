@@ -18,7 +18,6 @@
  */
 
 import Hapi from 'hapi';
-import sinon from 'sinon';
 import { createMockServer } from './_mock_server';
 import { createUpdateRoute } from './update';
 
@@ -26,16 +25,17 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
-    bulkCreate: sinon.stub().returns(''),
-    bulkGet: sinon.stub().returns(''),
-    create: sinon.stub().returns(''),
-    delete: sinon.stub().returns(''),
-    find: sinon.stub().returns(''),
-    get: sinon.stub().returns(''),
-    update: sinon.stub().returns(''),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
+    savedObjectsClient.update.mockImplementation(() => Promise.resolve(''));
     server = createMockServer();
 
     const prereqs = {
@@ -51,7 +51,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.update.resetHistory();
+    savedObjectsClient.update.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -66,31 +66,40 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       },
     };
 
-    savedObjectsClient.update.returns(Promise.resolve(true));
+    const clientResponse = {
+      id: 'logstash-*',
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+      notExpandable: true,
+      references: [],
+    };
+
+    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(true);
+    expect(response).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.update', async () => {
-    const attributes = { title: 'Testing' };
-    const options = { version: 'foo', references: [] };
     const request = {
       method: 'PUT',
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
-        attributes,
-        version: options.version,
+        attributes: { title: 'Testing' },
+        version: 'foo',
       },
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.update.calledOnce).toBe(true);
 
-    const args = savedObjectsClient.update.getCall(0).args;
-    expect(args).toEqual(['index-pattern', 'logstash-*', attributes, options]);
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'index-pattern',
+      'logstash-*',
+      { title: 'Testing' },
+      { version: 'foo', references: [] }
+    );
   });
 });

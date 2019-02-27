@@ -18,7 +18,6 @@
  */
 
 import Hapi from 'hapi';
-import sinon from 'sinon';
 import { createMockServer } from './_mock_server';
 import { createBulkGetRoute } from './bulk_get';
 
@@ -26,18 +25,18 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
-    bulkCreate: sinon.stub().returns(''),
-    bulkGet: sinon.stub().returns(''),
-    create: sinon.stub().returns(''),
-    delete: sinon.stub().returns(''),
-    find: sinon.stub().returns(''),
-    get: sinon.stub().returns(''),
-    update: sinon.stub().returns(''),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
+    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(''));
     server = createMockServer();
-
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -51,7 +50,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkGet.resetHistory();
+    savedObjectsClient.bulkGet.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -78,7 +77,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       ],
     };
 
-    savedObjectsClient.bulkGet.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -102,9 +101,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.bulkGet.calledOnce).toBe(true);
 
-    const args = savedObjectsClient.bulkGet.getCall(0).args;
-    expect(args[0]).toEqual(docs);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(docs);
   });
 });

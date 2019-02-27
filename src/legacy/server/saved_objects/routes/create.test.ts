@@ -18,7 +18,6 @@
  */
 
 import Hapi from 'hapi';
-import sinon from 'sinon';
 import { createMockServer } from './_mock_server';
 import { createCreateRoute } from './create';
 
@@ -26,16 +25,17 @@ describe('POST /api/saved_objects/{type}', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
-    bulkCreate: sinon.stub().returns(''),
-    bulkGet: sinon.stub().returns(''),
-    create: sinon.stub().returns(''),
-    delete: sinon.stub().returns(''),
-    find: sinon.stub().returns(''),
-    get: sinon.stub().returns(''),
-    update: sinon.stub().returns(''),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
+    savedObjectsClient.create.mockImplementation(() => Promise.resolve(''));
     server = createMockServer();
 
     const prereqs = {
@@ -51,7 +51,7 @@ describe('POST /api/saved_objects/{type}', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.create.resetHistory();
+    savedObjectsClient.create.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -64,6 +64,7 @@ describe('POST /api/saved_objects/{type}', () => {
         },
       },
     };
+
     const clientResponse = {
       type: 'index-pattern',
       id: 'logstash-*',
@@ -71,7 +72,7 @@ describe('POST /api/saved_objects/{type}', () => {
       references: [],
     };
 
-    savedObjectsClient.create.returns(Promise.resolve(clientResponse));
+    savedObjectsClient.create.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -108,18 +109,13 @@ describe('POST /api/saved_objects/{type}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.create.calledOnce).toBe(true);
+    expect(savedObjectsClient.create).toHaveBeenCalled();
 
-    const args = savedObjectsClient.create.getCall(0).args;
-    const options = {
-      overwrite: false,
-      id: undefined,
-      migrationVersion: undefined,
-      references: [],
-    };
-    const attributes = { title: 'Testing' };
-
-    expect(args).toEqual(['index-pattern', attributes, options]);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      { title: 'Testing' },
+      { overwrite: false, id: undefined, migrationVersion: undefined, references: [] }
+    );
   });
 
   it('can specify an id', async () => {
@@ -134,9 +130,9 @@ describe('POST /api/saved_objects/{type}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.create.calledOnce).toBe(true);
+    expect(savedObjectsClient.create).toHaveBeenCalled();
 
-    const args = savedObjectsClient.create.getCall(0).args;
+    const args = savedObjectsClient.create.mock.calls[0];
     const options = { overwrite: false, id: 'logstash-*', references: [] };
     const attributes = { title: 'Testing' };
 
