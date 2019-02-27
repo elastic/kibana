@@ -17,57 +17,68 @@
  * under the License.
  */
 
-export function AppsMenuProvider({ getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
   const globalNav = getService('globalNav');
 
   return new class AppsMenu {
-    async readLinks() {
-      await this._ensureMenuOpen();
+    public async readLinks() {
+      await this.ensureMenuOpen();
       const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
       const $ = await appMenu.parseDomContent();
-      const links = $.findTestSubjects('appLink').toArray().map(link => {
-        return {
-          text: $(link).text(),
-          href: $(link).attr('href')
-        };
-      });
-      await this._ensureMenuClosed();
+
+      const links: Array<{
+        text: string;
+        href: string;
+      }> = $.findTestSubjects('appLink')
+        .toArray()
+        .map((link: any) => {
+          return {
+            text: $(link).text(),
+            href: $(link).attr('href'),
+          };
+        });
+
+      await this.ensureMenuClosed();
       return links;
     }
 
-    async linkExists(name) {
+    public async linkExists(name: string) {
       return (await this.readLinks()).some(nl => nl.text === name);
     }
 
-    async clickLink(appTitle) {
+    public async clickLink(appTitle: string) {
       try {
         log.debug(`click "${appTitle}" tab`);
-        await this._ensureMenuOpen();
+        await this.ensureMenuOpen();
         const container = await testSubjects.find('navDrawer&expanded appsMenu');
         const link = await container.findByPartialLinkText(appTitle);
         await link.click();
       } finally {
-        await this._ensureMenuClosed();
+        await this.ensureMenuClosed();
       }
     }
 
-    async _ensureMenuOpen() {
-      if (!await testSubjects.exists('navDrawer&expanded')) {
-        await testSubjects.moveMouseTo('navDrawer');
-        await retry.waitFor('apps drawer open', async () => (
-          await testSubjects.exists('navDrawer&expanded')
-        ));
-      }
-    }
-
-    async _ensureMenuClosed() {
+    private async ensureMenuClosed() {
       await globalNav.moveMouseToLogo();
-      await retry.waitFor('apps drawer closed', async () => (
-        await testSubjects.exists('navDrawer&collapsed')
-      ));
+      await retry.waitFor(
+        'apps drawer closed',
+        async () => await testSubjects.exists('navDrawer&collapsed')
+      );
     }
-  };
+
+    private async ensureMenuOpen() {
+      if (!(await testSubjects.exists('navDrawer&expanded'))) {
+        await testSubjects.moveMouseTo('navDrawer');
+        await retry.waitFor(
+          'apps drawer open',
+          async () => await testSubjects.exists('navDrawer&expanded')
+        );
+      }
+    }
+  }();
 }
