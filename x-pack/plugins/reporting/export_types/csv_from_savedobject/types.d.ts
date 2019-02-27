@@ -95,6 +95,15 @@ export interface TimeRangeParams {
   max: Date;
 }
 
+export interface IndexPatternSavedObject {
+  title: string;
+  timeFieldName: string;
+  fields: any[];
+  fieldFormatMap: {
+    [key: string]: { id: string; params: { pattern: string } };
+  };
+}
+
 export interface SearchPanel {
   indexPatternSavedObject: any;
   attributes: VisObjectAttributes | SavedSearchObjectAttributes;

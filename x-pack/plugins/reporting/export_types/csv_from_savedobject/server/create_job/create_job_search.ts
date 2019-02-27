@@ -5,6 +5,7 @@
  */
 
 import {
+  IndexPatternSavedObject,
   SavedObject,
   SavedObjectMeta,
   SavedObjectReference,
@@ -38,19 +39,25 @@ export async function createJobSearch(
   if (!indexPatternMeta) {
     throw new Error('Could not find index pattern for the saved search!');
   }
-  const indexPatternSavedObject = await savedObjectsClient.get(
+  const { attributes: indexPatternAttributes } = await savedObjectsClient.get(
     'index-pattern',
     indexPatternMeta.id
   );
+  const indexPatternSavedObject: IndexPatternSavedObject = {
+    ...indexPatternAttributes,
+    fields: JSON.parse(indexPatternAttributes.fields),
+    fieldFormatMap: JSON.parse(indexPatternAttributes.fieldFormatMap),
+  };
 
   const sPanel = {
-    indexPatternSavedObject,
     attributes: {
       ...attributes,
       kibanaSavedObjectMeta: { searchSource },
     },
+    indexPatternSavedObject,
     timerange,
     references,
   };
+
   return { panel: sPanel, title: attributes.title, visType: 'search' };
 }
