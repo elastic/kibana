@@ -25,8 +25,7 @@ import {
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { DetailView } from './DetailView';
-// @ts-ignore
-import Distribution from './Distribution';
+import { Distribution } from './Distribution';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -67,7 +66,7 @@ interface Props {
   location: Location;
 }
 
-export function ErrorGroupDetails({ urlParams, location }: Props) {
+export function ErrorGroupDetailsView({ urlParams, location }: Props) {
   return (
     <ErrorGroupDetailsRequest
       urlParams={urlParams}

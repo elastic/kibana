@@ -7,10 +7,32 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+// @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 
-export function getFormattedBuckets(buckets, bucketSize) {
+interface IBucket {
+  key: number;
+  count: number;
+}
+
+// TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (ITransactionDistributionAPIResponse)
+interface IDistribution {
+  totalHits: number;
+  buckets: IBucket[];
+  bucketSize: number;
+}
+
+interface FormattedBucket {
+  x0: number;
+  x: number;
+  y: number;
+}
+
+export function getFormattedBuckets(
+  buckets: IBucket[],
+  bucketSize: number
+): FormattedBucket[] | null {
   if (!buckets) {
     return null;
   }
@@ -24,12 +46,17 @@ export function getFormattedBuckets(buckets, bucketSize) {
   });
 }
 
-function Distribution({
+interface Props {
+  distribution: IDistribution;
+  title?: React.ReactNode;
+}
+
+export function Distribution({
   distribution,
   title = i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
     defaultMessage: 'Occurrences'
   })
-}) {
+}: Props) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
@@ -53,17 +80,17 @@ function Distribution({
         <span>{title}</span>
       </EuiTitle>
       <Histogram
-        verticalLineHover={bucket => bucket.x}
+        verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time"
         buckets={buckets}
         bucketSize={distribution.bucketSize}
-        formatYShort={value =>
+        formatYShort={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
             defaultMessage: '{occCount} occ.',
             values: { occCount: value }
           })
         }
-        formatYLong={value =>
+        formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
             defaultMessage: '{occCount} occurrences',
             values: { occCount: value }
@@ -73,5 +100,3 @@ function Distribution({
     </div>
   );
 }
-
-export default Distribution;

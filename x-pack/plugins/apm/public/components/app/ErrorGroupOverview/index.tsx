@@ -8,12 +8,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-// @ts-ignore
-import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
+import { Distribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
-// @ts-ignore
 import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {

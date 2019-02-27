@@ -14,8 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-// @ts-ignore
-import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
+import { Distribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
 import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
