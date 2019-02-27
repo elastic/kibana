@@ -37,7 +37,7 @@ const aeroelasticConfiguration = {
   hoverLift: 100,
   intraGroupManipulation: false,
   intraGroupSnapOnly: false,
-  minimumElementSize: 0,
+  minimumElementSize: 2,
   persistentGroupName: 'persistentGroup',
   resizeAnnotationConnectorOffset: 0,
   resizeAnnotationOffset: 0,
