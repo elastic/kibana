@@ -37,8 +37,8 @@ export default (gulp, { buildTarget }) => {
     //# TODO: This might be able to go away with the upgrade to babel 7
     await moveFiles(
       gulp,
-      resolve(buildRoot, 'x-pack/plugins/**/*'),
-      resolve(buildRoot, 'plugins')
+      resolve(buildRoot, 'x-pack/build/plugin/kibana/x-pack/**/!(*.test).js'),
+      buildRoot
     );
     await del(resolve(buildRoot, 'x-pack'));
     //#
