@@ -16,7 +16,7 @@ export type HandlerFunction = (
 
 export type HandlerErrorFunction = (exportType: any, err: Error) => any;
 
-export interface HandlerResult {
+export interface QueuedJobPayload {
   error?: boolean;
   source: {
     job: {

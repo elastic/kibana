@@ -12,28 +12,33 @@ import { JobDoc, JobDocOutput, JobParams, KbnServer } from '../../types';
 // @ts-ignore
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
-import { HandlerErrorFunction, HandlerFunction, HandlerResult } from './types';
+import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL_V1}/generate`;
 
-const getExportHandlerResult = async (
-  handler: HandlerFunction,
-  handleError: HandlerErrorFunction,
+/*
+ * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
+ * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
+ * 3. Ensure that details for a queued job were returned
+ */
+const getJobFromRouteHandler = async (
+  handleRoute: HandlerFunction,
+  handleRouteError: HandlerErrorFunction,
   request: Request,
   h: ResponseToolkit,
   options: { isImmediate: boolean }
-): Promise<HandlerResult> => {
+): Promise<QueuedJobPayload> => {
   const { savedObjectType, savedObjectId } = request.params;
-  let result: HandlerResult;
+  let result: QueuedJobPayload;
   try {
     const jobParams: JobParams = {
       savedObjectType,
       savedObjectId,
       isImmediate: options.isImmediate,
     };
-    result = await handler(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
+    result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
   } catch (err) {
-    throw handleError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
+    throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
   }
 
   if (get(result, 'source.job') == null) {
@@ -55,8 +60,8 @@ const getExportHandlerResult = async (
  */
 export function registerGenerateCsvFromSavedObject(
   server: KbnServer,
-  handler: HandlerFunction,
-  handleError: HandlerErrorFunction
+  handleRoute: HandlerFunction,
+  handleRouteError: HandlerErrorFunction
 ) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
   const routeOptions = {
@@ -76,6 +81,7 @@ export function registerGenerateCsvFromSavedObject(
       }),
     },
   };
+  const getDocumentPayload = getDocumentPayloadFactory(server);
 
   // csv: immediate download
   server.route({
@@ -83,20 +89,31 @@ export function registerGenerateCsvFromSavedObject(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      const getDocumentPayload = getDocumentPayloadFactory(server);
-      const result: HandlerResult = await getExportHandlerResult(handler, handleError, request, h, {
-        isImmediate: true,
-      });
+      /*
+       * 1. Queue a job with getJobFromRouteHandler
+       *   - `isImmediate: true` gets us the complete result data in payload.objects
+       * 2. Copy the completed data stashed in the job as output.content
+       *   - Makes the content available for download
+       * 3. Return a response with CSV content
+       */
+      const queuedJob: QueuedJobPayload = await getJobFromRouteHandler(
+        handleRoute,
+        handleRouteError,
+        request,
+        h,
+        {
+          isImmediate: true,
+        }
+      );
 
-      // Emulate a document of a completed job and stick the generated contents into it
       // FIXME this is REALLY ugly
-      const docSource: JobDoc = get(result, 'source.job');
+      const jobSource: JobDoc = get(queuedJob, 'source.job');
       const output: JobDocOutput = getDocumentPayload({
         _source: {
-          ...docSource,
+          ...jobSource,
           status: 'completed',
           output: {
-            content: docSource.payload.objects,
+            content: jobSource.payload.objects,
             content_type: 'text/csv',
           },
         },
@@ -129,7 +146,9 @@ export function registerGenerateCsvFromSavedObject(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      return getExportHandlerResult(handler, handleError, request, h, { isImmediate: false });
+      return getJobFromRouteHandler(handleRoute, handleRouteError, request, h, {
+        isImmediate: false,
+      });
     },
   });
 }

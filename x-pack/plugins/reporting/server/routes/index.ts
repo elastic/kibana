@@ -21,6 +21,9 @@ export function registerRoutes(server: KbnServer) {
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
+  /*
+   * Generates enqueued job details to use in responses
+   */
   async function handler(
     exportTypeId: string,
     jobParams: any,
