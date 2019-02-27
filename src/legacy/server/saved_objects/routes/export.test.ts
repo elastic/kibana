@@ -24,8 +24,14 @@ import { createExportRoute } from './export';
 describe('GET /api/saved_objects/_export', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
-    find: jest.fn(),
+    errors: {} as any,
+    bulkCreate: jest.fn(),
     bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   beforeEach(() => {
@@ -43,8 +49,13 @@ describe('GET /api/saved_objects/_export', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.find.mockClear();
-    savedObjectsClient.bulkGet.mockClear();
+    savedObjectsClient.bulkCreate.mockReset();
+    savedObjectsClient.bulkGet.mockReset();
+    savedObjectsClient.create.mockReset();
+    savedObjectsClient.delete.mockReset();
+    savedObjectsClient.find.mockReset();
+    savedObjectsClient.get.mockReset();
+    savedObjectsClient.update.mockReset();
   });
 
   test('formats successful response', async () => {

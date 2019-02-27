@@ -20,11 +20,27 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
+import { SavedObjectsClient } from '../';
 import { getSortedObjectsForExport } from '../lib/export';
+import { Prerequisites } from './types';
 
 const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
-export const createExportRoute = (prereqs: any, server: Hapi.Server) => ({
+// @ts-ignore
+interface ExportRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClient;
+  };
+  query: {
+    type?: string[];
+    objects?: Array<{
+      type: string;
+      id: string;
+    }>;
+  };
+}
+
+export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
   path: '/api/saved_objects/_export',
   method: 'GET',
   config: {
@@ -49,7 +65,7 @@ export const createExportRoute = (prereqs: any, server: Hapi.Server) => ({
         .xor('type', 'objects')
         .default(),
     },
-    async handler(request: any, h: any) {
+    async handler(request: ExportRequest, h: Hapi.ResponseToolkit) {
       const { savedObjectsClient } = request.pre;
       const docsToExport = await getSortedObjectsForExport({
         savedObjectsClient,
