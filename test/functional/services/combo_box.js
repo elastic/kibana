@@ -36,7 +36,12 @@ export function ComboBoxProvider({ getService }) {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
-      await find.clickByCssSelector('.euiComboBoxOption');
+      try {
+        await find.clickByCssSelector(`.euiComboBoxOption[title="${value}"]`);
+      } catch (err) {
+        await find.clickByCssSelector(`.euiComboBoxOption`);
+      }
+
       await this.closeOptionsList(comboBoxElement);
     }
 

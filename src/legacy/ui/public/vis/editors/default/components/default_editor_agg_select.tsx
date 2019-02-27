@@ -44,7 +44,7 @@ function DefaultEditorAggSelect({
   agg,
   isSubAggregation,
   aggHelpLink,
-  aggTypeOptions,
+  aggTypeOptions = [],
   onChangeAggType,
   isSelectValid,
 }: DefaultEditorAggSelectProps) {
