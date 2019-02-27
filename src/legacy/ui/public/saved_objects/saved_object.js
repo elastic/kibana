@@ -66,7 +66,7 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export function SavedObjectProvider(Promise, Private, Notifier, confirmModalPromise, indexPatterns) {
+export function SavedObjectProvider(Promise, Private, confirmModalPromise, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const SearchSource = Private(SearchSourceProvider);
   const mappingSetup = Private(MappingSetupProvider);

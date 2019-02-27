@@ -799,7 +799,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      return find.clickByButtonText(vizName);
+      return find.clickByPartialLinkText(vizName);
     }
 
     async loadSavedVisualization(vizName, { navigateToVisualize = true } = {}) {

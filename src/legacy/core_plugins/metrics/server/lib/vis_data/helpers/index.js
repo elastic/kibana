@@ -22,7 +22,6 @@ import getAggValue from './get_agg_value';
 import getBucketSize from './get_bucket_size';
 import getBucketPath from './get_buckets_path';
 import getDefaultDecoration from './get_default_decoration';
-import getEsShardTimeout from './get_es_shard_timeout';
 import getLastMetric from './get_last_metric';
 import getSiblingAggValue from './get_sibling_agg_value';
 import getSplits from './get_splits';
@@ -37,7 +36,6 @@ export default {
   getBucketSize,
   getBucketPath,
   getDefaultDecoration,
-  getEsShardTimeout,
   getLastMetric,
   getSiblingAggValue,
   getSplits,
