@@ -59,8 +59,8 @@ export class PanelUtils {
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
       i: panel.panelIndex.toString(),
     };
-
     panel.version = chrome.getKibanaVersion();
+    panel.panelIndex = panel.panelIndex.toString();
     delete panel.size_x;
     delete panel.size_y;
     delete panel.row;
