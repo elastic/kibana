@@ -21,6 +21,7 @@ import './sidebar';
 import './vis_options';
 import './vis_editor_resizer';
 import './vis_type_agg_filter';
+import './vis_expr.js';
 import $ from 'jquery';
 
 import _ from 'lodash';
@@ -68,6 +69,7 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
 
           updateScope();
 
+          $scope.savedObj = this.savedObj;
           $scope.state = $scope.vis.copyCurrentState(true);
           $scope.oldState = $scope.vis.getSerializableState($scope.state);
 

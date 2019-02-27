@@ -1,21 +1,31 @@
-<div class="visEditor--default">
-  <div class="collapsible-sidebar visEditor__collapsibleSidebar" ng-class="::getSidebarClass()">
-    <vis-editor-sidebar class="visEditor__sidebar" />
-    <vis-editor-resizer
-      class="visEditor__resizer"
-      tabindex="0"
-      aria-label="{{::'common.ui.vis.editors.resizeAriaLabels' | i18n: { defaultMessage: 'Press left/right to resize the editor' } }}"
-      data-test-subj="visualizeEditorResizer"
-    >&#xFE19;</vis-editor-resizer>
+<div style="display: flex; flex-direction: column; flex: 1 1 100%;">
+  <div class="visEditor--default">
+    <div class="collapsible-sidebar visEditor__collapsibleSidebar" ng-class="::getSidebarClass()">
+      <vis-editor-sidebar class="visEditor__sidebar" />
+      <vis-editor-resizer
+        class="visEditor__resizer"
+        tabindex="0"
+        aria-label="{{::'common.ui.vis.editors.resizeAriaLabels' | i18n: { defaultMessage: 'Press left/right to resize the editor' } }}"
+        data-test-subj="visualizeEditorResizer"
+      >&#xFE19;</vis-editor-resizer>
+    </div>
+
+    <div
+      class="visEditor__canvas"
+      data-shared-item
+      data-shared-items-container
+      render-complete
+      data-title="{{vis.title}}"
+      data-description="{{vis.description}}"
+    />
+
+
   </div>
 
-  <div
-    class="visEditor__canvas"
-    data-shared-item
-    data-shared-items-container
-    render-complete
-    data-title="{{vis.title}}"
-    data-description="{{vis.description}}"
-  />
+  <div class="canvasTray">
+    <div class="euiPanel euiPanel--paddingMedium canvasTray__panel">
+      <vis-editor-expression />
+    </div>
+  </div>
 
 </div>
