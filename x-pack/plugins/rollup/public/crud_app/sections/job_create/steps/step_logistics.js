@@ -173,6 +173,7 @@ export class StepLogisticsUi extends Component {
               onChange={e => onFieldsChange({ rollupCron: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
               fullWidth
+              data-test-subj="rollupAdvancedCron"
             />
           </EuiFormRow>
 
@@ -207,7 +208,7 @@ export class StepLogisticsUi extends Component {
         />
 
         <EuiText size="s">
-          <EuiLink onClick={this.showAdvancedCron}>
+          <EuiLink onClick={this.showAdvancedCron} data-test-subj="rollupShowAdvancedCronLink">
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
               defaultMessage="Create cron expression"
@@ -248,7 +249,7 @@ export class StepLogisticsUi extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="rollupJobCreateLogisticsTitle">
               <h3>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogisticsTitle"

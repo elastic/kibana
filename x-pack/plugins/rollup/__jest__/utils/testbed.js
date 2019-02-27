@@ -43,12 +43,14 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
     formInput.simulate('change', { target: { value } });
     component.update();
 
+    // In some cases, changing an input value triggers an http request to validate
+    // it. Even by returning immediately the response on the mock server we need
+    // to wait until the next tick before the DOM updates.
+    // Setting isAsync to "true" solves that problem.
     if (!isAsync) {
       return;
     }
-    return new Promise((resolve) => {
-      setTimeout(resolve);
-    });
+    return new Promise((resolve) => setTimeout(resolve));
   };
 
   return {
