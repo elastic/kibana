@@ -202,7 +202,12 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
 }
 
 // Obtain the list of 'View by' fields per job and swimlaneViewByFieldName
-export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFieldName) {
+export function getViewBySwimlaneOptions({
+  currentSwimlaneViewByFieldName,
+  filterActive,
+  filteredFields,
+  selectedJobs
+}) {
   const selectedJobIds = selectedJobs.map(d => d.id);
 
   // Unique influencers for the selected job(s).
@@ -218,7 +223,7 @@ export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFiel
     .value();
 
   viewByOptions.push(VIEW_BY_JOB_LABEL);
-  const viewBySwimlaneOptions = viewByOptions;
+  let viewBySwimlaneOptions = viewByOptions;
 
   let swimlaneViewByFieldName = undefined;
 
@@ -282,6 +287,13 @@ export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFiel
         }
       }
     }
+  }
+
+  // filter View by options to relevant filter fields
+  if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
+    viewBySwimlaneOptions = viewBySwimlaneOptions.filter(option => {
+      return (filteredFields.includes(option) || option === 'job ID');
+    });
   }
 
   return {

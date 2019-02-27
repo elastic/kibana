@@ -94,6 +94,7 @@ function getExplorerDefaultState() {
     filterActive: false,
     filteredFields: [],
     filterPlaceHolder: undefined,
+    indexPattern: { title: ML_RESULTS_INDEX_PATTERN, fields: [] },
     influencersFilterQuery: undefined,
     isAndOperator: false,
     hasResults: false,
@@ -147,8 +148,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     // initialize an empty callback, this will be set in componentDidMount()
     updateCharts = () => {};
-
-    indexPattern = { title: ML_RESULTS_INDEX_PATTERN };
 
     dragSelect = new DragSelect({
       selectables: document.getElementsByClassName('sl-cell'),
@@ -241,7 +240,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             Object.assign(stateUpdate, { ...filterData });
           }
 
-          this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
+          const indexPattern = await this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
+          Object.assign(stateUpdate, { ...indexPattern });
+
           this.updateExplorer(stateUpdate, true);
         }
 
@@ -253,7 +254,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobs,
           };
 
-          this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
+          const indexPattern = await this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
+          Object.assign(stateUpdate, { ...indexPattern });
+
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
           Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
 
@@ -305,15 +308,18 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
     // Field objects required fields: name, type, aggregatable, searchable
     async getIndexPattern(selectedJobs, noInfluencersConfigured) {
+      const { indexPattern } = this.state;
       const selectedJobIds = selectedJobs.map((job) => job.id);
       const influencers = await loadInfluencerFields(selectedJobIds, noInfluencersConfigured);
 
-      this.indexPattern.fields = influencers.map((influencer) => ({
+      indexPattern.fields = influencers.map((influencer) => ({
         name: influencer,
         type: 'string',
         aggregatable: true,
         searchable: true
       }));
+
+      return { indexPattern };
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
@@ -680,13 +686,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         );
       }
 
-      const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, swimlaneViewByFieldName);
-      // filter View by options to relevant filter fields
-      if (filterActive === true && viewBySwimlaneOptions !== undefined && Array.isArray(viewBySwimlaneOptions.viewBySwimlaneOptions)) {
-        viewBySwimlaneOptions.viewBySwimlaneOptions = viewBySwimlaneOptions.viewBySwimlaneOptions.filter(option => {
-          return (filteredFields.includes(option) || option === 'job ID');
-        });
-      }
+      const viewBySwimlaneOptions = getViewBySwimlaneOptions({
+        currentSwimlaneViewByFieldName: swimlaneViewByFieldName,
+        filterActive,
+        filteredFields,
+        selectedJobs
+      });
 
       Object.assign(stateUpdate, viewBySwimlaneOptions);
       if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
@@ -969,6 +974,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         chartsData,
         filterActive,
         filterPlaceHolder,
+        indexPattern,
         isAndOperator,
         maskAll,
         influencers,
@@ -1027,7 +1033,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             influencers !== undefined &&
             <div className="mlAnomalyExplorer__filterBar">
               <KueryFilterBar
-                indexPattern={this.indexPattern}
+                indexPattern={indexPattern}
                 onSubmit={this.applyInfluencersFilterQuery}
                 initialValue={filterBarInitialValue}
                 placeholder={filterBarPlaceholder}
