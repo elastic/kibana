@@ -27,8 +27,8 @@ describe('Reporting: Validate config', () => {
       expect(() => validateConfig(config, logger)).not.to.throwError();
 
       sinon.assert.calledWith(config.set, 'xpack.reporting.encryptionKey');
-      sinon.assert.calledWithMatch(logger, /Generating a random key/);
-      sinon.assert.calledWithMatch(logger, /please set xpack.reporting.encryptionKey/);
+      sinon.assert.calledWithMatch(logger.warning, /Generating a random key/);
+      sinon.assert.calledWithMatch(logger.warning, /please set xpack.reporting.encryptionKey/);
     });
   });
 });
