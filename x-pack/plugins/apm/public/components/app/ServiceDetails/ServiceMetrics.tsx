@@ -8,13 +8,12 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle
+  EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { Distribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
+import { ErrorDistribution } from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
 import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
@@ -50,20 +49,14 @@ export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
           <ErrorDistributionRequest
             urlParams={urlParams}
             render={({ data }) => (
-              <Distribution
+              <ErrorDistribution
                 distribution={data}
-                title={
-                  <EuiTitle size="xs">
-                    <span>
-                      {i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                        {
-                          defaultMessage: 'Error occurrences'
-                        }
-                      )}
-                    </span>
-                  </EuiTitle>
-                }
+                title={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                  {
+                    defaultMessage: 'Error occurrences'
+                  }
+                )}
               />
             )}
           />

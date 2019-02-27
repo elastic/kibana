@@ -48,15 +48,10 @@ export function getFormattedBuckets(
 
 interface Props {
   distribution: IDistribution;
-  title?: React.ReactNode;
+  title: React.ReactNode;
 }
 
-export function Distribution({
-  distribution,
-  title = i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
-    defaultMessage: 'Occurrences'
-  })
-}: Props) {
+export function ErrorDistribution({ distribution, title }: Props) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize

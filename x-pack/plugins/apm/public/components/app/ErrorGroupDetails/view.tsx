@@ -25,7 +25,7 @@ import {
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { DetailView } from './DetailView';
-import { Distribution } from './Distribution';
+import { ErrorDistribution } from './Distribution';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -151,7 +151,17 @@ export function ErrorGroupDetailsView({ urlParams, location }: Props) {
             )}
             <ErrorDistributionRequest
               urlParams={urlParams}
-              render={({ data }) => <Distribution distribution={data} />}
+              render={({ data }) => (
+                <ErrorDistribution
+                  distribution={data}
+                  title={i18n.translate(
+                    'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                    {
+                      defaultMessage: 'Occurrences'
+                    }
+                  )}
+                />
+              )}
             />
             {showDetails && (
               <DetailView
