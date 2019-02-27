@@ -283,12 +283,12 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     plugin$: from([firstPlugin, secondPlugin]),
   });
 
-  const pluginContracts = new Map();
-  mockPluginSystem.startPlugins.mockResolvedValue(pluginContracts);
+  const pluginsStart = new Map();
+  mockPluginSystem.startPlugins.mockResolvedValue(pluginsStart);
 
-  const startContract = await pluginsService.start();
+  const start = await pluginsService.start();
 
-  expect(startContract).toBe(pluginContracts);
+  expect(start).toBe(pluginsStart);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);

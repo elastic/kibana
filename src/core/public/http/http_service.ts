@@ -28,10 +28,10 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { FatalErrorsStartContract } from '../fatal_errors';
+import { FatalErrorsStart } from '../fatal_errors';
 
 interface Deps {
-  fatalErrors: FatalErrorsStartContract;
+  fatalErrors: FatalErrorsStart;
 }
 
 export class HttpService {
@@ -83,4 +83,4 @@ export class HttpService {
   }
 }
 
-export type HttpStartContract = ReturnType<HttpService['start']>;
+export type HttpStart = ReturnType<HttpService['start']>;
