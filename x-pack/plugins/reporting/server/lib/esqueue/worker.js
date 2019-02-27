@@ -17,7 +17,6 @@ const puid = new Puid();
 function formatJobObject(job) {
   return {
     index: job._index,
-    type: job._type,
     id: job._id,
   };
 }
@@ -56,7 +55,6 @@ export class Worker extends events.EventEmitter {
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
-    this.doctype = opts.doctype || constants.DEFAULT_SETTING_DOCTYPE;
 
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warn');
@@ -86,7 +84,6 @@ export class Worker extends events.EventEmitter {
       id: this.id,
       index: this.queue.index,
       jobType: this.jobType,
-      doctype: this.doctype,
     };
   }
 
@@ -128,7 +125,6 @@ export class Worker extends events.EventEmitter {
 
     return this._client.callWithInternalUser('update', {
       index: job._index,
-      type: job._type,
       id: job._id,
       if_seq_no: job._seq_no,
       if_primary_term: job._primary_term,
@@ -166,7 +162,6 @@ export class Worker extends events.EventEmitter {
 
     return this._client.callWithInternalUser('update', {
       index: job._index,
-      type: job._type,
       id: job._id,
       if_seq_no: job._seq_no,
       if_primary_term: job._primary_term,
@@ -244,7 +239,6 @@ export class Worker extends events.EventEmitter {
 
       return this._client.callWithInternalUser('update', {
         index: job._index,
-        type: job._type,
         id: job._id,
         if_seq_no: job._seq_no,
         if_primary_term: job._primary_term,
@@ -388,7 +382,6 @@ export class Worker extends events.EventEmitter {
 
     return this._client.callWithInternalUser('search', {
       index: `${this.queue.index}-*`,
-      type: this.doctype,
       body: query
     })
       .then((results) => {
