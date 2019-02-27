@@ -8,7 +8,18 @@ This tutorial requires three data sets:
 * A set of fictitious accounts with randomly generated data. Download
   https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip[`accounts.zip`].
 * A set of randomly generated log files. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/7.x/logs.jsonl.gz[`logs.jsonl.gz`].
+This tutorial requires three data sets:
+
+* The complete works of William Shakespeare, suitably parsed into fields
+* A set of fictitious accounts with randomly generated data
+* A set of randomly generated log files
+
+Create a new working directory where you want to download the files. From that directory, run the following commands:
+
+[source,shell]
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/7.x/shakespeare.json
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/7.x/logs.jsonl.gz
 
 Two of the data sets are compressed. To extract the files, use these commands:
 
