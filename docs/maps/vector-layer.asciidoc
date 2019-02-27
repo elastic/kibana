@@ -5,3 +5,13 @@ Display points, lines, and polygons.
 
 [role="screenshot"]
 image::maps/images/vector_layer.png[]
+
+Vector layers can be created from the following sources
+
+*Custom vector shapes*:: Vector shapes from static files configured in kibana.yml.
+
+*Documents*:: Geospatial data from a Kibana index pattern.
+
+*Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
+
+*Vector shapes*:: Vector shapes of administrative boundaries from Elastic Maps Service.

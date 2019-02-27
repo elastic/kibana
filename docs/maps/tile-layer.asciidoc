@@ -5,3 +5,13 @@ Display tiles served from a tile server.
 
 [role="screenshot"]
 image::maps/images/tile_layer.png[]
+
+Tile layers can be created from the following sources
+
+*Custom Tile Map Service*:: Map tiles configured in kibana.yml.
+
+*Tiles*:: Map tiles from Elastic Maps Service.
+
+*Tile Map Service from URL*:: Map tiles from a URL that includes the XYZ coordinates.
+
+*Web Map Service*:: Maps from OGC Standard WMS.
