@@ -41,7 +41,7 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
 };
 
 function DefaultEditorAggSelect({
-  agg,
+  agg = {},
   isSubAggregation,
   aggHelpLink,
   aggTypeOptions = [],
@@ -50,7 +50,7 @@ function DefaultEditorAggSelect({
 }: DefaultEditorAggSelectProps) {
   // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
   // we added null check for agg. It can be removed after 'agg_params' is converted to React
-  const selectedOptions = agg && agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
+  const selectedOptions = agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
   const labelNode = (
     <div>
       {isSubAggregation ? (
