@@ -8,25 +8,27 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import { validateConfig } from '../validate_config';
 
-describe('Reporting: Validate config', function () {
-  const log = sinon.spy();
+describe('Reporting: Validate config', () => {
+  const logger = {
+    warning: sinon.spy(),
+  };
 
   beforeEach(() => {
-    log.resetHistory();
+    logger.warning.resetHistory();
   });
 
   [undefined, null].forEach(value => {
-    it(`should log a warning and set xpack.reporting.encryptionKey if encryptionKey is ${value}`, function () {
+    it(`should log a warning and set xpack.reporting.encryptionKey if encryptionKey is ${value}`, () => {
       const config = {
         get: sinon.stub().returns(value),
-        set: sinon.stub()
+        set: sinon.stub(),
       };
 
-      expect(() => validateConfig(config, log)).not.to.throwError();
+      expect(() => validateConfig(config, logger)).not.to.throwError();
 
       sinon.assert.calledWith(config.set, 'xpack.reporting.encryptionKey');
-      sinon.assert.calledWithMatch(log, /Generating a random key/);
-      sinon.assert.calledWithMatch(log, /please set xpack.reporting.encryptionKey/);
+      sinon.assert.calledWithMatch(logger, /Generating a random key/);
+      sinon.assert.calledWithMatch(logger, /please set xpack.reporting.encryptionKey/);
     });
   });
 });
