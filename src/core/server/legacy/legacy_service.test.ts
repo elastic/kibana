@@ -31,7 +31,7 @@ import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { logger } from '../logging/__mocks__';
-import { PluginsServiceStartContract } from '../plugins/plugins_service';
+import { PluginsServiceStart } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -41,7 +41,7 @@ let legacyService: LegacyService;
 let configService: jest.Mocked<ConfigService>;
 let env: Env;
 let config$: BehaviorSubject<Config>;
-let startDeps: { http: any; plugins: PluginsServiceStartContract };
+let startDeps: { http: any; plugins: PluginsServiceStart };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 

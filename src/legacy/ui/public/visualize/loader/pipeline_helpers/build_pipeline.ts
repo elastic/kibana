@@ -49,7 +49,7 @@ interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
+type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
 type buildVisConfigFunction = (visState: Vis, schemas: Schemas) => VisState;
 
 interface BuildPipelineVisFunction {
@@ -206,8 +206,11 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: visState => {
-    return `tsvb ${prepareJson('params', visState.params)}`;
+  metrics: (visState, schemas, uiState = {}) => {
+    const paramsJson = prepareJson('params', visState.params);
+    const uiStateJson = prepareJson('uiState', uiState);
+
+    return `tsvb ${paramsJson} ${uiStateJson}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);
@@ -347,6 +350,7 @@ export const buildPipeline = (
   const query = searchSource.getField('query');
   const filters = searchSource.getField('filter');
   const visState = vis.getCurrentState();
+  const uiState = vis.getUiState();
 
   // context
   let pipeline = `kibana | kibana_context `;
@@ -372,7 +376,7 @@ export const buildPipeline = (
 
   const schemas = getSchemas(vis, params.timeRange);
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
+    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
     visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);

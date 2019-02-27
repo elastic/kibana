@@ -29,7 +29,7 @@ export function indexManagement(kibana)  {
     init: function (server) {
       const router = createRouter(server, PLUGIN.ID, '/api/index_management/');
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
-      registerLicenseChecker(server, PLUGIN.ID);
+      registerLicenseChecker(server, PLUGIN.ID, PLUGIN.NAME, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       registerIndicesRoutes(router);
       registerSettingsRoutes(router);
       registerStatsRoute(router);
