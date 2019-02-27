@@ -52,6 +52,6 @@ export const EmptyState = ({ children, count }: EmptyStateProps) => (
         }
       />
     )}
-    {count && count > 0 && children}
+    {!!count && count > 0 && children}
   </Fragment>
 );
