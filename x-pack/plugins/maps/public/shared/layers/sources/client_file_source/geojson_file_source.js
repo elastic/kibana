@@ -7,7 +7,7 @@
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { GEOJSON_FILE } from '../../../../../common/constants';
-import { ClientFileCreateSourceEditor } from './create_client_file_source_editor/';
+import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 
 export class GeojsonFileSource extends AbstractVectorSource {
 
@@ -26,6 +26,10 @@ export class GeojsonFileSource extends AbstractVectorSource {
 
   static previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
     return (geojsonFile, name) => {
+      if (!geojsonFile) {
+        onPreviewSource(null);
+        return;
+      }
       const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
       const source = new GeojsonFileSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
