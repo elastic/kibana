@@ -3,19 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as sinon from 'sinon';
 import { SecretService } from './secret_service';
 
 describe('The Secret Secret Store', function TestSecretServiceObject() {
   const savedObjectsClient = {
-    create: sinon.stub(),
-    errors: sinon.stub(),
-    bulkCreate: sinon.stub(),
-    bulkGet: sinon.stub(),
-    delete: sinon.stub(),
-    find: sinon.stub(),
-    get: sinon.stub(),
-    update: sinon.stub(),
+    create: jest.fn(),
+    errors: jest.fn(),
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
   };
 
   const subject = new SecretService(savedObjectsClient as any, 'testSecretType');
@@ -27,9 +26,9 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
   });
 
   it('should hide values using the saved object client', async () => {
-    const hideMe = { message: 'my secret message', nonSecret: 'this is unhidden' };
+    const hideMe = { message: 'my secret message', anotherSecret: 'this is unhidden' };
     let insideJob: any = null;
-    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+    savedObjectsClient.create.mockImplementation((type: string, attributes: any, options?: any) => {
       insideJob = {
         id: options.id,
         type: 'testSecretType',
@@ -39,13 +38,13 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
     });
 
     const hidden = await subject.hideAttribute(hideMe, 'message');
-    sinon.assert.calledOnce(savedObjectsClient.create);
-    expect(savedObjectsClient.update.notCalled).toBeTruthy();
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
     expect(hidden).toBeDefined();
     expect(hidden.attributes.message).toBeUndefined();
     expect(hidden.attributes.secret).toBeDefined();
     expect(hidden.attributes.secret).not.toContain('my secret message');
-    expect(hidden.attributes.nonSecret).toBeUndefined();
+    expect(hidden.attributes.anotherSecret).toBeUndefined();
     expect(subject);
   });
 
@@ -53,11 +52,11 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
     expect.assertions(4);
     const hideMe = {
       message: 'my secret message',
-      nonSecret: 'this is unhidden',
+      anotherSecret: 'this is unhidden',
       someOtherProp: 'check me',
     };
     let insideJob: any = null;
-    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+    savedObjectsClient.create.mockImplementation((type: string, attributes: any, options?: any) => {
       insideJob = {
         id: options.id,
         type: 'testSecretType',
@@ -65,7 +64,7 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
       };
       return insideJob;
     });
-    savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
+    savedObjectsClient.get.mockImplementation((type: string, id: string, options?: any) => {
       return insideJob;
     });
     const hidden = await subject.hideAttribute(hideMe, 'message');
@@ -80,12 +79,12 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
     expect.assertions(1);
     const hideMe = {
       message: 'my secret message',
-      nonSecret: 'this is unhidden',
+      anotherSecret: 'this is unhidden',
       someOtherProp: 'check me',
     };
     let insideJob: any = null;
     let internalSavedObject: any = null;
-    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+    savedObjectsClient.create.mockImplementation((type: string, attributes: any, options?: any) => {
       insideJob = {
         id: 'testId',
         type: 'testSecretType',
@@ -93,7 +92,7 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
       };
       return insideJob;
     });
-    savedObjectsClient.update.callsFake(
+    savedObjectsClient.update.mockImplementation(
       (type: string, id: string, attributes: any, options?: any) => {
         return (internalSavedObject = {
           id,
@@ -105,8 +104,8 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
         });
       }
     );
-    savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
-      internalSavedObject.nonSecret = 'I am changing the message';
+    savedObjectsClient.get.mockImplementation((type: string, id: string, options?: any) => {
+      internalSavedObject.anotherSecret = 'I am changing the message';
       internalSavedObject.addNewField = 'me';
       return internalSavedObject;
     });
