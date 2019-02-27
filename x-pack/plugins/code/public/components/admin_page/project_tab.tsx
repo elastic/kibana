@@ -19,8 +19,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  // @ts-ignore
   EuiSpacer,
+  // @ts-ignore
   EuiSuperSelect,
   EuiText,
   EuiTitle,
@@ -256,4 +256,5 @@ const mapDispatchToProps = {
 export const ProjectTab = connect(
   mapStateToProps,
   mapDispatchToProps
+  // @ts-ignore
 )(CodeProjectTab);
