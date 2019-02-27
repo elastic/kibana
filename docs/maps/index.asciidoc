@@ -13,5 +13,5 @@ image::images/maps_ecommerce.png[]
 
 --
 
-include::maps/vector_layer.asciidoc[]
-include::maps/tile_layer.asciidoc[]
+include::maps/vector-layer.asciidoc[]
+include::maps/tile-layer.asciidoc[]
