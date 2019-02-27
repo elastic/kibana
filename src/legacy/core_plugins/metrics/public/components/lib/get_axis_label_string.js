@@ -24,6 +24,12 @@ export function getAxisLabelString(interval) {
 
   if (convertedValue) {
     return i18n.translate('tsvb.axisLabelOptions.axisLabel',
-      { defaultMessage: 'per {unitValue} {unitString}', values: convertedValue });
+      {
+        defaultMessage: 'per {unitValue} {unitString}',
+        values: {
+          unitValue: convertedValue.unitValue,
+          unitString: convertedValue.unitString,
+        },
+      });
   }
 }

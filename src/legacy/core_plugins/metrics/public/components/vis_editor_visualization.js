@@ -209,7 +209,10 @@ class VisEditorVisualization extends Component {
             <FormattedMessage
               id="tsvb.visEditorVisualization.panelInterval"
               defaultMessage="Interval: last {unitValue}{unitString}"
-              values={formattedPavelIntervalValue}
+              values={{
+                unitValue: formattedPavelIntervalValue.unitValue,
+                unitString: formattedPavelIntervalValue.unitString
+              }}
             />
           </EuiText>
         </EuiFlexItem>
