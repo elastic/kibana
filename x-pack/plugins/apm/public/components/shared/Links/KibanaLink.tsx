@@ -39,6 +39,8 @@ export const UnconnectedKibanaLink: React.FunctionComponent<Props> = ({
   return <EuiLink {...props} href={href} />;
 };
 
+UnconnectedKibanaLink.displayName = 'UnconnectedKibanaLink';
+
 const withLocation = connect(
   ({ location }: { location: Location }) => ({ location }),
   {}
