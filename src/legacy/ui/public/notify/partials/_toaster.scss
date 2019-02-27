@@ -69,8 +69,28 @@ $kbnToastTypes: (
 );
 
 @each $name, $color in $kbnToastTypes {
+  $foreground: euiCallOutColor($color, 'foreground');
+
   .kbnToast--#{$name} {
     background-color: euiCallOutColor($color, 'background');
-    color: euiCallOutColor($color, 'foreground');
+    color: $foreground;
+
+    // Fix dark mode contrast by forcing button colors to use the same foreground color
+    // Override hover/focus text color changes by using !important
+    @if ($name = 'danger') {
+      .kuiButton--danger,
+      .kuiButton--danger:hover {
+        color: $foreground !important;
+        border-color: $foreground;
+      }
+    }
+
+    @if ($name = 'info') {
+      .kuiButton--secondary,
+      .kuiButton--secondary:hover {
+        color: $foreground !important;
+        border-color: $foreground;
+      }
+    }
   }
 }
