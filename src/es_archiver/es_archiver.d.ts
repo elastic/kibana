@@ -19,14 +19,21 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { Client } from 'elasticsearch';
+import { createStats } from './lib/stats';
+
+export type JsonStats = ReturnType<ReturnType<typeof createStats>['toJSON']>;
 
 export class EsArchiver {
   constructor(options: { client: Client; dataDir: string; log: ToolingLog; kibanaUrl: string });
-  public save(name: string, indices: string | string[], options?: { raw?: boolean }): Promise<void>;
-  public load(name: string, options?: { skipExisting?: boolean }): Promise<void>;
-  public unload(name: string): Promise<void>;
+  public save(
+    name: string,
+    indices: string | string[],
+    options?: { raw?: boolean }
+  ): Promise<JsonStats>;
+  public load(name: string, options?: { skipExisting?: boolean }): Promise<JsonStats>;
+  public unload(name: string): Promise<JsonStats>;
   public rebuildAll(): Promise<void>;
   public edit(prefix: string, handler: () => Promise<void>): Promise<void>;
-  public loadIfNeeded(name: string): Promise<void>;
-  public emptyKibanaIndex(): Promise<void>;
+  public loadIfNeeded(name: string): Promise<JsonStats>;
+  public emptyKibanaIndex(): Promise<JsonStats>;
 }
