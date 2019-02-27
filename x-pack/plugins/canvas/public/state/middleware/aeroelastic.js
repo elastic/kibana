@@ -18,7 +18,7 @@ import {
 } from '../actions/elements';
 import { restoreHistory } from '../actions/history';
 import { selectElement } from '../actions/transient';
-import { addPage, removePage, duplicatePage } from '../actions/pages';
+import { addPage, removePage, duplicatePage, gotoPage } from '../actions/pages';
 import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
@@ -58,6 +58,8 @@ const aeroelasticConfiguration = {
 };
 
 const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
+
+const pageChangerActions = [gotoPage.toString(), duplicatePage.toString(), addPage.toString()];
 
 /**
  * elementToShape
@@ -318,6 +320,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
       }
 
       aero.removeStore(action.payload);
+    }
+
+    if (pageChangerActions.indexOf(action.type) >= 0) {
+      unselectShape(prevPage);
     }
 
     next(action);
