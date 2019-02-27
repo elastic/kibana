@@ -133,7 +133,7 @@ describe('Saved Objects Mixin', () => {
     });
     it('should add GET /api/saved_objects/_export', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/_export', method: 'GET' }))).toBeTruthy();
+      expect(mockServer.route.calledWithMatch(sinon.match({ path: '/api/saved_objects/_export', method: 'POST' }))).toBeTruthy();
     });
   });
 
