@@ -518,17 +518,6 @@ describe('Create Rollup Job', () => {
         });
       });
     });
-
-    describe('navigation', () => {
-      it('should go to "Date histogram" when all form fields are valid', async () => {
-        expect(getEuiStepsHorizontalActive()).toContain('Logistics'); // Make sure we are on Logistics
-
-        await form.fillFormFields('logistics');
-        userActions.clickNextStep();
-
-        expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
-      });
-    });
   });
 
   describe('Step 2: Date histogram', () => {
@@ -537,7 +526,7 @@ describe('Create Rollup Job', () => {
         await goToStep(2);
       });
 
-      it('should have the horizontal step active on "Date histogramm"', () => {
+      it('should have the horizontal step active on "Date histogram"', () => {
         expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
       });
 
@@ -605,14 +594,6 @@ describe('Create Rollup Job', () => {
           userActions.clickNextStep();
           expect(getFormErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
         });
-      });
-    });
-
-    describe('navigation', () => {
-      it('should go to "Terms" when all form fields are valid', async () => {
-        await goToStep(3);
-
-        expect(getEuiStepsHorizontalActive()).toContain('Terms');
       });
     });
   });
