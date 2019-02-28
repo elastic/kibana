@@ -90,7 +90,7 @@ const initFillFormFields = form => async (step) => {
 };
 
 const initGoToStep = (fillFormFields, clickNextStep) => async (step) => {
-  if (!step) {
+  if (!step || step === 1) {
     return;
   }
 
@@ -103,6 +103,10 @@ const initGoToStep = (fillFormFields, clickNextStep) => async (step) => {
   }
 
   if (step > 3) {
+    clickNextStep();
+  }
+
+  if (step > 4) {
     clickNextStep();
   }
 };
@@ -212,10 +216,19 @@ describe('Create Rollup Job', () => {
         'Index pattern is required.',
         'Rollup index is required.',
       ]);
+      expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
     });
 
     describe('form validations', () => {
       describe('index pattern', () => {
+        beforeEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        });
+
+        afterEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
+
         it('should not allow spaces', async () => {
           await form.setInputValue('rollupIndexPattern', 'with space', true);
           userActions.clickNextStep();
@@ -256,6 +269,14 @@ describe('Create Rollup Job', () => {
       });
 
       describe('rollup index name', () => {
+        beforeEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        });
+
+        afterEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
+
         it('should not allow spaces', () => {
           form.setInputValue('rollupIndexName', 'with space');
           userActions.clickNextStep();
@@ -501,6 +522,14 @@ describe('Create Rollup Job', () => {
       });
 
       describe('page size', () => {
+        beforeEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        });
+
+        afterEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
+
         it('should not be empty', () => {
           form.setInputValue('rollupPageSize', '');
           userActions.clickNextStep();
@@ -515,6 +544,14 @@ describe('Create Rollup Job', () => {
       });
 
       describe('delay', () => {
+        beforeEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(false);
+        });
+
+        afterEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
+
         it('should validate the interval format', () => {
           form.setInputValue('rollupDelay', 'abc');
           userActions.clickNextStep();
@@ -594,9 +631,14 @@ describe('Create Rollup Job', () => {
 
         expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
         expect(getFormErrorsMessages()).toEqual(['Interval is required.']);
+        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       describe('interval', () => {
+        afterEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
+
         it('should validate the interval format', () => {
           form.setInputValue('rollupJobInterval', 'abc');
           userActions.clickNextStep();
@@ -743,7 +785,7 @@ describe('Create Rollup Job', () => {
 
         // Make sure rows value has been set
         let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobTermsFieldList');
-        expect(fieldListRows[0].columns[0].value).toEqual('a-numericField');
+        expect(fieldListRows[0].columns[0].value).not.toEqual('No terms fields added');
 
         const columnsFirstRow = fieldListRows[0].columns;
         // The last column is the eui "actions" column
@@ -842,7 +884,7 @@ describe('Create Rollup Job', () => {
           await goToStepAndOpenFieldChooser();
         });
 
-        it('should display the hisogram fields available', async () => {
+        it('should display the histogram fields available', async () => {
           const { tableCellsValues } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
 
           expect(tableCellsValues).toEqual([
@@ -882,7 +924,7 @@ describe('Create Rollup Job', () => {
 
         // Make sure rows value has been set
         let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobHistogramFieldList');
-        expect(fieldListRows[0].columns[0].value).toEqual('a-numericField');
+        expect(fieldListRows[0].columns[0].value).not.toEqual('No histogram fields added');
 
         const columnsFirstRow = fieldListRows[0].columns;
         // The last column is the eui "actions" column
@@ -907,31 +949,236 @@ describe('Create Rollup Job', () => {
         addHistogramFieldToList();
       });
 
-      it('should display errors when clicking "next" without filling the interval', () => {
-        expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+      describe('--> invalid', () => {
+        afterEach(() => {
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
 
-        userActions.clickNextStep();
+        it('should display errors when clicking "next" without filling the interval', () => {
+          expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
 
-        expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
-      });
+          userActions.clickNextStep();
 
-      it('should be a whole number', () => {
-        form.setInputValue('rollupJobCreateHistogramInterval', 5.5);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
-      });
+          expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
+          expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        });
 
-      it('should be greater than zero', () => {
-        form.setInputValue('rollupJobCreateHistogramInterval', -1);
-        userActions.clickNextStep();
-        expect(getFormErrorsMessages()).toEqual(['Interval must be greater than zero.']);
+        it('should be a whole number', () => {
+          form.setInputValue('rollupJobCreateHistogramInterval', 5.5);
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        });
+
+        it('should be greater than zero', () => {
+          form.setInputValue('rollupJobCreateHistogramInterval', -1);
+          userActions.clickNextStep();
+          expect(getFormErrorsMessages()).toEqual(['Interval must be greater than zero.']);
+        });
       });
 
       it('should go to next "Metrics" step if value is valid', () => {
         form.setInputValue('rollupJobCreateHistogramInterval', 3);
         userActions.clickNextStep();
         expect(getEuiStepsHorizontalActive()).toContain('Metrics');
+      });
+    });
+  });
+
+  describe('Step 5: Metrics', () => {
+    const numericFields = ['a-numericField', 'c-numericField'];
+    const dateFields = ['b-dateField', 'd-dateField'];
+
+    const goToStepAndOpenFieldChooser = async () => {
+      await goToStep(5);
+      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+    };
+
+    describe('layout', () => {
+      beforeEach(async () => {
+        await goToStep(5);
+      });
+
+      it('should have the horizontal step active on "Metrics"', () => {
+        expect(getEuiStepsHorizontalActive()).toContain('Metrics');
+      });
+
+      it('should have the title set to "Metrics"', () => {
+        expect(testSubjectExists('rollupJobCreateMetricsTitle')).toBe(true);
+      });
+
+      it('should have a link to the documentation', () => {
+        expect(testSubjectExists('rollupJobCreateMetricsDocsButton')).toBe(true);
+      });
+
+      it('should have the "next" and "back" button visible', () => {
+        expect(testSubjectExists('rollupJobBackButton')).toBe(true);
+        expect(testSubjectExists('rollupJobNextButton')).toBe(true);
+        expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      });
+
+      it('should go to the "Histogram" step when clicking the back button', async () => {
+        userActions.clickPreviousStep();
+        expect(getEuiStepsHorizontalActive()).toContain('Histogram');
+      });
+
+      it('should go to the "Review" step when clicking the next button', async () => {
+        userActions.clickNextStep();
+        expect(getEuiStepsHorizontalActive()).toContain('Review');
+      });
+
+      it('should have a button to display the list of metrics fields to chose from', () => {
+        expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(false);
+
+        findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+
+        expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(true);
+      });
+    });
+
+    describe('metrics field chooser (flyout)', () => {
+      describe('layout', () => {
+        beforeEach(async () => {
+          await goToStepAndOpenFieldChooser();
+        });
+
+        it('should have the title set to "Add metrics fields"', async () => {
+          expect(findTestSubject('rollupJobCreateFlyoutTitle').text()).toEqual('Add metrics fields');
+        });
+
+        it('should have a button to close the flyout', () => {
+          expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(true);
+
+          findTestSubject('euiFlyoutCloseButton').simulate('click');
+
+          expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(false);
+        });
+      });
+
+      describe('table', () => {
+        beforeEach(async () => {
+          mockIndexPatternValidityResponse({ numericFields, dateFields });
+          await goToStepAndOpenFieldChooser();
+        });
+
+        it('should display the fields with metrics and its type', async () => {
+          const { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+
+          expect(tableCellsValues).toEqual([
+            ['a-numericField', 'numeric'],
+            ['b-dateField', 'date'],
+            ['c-numericField', 'numeric'],
+            ['d-dateField', 'date'],
+          ]);
+        });
+
+        it('should add metric field to the field list when clicking on a row', () => {
+          let { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+          expect(tableCellsValues).toEqual([['No metrics fields added']]); // make sure the field list is empty
+
+          const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+          rows[0].reactWrapper.simulate('click'); // Select first row in field chooser
+
+          ({ tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
+          const [firstRow] = tableCellsValues;
+          const [field, type] = firstRow;
+          expect(field).toEqual(rows[0].columns[0].value);
+          expect(type).toEqual(rows[0].columns[1].value);
+        });
+      });
+    });
+
+    describe('fields list', () => {
+      const addFieldToList = (type = 'numeric') => {
+        if(!testSubjectExists('rollupJobMetricsFieldChooser-table')) {
+          findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+        }
+        const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+        for (let i = 0; i < rows.length; i++) {
+          if (rows[i].columns[1].value === type) {
+            rows[i].reactWrapper.simulate('click');
+            break;
+          }
+        }
+      };
+
+      it('should have an empty field list', async () => {
+        await goToStep(5);
+
+        const { tableCellsValues } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+        expect(tableCellsValues).toEqual([['No metrics fields added']]);
+      });
+
+      describe('when fields are added', () => {
+        beforeEach(async () => {
+          mockIndexPatternValidityResponse({ numericFields, dateFields });
+          await goToStepAndOpenFieldChooser();
+        });
+
+        it('should have "avg", "max", "min", "sum" & "value count" metrics for *numeric* fields', () => {
+          const numericTypeMetrics = ['avg', 'max', 'min', 'sum', 'value_count'];
+          addFieldToList('numeric');
+          numericTypeMetrics.forEach(type => {
+            try {
+              expect(testSubjectExists(`rollupJobMetricCheckbox-${type}`)).toBe(true);
+            } catch(e) {
+              throw(new Error(`Test subject "rollupJobMetricCheckbox-${type}" was not found.`));
+            }
+          });
+
+          // Make sure there are no other checkboxes
+          const { rows: [firstRow] } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+          const columnWithMetricsCheckboxes = 2;
+          const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
+          expect(metricsCheckboxes.length).toBe(numericTypeMetrics.length);
+        });
+
+        it('should have "max", "min", & "value count" metrics for *date* fields', () => {
+          const dateTypeMetrics = ['max', 'min', 'value_count'];
+          addFieldToList('date');
+
+          dateTypeMetrics.forEach(type => {
+            try {
+              expect(testSubjectExists(`rollupJobMetricCheckbox-${type}`)).toBe(true);
+            } catch(e) {
+              throw(new Error(`Test subject "rollupJobMetricCheckbox-${type}" was not found.`));
+            }
+          });
+
+          // Make sure there are no other checkboxes
+          const { rows: [firstRow] } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+          const columnWithMetricsCheckboxes = 2;
+          const metricsCheckboxes = firstRow.columns[columnWithMetricsCheckboxes].reactWrapper.find('input');
+          expect(metricsCheckboxes.length).toBe(dateTypeMetrics.length);
+        });
+
+        it('should not allow to go to the next step if at least one metric type is not selected', () => {
+          expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+
+          addFieldToList('numeric');
+          userActions.clickNextStep();
+
+          const stepError = findTestSubject('rollupJobCreateStepError');
+          expect(stepError.length).toBeTruthy();
+          expect(stepError.text()).toEqual('Select metrics types for these fields or remove them: a-numericField.');
+          expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        });
+
+        it('should have a delete button on each row to remove the metric field', async () => {
+          const { rows: fieldChooserRows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
+          fieldChooserRows[0].reactWrapper.simulate('click'); // select first item
+
+          // Make sure rows value has been set
+          let { rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList');
+          expect(fieldListRows[0].columns[0].value).not.toEqual('No metrics fields added');
+
+          const columnsFirstRow = fieldListRows[0].columns;
+          // The last column is the eui "actions" column
+          const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
+          deleteButton.simulate('click');
+
+          ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
+          expect(fieldListRows[0].columns[0].value).toEqual('No metrics fields added');
+        });
       });
     });
   });
