@@ -69,7 +69,6 @@
     "abab": "^1.0.4",
     "ansi-colors": "^3.0.5",
     "ansicolors": "0.3.2",
-    "aws-sdk": "2.2.33",
     "axios": "^0.18.0",
     "babel-jest": "^23.6.0",
     "babel-plugin-inline-react-svg": "^0.5.4",
