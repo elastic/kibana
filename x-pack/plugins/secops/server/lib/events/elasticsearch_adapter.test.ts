@@ -57,6 +57,7 @@ describe('events elasticsearch_adapter', () => {
           module: 'event-module-1',
           type: 'event-type-1',
           category: 'event-category-1',
+          severity: 1,
         },
       },
       sort: ['123567890', '1234'],

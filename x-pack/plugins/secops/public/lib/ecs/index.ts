@@ -90,3 +90,6 @@ export const getPopulatedMappedFields = ({
     'name',
     getAllFieldsInSchema(schema).filter(f => getMappedEcsValue({ data, fieldName: f.name }) != null)
   );
+
+export const fieldExists = ({ data, fieldName }: { data: Ecs; fieldName: string }): boolean =>
+  getMappedEcsValue({ data, fieldName }) != null;

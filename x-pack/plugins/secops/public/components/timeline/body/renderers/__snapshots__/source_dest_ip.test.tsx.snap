@@ -1,0 +1,2532 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SuricataDestIp rendering it renders the default SuricataDestIp 1`] = `
+<ThemeProvider
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  theme={[Function]}
+>
+  <Provider
+    store={
+      Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(observable): [Function],
+      }
+    }
+  >
+    <DragDropContext
+      onDragEnd={[Function]}
+    >
+      <pure(Component)
+        data={
+          Object {
+            "_id": "4",
+            "destination": Object {
+              "ip": "192.168.0.3",
+              "port": 6343,
+            },
+            "event": Object {
+              "category": "Attempted Administrator Privilege Gain",
+              "id": 4,
+              "module": "suricata",
+              "severity": 1,
+              "type": "Alert",
+            },
+            "geo": Object {
+              "country_iso_code": "xx",
+              "region_name": "xx",
+            },
+            "host": Object {
+              "ip": Array [
+                "192.168.0.1",
+              ],
+              "name": "suricata",
+            },
+            "source": Object {
+              "ip": "192.168.0.3",
+              "port": 53,
+            },
+            "suricata": Object {
+              "eve": Object {
+                "alert": Object {
+                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                  "signature_id": 4,
+                },
+                "flow_id": 4,
+                "proto": "",
+              },
+            },
+            "timestamp": "2018-11-08T19:03:25.937Z",
+            "user": Object {
+              "id": 4,
+              "name": "jenny.jones",
+            },
+          }
+        }
+      >
+        <Component
+          data={
+            Object {
+              "_id": "4",
+              "destination": Object {
+                "ip": "192.168.0.3",
+                "port": 6343,
+              },
+              "event": Object {
+                "category": "Attempted Administrator Privilege Gain",
+                "id": 4,
+                "module": "suricata",
+                "severity": 1,
+                "type": "Alert",
+              },
+              "geo": Object {
+                "country_iso_code": "xx",
+                "region_name": "xx",
+              },
+              "host": Object {
+                "ip": Array [
+                  "192.168.0.1",
+                ],
+                "name": "suricata",
+              },
+              "source": Object {
+                "ip": "192.168.0.3",
+                "port": 53,
+              },
+              "suricata": Object {
+                "eve": Object {
+                  "alert": Object {
+                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                    "signature_id": 4,
+                  },
+                  "flow_id": 4,
+                  "proto": "",
+                },
+              },
+              "timestamp": "2018-11-08T19:03:25.937Z",
+              "user": Object {
+                "id": 4,
+                "name": "jenny.jones",
+              },
+            }
+          }
+        >
+          <EuiFlexGroup
+            alignItems="stretch"
+            component="div"
+            direction="row"
+            gutterSize="l"
+            justifyContent="spaceEvenly"
+            responsive={true}
+            wrap={false}
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceEvenly euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    component="div"
+                    direction="column"
+                    gutterSize="none"
+                    justifyContent="flexStart"
+                    responsive={true}
+                    wrap={false}
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                    >
+                      <pure(Component)
+                        data={
+                          Object {
+                            "_id": "4",
+                            "destination": Object {
+                              "ip": "192.168.0.3",
+                              "port": 6343,
+                            },
+                            "event": Object {
+                              "category": "Attempted Administrator Privilege Gain",
+                              "id": 4,
+                              "module": "suricata",
+                              "severity": 1,
+                              "type": "Alert",
+                            },
+                            "geo": Object {
+                              "country_iso_code": "xx",
+                              "region_name": "xx",
+                            },
+                            "host": Object {
+                              "ip": Array [
+                                "192.168.0.1",
+                              ],
+                              "name": "suricata",
+                            },
+                            "source": Object {
+                              "ip": "192.168.0.3",
+                              "port": 53,
+                            },
+                            "suricata": Object {
+                              "eve": Object {
+                                "alert": Object {
+                                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                  "signature_id": 4,
+                                },
+                                "flow_id": 4,
+                                "proto": "",
+                              },
+                            },
+                            "timestamp": "2018-11-08T19:03:25.937Z",
+                            "user": Object {
+                              "id": 4,
+                              "name": "jenny.jones",
+                            },
+                          }
+                        }
+                      >
+                        <Component
+                          data={
+                            Object {
+                              "_id": "4",
+                              "destination": Object {
+                                "ip": "192.168.0.3",
+                                "port": 6343,
+                              },
+                              "event": Object {
+                                "category": "Attempted Administrator Privilege Gain",
+                                "id": 4,
+                                "module": "suricata",
+                                "severity": 1,
+                                "type": "Alert",
+                              },
+                              "geo": Object {
+                                "country_iso_code": "xx",
+                                "region_name": "xx",
+                              },
+                              "host": Object {
+                                "ip": Array [
+                                  "192.168.0.1",
+                                ],
+                                "name": "suricata",
+                              },
+                              "source": Object {
+                                "ip": "192.168.0.3",
+                                "port": 53,
+                              },
+                              "suricata": Object {
+                                "eve": Object {
+                                  "alert": Object {
+                                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                    "signature_id": 4,
+                                  },
+                                  "flow_id": 4,
+                                  "proto": "",
+                                },
+                              },
+                              "timestamp": "2018-11-08T19:03:25.937Z",
+                              "user": Object {
+                                "id": 4,
+                                "name": "jenny.jones",
+                              },
+                            }
+                          }
+                        >
+                          <EuiFlexItem
+                            component="div"
+                            grow={true}
+                          >
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <styled.div>
+                                <div
+                                  className="sc-feJyhm koOjEJ"
+                                >
+                                  Source
+                                </div>
+                              </styled.div>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            component="div"
+                            grow={true}
+                          >
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiFlexGroup
+                                alignItems="stretch"
+                                component="div"
+                                direction="row"
+                                gutterSize="none"
+                                justifyContent="flexStart"
+                                responsive={true}
+                                wrap={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                >
+                                  <EuiFlexItem
+                                    component="div"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <pure(Component)
+                                        data={
+                                          Object {
+                                            "_id": "4",
+                                            "destination": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 6343,
+                                            },
+                                            "event": Object {
+                                              "category": "Attempted Administrator Privilege Gain",
+                                              "id": 4,
+                                              "module": "suricata",
+                                              "severity": 1,
+                                              "type": "Alert",
+                                            },
+                                            "geo": Object {
+                                              "country_iso_code": "xx",
+                                              "region_name": "xx",
+                                            },
+                                            "host": Object {
+                                              "ip": Array [
+                                                "192.168.0.1",
+                                              ],
+                                              "name": "suricata",
+                                            },
+                                            "source": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 53,
+                                            },
+                                            "suricata": Object {
+                                              "eve": Object {
+                                                "alert": Object {
+                                                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                  "signature_id": 4,
+                                                },
+                                                "flow_id": 4,
+                                                "proto": "",
+                                              },
+                                            },
+                                            "timestamp": "2018-11-08T19:03:25.937Z",
+                                            "user": Object {
+                                              "id": 4,
+                                              "name": "jenny.jones",
+                                            },
+                                          }
+                                        }
+                                        data-test-subj="source-ip-and-port"
+                                        fieldName="source.ip"
+                                      >
+                                        <Component
+                                          data={
+                                            Object {
+                                              "_id": "4",
+                                              "destination": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 6343,
+                                              },
+                                              "event": Object {
+                                                "category": "Attempted Administrator Privilege Gain",
+                                                "id": 4,
+                                                "module": "suricata",
+                                                "severity": 1,
+                                                "type": "Alert",
+                                              },
+                                              "geo": Object {
+                                                "country_iso_code": "xx",
+                                                "region_name": "xx",
+                                              },
+                                              "host": Object {
+                                                "ip": Array [
+                                                  "192.168.0.1",
+                                                ],
+                                                "name": "suricata",
+                                              },
+                                              "source": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 53,
+                                              },
+                                              "suricata": Object {
+                                                "eve": Object {
+                                                  "alert": Object {
+                                                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                    "signature_id": 4,
+                                                  },
+                                                  "flow_id": 4,
+                                                  "proto": "",
+                                                },
+                                              },
+                                              "timestamp": "2018-11-08T19:03:25.937Z",
+                                              "user": Object {
+                                                "id": 4,
+                                                "name": "jenny.jones",
+                                              },
+                                            }
+                                          }
+                                          data-test-subj="source-ip-and-port"
+                                          fieldName="source.ip"
+                                        >
+                                          <Connect(DraggableWrapperComponent)
+                                            dataProvider={
+                                              Object {
+                                                "and": Array [],
+                                                "enabled": true,
+                                                "excluded": false,
+                                                "id": "row-render-value-for-4-source_ip",
+                                                "kqlQuery": "",
+                                                "name": "source.ip: 192.168.0.3",
+                                                "queryMatch": Object {
+                                                  "field": "source.ip",
+                                                  "value": "192.168.0.3",
+                                                },
+                                              }
+                                            }
+                                            key="row-render-value-for-4-source.ip"
+                                            render={[Function]}
+                                          >
+                                            <DraggableWrapperComponent
+                                              dataProvider={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "source.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "source.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              registerProvider={[Function]}
+                                              render={[Function]}
+                                              row-render-value-for-4-destination_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-destination_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_port",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.port: 6343",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.port",
+                                                    "value": 6343,
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "source.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "source.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_port",
+                                                  "kqlQuery": "",
+                                                  "name": "source.port: 53",
+                                                  "queryMatch": Object {
+                                                    "field": "source.port",
+                                                    "value": 53,
+                                                  },
+                                                }
+                                              }
+                                              unRegisterProvider={[Function]}
+                                            >
+                                              <div
+                                                data-test-subj="draggableWrapperDiv"
+                                              >
+                                                <Connect(Droppable)
+                                                  direction="vertical"
+                                                  droppableId="droppableId.content.row-render-value-for-4-source_ip"
+                                                  ignoreContainerClipping={false}
+                                                  isDropDisabled={true}
+                                                  type="DEFAULT"
+                                                >
+                                                  <Droppable
+                                                    direction="vertical"
+                                                    dispatch={[Function]}
+                                                    draggingOverWith={null}
+                                                    droppableId="droppableId.content.row-render-value-for-4-source_ip"
+                                                    ignoreContainerClipping={false}
+                                                    isDraggingOver={false}
+                                                    isDropDisabled={true}
+                                                    placeholder={null}
+                                                    type="DEFAULT"
+                                                  >
+                                                    <DroppableDimensionPublisher
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.row-render-value-for-4-source_ip"
+                                                      getDroppableRef={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isDropDisabled={true}
+                                                      type="DEFAULT"
+                                                    >
+                                                      <div
+                                                        data-react-beautiful-dnd-droppable="0"
+                                                      >
+                                                        <Connect(Draggable)
+                                                          disableInteractiveElementBlocking={false}
+                                                          draggableId="draggableId.content.row-render-value-for-4-source_ip"
+                                                          index={0}
+                                                          isDragDisabled={false}
+                                                          key="row-render-value-for-4-source_ip"
+                                                        >
+                                                          <Draggable
+                                                            dimension={null}
+                                                            disableInteractiveElementBlocking={false}
+                                                            draggableId="draggableId.content.row-render-value-for-4-source_ip"
+                                                            draggingOver={null}
+                                                            drop={[Function]}
+                                                            dropAnimationFinished={[Function]}
+                                                            index={0}
+                                                            isDragDisabled={false}
+                                                            isDragging={false}
+                                                            isDropAnimating={false}
+                                                            lift={[Function]}
+                                                            move={[Function]}
+                                                            moveByWindowScroll={[Function]}
+                                                            moveDown={[Function]}
+                                                            moveLeft={[Function]}
+                                                            moveRight={[Function]}
+                                                            moveUp={[Function]}
+                                                            offset={
+                                                              Object {
+                                                                "x": 0,
+                                                                "y": 0,
+                                                              }
+                                                            }
+                                                            shouldAnimateDisplacement={true}
+                                                            shouldAnimateDragMovement={false}
+                                                          >
+                                                            <DraggableDimensionPublisher
+                                                              draggableId="draggableId.content.row-render-value-for-4-source_ip"
+                                                              droppableId="droppableId.content.row-render-value-for-4-source_ip"
+                                                              getDraggableRef={[Function]}
+                                                              index={0}
+                                                              key="draggableId.content.row-render-value-for-4-source_ip"
+                                                              type="DEFAULT"
+                                                            >
+                                                              <Moveable
+                                                                destination={
+                                                                  Object {
+                                                                    "x": 0,
+                                                                    "y": 0,
+                                                                  }
+                                                                }
+                                                                onMoveEnd={[Function]}
+                                                                speed="INSTANT"
+                                                              >
+                                                                <Motion
+                                                                  defaultStyle={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                  onRest={[Function]}
+                                                                  style={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                >
+                                                                  <DoubleRenderBlocker
+                                                                    change={
+                                                                      Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      }
+                                                                    }
+                                                                  >
+                                                                    <DragHandle
+                                                                      callbacks={
+                                                                        Object {
+                                                                          "onCancel": [Function],
+                                                                          "onDrop": [Function],
+                                                                          "onLift": [Function],
+                                                                          "onMove": [Function],
+                                                                          "onMoveDown": [Function],
+                                                                          "onMoveLeft": [Function],
+                                                                          "onMoveRight": [Function],
+                                                                          "onMoveUp": [Function],
+                                                                          "onWindowScroll": [Function],
+                                                                        }
+                                                                      }
+                                                                      canDragInteractiveElements={false}
+                                                                      draggableId="draggableId.content.row-render-value-for-4-source_ip"
+                                                                      getDraggableRef={[Function]}
+                                                                      isDragging={false}
+                                                                      isDropAnimating={false}
+                                                                      isEnabled={true}
+                                                                    >
+                                                                      <styled.div
+                                                                        aria-roledescription="Draggable item. Press space bar to lift"
+                                                                        data-react-beautiful-dnd-drag-handle="0"
+                                                                        data-react-beautiful-dnd-draggable="0"
+                                                                        data-test-subj="providerContainer"
+                                                                        draggable={false}
+                                                                        innerRef={[Function]}
+                                                                        onBlur={[Function]}
+                                                                        onDragStart={[Function]}
+                                                                        onFocus={[Function]}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseDown={[Function]}
+                                                                        onTouchStart={[Function]}
+                                                                        style={
+                                                                          Object {
+                                                                            "transform": null,
+                                                                            "transition": null,
+                                                                            "zIndex": 9000,
+                                                                          }
+                                                                        }
+                                                                        tabIndex={0}
+                                                                      >
+                                                                        <div
+                                                                          aria-roledescription="Draggable item. Press space bar to lift"
+                                                                          className="sc-hzDkRC koNYSi"
+                                                                          data-react-beautiful-dnd-drag-handle="0"
+                                                                          data-react-beautiful-dnd-draggable="0"
+                                                                          data-test-subj="providerContainer"
+                                                                          draggable={false}
+                                                                          onBlur={[Function]}
+                                                                          onDragStart={[Function]}
+                                                                          onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
+                                                                          onMouseDown={[Function]}
+                                                                          onTouchStart={[Function]}
+                                                                          style={
+                                                                            Object {
+                                                                              "transform": null,
+                                                                              "transition": null,
+                                                                              "zIndex": 9000,
+                                                                            }
+                                                                          }
+                                                                          tabIndex={0}
+                                                                        >
+                                                                          <pure(Component)
+                                                                            data={
+                                                                              Object {
+                                                                                "_id": "4",
+                                                                                "destination": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 6343,
+                                                                                },
+                                                                                "event": Object {
+                                                                                  "category": "Attempted Administrator Privilege Gain",
+                                                                                  "id": 4,
+                                                                                  "module": "suricata",
+                                                                                  "severity": 1,
+                                                                                  "type": "Alert",
+                                                                                },
+                                                                                "geo": Object {
+                                                                                  "country_iso_code": "xx",
+                                                                                  "region_name": "xx",
+                                                                                },
+                                                                                "host": Object {
+                                                                                  "ip": Array [
+                                                                                    "192.168.0.1",
+                                                                                  ],
+                                                                                  "name": "suricata",
+                                                                                },
+                                                                                "source": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 53,
+                                                                                },
+                                                                                "suricata": Object {
+                                                                                  "eve": Object {
+                                                                                    "alert": Object {
+                                                                                      "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                      "signature_id": 4,
+                                                                                    },
+                                                                                    "flow_id": 4,
+                                                                                    "proto": "",
+                                                                                  },
+                                                                                },
+                                                                                "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                "user": Object {
+                                                                                  "id": 4,
+                                                                                  "name": "jenny.jones",
+                                                                                },
+                                                                              }
+                                                                            }
+                                                                            fieldName="source.ip"
+                                                                            fieldType="ip"
+                                                                          >
+                                                                            <Component
+                                                                              data={
+                                                                                Object {
+                                                                                  "_id": "4",
+                                                                                  "destination": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 6343,
+                                                                                  },
+                                                                                  "event": Object {
+                                                                                    "category": "Attempted Administrator Privilege Gain",
+                                                                                    "id": 4,
+                                                                                    "module": "suricata",
+                                                                                    "severity": 1,
+                                                                                    "type": "Alert",
+                                                                                  },
+                                                                                  "geo": Object {
+                                                                                    "country_iso_code": "xx",
+                                                                                    "region_name": "xx",
+                                                                                  },
+                                                                                  "host": Object {
+                                                                                    "ip": Array [
+                                                                                      "192.168.0.1",
+                                                                                    ],
+                                                                                    "name": "suricata",
+                                                                                  },
+                                                                                  "source": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 53,
+                                                                                  },
+                                                                                  "suricata": Object {
+                                                                                    "eve": Object {
+                                                                                      "alert": Object {
+                                                                                        "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                        "signature_id": 4,
+                                                                                      },
+                                                                                      "flow_id": 4,
+                                                                                      "proto": "",
+                                                                                    },
+                                                                                  },
+                                                                                  "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                  "user": Object {
+                                                                                    "id": 4,
+                                                                                    "name": "jenny.jones",
+                                                                                  },
+                                                                                }
+                                                                              }
+                                                                              fieldName="source.ip"
+                                                                              fieldType="ip"
+                                                                            >
+                                                                              192.168.0.3
+                                                                            </Component>
+                                                                          </pure(Component)>
+                                                                        </div>
+                                                                      </styled.div>
+                                                                    </DragHandle>
+                                                                  </DoubleRenderBlocker>
+                                                                </Motion>
+                                                              </Moveable>
+                                                            </DraggableDimensionPublisher>
+                                                          </Draggable>
+                                                        </Connect(Draggable)>
+                                                      </div>
+                                                    </DroppableDimensionPublisher>
+                                                  </Droppable>
+                                                </Connect(Droppable)>
+                                              </div>
+                                            </DraggableWrapperComponent>
+                                          </Connect(DraggableWrapperComponent)>
+                                        </Component>
+                                      </pure(Component)>
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    component="div"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      :
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    component="div"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <pure(Component)
+                                        data={
+                                          Object {
+                                            "_id": "4",
+                                            "destination": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 6343,
+                                            },
+                                            "event": Object {
+                                              "category": "Attempted Administrator Privilege Gain",
+                                              "id": 4,
+                                              "module": "suricata",
+                                              "severity": 1,
+                                              "type": "Alert",
+                                            },
+                                            "geo": Object {
+                                              "country_iso_code": "xx",
+                                              "region_name": "xx",
+                                            },
+                                            "host": Object {
+                                              "ip": Array [
+                                                "192.168.0.1",
+                                              ],
+                                              "name": "suricata",
+                                            },
+                                            "source": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 53,
+                                            },
+                                            "suricata": Object {
+                                              "eve": Object {
+                                                "alert": Object {
+                                                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                  "signature_id": 4,
+                                                },
+                                                "flow_id": 4,
+                                                "proto": "",
+                                              },
+                                            },
+                                            "timestamp": "2018-11-08T19:03:25.937Z",
+                                            "user": Object {
+                                              "id": 4,
+                                              "name": "jenny.jones",
+                                            },
+                                          }
+                                        }
+                                        fieldName="source.port"
+                                      >
+                                        <Component
+                                          data={
+                                            Object {
+                                              "_id": "4",
+                                              "destination": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 6343,
+                                              },
+                                              "event": Object {
+                                                "category": "Attempted Administrator Privilege Gain",
+                                                "id": 4,
+                                                "module": "suricata",
+                                                "severity": 1,
+                                                "type": "Alert",
+                                              },
+                                              "geo": Object {
+                                                "country_iso_code": "xx",
+                                                "region_name": "xx",
+                                              },
+                                              "host": Object {
+                                                "ip": Array [
+                                                  "192.168.0.1",
+                                                ],
+                                                "name": "suricata",
+                                              },
+                                              "source": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 53,
+                                              },
+                                              "suricata": Object {
+                                                "eve": Object {
+                                                  "alert": Object {
+                                                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                    "signature_id": 4,
+                                                  },
+                                                  "flow_id": 4,
+                                                  "proto": "",
+                                                },
+                                              },
+                                              "timestamp": "2018-11-08T19:03:25.937Z",
+                                              "user": Object {
+                                                "id": 4,
+                                                "name": "jenny.jones",
+                                              },
+                                            }
+                                          }
+                                          fieldName="source.port"
+                                        >
+                                          <Connect(DraggableWrapperComponent)
+                                            dataProvider={
+                                              Object {
+                                                "and": Array [],
+                                                "enabled": true,
+                                                "excluded": false,
+                                                "id": "row-render-value-for-4-source_port",
+                                                "kqlQuery": "",
+                                                "name": "source.port: 53",
+                                                "queryMatch": Object {
+                                                  "field": "source.port",
+                                                  "value": 53,
+                                                },
+                                              }
+                                            }
+                                            key="row-render-value-for-4-source.port"
+                                            render={[Function]}
+                                          >
+                                            <DraggableWrapperComponent
+                                              dataProvider={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_port",
+                                                  "kqlQuery": "",
+                                                  "name": "source.port: 53",
+                                                  "queryMatch": Object {
+                                                    "field": "source.port",
+                                                    "value": 53,
+                                                  },
+                                                }
+                                              }
+                                              registerProvider={[Function]}
+                                              render={[Function]}
+                                              row-render-value-for-4-destination_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-destination_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_port",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.port: 6343",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.port",
+                                                    "value": 6343,
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "source.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "source.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_port",
+                                                  "kqlQuery": "",
+                                                  "name": "source.port: 53",
+                                                  "queryMatch": Object {
+                                                    "field": "source.port",
+                                                    "value": 53,
+                                                  },
+                                                }
+                                              }
+                                              unRegisterProvider={[Function]}
+                                            >
+                                              <div
+                                                data-test-subj="draggableWrapperDiv"
+                                              >
+                                                <Connect(Droppable)
+                                                  direction="vertical"
+                                                  droppableId="droppableId.content.row-render-value-for-4-source_port"
+                                                  ignoreContainerClipping={false}
+                                                  isDropDisabled={true}
+                                                  type="DEFAULT"
+                                                >
+                                                  <Droppable
+                                                    direction="vertical"
+                                                    dispatch={[Function]}
+                                                    draggingOverWith={null}
+                                                    droppableId="droppableId.content.row-render-value-for-4-source_port"
+                                                    ignoreContainerClipping={false}
+                                                    isDraggingOver={false}
+                                                    isDropDisabled={true}
+                                                    placeholder={null}
+                                                    type="DEFAULT"
+                                                  >
+                                                    <DroppableDimensionPublisher
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.row-render-value-for-4-source_port"
+                                                      getDroppableRef={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isDropDisabled={true}
+                                                      type="DEFAULT"
+                                                    >
+                                                      <div
+                                                        data-react-beautiful-dnd-droppable="0"
+                                                      >
+                                                        <Connect(Draggable)
+                                                          disableInteractiveElementBlocking={false}
+                                                          draggableId="draggableId.content.row-render-value-for-4-source_port"
+                                                          index={0}
+                                                          isDragDisabled={false}
+                                                          key="row-render-value-for-4-source_port"
+                                                        >
+                                                          <Draggable
+                                                            dimension={null}
+                                                            disableInteractiveElementBlocking={false}
+                                                            draggableId="draggableId.content.row-render-value-for-4-source_port"
+                                                            draggingOver={null}
+                                                            drop={[Function]}
+                                                            dropAnimationFinished={[Function]}
+                                                            index={0}
+                                                            isDragDisabled={false}
+                                                            isDragging={false}
+                                                            isDropAnimating={false}
+                                                            lift={[Function]}
+                                                            move={[Function]}
+                                                            moveByWindowScroll={[Function]}
+                                                            moveDown={[Function]}
+                                                            moveLeft={[Function]}
+                                                            moveRight={[Function]}
+                                                            moveUp={[Function]}
+                                                            offset={
+                                                              Object {
+                                                                "x": 0,
+                                                                "y": 0,
+                                                              }
+                                                            }
+                                                            shouldAnimateDisplacement={true}
+                                                            shouldAnimateDragMovement={false}
+                                                          >
+                                                            <DraggableDimensionPublisher
+                                                              draggableId="draggableId.content.row-render-value-for-4-source_port"
+                                                              droppableId="droppableId.content.row-render-value-for-4-source_port"
+                                                              getDraggableRef={[Function]}
+                                                              index={0}
+                                                              key="draggableId.content.row-render-value-for-4-source_port"
+                                                              type="DEFAULT"
+                                                            >
+                                                              <Moveable
+                                                                destination={
+                                                                  Object {
+                                                                    "x": 0,
+                                                                    "y": 0,
+                                                                  }
+                                                                }
+                                                                onMoveEnd={[Function]}
+                                                                speed="INSTANT"
+                                                              >
+                                                                <Motion
+                                                                  defaultStyle={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                  onRest={[Function]}
+                                                                  style={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                >
+                                                                  <DoubleRenderBlocker
+                                                                    change={
+                                                                      Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      }
+                                                                    }
+                                                                  >
+                                                                    <DragHandle
+                                                                      callbacks={
+                                                                        Object {
+                                                                          "onCancel": [Function],
+                                                                          "onDrop": [Function],
+                                                                          "onLift": [Function],
+                                                                          "onMove": [Function],
+                                                                          "onMoveDown": [Function],
+                                                                          "onMoveLeft": [Function],
+                                                                          "onMoveRight": [Function],
+                                                                          "onMoveUp": [Function],
+                                                                          "onWindowScroll": [Function],
+                                                                        }
+                                                                      }
+                                                                      canDragInteractiveElements={false}
+                                                                      draggableId="draggableId.content.row-render-value-for-4-source_port"
+                                                                      getDraggableRef={[Function]}
+                                                                      isDragging={false}
+                                                                      isDropAnimating={false}
+                                                                      isEnabled={true}
+                                                                    >
+                                                                      <styled.div
+                                                                        aria-roledescription="Draggable item. Press space bar to lift"
+                                                                        data-react-beautiful-dnd-drag-handle="0"
+                                                                        data-react-beautiful-dnd-draggable="0"
+                                                                        data-test-subj="providerContainer"
+                                                                        draggable={false}
+                                                                        innerRef={[Function]}
+                                                                        onBlur={[Function]}
+                                                                        onDragStart={[Function]}
+                                                                        onFocus={[Function]}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseDown={[Function]}
+                                                                        onTouchStart={[Function]}
+                                                                        style={
+                                                                          Object {
+                                                                            "transform": null,
+                                                                            "transition": null,
+                                                                            "zIndex": 9000,
+                                                                          }
+                                                                        }
+                                                                        tabIndex={0}
+                                                                      >
+                                                                        <div
+                                                                          aria-roledescription="Draggable item. Press space bar to lift"
+                                                                          className="sc-hzDkRC koNYSi"
+                                                                          data-react-beautiful-dnd-drag-handle="0"
+                                                                          data-react-beautiful-dnd-draggable="0"
+                                                                          data-test-subj="providerContainer"
+                                                                          draggable={false}
+                                                                          onBlur={[Function]}
+                                                                          onDragStart={[Function]}
+                                                                          onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
+                                                                          onMouseDown={[Function]}
+                                                                          onTouchStart={[Function]}
+                                                                          style={
+                                                                            Object {
+                                                                              "transform": null,
+                                                                              "transition": null,
+                                                                              "zIndex": 9000,
+                                                                            }
+                                                                          }
+                                                                          tabIndex={0}
+                                                                        >
+                                                                          <pure(Component)
+                                                                            data={
+                                                                              Object {
+                                                                                "_id": "4",
+                                                                                "destination": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 6343,
+                                                                                },
+                                                                                "event": Object {
+                                                                                  "category": "Attempted Administrator Privilege Gain",
+                                                                                  "id": 4,
+                                                                                  "module": "suricata",
+                                                                                  "severity": 1,
+                                                                                  "type": "Alert",
+                                                                                },
+                                                                                "geo": Object {
+                                                                                  "country_iso_code": "xx",
+                                                                                  "region_name": "xx",
+                                                                                },
+                                                                                "host": Object {
+                                                                                  "ip": Array [
+                                                                                    "192.168.0.1",
+                                                                                  ],
+                                                                                  "name": "suricata",
+                                                                                },
+                                                                                "source": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 53,
+                                                                                },
+                                                                                "suricata": Object {
+                                                                                  "eve": Object {
+                                                                                    "alert": Object {
+                                                                                      "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                      "signature_id": 4,
+                                                                                    },
+                                                                                    "flow_id": 4,
+                                                                                    "proto": "",
+                                                                                  },
+                                                                                },
+                                                                                "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                "user": Object {
+                                                                                  "id": 4,
+                                                                                  "name": "jenny.jones",
+                                                                                },
+                                                                              }
+                                                                            }
+                                                                            fieldName="source.port"
+                                                                            fieldType="long"
+                                                                          >
+                                                                            <Component
+                                                                              data={
+                                                                                Object {
+                                                                                  "_id": "4",
+                                                                                  "destination": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 6343,
+                                                                                  },
+                                                                                  "event": Object {
+                                                                                    "category": "Attempted Administrator Privilege Gain",
+                                                                                    "id": 4,
+                                                                                    "module": "suricata",
+                                                                                    "severity": 1,
+                                                                                    "type": "Alert",
+                                                                                  },
+                                                                                  "geo": Object {
+                                                                                    "country_iso_code": "xx",
+                                                                                    "region_name": "xx",
+                                                                                  },
+                                                                                  "host": Object {
+                                                                                    "ip": Array [
+                                                                                      "192.168.0.1",
+                                                                                    ],
+                                                                                    "name": "suricata",
+                                                                                  },
+                                                                                  "source": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 53,
+                                                                                  },
+                                                                                  "suricata": Object {
+                                                                                    "eve": Object {
+                                                                                      "alert": Object {
+                                                                                        "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                        "signature_id": 4,
+                                                                                      },
+                                                                                      "flow_id": 4,
+                                                                                      "proto": "",
+                                                                                    },
+                                                                                  },
+                                                                                  "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                  "user": Object {
+                                                                                    "id": 4,
+                                                                                    "name": "jenny.jones",
+                                                                                  },
+                                                                                }
+                                                                              }
+                                                                              fieldName="source.port"
+                                                                              fieldType="long"
+                                                                            >
+                                                                              53
+                                                                            </Component>
+                                                                          </pure(Component)>
+                                                                        </div>
+                                                                      </styled.div>
+                                                                    </DragHandle>
+                                                                  </DoubleRenderBlocker>
+                                                                </Motion>
+                                                              </Moveable>
+                                                            </DraggableDimensionPublisher>
+                                                          </Draggable>
+                                                        </Connect(Draggable)>
+                                                      </div>
+                                                    </DroppableDimensionPublisher>
+                                                  </Droppable>
+                                                </Connect(Droppable)>
+                                              </div>
+                                            </DraggableWrapperComponent>
+                                          </Connect(DraggableWrapperComponent)>
+                                        </Component>
+                                      </pure(Component)>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiFlexItem>
+                        </Component>
+                      </pure(Component)>
+                    </div>
+                  </EuiFlexGroup>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    component="div"
+                    direction="column"
+                    gutterSize="none"
+                    justifyContent="flexStart"
+                    responsive={true}
+                    wrap={false}
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                    >
+                      <pure(Component)
+                        data={
+                          Object {
+                            "_id": "4",
+                            "destination": Object {
+                              "ip": "192.168.0.3",
+                              "port": 6343,
+                            },
+                            "event": Object {
+                              "category": "Attempted Administrator Privilege Gain",
+                              "id": 4,
+                              "module": "suricata",
+                              "severity": 1,
+                              "type": "Alert",
+                            },
+                            "geo": Object {
+                              "country_iso_code": "xx",
+                              "region_name": "xx",
+                            },
+                            "host": Object {
+                              "ip": Array [
+                                "192.168.0.1",
+                              ],
+                              "name": "suricata",
+                            },
+                            "source": Object {
+                              "ip": "192.168.0.3",
+                              "port": 53,
+                            },
+                            "suricata": Object {
+                              "eve": Object {
+                                "alert": Object {
+                                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                  "signature_id": 4,
+                                },
+                                "flow_id": 4,
+                                "proto": "",
+                              },
+                            },
+                            "timestamp": "2018-11-08T19:03:25.937Z",
+                            "user": Object {
+                              "id": 4,
+                              "name": "jenny.jones",
+                            },
+                          }
+                        }
+                      >
+                        <Component
+                          data={
+                            Object {
+                              "_id": "4",
+                              "destination": Object {
+                                "ip": "192.168.0.3",
+                                "port": 6343,
+                              },
+                              "event": Object {
+                                "category": "Attempted Administrator Privilege Gain",
+                                "id": 4,
+                                "module": "suricata",
+                                "severity": 1,
+                                "type": "Alert",
+                              },
+                              "geo": Object {
+                                "country_iso_code": "xx",
+                                "region_name": "xx",
+                              },
+                              "host": Object {
+                                "ip": Array [
+                                  "192.168.0.1",
+                                ],
+                                "name": "suricata",
+                              },
+                              "source": Object {
+                                "ip": "192.168.0.3",
+                                "port": 53,
+                              },
+                              "suricata": Object {
+                                "eve": Object {
+                                  "alert": Object {
+                                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                    "signature_id": 4,
+                                  },
+                                  "flow_id": 4,
+                                  "proto": "",
+                                },
+                              },
+                              "timestamp": "2018-11-08T19:03:25.937Z",
+                              "user": Object {
+                                "id": 4,
+                                "name": "jenny.jones",
+                              },
+                            }
+                          }
+                        >
+                          <EuiFlexItem
+                            component="div"
+                            grow={true}
+                          >
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <styled.div>
+                                <div
+                                  className="sc-feJyhm koOjEJ"
+                                >
+                                  Destination
+                                </div>
+                              </styled.div>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            component="div"
+                            grow={true}
+                          >
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiFlexGroup
+                                alignItems="stretch"
+                                component="div"
+                                direction="row"
+                                gutterSize="none"
+                                justifyContent="flexStart"
+                                responsive={true}
+                                wrap={false}
+                              >
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                >
+                                  <EuiFlexItem
+                                    component="div"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <pure(Component)
+                                        data={
+                                          Object {
+                                            "_id": "4",
+                                            "destination": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 6343,
+                                            },
+                                            "event": Object {
+                                              "category": "Attempted Administrator Privilege Gain",
+                                              "id": 4,
+                                              "module": "suricata",
+                                              "severity": 1,
+                                              "type": "Alert",
+                                            },
+                                            "geo": Object {
+                                              "country_iso_code": "xx",
+                                              "region_name": "xx",
+                                            },
+                                            "host": Object {
+                                              "ip": Array [
+                                                "192.168.0.1",
+                                              ],
+                                              "name": "suricata",
+                                            },
+                                            "source": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 53,
+                                            },
+                                            "suricata": Object {
+                                              "eve": Object {
+                                                "alert": Object {
+                                                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                  "signature_id": 4,
+                                                },
+                                                "flow_id": 4,
+                                                "proto": "",
+                                              },
+                                            },
+                                            "timestamp": "2018-11-08T19:03:25.937Z",
+                                            "user": Object {
+                                              "id": 4,
+                                              "name": "jenny.jones",
+                                            },
+                                          }
+                                        }
+                                        data-test-subj="destination-ip-and-port"
+                                        fieldName="destination.ip"
+                                      >
+                                        <Component
+                                          data={
+                                            Object {
+                                              "_id": "4",
+                                              "destination": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 6343,
+                                              },
+                                              "event": Object {
+                                                "category": "Attempted Administrator Privilege Gain",
+                                                "id": 4,
+                                                "module": "suricata",
+                                                "severity": 1,
+                                                "type": "Alert",
+                                              },
+                                              "geo": Object {
+                                                "country_iso_code": "xx",
+                                                "region_name": "xx",
+                                              },
+                                              "host": Object {
+                                                "ip": Array [
+                                                  "192.168.0.1",
+                                                ],
+                                                "name": "suricata",
+                                              },
+                                              "source": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 53,
+                                              },
+                                              "suricata": Object {
+                                                "eve": Object {
+                                                  "alert": Object {
+                                                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                    "signature_id": 4,
+                                                  },
+                                                  "flow_id": 4,
+                                                  "proto": "",
+                                                },
+                                              },
+                                              "timestamp": "2018-11-08T19:03:25.937Z",
+                                              "user": Object {
+                                                "id": 4,
+                                                "name": "jenny.jones",
+                                              },
+                                            }
+                                          }
+                                          data-test-subj="destination-ip-and-port"
+                                          fieldName="destination.ip"
+                                        >
+                                          <Connect(DraggableWrapperComponent)
+                                            dataProvider={
+                                              Object {
+                                                "and": Array [],
+                                                "enabled": true,
+                                                "excluded": false,
+                                                "id": "row-render-value-for-4-destination_ip",
+                                                "kqlQuery": "",
+                                                "name": "destination.ip: 192.168.0.3",
+                                                "queryMatch": Object {
+                                                  "field": "destination.ip",
+                                                  "value": "192.168.0.3",
+                                                },
+                                              }
+                                            }
+                                            key="row-render-value-for-4-destination.ip"
+                                            render={[Function]}
+                                          >
+                                            <DraggableWrapperComponent
+                                              dataProvider={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              registerProvider={[Function]}
+                                              render={[Function]}
+                                              row-render-value-for-4-destination_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-destination_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_port",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.port: 6343",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.port",
+                                                    "value": 6343,
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "source.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "source.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_port",
+                                                  "kqlQuery": "",
+                                                  "name": "source.port: 53",
+                                                  "queryMatch": Object {
+                                                    "field": "source.port",
+                                                    "value": 53,
+                                                  },
+                                                }
+                                              }
+                                              unRegisterProvider={[Function]}
+                                            >
+                                              <div
+                                                data-test-subj="draggableWrapperDiv"
+                                              >
+                                                <Connect(Droppable)
+                                                  direction="vertical"
+                                                  droppableId="droppableId.content.row-render-value-for-4-destination_ip"
+                                                  ignoreContainerClipping={false}
+                                                  isDropDisabled={true}
+                                                  type="DEFAULT"
+                                                >
+                                                  <Droppable
+                                                    direction="vertical"
+                                                    dispatch={[Function]}
+                                                    draggingOverWith={null}
+                                                    droppableId="droppableId.content.row-render-value-for-4-destination_ip"
+                                                    ignoreContainerClipping={false}
+                                                    isDraggingOver={false}
+                                                    isDropDisabled={true}
+                                                    placeholder={null}
+                                                    type="DEFAULT"
+                                                  >
+                                                    <DroppableDimensionPublisher
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.row-render-value-for-4-destination_ip"
+                                                      getDroppableRef={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isDropDisabled={true}
+                                                      type="DEFAULT"
+                                                    >
+                                                      <div
+                                                        data-react-beautiful-dnd-droppable="0"
+                                                      >
+                                                        <Connect(Draggable)
+                                                          disableInteractiveElementBlocking={false}
+                                                          draggableId="draggableId.content.row-render-value-for-4-destination_ip"
+                                                          index={0}
+                                                          isDragDisabled={false}
+                                                          key="row-render-value-for-4-destination_ip"
+                                                        >
+                                                          <Draggable
+                                                            dimension={null}
+                                                            disableInteractiveElementBlocking={false}
+                                                            draggableId="draggableId.content.row-render-value-for-4-destination_ip"
+                                                            draggingOver={null}
+                                                            drop={[Function]}
+                                                            dropAnimationFinished={[Function]}
+                                                            index={0}
+                                                            isDragDisabled={false}
+                                                            isDragging={false}
+                                                            isDropAnimating={false}
+                                                            lift={[Function]}
+                                                            move={[Function]}
+                                                            moveByWindowScroll={[Function]}
+                                                            moveDown={[Function]}
+                                                            moveLeft={[Function]}
+                                                            moveRight={[Function]}
+                                                            moveUp={[Function]}
+                                                            offset={
+                                                              Object {
+                                                                "x": 0,
+                                                                "y": 0,
+                                                              }
+                                                            }
+                                                            shouldAnimateDisplacement={true}
+                                                            shouldAnimateDragMovement={false}
+                                                          >
+                                                            <DraggableDimensionPublisher
+                                                              draggableId="draggableId.content.row-render-value-for-4-destination_ip"
+                                                              droppableId="droppableId.content.row-render-value-for-4-destination_ip"
+                                                              getDraggableRef={[Function]}
+                                                              index={0}
+                                                              key="draggableId.content.row-render-value-for-4-destination_ip"
+                                                              type="DEFAULT"
+                                                            >
+                                                              <Moveable
+                                                                destination={
+                                                                  Object {
+                                                                    "x": 0,
+                                                                    "y": 0,
+                                                                  }
+                                                                }
+                                                                onMoveEnd={[Function]}
+                                                                speed="INSTANT"
+                                                              >
+                                                                <Motion
+                                                                  defaultStyle={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                  onRest={[Function]}
+                                                                  style={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                >
+                                                                  <DoubleRenderBlocker
+                                                                    change={
+                                                                      Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      }
+                                                                    }
+                                                                  >
+                                                                    <DragHandle
+                                                                      callbacks={
+                                                                        Object {
+                                                                          "onCancel": [Function],
+                                                                          "onDrop": [Function],
+                                                                          "onLift": [Function],
+                                                                          "onMove": [Function],
+                                                                          "onMoveDown": [Function],
+                                                                          "onMoveLeft": [Function],
+                                                                          "onMoveRight": [Function],
+                                                                          "onMoveUp": [Function],
+                                                                          "onWindowScroll": [Function],
+                                                                        }
+                                                                      }
+                                                                      canDragInteractiveElements={false}
+                                                                      draggableId="draggableId.content.row-render-value-for-4-destination_ip"
+                                                                      getDraggableRef={[Function]}
+                                                                      isDragging={false}
+                                                                      isDropAnimating={false}
+                                                                      isEnabled={true}
+                                                                    >
+                                                                      <styled.div
+                                                                        aria-roledescription="Draggable item. Press space bar to lift"
+                                                                        data-react-beautiful-dnd-drag-handle="0"
+                                                                        data-react-beautiful-dnd-draggable="0"
+                                                                        data-test-subj="providerContainer"
+                                                                        draggable={false}
+                                                                        innerRef={[Function]}
+                                                                        onBlur={[Function]}
+                                                                        onDragStart={[Function]}
+                                                                        onFocus={[Function]}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseDown={[Function]}
+                                                                        onTouchStart={[Function]}
+                                                                        style={
+                                                                          Object {
+                                                                            "transform": null,
+                                                                            "transition": null,
+                                                                            "zIndex": 9000,
+                                                                          }
+                                                                        }
+                                                                        tabIndex={0}
+                                                                      >
+                                                                        <div
+                                                                          aria-roledescription="Draggable item. Press space bar to lift"
+                                                                          className="sc-hzDkRC koNYSi"
+                                                                          data-react-beautiful-dnd-drag-handle="0"
+                                                                          data-react-beautiful-dnd-draggable="0"
+                                                                          data-test-subj="providerContainer"
+                                                                          draggable={false}
+                                                                          onBlur={[Function]}
+                                                                          onDragStart={[Function]}
+                                                                          onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
+                                                                          onMouseDown={[Function]}
+                                                                          onTouchStart={[Function]}
+                                                                          style={
+                                                                            Object {
+                                                                              "transform": null,
+                                                                              "transition": null,
+                                                                              "zIndex": 9000,
+                                                                            }
+                                                                          }
+                                                                          tabIndex={0}
+                                                                        >
+                                                                          <pure(Component)
+                                                                            data={
+                                                                              Object {
+                                                                                "_id": "4",
+                                                                                "destination": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 6343,
+                                                                                },
+                                                                                "event": Object {
+                                                                                  "category": "Attempted Administrator Privilege Gain",
+                                                                                  "id": 4,
+                                                                                  "module": "suricata",
+                                                                                  "severity": 1,
+                                                                                  "type": "Alert",
+                                                                                },
+                                                                                "geo": Object {
+                                                                                  "country_iso_code": "xx",
+                                                                                  "region_name": "xx",
+                                                                                },
+                                                                                "host": Object {
+                                                                                  "ip": Array [
+                                                                                    "192.168.0.1",
+                                                                                  ],
+                                                                                  "name": "suricata",
+                                                                                },
+                                                                                "source": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 53,
+                                                                                },
+                                                                                "suricata": Object {
+                                                                                  "eve": Object {
+                                                                                    "alert": Object {
+                                                                                      "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                      "signature_id": 4,
+                                                                                    },
+                                                                                    "flow_id": 4,
+                                                                                    "proto": "",
+                                                                                  },
+                                                                                },
+                                                                                "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                "user": Object {
+                                                                                  "id": 4,
+                                                                                  "name": "jenny.jones",
+                                                                                },
+                                                                              }
+                                                                            }
+                                                                            fieldName="destination.ip"
+                                                                            fieldType="ip"
+                                                                          >
+                                                                            <Component
+                                                                              data={
+                                                                                Object {
+                                                                                  "_id": "4",
+                                                                                  "destination": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 6343,
+                                                                                  },
+                                                                                  "event": Object {
+                                                                                    "category": "Attempted Administrator Privilege Gain",
+                                                                                    "id": 4,
+                                                                                    "module": "suricata",
+                                                                                    "severity": 1,
+                                                                                    "type": "Alert",
+                                                                                  },
+                                                                                  "geo": Object {
+                                                                                    "country_iso_code": "xx",
+                                                                                    "region_name": "xx",
+                                                                                  },
+                                                                                  "host": Object {
+                                                                                    "ip": Array [
+                                                                                      "192.168.0.1",
+                                                                                    ],
+                                                                                    "name": "suricata",
+                                                                                  },
+                                                                                  "source": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 53,
+                                                                                  },
+                                                                                  "suricata": Object {
+                                                                                    "eve": Object {
+                                                                                      "alert": Object {
+                                                                                        "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                        "signature_id": 4,
+                                                                                      },
+                                                                                      "flow_id": 4,
+                                                                                      "proto": "",
+                                                                                    },
+                                                                                  },
+                                                                                  "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                  "user": Object {
+                                                                                    "id": 4,
+                                                                                    "name": "jenny.jones",
+                                                                                  },
+                                                                                }
+                                                                              }
+                                                                              fieldName="destination.ip"
+                                                                              fieldType="ip"
+                                                                            >
+                                                                              192.168.0.3
+                                                                            </Component>
+                                                                          </pure(Component)>
+                                                                        </div>
+                                                                      </styled.div>
+                                                                    </DragHandle>
+                                                                  </DoubleRenderBlocker>
+                                                                </Motion>
+                                                              </Moveable>
+                                                            </DraggableDimensionPublisher>
+                                                          </Draggable>
+                                                        </Connect(Draggable)>
+                                                      </div>
+                                                    </DroppableDimensionPublisher>
+                                                  </Droppable>
+                                                </Connect(Droppable)>
+                                              </div>
+                                            </DraggableWrapperComponent>
+                                          </Connect(DraggableWrapperComponent)>
+                                        </Component>
+                                      </pure(Component)>
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    component="div"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      :
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    component="div"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <pure(Component)
+                                        data={
+                                          Object {
+                                            "_id": "4",
+                                            "destination": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 6343,
+                                            },
+                                            "event": Object {
+                                              "category": "Attempted Administrator Privilege Gain",
+                                              "id": 4,
+                                              "module": "suricata",
+                                              "severity": 1,
+                                              "type": "Alert",
+                                            },
+                                            "geo": Object {
+                                              "country_iso_code": "xx",
+                                              "region_name": "xx",
+                                            },
+                                            "host": Object {
+                                              "ip": Array [
+                                                "192.168.0.1",
+                                              ],
+                                              "name": "suricata",
+                                            },
+                                            "source": Object {
+                                              "ip": "192.168.0.3",
+                                              "port": 53,
+                                            },
+                                            "suricata": Object {
+                                              "eve": Object {
+                                                "alert": Object {
+                                                  "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                  "signature_id": 4,
+                                                },
+                                                "flow_id": 4,
+                                                "proto": "",
+                                              },
+                                            },
+                                            "timestamp": "2018-11-08T19:03:25.937Z",
+                                            "user": Object {
+                                              "id": 4,
+                                              "name": "jenny.jones",
+                                            },
+                                          }
+                                        }
+                                        fieldName="destination.port"
+                                      >
+                                        <Component
+                                          data={
+                                            Object {
+                                              "_id": "4",
+                                              "destination": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 6343,
+                                              },
+                                              "event": Object {
+                                                "category": "Attempted Administrator Privilege Gain",
+                                                "id": 4,
+                                                "module": "suricata",
+                                                "severity": 1,
+                                                "type": "Alert",
+                                              },
+                                              "geo": Object {
+                                                "country_iso_code": "xx",
+                                                "region_name": "xx",
+                                              },
+                                              "host": Object {
+                                                "ip": Array [
+                                                  "192.168.0.1",
+                                                ],
+                                                "name": "suricata",
+                                              },
+                                              "source": Object {
+                                                "ip": "192.168.0.3",
+                                                "port": 53,
+                                              },
+                                              "suricata": Object {
+                                                "eve": Object {
+                                                  "alert": Object {
+                                                    "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                    "signature_id": 4,
+                                                  },
+                                                  "flow_id": 4,
+                                                  "proto": "",
+                                                },
+                                              },
+                                              "timestamp": "2018-11-08T19:03:25.937Z",
+                                              "user": Object {
+                                                "id": 4,
+                                                "name": "jenny.jones",
+                                              },
+                                            }
+                                          }
+                                          fieldName="destination.port"
+                                        >
+                                          <Connect(DraggableWrapperComponent)
+                                            dataProvider={
+                                              Object {
+                                                "and": Array [],
+                                                "enabled": true,
+                                                "excluded": false,
+                                                "id": "row-render-value-for-4-destination_port",
+                                                "kqlQuery": "",
+                                                "name": "destination.port: 6343",
+                                                "queryMatch": Object {
+                                                  "field": "destination.port",
+                                                  "value": 6343,
+                                                },
+                                              }
+                                            }
+                                            key="row-render-value-for-4-destination.port"
+                                            render={[Function]}
+                                          >
+                                            <DraggableWrapperComponent
+                                              dataProvider={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_port",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.port: 6343",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.port",
+                                                    "value": 6343,
+                                                  },
+                                                }
+                                              }
+                                              registerProvider={[Function]}
+                                              render={[Function]}
+                                              row-render-value-for-4-destination_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-destination_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-destination_port",
+                                                  "kqlQuery": "",
+                                                  "name": "destination.port: 6343",
+                                                  "queryMatch": Object {
+                                                    "field": "destination.port",
+                                                    "value": 6343,
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_ip={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_ip",
+                                                  "kqlQuery": "",
+                                                  "name": "source.ip: 192.168.0.3",
+                                                  "queryMatch": Object {
+                                                    "field": "source.ip",
+                                                    "value": "192.168.0.3",
+                                                  },
+                                                }
+                                              }
+                                              row-render-value-for-4-source_port={
+                                                Object {
+                                                  "and": Array [],
+                                                  "enabled": true,
+                                                  "excluded": false,
+                                                  "id": "row-render-value-for-4-source_port",
+                                                  "kqlQuery": "",
+                                                  "name": "source.port: 53",
+                                                  "queryMatch": Object {
+                                                    "field": "source.port",
+                                                    "value": 53,
+                                                  },
+                                                }
+                                              }
+                                              unRegisterProvider={[Function]}
+                                            >
+                                              <div
+                                                data-test-subj="draggableWrapperDiv"
+                                              >
+                                                <Connect(Droppable)
+                                                  direction="vertical"
+                                                  droppableId="droppableId.content.row-render-value-for-4-destination_port"
+                                                  ignoreContainerClipping={false}
+                                                  isDropDisabled={true}
+                                                  type="DEFAULT"
+                                                >
+                                                  <Droppable
+                                                    direction="vertical"
+                                                    dispatch={[Function]}
+                                                    draggingOverWith={null}
+                                                    droppableId="droppableId.content.row-render-value-for-4-destination_port"
+                                                    ignoreContainerClipping={false}
+                                                    isDraggingOver={false}
+                                                    isDropDisabled={true}
+                                                    placeholder={null}
+                                                    type="DEFAULT"
+                                                  >
+                                                    <DroppableDimensionPublisher
+                                                      direction="vertical"
+                                                      droppableId="droppableId.content.row-render-value-for-4-destination_port"
+                                                      getDroppableRef={[Function]}
+                                                      ignoreContainerClipping={false}
+                                                      isDropDisabled={true}
+                                                      type="DEFAULT"
+                                                    >
+                                                      <div
+                                                        data-react-beautiful-dnd-droppable="0"
+                                                      >
+                                                        <Connect(Draggable)
+                                                          disableInteractiveElementBlocking={false}
+                                                          draggableId="draggableId.content.row-render-value-for-4-destination_port"
+                                                          index={0}
+                                                          isDragDisabled={false}
+                                                          key="row-render-value-for-4-destination_port"
+                                                        >
+                                                          <Draggable
+                                                            dimension={null}
+                                                            disableInteractiveElementBlocking={false}
+                                                            draggableId="draggableId.content.row-render-value-for-4-destination_port"
+                                                            draggingOver={null}
+                                                            drop={[Function]}
+                                                            dropAnimationFinished={[Function]}
+                                                            index={0}
+                                                            isDragDisabled={false}
+                                                            isDragging={false}
+                                                            isDropAnimating={false}
+                                                            lift={[Function]}
+                                                            move={[Function]}
+                                                            moveByWindowScroll={[Function]}
+                                                            moveDown={[Function]}
+                                                            moveLeft={[Function]}
+                                                            moveRight={[Function]}
+                                                            moveUp={[Function]}
+                                                            offset={
+                                                              Object {
+                                                                "x": 0,
+                                                                "y": 0,
+                                                              }
+                                                            }
+                                                            shouldAnimateDisplacement={true}
+                                                            shouldAnimateDragMovement={false}
+                                                          >
+                                                            <DraggableDimensionPublisher
+                                                              draggableId="draggableId.content.row-render-value-for-4-destination_port"
+                                                              droppableId="droppableId.content.row-render-value-for-4-destination_port"
+                                                              getDraggableRef={[Function]}
+                                                              index={0}
+                                                              key="draggableId.content.row-render-value-for-4-destination_port"
+                                                              type="DEFAULT"
+                                                            >
+                                                              <Moveable
+                                                                destination={
+                                                                  Object {
+                                                                    "x": 0,
+                                                                    "y": 0,
+                                                                  }
+                                                                }
+                                                                onMoveEnd={[Function]}
+                                                                speed="INSTANT"
+                                                              >
+                                                                <Motion
+                                                                  defaultStyle={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                  onRest={[Function]}
+                                                                  style={
+                                                                    Object {
+                                                                      "x": 0,
+                                                                      "y": 0,
+                                                                    }
+                                                                  }
+                                                                >
+                                                                  <DoubleRenderBlocker
+                                                                    change={
+                                                                      Object {
+                                                                        "x": 0,
+                                                                        "y": 0,
+                                                                      }
+                                                                    }
+                                                                  >
+                                                                    <DragHandle
+                                                                      callbacks={
+                                                                        Object {
+                                                                          "onCancel": [Function],
+                                                                          "onDrop": [Function],
+                                                                          "onLift": [Function],
+                                                                          "onMove": [Function],
+                                                                          "onMoveDown": [Function],
+                                                                          "onMoveLeft": [Function],
+                                                                          "onMoveRight": [Function],
+                                                                          "onMoveUp": [Function],
+                                                                          "onWindowScroll": [Function],
+                                                                        }
+                                                                      }
+                                                                      canDragInteractiveElements={false}
+                                                                      draggableId="draggableId.content.row-render-value-for-4-destination_port"
+                                                                      getDraggableRef={[Function]}
+                                                                      isDragging={false}
+                                                                      isDropAnimating={false}
+                                                                      isEnabled={true}
+                                                                    >
+                                                                      <styled.div
+                                                                        aria-roledescription="Draggable item. Press space bar to lift"
+                                                                        data-react-beautiful-dnd-drag-handle="0"
+                                                                        data-react-beautiful-dnd-draggable="0"
+                                                                        data-test-subj="providerContainer"
+                                                                        draggable={false}
+                                                                        innerRef={[Function]}
+                                                                        onBlur={[Function]}
+                                                                        onDragStart={[Function]}
+                                                                        onFocus={[Function]}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseDown={[Function]}
+                                                                        onTouchStart={[Function]}
+                                                                        style={
+                                                                          Object {
+                                                                            "transform": null,
+                                                                            "transition": null,
+                                                                            "zIndex": 9000,
+                                                                          }
+                                                                        }
+                                                                        tabIndex={0}
+                                                                      >
+                                                                        <div
+                                                                          aria-roledescription="Draggable item. Press space bar to lift"
+                                                                          className="sc-hzDkRC koNYSi"
+                                                                          data-react-beautiful-dnd-drag-handle="0"
+                                                                          data-react-beautiful-dnd-draggable="0"
+                                                                          data-test-subj="providerContainer"
+                                                                          draggable={false}
+                                                                          onBlur={[Function]}
+                                                                          onDragStart={[Function]}
+                                                                          onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
+                                                                          onMouseDown={[Function]}
+                                                                          onTouchStart={[Function]}
+                                                                          style={
+                                                                            Object {
+                                                                              "transform": null,
+                                                                              "transition": null,
+                                                                              "zIndex": 9000,
+                                                                            }
+                                                                          }
+                                                                          tabIndex={0}
+                                                                        >
+                                                                          <pure(Component)
+                                                                            data={
+                                                                              Object {
+                                                                                "_id": "4",
+                                                                                "destination": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 6343,
+                                                                                },
+                                                                                "event": Object {
+                                                                                  "category": "Attempted Administrator Privilege Gain",
+                                                                                  "id": 4,
+                                                                                  "module": "suricata",
+                                                                                  "severity": 1,
+                                                                                  "type": "Alert",
+                                                                                },
+                                                                                "geo": Object {
+                                                                                  "country_iso_code": "xx",
+                                                                                  "region_name": "xx",
+                                                                                },
+                                                                                "host": Object {
+                                                                                  "ip": Array [
+                                                                                    "192.168.0.1",
+                                                                                  ],
+                                                                                  "name": "suricata",
+                                                                                },
+                                                                                "source": Object {
+                                                                                  "ip": "192.168.0.3",
+                                                                                  "port": 53,
+                                                                                },
+                                                                                "suricata": Object {
+                                                                                  "eve": Object {
+                                                                                    "alert": Object {
+                                                                                      "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                      "signature_id": 4,
+                                                                                    },
+                                                                                    "flow_id": 4,
+                                                                                    "proto": "",
+                                                                                  },
+                                                                                },
+                                                                                "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                "user": Object {
+                                                                                  "id": 4,
+                                                                                  "name": "jenny.jones",
+                                                                                },
+                                                                              }
+                                                                            }
+                                                                            fieldName="destination.port"
+                                                                            fieldType="long"
+                                                                          >
+                                                                            <Component
+                                                                              data={
+                                                                                Object {
+                                                                                  "_id": "4",
+                                                                                  "destination": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 6343,
+                                                                                  },
+                                                                                  "event": Object {
+                                                                                    "category": "Attempted Administrator Privilege Gain",
+                                                                                    "id": 4,
+                                                                                    "module": "suricata",
+                                                                                    "severity": 1,
+                                                                                    "type": "Alert",
+                                                                                  },
+                                                                                  "geo": Object {
+                                                                                    "country_iso_code": "xx",
+                                                                                    "region_name": "xx",
+                                                                                  },
+                                                                                  "host": Object {
+                                                                                    "ip": Array [
+                                                                                      "192.168.0.1",
+                                                                                    ],
+                                                                                    "name": "suricata",
+                                                                                  },
+                                                                                  "source": Object {
+                                                                                    "ip": "192.168.0.3",
+                                                                                    "port": 53,
+                                                                                  },
+                                                                                  "suricata": Object {
+                                                                                    "eve": Object {
+                                                                                      "alert": Object {
+                                                                                        "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+                                                                                        "signature_id": 4,
+                                                                                      },
+                                                                                      "flow_id": 4,
+                                                                                      "proto": "",
+                                                                                    },
+                                                                                  },
+                                                                                  "timestamp": "2018-11-08T19:03:25.937Z",
+                                                                                  "user": Object {
+                                                                                    "id": 4,
+                                                                                    "name": "jenny.jones",
+                                                                                  },
+                                                                                }
+                                                                              }
+                                                                              fieldName="destination.port"
+                                                                              fieldType="long"
+                                                                            >
+                                                                              6343
+                                                                            </Component>
+                                                                          </pure(Component)>
+                                                                        </div>
+                                                                      </styled.div>
+                                                                    </DragHandle>
+                                                                  </DoubleRenderBlocker>
+                                                                </Motion>
+                                                              </Moveable>
+                                                            </DraggableDimensionPublisher>
+                                                          </Draggable>
+                                                        </Connect(Draggable)>
+                                                      </div>
+                                                    </DroppableDimensionPublisher>
+                                                  </Droppable>
+                                                </Connect(Droppable)>
+                                              </div>
+                                            </DraggableWrapperComponent>
+                                          </Connect(DraggableWrapperComponent)>
+                                        </Component>
+                                      </pure(Component)>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiFlexItem>
+                        </Component>
+                      </pure(Component)>
+                    </div>
+                  </EuiFlexGroup>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </Component>
+      </pure(Component)>
+    </DragDropContext>
+  </Provider>
+</ThemeProvider>
+`;

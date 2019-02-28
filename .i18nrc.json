@@ -58,6 +58,7 @@
     "x-pack/plugins/secops/public/components/flyout/index.tsx",
     "x-pack/plugins/secops/public/components/flyout/resize_handle.tsx",
     "x-pack/plugins/secops/public/components/notes/helpers.tsx",
+    "x-pack/plugins/secops/public/components/timeline/body/renderers/suricata_rules_ref.ts",
     "x-pack/plugins/secops/public/components/timeline/properties/helpers.tsx",
     "x-pack/plugins/secops/public/components/timeline/properties/index.tsx",
     "x-pack/plugins/secops/public/components/timeline/search_or_filter/search_or_filter.tsx",

@@ -17,6 +17,7 @@
     "react-markdown": "^4.0.6",
     "lodash": "^4.17.10",
     "memoize-one": "^5.0.0",
-    "apollo-link-error": "^1.1.7"
+    "apollo-link-error": "^1.1.7",
+    "suricata-sid-db": "^1.0.2"
   }
 }
