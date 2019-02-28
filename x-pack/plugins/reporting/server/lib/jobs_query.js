@@ -33,7 +33,6 @@ function jobsQueryFn(server) {
 
     const query = {
       index: `${index}-*`,
-      type: QUEUE_DOCTYPE,
       body: Object.assign(defaultBody[type] || {}, body)
     };
 

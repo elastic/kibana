@@ -388,7 +388,6 @@ export class Worker extends events.EventEmitter {
 
     return this._client.callWithInternalUser('search', {
       index: `${this.queue.index}-*`,
-      type: this.doctype,
       body: query
     })
       .then((results) => {

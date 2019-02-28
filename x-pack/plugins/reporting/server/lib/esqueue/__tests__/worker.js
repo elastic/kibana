@@ -320,25 +320,6 @@ describe('Worker class', function () {
       });
     });
 
-
-    describe('query parameters', function () {
-      beforeEach(() => {
-        searchStub = sinon.stub(mockQueue.client, 'callWithInternalUser')
-          .callsFake(() => Promise.resolve({ hits: { hits: [] } }));
-      });
-
-      it('should query by default doctype', function () {
-        const params = getSearchParams();
-        expect(params).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
-      });
-
-      it('should query by custom doctype', function () {
-        const doctype = 'custom_test';
-        const params = getSearchParams('type', { doctype });
-        expect(params).to.have.property('type', doctype);
-      });
-    });
-
     describe('query body', function () {
       const conditionPath = 'query.bool.filter.bool';
       const jobtype = 'test_jobtype';

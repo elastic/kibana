@@ -48,7 +48,6 @@ export class Job extends events.EventEmitter {
 
     const indexParams = {
       index: this.index,
-      type: this.doctype,
       id: this.id,
       body: {
         jobtype: this.jobtype,
@@ -110,7 +109,6 @@ export class Job extends events.EventEmitter {
       .then(() => {
         return this._client.callWithInternalUser('get', {
           index: this.index,
-          type: this.doctype,
           id: this.id
         });
       })
