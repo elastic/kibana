@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isString, get } from  'lodash';
+import { get } from  'lodash';
 
 export async function getIndexPatternObject(req, indexPatternString) {
   let defaultIndex;
 
-  if (!isString(indexPatternString)) {
+  if (!indexPatternString) {
     defaultIndex = await req.getUiSettingsService().get('defaultIndex');
   }
 
