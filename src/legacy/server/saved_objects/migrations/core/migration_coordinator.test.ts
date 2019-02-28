@@ -51,7 +51,7 @@ describe('coordinateMigration', () => {
 
   test('does not poll if the runMigration succeeds', async () => {
     const pollInterval = 1;
-    const runMigration = jest.fn(() => Promise.resolve());
+    const runMigration = jest.fn<any, any>(() => Promise.resolve());
     const isMigrated = jest.fn(() => Promise.resolve(true));
 
     await coordinateMigration({

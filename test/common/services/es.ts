@@ -21,7 +21,7 @@ import { format as formatUrl } from 'url';
 
 import elasticsearch from 'elasticsearch';
 
-import { DEFAULT_API_VERSION } from '../../../src/legacy/core_plugins/elasticsearch/lib/default_api_version';
+import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EsProvider({ getService }: FtrProviderContext): elasticsearch.Client {
