@@ -29,9 +29,8 @@ describe('Create Index', function () {
         .then((exists) => expect(exists).to.be(true));
     });
 
-    it('should create the index with type mappings and default settings', function () {
+    it('should create the index with mappings and default settings', function () {
       const indexName = 'test-index';
-      const docType = constants.DEFAULT_SETTING_DOCTYPE;
       const settings = constants.DEFAULT_SETTING_INDEX_SETTINGS;
       const result = createIndex(client, indexName);
 
@@ -44,34 +43,12 @@ describe('Create Index', function () {
           expect(payload.body).to.have.property('settings');
           expect(payload.body.settings).to.eql(settings);
           expect(payload.body).to.have.property('mappings');
-          expect(payload.body.mappings).to.have.property(docType);
-          expect(payload.body.mappings[docType]).to.have.property('properties');
-        });
-    });
-
-    it('should accept a custom doctype', function () {
-      const indexName = 'test-index';
-      const docType = 'my_type';
-      const settings = constants.DEFAULT_SETTING_INDEX_SETTINGS;
-      const result = createIndex(client, indexName, docType);
-
-      return result
-        .then(function () {
-          const payload = createSpy.getCall(0).args[0];
-          sinon.assert.callCount(createSpy, 1);
-          expect(payload).to.have.property('index', indexName);
-          expect(payload).to.have.property('body');
-          expect(payload.body).to.have.property('settings');
-          expect(payload.body.settings).to.eql(settings);
-          expect(payload.body).to.have.property('mappings');
-          expect(payload.body.mappings).to.have.property(docType);
-          expect(payload.body.mappings[docType]).to.have.property('properties');
+          expect(payload.body.mappings).to.have.property('properties');
         });
     });
 
     it('should create the index with custom settings', function () {
       const indexName = 'test-index';
-      const docType = constants.DEFAULT_SETTING_DOCTYPE;
       const settings = {
         ...constants.DEFAULT_SETTING_INDEX_SETTINGS,
         auto_expand_replicas: false,
@@ -79,7 +56,7 @@ describe('Create Index', function () {
         number_of_replicas: 1,
         format: '3000',
       };
-      const result = createIndex(client, indexName, docType, settings);
+      const result = createIndex(client, indexName, settings);
 
       return result
         .then(function () {
@@ -90,8 +67,7 @@ describe('Create Index', function () {
           expect(payload.body).to.have.property('settings');
           expect(payload.body.settings).to.eql(settings);
           expect(payload.body).to.have.property('mappings');
-          expect(payload.body.mappings).to.have.property(docType);
-          expect(payload.body.mappings[docType]).to.have.property('properties');
+          expect(payload.body.mappings).to.have.property('properties');
         });
     });
   });
