@@ -30,7 +30,7 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
     range: {
       [config.timefield]: {
         gte: moment(tlConfig.time.from).toISOString(),
-        lte: moment(tlConfig.time.to).toISOString(), 
+        lte: moment(tlConfig.time.to).toISOString(),
         format: 'strict_date_optional_time'
       }
     }
