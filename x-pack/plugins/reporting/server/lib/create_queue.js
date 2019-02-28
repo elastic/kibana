@@ -6,7 +6,6 @@
 
 import { Esqueue } from './esqueue';
 import { createWorkersFactory } from './create_workers';
-import { QUEUE_DOCTYPE } from '../../common/constants';
 import { oncePerServer } from './once_per_server';
 import { createTaggedLogger } from './create_tagged_logger';
 
@@ -20,7 +19,6 @@ function createQueueFn(server) {
 
   const logger = createTaggedLogger(server, ['reporting', 'esqueue']);
   const queueOptions = {
-    doctype: QUEUE_DOCTYPE,
     interval: queueConfig.indexInterval,
     timeout: queueConfig.timeout,
     dateSeparator: dateSeparator,
