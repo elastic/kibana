@@ -21,8 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
-import { fetchFields } from '../lib/fetch_fields';
+import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
@@ -32,15 +31,6 @@ function ReactEditorControllerProvider(Private, config) {
       this.vis = savedObj.vis;
       this.vis.fields = {};
     }
-
-    fetchIndexPatternFields = async () => {
-      const { params, fields } = this.vis;
-      const indexPatterns = extractIndexPatterns(params, fields);
-      const updatedFields = await fetchFields(indexPatterns);
-      this.vis.fields = { ...this.vis.fields, ...updatedFields };
-      return this.vis.fields;
-    };
-
 
     setDefaultIndexPattern = async () => {
       if (this.vis.params.index_pattern === '') {
@@ -56,19 +46,19 @@ function ReactEditorControllerProvider(Private, config) {
       const Component = this.vis.type.editorConfig.component;
 
       await this.setDefaultIndexPattern();
-      await this.fetchIndexPatternFields();
+      const visFields = await fetchIndexPatternFields(this.vis.params, this.vis.fields);
 
       render(
         <I18nContext>
           <Component
             config={config}
             vis={this.vis}
+            visFields={visFields}
             savedObj={this.savedObj}
             timeRange={params.timeRange}
             renderComplete={() => {}}
             isEditorMode={true}
             appState={params.appState}
-            fetchIndexPatternFields={this.fetchIndexPatternFields}
           />
         </I18nContext>,
         this.el);
