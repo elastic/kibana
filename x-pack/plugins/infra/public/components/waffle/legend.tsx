@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapLegend } from '../../lib/lib';
 import { GradientLegend } from './gradient_legend';
+import { LegendControls } from './legend_controls';
 import { isInfraWaffleMapGradientLegend, isInfraWaffleMapStepLegend } from './lib/type_guards';
 import { StepLegend } from './steps_legend';
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
 export const Legend: React.SFC<Props> = ({ legend, bounds, formatter }) => {
   return (
     <LegendContainer>
+      <LegendControls />
       {isInfraWaffleMapGradientLegend(legend) && (
         <GradientLegend formatter={formatter} legend={legend} bounds={bounds} />
       )}
