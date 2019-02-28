@@ -18,6 +18,7 @@
  */
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+import { delay } from 'bluebird';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -86,10 +87,18 @@ export class LeadfootElementWrapper {
    * files, use leadfoot/Session#pressKeys instead.
    *
    * @param {string|string[]} value
+   * @param {charByChar: boolean} options
    * @return {Promise<void>}
    */
-  async type(value) {
-    await this._leadfootElement.type(value);
+  async type(value, options = { charByChar: false }) {
+    if (options.charByChar) {
+      for (const char of value) {
+        await this._leadfootElement.type(char);
+        await delay(100);
+      }
+    } else {
+      await this._leadfootElement.type(value);
+    }
   }
 
   /**
