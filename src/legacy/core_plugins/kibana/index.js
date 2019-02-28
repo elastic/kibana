@@ -153,6 +153,8 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const { savedObjects } = server;
+
         return {
           kbnIndex: options.index,
           kbnBaseUrl,
@@ -182,6 +184,14 @@ export default function (kibana) {
             advancedSettings: {
               save: true
             },
+            savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
+              ...acc,
+              [type]: {
+                delete: true,
+                edit: true,
+                read: true,
+              }
+            }), {}),
             management: {
               /*
                * Management settings correspond to management section/link ids, and should not be changed

@@ -64,6 +64,7 @@ export default function uiCapabilitesTests({
     loadTestFile(require.resolve('./logs'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./nav_links'));
+    loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./timelion'));
     loadTestFile(require.resolve('./visualize'));
   });
