@@ -62,7 +62,6 @@ describe('context app', function () {
         'desc',
         MS_PER_DAY * 3000,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -89,7 +88,6 @@ describe('context app', function () {
         'desc',
         MS_PER_DAY * 3000,
         '_doc',
-        'asc',
         0,
         6,
         []
@@ -127,7 +125,6 @@ describe('context app', function () {
         'desc',
         MS_PER_DAY * 3000,
         '_doc',
-        'asc',
         0,
         4,
         []
@@ -154,7 +151,6 @@ describe('context app', function () {
         'desc',
         MS_PER_DAY * 3,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -173,7 +169,6 @@ describe('context app', function () {
         'desc',
         MS_PER_DAY * 3,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -182,6 +177,27 @@ describe('context app', function () {
           const setParentSpy = searchSourceStub.setParent;
           expect(setParentSpy.alwaysCalledWith(false)).to.be(true);
           expect(setParentSpy.called).to.be(true);
+        });
+    });
+
+    it('should set the tiebreaker sort order to the same as the time field', function () {
+      const searchSourceStub = getSearchSourceStub();
+
+      return fetchSuccessors(
+        'INDEX_PATTERN_ID',
+        '@timestamp',
+        'desc',
+        MS_PER_DAY,
+        '_doc',
+        0,
+        3,
+        []
+      )
+        .then(() => {
+          expect(searchSourceStub.setField.calledWith('sort', [
+            { '@timestamp': 'desc' },
+            { '_doc': 'desc' },
+          ])).to.be(true);
         });
     });
   });
